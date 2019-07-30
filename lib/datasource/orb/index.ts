@@ -1,21 +1,29 @@
-const { logger } = require('../../logger');
-const got = require('../../util/got');
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-module.exports = {
-  getPkgReleases,
-};
+interface OrbRelease {
+  homeUrl?: string;
+  versions: {
+    version: string;
+  }[];
+}
 
-/*
+/**
  * orb.getPkgReleases
  *
  * This function will fetch an orb from CircleCI and return all semver versions.
  */
-
-async function getPkgReleases({ lookupName }) {
+export async function getPkgReleases({
+  lookupName,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   logger.debug({ lookupName }, 'orb.getPkgReleases()');
   const cacheNamespace = 'orb';
   const cacheKey = lookupName;
-  const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    cacheKey
+  );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
@@ -26,7 +34,7 @@ async function getPkgReleases({ lookupName }) {
     variables: {},
   };
   try {
-    const res = (await got.post(url, {
+    const res: OrbRelease = (await got.post(url, {
       body,
       json: true,
       retry: 5,
@@ -36,17 +44,18 @@ async function getPkgReleases({ lookupName }) {
       return null;
     }
     // Simplify response before caching and returning
-    const dep = {
+    const dep: ReleaseResult = {
       name: lookupName,
       versions: {},
+      releases: null,
     };
     if (res.homeUrl && res.homeUrl.length) {
       dep.homepage = res.homeUrl;
     }
     dep.homepage =
       dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
-    dep.releases = res.versions.map(v => v.version);
-    dep.releases = dep.releases.map(version => ({
+    const releases = res.versions.map(v => v.version);
+    dep.releases = releases.map(version => ({
       version,
     }));
     logger.trace({ dep }, 'dep');

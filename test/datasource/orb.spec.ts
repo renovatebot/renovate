@@ -1,7 +1,9 @@
-const got = require('../../lib/util/got');
-const datasource = require('../../lib/datasource');
+import _got from '../../lib/util/got';
+import { getPkgReleases } from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
+
+const got: any = _got;
 
 const orbData = {
   data: {
@@ -34,7 +36,7 @@ describe('datasource/orb', () => {
     it('returns null for empty result', async () => {
       got.post.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases({
+        await getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
         })
@@ -43,7 +45,7 @@ describe('datasource/orb', () => {
     it('returns null for missing orb', async () => {
       got.post.mockReturnValueOnce({ body: { data: {} } });
       expect(
-        await datasource.getPkgReleases({
+        await getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-wonkflows',
         })
@@ -56,7 +58,7 @@ describe('datasource/orb', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
+        await getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
         })
@@ -67,7 +69,7 @@ describe('datasource/orb', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
         })
@@ -77,7 +79,7 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await getPkgReleases({
         datasource: 'orb',
         lookupName: 'hyper-expanse/library-release-workflows',
       });
@@ -89,7 +91,7 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await getPkgReleases({
         datasource: 'orb',
         lookupName: 'hyper-expanse/library-release-workflows',
       });

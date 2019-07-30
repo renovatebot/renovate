@@ -23,9 +23,11 @@ export interface ReleaseResult {
   dockerRegistry?: string;
   dockerRepository?: string;
   homepage?: string;
+  name?: string;
   pkgName?: string;
   releases: Release[];
   sourceUrl?: string;
+  versions?: any;
 }
 
 export interface DigestConfig {
