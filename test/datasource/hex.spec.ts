@@ -1,13 +1,12 @@
-const fs = require('fs');
-const got = require('../../lib/util/got');
-/** @type any */
-const hostRules = require('../../lib/util/host-rules');
-const { getPkgReleases } = require('../../lib/datasource/hex');
+import { readFileSync } from 'fs';
+import _got from '../../lib/util/got';
+import { find as _find } from '../../lib/util/host-rules';
+import { getPkgReleases } from '../../lib/datasource/hex';
 
-let res1 = fs.readFileSync(
-  'test/datasource/hex/_fixtures/certifi.json',
-  'utf8'
-);
+const got: any = _got;
+const find: any = _find;
+
+let res1 = readFileSync('test/datasource/hex/_fixtures/certifi.json', 'utf8');
 res1 = JSON.parse(res1);
 
 jest.mock('../../lib/util/got');
@@ -53,7 +52,7 @@ describe('datasource/hex', () => {
       expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
     });
     it('returns null with wrong auth token', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'this_simple_token' });
+      find.mockReturnValueOnce({ token: 'this_simple_token' });
       got.mockReturnValueOnce(
         Promise.reject({
           statusCode: 401,
@@ -72,7 +71,7 @@ describe('datasource/hex', () => {
       expect(res).toBeDefined();
     });
     it('process public repo without auth', async () => {
-      hostRules.find.mockReturnValueOnce({});
+      find.mockReturnValueOnce({});
       got.mockReturnValueOnce({
         body: res1,
       });

@@ -1,9 +1,6 @@
-const { logger } = require('../../logger');
-const got = require('../../util/got');
-
-module.exports = {
-  getPkgReleases,
-};
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { ReleaseResult, PkgReleaseConfig } from '../common';
 
 function getHostOpts() {
   return {
@@ -12,11 +9,20 @@ function getHostOpts() {
   };
 }
 
-async function getPkgReleases({ lookupName }) {
+interface HexRelease {
+  html_url: string;
+  meta?: { links?: Record<string, string> };
+  name?: string;
+  releases?: { version: string }[];
+}
+
+export async function getPkgReleases({
+  lookupName,
+}: Partial<PkgReleaseConfig>): Promise<ReleaseResult> {
   const hexUrl = `https://hex.pm/api/packages/${lookupName}`;
   try {
     const opts = getHostOpts();
-    const res = (await got(hexUrl, {
+    const res: HexRelease = (await got(hexUrl, {
       json: true,
       ...opts,
     })).body;
@@ -24,7 +30,7 @@ async function getPkgReleases({ lookupName }) {
       logger.warn({ lookupName }, `Received invalid hex package data`);
       return null;
     }
-    const result = {
+    const result: ReleaseResult = {
       releases: [],
     };
     if (res.releases) {
