@@ -143,7 +143,6 @@ Array [
       },
     ],
     "packageFile": "random.pom.xml",
-    "parent": "../pom.xml",
   },
 ]
 `;

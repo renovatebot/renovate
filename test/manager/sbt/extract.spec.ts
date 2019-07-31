@@ -3,12 +3,16 @@ import { resolve } from 'path';
 import { extractPackageFile } from '../../../lib/manager/sbt/extract';
 
 const sbt = readFileSync(resolve(__dirname, `./_fixtures/sample.sbt`), 'utf8');
+const sbtScalaVersionVariable = readFileSync(
+  resolve(__dirname, `./_fixtures/scala-version-variable.sbt`),
+  'utf8'
+);
 const sbtMissingScalaVersion = readFileSync(
   resolve(__dirname, `./_fixtures/missing-scala-version.sbt`),
   'utf8'
 );
 
-describe('lib/manager/terraform/extract', () => {
+describe('lib/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(null)).toBeNull();
@@ -37,6 +41,9 @@ describe('lib/manager/terraform/extract', () => {
     });
     it('extracts deps for generic use-cases', () => {
       expect(extractPackageFile(sbt)).toMatchSnapshot();
+    });
+    it('extracts deps when scala version is defined in a variable', () => {
+      expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot();
     });
     it('skips deps when scala version is missing', () => {
       expect(extractPackageFile(sbtMissingScalaVersion)).toMatchSnapshot();

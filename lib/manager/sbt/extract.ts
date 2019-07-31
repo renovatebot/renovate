@@ -18,6 +18,11 @@ const isScalaVersion = (str: string) =>
 const getScalaVersion = (str: string) =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
 
+const isScalaVersionVariable = (str: string) =>
+  /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
+const getScalaVersionVariable = (str: string) =>
+  str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/\s*$/, '');
+
 const isResolver = (str: string) =>
   /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/.test(
     str
@@ -146,10 +151,14 @@ function parseSbtLine(
   };
 
   let dep: PackageDependency = null;
+  let scalaVersionVariable: string = null;
   if (!isComment(line)) {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
       scalaVersion = getScalaVersion(line);
+    } else if (isScalaVersionVariable(line)) {
+      isMultiDeps = false;
+      scalaVersionVariable = getScalaVersionVariable(line);
     } else if (isResolver(line)) {
       isMultiDeps = false;
       const url = getResolverUrl(line);
@@ -199,7 +208,11 @@ function parseSbtLine(
       ...acc,
       fileOffset: fileOffset + line.length + 1, // inc. newline
       isMultiDeps,
-      scalaVersion,
+      scalaVersion:
+        scalaVersion ||
+        (scalaVersionVariable &&
+          variables[scalaVersionVariable] &&
+          variables[scalaVersionVariable].val),
     };
   if (deps.length) return { deps };
   return null;

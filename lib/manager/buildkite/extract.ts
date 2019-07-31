@@ -8,18 +8,30 @@ function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
-      const plugins = line.match(/^\s*-?\s*plugins:\s*$/);
-      if (plugins) {
+    let isPluginsSection = false;
+    let pluginsIndent = '';
+    for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {
+      const lineIdx = lineNumber - 1;
+      const line = lines[lineIdx];
+      const pluginsSection = line.match(
+        /^(?<pluginsIndent>\s*)(-?\s*)plugins:/
+      );
+      if (pluginsSection) {
         logger.trace(`Matched plugins on line ${lineNumber}`);
-        const depLine = lines[lineNumber + 1];
-        logger.debug(`serviceImageLine: "${depLine}"`);
-        const depLineMatch = depLine.match(/^\s+(?:-\s+)?([^#]+)#([^:]+):/);
-        if (depLineMatch) {
+        isPluginsSection = true;
+        pluginsIndent = pluginsSection.groups.pluginsIndent;
+      } else if (isPluginsSection) {
+        logger.debug(`serviceImageLine: "${line}"`);
+        const { currentIndent } = line.match(/^(?<currentIndent>\s*)/).groups;
+        const depLineMatch = line.match(
+          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+):/
+        );
+        if (currentIndent.length <= pluginsIndent.length) {
+          isPluginsSection = false;
+          pluginsIndent = '';
+        } else if (depLineMatch) {
+          const { depName, currentValue } = depLineMatch.groups;
           logger.trace('depLineMatch');
-          lineNumber += 1;
-          const [, depName, currentValue] = depLineMatch;
           let skipReason: string;
           let repo: string;
           if (depName.startsWith('https://') || depName.startsWith('git@')) {

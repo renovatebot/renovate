@@ -532,34 +532,7 @@ Object {
     "composerJsonType": "project",
   },
   "registryUrls": Array [
-    Object {
-      "type": "composer",
-      "url": "https://wpackagist.org",
-    },
-    Object {
-      "package": Object {
-        "dist": Object {
-          "type": "zip",
-          "url": "https://github.com/asha23/wp-seed-timber/archive/v1.2.6.zip",
-        },
-        "name": "asha23/wp-seed-timber",
-        "type": "wordpress-theme",
-        "version": "1.2.6",
-      },
-      "type": "package",
-    },
-    Object {
-      "package": Object {
-        "dist": Object {
-          "type": "zip",
-          "url": "https://github.com/corysimmons/wp-sync-db/archive/1.6.zip",
-        },
-        "name": "wp-sync-db/wp-sync-db",
-        "type": "wordpress-plugin",
-        "version": "1.5",
-      },
-      "type": "package",
-    },
+    "https://wpackagist.org",
   ],
 }
 `;
@@ -593,10 +566,8 @@ Object {
     },
   ],
   "registryUrls": Array [
-    Object {
-      "type": "composer",
-      "url": "https://wpackagist.org",
-    },
+    "https://wpackagist.org",
+    "https://packagist.org",
   ],
 }
 `;
@@ -633,10 +604,7 @@ Object {
     },
   ],
   "registryUrls": Array [
-    Object {
-      "type": "composer",
-      "url": "https://wpackagist.org",
-    },
+    "https://wpackagist.org",
   ],
 }
 `;
@@ -668,10 +636,8 @@ Object {
     },
   ],
   "registryUrls": Array [
-    Object {
-      "type": "composer",
-      "url": "https://wpackagist.org",
-    },
+    "https://wpackagist.org",
+    "https://packagist.org",
   ],
 }
 `;

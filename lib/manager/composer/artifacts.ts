@@ -3,7 +3,7 @@ import URL from 'url';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { exec } from '../../util/exec';
-import { UpdateArtifactsConfig, Registry } from '../common';
+import { UpdateArtifactsConfig } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
@@ -61,12 +61,12 @@ export async function updateArtifacts(
     try {
       // istanbul ignore else
       if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls as Registry[]) {
-          if (regUrl.url) {
-            const { host } = URL.parse(regUrl.url);
+        for (const regUrl of config.registryUrls as string[]) {
+          if (regUrl) {
+            const { host } = URL.parse(regUrl);
             const hostRule = hostRules.find({
               hostType: 'packagist',
-              url: regUrl.url,
+              url: regUrl,
             });
             // istanbul ignore else
             if (hostRule.username && hostRule.password) {
@@ -77,7 +77,7 @@ export async function updateArtifacts(
                 password: hostRule.password,
               };
             } else {
-              logger.debug('No packagist auth found for ' + regUrl.url);
+              logger.debug('No packagist auth found for ' + regUrl);
             }
           }
         }
