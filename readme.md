@@ -30,8 +30,8 @@ Renovate was released in 2017 and already is widely used in the developer commun
 
 - We believe everyone can benefit from automation, whether it's a little or a lot
 - Renovate should not cause you to change your workflow against your wishes instead, it should be adaptable to your existing workflow
-- All behavior should be configurable, down to a ridiculous level if necessary
-- Autodetect settings wherever possible (to minimize configuration) but always allow overrides
+- All behaviour should be configurable, down to a ridiculous level if necessary
+- Autodetect settings wherever possible (to minimise configuration) but always allow overrides
 
 ## Using Renovate
 
