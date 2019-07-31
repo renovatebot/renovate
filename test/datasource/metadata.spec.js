@@ -1,6 +1,6 @@
 const { addMetaData } = require('../../lib/datasource/metadata');
 
-describe('datasource/terraform', () => {
+describe('datasource/metadata', () => {
   it('Should do nothing if dep is not specified', () => {
     expect(addMetaData()).toBeUndefined();
   });
@@ -63,5 +63,17 @@ describe('datasource/terraform', () => {
 
     addMetaData(dep, datasource, lookupName);
     expect(dep).toMatchSnapshot();
+  });
+
+  it('Should handle parsing/converting of GitHub sourceUrls with http and www correctly', () => {
+    const dep = {
+      sourceUrl: 'http://www.github.com/mockk/mockk/',
+      releases: [{ version: '1.9.3' }],
+    };
+    const datasource = 'maven';
+    const lookupName = 'io.mockk:mockk';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
   });
 });
