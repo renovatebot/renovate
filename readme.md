@@ -18,7 +18,7 @@ Automated dependency updates. Multi-platform and multi-language.
 - Use eslint-like shared config presets for ease of use and simplifying configuration
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
 - Supports GitHub (.com and Enterprise), GitLab (.com and CE/EE), Bitbucket Server, and Azure DevOps. Bitbucket Cloud is also supported but considered in Beta until it gets the thumbs-up from more users
-- Open source (installable via npm/yarn or Docker Hub) so can be self-hosted or used via GitHub App
+- Open-source (installable via npm/yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
 ## Who Uses Renovate?
 
@@ -29,9 +29,9 @@ Renovate was released in 2017 and already is widely used in the developer commun
 ## The Renovate Approach
 
 - We believe everyone can benefit from automation, whether it's a little or a lot
-- Renovate should not cause you to change your workflow against your wishes, instead it should be adaptable to your existing workflow
-- All behaviour should be configurable, down to a ridiculous level if necessary
-- Autodetect settings wherever possible (to minimise configuration) but always allow overrides
+- Renovate should not cause you to change your workflow against your wishes instead, it should be adaptable to your existing workflow
+- All behavior should be configurable, down to a ridiculous level if necessary
+- Autodetect settings wherever possible (to minimize configuration) but always allow overrides
 
 ## Using Renovate
 
@@ -40,7 +40,7 @@ The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is
 For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install
 it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://renovatebot.com/docs/install-github-app/).
 
-For GitLab, log into [renovatebot.com/dashboard](https://renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://renovatebot.com/docs/install-gitlab-app/).
+For GitLab, log into [renovatebot.com/dashboard](https://renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently, the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://renovatebot.com/docs/install-gitlab-app/).
 
 ## Configuration
 
