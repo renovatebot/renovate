@@ -10,7 +10,7 @@ export function getNpmrc() {
   return npmrc;
 }
 
-export function setNpmrc(input: string) {
+export function setNpmrc(input?: string) {
   if (input) {
     if (input === npmrcRaw) {
       return;

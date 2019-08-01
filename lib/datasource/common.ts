@@ -27,6 +27,7 @@ export interface Release {
 export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
+  deprecationMessage?: string;
   display?: string;
   dockerRegistry?: string;
   dockerRepository?: string;

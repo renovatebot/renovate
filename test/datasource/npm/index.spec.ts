@@ -1,7 +1,7 @@
 import _registryAuthToken from 'registry-auth-token';
 import nock from 'nock';
 import moment from 'moment';
-import npm from '../../../lib/datasource/npm';
+import * as npm from '../../../lib/datasource/npm';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');

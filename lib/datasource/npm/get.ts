@@ -29,7 +29,6 @@ export interface NpmRelease extends Release {
 export interface NpmDependency extends ReleaseResult {
   releases: NpmRelease[];
   deprecationSource?: string;
-  deprecationMessage?: string;
   name: string;
   homepage: string;
   latestVersion: string;
