@@ -1,4 +1,4 @@
-const retriable = require('../../../lib/datasource/rubygems/retriable.js');
+import retriable from '../../../lib/datasource/rubygems/retriable';
 
 describe('datasource/rubygems/retriable', () => {
   const { RENOVATE_RUBYGEMS_RETRY_DELAY_STEP } = process.env;

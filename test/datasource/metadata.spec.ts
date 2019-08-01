@@ -1,4 +1,4 @@
-const { addMetaData } = require('../../lib/datasource/metadata');
+import { addMetaData } from '../../lib/datasource/metadata';
 
 describe('datasource/metadata', () => {
   it('Should do nothing if dep is not specified', () => {

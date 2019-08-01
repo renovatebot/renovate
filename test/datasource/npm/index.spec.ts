@@ -1,15 +1,21 @@
-const registryAuthToken = require('registry-auth-token');
-const nock = require('nock');
-const moment = require('moment');
-const npm = require('../../../lib/datasource/npm');
+import _registryAuthToken from 'registry-auth-token';
+import nock from 'nock';
+import moment from 'moment';
+import npm from '../../../lib/datasource/npm';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-let npmResponse;
+const registryAuthToken: any = _registryAuthToken;
+let npmResponse: any;
 
-function getRelease(dependency, version) {
-  return dependency.releases.find(release => release.version === version);
+function getRelease(
+  dependency: { releases: { version: string; canBeUnpublished?: boolean }[] },
+  version: string
+) {
+  return dependency.releases.find(
+    (release: { version: string }) => release.version === version
+  );
 }
 
 describe('api/npm', () => {
