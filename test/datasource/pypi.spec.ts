@@ -1,11 +1,10 @@
-const fs = require('fs');
-const got = require('../../lib/util/got');
-const datasource = require('../../lib/datasource');
+import fs from 'fs';
+import got from '../../lib/util/got';
+import * as datasource from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
 
-/** @type any */
-const res1 = fs.readFileSync(
+const res1: any = fs.readFileSync(
   'test/datasource/pypi/_fixtures/azure-cli-monitor.json'
 );
 const htmlResponse = fs.readFileSync(

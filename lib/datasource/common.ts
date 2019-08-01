@@ -19,6 +19,7 @@ export interface Release {
   isDeprecated?: boolean;
 
   releaseDate?: string;
+  releaseTimestamp?: any;
   version: string;
 }
 
