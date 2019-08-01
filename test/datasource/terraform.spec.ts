@@ -1,10 +1,10 @@
-const fs = require('fs');
-const got = require('../../lib/util/got');
-const datasource = require('../../lib/datasource');
+import fs from 'fs';
+import got from '../../lib/util/got';
+import * as datasource from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
-/** @type any */
-const consulData = fs.readFileSync(
+
+const consulData: any = fs.readFileSync(
   'test/datasource/terraform/_fixtures/registry-consul.json'
 );
 
