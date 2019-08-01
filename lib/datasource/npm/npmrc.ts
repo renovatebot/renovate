@@ -1,19 +1,16 @@
 import is from '@sindresorhus/is';
+import ini from 'ini';
+import { isBase64 } from 'validator';
+import { logger } from '../../logger';
 
-const ini = require('ini');
-const { isBase64 } = require('validator');
-const { logger } = require('../../logger');
+let npmrc: Record<string, any> = null;
+let npmrcRaw: string;
 
-let npmrc = null;
-let npmrcRaw;
-
-export { getNpmrc, setNpmrc };
-
-function getNpmrc() {
+export function getNpmrc() {
   return npmrc;
 }
 
-function setNpmrc(input) {
+export function setNpmrc(input: string) {
   if (input) {
     if (input === npmrcRaw) {
       return;
@@ -60,7 +57,7 @@ function setNpmrc(input) {
   }
 }
 
-function envReplace(value, env = process.env) {
+function envReplace(value: any, env = process.env) {
   // istanbul ignore if
   if (!is.string(value)) {
     return value;

@@ -8,6 +8,7 @@ export interface PkgReleaseConfig {
   gradleWrapperType?: string;
   lookupName?: string;
   lookupType?: string;
+  npmrc?: string;
   registryUrls?: string[];
   typeStrategy?: string;
   versionScheme?: string;
@@ -35,6 +36,7 @@ export interface ReleaseResult {
   pkgName?: string;
   releases: Release[];
   sourceUrl?: string;
+  tags?: string[];
   versions?: any;
 }
 

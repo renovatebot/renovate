@@ -1,10 +1,11 @@
 import { logger } from '../../logger';
+import { getDependency } from './get';
+import { Preset } from '../common';
 
-const { getDependency } = require('./get');
-
-export { getPreset };
-
-async function getPreset(pkgName, presetName = 'default') {
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
   const dep = await getDependency(pkgName);
   if (!dep) {
     throw new Error('dep not found');

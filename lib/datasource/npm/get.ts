@@ -1,34 +1,46 @@
-const moment = require('moment');
-const url = require('url');
-const getRegistryUrl = require('registry-auth-token/registry-url');
-const registryAuthToken = require('registry-auth-token');
-const parse = require('github-url-from-git');
-const { isBase64 } = require('validator');
-const { logger } = require('../../logger');
-
-const got = require('../../util/got');
-const hostRules = require('../../util/host-rules');
-const { maskToken } = require('../../util/mask');
-const { getNpmrc } = require('./npmrc');
-
-module.exports = {
-  getDependency,
-  resetCache,
-  resetMemCache,
-};
+import moment from 'moment';
+import { resolve } from 'url';
+import getRegistryUrl from 'registry-auth-token/registry-url';
+import registryAuthToken from 'registry-auth-token';
+import parse from 'github-url-from-git';
+import { isBase64 } from 'validator';
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { hosts } from '../../util/host-rules';
+import { maskToken } from '../../util/mask';
+import { getNpmrc } from './npmrc';
+import { Release, ReleaseResult } from '../common';
 
 let memcache = {};
 
-function resetMemCache() {
+export function resetMemCache() {
   logger.debug('resetMemCache()');
   memcache = {};
 }
 
-function resetCache() {
+export function resetCache() {
   resetMemCache();
 }
 
-async function getDependency(name) {
+export interface NpmRelease extends Release {
+  canBeUnpublished?: boolean;
+  gitRef?: string;
+}
+export interface NpmDependency extends ReleaseResult {
+  releases: NpmRelease[];
+  deprecationSource?: string;
+  deprecationMessage?: string;
+  name: string;
+  homepage: string;
+  latestVersion: string;
+  sourceUrl: string;
+  versions: Record<string, any>;
+  'dist-tags': string[];
+  'renovate-config': any;
+  sourceDirectory?: string;
+}
+
+export async function getDependency(name: string): Promise<NpmDependency> {
   logger.trace(`npm.getDependency(${name})`);
 
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
@@ -38,25 +50,25 @@ async function getDependency(name) {
   }
 
   const scope = name.split('/')[0];
-  let regUrl;
+  let regUrl: string;
   const npmrc = getNpmrc();
   try {
     regUrl = getRegistryUrl(scope, npmrc);
   } catch (err) {
     regUrl = 'https://registry.npmjs.org';
   }
-  const pkgUrl = url.resolve(
-    regUrl,
-    encodeURIComponent(name).replace(/^%40/, '@')
-  );
+  const pkgUrl = resolve(regUrl, encodeURIComponent(name).replace(/^%40/, '@'));
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await renovateCache.get(cacheNamespace, pkgUrl);
+  const cachedResult = await renovateCache.get<NpmDependency>(
+    cacheNamespace,
+    pkgUrl
+  );
   if (cachedResult) {
     return cachedResult;
   }
   const authInfo = registryAuthToken(regUrl, { npmrc });
-  const headers = {};
+  const headers: Record<string, string> = {};
 
   if (authInfo && authInfo.type && authInfo.token) {
     // istanbul ignore if
@@ -125,12 +137,12 @@ async function getDependency(name) {
     res.homepage = res.homepage || latestVersion.homepage;
 
     // Determine repository URL
-    let sourceUrl;
+    let sourceUrl: string;
 
     if (res.repository && res.repository.url) {
       const extraBaseUrls = [];
       // istanbul ignore next
-      hostRules.hosts({ hostType: 'github' }).forEach(host => {
+      hosts({ hostType: 'github' }).forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
       // Massage www out of github URL
@@ -155,12 +167,13 @@ async function getDependency(name) {
       delete res.homepage;
     }
     // Simplify response before caching and returning
-    const dep = {
+    const dep: NpmDependency = {
       name: res.name,
       homepage: res.homepage,
       latestVersion: res['dist-tags'].latest,
       sourceUrl,
       versions: {},
+      releases: null,
       'dist-tags': res['dist-tags'],
       'renovate-config': latestVersion['renovate-config'],
     };
@@ -172,7 +185,7 @@ async function getDependency(name) {
       dep.deprecationSource = 'npm';
     }
     dep.releases = Object.keys(res.versions).map(version => {
-      const release = {
+      const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
       };
