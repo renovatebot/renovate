@@ -38,10 +38,10 @@ const getErrorMessage = (status: number) => {
 };
 
 // TODO: workaround because got does not export HTTPError, should be moved to `lib/util/got`
-type HTTPError = InstanceType<got.GotInstance['HTTPError']>;
+export type HTTPError = InstanceType<got.GotInstance['HTTPError']>;
 
-export default (numberOfRetries = NUMBER_OF_RETRIES) => (
-  _?: any,
+export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
+  _?: number,
   err?: Partial<HTTPError>
 ) => {
   if (numberOfRetries === 0) {
