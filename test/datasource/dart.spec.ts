@@ -3,6 +3,7 @@ import _got from '../../lib/util/got';
 import { getPkgReleases } from '../../lib/datasource/dart';
 
 const got = _got;
+
 const body: any = JSON.parse(
   fs.readFileSync(
     'test/datasource/dart/_fixtures/shared_preferences.json',

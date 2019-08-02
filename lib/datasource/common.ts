@@ -1,18 +1,22 @@
-export interface PkgReleaseConfig {
-  compatibility?: Record<string, string>;
+export interface Config {
   datasource?: string;
   depName?: string;
+  lookupName?: string;
+  registryUrls?: string[];
+}
+export interface PkgReleaseConfig extends Config {
+  compatibility?: Record<string, string>;
   depType?: string;
   digests?: string;
   digestsStrategy?: string;
   gradleWrapperType?: string;
-  lookupName?: string;
   lookupType?: string;
   npmrc?: string;
-  registryUrls?: string[];
   typeStrategy?: string;
   versionScheme?: string;
 }
+
+export type DigestConfig = Config;
 
 export interface Release {
   changelogUrl?: string;
@@ -39,11 +43,6 @@ export interface ReleaseResult {
   sourceUrl?: string;
   tags?: string[];
   versions?: any;
-}
-
-export interface DigestConfig {
-  lookupName: string;
-  registryUrls: string[];
 }
 
 // TODO: Proper typing

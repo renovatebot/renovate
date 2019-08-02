@@ -21,7 +21,13 @@ import * as rubygems from './rubygems';
 import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as terraform from './terraform';
-import { Datasource, PkgReleaseConfig, Release, ReleaseResult } from './common';
+import {
+  Datasource,
+  PkgReleaseConfig,
+  Release,
+  ReleaseResult,
+  DigestConfig,
+} from './common';
 
 export * from './common';
 
@@ -101,19 +107,11 @@ async function fetchReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   return dep;
 }
 
-export function supportsDigests(config: { datasource: string }) {
+export function supportsDigests(config: DigestConfig) {
   return !!datasources[config.datasource].getDigest;
 }
 
-export function getDigest(
-  config: {
-    datasource: string;
-    depName?: string;
-    registryUrls?: string[];
-    lookupName?: string;
-  },
-  value?: string
-) {
+export function getDigest(config: DigestConfig, value?: string) {
   const lookupName = config.lookupName || config.depName;
   const { registryUrls } = config;
   return datasources[config.datasource].getDigest(

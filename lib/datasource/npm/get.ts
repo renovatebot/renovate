@@ -4,9 +4,10 @@ import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
 import parse from 'github-url-from-git';
 import { isBase64 } from 'validator';
+import { OutgoingHttpHeaders } from 'http';
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { hosts } from '../../util/host-rules';
+import * as hostRules from '../../util/host-rules';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
@@ -70,7 +71,7 @@ export async function getDependency(name: string): Promise<NpmDependency> {
     return cachedResult;
   }
   const authInfo = registryAuthToken(regUrl, { npmrc });
-  const headers: Record<string, string> = {};
+  const headers: OutgoingHttpHeaders = {};
 
   if (authInfo && authInfo.type && authInfo.token) {
     // istanbul ignore if
@@ -144,7 +145,7 @@ export async function getDependency(name: string): Promise<NpmDependency> {
     if (res.repository && res.repository.url) {
       const extraBaseUrls = [];
       // istanbul ignore next
-      hosts({ hostType: 'github' }).forEach(host => {
+      hostRules.hosts({ hostType: 'github' }).forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
       // Massage www out of github URL
