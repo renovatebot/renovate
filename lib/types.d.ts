@@ -16,6 +16,8 @@ declare namespace Renovate {
 declare interface Error {
   configFile?: string;
 
+  headers?: Record<string, string>;
+
   statusCode?: number;
 
   validationError?: string;

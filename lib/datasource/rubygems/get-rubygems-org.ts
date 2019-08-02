@@ -1,12 +1,9 @@
-const got = require('../../util/got');
-const { logger } = require('../../logger');
-
-module.exports = {
-  getRubygemsOrgDependency,
-};
+import got from '../../util/got';
+import { logger } from '../../logger';
+import { ReleaseResult } from '../common';
 
 let lastSync = new Date('2000-01-01');
-let packageReleases = Object.create(null); // Because we might need a "constructor" key
+let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
 let contentLength = 0;
 
 async function updateRubyGemsVersions() {
@@ -17,7 +14,7 @@ async function updateRubyGemsVersions() {
       range: `bytes=${contentLength}-`,
     },
   };
-  let newLines;
+  let newLines: string;
   try {
     logger.debug('Rubygems: Fetching rubygems.org versions');
     newLines = (await got(url, options)).body;
@@ -33,10 +30,10 @@ async function updateRubyGemsVersions() {
     return;
   }
 
-  function processLine(line) {
-    let split;
-    let pkg;
-    let versions;
+  function processLine(line: string) {
+    let split: string[];
+    let pkg: string;
+    let versions: string;
     try {
       const l = line.trim();
       if (!l.length || l.startsWith('created_at:') || l === '---') {
@@ -87,13 +84,15 @@ async function syncVersions() {
   }
 }
 
-async function getRubygemsOrgDependency(lookupName) {
+export async function getRubygemsOrgDependency(
+  lookupName: string
+): Promise<ReleaseResult> {
   logger.debug(`getRubygemsOrgDependency(${lookupName})`);
   await syncVersions();
   if (!packageReleases[lookupName]) {
     return null;
   }
-  const dep = {
+  const dep: ReleaseResult = {
     name: lookupName,
     releases: packageReleases[lookupName].map(version => ({ version })),
   };

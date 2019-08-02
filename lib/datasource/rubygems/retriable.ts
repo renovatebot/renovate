@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
-const {
+import { logger } from '../../logger';
+import {
   UNAUTHORIZED,
   FORBIDDEN,
   REQUEST_TIMEOUT,
   TOO_MANY_REQUEST,
   SERVICE_UNAVAILABLE,
-} = require('./errors');
+} from './errors';
 
 const RETRY_AFTER = 600;
 const NUMBER_OF_RETRIES = 5;
@@ -13,13 +13,14 @@ const NUMBER_OF_RETRIES = 5;
 const getDelayStep = () =>
   parseInt(process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP || '1000', 10);
 
-const toMs = value => value * getDelayStep();
-const getBannedDelay = retryAfter =>
+const toMs = (value: number) => value * getDelayStep();
+const getBannedDelay = (retryAfter: string) =>
   (parseInt(retryAfter, 10) || RETRY_AFTER) + 1;
-const getDefaultDelay = count => (NUMBER_OF_RETRIES * getDelayStep()) / count;
+const getDefaultDelay = (count: number) =>
+  (NUMBER_OF_RETRIES * getDelayStep()) / count;
 
-const getDelayMessage = delay => `Retry in ${delay} seconds.`;
-const getErrorMessage = status => {
+const getDelayMessage = (delay: any) => `Retry in ${delay} seconds.`;
+const getErrorMessage = (status: number) => {
   // istanbul ignore next
   switch (status) {
     case UNAUTHORIZED:
@@ -35,7 +36,10 @@ const getErrorMessage = status => {
   }
 };
 
-module.exports = (numberOfRetries = NUMBER_OF_RETRIES) => (_, err) => {
+export default (numberOfRetries = NUMBER_OF_RETRIES) => (
+  _?: any,
+  err?: Error
+) => {
   if (numberOfRetries === 0) {
     return 0;
   }

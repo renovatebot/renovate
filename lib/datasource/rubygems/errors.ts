@@ -7,7 +7,7 @@ const REQUEST_TIMEOUT = 408;
 const TOO_MANY_REQUEST = 429;
 const SERVICE_UNAVAILABLE = 503;
 
-module.exports = {
+export {
   UNAUTHORIZED,
   FORBIDDEN,
   NOT_FOUND,

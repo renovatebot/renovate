@@ -1,14 +1,17 @@
 import is from '@sindresorhus/is';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-const { getDependency } = require('./get');
-const { getRubygemsOrgDependency } = require('./get-rubygems-org');
+import { getDependency } from './get';
+import { getRubygemsOrgDependency } from './get-rubygems-org';
 
-/** @param {{lookupName:string, registryUrls?: string[]}} opt */
-async function getPkgReleases({ lookupName, registryUrls }) {
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   const registries = is.nonEmptyArray(registryUrls) ? registryUrls : [];
 
   for (const registry of registries) {
-    let pkg;
+    let pkg: ReleaseResult;
     if (registry.endsWith('rubygems.org')) {
       pkg = await getRubygemsOrgDependency(lookupName);
     } else {
@@ -21,5 +24,3 @@ async function getPkgReleases({ lookupName, registryUrls }) {
 
   return null;
 }
-
-export { getPkgReleases };
