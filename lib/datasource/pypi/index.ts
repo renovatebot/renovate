@@ -115,8 +115,7 @@ async function getSimpleDependency(
   const lookupUrl = url.resolve(hostUrl, `${depName}`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const response: { body: string } = await got(url.parse(lookupUrl), {
-      json: false,
+    const response = await got<string>(url.parse(lookupUrl), {
       hostType: 'pypi',
     });
     const dep = response && response.body;
