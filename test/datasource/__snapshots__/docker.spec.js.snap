@@ -351,3 +351,48 @@ Array [
   ],
 ]
 `;
+
+exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/tags/list?n=1000",
+      Object {
+        "headers": Object {},
+        "json": true,
+      },
+    ],
+    Array [
+      "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Object {
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "body": Object {},
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
