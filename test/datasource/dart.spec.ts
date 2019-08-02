@@ -2,7 +2,7 @@ import fs from 'fs';
 import _got from '../../lib/util/got';
 import { getPkgReleases } from '../../lib/datasource/dart';
 
-const got = _got;
+const got: any = _got;
 
 const body: any = JSON.parse(
   fs.readFileSync(

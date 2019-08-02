@@ -1,9 +1,11 @@
 import fs from 'fs';
-import got from '../../lib/util/got';
+import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
+
+const got: any = _got;
 
 const pkgListV3 = fs.readFileSync(
   'test/datasource/nuget/_fixtures/nunitV3.json',
