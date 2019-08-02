@@ -1,28 +1,26 @@
-const parse = require('github-url-from-git');
-const semver = require('semver');
-const { XmlDocument } = require('xmldoc');
-const { logger } = require('../../logger');
-const got = require('../../util/got');
-
-module.exports = {
-  getQueryUrl,
-  getPkgReleases,
-  getDefaultFeed,
-};
+import parse from 'github-url-from-git';
+import { valid, prerelease } from 'semver';
+import { XmlDocument } from 'xmldoc';
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { ReleaseResult } from '../common';
 
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
 const cacheNamespace = 'datasource-nuget';
 
-function getDefaultFeed() {
+export function getDefaultFeed() {
   return defaultNugetFeed;
 }
 
-async function getQueryUrl(url) {
+export async function getQueryUrl(url: string): Promise<string> {
   // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
   const resourceType = 'SearchQueryService';
   const cacheKey = `${url}:${resourceType}`;
-  const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await renovateCache.get<string>(
+    cacheNamespace,
+    cacheKey
+  );
 
   // istanbul ignore if
   if (cachedResult) {
@@ -61,13 +59,17 @@ async function getQueryUrl(url) {
   }
 }
 
-async function getPkgReleases(registryUrl, feedUrl, pkgName) {
+export async function getPkgReleases(
+  registryUrl: string,
+  feedUrl: string,
+  pkgName: string
+): Promise<ReleaseResult> {
   let queryUrl = `${feedUrl}?q=${pkgName}`;
   if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
     queryUrl = queryUrl.replace('q=', 'q=PackageId:');
     queryUrl += '&semVerLevel=2.0.0&prerelease=true';
   }
-  const dep = {
+  const dep: ReleaseResult = {
     pkgName,
     releases: null,
   };
@@ -98,10 +100,10 @@ async function getPkgReleases(registryUrl, feedUrl, pkgName) {
     try {
       // For nuget.org we have a way to get nuspec file
       const sanitizedVersions = dep.releases
-        .map(release => semver.valid(release.version))
+        .map(release => valid(release.version))
         .filter(Boolean)
-        .filter(version => !semver.prerelease(version));
-      let lastVersion;
+        .filter(version => !prerelease(version));
+      let lastVersion: string;
       // istanbul ignore else
       if (sanitizedVersions.length) {
         // Use the last stable version we found
@@ -112,7 +114,7 @@ async function getPkgReleases(registryUrl, feedUrl, pkgName) {
       }
       if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
         const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
-        let metaresult;
+        let metaresult: { body: string };
         try {
           metaresult = await got(nugetOrgApi, { hostType: 'nuget' });
         } catch (err) /* istanbul ignore next */ {

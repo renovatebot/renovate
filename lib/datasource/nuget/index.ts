@@ -1,15 +1,15 @@
-const urlApi = require('url');
-const { logger } = require('../../logger');
-const v2 = require('./v2');
-const v3 = require('./v3');
+import { parse } from 'url';
+import { logger } from '../../logger';
+import * as v2 from './v2';
+import * as v3 from './v3';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-module.exports = {
-  getPkgReleases,
-};
-
-async function getPkgReleases({ lookupName, registryUrls }) {
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   logger.trace(`nuget.getPkgReleases(${lookupName})`);
-  let dep = null;
+  let dep: ReleaseResult = null;
   for (const feed of registryUrls || [v3.getDefaultFeed()]) {
     const feedVersion = detectFeedVersion(feed);
     if (feedVersion === 2) {
@@ -33,9 +33,9 @@ async function getPkgReleases({ lookupName, registryUrls }) {
   return dep;
 }
 
-function detectFeedVersion(url) {
+function detectFeedVersion(url: string) {
   try {
-    const parsecUrl = urlApi.parse(url);
+    const parsecUrl = parse(url);
     // Official client does it in the same way
     if (parsecUrl.pathname.endsWith('.json')) {
       return 3;

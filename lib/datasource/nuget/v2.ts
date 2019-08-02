@@ -1,14 +1,14 @@
-const parse = require('github-url-from-git');
-const { XmlDocument } = require('xmldoc');
-const { logger } = require('../../logger');
-const got = require('../../util/got');
+import parse from 'github-url-from-git';
+import { XmlDocument, XmlElement } from 'xmldoc';
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { ReleaseResult } from '../common';
 
-module.exports = {
-  getPkgReleases,
-};
-
-async function getPkgReleases(feedUrl, pkgName) {
-  const dep = {
+export async function getPkgReleases(
+  feedUrl: string,
+  pkgName: string
+): Promise<ReleaseResult> {
+  const dep: ReleaseResult = {
     pkgName,
     releases: null,
   };
@@ -65,6 +65,6 @@ async function getPkgReleases(feedUrl, pkgName) {
   }
 }
 
-function getPkgProp(pkgInfo, propName) {
+function getPkgProp(pkgInfo: XmlElement, propName: string) {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
 }
