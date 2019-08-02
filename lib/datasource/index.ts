@@ -23,6 +23,8 @@ import * as sbt from './sbt';
 import * as terraform from './terraform';
 import { Datasource, PkgReleaseConfig, Release, ReleaseResult } from './common';
 
+export * from './common';
+
 const datasources: Record<string, Datasource> = {
   cargo,
   dart,

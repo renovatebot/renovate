@@ -1,7 +1,6 @@
 import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
-import { PkgReleaseConfig } from '../../lib/datasource/common';
 
 jest.mock('../../lib/util/got');
 
@@ -11,7 +10,7 @@ const allResponse: any = fs.readFileSync(
   'test/datasource/gradle-wrapper/_fixtures/all.json'
 );
 
-let config: PkgReleaseConfig = {};
+let config: datasource.PkgReleaseConfig = {};
 
 describe('datasource/gradle', () => {
   describe('getPkgReleases', () => {
