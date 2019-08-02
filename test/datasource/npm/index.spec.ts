@@ -172,7 +172,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, presetPackage);
-    const res = await npm.getPreset('foobar', 'default');
+    const res = await npm.getPreset('foobar');
     expect(res).toMatchSnapshot();
   });
   it('should parse repo url', async () => {
