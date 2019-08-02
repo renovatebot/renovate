@@ -1,3 +1,4 @@
+import got from 'got';
 import { logger } from '../../logger';
 import {
   UNAUTHORIZED,
@@ -36,9 +37,12 @@ const getErrorMessage = (status: number) => {
   }
 };
 
+// TODO: workaround because got does not export HTTPError, should be moved to `lib/util/got`
+type HTTPError = InstanceType<got.GotInstance['HTTPError']>;
+
 export default (numberOfRetries = NUMBER_OF_RETRIES) => (
   _?: any,
-  err?: Error
+  err?: Partial<HTTPError>
 ) => {
   if (numberOfRetries === 0) {
     return 0;
