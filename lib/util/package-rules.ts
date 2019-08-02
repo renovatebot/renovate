@@ -4,7 +4,8 @@ import { logger } from '../logger';
 import * as versioning from '../versioning';
 import { mergeChildConfig } from '../config';
 
-interface Config {
+// TODO: move to `../config`
+interface Config extends Record<string, any> {
   versionScheme?: string;
   packageFile?: string;
   depType?: string;
@@ -20,9 +21,10 @@ interface Config {
   baseBranch?: string;
   manager?: string;
   datasource?: string;
-  packageRules?: PackageRule[];
+  packageRules?: (PackageRule & Config)[];
 }
 
+// TODO: move to `../config`
 interface PackageRule {
   paths?: string[];
   languages?: string[];
@@ -225,8 +227,8 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
 }
 
 export function applyPackageRules(inputConfig: Config): Config {
-  let config: Config & PackageRule = { ...inputConfig };
-  const packageRules: PackageRule[] = config.packageRules || [];
+  let config = { ...inputConfig };
+  const packageRules = config.packageRules || [];
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`
