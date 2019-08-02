@@ -41,6 +41,7 @@ interface Pr {
   sha: string;
 
   sourceRepo: string;
+  canRebase: boolean;
 }
 
 interface RepoConfig {
@@ -1211,6 +1212,7 @@ export async function createPr(
       urls.homepage
     );
   }
+  pr.canRebase = true;
   return pr;
 }
 

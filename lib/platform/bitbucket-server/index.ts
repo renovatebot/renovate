@@ -786,6 +786,7 @@ export async function createPr(
   const pr = {
     id: prInfoRes.body.id,
     displayNumber: `Pull Request #${prInfoRes.body.id}`,
+    canRebase: true,
     ...utils.prInfo(prInfoRes.body),
   };
 
