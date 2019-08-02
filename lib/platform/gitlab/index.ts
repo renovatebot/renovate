@@ -709,6 +709,7 @@ export async function createPr(
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
+  pr.canRebase = true;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);

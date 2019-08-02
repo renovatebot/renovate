@@ -554,7 +554,11 @@ export async function createPr(
     `/2.0/repositories/${config.repository}/pullrequests`,
     { body }
   )).body;
-  const pr = { number: prInfo.id, displayNumber: `Pull Request #${prInfo.id}` };
+  const pr = {
+    number: prInfo.id,
+    displayNumber: `Pull Request #${prInfo.id}`,
+    canRebase: true,
+  };
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
