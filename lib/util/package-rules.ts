@@ -1,14 +1,45 @@
-const minimatch = require('minimatch');
+import minimatch from 'minimatch';
+import { Range } from 'semver';
+import { logger } from '../logger';
+import * as versioning from '../versioning';
+import { mergeChildConfig } from '../config';
 
-const { logger } = require('../logger');
-const versioning = require('../versioning');
-const { mergeChildConfig } = require('../config');
+interface Config {
+  versionScheme?: string;
+  packageFile?: string;
+  depType?: string;
+  depTypes?: string[];
+  depName?: string;
+  currentValue?: string;
+  fromVersion?: string;
+  lockedVersion?: string;
+  updateType?: string;
+  isBump?: boolean;
+  sourceUrl?: string;
+  language?: string;
+  baseBranch?: string;
+  manager?: string;
+  datasource?: string;
+  packageRules?: PackageRule[];
+}
 
-module.exports = {
-  applyPackageRules,
-};
+interface PackageRule {
+  paths?: string[];
+  languages?: string[];
+  baseBranchList?: string[];
+  managers?: string[];
+  datasources?: string[];
+  depTypeList?: string[];
+  packageNames?: string[];
+  packagePatterns?: string[];
+  excludePackageNames?: string[];
+  excludePackagePatterns?: string[];
+  matchCurrentVersion?: string | Range;
+  sourceUrlPrefixes?: string[];
+  updateTypes?: string[];
+}
 
-function matchesRule(inputConfig, packageRule) {
+function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
     versionScheme,
     packageFile,
@@ -193,9 +224,9 @@ function matchesRule(inputConfig, packageRule) {
   return positiveMatch;
 }
 
-function applyPackageRules(inputConfig) {
-  let config = { ...inputConfig };
-  const packageRules = config.packageRules || [];
+export function applyPackageRules(inputConfig: Config): Config {
+  let config: Config & PackageRule = { ...inputConfig };
+  const packageRules: PackageRule[] = config.packageRules || [];
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`
