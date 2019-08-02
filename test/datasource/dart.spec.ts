@@ -1,10 +1,13 @@
-import { readFileSync } from 'fs';
+import fs from 'fs';
 import _got from '../../lib/util/got';
 import { getPkgReleases } from '../../lib/datasource/dart';
 
 const got = _got;
 const body: any = JSON.parse(
-  readFileSync('test/datasource/dart/_fixtures/shared_preferences.json', 'utf8')
+  fs.readFileSync(
+    'test/datasource/dart/_fixtures/shared_preferences.json',
+    'utf8'
+  )
 );
 
 jest.mock('../../lib/util/got');

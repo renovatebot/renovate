@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import fs from 'fs';
 import _got from '../../lib/util/got';
 import { getPkgReleases } from '../../lib/datasource/ruby-version';
 
@@ -6,7 +6,7 @@ jest.mock('../../lib/util/got');
 
 const got: any = _got;
 
-const rubyReleasesHtml = readFileSync(
+const rubyReleasesHtml = fs.readFileSync(
   'test/datasource/ruby-version/_fixtures/releases.html',
   'utf8'
 );

@@ -1,13 +1,16 @@
-import { readFileSync } from 'fs';
+import fs from 'fs';
 
 import _got from '../../lib/util/got';
 import { getPkgReleases } from '../../lib/datasource/cargo';
 
 const got: any = _got;
 
-const res1 = readFileSync('test/datasource/cargo/_fixtures/libc', 'utf8');
-const res2 = readFileSync('test/datasource/cargo/_fixtures/amethyst', 'utf8');
-const res3 = readFileSync(
+const res1 = fs.readFileSync('test/datasource/cargo/_fixtures/libc', 'utf8');
+const res2 = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/amethyst',
+  'utf8'
+);
+const res3 = fs.readFileSync(
   'test/datasource/cargo/_fixtures/invalid_crate_data',
   'utf8'
 );

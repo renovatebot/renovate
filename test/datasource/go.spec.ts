@@ -1,6 +1,6 @@
 import _got from '../../lib/util/got';
 import * as _github from '../../lib/datasource/github';
-import { getDigest, getPkgReleases } from '../../lib/datasource/go';
+import * as go from '../../lib/datasource/go';
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/datasource/github');
@@ -31,7 +31,7 @@ describe('datasource/go', () => {
         body: res1,
       });
       github.getDigest.mockReturnValueOnce('abcdefabcdefabcdefabcdef');
-      const res = await getDigest({ lookupName: 'golang.org/y/text' }, null);
+      const res = await go.getDigest({ lookupName: 'golang.org/y/text' }, null);
       expect(res).toBeNull();
     });
     it('returns digest', async () => {
@@ -39,7 +39,7 @@ describe('datasource/go', () => {
         body: res1,
       });
       github.getDigest.mockReturnValueOnce('abcdefabcdefabcdefabcdef');
-      const res = await getDigest({ lookupName: 'golang.org/x/text' }, null);
+      const res = await go.getDigest({ lookupName: 'golang.org/x/text' }, null);
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
   });
@@ -47,7 +47,7 @@ describe('datasource/go', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(
-        await getPkgReleases({
+        await go.getPkgReleases({
           lookupName: 'golang.org/foo/something',
         })
       ).toBeNull();
@@ -59,7 +59,7 @@ describe('datasource/go', () => {
         })
       );
       expect(
-        await getPkgReleases({
+        await go.getPkgReleases({
           lookupName: 'golang.org/foo/something',
         })
       ).toBeNull();
@@ -69,7 +69,7 @@ describe('datasource/go', () => {
         throw new Error();
       });
       expect(
-        await getPkgReleases({
+        await go.getPkgReleases({
           lookupName: 'golang.org/foo/something',
         })
       ).toBeNull();
@@ -81,7 +81,7 @@ describe('datasource/go', () => {
       github.getPkgReleases.mockReturnValueOnce({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
       });
-      const res = await getPkgReleases({
+      const res = await go.getPkgReleases({
         lookupName: 'golang.org/x/text',
       });
       expect(res).toMatchSnapshot();
@@ -92,7 +92,7 @@ describe('datasource/go', () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      const res = await getPkgReleases({
+      const res = await go.getPkgReleases({
         lookupName: 'golang.org/x/sys',
       });
       expect(res).toBeNull();
@@ -104,7 +104,7 @@ describe('datasource/go', () => {
           'https://google.com/golang/text/'
         ),
       });
-      const res = await getPkgReleases({
+      const res = await go.getPkgReleases({
         lookupName: 'golang.org/x/text',
       });
       expect(res).toBeNull();
@@ -120,7 +120,7 @@ describe('datasource/go', () => {
       const githubRes = { releases: [1, 2] };
       for (const pkg of packages) {
         github.getPkgReleases.mockReturnValueOnce(githubRes);
-        expect(await getPkgReleases(pkg)).toEqual(githubRes);
+        expect(await go.getPkgReleases(pkg)).toEqual(githubRes);
       }
       expect(got).toHaveBeenCalledTimes(0);
       expect(github.getPkgReleases.mock.calls).toMatchSnapshot();

@@ -1,9 +1,6 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import {
-  getPkgReleases as _getPkgReleases,
-  getDigest as _getDigest,
-} from '../github';
+import * as github from '../github';
 import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
 
 interface DataSource {
@@ -79,7 +76,7 @@ export async function getPkgReleases({
   logger.trace(`go.getPkgReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === 'github') {
-    const res = await _getPkgReleases(source);
+    const res = await github.getPkgReleases(source);
     if (res && res.releases) {
       res.releases = res.releases.filter(
         release => release.version && release.version.startsWith('v')
@@ -108,7 +105,7 @@ export async function getDigest(
   if (source && source.datasource === 'github') {
     // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
     const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
-    const digest = await _getDigest(source, tag);
+    const digest = await github.getDigest(source, tag);
     return digest;
   }
   return null;

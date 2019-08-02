@@ -1,5 +1,5 @@
 import parse from 'github-url-from-git';
-import { valid, prerelease } from 'semver';
+import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import got from '../../util/got';
@@ -100,9 +100,9 @@ export async function getPkgReleases(
     try {
       // For nuget.org we have a way to get nuspec file
       const sanitizedVersions = dep.releases
-        .map(release => valid(release.version))
+        .map(release => semver.valid(release.version))
         .filter(Boolean)
-        .filter(version => !prerelease(version));
+        .filter(version => !semver.prerelease(version));
       let lastVersion: string;
       // istanbul ignore else
       if (sanitizedVersions.length) {

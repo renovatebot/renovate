@@ -1,8 +1,7 @@
 import is from '@sindresorhus/is';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
-
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 export async function getPkgReleases({
   lookupName,

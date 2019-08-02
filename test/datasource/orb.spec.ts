@@ -1,5 +1,5 @@
 import _got from '../../lib/util/got';
-import { getPkgReleases } from '../../lib/datasource';
+import * as datasource from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
 
@@ -36,7 +36,7 @@ describe('datasource/orb', () => {
     it('returns null for empty result', async () => {
       got.post.mockReturnValueOnce({ body: {} });
       expect(
-        await getPkgReleases({
+        await datasource.getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
         })
@@ -45,7 +45,7 @@ describe('datasource/orb', () => {
     it('returns null for missing orb', async () => {
       got.post.mockReturnValueOnce({ body: { data: {} } });
       expect(
-        await getPkgReleases({
+        await datasource.getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-wonkflows',
         })
@@ -58,7 +58,7 @@ describe('datasource/orb', () => {
         })
       );
       expect(
-        await getPkgReleases({
+        await datasource.getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
         })
@@ -69,7 +69,7 @@ describe('datasource/orb', () => {
         throw new Error();
       });
       expect(
-        await getPkgReleases({
+        await datasource.getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
         })
@@ -79,7 +79,7 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await getPkgReleases({
+      const res = await datasource.getPkgReleases({
         datasource: 'orb',
         lookupName: 'hyper-expanse/library-release-workflows',
       });
@@ -91,7 +91,7 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await getPkgReleases({
+      const res = await datasource.getPkgReleases({
         datasource: 'orb',
         lookupName: 'hyper-expanse/library-release-workflows',
       });

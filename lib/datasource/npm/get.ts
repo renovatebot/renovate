@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { resolve } from 'url';
+import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
 import parse from 'github-url-from-git';
@@ -56,7 +56,10 @@ export async function getDependency(name: string): Promise<NpmDependency> {
   } catch (err) {
     regUrl = 'https://registry.npmjs.org';
   }
-  const pkgUrl = resolve(regUrl, encodeURIComponent(name).replace(/^%40/, '@'));
+  const pkgUrl = url.resolve(
+    regUrl,
+    encodeURIComponent(name).replace(/^%40/, '@')
+  );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
   const cachedResult = await renovateCache.get<NpmDependency>(

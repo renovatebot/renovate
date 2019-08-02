@@ -1,6 +1,6 @@
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
-import { get } from '../versioning';
+import * as versioning from '../versioning';
 
 import * as cargo from './cargo';
 import * as dart from './dart';
@@ -58,7 +58,7 @@ export async function getPkgReleases(config: PkgReleaseConfig) {
   const versionScheme =
     config && config.versionScheme ? config.versionScheme : 'semver';
   // Filter by version scheme
-  const { isVersion, sortVersions } = get(versionScheme);
+  const { isVersion, sortVersions } = versioning.get(versionScheme);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release) {
     return sortVersions(release1.version, release2.version);

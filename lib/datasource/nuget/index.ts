@@ -1,4 +1,4 @@
-import { parse } from 'url';
+import urlApi from 'url';
 import { logger } from '../../logger';
 import * as v2 from './v2';
 import * as v3 from './v3';
@@ -35,7 +35,7 @@ export async function getPkgReleases({
 
 function detectFeedVersion(url: string) {
   try {
-    const parsecUrl = parse(url);
+    const parsecUrl = urlApi.parse(url);
     // Official client does it in the same way
     if (parsecUrl.pathname.endsWith('.json')) {
       return 3;
