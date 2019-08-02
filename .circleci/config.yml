@@ -56,7 +56,7 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4
+      - image: amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8
     steps:
       - test
   test_node_12:
@@ -66,7 +66,7 @@ jobs:
       - test
   release:
     docker:
-      - image: amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4
+      - image: amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8
     steps:
       - checkout
       - run: yarn install --frozen-lockfile
