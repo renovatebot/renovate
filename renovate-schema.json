@@ -126,6 +126,11 @@
       "type": "string",
       "default": "Update Dependencies (Renovate Bot)"
     },
+    "configWarningReuseIssue": {
+      "description": "If true will reopen the prevoiusly closed issue or else will create a new Issue",
+      "type": "boolean",
+      "default": true
+    },
     "privateKey": {
       "description": "Server-side private key",
       "type": "string"
