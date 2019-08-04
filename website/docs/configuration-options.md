@@ -216,6 +216,8 @@ Add configuration here if you want to enable or disable something in particular 
 
 ## dotnet
 
+## droneci
+
 ## enabled
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
@@ -915,6 +917,11 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
+## pruneStaleBranches
+
+Set to `false` to disable deleting orphan branches and autoclosing PRs.
+Defaults to `true`.
+
 ## pub
 
 ## python
@@ -1141,12 +1148,6 @@ Note: Travis renovation is disabled by default as we cannot be sure of which com
 It is not known by many that npm package authors and collaborators can _delete_ an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.
 
 Enabling `unpublishSafe` will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
-
-## unstablePattern
-
-Because Docker uses tags instead of semver, there is no fixed convention for how to identify unstable releases. e.g. some images may use semver convention like `v2.0.0-beta1` but others may use their own convention, like Node.js or Ubuntu even/odd.
-
-This field is currently used by some config prefixes.
 
 ## updateLockFiles
 

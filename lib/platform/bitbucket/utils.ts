@@ -1,5 +1,29 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
+import { Storage } from '../git/storage';
+import { GotResponse } from '../common';
+
+export interface Config {
+  baseBranch: string;
+  baseCommitSHA: string;
+  defaultBranch: string;
+  fileList: any[];
+  has_issues: boolean;
+  mergeMethod: string;
+  owner: string;
+  prList: any[];
+  repository: string;
+  storage: Storage;
+
+  username: string;
+}
+
+export interface PagedResult<T = any> {
+  pagelen: number;
+  size?: number;
+  next?: string;
+  values: T[];
+}
 
 export function repoInfoTransformer(repoInfoBody: any) {
   return {
@@ -9,6 +33,7 @@ export function repoInfoTransformer(repoInfoBody: any) {
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
+    has_issues: repoInfoBody.has_issues,
   };
 }
 
@@ -40,18 +65,21 @@ const addMaxLength = (inputUrl: string, pagelen = 100) => {
   return maxedUrl;
 };
 
-export async function accumulateValues(
+export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
   options?: any,
   pagelen?: number
 ) {
-  let accumulator: any[] = [];
+  let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, pagelen);
   const lowerCaseMethod = method.toLocaleLowerCase();
 
   while (typeof nextUrl !== 'undefined') {
-    const { body } = await (api as any)[lowerCaseMethod](nextUrl, options);
+    const { body } = (await api[lowerCaseMethod](
+      nextUrl,
+      options
+    )) as GotResponse<PagedResult<T>>;
     accumulator = [...accumulator, ...body.values];
     nextUrl = body.next;
   }

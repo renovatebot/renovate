@@ -1,14 +1,15 @@
 const { getInstalledPath } = require('get-installed-path');
 
 jest.mock('fs-extra');
-jest.mock('child-process-promise');
+jest.mock('../../../../lib/util/exec');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 
 /** @type any */
 const fs = require('fs-extra');
-const { exec } = require('child-process-promise');
+/** @type any */
+const { exec } = require('../../../../lib/util/exec');
 const npmHelper = require('../../../../lib/manager/npm/post-update/npm');
 
 describe('generateLockFile', () => {

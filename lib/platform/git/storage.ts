@@ -338,7 +338,7 @@ export class Storage {
     await this._git!.reset('hard');
     await this._git!.checkout(['-B', branchName, 'origin/' + branchName]);
     await this._git!.checkout(this._config.baseBranch);
-    await this._git!.merge([branchName]);
+    await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
   }
 
@@ -470,6 +470,7 @@ function checkForPlatformFailure(err: Error) {
     return;
   }
   const platformErrorStrings = [
+    'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
@@ -478,7 +479,7 @@ function checkForPlatformFailure(err: Error) {
   ];
   for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-error');
+      throw new Error('platform-failure');
     }
   }
 }

@@ -17,6 +17,12 @@ import {
 
 const defaultConfigFile = configFileNames[0];
 
+interface PlatformConfig {
+  gitAuthor: string;
+  renovateUsername: string;
+  endpoint: string;
+}
+
 interface Comment {
   id: number;
   body: string;
@@ -35,6 +41,7 @@ interface Pr {
   sha: string;
 
   sourceRepo: string;
+  canRebase: boolean;
 }
 
 interface RepoConfig {
@@ -78,11 +85,6 @@ export async function initPlatform({
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
-  }
-  interface PlatformConfig {
-    gitAuthor: string;
-    renovateUsername: string;
-    endpoint: string;
   }
 
   const res: PlatformConfig = {} as any;
@@ -1070,6 +1072,9 @@ export async function ensureComment(
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === 'platform-failure') {
+      throw err;
+    }
     if (
       err.message === 'Unable to create comment because issue is locked. (403)'
     ) {
@@ -1216,6 +1221,7 @@ export async function createPr(
       urls.homepage
     );
   }
+  pr.canRebase = true;
   return pr;
 }
 

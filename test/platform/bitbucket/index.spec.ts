@@ -1,6 +1,6 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
-import { GotApi } from '../../../lib/platform/common';
+import { GotApi, RepoConfig } from '../../../lib/platform/common';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
@@ -71,11 +71,12 @@ describe('platform/bitbucket', () => {
     return (...args: any) => mocked(() => (bitbucket as any)[prop](...args));
   }
 
-  function initRepo() {
+  function initRepo(config?: Partial<RepoConfig>) {
     return mocked(() =>
       bitbucket.initRepo({
         repository: 'some/repo',
         localDir: '',
+        ...config,
       })
     );
   }
@@ -119,6 +120,13 @@ describe('platform/bitbucket', () => {
   describe('initRepo()', () => {
     it('works', async () => {
       expect(await initRepo()).toMatchSnapshot();
+    });
+
+    it('throws disabled', async () => {
+      expect.assertions(1);
+      await expect(
+        initRepo({ repository: 'some/empty', optimizeForDisabled: true })
+      ).rejects.toThrow('disabled');
     });
   });
 
@@ -391,6 +399,27 @@ describe('platform/bitbucket', () => {
     it('exists', async () => {
       await initRepo();
       expect(await getPr(5)).toMatchSnapshot();
+    });
+
+    it('canRebase', async () => {
+      expect.assertions(4);
+      await initRepo();
+      const author = global.gitAuthor;
+      try {
+        await mocked(async () => {
+          expect(await bitbucket.getPr(3)).toMatchSnapshot();
+
+          global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
+
+          global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
+
+          expect(api.get.mock.calls).toMatchSnapshot();
+        });
+      } finally {
+        global.gitAuthor = author;
+      }
     });
   });
 

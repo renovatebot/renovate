@@ -37,7 +37,7 @@ This function is mandatory unless you use `extractAllPackageFiles` instead. It t
 - currentValue
 - version scheme used (e.g. semver, pep440)
 
-The fields returned here can be customised to suit the package manager, e.g. Docker uses `currentFrom`
+The fields returned here can be customised to suit the package manager, e.g. Dockerfile uses `lineNumber`. Custom fields should be added within a `managerData` object.
 
 This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract the list of dependencies.
 

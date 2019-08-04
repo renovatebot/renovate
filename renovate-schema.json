@@ -61,6 +61,11 @@
       "description": "The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.",
       "type": "string"
     },
+    "dockerMapDotfiles": {
+      "description": "Map relevant home directory dotfiles into containers when binarySource=docker.",
+      "type": "boolean",
+      "default": false
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
@@ -466,11 +471,6 @@
       "description": "Ignore deprecated versions unless the current version is deprecated",
       "type": "boolean",
       "default": true
-    },
-    "unstablePattern": {
-      "description": "Regex for identifying unstable versions (docker only)",
-      "type": "string",
-      "format": "regex"
     },
     "followTag": {
       "description": "If defined, packages will follow this release tag exactly.",
@@ -1011,6 +1011,14 @@
       },
       "$ref": "#"
     },
+    "droneci": {
+      "description": "Configuration object for DroneCI yml renovation. Also inherits settings from `docker` object.",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/).drone.yml$"]
+      },
+      "$ref": "#"
+    },
     "ansible": {
       "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "type": "object",
@@ -1127,7 +1135,7 @@
       "description": "Configuration object for build.gradle files",
       "type": "object",
       "default": {
-        "fileMatch": ["\\.gradle$", "(^|/)gradle.properties$"],
+        "fileMatch": ["\\.gradle(\\.kts)?$", "(^|/)gradle.properties$"],
         "timeout": 300,
         "versionScheme": "maven"
       },
@@ -1270,6 +1278,11 @@
         "rangeStrategy": "bump"
       },
       "$ref": "#"
+    },
+    "pruneStaleBranches": {
+      "description": "Enable or disable pruning of stale branches",
+      "type": "boolean",
+      "default": true
     }
   }
 }

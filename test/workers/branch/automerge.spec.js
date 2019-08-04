@@ -57,5 +57,12 @@ describe('workers/branch/automerge', () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
+    it('returns true if automerge succeeds (dry-run)', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.dryRun = true;
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
+    });
   });
 });
