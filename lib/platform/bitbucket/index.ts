@@ -608,7 +608,7 @@ export async function getPr(prNo: number) {
     // istanbul ignore if
     if (size === undefined) {
       logger.warn({ prNo, url, body }, 'invalid response so can rebase');
-      pr.canRebase = true;
+      res.canRebase = true;
     } else if (size === 1) {
       if (global.gitAuthor) {
         const author = addrs.parseOneAddress(
@@ -619,24 +619,24 @@ export async function getPr(prNo: number) {
             { prNo },
             '1 commit matches configured gitAuthor so can rebase'
           );
-          pr.canRebase = true;
+          res.canRebase = true;
         } else {
           logger.debug(
             { prNo },
             '1 commit and not by configured gitAuthor so cannot rebase'
           );
-          pr.canRebase = false;
+          res.canRebase = false;
         }
       } else {
         logger.debug(
           { prNo },
           '1 commit and no configured gitAuthor so can rebase'
         );
-        pr.canRebase = true;
+        res.canRebase = true;
       }
     } else {
       logger.debug({ prNo }, `${size} commits so cannot rebase`);
-      pr.canRebase = false;
+      res.canRebase = false;
     }
   }
   if (await branchExists(pr.source.branch.name)) {
