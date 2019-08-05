@@ -31,6 +31,7 @@ const manualChangelogUrls = {
       'https://firebase.google.com/support/release-notes/admin/python',
     requests:
       'http://docs.python-requests.org/en/master/community/updates/#release-and-version-history',
+    wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
   },
 };
 

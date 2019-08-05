@@ -226,6 +226,20 @@ describe('api/docker', () => {
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
+    it('uses lower tag limit for ECR deps', async () => {
+      got.mockReturnValueOnce({ headers: {} });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
+      await getPkgReleases({
+        datasource: 'docker',
+        depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+      });
+      // The  tag limit parameter `n` needs to be limited to 1000 for ECR
+      // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+      expect(got.mock.calls[1][0]).toEqual(
+        'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/tags/list?n=1000'
+      );
+      expect(got).toMatchSnapshot();
+    });
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
       const tags = ['1.0.0'];
       got.mockReturnValueOnce({

@@ -7,7 +7,7 @@ import { Upgrade } from '../../../lib/manager/common';
 const sbtPath = resolve(__dirname, `./_fixtures/sample.sbt`);
 const fileContent = readFileSync(sbtPath, 'utf8');
 
-describe('lib/manager/terraform/extract', () => {
+describe('lib/manager/sbt/extract', () => {
   describe('updateDependency()', () => {
     it('returns content untouched if versions are same', () => {
       const { deps } = extractPackageFile(fileContent);

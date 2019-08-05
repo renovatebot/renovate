@@ -40,7 +40,7 @@ const getHeaders = () => {
 const fetch = async ({ dependency, registry, path }) => {
   const json = true;
 
-  const retry = retriable();
+  const retry = { retries: retriable() };
   const headers = getHeaders();
 
   const name = `/${dependency}.json`;

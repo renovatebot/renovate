@@ -1,0 +1,62 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - 'master'
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - '*'
+
+variables:
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+  CI: true
+
+jobs:
+  - job: 'Windows'
+    strategy:
+      matrix:
+        Node10 Py3.7:
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
+        Node12 Py3.7:
+          nodeVersion: '12.x'
+          pythonVersion: '3.7'
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+      - script: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+        displayName: 'Preserve LF endings and symbolic links on check out'
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: Set-MpPreference -DisableRealtimeMonitoring $true
+        displayName: 'Disable defender'
+
+      - template: .azure/steps.yml
+
+  - job: 'Linux'
+    strategy:
+      matrix:
+        Node10 Py3.7:
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - template: .azure/steps.yml
+
+  - job: 'MacOS'
+    strategy:
+      matrix:
+        Node10 Py3.7:
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
+    pool:
+      vmImage: macOS-10.14
+
+    steps:
+      - template: .azure/steps.yml
