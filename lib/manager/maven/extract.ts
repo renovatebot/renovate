@@ -179,8 +179,9 @@ export function extractPackage(rawContent: string, packageFile: string = null) {
     });
   }
 
-  const parentPath = project.valueWithPath('parent.relativePath');
-  if (parentPath) {
+  if (packageFile && project.childNamed('parent')) {
+    const parentPath =
+      project.valueWithPath('parent.relativePath') || '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
@@ -204,10 +205,16 @@ export function resolveProps(packages: PackageFile[]): PackageFile[] {
   // which allows inheritance/overriding.
   packageFileNames.forEach(name => {
     const hierarchy: Record<string, MavenProp>[] = [];
+    const alreadyExtracted: Record<string, boolean> = {};
     let pkg = extractedPackages[name];
     while (pkg) {
       hierarchy.unshift(pkg.mavenProps);
-      pkg = extractedPackages[pkg.parent];
+      if (pkg.parent && !alreadyExtracted[pkg.parent]) {
+        alreadyExtracted[pkg.parent] = true;
+        pkg = extractedPackages[pkg.parent];
+      } else {
+        pkg = null;
+      }
     }
     hierarchy.unshift({});
     // @ts-ignore
