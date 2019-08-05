@@ -466,7 +466,7 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CIRCLECI) {
+  if (process.env.CI) {
     return;
   }
   const platformErrorStrings = [

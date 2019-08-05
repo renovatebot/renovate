@@ -192,6 +192,7 @@
     "glob": "7.1.4",
     "husky": "3.0.2",
     "jest": "24.8.0",
+    "jest-junit": "7.0.0",
     "jest-silent-reporter": "0.1.2",
     "mockdate": "2.0.3",
     "nock": "11.0.0-beta.31",
