@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4 AS tsbuild
+FROM amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .

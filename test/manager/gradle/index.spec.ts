@@ -42,6 +42,14 @@ describe('manager/gradle', () => {
       expect(dependencies).toMatchSnapshot();
     });
 
+    it('should return gradle.kts dependencies', async () => {
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle.kts',
+        'subproject/build.gradle.kts',
+      ]);
+      expect(dependencies).toMatchSnapshot();
+    });
+
     it('should return empty if there are no dependencies', async () => {
       fs.readFile.mockResolvedValue(fsReal.readFileSync(
         'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
@@ -199,6 +207,35 @@ describe('manager/gradle', () => {
       );
       expect(buildGradleContentUpdated).not.toMatch(
         'id "com.github.ben-manes.versions" version "0.20.0"'
+      );
+    });
+
+    it('should update an existing plugin dependency with Kotlin DSL', () => {
+      const buildGradleContent = `
+        plugins {
+            id("com.github.ben-manes.versions") version "0.20.0"
+        }
+        `;
+      const upgrade = {
+        depGroup: 'com.github.ben-manes.versions',
+        name: 'com.github.ben-manes.versions.gradle.plugin',
+        version: '0.20.0',
+        newValue: '0.21.0',
+      };
+      const buildGradleContentUpdated = manager.updateDependency(
+        buildGradleContent,
+        upgrade
+      );
+
+      expect(buildGradleContent).not.toMatch(
+        'id("com.github.ben-manes.versions") version "0.21.0"'
+      );
+
+      expect(buildGradleContentUpdated).toMatch(
+        'id("com.github.ben-manes.versions") version "0.21.0"'
+      );
+      expect(buildGradleContentUpdated).not.toMatch(
+        'id("com.github.ben-manes.versions") version "0.20.0"'
       );
     });
   });

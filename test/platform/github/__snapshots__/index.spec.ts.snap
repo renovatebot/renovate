@@ -38,6 +38,7 @@ Array [
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "branchName": "some-branch",
+  "canRebase": true,
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
@@ -82,6 +83,7 @@ Array [
 exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "branchName": "some-branch",
+  "canRebase": true,
   "displayNumber": "Pull Request #123",
   "number": 123,
 }

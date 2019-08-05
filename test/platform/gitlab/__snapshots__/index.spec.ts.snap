@@ -30,6 +30,7 @@ Array [
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
   "branchName": "some-branch",
+  "canRebase": true,
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
@@ -58,6 +59,7 @@ Array [
 exports[`platform/gitlab createPr(branchName, title, body) uses default branch 1`] = `
 Object {
   "branchName": "some-branch",
+  "canRebase": true,
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,

@@ -22,8 +22,12 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[]> {
-  if (!packageFiles.some(packageFile => packageFile === 'build.gradle')) {
-    logger.warn('No root build.gradle found - skipping');
+  if (
+    !packageFiles.some(packageFile =>
+      ['build.gradle', 'build.gradle.kts'].includes(packageFile)
+    )
+  ) {
+    logger.warn('No root build.gradle nor build.gradle.kts found - skipping');
     return null;
   }
   logger.info('Extracting dependencies from all gradle files');

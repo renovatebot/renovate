@@ -1130,7 +1130,7 @@
       "description": "Configuration object for build.gradle files",
       "type": "object",
       "default": {
-        "fileMatch": ["\\.gradle$", "(^|/)gradle.properties$"],
+        "fileMatch": ["\\.gradle(\\.kts)?$", "(^|/)gradle.properties$"],
         "timeout": 300,
         "versionScheme": "maven"
       },
