@@ -93,7 +93,7 @@ Add `"default:automergeDigest"` to your `extends` array. Also add `"default:auto
 
 ##### Registry authentication
 
-If you are running your own docker registry, add this to your `config.js`:
+Here is an example of configuring a default Docker username/password in `config.js`:
 
 ```js
 module.exports = {
