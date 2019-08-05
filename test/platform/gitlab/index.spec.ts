@@ -310,7 +310,14 @@ describe('platform/gitlab', () => {
     it('should return the PR object', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
-        body: [{ iid: 91, source_branch: 'some-branch', state: 'opened' }],
+        body: [
+          {
+            iid: 91,
+            target_branch: 'master',
+            source_branch: 'some-branch',
+            state: 'opened',
+          },
+        ],
       } as any);
       api.get.mockReturnValueOnce({
         body: {
@@ -319,6 +326,7 @@ describe('platform/gitlab', () => {
           additions: 1,
           deletions: 1,
           commits: 1,
+          target_branch: 'master',
           source_branch: 'some-branch',
           base: {
             sha: '1234',
@@ -778,6 +786,7 @@ describe('platform/gitlab', () => {
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
         },
       } as any);
       api.get.mockReturnValueOnce({
@@ -798,6 +807,7 @@ describe('platform/gitlab', () => {
           state: 'open',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
         },
       } as any);
       api.get.mockReturnValueOnce({ body: [{ status: 'success' }] } as any); // get commit statuses
@@ -817,6 +827,7 @@ describe('platform/gitlab', () => {
               merge_status: 'cannot_be_merged',
               diverged_commits_count: 2,
               source_branch: 'some-branch',
+              target_branch: 'master',
             },
           } as any)
       );
@@ -912,6 +923,7 @@ These updates have all been created already. Click a checkbox below to force a r
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
           labels: ['foo', 'renovate', 'rebase'],
         },
       } as any);

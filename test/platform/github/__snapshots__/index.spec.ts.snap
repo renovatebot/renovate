@@ -209,6 +209,7 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
 
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
 Object {
+  "baseRefName": "master",
   "branchName": "renovate/jest-monorepo",
   "canMerge": false,
   "canRebase": true,
@@ -217,6 +218,7 @@ Object {
   "isStale": true,
   "number": 2500,
   "state": "open",
+  "targetBranch": "master",
   "title": "chore(deps): update dependency jest to v23.6.0",
 }
 `;
@@ -411,6 +413,7 @@ Object {
 
 exports[`platform/github initRepo should forks when forkMode 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
   "privateRepo": false,
 }
@@ -418,6 +421,7 @@ Object {
 
 exports[`platform/github initRepo should merge 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
   "privateRepo": false,
 }
@@ -425,6 +429,7 @@ Object {
 
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
   "privateRepo": false,
 }
@@ -432,6 +437,7 @@ Object {
 
 exports[`platform/github initRepo should rebase 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
   "privateRepo": false,
 }
@@ -439,6 +445,7 @@ Object {
 
 exports[`platform/github initRepo should squash 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
   "privateRepo": false,
 }
@@ -446,6 +453,7 @@ Object {
 
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
   "privateRepo": false,
 }

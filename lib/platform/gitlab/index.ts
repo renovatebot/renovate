@@ -143,6 +143,7 @@ export async function initRepo({
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
     platformConfig.isFork = !!res.body.forked_from_project;
+    platformConfig.baseBranch = config.baseBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
@@ -723,6 +724,7 @@ export async function getPr(iid: number) {
   const pr = (await api.get(url)).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;
+  pr.targetBranch = pr.target_branch;
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;

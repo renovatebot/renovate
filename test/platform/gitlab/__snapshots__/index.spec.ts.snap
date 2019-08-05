@@ -147,6 +147,8 @@ Object {
   "number": 91,
   "source_branch": "some-branch",
   "state": "open",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 
@@ -167,6 +169,8 @@ Object {
   "number": 12345,
   "source_branch": "some-branch",
   "state": "merged",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 
@@ -186,6 +190,8 @@ Object {
   "number": 12345,
   "source_branch": "some-branch",
   "state": "open",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 
@@ -204,6 +210,8 @@ Object {
   "number": 12345,
   "source_branch": "some-branch",
   "state": "open",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 

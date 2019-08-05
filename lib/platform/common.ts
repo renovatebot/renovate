@@ -42,6 +42,7 @@ export interface GotApi<TOptions extends object = any> {
 export interface PlatformConfig {
   isFork: boolean;
   privateRepo: boolean;
+  baseBranch?: string;
   // do we need this?
   repoFullName?: string;
 }

@@ -191,7 +191,11 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
   // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: { privateRepo: boolean; isFork: boolean } = {} as any;
+  const platformConfig: {
+    privateRepo: boolean;
+    isFork: boolean;
+    baseBranch: string;
+  } = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
@@ -255,6 +259,7 @@ export async function initRepo({
     config.defaultBranch = res.body.default_branch;
     // Base branch may be configured but defaultBranch is always fixed
     config.baseBranch = config.defaultBranch;
+    platformConfig.baseBranch = config.baseBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
     if (res.body.allow_rebase_merge) {
@@ -1240,6 +1245,7 @@ async function getOpenPrs() {
           pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
             nodes {
               number
+              baseRefName
               headRefName
               title
               mergeable
@@ -1300,6 +1306,7 @@ async function getOpenPrs() {
         const branchName = pr.branchName;
         const prNo = pr.number;
         delete pr.headRefName;
+        pr.targetBranch = pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
         const canMergeStates = ['BEHIND', 'CLEAN'];
         const hasNegativeReview =
