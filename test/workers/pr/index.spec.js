@@ -291,6 +291,16 @@ describe('workers/pr', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(0);
       expect(platform.addReviewers).toHaveBeenCalledTimes(0);
     });
+    it('should add assignees and reviewers to new PR if automerging enabled but configured to always assign', async () => {
+      config.assignees = ['bar'];
+      config.reviewers = ['baz'];
+      config.automerge = true;
+      config.assignAutomerge = true;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addAssignees).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+    });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       config.semanticCommitScope = null;
