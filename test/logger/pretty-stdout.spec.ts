@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import * as prettyStdout from '../../lib/logger/pretty-stdout';
+import { BunyanRecord } from '../../lib/logger/utils';
 
 jest.mock('chalk', () =>
   ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
@@ -76,7 +77,7 @@ describe('logger/pretty-stdout', () => {
       delete process.env.FORCE_COLOR;
     });
     it('formats record', () => {
-      const rec: prettyStdout.BunyanRecord = {
+      const rec: BunyanRecord = {
         level: 10,
         msg: 'test message',
         v: 0,
