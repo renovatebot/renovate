@@ -119,7 +119,7 @@ export async function initRepo({
     url,
   });
   const platformConfig: PlatformConfig = {
-    privateRepo: true,
+    baseBranch: config.baseBranch,
     isFork: false,
   };
   return platformConfig;
