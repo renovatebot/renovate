@@ -242,7 +242,6 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-    platformConfig.privateRepo = res.body.private === true;
     platformConfig.isFork = res.body.fork === true;
     const owner = res.body.owner.login;
     logger.debug(`${repository} owner = ${owner}`);

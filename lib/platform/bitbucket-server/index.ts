@@ -186,7 +186,6 @@ export async function initRepo({
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    platformConfig.privateRepo = info.is_private;
     platformConfig.isFork = !!info.parent;
     platformConfig.repoFullName = info.name;
     config.owner = info.project.key;

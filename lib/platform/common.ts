@@ -44,8 +44,7 @@ export interface PlatformConfig {
   renovateUsername?: any;
   gitAuthor?: any;
   isFork: boolean;
-  privateRepo: boolean;
-  baseBranch?: string;
+  baseBranch: string;
   // do we need this?
   repoFullName?: string;
 }
