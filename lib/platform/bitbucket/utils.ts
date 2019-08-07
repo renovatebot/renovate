@@ -105,6 +105,7 @@ export function prInfo(pr: any) {
     number: pr.id,
     body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
     branchName: pr.source.branch.name,
+    targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
       ? /* istanbul ignore next */ 'closed'
