@@ -191,11 +191,7 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
   // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: {
-    privateRepo: boolean;
-    isFork: boolean;
-    baseBranch: string;
-  } = {} as any;
+  const platformConfig: PlatformConfig = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
