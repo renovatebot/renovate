@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`logger saves errors 1`] = `
+Array [
+  Object {
+    "level": "error",
+    "meta": Object {
+      "any": "test",
+    },
+    "msg": "some meta",
+  },
+  Object {
+    "level": "error",
+    "meta": Object {
+      "any": "test",
+      "some": "meta",
+    },
+  },
+  Object {
+    "level": "error",
+    "meta": Object {
+      "any": "test",
+      "some": "meta",
+    },
+    "msg": "message",
+  },
+]
+`;

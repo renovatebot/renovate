@@ -7,6 +7,13 @@ import errSerializer from './err-serializer';
 import cmdSerializer from './cmd-serializer';
 
 let meta = {};
+export interface LogError {
+  level: bunyan.LogLevel;
+  meta: any;
+  msg?: string;
+}
+
+const errors: LogError[] = [];
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
@@ -37,18 +44,20 @@ const bunyanLogger = bunyan.createLogger({
 });
 
 const logFactory = (level: bunyan.LogLevelString): any => {
+  const isError = level === 'error' || level === 'fatal';
   return (p1: any, p2: any): void => {
-    global.renovateError =
-      global.renovateError || level === 'error' || level === 'fatal';
     if (p2) {
       // meta and msg provided
       bunyanLogger[level]({ ...meta, ...p1 }, p2);
+      if (isError) errors.push({ level, meta: { ...meta, ...p1 }, msg: p2 });
     } else if (is.string(p1)) {
       // only message provided
       bunyanLogger[level](meta, p1);
+      if (isError) errors.push({ level, meta: { ...meta }, msg: p1 });
     } else {
       // only meta provided
       bunyanLogger[level]({ ...meta, ...p1 });
+      if (isError) errors.push({ level, meta: { ...meta, ...p1 } });
     }
   };
 };
@@ -96,4 +105,8 @@ export /* istanbul ignore next */ function addStream(
 
 export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
+}
+
+export function getErrors() {
+  return errors;
 }
