@@ -49,6 +49,12 @@ describe('manager/maven', () => {
     it('should return package files info', async () => {
       platform.getFile.mockReturnValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
+      // windows path fix
+      for (const p of packages) {
+        if (p.parent) {
+          p.parent = p.parent.replace(/\\/g, '/');
+        }
+      }
       expect(packages).toMatchSnapshot();
     });
   });
