@@ -17,10 +17,6 @@ describe('datasource/gradle', () => {
     beforeEach(() => {
       config = {
         datasource: 'gradleVersion',
-        gradleWrapperType: 'bin',
-        typeStrategy: 'auto',
-        digests: 'true',
-        digestsStrategy: 'true',
       };
       jest.clearAllMocks();
       global.repoCache = {};
