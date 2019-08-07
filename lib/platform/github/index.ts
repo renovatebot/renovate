@@ -185,8 +185,6 @@ export async function initRepo({
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
-  // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: PlatformConfig = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
@@ -242,14 +240,12 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-    platformConfig.isFork = res.body.fork === true;
     const owner = res.body.owner.login;
     logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = res.body.default_branch;
     // Base branch may be configured but defaultBranch is always fixed
     config.baseBranch = config.defaultBranch;
-    platformConfig.baseBranch = config.baseBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
     if (res.body.allow_rebase_merge) {
@@ -382,7 +378,10 @@ export async function initRepo({
     ...config,
     url,
   });
-
+  const platformConfig: PlatformConfig = {
+    baseBranch: config.baseBranch,
+    isFork: res.body.fork === true,
+  };
   return platformConfig;
 }
 
