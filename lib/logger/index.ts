@@ -48,7 +48,7 @@ const logFactory = (level: bunyan.LogLevelString): any => {
       bunyanLogger[level](meta, p1);
     } else {
       // only meta provided
-      bunyanLogger[level](meta, p1);
+      bunyanLogger[level]({ ...meta, ...p1 });
     }
   };
 };
