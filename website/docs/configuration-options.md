@@ -25,6 +25,10 @@ If you have any questions about the below config options, or would like to get h
 
 Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
 
+## assignAutomerge
+
+By default, Renovate will not assign reviewers and assignees if the PR is to be automerged, unless the status check failed. By configuring this setting, you can enable Renovate to always assign reviewers and assignees.
+
 ## assignees
 
 Must be valid usernames.

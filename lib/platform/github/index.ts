@@ -7,6 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { PlatformConfig } from '../common';
 
 import {
   appName,
@@ -16,12 +17,6 @@ import {
 } from '../../config/app-strings';
 
 const defaultConfigFile = configFileNames[0];
-
-interface PlatformConfig {
-  gitAuthor: string;
-  renovateUsername: string;
-  endpoint: string;
-}
 
 interface Comment {
   id: number;
