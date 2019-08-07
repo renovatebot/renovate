@@ -533,6 +533,7 @@ describe('platform/bitbucket-server', () => {
               state: 'MERGED',
               reviewers: [],
               fromRef: {},
+              toRef: {},
             },
           } as any);
           expect(await bitbucket.getPr(5)).toMatchSnapshot();

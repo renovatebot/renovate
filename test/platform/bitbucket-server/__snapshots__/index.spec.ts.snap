@@ -505,6 +505,7 @@ Object {
   "createdAt": 1547853840016,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -556,6 +557,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -722,6 +724,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -743,6 +746,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -764,6 +768,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -850,6 +855,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -895,6 +901,7 @@ Object {
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
+  "targetBranch": undefined,
   "title": undefined,
   "version": 0,
 }
@@ -946,6 +953,7 @@ Array [
     "createdAt": 1547853840016,
     "number": 5,
     "state": "open",
+    "targetBranch": "master",
     "title": "title",
     "version": 1,
   },
@@ -1967,6 +1975,7 @@ Object {
   "createdAt": 1547853840016,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2018,6 +2027,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2184,6 +2194,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2205,6 +2216,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2226,6 +2238,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2312,6 +2325,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2357,6 +2371,7 @@ Object {
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
+  "targetBranch": undefined,
   "title": undefined,
   "version": 0,
 }
@@ -2408,6 +2423,7 @@ Array [
     "createdAt": 1547853840016,
     "number": 5,
     "state": "open",
+    "targetBranch": "master",
     "title": "title",
     "version": 1,
   },
