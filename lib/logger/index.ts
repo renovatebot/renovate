@@ -5,6 +5,7 @@ import { RenovateStream } from './pretty-stdout';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import cmdSerializer from './cmd-serializer';
+import { ErrorStream } from './utils';
 
 let meta = {};
 export interface LogError {
@@ -13,7 +14,7 @@ export interface LogError {
   msg?: string;
 }
 
-const errors: LogError[] = [];
+const errors = new ErrorStream();
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
@@ -40,24 +41,28 @@ const bunyanLogger = bunyan.createLogger({
     presetConfig: configSerializer,
     err: errSerializer,
   },
-  streams: [stdout],
+  streams: [
+    stdout,
+    {
+      name: 'error',
+      level: 'error' as bunyan.LogLevel,
+      stream: errors as any,
+      type: 'raw',
+    },
+  ],
 });
 
 const logFactory = (level: bunyan.LogLevelString): any => {
-  const isError = level === 'error' || level === 'fatal';
   return (p1: any, p2: any): void => {
     if (p2) {
       // meta and msg provided
       bunyanLogger[level]({ ...meta, ...p1 }, p2);
-      if (isError) errors.push({ level, meta: { ...meta, ...p1 }, msg: p2 });
     } else if (is.string(p1)) {
       // only message provided
       bunyanLogger[level](meta, p1);
-      if (isError) errors.push({ level, meta: { ...meta }, msg: p1 });
     } else {
       // only meta provided
       bunyanLogger[level]({ ...meta, ...p1 });
-      if (isError) errors.push({ level, meta: { ...meta, ...p1 } });
     }
   };
 };
@@ -108,5 +113,5 @@ export function levels(name: string, level: bunyan.LogLevel): void {
 }
 
 export function getErrors() {
-  return errors;
+  return errors.getErrors();
 }
