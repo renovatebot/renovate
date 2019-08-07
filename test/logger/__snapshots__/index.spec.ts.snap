@@ -4,35 +4,23 @@ exports[`logger saves errors 1`] = `
 Array [
   Object {
     "any": "test",
-    "hostname": "viceicemobile",
     "level": 50,
     "msg": "some meta",
     "name": "renovate",
-    "pid": 11204,
-    "time": 2019-08-07T06:47:19.045Z,
-    "v": 0,
   },
   Object {
     "any": "test",
-    "hostname": "viceicemobile",
     "level": 50,
     "msg": "",
     "name": "renovate",
-    "pid": 11204,
     "some": "meta",
-    "time": 2019-08-07T06:47:19.045Z,
-    "v": 0,
   },
   Object {
     "any": "test",
-    "hostname": "viceicemobile",
     "level": 50,
     "msg": "message",
     "name": "renovate",
-    "pid": 11204,
     "some": "meta",
-    "time": 2019-08-07T06:47:19.045Z,
-    "v": 0,
   },
 ]
 `;

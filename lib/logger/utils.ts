@@ -6,6 +6,8 @@ export interface BunyanRecord extends Record<string, any> {
   module?: string;
 }
 
+const excludeProps = ['pid', 'time', 'v', 'hostname'];
+
 export class ErrorStream extends Stream {
   private _errors: BunyanRecord[] = [];
 
@@ -20,7 +22,9 @@ export class ErrorStream extends Stream {
   }
 
   write(data: BunyanRecord) {
-    this._errors.push(data);
+    const err = { ...data };
+    for (const prop of excludeProps) delete err[prop];
+    this._errors.push(err);
     return true;
   }
 
