@@ -7,12 +7,8 @@ export interface Config {
 export interface PkgReleaseConfig extends Config {
   compatibility?: Record<string, string>;
   depType?: string;
-  digests?: string;
-  digestsStrategy?: string;
-  gradleWrapperType?: string;
   lookupType?: string;
   npmrc?: string;
-  typeStrategy?: string;
   versionScheme?: string;
 }
 
