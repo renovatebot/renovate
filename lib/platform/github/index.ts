@@ -7,6 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { PlatformConfig } from '../common';
 
 import {
   appName,
@@ -16,12 +17,6 @@ import {
 } from '../../config/app-strings';
 
 const defaultConfigFile = configFileNames[0];
-
-interface PlatformConfig {
-  gitAuthor: string;
-  renovateUsername: string;
-  endpoint: string;
-}
 
 interface Comment {
   id: number;
@@ -191,7 +186,7 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
   // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: { privateRepo: boolean; isFork: boolean } = {} as any;
+  const platformConfig: PlatformConfig = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
