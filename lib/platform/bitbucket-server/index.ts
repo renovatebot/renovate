@@ -19,6 +19,7 @@ import { RepoConfig, PlatformConfig } from '../common';
  */
 
 interface BbsConfig {
+  isFork: boolean;
   baseBranch: string;
   bbUseDefaultReviewers: boolean;
   defaultBranch: string;
@@ -180,14 +181,11 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: PlatformConfig = {} as any;
-
   try {
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    platformConfig.isFork = !!info.parent;
-    platformConfig.repoFullName = info.name;
+    config.isFork = !!info.parent;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
@@ -203,6 +201,10 @@ export async function initRepo({
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
+  const platformConfig: PlatformConfig = {
+    baseBranch: config.baseBranch,
+    isFork: config.isFork,
+  };
   logger.debug(
     { platformConfig },
     `platformConfig for ${config.projectKey}/${config.repositorySlug}`
