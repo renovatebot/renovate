@@ -10,6 +10,9 @@ export type RangeStrategy =
   | 'widen';
 
 export interface VersioningApi {
+  // configuration
+  configure?(config: string): void;
+
   // validation
   isCompatible(version: string, range?: string): string | boolean | null;
   isSingleVersion(version: string): string | boolean | null;

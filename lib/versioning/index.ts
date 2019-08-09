@@ -16,7 +16,7 @@ for (const scheme of supportedSchemes) {
 
 export { get };
 
-function get(versionScheme: string) {
+function get(versionScheme: string, versionConfig?: string) {
   if (!versionScheme) {
     logger.debug('Missing versionScheme');
     return schemes.semver;
@@ -25,6 +25,16 @@ function get(versionScheme: string) {
   if (!scheme) {
     logger.warn({ versionScheme }, 'Unknown version scheme');
     return schemes.semver;
+  }
+  if (versionConfig) {
+    if (!scheme.configure) {
+      logger.warn(
+        { versionScheme },
+        'Version config specified for unsupported scheme'
+      );
+      return scheme;
+    }
+    scheme.configure(versionConfig);
   }
   return scheme;
 }

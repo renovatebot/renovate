@@ -283,6 +283,10 @@
       },
       "default": null
     },
+    "versionConfig": {
+      "description": "Configuration for the selected versionScheme",
+      "type": "string"
+    },
     "versionScheme": {
       "description": "Version scheme to use for filtering and comparisons",
       "type": "string",
@@ -299,6 +303,7 @@
         "npm",
         "pep440",
         "poetry",
+        "regex",
         "ruby",
         "semver",
         "swift"
