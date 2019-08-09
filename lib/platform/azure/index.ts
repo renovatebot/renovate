@@ -218,10 +218,6 @@ export /* istanbul ignore next */ function getCommitMessages() {
   return config.storage.getCommitMessages();
 }
 
-export function hasSingleAuthor(branchName) {
-  return config.storage.hasSingleAuthor(branchName);
-}
-
 async function getBranchCommit(fullBranchName: string) {
   const azureApiGit = await azureApi.gitApi();
   const commit = await azureApiGit.getBranch(

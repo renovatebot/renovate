@@ -187,17 +187,6 @@ export class Storage {
     return res.all.map(commit => commit.message);
   }
 
-  async hasSingleAuthor(branchName: string): Promise<boolean> {
-    logger.debug(`hasSingleAuthor(${branchName})`);
-    const res = await this._git!.raw([
-      'log',
-      '--pretty=format:"%ae"',
-      `${this._config.baseBranch}..origin/${branchName}`,
-    ]);
-    const uniqueAuthors = new Set(res.trim().split(/\n/));
-    return uniqueAuthors.size < 2;
-  }
-
   async setBaseBranch(branchName: string) {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
