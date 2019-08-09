@@ -973,6 +973,10 @@ export function getCommitMessages() {
   return config.storage.getCommitMessages();
 }
 
+export function hasSingleAuthor(branchName) {
+  return config.storage.hasSingleAuthor(branchName);
+}
+
 export function getVulnerabilityAlerts() {
   logger.debug(`getVulnerabilityAlerts()`);
   return [];

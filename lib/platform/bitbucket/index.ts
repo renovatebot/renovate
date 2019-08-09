@@ -224,6 +224,10 @@ export function getCommitMessages() {
   return config.storage.getCommitMessages();
 }
 
+export function hasSingleAuthor(branchName) {
+  return config.storage.hasSingleAuthor(branchName);
+}
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string) {
   logger.debug(`getBranchPr(${branchName})`);
