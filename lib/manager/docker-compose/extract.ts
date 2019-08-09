@@ -22,7 +22,7 @@ class LineMapper {
 
   constructor(content: string, filter: RegExp) {
     this.imageLines = [...content.split('\n').entries()]
-      .filter(([_, line]) => filter.test(line))
+      .filter(entry => filter.test(entry[1]))
       .map(([lineNumber, line]) => ({ lineNumber, line, used: false }));
   }
 
@@ -30,9 +30,7 @@ class LineMapper {
     const lineMeta = this.imageLines.find(
       ({ line, used }) => !used && line.includes(imageName)
     );
-    if (!lineMeta) {
-      throw Error('Unable to determine line number for image ' + imageName);
-    }
+
     lineMeta.used = true; // unset plucked lines so duplicates are skipped
     return lineMeta.lineNumber;
   }
