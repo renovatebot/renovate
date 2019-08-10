@@ -955,6 +955,10 @@ For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0`
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
 
+## rebaseConflictedPrs
+
+This field defaults to `true` which means Renovate will rebase whenever there is a merge conflict with the master branch. However, this default behavior may result in costing a lot of CI cycles. If you wish to disable auto-rebasing in case of merge conflicts with the master branch, set it's value to `false`.
+
 ## rebaseLabel
 
 On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is `"rebase"` however you can configure it to anything you want by changing this `rebaseLabel` field.
