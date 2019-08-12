@@ -61,12 +61,12 @@ describe('datasource/github', () => {
     });
   });
   describe('getPreset()', () => {
-    it('passes up platform-error', async () => {
+    it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
-        throw new Error('platform-error');
+        throw new Error('platform-failure');
       });
       await expect(github.getPreset('some/repo')).rejects.toThrow(
-        'platform-error'
+        'platform-failure'
       );
     });
     it('tries default then renovate', async () => {
