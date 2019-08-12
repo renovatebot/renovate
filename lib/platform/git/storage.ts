@@ -477,6 +477,7 @@ function checkForPlatformFailure(err: Error) {
     'access denied or repository not exported',
     'Could not write new index file',
     'Failed to connect to',
+    'Connection timed out',
   ];
   for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {
