@@ -1,6 +1,6 @@
 # Deployment
 
-Before deploying the script for scheduled runs, it's recommend you test your
+Before deploying the script for scheduled runs, it's recommended you test your
 settings locally first.
 
 ## Server cron
