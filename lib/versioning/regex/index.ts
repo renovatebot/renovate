@@ -11,6 +11,8 @@ import {
 import { logger } from '../../logger';
 import { RangeStrategy, VersioningApi } from '../common';
 
+const safe = require('safe-regex');
+
 interface Version {
   // major, minor, and patch act in the standard semver fashion, but without
   // correctness requirements: if any one or two is omitted, they are treated
@@ -80,6 +82,14 @@ function configure(new_config: string): void {
 
   // TODO: should we validate the user has not added extra unsupported
   // capture groups?
+
+  if (!safe(new_config)) {
+    logger.warn('Unsafe regex versionScheme found');
+    const error = new Error('config-validation');
+    error.configFile = new_config;
+    error.validationError = 'Unsafe regex versionSheme found';
+    throw error;
+  }
 
   config = RegExp(new_config);
 }
