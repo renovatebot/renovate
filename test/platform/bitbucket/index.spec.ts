@@ -76,6 +76,7 @@ describe('platform/bitbucket', () => {
       bitbucket.initRepo({
         repository: 'some/repo',
         localDir: '',
+        optimizeForDisabled: false,
         ...config,
       })
     );
@@ -289,6 +290,7 @@ describe('platform/bitbucket', () => {
         await bitbucket.initRepo({
           repository: 'some/empty',
           localDir: '',
+          optimizeForDisabled: false,
         });
         expect(await bitbucket.findIssue('title')).toBeNull();
       });
@@ -308,6 +310,7 @@ describe('platform/bitbucket', () => {
         await bitbucket.initRepo({
           repository: 'some/empty',
           localDir: '',
+          optimizeForDisabled: false,
         });
         await bitbucket.ensureIssue('title', 'body');
         expect(api.get.mock.calls).toMatchSnapshot();
