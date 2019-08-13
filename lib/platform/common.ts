@@ -54,11 +54,11 @@ export interface RepoConfig {
 }
 
 export interface RepoParams {
-  azureWorkItemId?: number;
-  bbUseDefaultReviewers?: boolean;
+  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
+  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
   gitPrivateKey?: string;
   localDir: string;
-  optimizeForDisabled?: boolean;
+  optimizeForDisabled: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;
