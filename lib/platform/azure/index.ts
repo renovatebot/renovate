@@ -4,7 +4,7 @@ import * as hostRules from '../../util/host-rules';
 import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
-import { RepoParams, RepoConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 interface Config {
   storage: GitStorage;
@@ -46,7 +46,10 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  return res;
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+  };
+  return platformConfig;
 }
 
 export async function getRepos() {

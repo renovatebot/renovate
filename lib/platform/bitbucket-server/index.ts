@@ -6,7 +6,7 @@ import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
-import { RepoParams, RepoConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -67,12 +67,12 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+  defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+  api.setBaseUrl(defaults.endpoint);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
   };
-  api.setBaseUrl(res.endpoint);
-  defaults.endpoint = res.endpoint;
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to

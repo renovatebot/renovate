@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { RepoConfig } from '../common';
+import { PlatformConfig, RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 
@@ -38,18 +38,16 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  const res = {} as any;
   if (endpoint) {
-    res.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
-    api.setBaseUrl(res.endpoint);
-    defaults.endpoint = res.endpoint;
+    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    api.setBaseUrl(defaults.endpoint);
   } else {
-    res.endpoint = defaults.endpoint;
-    logger.info('Using default GitLab endpoint: ' + res.endpoint);
+    logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
   }
+  let gitAuthor;
   try {
     const user = (await api.get(`user`, { token })).body;
-    res.gitAuthor = user.email;
+    gitAuthor = user.email;
     authorId = user.id;
   } catch (err) {
     logger.info(
@@ -58,7 +56,11 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  return res;
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to

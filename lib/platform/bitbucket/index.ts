@@ -8,7 +8,7 @@ import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
-import { RepoParams, RepoConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 let config: utils.Config = {} as any;
 
@@ -32,11 +32,10 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
+  const platformConfig: PlatformConfig = {
     endpoint: 'https://api.bitbucket.org/',
   };
-  logger.info('Using default Bitbucket Cloud endpoint: ' + res.endpoint);
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to

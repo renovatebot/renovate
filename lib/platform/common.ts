@@ -41,8 +41,8 @@ export interface GotApi<TOptions extends object = any> {
 
 export interface PlatformConfig {
   endpoint: string;
-  renovateUsername: any;
-  gitAuthor: any;
+  renovateUsername?: any;
+  gitAuthor?: any;
 }
 
 export interface RepoConfig {
