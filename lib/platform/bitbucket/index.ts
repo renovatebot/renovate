@@ -8,7 +8,7 @@ import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
-import { RepoConfig, PlatformConfig } from '../common';
+import { InitRepoConfig, PlatformConfig } from '../common';
 
 let config: utils.Config = {} as any;
 
@@ -58,7 +58,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: RepoConfig) {
+}: InitRepoConfig) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: 'bitbucket',

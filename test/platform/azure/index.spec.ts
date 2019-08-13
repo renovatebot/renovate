@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as _hostRules from '../../../lib/util/host-rules';
-import { RepoConfig } from '../../../lib/platform/common';
+import { InitRepoConfig } from '../../../lib/platform/common';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -124,7 +124,7 @@ describe('platform/azure', () => {
       azure.cleanRepo();
     });
   });
-  function initRepo(args?: Partial<RepoConfig> | string) {
+  function initRepo(args?: Partial<InitRepoConfig> | string) {
     azureApi.gitApi.mockImplementationOnce(
       () =>
         ({

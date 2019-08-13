@@ -49,7 +49,7 @@ export interface PlatformConfig {
   repoFullName?: string;
 }
 
-export interface RepoConfig {
+export interface InitRepoConfig {
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitPrivateKey?: string;

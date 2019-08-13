@@ -469,15 +469,17 @@ function checkForPlatformFailure(err: Error) {
   if (process.env.CI) {
     return;
   }
-  const platformErrorStrings = [
+  const platformFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
     'Could not write new index file',
+    'Failed to connect to',
+    'Connection timed out',
   ];
-  for (const errorStr of platformErrorStrings) {
+  for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
       throw new Error('platform-failure');
     }
