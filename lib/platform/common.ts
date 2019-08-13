@@ -39,7 +39,7 @@ export interface GotApi<TOptions extends object = any> {
   setBaseUrl(endpoint: string): void;
 }
 
-export interface PlatformConfig {
+export interface RepoConfig {
   endpoint?: string;
   renovateUsername?: any;
   gitAuthor?: any;
@@ -47,7 +47,7 @@ export interface PlatformConfig {
   privateRepo: boolean;
 }
 
-export interface InitRepoConfig {
+export interface RepoParams {
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitPrivateKey?: string;

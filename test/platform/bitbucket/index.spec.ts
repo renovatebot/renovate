@@ -1,6 +1,6 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
-import { GotApi, InitRepoConfig } from '../../../lib/platform/common';
+import { GotApi, RepoParams } from '../../../lib/platform/common';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
@@ -71,7 +71,7 @@ describe('platform/bitbucket', () => {
     return (...args: any) => mocked(() => (bitbucket as any)[prop](...args));
   }
 
-  function initRepo(config?: Partial<InitRepoConfig>) {
+  function initRepo(config?: Partial<RepoParams>) {
     return mocked(() =>
       bitbucket.initRepo({
         repository: 'some/repo',

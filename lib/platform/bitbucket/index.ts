@@ -8,7 +8,7 @@ import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
-import { InitRepoConfig, PlatformConfig } from '../common';
+import { RepoParams, RepoConfig } from '../common';
 
 let config: utils.Config = {} as any;
 
@@ -58,7 +58,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: InitRepoConfig) {
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: 'bitbucket',
@@ -70,7 +70,7 @@ export async function initRepo({
   } as any;
 
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  const platformConfig: PlatformConfig = {} as any;
+  const platformConfig: RepoConfig = {} as any;
 
   try {
     const info = utils.repoInfoTransformer(

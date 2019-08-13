@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
+import { RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 
@@ -104,7 +104,7 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.localDir = localDir;
   let res;
-  const platformConfig: PlatformConfig = {} as any;
+  const platformConfig: RepoConfig = {} as any;
   try {
     res = await api.get(`projects/${config.repository}`);
     if (res.body.archived) {

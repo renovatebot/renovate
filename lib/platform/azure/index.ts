@@ -4,7 +4,7 @@ import * as hostRules from '../../util/host-rules';
 import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
-import { InitRepoConfig, PlatformConfig } from '../common';
+import { RepoParams, RepoConfig } from '../common';
 
 interface Config {
   storage: GitStorage;
@@ -61,7 +61,7 @@ export async function initRepo({
   localDir,
   azureWorkItemId,
   optimizeForDisabled,
-}: InitRepoConfig) {
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   config = { repository, azureWorkItemId } as any;
   const azureApiGit = await azureApi.gitApi();
@@ -118,7 +118,7 @@ export async function initRepo({
     localDir,
     url,
   });
-  const platformConfig: PlatformConfig = {
+  const platformConfig: RepoConfig = {
     privateRepo: true,
     isFork: false,
   };

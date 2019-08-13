@@ -1,5 +1,5 @@
 import responses from './_fixtures/responses';
-import { GotApi, InitRepoConfig } from '../../../lib/platform/common';
+import { GotApi, RepoParams } from '../../../lib/platform/common';
 import { Storage } from '../../../lib/platform/git/storage';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
@@ -83,7 +83,7 @@ describe('platform/bitbucket-server', () => {
         bitbucket.cleanRepo();
       });
 
-      function initRepo(config?: Partial<InitRepoConfig>) {
+      function initRepo(config?: Partial<RepoParams>) {
         return bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',

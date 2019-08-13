@@ -6,7 +6,7 @@ import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
-import { InitRepoConfig, PlatformConfig } from '../common';
+import { RepoParams, RepoConfig } from '../common';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -109,7 +109,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: InitRepoConfig) {
+}: RepoParams) {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -180,7 +180,7 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: PlatformConfig = {} as any;
+  const platformConfig: RepoConfig = {} as any;
 
   try {
     const info = (await api.get(

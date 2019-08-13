@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
+import { RepoConfig } from '../common';
 
 import {
   appName,
@@ -39,7 +39,7 @@ interface Pr {
   canRebase: boolean;
 }
 
-interface InitRepoConfig {
+interface RepoParams {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
@@ -64,7 +64,7 @@ interface InitRepoConfig {
   renovateUsername: string;
 }
 
-let config: InitRepoConfig = {} as any;
+let config: RepoParams = {} as any;
 
 const defaults = {
   hostType: 'github',
@@ -82,7 +82,7 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
-  const res: PlatformConfig = {} as any;
+  const res: RepoConfig = {} as any;
   if (endpoint) {
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
@@ -186,7 +186,7 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
   // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: PlatformConfig = {} as any;
+  const platformConfig: RepoConfig = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
