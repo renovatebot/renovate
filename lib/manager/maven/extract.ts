@@ -135,7 +135,10 @@ function resolveParentFile(packageFile: string, parentPath: string) {
   return normalize(join(dir, parentDir, parentFile));
 }
 
-export function extractPackage(rawContent: string, packageFile: string = null) {
+export async function extractPackage(
+  rawContent: string,
+  packageFile: string = null
+) {
   if (!rawContent) return null;
 
   const project = parsePom(rawContent);
@@ -183,9 +186,35 @@ export function extractPackage(rawContent: string, packageFile: string = null) {
     const parentPath =
       project.valueWithPath('parent.relativePath') || '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
+
+    const parentRepos = await parseParentRepos(result, result.parent);
+    if (parentRepos) {
+      result.deps.forEach(dep => {
+        if (dep.registryUrls) {
+          parentRepos.forEach(url => dep.registryUrls.push(url));
+        }
+      });
+    }
   }
 
   return result;
+}
+
+export async function parseParentRepos(result, parentPath) {
+  const contentPromise = platform.getFile(parentPath);
+  const content = await contentPromise;
+  const project = parsePom(content);
+  const repositories = project.childNamed('repositories');
+  if (repositories && repositories.children) {
+    const repoUrls = [];
+    for (const repo of repositories.childrenNamed('repository')) {
+      const repoUrl = repo.valueWithPath('url');
+      if (repoUrl) {
+        repoUrls.push(repoUrl);
+      }
+    }
+    return repoUrls;
+  }
 }
 
 export function resolveProps(packages: PackageFile[]): PackageFile[] {
@@ -255,7 +284,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await platform.getFile(packageFile);
     if (content) {
-      const pkg = extractPackage(content, packageFile);
+      const pkg = await extractPackage(content, packageFile);
       if (pkg) {
         packages.push(pkg);
       } else {
