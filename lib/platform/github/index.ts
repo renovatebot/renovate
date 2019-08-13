@@ -89,7 +89,7 @@ export async function initPlatform({
     logger.info('Using default github endpoint: ' + defaults.endpoint);
   }
   let gitAuthor: string;
-  let renovateUsername;
+  let renovateUsername: string;
   try {
     const userData = (await api.get(defaults.endpoint + 'user', {
       token,
