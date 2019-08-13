@@ -60,4 +60,9 @@ export interface RepoParams {
   localDir: string;
   optimizeForDisabled?: boolean;
   repository: string;
+  endpoint?: string;
+  forkMode?: string;
+  forkToken?: string;
+  includeForks?: boolean;
+  renovateUsername?: string;
 }

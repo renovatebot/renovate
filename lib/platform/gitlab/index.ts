@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig, RepoConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 
@@ -97,11 +97,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: {
-  repository: string;
-  localDir: string;
-  optimizeForDisabled: boolean;
-}) {
+}: RepoParams) {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;

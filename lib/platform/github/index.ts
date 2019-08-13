@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig, RepoConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 import {
   appName,
@@ -39,7 +39,7 @@ interface Pr {
   canRebase: boolean;
 }
 
-interface RepoParams {
+interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
@@ -64,7 +64,7 @@ interface RepoParams {
   renovateUsername: string;
 }
 
-let config: RepoParams = {} as any;
+let config: LocalRepoConfig = {} as any;
 
 const defaults = {
   hostType: 'github',
@@ -157,29 +157,12 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
-}: {
-  endpoint: string;
-  repository: string;
-  forkMode?: boolean;
-  forkToken?: string;
-  gitPrivateKey?: string;
-  localDir: string;
-  includeForks: boolean;
-  renovateUsername: string;
-  optimizeForDisabled: boolean;
-}) {
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   logger.info('Authenticated as user: ' + renovateUsername);
   logger.info('Using renovate version: ' + global.renovateVersion);
   // config is used by the platform api itself, not necessary for the app layer to know
   cleanRepo();
-  // istanbul ignore if
-  if (endpoint) {
-    // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
-    defaults.endpoint = endpoint;
-    api.setBaseUrl(endpoint);
-  }
   const opts = hostRules.find({
     hostType: 'github',
     url: defaults.endpoint,
