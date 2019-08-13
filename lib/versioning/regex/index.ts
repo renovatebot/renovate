@@ -66,17 +66,16 @@ function asSemver(version: Version): string {
 function configure(new_config: string): void {
   // without at least one of {major, minor, patch} specified in the regex,
   // this versioner will not work properly
-  // TODO: there's got to be a better way to do this
   if (
     !new_config.includes('<major>') &&
     !new_config.includes('<minor>') &&
     !new_config.includes('<patch>')
   ) {
-    logger.fatal(
-      { new_config },
-      'Invalid versionConfig for versionScheme regex'
-    );
-    return;
+    const error = new Error('config-validation');
+    error.configFile = new_config;
+    error.validationError =
+      'regex versionScheme needs at least one major, minor or patch group defined';
+    throw error;
   }
 
   // TODO: should we validate the user has not added extra unsupported

@@ -16,17 +16,26 @@ for (const scheme of supportedSchemes) {
 
 export { get };
 
-function get(versionScheme: string, versionConfig?: string) {
+function get(versionScheme: string) {
   if (!versionScheme) {
     logger.debug('Missing versionScheme');
     return schemes.semver;
   }
-  const scheme = schemes[versionScheme];
+  let schemeName;
+  let schemeConfig;
+  if (versionScheme.includes(':')) {
+    const versionSplit = versionScheme.split(':');
+    schemeName = versionSplit.shift();
+    schemeConfig = versionSplit.join(':');
+  } else {
+    schemeName = versionScheme;
+  }
+  const scheme = schemes[schemeName];
   if (!scheme) {
     logger.warn({ versionScheme }, 'Unknown version scheme');
     return schemes.semver;
   }
-  if (versionConfig) {
+  if (schemeConfig) {
     if (!scheme.configure) {
       logger.warn(
         { versionScheme },
@@ -34,7 +43,7 @@ function get(versionScheme: string, versionConfig?: string) {
       );
       return scheme;
     }
-    scheme.configure(versionConfig);
+    scheme.configure(schemeConfig);
   }
   return scheme;
 }

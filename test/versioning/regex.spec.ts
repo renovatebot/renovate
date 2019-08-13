@@ -1,13 +1,12 @@
 import { get } from '../../lib/versioning';
 
 const regex = get(
-  'regex',
-  '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$'
+  'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$'
 );
 
 describe('regex', () => {
   it('requires a valid configuration to be initialized', () => {
-    expect(get('regex', 'not a regex')).toBe(null);
+    expect(() => get('regex:not a regex')).toThrow();
   });
 
   describe('.parse()', () => {

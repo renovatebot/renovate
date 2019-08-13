@@ -15,12 +15,6 @@ describe('versioning.get(versionScheme)', () => {
     expect(versioning.get('unknown')).toBe(versioning.get('semver'));
   });
 
-  it('should warn but not break on bad config usage', () => {
-    expect(versioning.get('semver', 'useless config')).toBe(
-      versioning.get('semver')
-    );
-  });
-
   describe('should return the same interface', () => {
     const optionalFunctions = [
       'configure',

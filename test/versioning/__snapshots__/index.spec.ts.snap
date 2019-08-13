@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`versioning.get(versionScheme, "") has api 1`] = `
+exports[`versioning.get(versionScheme) has api 1`] = `
 Array [
   "equals",
   "getMajor",
