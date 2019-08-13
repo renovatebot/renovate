@@ -30,7 +30,7 @@ export async function initPlatform(config: any) {
   // TODO: types
   const platformInfo: any = await global.platform.initPlatform(config);
   const returnConfig = { ...config, ...platformInfo };
-  let gitAuthor;
+  let gitAuthor: string;
   if (config && config.gitAuthor) {
     logger.info(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;

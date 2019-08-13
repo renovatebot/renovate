@@ -44,7 +44,7 @@ export async function initPlatform({
   } else {
     logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
   }
-  let gitAuthor;
+  let gitAuthor: string;
   try {
     const user = (await api.get(`user`, { token })).body;
     gitAuthor = user.email;
