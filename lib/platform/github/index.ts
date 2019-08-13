@@ -39,7 +39,7 @@ interface Pr {
   canRebase: boolean;
 }
 
-interface RepoConfig {
+interface InitRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
@@ -64,7 +64,7 @@ interface RepoConfig {
   renovateUsername: string;
 }
 
-let config: RepoConfig = {} as any;
+let config: InitRepoConfig = {} as any;
 
 const defaults = {
   hostType: 'github',
