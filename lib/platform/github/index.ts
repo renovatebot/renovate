@@ -82,42 +82,47 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
-  const res: PlatformConfig = {} as any;
   if (endpoint) {
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.info('Using default github endpoint: ' + defaults.endpoint);
   }
-  res.endpoint = defaults.endpoint;
+  let gitAuthor;
+  let renovateUsername;
   try {
-    const userData = (await api.get(res.endpoint + 'user', {
+    const userData = (await api.get(defaults.endpoint + 'user', {
       token,
     })).body;
-    res.renovateUsername = userData.login;
-    res.gitAuthor = userData.name;
+    renovateUsername = userData.login;
+    gitAuthor = userData.name;
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');
     throw new Error('Init: Authentication failure');
   }
   try {
-    const userEmail = (await api.get(res.endpoint + 'user/emails', {
+    const userEmail = (await api.get(defaults.endpoint + 'user/emails', {
       token,
     })).body;
     if (userEmail.length && userEmail[0].email) {
-      res.gitAuthor += ` <${userEmail[0].email}>`;
+      gitAuthor += ` <${userEmail[0].email}>`;
     } else {
       logger.debug('Cannot find an email address for Renovate user');
-      delete res.gitAuthor;
+      gitAuthor = undefined;
     }
   } catch (err) {
     logger.debug(
       'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
     );
-    delete res.gitAuthor;
+    gitAuthor = undefined;
   }
-  logger.info('Authenticated as GitHub user: ' + res.renovateUsername);
-  return res;
+  logger.info('Authenticated as GitHub user: ' + renovateUsername);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+    renovateUsername,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
