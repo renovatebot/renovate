@@ -215,6 +215,7 @@ export async function parseParentRepos(result, parentPath) {
     }
     return repoUrls;
   }
+  return null;
 }
 
 export function resolveProps(packages: PackageFile[]): PackageFile[] {
