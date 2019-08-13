@@ -562,12 +562,12 @@
       "default": false
     },
     "rebaseStalePrs": {
-      "description": "Rebase stale PRs (GitHub only)",
+      "description": "Rebase any PRs that are not up-to-date with the base branch",
       "type": "boolean",
       "default": null
     },
     "rebaseLabel": {
-      "description": "Label to use to request the bot to rebase a PR manually (GitHub only)",
+      "description": "Label to use to request the bot to rebase a PR manually",
       "type": "string",
       "default": "rebase"
     },
@@ -756,7 +756,7 @@
       }
     },
     "assignees": {
-      "description": "Assignees for Pull Request (username in GitHub/GitLab, email address in Azure DevOps)",
+      "description": "Assignees for Pull Request (either username or email address depending on the platform)",
       "type": "array",
       "items": {
         "type": "string"
@@ -768,7 +768,7 @@
       "default": false
     },
     "reviewers": {
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab/Bitbucket, email or username in Azure DevOps)",
+      "description": "Requested reviewers for Pull Requests (either username or email address depending on the platform)",
       "type": "array",
       "items": {
         "type": "string"
