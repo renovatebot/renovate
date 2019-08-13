@@ -39,6 +39,14 @@ export interface GotApi<TOptions extends object = any> {
   setBaseUrl(endpoint: string): void;
 }
 
+export interface PlatformConfig {
+  endpoint?: string;
+  renovateUsername?: any;
+  gitAuthor?: any;
+  isFork: boolean;
+  privateRepo: boolean;
+}
+
 export interface RepoConfig {
   endpoint?: string;
   renovateUsername?: any;

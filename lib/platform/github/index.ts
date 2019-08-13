@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { RepoConfig } from '../common';
+import { PlatformConfig, RepoConfig } from '../common';
 
 import {
   appName,
@@ -82,7 +82,7 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
-  const res: RepoConfig = {} as any;
+  const res: PlatformConfig = {} as any;
   if (endpoint) {
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
