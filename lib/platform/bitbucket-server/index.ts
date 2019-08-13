@@ -180,14 +180,14 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: RepoConfig = {} as any;
+  const repoConfig: RepoConfig = {} as any;
 
   try {
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    platformConfig.privateRepo = info.is_private;
-    platformConfig.isFork = !!info.parent;
+    repoConfig.privateRepo = info.is_private;
+    repoConfig.isFork = !!info.parent;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
@@ -204,10 +204,10 @@ export async function initRepo({
     throw err;
   }
   logger.debug(
-    { platformConfig },
-    `platformConfig for ${config.projectKey}/${config.repositorySlug}`
+    { repoConfig },
+    `repoConfig for ${config.projectKey}/${config.repositorySlug}`
   );
-  return platformConfig;
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {

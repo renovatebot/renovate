@@ -118,11 +118,11 @@ export async function initRepo({
     localDir,
     url,
   });
-  const platformConfig: RepoConfig = {
+  const repoConfig: RepoConfig = {
     privateRepo: true,
     isFork: false,
   };
-  return platformConfig;
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {

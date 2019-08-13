@@ -70,7 +70,7 @@ export async function initRepo({
   } as any;
 
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  const platformConfig: RepoConfig = {} as any;
+  const repoConfig: RepoConfig = {} as any;
 
   try {
     const info = utils.repoInfoTransformer(
@@ -95,8 +95,8 @@ export async function initRepo({
       }
     }
 
-    platformConfig.privateRepo = info.privateRepo;
-    platformConfig.isFork = info.isFork;
+    repoConfig.privateRepo = info.privateRepo;
+    repoConfig.isFork = info.isFork;
 
     Object.assign(config, {
       owner: info.owner,
@@ -130,7 +130,7 @@ export async function initRepo({
   });
 
   await Promise.all([getPrList(), getFileList()]);
-  return platformConfig;
+  return repoConfig;
 }
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
