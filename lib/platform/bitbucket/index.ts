@@ -97,7 +97,6 @@ export async function initRepo({
 
     platformConfig.privateRepo = info.privateRepo;
     platformConfig.isFork = info.isFork;
-    platformConfig.repoFullName = info.repoFullName;
 
     Object.assign(config, {
       owner: info.owner,

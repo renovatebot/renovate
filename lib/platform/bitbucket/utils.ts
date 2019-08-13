@@ -29,7 +29,6 @@ export function repoInfoTransformer(repoInfoBody: any) {
   return {
     privateRepo: repoInfoBody.is_private,
     isFork: !!repoInfoBody.parent,
-    repoFullName: repoInfoBody.full_name,
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',

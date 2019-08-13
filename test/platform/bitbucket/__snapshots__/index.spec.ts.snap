@@ -281,7 +281,6 @@ exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoFullName": "some/repo",
 }
 `;
 

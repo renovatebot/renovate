@@ -188,7 +188,6 @@ export async function initRepo({
     )).body;
     platformConfig.privateRepo = info.is_private;
     platformConfig.isFork = !!info.parent;
-    platformConfig.repoFullName = info.name;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(

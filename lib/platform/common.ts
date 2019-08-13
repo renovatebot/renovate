@@ -45,8 +45,6 @@ export interface PlatformConfig {
   gitAuthor?: any;
   isFork: boolean;
   privateRepo: boolean;
-  // do we need this?
-  repoFullName?: string;
 }
 
 export interface InitRepoConfig {
