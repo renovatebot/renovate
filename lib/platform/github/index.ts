@@ -614,6 +614,9 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
+      if (err.message === 'platform-failure') {
+        throw err;
+      }
       if (
         err.statusCode === 403 ||
         err.message === 'integration-unauthorized'
