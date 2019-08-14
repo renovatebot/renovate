@@ -217,6 +217,7 @@ Object {
   "isStale": true,
   "number": 2500,
   "state": "open",
+  "targetBranch": "master",
   "title": "chore(deps): update dependency jest to v23.6.0",
 }
 `;

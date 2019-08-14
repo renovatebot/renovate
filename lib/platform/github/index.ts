@@ -1230,6 +1230,7 @@ async function getOpenPrs() {
             nodes {
               number
               headRefName
+              baseRefName
               title
               mergeable
               mergeStateStatus
@@ -1289,6 +1290,8 @@ async function getOpenPrs() {
         const branchName = pr.branchName;
         const prNo = pr.number;
         delete pr.headRefName;
+        pr.targetBranch = pr.baseRefName;
+        delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
         const canMergeStates = ['BEHIND', 'CLEAN'];
         const hasNegativeReview =

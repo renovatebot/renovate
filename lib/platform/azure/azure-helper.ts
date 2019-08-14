@@ -198,12 +198,14 @@ export function getRenovatePRFormat(azurePr: {
   description: any;
   status: number;
   mergeStatus: number;
+  targetRefName: string;
 }) {
   const pr = azurePr as any;
 
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
+  pr.targetBranch = azurePr.targetRefName;
 
   // status
   // export declare enum PullRequestStatus {
