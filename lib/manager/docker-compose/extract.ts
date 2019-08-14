@@ -50,6 +50,7 @@ export function extractPackageFile(
         { fileName, content },
         'Null config when parsing Docker Compose content'
       );
+      return null;
     }
   } catch (err) {
     logger.warn({ fileName, err }, 'Parsing Docker Compose config YAML');
