@@ -30,7 +30,10 @@ class LineMapper {
     const lineMeta = this.imageLines.find(
       ({ line, used }) => !used && line.includes(imageName)
     );
-
+    // istanbul ignore if
+    if (!lineMeta) {
+      return null;
+    }
     lineMeta.used = true; // unset plucked lines so duplicates are skipped
     return lineMeta.lineNumber;
   }
@@ -66,9 +69,14 @@ export function extractPackageFile(
       .map(service => {
         const dep = getDep(service.image);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
+        // istanbul ignore if
+        if (!lineNumber) {
+          return null;
+        }
         dep.managerData = { lineNumber };
         return dep;
-      });
+      })
+      .filter(Boolean);
 
     logger.trace({ deps }, 'Docker Compose image');
     if (!deps.length) {
