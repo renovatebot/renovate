@@ -190,7 +190,7 @@ export function resolveWithParents(packages: PackageFile[]): PackageFile[] {
   const extractedPackages: Record<string, PackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
-  const parentRegistryUrls: Record<string, Set<string>> = {};
+  const registryUrls: Record<string, Set<string>> = {};
   packages.forEach(pkg => {
     const name = pkg.packageFile;
     packageFileNames.push(name);
@@ -202,7 +202,7 @@ export function resolveWithParents(packages: PackageFile[]): PackageFile[] {
   // and merge them in reverse order,
   // which allows inheritance/overriding.
   packageFileNames.forEach(name => {
-    parentRegistryUrls[name] = new Set();
+    registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
     let pkg = extractedPackages[name];
@@ -211,7 +211,7 @@ export function resolveWithParents(packages: PackageFile[]): PackageFile[] {
 
       if (pkg.registryUrls) {
         pkg.registryUrls.forEach(url => {
-          parentRegistryUrls[name].add(url);
+          registryUrls[name].add(url);
         });
       }
 
@@ -230,7 +230,7 @@ export function resolveWithParents(packages: PackageFile[]): PackageFile[] {
   // Resolve registryUrls
   packageFileNames.forEach(name => {
     const pkg = extractedPackages[name];
-    const urls = [...parentRegistryUrls[name]];
+    const urls = [...registryUrls[name]];
     pkg.deps.forEach(rawDep => {
       rawDep.registryUrls = urls;
     });
