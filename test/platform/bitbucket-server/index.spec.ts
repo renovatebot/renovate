@@ -684,6 +684,21 @@ describe('platform/bitbucket-server', () => {
             )
           ).toMatchSnapshot();
         });
+
+        it('sanitizes HTML comments in the body', () => {
+          const prBody = bitbucket.getPrBody(`---
+
+- [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
+
+---
+<!---->
+Empty comment.
+<!-- This is another comment -->
+Followed by some information.
+<!-- followed by some more comments -->`);
+          expect(prBody).toMatchSnapshot();
+        });
       });
 
       describe('getCommitMessages()', () => {

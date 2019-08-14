@@ -964,6 +964,7 @@ export function getPrBody(input: string) {
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
+    .replace(new RegExp('<!--.*?-->', 'g'), '')
     .substring(0, 30000);
 }
 
