@@ -414,36 +414,42 @@ Object {
 
 exports[`platform/github initRepo should forks when forkMode 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/github initRepo should merge 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/github initRepo should rebase 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/github initRepo should squash 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;

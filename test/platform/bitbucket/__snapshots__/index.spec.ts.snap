@@ -275,6 +275,7 @@ Object {
 
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;

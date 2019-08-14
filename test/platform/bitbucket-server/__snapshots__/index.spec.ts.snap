@@ -998,12 +998,14 @@ Object {
 
 exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
@@ -2470,12 +2472,14 @@ Object {
 
 exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
 }
 `;

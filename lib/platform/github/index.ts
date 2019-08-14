@@ -374,6 +374,7 @@ export async function initRepo({
     url,
   });
   const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
     isFork: res.body.fork === true,
   };
   return repoConfig;
