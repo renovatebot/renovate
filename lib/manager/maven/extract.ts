@@ -229,7 +229,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     const urls = [...registryUrls[name]];
     pkg.deps.forEach(rawDep => {
-      rawDep.registryUrls = urls;
+      rawDep.registryUrls = urls; // eslint-disable-line no-param-reassign
     });
     delete pkg.registryUrls;
   });
