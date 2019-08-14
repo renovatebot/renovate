@@ -55,22 +55,30 @@ export function extractPackageFile(
     logger.warn({ fileName, err }, 'Parsing Docker Compose config YAML');
     return null;
   }
-  const lineMapper = new LineMapper(content, /^\s*image:/);
+  try {
+    const lineMapper = new LineMapper(content, /^\s*image:/);
 
-  // Image name/tags for services are only eligible for update if they don't
-  // use variables and if the image is not built locally
-  const deps = Object.values(config.services || {})
-    .filter(service => service.image && !service.build)
-    .map(service => {
-      const dep = getDep(service.image);
-      const lineNumber = lineMapper.pluckLineNumber(service.image);
-      dep.managerData = { lineNumber };
-      return dep;
-    });
+    // Image name/tags for services are only eligible for update if they don't
+    // use variables and if the image is not built locally
+    const deps = Object.values(config.services || {})
+      .filter(service => service.image && !service.build)
+      .map(service => {
+        const dep = getDep(service.image);
+        const lineNumber = lineMapper.pluckLineNumber(service.image);
+        dep.managerData = { lineNumber };
+        return dep;
+      });
 
-  logger.trace({ deps }, 'Docker Compose image');
-  if (!deps.length) {
+    logger.trace({ deps }, 'Docker Compose image');
+    if (!deps.length) {
+      return null;
+    }
+    return { deps };
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn(
+      { fileName, content, err },
+      'Error extracting Docker Compose file'
+    );
     return null;
   }
-  return { deps };
 }
