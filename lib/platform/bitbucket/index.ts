@@ -67,12 +67,9 @@ export async function initRepo({
     repository,
     username: opts!.username,
   } as any;
-
-  // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  const repoConfig: RepoConfig = {} as any;
-
+  let info;
   try {
-    const info = utils.repoInfoTransformer(
+    info = utils.repoInfoTransformer(
       (await api.get(`/2.0/repositories/${repository}`)).body
     );
 
@@ -93,8 +90,6 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-
-    repoConfig.isFork = info.isFork;
 
     Object.assign(config, {
       owner: info.owner,
@@ -126,6 +121,9 @@ export async function initRepo({
     localDir,
     url,
   });
+  const repoConfig: RepoConfig = {
+    isFork: info.isFork,
+  };
   return repoConfig;
 }
 

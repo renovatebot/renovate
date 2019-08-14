@@ -102,7 +102,6 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.localDir = localDir;
   let res;
-  const repoConfig: RepoConfig = {} as any;
   try {
     res = await api.get(`projects/${config.repository}`);
     if (res.body.archived) {
@@ -140,7 +139,6 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
-    repoConfig.isFork = !!res.body.forked_from_project;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
@@ -192,6 +190,9 @@ export async function initRepo({
     logger.info({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
+  const repoConfig: RepoConfig = {
+    isFork: !!res.body.forked_from_project,
+  };
   return repoConfig;
 }
 

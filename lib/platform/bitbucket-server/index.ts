@@ -180,13 +180,10 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const repoConfig: RepoConfig = {} as any;
-
   try {
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    repoConfig.isFork = !!info.parent;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
@@ -194,6 +191,10 @@ export async function initRepo({
     )).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
+    const repoConfig: RepoConfig = {
+      isFork: !!info.parent,
+    };
+    return repoConfig;
   } catch (err) /* istanbul ignore next */ {
     logger.debug(err);
     if (err.statusCode === 404) {
@@ -202,11 +203,6 @@ export async function initRepo({
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
-  logger.debug(
-    { repoConfig },
-    `repoConfig for ${config.projectKey}/${config.repositorySlug}`
-  );
-  return repoConfig;
 }
 
 export function getRepoForceRebase() {

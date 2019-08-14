@@ -180,8 +180,6 @@ export async function initRepo({
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
-  // repoConfig is passed back to the app layer and contains info about the platform they require
-  const repoConfig: RepoConfig = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
@@ -237,7 +235,6 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-    repoConfig.isFork = res.body.fork === true;
     const owner = res.body.owner.login;
     logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
@@ -376,7 +373,9 @@ export async function initRepo({
     ...config,
     url,
   });
-
+  const repoConfig: RepoConfig = {
+    isFork: res.body.fork === true,
+  };
   return repoConfig;
 }
 
