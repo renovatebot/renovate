@@ -27,9 +27,7 @@ export interface PagedResult<T = any> {
 
 export function repoInfoTransformer(repoInfoBody: any) {
   return {
-    privateRepo: repoInfoBody.is_private,
     isFork: !!repoInfoBody.parent,
-    repoFullName: repoInfoBody.full_name,
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
@@ -105,6 +103,7 @@ export function prInfo(pr: any) {
     number: pr.id,
     body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
     branchName: pr.source.branch.name,
+    targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
       ? /* istanbul ignore next */ 'closed'

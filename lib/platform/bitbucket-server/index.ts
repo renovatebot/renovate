@@ -6,7 +6,7 @@ import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
-import { InitRepoConfig, PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -67,12 +67,12 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+  defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+  api.setBaseUrl(defaults.endpoint);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
   };
-  api.setBaseUrl(res.endpoint);
-  defaults.endpoint = res.endpoint;
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -109,7 +109,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: InitRepoConfig) {
+}: RepoParams) {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -180,15 +180,10 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: PlatformConfig = {} as any;
-
   try {
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    platformConfig.privateRepo = info.is_private;
-    platformConfig.isFork = !!info.parent;
-    platformConfig.repoFullName = info.name;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
@@ -196,6 +191,11 @@ export async function initRepo({
     )).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
+    const repoConfig: RepoConfig = {
+      baseBranch: config.baseBranch,
+      isFork: !!info.parent,
+    };
+    return repoConfig;
   } catch (err) /* istanbul ignore next */ {
     logger.debug(err);
     if (err.statusCode === 404) {
@@ -204,11 +204,6 @@ export async function initRepo({
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
-  logger.debug(
-    { platformConfig },
-    `platformConfig for ${config.projectKey}/${config.repositorySlug}`
-  );
-  return platformConfig;
 }
 
 export function getRepoForceRebase() {
@@ -965,6 +960,7 @@ export function getPrBody(input: string) {
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
+    .replace(new RegExp('<!--.*?-->', 'g'), '')
     .substring(0, 30000);
 }
 

@@ -92,6 +92,7 @@ Object {
   "number": undefined,
   "state": "merged",
   "status": 3,
+  "targetBranch": undefined,
 }
 `;
 
@@ -103,6 +104,7 @@ Object {
   "number": undefined,
   "state": "closed",
   "status": 2,
+  "targetBranch": undefined,
 }
 `;
 
@@ -115,6 +117,7 @@ Object {
   "mergeStatus": 2,
   "number": undefined,
   "state": "open",
+  "targetBranch": undefined,
 }
 `;
 
@@ -126,6 +129,7 @@ Object {
   "number": undefined,
   "state": "open",
   "status": 1,
+  "targetBranch": undefined,
 }
 `;
 
