@@ -182,7 +182,7 @@ export function extractPackage(rawContent: string, packageFile: string = null) {
   return result;
 }
 
-export function resolveWithParents(packages: PackageFile[]): PackageFile[] {
+export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, PackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
@@ -278,5 +278,5 @@ export async function extractAllPackageFiles(
       logger.info({ packageFile }, 'packageFile has no content');
     }
   }
-  return cleanResult(resolveWithParents(packages));
+  return cleanResult(resolveParents(packages));
 }
