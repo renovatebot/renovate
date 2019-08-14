@@ -21,8 +21,8 @@ function get(versionScheme: string) {
     logger.debug('Missing versionScheme');
     return schemes.semver;
   }
-  let schemeName;
-  let schemeConfig;
+  let schemeName: string;
+  let schemeConfig: string;
   if (versionScheme.includes(':')) {
     const versionSplit = versionScheme.split(':');
     schemeName = versionSplit.shift();

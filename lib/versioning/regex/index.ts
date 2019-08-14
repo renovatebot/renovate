@@ -37,7 +37,7 @@ interface Version {
 //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<architecture>.*))?$')
 // * matches the versoining scheme used by the Python images on DockerHub:
 //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$');
-let config = null;
+let config: RegExp = null;
 
 // convenience method for passing a string into a Version given current config.
 function parse(version: string): Version | null {
