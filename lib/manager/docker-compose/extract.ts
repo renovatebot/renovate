@@ -36,13 +36,23 @@ class LineMapper {
   }
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  fileName?: string
+): PackageFile | null {
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {
     config = safeLoad(content);
+    // istanbul ignore if
+    if (!config) {
+      logger.info(
+        { fileName, content },
+        'Null config when parsing Docker Compose content'
+      );
+    }
   } catch (err) {
-    logger.error({ err }, 'Parsing Docker Compose config YAML');
+    logger.warn({ fileName, err }, 'Parsing Docker Compose config YAML');
     return null;
   }
   const lineMapper = new LineMapper(content, /^\s*image:/);
