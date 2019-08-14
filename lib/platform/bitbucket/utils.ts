@@ -29,7 +29,6 @@ export interface PagedResult<T = any> {
 export function repoInfoTransformer(repoInfoBody: any) {
   return {
     isFork: !!repoInfoBody.parent,
-    repoFullName: repoInfoBody.full_name,
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',

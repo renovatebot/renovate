@@ -313,8 +313,8 @@ describe('platform/gitlab', () => {
         body: [
           {
             iid: 91,
-            target_branch: 'master',
             source_branch: 'some-branch',
+            target_branch: 'master',
             state: 'opened',
           },
         ],
@@ -326,8 +326,8 @@ describe('platform/gitlab', () => {
           additions: 1,
           deletions: 1,
           commits: 1,
-          target_branch: 'master',
           source_branch: 'some-branch',
+          target_branch: 'master',
           base: {
             sha: '1234',
           },
@@ -923,7 +923,6 @@ These updates have all been created already. Click a checkbox below to force a r
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
-          target_branch: 'master',
           labels: ['foo', 'renovate', 'rebase'],
         },
       } as any);

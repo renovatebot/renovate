@@ -928,6 +928,20 @@ exports[`platform/bitbucket-server endpoint with no path getPr() returns null fo
 
 exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with no path getPrBody() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
 exports[`platform/bitbucket-server endpoint with no path getPrFiles() returns one file 1`] = `
 Array [
   Array [
@@ -992,17 +1006,15 @@ Object {
 
 exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 
 exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 
@@ -2398,6 +2410,20 @@ exports[`platform/bitbucket-server endpoint with path getPr() returns null for n
 
 exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with path getPrBody() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
 exports[`platform/bitbucket-server endpoint with path getPrFiles() returns one file 1`] = `
 Array [
   Array [
@@ -2462,17 +2488,15 @@ Object {
 
 exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 
 exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 

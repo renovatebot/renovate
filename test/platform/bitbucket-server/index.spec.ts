@@ -1,5 +1,5 @@
 import responses from './_fixtures/responses';
-import { GotApi, InitRepoConfig } from '../../../lib/platform/common';
+import { GotApi, RepoParams } from '../../../lib/platform/common';
 import { Storage } from '../../../lib/platform/git/storage';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
@@ -83,7 +83,7 @@ describe('platform/bitbucket-server', () => {
         bitbucket.cleanRepo();
       });
 
-      function initRepo(config?: Partial<InitRepoConfig>) {
+      function initRepo(config?: Partial<RepoParams>) {
         return bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
@@ -684,6 +684,21 @@ describe('platform/bitbucket-server', () => {
               '<details><summary>foo</summary>bar</details>text<details>'
             )
           ).toMatchSnapshot();
+        });
+
+        it('sanitizes HTML comments in the body', () => {
+          const prBody = bitbucket.getPrBody(`---
+
+- [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
+
+---
+<!---->
+Empty comment.
+<!-- This is another comment -->
+Followed by some information.
+<!-- followed by some more comments -->`);
+          expect(prBody).toMatchSnapshot();
         });
       });
 

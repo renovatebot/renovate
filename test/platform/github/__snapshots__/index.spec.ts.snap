@@ -385,6 +385,7 @@ Array [
 exports[`platform/github initPlatform() should support custom endpoint 1`] = `
 Object {
   "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -392,6 +393,7 @@ Object {
 exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -399,6 +401,7 @@ Object {
 exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -415,7 +418,6 @@ exports[`platform/github initRepo should forks when forkMode 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
@@ -423,7 +425,6 @@ exports[`platform/github initRepo should merge 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
@@ -431,7 +432,6 @@ exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
@@ -439,7 +439,6 @@ exports[`platform/github initRepo should rebase 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
@@ -447,7 +446,6 @@ exports[`platform/github initRepo should squash 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
@@ -455,7 +453,6 @@ exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
