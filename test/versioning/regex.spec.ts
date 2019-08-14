@@ -1,10 +1,10 @@
-import { get } from '../../lib/versioning';
-
-const regex = get(
-  'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$'
-);
+import { get, VersioningApi } from '../../lib/versioning';
 
 describe('regex', () => {
+  const regex: VersioningApi = get(
+    'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$'
+  );
+
   it('requires a valid configuration to be initialized', () => {
     expect(() => get('regex:not a regex')).toThrow();
   });
@@ -290,7 +290,9 @@ describe('regex', () => {
   describe('.sortVersions', () => {
     it('sorts versions in an ascending order', () => {
       expect(
-        ['1.2.3a1', '2.0.1', '1.3.4', '1.2.3'].sort(regex.sortVersions)
+        ['1.2.3a1', '2.0.1', '1.3.4', '1.2.3'].sort(
+          regex.sortVersions.bind(regex)
+        )
       ).toEqual(['1.2.3a1', '1.2.3', '1.3.4', '2.0.1']);
     });
   });

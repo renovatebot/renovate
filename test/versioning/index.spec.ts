@@ -16,15 +16,11 @@ describe('versioning.get(versionScheme)', () => {
   });
 
   describe('should return the same interface', () => {
-    const optionalFunctions = [
-      'configure',
-      'isLessThanRange',
-      'valueToVersion',
-    ];
+    const optionalFunctions = ['isLessThanRange', 'valueToVersion'];
     const npmApi = Object.keys(versioning.get('semver'))
       .filter(val => !optionalFunctions.includes(val))
       .sort();
-    for (const supportedScheme of supportedSchemes) {
+    for (const supportedScheme of supportedSchemes.filter(s => s !== 'regex')) {
       it(supportedScheme, () => {
         const schemeKeys = Object.keys(versioning.get(supportedScheme))
           .filter(val => !optionalFunctions.includes(val))

@@ -1,6 +1,10 @@
 import { logger } from '../logger';
 import { getOptions } from '../config/definitions';
-import { VersioningApi } from './common';
+import {
+  VersioningApi,
+  VersioningApiConstructor,
+  isVersionApiClass,
+} from './common';
 
 export * from './common';
 
@@ -8,7 +12,7 @@ const supportedSchemes = getOptions().find(
   option => option.name === 'versionScheme'
 ).allowedValues;
 
-const schemes: Record<string, VersioningApi> = {};
+const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
 
 for (const scheme of supportedSchemes) {
   schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
@@ -16,10 +20,10 @@ for (const scheme of supportedSchemes) {
 
 export { get };
 
-function get(versionScheme: string) {
+function get(versionScheme: string): VersioningApi {
   if (!versionScheme) {
     logger.debug('Missing versionScheme');
-    return schemes.semver;
+    return schemes.semver as VersioningApi;
   }
   let schemeName: string;
   let schemeConfig: string;
@@ -33,17 +37,11 @@ function get(versionScheme: string) {
   const scheme = schemes[schemeName];
   if (!scheme) {
     logger.warn({ versionScheme }, 'Unknown version scheme');
-    return schemes.semver;
+    return schemes.semver as VersioningApi;
   }
-  if (schemeConfig) {
-    if (!scheme.configure) {
-      logger.warn(
-        { versionScheme },
-        'Version config specified for unsupported scheme'
-      );
-      return scheme;
-    }
-    scheme.configure(schemeConfig);
+  if (isVersionApiClass(scheme)) {
+    // eslint-disable-next-line new-cap
+    return new scheme(schemeConfig);
   }
   return scheme;
 }
