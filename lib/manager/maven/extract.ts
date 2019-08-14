@@ -133,10 +133,7 @@ function resolveParentFile(packageFile: string, parentPath: string) {
   return normalize(join(dir, parentDir, parentFile));
 }
 
-export async function extractPackage(
-  rawContent: string,
-  packageFile: string = null
-) {
+export function extractPackage(rawContent: string, packageFile: string = null) {
   if (!rawContent) return null;
 
   const project = parsePom(rawContent);
@@ -271,7 +268,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await platform.getFile(packageFile);
     if (content) {
-      const pkg = await extractPackage(content, packageFile);
+      const pkg = extractPackage(content, packageFile);
       if (pkg) {
         packages.push(pkg);
       } else {
