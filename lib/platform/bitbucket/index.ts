@@ -94,7 +94,6 @@ export async function initRepo({
       }
     }
 
-    repoConfig.privateRepo = info.privateRepo;
     repoConfig.isFork = info.isFork;
 
     Object.assign(config, {

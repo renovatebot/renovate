@@ -27,7 +27,6 @@ export interface PagedResult<T = any> {
 
 export function repoInfoTransformer(repoInfoBody: any) {
   return {
-    privateRepo: repoInfoBody.is_private,
     isFork: !!repoInfoBody.parent,
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,

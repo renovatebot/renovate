@@ -50,7 +50,6 @@ export interface RepoConfig {
   renovateUsername?: any;
   gitAuthor?: any;
   isFork: boolean;
-  privateRepo: boolean;
 }
 
 export interface RepoParams {

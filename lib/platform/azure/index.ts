@@ -122,7 +122,6 @@ export async function initRepo({
     url,
   });
   const repoConfig: RepoConfig = {
-    privateRepo: true,
     isFork: false,
   };
   return repoConfig;

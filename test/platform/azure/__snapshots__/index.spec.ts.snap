@@ -136,7 +136,6 @@ Array [
 exports[`platform/azure initRepo should initialise the config for a repo 2`] = `
 Object {
   "isFork": false,
-  "privateRepo": true,
 }
 `;
 
