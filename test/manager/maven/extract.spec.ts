@@ -10,15 +10,15 @@ const simpleContent = readFileSync(
 
 describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {
-    it('returns null for invalid XML', async () => {
-      expect(await extractPackage(undefined)).toBeNull();
-      expect(await extractPackage('invalid xml content')).toBeNull();
-      expect(await extractPackage('<foobar></foobar>')).toBeNull();
-      expect(await extractPackage('<project></project>')).toBeNull();
+    it('returns null for invalid XML', () => {
+      expect(extractPackage(undefined)).toBeNull();
+      expect(extractPackage('invalid xml content')).toBeNull();
+      expect(extractPackage('<foobar></foobar>')).toBeNull();
+      expect(extractPackage('<project></project>')).toBeNull();
     });
 
-    it('extract dependencies from any XML position', async () => {
-      const res = await extractPackage(simpleContent);
+    it('extract dependencies from any XML position', () => {
+      const res = extractPackage(simpleContent);
       expect(res).toMatchSnapshot();
     });
   });
