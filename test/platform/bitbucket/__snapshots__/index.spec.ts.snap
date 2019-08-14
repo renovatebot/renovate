@@ -62,10 +62,6 @@ Array [
     "/2.0/repositories/some/empty",
   ],
   Array [
-    "/2.0/repositories/some/empty/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
-    undefined,
-  ],
-  Array [
     "/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]

@@ -126,8 +126,6 @@ export async function initRepo({
     localDir,
     url,
   });
-
-  await Promise.all([getPrList(), getFileList()]);
   return repoConfig;
 }
 
