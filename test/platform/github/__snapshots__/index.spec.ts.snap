@@ -209,7 +209,6 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
 
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
 Object {
-  "baseRefName": "master",
   "branchName": "renovate/jest-monorepo",
   "canMerge": false,
   "canRebase": true,

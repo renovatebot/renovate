@@ -9,7 +9,6 @@ export interface Config {
   defaultBranch: string;
   fileList: any[];
   has_issues: boolean;
-  isFork: boolean;
   mergeMethod: string;
   owner: string;
   prList: any[];
