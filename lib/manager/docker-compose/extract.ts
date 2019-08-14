@@ -43,7 +43,7 @@ export function extractPackageFile(
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {
-    config = safeLoad(content);
+    config = safeLoad(content, { json: true });
     // istanbul ignore if
     if (!config) {
       logger.info(
