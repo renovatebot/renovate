@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 import {
   appName,
@@ -39,7 +39,7 @@ interface Pr {
   canRebase: boolean;
 }
 
-interface InitRepoConfig {
+interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
@@ -64,7 +64,7 @@ interface InitRepoConfig {
   renovateUsername: string;
 }
 
-let config: InitRepoConfig = {} as any;
+let config: LocalRepoConfig = {} as any;
 
 const defaults = {
   hostType: 'github',
@@ -82,42 +82,47 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
-  const res: PlatformConfig = {} as any;
   if (endpoint) {
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.info('Using default github endpoint: ' + defaults.endpoint);
   }
-  res.endpoint = defaults.endpoint;
+  let gitAuthor: string;
+  let renovateUsername: string;
   try {
-    const userData = (await api.get(res.endpoint + 'user', {
+    const userData = (await api.get(defaults.endpoint + 'user', {
       token,
     })).body;
-    res.renovateUsername = userData.login;
-    res.gitAuthor = userData.name;
+    renovateUsername = userData.login;
+    gitAuthor = userData.name;
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');
     throw new Error('Init: Authentication failure');
   }
   try {
-    const userEmail = (await api.get(res.endpoint + 'user/emails', {
+    const userEmail = (await api.get(defaults.endpoint + 'user/emails', {
       token,
     })).body;
     if (userEmail.length && userEmail[0].email) {
-      res.gitAuthor += ` <${userEmail[0].email}>`;
+      gitAuthor += ` <${userEmail[0].email}>`;
     } else {
       logger.debug('Cannot find an email address for Renovate user');
-      delete res.gitAuthor;
+      gitAuthor = undefined;
     }
   } catch (err) {
     logger.debug(
       'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
     );
-    delete res.gitAuthor;
+    gitAuthor = undefined;
   }
-  logger.info('Authenticated as GitHub user: ' + res.renovateUsername);
-  return res;
+  logger.info('Authenticated as GitHub user: ' + renovateUsername);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+    renovateUsername,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -152,17 +157,7 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
-}: {
-  endpoint: string;
-  repository: string;
-  forkMode?: boolean;
-  forkToken?: string;
-  gitPrivateKey?: string;
-  localDir: string;
-  includeForks: boolean;
-  renovateUsername: string;
-  optimizeForDisabled: boolean;
-}) {
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   logger.info('Authenticated as user: ' + renovateUsername);
   logger.info('Using renovate version: ' + global.renovateVersion);
@@ -185,8 +180,8 @@ export async function initRepo({
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
-  // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: PlatformConfig = {} as any;
+  // repoConfig is passed back to the app layer and contains info about the platform they require
+  const repoConfig: RepoConfig = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
@@ -242,8 +237,8 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-    platformConfig.privateRepo = res.body.private === true;
-    platformConfig.isFork = res.body.fork === true;
+    repoConfig.privateRepo = res.body.private === true;
+    repoConfig.isFork = res.body.fork === true;
     const owner = res.body.owner.login;
     logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
@@ -383,7 +378,7 @@ export async function initRepo({
     url,
   });
 
-  return platformConfig;
+  return repoConfig;
 }
 
 export async function getRepoForceRebase() {

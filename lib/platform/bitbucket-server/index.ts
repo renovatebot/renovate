@@ -6,7 +6,7 @@ import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
-import { InitRepoConfig, PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -67,12 +67,12 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+  defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+  api.setBaseUrl(defaults.endpoint);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
   };
-  api.setBaseUrl(res.endpoint);
-  defaults.endpoint = res.endpoint;
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -109,7 +109,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: InitRepoConfig) {
+}: RepoParams) {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -180,15 +180,14 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: PlatformConfig = {} as any;
+  const repoConfig: RepoConfig = {} as any;
 
   try {
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    platformConfig.privateRepo = info.is_private;
-    platformConfig.isFork = !!info.parent;
-    platformConfig.repoFullName = info.name;
+    repoConfig.privateRepo = info.is_private;
+    repoConfig.isFork = !!info.parent;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
@@ -205,10 +204,10 @@ export async function initRepo({
     throw err;
   }
   logger.debug(
-    { platformConfig },
-    `platformConfig for ${config.projectKey}/${config.repositorySlug}`
+    { repoConfig },
+    `repoConfig for ${config.projectKey}/${config.repositorySlug}`
   );
-  return platformConfig;
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {
