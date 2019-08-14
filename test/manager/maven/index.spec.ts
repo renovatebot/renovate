@@ -60,34 +60,34 @@ describe('manager/maven', () => {
   });
 
   describe('updateDependency', () => {
-    it('should update an existing dependency', () => {
+    it('should update an existing dependency', async () => {
       const newValue = '9.9.9.9-final';
 
-      const { deps } = extractPackage(pomContent);
+      const { deps } = await extractPackage(pomContent);
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
-      const updatedDep = selectDep(extractPackage(updatedContent).deps);
+      const updatedDep = selectDep((await extractPackage(updatedContent)).deps);
 
       expect(updatedDep.currentValue).toEqual(newValue);
     });
 
-    it('should update existing dependency defined via properties', () => {
+    it('should update existing dependency defined via properties', async () => {
       const finder = ({ depName }: PackageDependency) =>
         depName === 'org.example:quux';
       const newValue = '9.9.9.9-final';
 
       const packages = resolveProps([
-        extractPackage(pomParent, 'parent.pom.xml'),
-        extractPackage(pomChild, 'child.pom.xml'),
+        await extractPackage(pomParent, 'parent.pom.xml'),
+        await extractPackage(pomChild, 'child.pom.xml'),
       ]);
       const [{ deps }] = packages;
       const dep = deps.find(finder);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomParent, upgrade);
       const [updatedPkg] = resolveProps([
-        extractPackage(updatedContent, 'parent.pom.xml'),
-        extractPackage(pomChild, 'child.pom.xml'),
+        await extractPackage(updatedContent, 'parent.pom.xml'),
+        await extractPackage(pomChild, 'child.pom.xml'),
       ]);
       const updatedDep = updatedPkg.deps.find(finder);
 
@@ -95,10 +95,10 @@ describe('manager/maven', () => {
       expect(updatedDep.currentValue).toEqual(newValue);
     });
 
-    it('should not touch content if new and old versions are equal', () => {
+    it('should not touch content if new and old versions are equal', async () => {
       const newValue = '1.2.3';
 
-      const { deps } = extractPackage(pomContent);
+      const { deps } = await extractPackage(pomContent);
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
@@ -148,35 +148,37 @@ describe('manager/maven', () => {
       expect(updateDependency(updatedOutside, upgrade)).toBeNull();
     });
 
-    it('should return null if current versions in content and upgrade are not same', () => {
+    it('should return null if current versions in content and upgrade are not same', async () => {
       const currentValue = '1.2.2';
       const newValue = '1.2.4';
 
-      const { deps } = extractPackage(pomContent);
+      const { deps } = await extractPackage(pomContent);
       const dep = selectDep(deps);
       const upgrade = { ...dep, currentValue, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
 
       expect(updatedContent).toBeNull();
     });
-    it('should update ranges', () => {
+    it('should update ranges', async () => {
       const newValue = '[1.2.3]';
       const select = (depSet: PackageFile) =>
         selectDep(depSet.deps, 'org.example:hard-range');
-      const oldContent = extractPackage(pomContent);
+      const oldContent = await extractPackage(pomContent);
       const dep = select(oldContent);
       const upgrade = { ...dep, newValue };
-      const newContent = extractPackage(updateDependency(pomContent, upgrade));
+      const newContent = await extractPackage(
+        updateDependency(pomContent, upgrade)
+      );
       const newDep = select(newContent);
       expect(newDep.currentValue).toEqual(newValue);
     });
-    it('should preserve ranges', () => {
+    it('should preserve ranges', async () => {
       const newValue = '[1.0.0]';
       const select = (depSet: PackageFile) =>
         depSet && depSet.deps
           ? selectDep(depSet.deps, 'org.example:hard-range')
           : null;
-      const oldContent = extractPackage(pomContent);
+      const oldContent = await extractPackage(pomContent);
       const dep = select(oldContent);
       expect(dep).not.toEqual(null);
       const upgrade = { ...dep, newValue };
