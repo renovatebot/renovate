@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import {
   extractPackage,
-  resolveProps,
+  resolveParents,
 } from '../../../lib/manager/maven/extract';
 import {
   extractAllPackageFiles,
@@ -77,7 +77,7 @@ describe('manager/maven', () => {
         depName === 'org.example:quux';
       const newValue = '9.9.9.9-final';
 
-      const packages = resolveProps([
+      const packages = resolveParents([
         extractPackage(pomParent, 'parent.pom.xml'),
         extractPackage(pomChild, 'child.pom.xml'),
       ]);
@@ -85,7 +85,7 @@ describe('manager/maven', () => {
       const dep = deps.find(finder);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomParent, upgrade);
-      const [updatedPkg] = resolveProps([
+      const [updatedPkg] = resolveParents([
         extractPackage(updatedContent, 'parent.pom.xml'),
         extractPackage(pomChild, 'child.pom.xml'),
       ]);
