@@ -1,4 +1,4 @@
-function maskToken(str) {
+export function maskToken(str?: string): string {
   return str
     ? [
         str.substring(0, 2),
@@ -7,7 +7,3 @@ function maskToken(str) {
       ].join('')
     : str;
 }
-
-module.exports = {
-  maskToken,
-};

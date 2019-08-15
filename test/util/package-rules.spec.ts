@@ -1,4 +1,4 @@
-const { applyPackageRules } = require('../../lib/util/package-rules');
+import { applyPackageRules } from '../../lib/util/package-rules';
 
 describe('applyPackageRules()', () => {
   const config1 = {

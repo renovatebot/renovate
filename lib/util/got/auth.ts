@@ -1,9 +1,8 @@
-const got = require('got');
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { create } from './util';
 
 // istanbul ignore next
-// @ts-ignore
-module.exports = got.create({
+export default create({
   options: {},
   handler: (options, next) => {
     if (options.auth || options.headers.authorization) {

@@ -1,4 +1,4 @@
-const { maskToken } = require('../../lib/util/mask');
+import { maskToken } from '../../lib/util/mask';
 
 describe('util/mask', () => {
   describe('.maskToken', () => {

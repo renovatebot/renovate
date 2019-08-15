@@ -1,10 +1,13 @@
-const fs = require('fs-extra');
-const ghGot = require('../../../../lib/util/got');
-const {
+import fs from 'fs-extra';
+import got from '../../../../lib/util/got';
+import {
   addReleaseNotes,
   getReleaseNotes,
   getReleaseNotesMd,
-} = require('../../../../lib/workers/pr/changelog/release-notes');
+} from '../../../../lib/workers/pr/changelog/release-notes';
+
+/** @type any */
+const ghGot = got;
 
 const angularJsChangelogMd = fs.readFileSync(
   'test/workers/pr/_fixtures/angular.js.md',

@@ -1,8 +1,10 @@
 import fs from 'fs';
-import got from '../../lib/util/got';
+import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
+
+const got: any = _got;
 
 const res1: any = fs.readFileSync(
   'test/datasource/pypi/_fixtures/azure-cli-monitor.json'

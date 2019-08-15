@@ -1,4 +1,4 @@
-const { add, find, clear, hosts } = require('../../lib/util/host-rules');
+import { add, find, clear, hosts } from '../../lib/util/host-rules';
 
 describe('util/host-rules', () => {
   beforeEach(() => {

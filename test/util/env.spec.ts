@@ -1,4 +1,4 @@
-const { getChildProcessEnv } = require('../../lib/util/env');
+import { getChildProcessEnv } from '../../lib/util/env';
 
 describe('getChildProcess environment when trustlevel set to low', () => {
   const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'HOME', 'PATH'];

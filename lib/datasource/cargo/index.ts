@@ -38,7 +38,7 @@ export async function getPkgReleases({
     'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
   const crateUrl = baseUrl + path;
   try {
-    let res = await got(crateUrl, {
+    let res: any = await got(crateUrl, {
       hostType: 'cargo',
     });
     if (!res || !res.body) {

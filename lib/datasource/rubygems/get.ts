@@ -47,7 +47,9 @@ const fetch = async ({ dependency, registry, path }) => {
   const baseUrl = registry;
 
   logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
-  const response = (await got(name, { retry, json, baseUrl, headers })) || {};
+  const response = (await got(name, { retry, json, baseUrl, headers })) || {
+    body: undefined,
+  };
 
   return response.body;
 };

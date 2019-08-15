@@ -2,13 +2,14 @@ import { api } from '../../lib/platform/github/gh-got-wrapper';
 
 import * as datasource from '../../lib/datasource';
 import * as github from '../../lib/datasource/github';
-import got from '../../lib/util/got';
+import _got from '../../lib/util/got';
 import * as hostRules from '../../lib/util/host-rules';
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
+const got: any = _got;
 const ghGot: any = api.get;
 
 describe('datasource/github', () => {

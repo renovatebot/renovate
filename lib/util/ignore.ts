@@ -1,10 +1,6 @@
-const { logger } = require('../logger');
+import { logger } from '../logger';
 
-module.exports = {
-  isSkipComment,
-};
-
-function isSkipComment(comment) {
+export function isSkipComment(comment?: string): boolean {
   if (comment && comment.match(/^(renovate|pyup):/)) {
     const command = comment
       .split('#')[0]
