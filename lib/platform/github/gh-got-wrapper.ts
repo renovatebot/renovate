@@ -167,10 +167,6 @@ for (const x of helpers) {
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-get.setAppMode = function setAppMode() {
-  // no-op
-};
-
 get.setBaseUrl = (u: string) => {
   baseUrl = u;
 };
