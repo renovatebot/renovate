@@ -614,6 +614,9 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
+      if (err.message === 'platform-failure') {
+        throw err;
+      }
       if (
         err.statusCode === 403 ||
         err.message === 'integration-unauthorized'
@@ -817,7 +820,12 @@ export async function findIssue(title: string) {
   };
 }
 
-export async function ensureIssue(title: string, body: string, once = false) {
+export async function ensureIssue(
+  title: string,
+  body: string,
+  once = false,
+  reopen = true
+) {
   logger.debug(`ensureIssue()`);
   try {
     const issueList = await getIssueList();
@@ -829,7 +837,9 @@ export async function ensureIssue(title: string, body: string, once = false) {
           logger.debug('Issue already closed - skipping recreation');
           return null;
         }
-        logger.info('Reopening previously closed issue');
+        if (reopen) {
+          logger.info('Reopening previously closed issue');
+        }
         issue = issues[issues.length - 1];
       }
       for (const i of issues) {
@@ -845,17 +855,19 @@ export async function ensureIssue(title: string, body: string, once = false) {
         logger.info('Issue is open and up to date - nothing to do');
         return null;
       }
-      logger.info('Patching issue');
-      await api.patch(
-        `repos/${config.parentRepo || config.repository}/issues/${
-          issue.number
-        }`,
-        {
-          body: { body, state: 'open' },
-        }
-      );
-      logger.info('Issue updated');
-      return 'updated';
+      if (reopen) {
+        logger.info('Patching issue');
+        await api.patch(
+          `repos/${config.parentRepo || config.repository}/issues/${
+            issue.number
+          }`,
+          {
+            body: { body, state: 'open' },
+          }
+        );
+        logger.info('Issue updated');
+        return 'updated';
+      }
     }
     await api.post(`repos/${config.parentRepo || config.repository}/issues`, {
       body: {
@@ -1040,7 +1052,10 @@ export async function ensureComment(
     }
     if (!commentId) {
       await addComment(issueNo, body);
-      logger.info({ repository: config.repository, issueNo }, 'Comment added');
+      logger.info(
+        { repository: config.repository, issueNo, topic },
+        'Comment added'
+      );
     } else if (commentNeedsUpdating) {
       await editComment(commentId, body);
       logger.info(
