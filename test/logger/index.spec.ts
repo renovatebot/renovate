@@ -1,4 +1,4 @@
-import { logger, setMeta, levels } from '../../lib/logger';
+import { logger, setMeta, levels, getErrors } from '../../lib/logger';
 
 jest.unmock('../../lib/logger');
 
@@ -22,5 +22,13 @@ describe('logger', () => {
 
   it('sets level', () => {
     levels('stdout', 'debug');
+  });
+
+  it('saves errors', () => {
+    levels('stdout', 'fatal');
+    logger.error('some meta');
+    logger.error({ some: 'meta' });
+    logger.error({ some: 'meta' }, 'message');
+    expect(getErrors()).toMatchSnapshot();
   });
 });

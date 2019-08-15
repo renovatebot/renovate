@@ -1,6 +1,10 @@
 import { logger } from '../logger';
 import { getOptions } from '../config/definitions';
-import { VersioningApi } from './common';
+import {
+  VersioningApi,
+  VersioningApiConstructor,
+  isVersioningApiConstructor,
+} from './common';
 
 export * from './common';
 
@@ -8,7 +12,7 @@ const supportedSchemes = getOptions().find(
   option => option.name === 'versionScheme'
 ).allowedValues;
 
-const schemes: Record<string, VersioningApi> = {};
+const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
 
 for (const scheme of supportedSchemes) {
   schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
@@ -16,15 +20,29 @@ for (const scheme of supportedSchemes) {
 
 export { get };
 
-function get(versionScheme: string) {
+function get(versionScheme: string): VersioningApi {
   if (!versionScheme) {
     logger.debug('Missing versionScheme');
-    return schemes.semver;
+    return schemes.semver as VersioningApi;
   }
-  const scheme = schemes[versionScheme];
+  let schemeName: string;
+  let schemeConfig: string;
+  if (versionScheme.includes(':')) {
+    const versionSplit = versionScheme.split(':');
+    schemeName = versionSplit.shift();
+    schemeConfig = versionSplit.join(':');
+  } else {
+    schemeName = versionScheme;
+  }
+  const scheme = schemes[schemeName];
   if (!scheme) {
     logger.warn({ versionScheme }, 'Unknown version scheme');
-    return schemes.semver;
+    return schemes.semver as VersioningApi;
+  }
+  // istanbul ignore if: needs an implementation
+  if (isVersioningApiConstructor(scheme)) {
+    // eslint-disable-next-line new-cap
+    return new scheme(schemeConfig);
   }
   return scheme;
 }

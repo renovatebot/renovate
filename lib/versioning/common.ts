@@ -40,3 +40,13 @@ export interface VersioningApi {
 
   valueToVersion?(version: string): string;
 }
+
+export interface VersioningApiConstructor {
+  new (config?: string): VersioningApi;
+}
+
+export function isVersioningApiConstructor(
+  obj: VersioningApi | VersioningApiConstructor
+): obj is VersioningApiConstructor {
+  return typeof obj === 'function';
+}
