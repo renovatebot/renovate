@@ -41,7 +41,7 @@ describe('loose/utils', () => {
 
       // eslint-disable-next-line class-methods-use-this
       protected _parse(_version: string): GenericVersion {
-        return { release: [1, 0, 0] };
+        return _version === 'test' ? null : { release: [1, 0, 0] };
       }
     }
 
@@ -58,6 +58,10 @@ describe('loose/utils', () => {
         expect(api[key]()).toMatchSnapshot();
       });
     }
+
+    it('getMajor is null', () => {
+      expect(api.getMajor('test')).toBeNull();
+    });
 
     it('isLessThanRange', () => {
       expect(api.isLessThanRange('', '')).toBeFalsy();
