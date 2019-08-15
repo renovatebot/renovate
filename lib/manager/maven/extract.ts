@@ -39,13 +39,11 @@ function depFromNode(node: XmlElement): PackageDependency {
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
     const datasource = 'maven';
-    const registryUrls = [DEFAULT_MAVEN_REPO];
     return {
       datasource,
       depName,
       currentValue,
       fileReplacePosition,
-      registryUrls,
     };
   }
   return null;
@@ -165,18 +163,14 @@ export function extractPackage(rawContent: string, packageFile: string = null) {
 
   const repositories = project.childNamed('repositories');
   if (repositories && repositories.children) {
-    const repoUrls = [];
+    const repoUrls = [DEFAULT_MAVEN_REPO];
     for (const repo of repositories.childrenNamed('repository')) {
       const repoUrl = repo.valueWithPath('url');
       if (repoUrl) {
         repoUrls.push(repoUrl);
       }
     }
-    result.deps.forEach(dep => {
-      if (dep.registryUrls) {
-        repoUrls.forEach(url => dep.registryUrls.push(url));
-      }
-    });
+    result.registryUrls = repoUrls;
   }
 
   if (packageFile && project.childNamed('parent')) {
@@ -188,11 +182,12 @@ export function extractPackage(rawContent: string, packageFile: string = null) {
   return result;
 }
 
-export function resolveProps(packages: PackageFile[]): PackageFile[] {
+export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, PackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
+  const registryUrls: Record<string, Set<string>> = {};
   packages.forEach(pkg => {
     const name = pkg.packageFile;
     packageFileNames.push(name);
@@ -204,21 +199,39 @@ export function resolveProps(packages: PackageFile[]): PackageFile[] {
   // and merge them in reverse order,
   // which allows inheritance/overriding.
   packageFileNames.forEach(name => {
-    const hierarchy: Record<string, MavenProp>[] = [];
-    const alreadyExtracted: Record<string, boolean> = {};
+    registryUrls[name] = new Set();
+    const propsHierarchy: Record<string, MavenProp>[] = [];
+    const visitedPackages: Set<string> = new Set();
     let pkg = extractedPackages[name];
     while (pkg) {
-      hierarchy.unshift(pkg.mavenProps);
-      if (pkg.parent && !alreadyExtracted[pkg.parent]) {
-        alreadyExtracted[pkg.parent] = true;
+      propsHierarchy.unshift(pkg.mavenProps);
+
+      if (pkg.registryUrls) {
+        pkg.registryUrls.forEach(url => {
+          registryUrls[name].add(url);
+        });
+      }
+
+      if (pkg.parent && !visitedPackages.has(pkg.parent)) {
+        visitedPackages.add(pkg.parent);
         pkg = extractedPackages[pkg.parent];
       } else {
         pkg = null;
       }
     }
-    hierarchy.unshift({});
+    propsHierarchy.unshift({});
     // @ts-ignore
-    extractedProps[name] = Object.assign.apply(null, hierarchy);
+    extractedProps[name] = Object.assign.apply(null, propsHierarchy);
+  });
+
+  // Resolve registryUrls
+  packageFileNames.forEach(name => {
+    const pkg = extractedPackages[name];
+    const urls = [...registryUrls[name]];
+    pkg.deps.forEach(rawDep => {
+      rawDep.registryUrls = urls; // eslint-disable-line no-param-reassign
+    });
+    delete pkg.registryUrls;
   });
 
   // Resolve placeholders
@@ -265,6 +278,5 @@ export async function extractAllPackageFiles(
       logger.info({ packageFile }, 'packageFile has no content');
     }
   }
-
-  return cleanResult(resolveProps(packages));
+  return cleanResult(resolveParents(packages));
 }
