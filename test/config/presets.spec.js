@@ -6,6 +6,8 @@ const presetGroup = require('./npm/_fixtures/renovate-config-group.json');
 const presetMonorepo = require('./npm/_fixtures/renovate-config-monorepo.json');
 const presetIkatyang = require('./npm/_fixtures/renovate-config-ikatyang.json');
 
+jest.mock('../../lib/datasource/npm');
+
 npm.getPreset = jest.fn((dep, presetName) => {
   if (dep === 'renovate-config-default') {
     return presetDefaults.versions[presetDefaults['dist-tags'].latest][

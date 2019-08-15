@@ -1,6 +1,6 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
-import { GotApi, RepoConfig } from '../../../lib/platform/common';
+import { GotApi, RepoParams } from '../../../lib/platform/common';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
@@ -71,11 +71,12 @@ describe('platform/bitbucket', () => {
     return (...args: any) => mocked(() => (bitbucket as any)[prop](...args));
   }
 
-  function initRepo(config?: Partial<RepoConfig>) {
+  function initRepo(config?: Partial<RepoParams>) {
     return mocked(() =>
       bitbucket.initRepo({
         repository: 'some/repo',
         localDir: '',
+        optimizeForDisabled: false,
         ...config,
       })
     );
@@ -289,6 +290,7 @@ describe('platform/bitbucket', () => {
         await bitbucket.initRepo({
           repository: 'some/empty',
           localDir: '',
+          optimizeForDisabled: false,
         });
         expect(await bitbucket.findIssue('title')).toBeNull();
       });
@@ -308,6 +310,7 @@ describe('platform/bitbucket', () => {
         await bitbucket.initRepo({
           repository: 'some/empty',
           localDir: '',
+          optimizeForDisabled: false,
         });
         await bitbucket.ensureIssue('title', 'body');
         expect(api.get.mock.calls).toMatchSnapshot();
