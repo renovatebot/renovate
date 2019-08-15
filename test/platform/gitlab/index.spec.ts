@@ -310,7 +310,14 @@ describe('platform/gitlab', () => {
     it('should return the PR object', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
-        body: [{ iid: 91, source_branch: 'some-branch', state: 'opened' }],
+        body: [
+          {
+            iid: 91,
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ],
       } as any);
       api.get.mockReturnValueOnce({
         body: {
@@ -320,6 +327,7 @@ describe('platform/gitlab', () => {
           deletions: 1,
           commits: 1,
           source_branch: 'some-branch',
+          target_branch: 'master',
           base: {
             sha: '1234',
           },
@@ -778,6 +786,7 @@ describe('platform/gitlab', () => {
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
         },
       } as any);
       api.get.mockReturnValueOnce({
@@ -798,6 +807,7 @@ describe('platform/gitlab', () => {
           state: 'open',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
         },
       } as any);
       api.get.mockReturnValueOnce({ body: [{ status: 'success' }] } as any); // get commit statuses
@@ -817,6 +827,7 @@ describe('platform/gitlab', () => {
               merge_status: 'cannot_be_merged',
               diverged_commits_count: 2,
               source_branch: 'some-branch',
+              target_branch: 'master',
             },
           } as any)
       );

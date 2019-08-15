@@ -131,6 +131,11 @@
       "type": "string",
       "default": "Update Dependencies (Renovate Bot)"
     },
+    "configWarningReuseIssue": {
+      "description": "Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.",
+      "type": "boolean",
+      "default": true
+    },
     "privateKey": {
       "description": "Server-side private key",
       "type": "string"
@@ -560,6 +565,11 @@
       "description": "Recreate PRs even if same ones were closed previously",
       "type": "boolean",
       "default": false
+    },
+    "rebaseConflictedPrs": {
+      "description": "Auto-rebase when there is conflict in PRs",
+      "type": "boolean",
+      "default": true
     },
     "rebaseStalePrs": {
       "description": "Rebase any PRs that are not up-to-date with the base branch",

@@ -5,6 +5,8 @@ const defaultConfig = require('../../lib/config/defaults').getConfig();
 const npm = require('../../lib/datasource/npm');
 const presetDefaults = require('./npm/_fixtures/renovate-config-default.json');
 
+jest.mock('../../lib/datasource/npm');
+
 npm.getPkgReleases = jest.fn(() => ({
   'renovate-config':
     presetDefaults.versions[presetDefaults['dist-tags'].latest][

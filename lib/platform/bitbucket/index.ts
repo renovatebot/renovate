@@ -8,7 +8,7 @@ import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
-import { InitRepoConfig, PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 let config: utils.Config = {} as any;
 
@@ -32,11 +32,10 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
+  const platformConfig: PlatformConfig = {
     endpoint: 'https://api.bitbucket.org/',
   };
-  logger.info('Using default Bitbucket Cloud endpoint: ' + res.endpoint);
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -58,7 +57,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: InitRepoConfig) {
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: 'bitbucket',
@@ -68,12 +67,9 @@ export async function initRepo({
     repository,
     username: opts!.username,
   } as any;
-
-  // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  const platformConfig: PlatformConfig = {} as any;
-
+  let info;
   try {
-    const info = utils.repoInfoTransformer(
+    info = utils.repoInfoTransformer(
       (await api.get(`/2.0/repositories/${repository}`)).body
     );
 
@@ -94,10 +90,6 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-
-    platformConfig.privateRepo = info.privateRepo;
-    platformConfig.isFork = info.isFork;
-    platformConfig.repoFullName = info.repoFullName;
 
     Object.assign(config, {
       owner: info.owner,
@@ -129,9 +121,11 @@ export async function initRepo({
     localDir,
     url,
   });
-
-  await Promise.all([getPrList(), getFileList()]);
-  return platformConfig;
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
+    isFork: info.isFork,
+  };
+  return repoConfig;
 }
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
