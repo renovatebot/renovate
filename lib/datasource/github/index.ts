@@ -25,7 +25,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   try {
     res = await got(url, opts);
   } catch (err) {
-    if (err.message === 'platform-error') {
+    if (err.message === 'platform-failure') {
       throw err;
     }
     logger.debug(
@@ -52,7 +52,7 @@ export async function getPreset(
       const defaultJson = await fetchJSONFile(pkgName, 'default.json');
       return defaultJson;
     } catch (err) {
-      if (err.message === 'platform-error') {
+      if (err.message === 'platform-failure') {
         throw err;
       }
       if (err.message === 'dep not found') {

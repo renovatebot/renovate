@@ -1,6 +1,7 @@
 const pr = id => ({
   id,
   source: { branch: { name: 'branch' } },
+  destination: { branch: { name: 'master' } },
   title: 'title',
   summary: { raw: 'summary' },
   state: 'OPEN',

@@ -66,14 +66,14 @@ export async function getPkgReleases(config: PkgReleaseConfig) {
   const versionScheme =
     config && config.versionScheme ? config.versionScheme : 'semver';
   // Filter by version scheme
-  const { isVersion, sortVersions } = versioning.get(versionScheme);
+  const version = versioning.get(versionScheme);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release) {
-    return sortVersions(release1.version, release2.version);
+    return version.sortVersions(release1.version, release2.version);
   }
   if (res.releases) {
     res.releases = res.releases
-      .filter(release => isVersion(release.version))
+      .filter(release => version.isVersion(release.version))
       .sort(sortReleases);
   }
   return res;

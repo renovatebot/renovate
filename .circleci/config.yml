@@ -30,7 +30,8 @@ commands:
       - run:
           name: Lint
           command: |
-            yarn lint
+            yarn eslint --format junit -o reports/junit/js-lint-results.xml
+            yarn prettier
             yarn test-schema
             yarn type-check
 
@@ -42,7 +43,14 @@ commands:
       - run:
           name: Unit Tests
           command: |
-            yarn jest --runInBand
+            yarn jest --runInBand  --ci --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: 'reports/junit/js-test-results.xml'
+
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
 
       - run:
           name: E2E Tests

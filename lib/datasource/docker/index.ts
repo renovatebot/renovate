@@ -98,6 +98,11 @@ async function getAuthHeaders(registry: string, repository: string) {
       logger.debug({ err });
       return null;
     }
+    if (err.name === 'RequestError' && registry.endsWith('docker.io')) {
+      logger.debug({ err }, 'err');
+      logger.info('Docker registry error: RequestError');
+      throw new Error('registry-failure');
+    }
     if (err.statusCode === 429 && registry.endsWith('docker.io')) {
       logger.warn({ err }, 'docker registry failure: too many requests');
       throw new Error('registry-failure');

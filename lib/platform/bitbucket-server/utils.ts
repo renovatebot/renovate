@@ -15,6 +15,7 @@ export function prInfo(pr: any) {
     number: pr.id,
     body: pr.description,
     branchName: pr.fromRef.displayId,
+    targetBranch: pr.toRef.displayId,
     title: pr.title,
     state: prStateMapping[pr.state],
     createdAt: pr.createdDate,
