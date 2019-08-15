@@ -1,6 +1,6 @@
 import fs from 'fs';
 import * as dcUpdate from '../../../lib/manager/gradle-wrapper';
-import * as _got from '../../../lib/util/got';
+import _got from '../../../lib/util/got';
 
 jest.mock('../../../lib/util/got');
 

@@ -1,10 +1,12 @@
 import delay from 'delay';
 import { Response } from 'got';
-import got from '../../../lib/util/got';
+import _got from '../../../lib/util/got';
 import { api } from '../../../lib/platform/github/gh-got-wrapper';
 
 jest.mock('../../../lib/util/got');
 jest.mock('delay');
+
+const got: any = _got;
 
 const get: <T extends object = any>(
   path: string,

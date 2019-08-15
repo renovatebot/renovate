@@ -1,0 +1,1 @@
+export { getPkgReleases } from './releases';

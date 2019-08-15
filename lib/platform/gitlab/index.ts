@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 
@@ -38,18 +38,16 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  const res = {} as any;
   if (endpoint) {
-    res.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
-    api.setBaseUrl(res.endpoint);
-    defaults.endpoint = res.endpoint;
+    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    api.setBaseUrl(defaults.endpoint);
   } else {
-    res.endpoint = defaults.endpoint;
-    logger.info('Using default GitLab endpoint: ' + res.endpoint);
+    logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
   }
+  let gitAuthor: string;
   try {
     const user = (await api.get(`user`, { token })).body;
-    res.gitAuthor = user.email;
+    gitAuthor = user.email;
     authorId = user.id;
   } catch (err) {
     logger.info(
@@ -58,7 +56,11 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  return res;
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -95,16 +97,11 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: {
-  repository: string;
-  localDir: string;
-  optimizeForDisabled: boolean;
-}) {
+}: RepoParams) {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
   let res;
-  const platformConfig: PlatformConfig = {} as any;
   try {
     res = await api.get(`projects/${config.repository}`);
     if (res.body.archived) {
@@ -142,7 +139,6 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
-    platformConfig.isFork = !!res.body.forked_from_project;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
@@ -194,7 +190,11 @@ export async function initRepo({
     logger.info({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
-  return platformConfig;
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
+    isFork: !!res.body.forked_from_project,
+  };
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {
@@ -723,6 +723,7 @@ export async function getPr(iid: number) {
   const pr = (await api.get(url)).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;
+  pr.targetBranch = pr.target_branch;
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
