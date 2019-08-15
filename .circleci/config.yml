@@ -30,7 +30,7 @@ commands:
       - run:
           name: Lint
           command: |
-            yarn eslint --format junit -o reports/junit/js-lint-results.xml
+            yarn eslint --format junit -o test-results/lint/results.xml
             yarn prettier
             yarn test-schema
             yarn type-check
@@ -45,12 +45,12 @@ commands:
           command: |
             yarn jest --runInBand  --ci --reporters=default --reporters=jest-junit
           environment:
-            JEST_JUNIT_OUTPUT: 'reports/junit/js-test-results.xml'
+            JEST_JUNIT_OUTPUT: 'test-results/jest/results.xml'
 
       - store_test_results:
-          path: reports/junit
+          path: test-results
       - store_artifacts:
-          path: reports/junit
+          path: test-results
 
       - run:
           name: E2E Tests
@@ -61,6 +61,7 @@ commands:
           name: Coverage
           command: |
             bash <(curl -s https://codecov.io/bash) -Z -C $CIRCLE_SHA1
+          when: always
 jobs:
   test_node_10:
     docker:
