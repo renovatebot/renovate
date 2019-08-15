@@ -1,5 +1,9 @@
 import * as versioning from '../../lib/versioning';
 import { getOptions } from '../../lib/config/definitions';
+import {
+  GenericVersioningApi,
+  GenericVersion,
+} from '../../lib/versioning/loose/generic';
 
 const supportedSchemes = getOptions().find(
   option => option.name === 'versionScheme'
@@ -13,6 +17,10 @@ describe('versioning.get(versionScheme)', () => {
   it('should fallback to semver', () => {
     expect(versioning.get(undefined)).toBe(versioning.get('semver'));
     expect(versioning.get('unknown')).toBe(versioning.get('semver'));
+  });
+
+  it('should accept config', () => {
+    expect(versioning.get('semver:test')).toBeDefined();
   });
 
   describe('should return the same interface', () => {
@@ -67,5 +75,26 @@ describe('versioning.get(versionScheme)', () => {
         );
       });
     }
+
+    it('dummy', () => {
+      class DummyScheme extends GenericVersioningApi {
+        // eslint-disable-next-line class-methods-use-this
+        protected _compare(_version: string, _other: string): number {
+          throw new Error('Method not implemented.');
+        }
+
+        // eslint-disable-next-line class-methods-use-this
+        protected _parse(_version: string): GenericVersion {
+          throw new Error('Method not implemented.');
+        }
+      }
+
+      const api = new DummyScheme();
+      const schemeKeys = getAllPropertyNames(api)
+        .filter(val => !optionalFunctions.includes(val) && !val.startsWith('_'))
+        .sort();
+
+      expect(schemeKeys).toEqual(npmApi);
+    });
   });
 });

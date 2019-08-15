@@ -39,6 +39,7 @@ function get(versionScheme: string): VersioningApi {
     logger.warn({ versionScheme }, 'Unknown version scheme');
     return schemes.semver as VersioningApi;
   }
+  // istanbul ignore if: needs an implementation
   if (isVersioningApiConstructor(scheme)) {
     // eslint-disable-next-line new-cap
     return new scheme(schemeConfig);
