@@ -6,7 +6,7 @@ import * as _hostRules from '../../lib/util/host-rules';
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
-const got = _got;
+const got: any = _got;
 const hostRules = _hostRules;
 
 const includesJson: any = fs.readFileSync(

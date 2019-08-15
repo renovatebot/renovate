@@ -1,11 +1,7 @@
-/**
- *
- * @param {string[]} customEnvVars
- * @returns {NodeJS.ProcessEnv}
- */
-export function getChildProcessEnv(customEnvVars = []) {
-  /** @type NodeJS.ProcessEnv */
-  const env = {};
+export function getChildProcessEnv(
+  customEnvVars: string[] = []
+): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
   if (global.trustLevel === 'high') {
     return Object.assign(env, process.env);
   }

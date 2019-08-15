@@ -1,7 +1,9 @@
-import got from '../../../lib/util/got';
+import _got from '../../../lib/util/got';
 import railsInfo from './_fixtures/rails/info.json';
 import railsVersions from './_fixtures/rails/versions.json';
 import * as rubygems from '../../../lib/datasource/rubygems';
+
+const got: any = _got;
 
 const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 ---

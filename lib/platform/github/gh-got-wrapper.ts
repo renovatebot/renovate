@@ -48,7 +48,7 @@ async function get(
     if (opts.paginate) {
       // Check if result is paginated
       const pageLimit = opts.pageLimit || 10;
-      const linkHeader = parseLinkHeader(res.headers.link);
+      const linkHeader = parseLinkHeader(res.headers.link as string);
       if (linkHeader && linkHeader.next && linkHeader.last) {
         let lastPage = +linkHeader.last.page;
         if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {

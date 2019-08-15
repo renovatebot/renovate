@@ -1,14 +1,13 @@
-const crypto = require('crypto');
-const got = require('got');
+import crypto from 'crypto';
+import { create } from './util';
 
-const clone = input => JSON.parse(JSON.stringify(input));
+const clone = (input: any) => JSON.parse(JSON.stringify(input));
 
 // global.repoCache is reset to {} every time a repository is initialized
 // With this caching, it means every GET request is cached during each repository run
 
 // istanbul ignore next
-// @ts-ignore
-module.exports = got.create({
+export default create({
   options: {},
   handler: (options, next) => {
     if (!global.repoCache) {

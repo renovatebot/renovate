@@ -6,13 +6,13 @@ import {
   DigestConfig,
 } from '../common';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 
 const ghGot = api.get;
 
 async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
-  const opts = {
+  const opts: GotJSONOptions = {
     headers: {
       accept: global.appMode
         ? 'application/vnd.github.machine-man-preview+json'

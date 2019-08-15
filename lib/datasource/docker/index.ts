@@ -3,6 +3,7 @@ import hasha from 'hasha';
 import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
+import { OutgoingHttpHeaders } from 'http';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
@@ -37,7 +38,10 @@ function getRegistryRepository(lookupName: string, registryUrls: string[]) {
   };
 }
 
-async function getAuthHeaders(registry: string, repository: string) {
+async function getAuthHeaders(
+  registry: string,
+  repository: string
+): Promise<OutgoingHttpHeaders> {
   try {
     const apiCheckUrl = `${registry}/v2/`;
     const apiCheckResponse = await got(apiCheckUrl, { throwHttpErrors: false });
@@ -293,18 +297,9 @@ async function getTags(
     }
     let page = 1;
     do {
-      interface DockerTagResult {
-        body: {
-          tags: string[];
-        };
-        headers: {
-          link: string;
-        };
-      }
-
-      const res: DockerTagResult = await got(url, { json: true, headers });
+      const res = await got<{ tags: string[] }>(url, { json: true, headers });
       tags = tags.concat(res.body.tags);
-      const linkHeader = parseLinkHeader(res.headers.link);
+      const linkHeader = parseLinkHeader(res.headers.link as string);
       url =
         linkHeader && linkHeader.next
           ? URL.resolve(url, linkHeader.next.url)
@@ -431,7 +426,7 @@ async function getLabels(
       headers,
       hooks: {
         beforeRedirect: [
-          options => {
+          (options: any) => {
             if (
               options.search &&
               options.search.indexOf('X-Amz-Algorithm') !== -1
