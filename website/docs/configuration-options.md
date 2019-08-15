@@ -192,6 +192,10 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
+## configWarningReuseIssue
+
+Set this option to false if you prefer Renovate to open a new issue whenever there is config warning.
+
 ## deps-edn
 
 ## description
