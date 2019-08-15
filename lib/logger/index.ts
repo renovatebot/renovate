@@ -5,8 +5,16 @@ import { RenovateStream } from './pretty-stdout';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import cmdSerializer from './cmd-serializer';
+import { ErrorStream } from './utils';
 
 let meta = {};
+export interface LogError {
+  level: bunyan.LogLevel;
+  meta: any;
+  msg?: string;
+}
+
+const errors = new ErrorStream();
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
@@ -33,13 +41,19 @@ const bunyanLogger = bunyan.createLogger({
     presetConfig: configSerializer,
     err: errSerializer,
   },
-  streams: [stdout],
+  streams: [
+    stdout,
+    {
+      name: 'error',
+      level: 'error' as bunyan.LogLevel,
+      stream: errors as any,
+      type: 'raw',
+    },
+  ],
 });
 
 const logFactory = (level: bunyan.LogLevelString): any => {
   return (p1: any, p2: any): void => {
-    global.renovateError =
-      global.renovateError || level === 'error' || level === 'fatal';
     if (p2) {
       // meta and msg provided
       bunyanLogger[level]({ ...meta, ...p1 }, p2);
@@ -96,4 +110,8 @@ export /* istanbul ignore next */ function addStream(
 
 export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
+}
+
+export function getErrors() {
+  return errors.getErrors();
 }
