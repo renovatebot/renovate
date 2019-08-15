@@ -1,12 +1,10 @@
-const _ = require('lodash');
-const yaml = require('js-yaml');
-const is = require('@sindresorhus/is');
+import _ from 'lodash';
+import yaml from 'js-yaml';
+import is from '@sindresorhus/is';
 
-module.exports = {
-  updateDependency,
-};
+import { logger } from '../../logger';
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(fileContent, upgrade) {
   logger.trace({ config: upgrade }, 'updateDependency()');
   if (!upgrade || !upgrade.depName || !upgrade.newValue) {
     logger.debug('Failed to update dependency, invalid upgrade');

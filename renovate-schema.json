@@ -1017,7 +1017,7 @@
       "description": "Configuration object for helm (kubernetes package manager) renovation.",
       "type": "object",
       "default": {
-        "commitMessageTopic": "{{chartName}} dependency {{depName}}",
+        "commitMessageTopic": "helm chart {{depName}}",
         "fileMatch": ["(^|/)requirements.ya?ml$"]
       },
       "$ref": "#"

@@ -7,12 +7,16 @@ Object {
     Object {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
     },
     Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
     },
   ],
 }
@@ -20,18 +24,21 @@ Object {
 
 exports[`lib/manager/helm/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
 Object {
-  "chartName": "example",
   "datasource": "helm",
   "deps": Array [
     Object {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
     },
     Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
     },
   ],
 }
@@ -39,18 +46,21 @@ Object {
 
 exports[`lib/manager/helm/extract extractPackageFile() skips local dependencies 1`] = `
 Object {
-  "chartName": "example",
   "datasource": "helm",
   "deps": Array [
     Object {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
     },
     Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "helmRepository": "file:///some/local/path/",
+      "registryUrls": Array [
+        "file:///some/local/path/",
+      ],
       "skipReason": "local-dependency",
     },
   ],

@@ -1,13 +1,14 @@
-const upath = require('upath');
-const yaml = require('js-yaml');
-const is = require('@sindresorhus/is');
+import is from '@sindresorhus/is';
+import upath from 'upath';
+import yaml from 'js-yaml';
 
-module.exports = {
-  extractPackageFile,
-};
+import { logger } from '../../logger';
+import { PackageFile, PackageDependency } from '../common';
 
-async function extractPackageFile(content, fileName) {
-  let chartName;
+export async function extractPackageFile(
+  content: string,
+  fileName: string
+): Promise<PackageFile> {
   try {
     const baseDir = upath.parse(fileName).dir;
     const chartFileName = upath.join(baseDir, 'Chart.yaml');
@@ -15,22 +16,19 @@ async function extractPackageFile(content, fileName) {
     if (!chart) {
       logger.warn('Failed to read Chart.yaml');
     }
-    const doc = yaml.safeLoad(chart);
-    chartName = doc.name;
   } catch (err) {
     logger.warn('Failed to parse Chart.yaml');
   }
-  logger.info(`Chart name: ${chartName}`);
   logger.trace('helm.extractPackageFile()');
   let deps = [];
   try {
     const doc = yaml.safeLoad(content);
     if (doc && is.array(doc.dependencies)) {
       deps = doc.dependencies.map(dep => {
-        const res = {
+        const res: PackageDependency = {
           depName: dep.name,
           currentValue: dep.version,
-          helmRepository: dep.repository,
+          registryUrls: [dep.repository],
         };
         const url = new URL(dep.repository);
         if (url.protocol === 'file:') {
@@ -56,8 +54,5 @@ async function extractPackageFile(content, fileName) {
     deps,
     datasource: 'helm',
   };
-  if (chartName) {
-    res.chartName = chartName;
-  }
   return res;
 }

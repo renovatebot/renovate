@@ -1,4 +1,6 @@
-const { extractPackageFile } = require('../../../lib/manager/helm/extract');
+import { extractPackageFile } from '../../../lib/manager/helm/extract';
+
+const platform: any = global.platform;
 
 describe('lib/manager/helm/extract', () => {
   describe('extractPackageFile()', () => {

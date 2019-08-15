@@ -1,9 +1,8 @@
-const fs = require('fs');
-const got = require('../../lib/util/got');
-const {
-  getPkgReleases,
-  getRepositoryData,
-} = require('../../lib/datasource/helm');
+import fs from 'fs';
+import _got from '../../lib/util/got';
+import { getPkgReleases, getRepositoryData } from '../../lib/datasource/helm';
+
+const got: any = _got;
 
 // Truncated index.yaml file
 const indexYaml = fs.readFileSync(
@@ -24,7 +23,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: undefined,
-          helmRepository: 'example-repository.com',
+          registryUrls: ['example-repository.com'],
         })
       ).toBeNull();
     });
@@ -32,7 +31,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'some_chart',
-          helmRepository: undefined,
+          registryUrls: [],
         })
       ).toBeNull();
     });
@@ -41,7 +40,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'non_existent_chart',
-          helmRepository: 'example-repository.com',
+          registryUrls: ['example-repository.com'],
         })
       ).toBeNull();
     });
@@ -52,7 +51,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'non_existent_chart',
-          helmRepository: 'example-repository.com',
+          registryUrls: ['example-repository.com'],
         })
       ).toBeNull();
     });
@@ -65,7 +64,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'some_chart',
-          helmRepository: 'example-repository.com',
+          registryUrls: ['example-repository.com'],
         })
       ).toBeNull();
     });
@@ -79,7 +78,7 @@ describe('datasource/helm', () => {
       try {
         await getPkgReleases({
           lookupName: 'some_chart',
-          helmRepository: 'example-repository.com',
+          registryUrls: ['example-repository.com'],
         });
       } catch (err) {
         e = err;
@@ -94,7 +93,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'some_chart',
-          helmRepository: 'example-repository.com',
+          registryUrls: ['example-repository.com'],
         })
       ).toBeNull();
     });
@@ -103,7 +102,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce(res);
       const releases = await getPkgReleases({
         lookupName: 'non_existent_chart',
-        helmRepository: 'example-repository.com',
+        registryUrls: ['example-repository.com'],
       });
       expect(releases).toBeNull();
     });
@@ -117,7 +116,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce(res);
       const releases = await getPkgReleases({
         lookupName: 'non_existent_chart',
-        helmRepository: 'example-repository.com',
+        registryUrls: ['example-repository.com'],
       });
       expect(releases).toBeNull();
     });
@@ -125,7 +124,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getPkgReleases({
         lookupName: 'non_existent_chart',
-        helmRepository: 'example-repository.com',
+        registryUrls: ['example-repository.com'],
       });
       expect(releases).toBeNull();
     });
@@ -133,7 +132,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getPkgReleases({
         lookupName: 'ambassador',
-        helmRepository: 'example-repository.com',
+        registryUrls: ['example-repository.com'],
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();
@@ -153,7 +152,7 @@ describe('datasource/helm', () => {
       );
       const releases = await getPkgReleases({
         lookupName: 'ambassador',
-        helmRepository: repository,
+        registryUrls: [repository],
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();

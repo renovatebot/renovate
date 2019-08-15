@@ -1,4 +1,4 @@
-const { updateDependency } = require('../../../lib/manager/helm/update');
+import { updateDependency } from '../../../lib/manager/helm/update';
 
 describe('lib/manager/helm/extract', () => {
   describe('updateDependency()', () => {
