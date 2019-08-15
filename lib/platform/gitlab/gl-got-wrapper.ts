@@ -35,6 +35,7 @@ async function get(path: string, options: any) {
       throw new Error('platform-failure');
     }
     if (
+      err.code === 'ETIMEDOUT' ||
       err.code === 'ECONNRESET' ||
       err.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
     ) {

@@ -131,6 +131,11 @@
       "type": "string",
       "default": "Update Dependencies (Renovate Bot)"
     },
+    "configWarningReuseIssue": {
+      "description": "Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.",
+      "type": "boolean",
+      "default": true
+    },
     "privateKey": {
       "description": "Server-side private key",
       "type": "string"

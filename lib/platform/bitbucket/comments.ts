@@ -83,7 +83,10 @@ export async function ensureComment(
     }
     if (!commentId) {
       await addComment(config, prNo, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment added');
+      logger.info(
+        { repository: config.repository, prNo, topic },
+        'Comment added'
+      );
     } else if (commentNeedsUpdating) {
       await editComment(config, prNo, commentId, body);
       logger.info({ repository: config.repository, prNo }, 'Comment updated');
