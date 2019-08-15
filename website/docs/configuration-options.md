@@ -25,6 +25,10 @@ If you have any questions about the below config options, or would like to get h
 
 Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
 
+## assignAutomerge
+
+By default, Renovate will not assign reviewers and assignees if the PR is to be automerged, unless the status check failed. By configuring this setting, you can enable Renovate to always assign reviewers and assignees.
+
 ## assignees
 
 Must be valid usernames.
@@ -188,6 +192,10 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
+## configWarningReuseIssue
+
+Set this option to false if you prefer Renovate to open a new issue whenever there is config warning.
+
 ## deps-edn
 
 ## description
@@ -211,6 +219,8 @@ Add configuration here if you want to enable or disable something in particular 
 Add configuration here if you want to enable or disable something in particular for `Dockerfile` files and override the default Docker settings.
 
 ## dotnet
+
+## droneci
 
 ## enabled
 
@@ -950,6 +960,10 @@ By default, Renovate assumes that if you are using ranges then it's because you 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `rangeStrategy` to `bump` in your Renovate config.
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
+
+## rebaseConflictedPrs
+
+This field defaults to `true` which means Renovate will rebase whenever there is a merge conflict with the master branch. However, this default behavior may result in costing a lot of CI cycles. If you wish to disable auto-rebasing in case of merge conflicts with the master branch, set it's value to `false`.
 
 ## rebaseLabel
 

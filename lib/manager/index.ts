@@ -16,6 +16,7 @@ const managerList = [
   'deps-edn',
   'docker-compose',
   'dockerfile',
+  'droneci',
   'github-actions',
   'gitlabci',
   'gitlabci-include',
@@ -23,6 +24,7 @@ const managerList = [
   'gradle',
   'gradle-wrapper',
   'helm',
+  'homebrew',
   'kubernetes',
   'leiningen',
   'maven',
@@ -40,7 +42,6 @@ const managerList = [
   'terraform',
   'travis',
   'ruby-version',
-  'homebrew',
 ];
 
 const managers: Record<string, ManagerApi> = {};

@@ -62,10 +62,6 @@ Array [
     "/2.0/repositories/some/empty",
   ],
   Array [
-    "/2.0/repositories/some/empty/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
-    undefined,
-  ],
-  Array [
     "/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]
@@ -138,6 +134,7 @@ Object {
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
 }
 `;
@@ -147,12 +144,14 @@ Object {
   "body": "summary",
   "branchName": "branch",
   "canMerge": true,
+  "canRebase": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
   "isStale": false,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
 }
 `;
@@ -162,12 +161,14 @@ Object {
   "body": "summary",
   "branchName": "branch",
   "canMerge": true,
+  "canRebase": false,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #3",
   "isConflicted": false,
   "isStale": false,
   "number": 3,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
 }
 `;
@@ -177,12 +178,14 @@ Object {
   "body": "summary",
   "branchName": "branch",
   "canMerge": true,
+  "canRebase": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
   "isStale": false,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
 }
 `;
@@ -192,12 +195,14 @@ Object {
   "body": "summary",
   "branchName": "branch",
   "canMerge": true,
+  "canRebase": false,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
   "isStale": false,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
 }
 `;
@@ -214,7 +219,7 @@ Array [
     },
   ],
   Array [
-    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/commits?pagelen=1",
+    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/commits?pagelen=2",
   ],
   Array [
     "/2.0/repositories/some/repo/pullrequests/5",
@@ -226,7 +231,7 @@ Array [
     },
   ],
   Array [
-    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=1",
+    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2",
   ],
   Array [
     "/2.0/repositories/some/repo/pullrequests/5",
@@ -238,7 +243,7 @@ Array [
     },
   ],
   Array [
-    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=1",
+    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2",
   ],
 ]
 `;
@@ -248,12 +253,14 @@ Object {
   "body": "summary",
   "branchName": "branch",
   "canMerge": true,
+  "canRebase": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
   "isStale": false,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
 }
 `;
@@ -274,9 +281,8 @@ Object {
 
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
-  "repoFullName": "some/repo",
 }
 `;
 

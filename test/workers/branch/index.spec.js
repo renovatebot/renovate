@@ -159,6 +159,18 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
     });
+    it('skips branch if target branch changed', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: true,
+        targetBranch: 'v6',
+      });
+      config.baseBranch = 'master';
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pr-edited');
+    });
     it('returns if pr creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],

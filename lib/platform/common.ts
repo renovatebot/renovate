@@ -40,17 +40,29 @@ export interface GotApi<TOptions extends object = any> {
 }
 
 export interface PlatformConfig {
-  isFork: boolean;
-  privateRepo: boolean;
-  // do we need this?
-  repoFullName?: string;
+  endpoint: string;
+  renovateUsername?: any;
+  gitAuthor?: any;
 }
 
 export interface RepoConfig {
-  azureWorkItemId?: number;
-  bbUseDefaultReviewers?: boolean;
+  baseBranch: string;
+  endpoint?: string;
+  renovateUsername?: any;
+  gitAuthor?: any;
+  isFork: boolean;
+}
+
+export interface RepoParams {
+  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
+  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
   gitPrivateKey?: string;
   localDir: string;
-  optimizeForDisabled?: boolean;
+  optimizeForDisabled: boolean;
   repository: string;
+  endpoint?: string;
+  forkMode?: string;
+  forkToken?: string;
+  includeForks?: boolean;
+  renovateUsername?: string;
 }

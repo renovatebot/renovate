@@ -93,7 +93,7 @@ Add `"default:automergeDigest"` to your `extends` array. Also add `"default:auto
 
 ##### Registry authentication
 
-If you are running your own Renovate bot, add this to your `config.js`:
+Here is an example of configuring a default Docker username/password in `config.js`:
 
 ```js
 module.exports = {
@@ -108,3 +108,26 @@ module.exports = {
 ```
 
 Alternatively, configure `DOCKER_USERNAME` and `DOCKER_PASSWORD` in env to achieve the same.
+
+The above two approaches create an identical host rule in renovatebot. It is possible to add additional host rules following the [documentation](https://renovatebot.com/docs/configuration-options/#hostrules)
+
+For example if you have some images you host yourself and some images you pull from docker hub without logging in you can configure that like this:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostType: 'docker',
+      hostName: 'index.docker.io',
+      username: '',
+      password: '',
+    },
+    {
+      hostType: 'docker',
+      hostName: 'your.host.io',
+      username: '<your-username>',
+      password: '<your-password>',
+    },
+  ],
+};
+```

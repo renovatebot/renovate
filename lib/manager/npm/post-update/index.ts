@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import path from 'path';
 import upath from 'upath';
@@ -155,42 +154,6 @@ export async function writeExistingFiles(
       upath.join(basedir, 'package.json'),
       JSON.stringify(massagedFile)
     );
-
-    // copyLocalLibs
-    const toCopy = listLocalLibs(massagedFile.dependencies);
-    toCopy.push(...listLocalLibs(massagedFile.devDependencies));
-    if (toCopy.length !== 0) {
-      logger.debug(`listOfNeededLocalFiles files to copy: ${toCopy}`);
-      await Promise.all(
-        toCopy.map(async localPath => {
-          const resolvedLocalPath = upath.join(
-            path.resolve(basedir, localPath)
-          );
-          if (!resolvedLocalPath.startsWith(upath.join(config.localDir))) {
-            logger.info(
-              `local lib '${toCopy}' will not be copied because it's out of the repo.`
-            );
-          } else {
-            // at the root of local Lib we should find a package.json so that yarn/npm will use it to update *lock file
-            const resolvedRepoPath = upath.join(
-              resolvedLocalPath.substring(config.localDir.length + 1),
-              'package.json'
-            );
-            const fileContent = await platform.getFile(resolvedRepoPath);
-            if (fileContent !== null) {
-              await fs.outputFile(
-                upath.join(resolvedLocalPath, 'package.json'),
-                fileContent
-              );
-            } else {
-              logger.info(
-                `listOfNeededLocalFiles - file '${resolvedRepoPath}' not found.`
-              );
-            }
-          }
-        })
-      );
-    }
     const npmrc = packageFile.npmrc || config.npmrc;
     if (npmrc) {
       await fs.outputFile(upath.join(basedir, '.npmrc'), npmrc);
@@ -270,28 +233,6 @@ export async function writeExistingFiles(
       await fs.remove(upath.join(basedir, 'pnpm-lock.yaml'));
     }
   }
-}
-
-// istanbul ignore next
-function listLocalLibs(
-  dependencies: { [s: string]: unknown } | ArrayLike<unknown>
-) {
-  logger.trace(`listLocalLibs (${dependencies})`);
-  const toCopy = [];
-  if (dependencies) {
-    for (const [libName, libVersion] of Object.entries(dependencies)) {
-      if (is.string(libVersion) && libVersion.startsWith('file:')) {
-        if (libVersion.endsWith('.tgz')) {
-          logger.info(
-            `Link to local lib "${libName}": "${libVersion}" is not supported. Please do it like: 'file:/path/to/folder'`
-          );
-        } else {
-          toCopy.push(libVersion.substring('file:'.length));
-        }
-      }
-    }
-  }
-  return toCopy;
 }
 
 // istanbul ignore next

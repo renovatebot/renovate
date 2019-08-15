@@ -32,6 +32,9 @@ Object {
   "dockerfile": Array [
     Object {},
   ],
+  "droneci": Array [
+    Object {},
+  ],
   "github-actions": Array [
     Object {},
   ],

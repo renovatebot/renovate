@@ -235,7 +235,12 @@ export class Storage {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     this._config.branchPrefix = branchPrefix;
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+    try {
+      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      throw err;
+    }
   }
 
   async getFileList(branchName?: string) {
@@ -466,18 +471,20 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CIRCLECI) {
+  if (process.env.CI) {
     return;
   }
-  const platformErrorStrings = [
+  const platformFailureStrings = [
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
     'Could not write new index file',
+    'Failed to connect to',
+    'Connection timed out',
   ];
-  for (const errorStr of platformErrorStrings) {
+  for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
       throw new Error('platform-failure');
     }

@@ -52,18 +52,18 @@ describe('lib/manager/composer/extract', () => {
     it('extracts object registryUrls', async () => {
       const res = await extractPackageFile(requirements3, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res.registryUrls).toHaveLength(3);
+      expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts repositories and registryUrls', async () => {
       const res = await extractPackageFile(requirements4, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts object repositories and registryUrls with lock file', async () => {
       platform.getFile.mockResolvedValue(requirements5Lock);
       const res = await extractPackageFile(requirements5, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts dependencies with lock file', async () => {
       platform.getFile.mockResolvedValue('some content');

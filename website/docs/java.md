@@ -13,11 +13,11 @@ Renovate detects versions specified as string `'group:artifact:version'` and as 
 
 ### File Support
 
-Renovate can update `build.gradle` files in the root of the repository and any `*.gradle` file inside any subdirectory as multi-project configurations.
+Renovate can update `build.gradle`/`build.gradle.kts` files in the root of the repository and any `*.gradle`/`*.gradle.kts` file inside any subdirectory as multi-project configurations.
 
 Renovate does not support:
 
-- Projects without a `build.gradle` file in the root of the repository.
+- Projects without neither `build.gradle` nor `build.gradle.kts` file in the root of the repository.
 - Android projects that requires extra configuration to run. (e.g. setting the android SDK)
 
 ### How It Works

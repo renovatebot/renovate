@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4 AS tsbuild
+FROM amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -125,7 +125,7 @@ RUN chmod -R a+rw /usr
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-ENV DOCKER_VERSION=18.09.2
+ENV DOCKER_VERSION=19.03.1
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
   && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
@@ -133,6 +133,15 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
+
+# Cargo
+
+ENV RUST_BACKTRACE=1 \
+    PATH=/home/ubuntu/.cargo/bin:$PATH
+
+RUN set -ex ;\
+    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+    rustup toolchain install 1.36.0
 
 # Pipenv
 
@@ -149,13 +158,13 @@ RUN poetry config settings.virtualenvs.create false
 
 # npm
 
-ENV NPM_VERSION=6.9.0
+ENV NPM_VERSION=6.10.2
 
 RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.16.0
+ENV YARN_VERSION=1.17.3
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 

@@ -41,7 +41,7 @@ describe('lib/manager/buildkite/extract', () => {
     it('extracts arrays of plugins', () => {
       const res = extractPackageFile(pipeline4).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2); // TODO: should be 4
+      expect(res).toHaveLength(4);
     });
   });
 });

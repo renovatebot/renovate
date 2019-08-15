@@ -30,7 +30,8 @@ commands:
       - run:
           name: Lint
           command: |
-            yarn lint
+            yarn eslint --format junit -o reports/junit/js-lint-results.xml
+            yarn prettier
             yarn test-schema
             yarn type-check
 
@@ -42,7 +43,14 @@ commands:
       - run:
           name: Unit Tests
           command: |
-            yarn jest --runInBand
+            yarn jest --runInBand  --ci --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: 'reports/junit/js-test-results.xml'
+
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
 
       - run:
           name: E2E Tests
@@ -56,17 +64,17 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4
+      - image: amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8
     steps:
       - test
   test_node_12:
     docker:
-      - image: amd64/node:12.6.0@sha256:4200e3ad25e147903a2fce5273ccbf2ec4300162bc199b4963dc5bf5046c1eb8
+      - image: amd64/node:12.7.0@sha256:98ae860064c932572dc3ec2e926bab647f9de5a3508792c652dc272f229d9aa4
     steps:
       - test
   release:
     docker:
-      - image: amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4
+      - image: amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8
     steps:
       - checkout
       - run: yarn install --frozen-lockfile

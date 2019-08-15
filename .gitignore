@@ -12,3 +12,4 @@
 renovate-0.0.0-semantic-release.tgz
 /e2e/node_modules
 .eslintcache
+junit.xml

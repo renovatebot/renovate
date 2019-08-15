@@ -108,6 +108,7 @@ describe('pep440.getNewValue()', () => {
 
     // complex ranges
     ['~=1.1.0, !=1.1.1', '~=1.2.3, !=1.1.1'],
+    ['~=1.1.0,!=1.1.1', '~=1.2.3,!=1.1.1'],
 
     // invalid & not supported
     [' ', ' '],

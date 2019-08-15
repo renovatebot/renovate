@@ -138,7 +138,7 @@ If you are running on any platform except github.com, it's important to also con
 
 ## File/directory usage
 
-By default, Renovate will store all files within a `renovate/` subdirectory of the operating system's tempororary directory, e.g. `/tmp/renovate/`.
+By default, Renovate will store all files within a `renovate/` subdirectory of the operating system's temporary directory, e.g. `/tmp/renovate/`.
 
 Repository data will be copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 

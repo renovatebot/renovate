@@ -1,6 +1,6 @@
 # Adding a Package Manager
 
-This document describes the steps to take if you are interest in adding new language/package manager support.
+This document describes the steps to take if you are interested in adding new language/package manager support.
 
 ### Background
 
@@ -71,4 +71,4 @@ Set to true if this package manager needs to update lock files in addition to pa
 
 ##### `updateDependency(fileContent, upgrade)`
 
-This function is the final one called for most managers. It's purpose is to patch the package file with the new value (described in the upgrade) and return an updated file. If the file was already updated then it would return the same contents as it was provided.
+This function is the final one called for most managers. Its purpose is to patch the package file with the new value (described in the upgrade) and return an updated file. If the file was already updated then it would return the same contents as it was provided.

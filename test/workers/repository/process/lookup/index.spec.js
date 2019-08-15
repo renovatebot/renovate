@@ -981,6 +981,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = 'packagist';
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
+      config.registryUrls = ['https://packagist.org'];
       nock('https://packagist.org')
         .get('/packages/foo/bar.json')
         .reply(404);

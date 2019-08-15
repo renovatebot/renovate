@@ -49,11 +49,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile = jest.fn(() => 'Current composer.lock');
     const authConfig = {
       localDir: '/tmp/github/some/repo',
-      registryUrls: [
-        {
-          url: 'https://packagist.renovatebot.com',
-        },
-      ],
+      registryUrls: ['https://packagist.renovatebot.com'],
     };
     hostRules.find.mockReturnValue({
       username: 'some-username',
