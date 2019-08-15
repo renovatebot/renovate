@@ -1,19 +1,26 @@
-const got = require('got');
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { create } from './util';
 
-let stats = {};
+interface HostStats {
+  median?: number;
+  average?: number;
+  sum?: number;
+  requests?: number;
+}
+
+let stats: Record<string, number[]> = {};
 
 // istanbul ignore next
-module.exports.resetStats = () => {
+export const resetStats = () => {
   stats = {};
 };
 
 // istanbul ignore next
-module.exports.printStats = () => {
+export const printStats = () => {
   logger.trace({ stats }, 'Host transfer stats (milliseconds)');
-  const hostStats = {};
+  const hostStats: Record<string, HostStats> = {};
   for (const [hostname, entries] of Object.entries(stats)) {
-    const res = {};
+    const res: HostStats = {};
     res.requests = entries.length;
     res.sum = 0;
     entries.forEach(entry => {
@@ -26,15 +33,13 @@ module.exports.printStats = () => {
   logger.debug({ hostStats }, 'Host request stats (milliseconds)');
 };
 
-// @ts-ignore
-module.exports.instance = got.create({
+export const instance = create({
   options: {},
   handler: (options, next) => {
     const start = new Date();
     const nextPromise = next(options);
     nextPromise.on('response', () => {
-      // @ts-ignore
-      const elapsed = new Date() - start;
+      const elapsed = new Date().getTime() - start.getTime();
       stats[options.hostname] = stats[options.hostname] || [];
       stats[options.hostname].push(elapsed);
     });

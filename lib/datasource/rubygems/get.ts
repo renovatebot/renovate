@@ -46,7 +46,9 @@ const fetch = async ({ dependency, registry, path }) => {
   const name = `/${dependency}.json`;
   const baseUrl = `${registry}/${path}`;
 
-  const response = (await got(name, { retry, json, baseUrl, headers })) || {};
+  const response = (await got(name, { retry, json, baseUrl, headers })) || {
+    body: undefined,
+  };
 
   return response.body;
 };

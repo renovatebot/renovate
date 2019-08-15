@@ -1,8 +1,8 @@
-const got = require('got');
+import got from 'got';
 
 // Sets the user agent to be Renovate
 
-module.exports = got.extend({
+export default got.extend({
   headers: {
     'user-agent':
       process.env.RENOVATE_USER_AGENT ||

@@ -1,13 +1,12 @@
 /* eslint-disable no-param-reassign */
-const got = require('got');
-const { logger } = require('../../logger');
-const hostRules = require('../host-rules');
+import { logger } from '../../logger';
+import * as hostRules from '../host-rules';
+import { create } from './util';
 
 // Apply host rules to requests
 
 // istanbul ignore next
-// @ts-ignore
-module.exports = got.create({
+export default create({
   options: {},
   handler: (options, next) => {
     if (!options.hostname) {

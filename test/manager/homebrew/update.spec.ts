@@ -1,9 +1,10 @@
 import fs from 'fs';
 import { updateDependency } from '../../../lib/manager/homebrew/update';
-
-const got = require('../../../lib/util/got');
+import _got from '../../../lib/util/got';
 
 jest.mock('../../../lib/util/got');
+
+const got: any = _got;
 
 const aide = fs.readFileSync('test/manager/homebrew/_fixtures/aide.rb', 'utf8');
 const ibazel = fs.readFileSync(
