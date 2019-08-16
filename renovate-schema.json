@@ -949,11 +949,12 @@
     },
     "pub": {
       "description": "Configuration object for when renovating Dart pubspec files",
-      "type": "json",
+      "type": "object",
       "default": {
         "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
         "versionScheme": "npm"
-      }
+      },
+      "$ref": "#"
     },
     "docker": {
       "description": "Configuration object for Docker language",
@@ -1087,11 +1088,12 @@
     },
     "poetry": {
       "description": "Configuration object for pyproject.toml files",
-      "type": "toml",
+      "type": "object",
       "default": {
         "versionScheme": "poetry",
         "fileMatch": ["(^|/)pyproject\\.toml$"]
-      }
+      },
+      "$ref": "#"
     },
     "python": {
       "description": "Configuration object for python",
