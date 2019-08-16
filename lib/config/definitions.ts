@@ -29,11 +29,6 @@ export interface RenovateOptionBase {
   stage?: RenovateConfigStage;
 }
 
-export interface RenovateOption extends RenovateOptionBase {
-  default?: any;
-  type: 'json' | 'toml';
-}
-
 export interface RenovateArrayOption<T extends string | object = any>
   extends RenovateOptionBase {
   default?: T;
@@ -72,7 +67,6 @@ export interface RenovateObjectOption extends RenovateOptionBase {
 }
 
 export type RenovateOptions =
-  | RenovateOption
   | RenovateStringOption
   | RenovateStringArrayOption
   | RenovateIntegerOption
