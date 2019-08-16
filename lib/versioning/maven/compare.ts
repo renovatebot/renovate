@@ -370,7 +370,7 @@ function parseRange(rangeStr: string) {
   );
 }
 
-function rangeToStr(fullRange: Range[]) {
+function rangeToStr(fullRange: Range[]): string | null {
   if (fullRange === null) return null;
 
   const valToStr = (val: string) => (val === null ? '' : val);
@@ -398,7 +398,10 @@ function rangeToStr(fullRange: Range[]) {
   return intervals.join(',');
 }
 
-function autoExtendMavenRange(currentRepresentation: string, newValue: string) {
+function autoExtendMavenRange(
+  currentRepresentation: string,
+  newValue: string
+): string | null {
   const range = parseRange(currentRepresentation);
   if (!range) return currentRepresentation;
   const isPoint = (vals: Range[]) => {
