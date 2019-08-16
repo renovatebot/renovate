@@ -1,8 +1,8 @@
-const appName = 'Renovate';
+export const appName = 'Renovate';
 
-const appSlug = 'renovate';
+export const appSlug = 'renovate';
 
-const configFileNames = [
+export const configFileNames = [
   'renovate.json',
   'renovate.json5',
   '.github/renovate.json',
@@ -12,20 +12,11 @@ const configFileNames = [
   'package.json',
 ];
 
-const onboardingBranch = 'renovate/configure';
-const onboardingPrTitle = 'Configure Renovate';
+export const onboardingBranch = 'renovate/configure';
+export const onboardingPrTitle = 'Configure Renovate';
 
-const urls = {
+export const urls = {
   documentation: 'https://renovatebot.com/docs/',
   help: 'https://github.com/renovatebot/config-help/issues',
   homepage: 'https://renovatebot.com',
-};
-
-export {
-  appName,
-  appSlug,
-  configFileNames,
-  onboardingBranch,
-  onboardingPrTitle,
-  urls,
 };

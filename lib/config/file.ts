@@ -1,14 +1,15 @@
 import path from 'path';
 import { logger } from '../logger';
 import { migrateConfig } from './migration';
+import { RenovateConfig } from './common';
 
-export function getConfig(env) {
+export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
   if (!path.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
     logger.debug('Checking for config file in ' + configFile);
   }
-  let config = {};
+  let config: RenovateConfig = {};
   try {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);

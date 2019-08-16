@@ -1,13 +1,14 @@
 import is from '@sindresorhus/is';
+import { clone } from './util';
+import { RenovateConfig, UpdateType, PackageRule } from './common';
+import { getOptions } from './definitions';
 
-const options = require('./definitions').getOptions();
+const options = getOptions();
 
-const clone = input => JSON.parse(JSON.stringify(input));
-
-let allowedStrings;
+let allowedStrings: string[];
 
 // Returns a massaged config
-export function massageConfig(config) {
+export function massageConfig(config: RenovateConfig): RenovateConfig {
   if (!allowedStrings) {
     allowedStrings = [];
     options.forEach(option => {
@@ -37,8 +38,8 @@ export function massageConfig(config) {
     }
   }
   if (is.nonEmptyArray(massagedConfig.packageRules)) {
-    const newRules = [];
-    const updateTypes = [
+    const newRules: PackageRule[] = [];
+    const updateTypes: UpdateType[] = [
       'major',
       'minor',
       'patch',
@@ -49,7 +50,10 @@ export function massageConfig(config) {
     ];
     for (const rule of massagedConfig.packageRules) {
       newRules.push(rule);
-      for (const [key, val] of Object.entries(rule)) {
+      for (const [key, val] of Object.entries(rule) as [
+        UpdateType,
+        PackageRule
+      ][]) {
         if (updateTypes.includes(key)) {
           const newRule = clone(rule);
           newRule.updateTypes = rule.updateTypes || [];

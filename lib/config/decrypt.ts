@@ -2,8 +2,12 @@ import is from '@sindresorhus/is';
 import crypto from 'crypto';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
+import { RenovateConfig } from './common';
 
-export function decryptConfig(config, privateKey) {
+export function decryptConfig(
+  config: RenovateConfig,
+  privateKey?: string | Buffer
+): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   for (const [key, val] of Object.entries(config)) {
@@ -12,7 +16,7 @@ export function decryptConfig(config, privateKey) {
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           try {
-            let decryptedStr;
+            let decryptedStr: string;
             try {
               logger.debug('Trying default padding for ' + eKey);
               decryptedStr = crypto

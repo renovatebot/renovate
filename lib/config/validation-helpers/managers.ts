@@ -1,11 +1,19 @@
 import { getManagerList } from '../../manager';
+import { ValidationMessage, PackageRule } from '../common';
+
+export interface CheckManagerArgs {
+  resolvedRule: PackageRule;
+  currentPath: string;
+}
+
 /**
  * Only if type condition or context condition violated then errors array will be mutated to store metadata
- * @param {{resolvedRule:any, currentPath: string}} param
- * @returns {Array} with finded error or empty array
  */
-export function check({ resolvedRule, currentPath }) {
-  let managersErrMessage;
+export function check({
+  resolvedRule,
+  currentPath,
+}: CheckManagerArgs): ValidationMessage[] {
+  let managersErrMessage: string;
   if (Array.isArray(resolvedRule.managers)) {
     if (
       resolvedRule.managers.find(

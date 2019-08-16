@@ -1,6 +1,86 @@
 import { appName, appSlug, urls } from './app-strings';
+import { RenovateConfigStage } from './common';
 
-const options = [
+export interface RenovateOptionBase {
+  admin?: boolean;
+
+  allowedValues?: string[];
+
+  allowString?: boolean;
+
+  cli?: boolean;
+
+  description: string;
+
+  env?: false | string;
+
+  freeChoice?: boolean;
+  mergeable?: boolean;
+
+  name: string;
+
+  parent?: 'hostRules' | 'packageRules';
+
+  // used by tests
+  relatedOptions?: string[];
+
+  releaseStatus?: 'alpha' | 'beta' | 'unpublished';
+
+  stage?: RenovateConfigStage;
+}
+
+export interface RenovateOption extends RenovateOptionBase {
+  default?: any;
+  type: 'json' | 'toml';
+}
+
+export interface RenovateArrayOption<T extends string | object = any>
+  extends RenovateOptionBase {
+  default?: T;
+  mergeable?: boolean;
+  type: 'array';
+}
+
+export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
+  format?: 'regex';
+  subType: 'string';
+}
+
+export interface RenovateBooleanOption extends RenovateOptionBase {
+  default?: boolean;
+  type: 'boolean';
+}
+
+export interface RenovateIntegerOption extends RenovateOptionBase {
+  default?: number;
+  type: 'integer';
+}
+
+export interface RenovateStringOption extends RenovateOptionBase {
+  default?: string;
+  format?: 'regex';
+
+  // Not used
+  replaceLineReturns?: boolean;
+  type: 'string';
+}
+
+export interface RenovateObjectOption extends RenovateOptionBase {
+  default?: any;
+  mergeable?: boolean;
+  type: 'object';
+}
+
+export type RenovateOptions =
+  | RenovateOption
+  | RenovateStringOption
+  | RenovateStringArrayOption
+  | RenovateIntegerOption
+  | RenovateBooleanOption
+  | RenovateArrayOption
+  | RenovateObjectOption;
+
+const options: RenovateOptions[] = [
   {
     name: 'extends',
     description:

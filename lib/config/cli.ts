@@ -1,11 +1,8 @@
 import { Command } from 'commander';
 import { getOptions } from './definitions';
-// @ts-ignore
 import { version } from '../../package.json';
 
-export { getCliName, getConfig };
-
-function getCliName(option) {
+export function getCliName(option: { cli?: boolean; name?: string }) {
   if (option.cli === false) {
     return '';
   }
@@ -13,7 +10,11 @@ function getCliName(option) {
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
-function getConfig(input) {
+export interface RenovateCliConfig extends Record<string, any> {
+  repositories?: string[];
+}
+
+export function getConfig(input: string[]): RenovateCliConfig {
   // massage migrated configuration keys
   const argv = input
     .map(a =>
@@ -29,10 +30,10 @@ function getConfig(input) {
     .filter(a => !a.startsWith('--git-fs'));
   const options = getOptions();
 
-  const config = {};
+  const config: RenovateCliConfig = {};
 
   const coersions = {
-    boolean: val => {
+    boolean: (val: string) => {
       if (val === 'true' || val === '') return true;
       if (val === 'false') return false;
       throw new Error(
@@ -41,7 +42,7 @@ function getConfig(input) {
           "'"
       );
     },
-    array: val => {
+    array: (val: string) => {
       if (val === '') {
         return [];
       }
@@ -51,7 +52,7 @@ function getConfig(input) {
         return val.split(',').map(el => el.trim());
       }
     },
-    object: val => {
+    object: (val: string) => {
       if (val === '') {
         return {};
       }
@@ -61,7 +62,7 @@ function getConfig(input) {
         throw new Error("Invalid JSON value: '" + val + "'");
       }
     },
-    string: val => val,
+    string: (val: string) => val,
     integer: parseInt,
   };
 

@@ -1,11 +1,14 @@
 import is from '@sindresorhus/is';
+import { logger } from '../logger';
+import * as configMigration from './migration';
+import * as configMassage from './massage';
+import * as configValidation from './validation';
+import { RenovateConfig, ValidationMessage } from './common';
 
-const { logger } = require('../logger');
-const configMigration = require('./migration');
-const configMassage = require('./massage');
-const configValidation = require('./validation');
-
-export async function migrateAndValidate(config, input) {
+export async function migrateAndValidate(
+  config: RenovateConfig,
+  input: RenovateConfig
+): Promise<RenovateConfig> {
   logger.debug('migrateAndValidate()');
   try {
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(input);
@@ -19,9 +22,13 @@ export async function migrateAndValidate(config, input) {
     }
     const massagedConfig = configMassage.massageConfig(migratedConfig);
     logger.debug({ config: massagedConfig }, 'massaged config');
-    const { warnings, errors } = await configValidation.validateConfig(
-      massagedConfig
-    );
+    const {
+      warnings,
+      errors,
+    }: {
+      warnings: ValidationMessage[];
+      errors: ValidationMessage[];
+    } = await configValidation.validateConfig(massagedConfig);
     // istanbul ignore if
     if (is.nonEmptyArray(warnings)) {
       logger.info({ warnings }, 'Found renovate config warnings');
