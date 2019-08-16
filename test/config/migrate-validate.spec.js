@@ -13,6 +13,7 @@ describe('config/migrate-validate', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles migration', async () => {
+      /** @type any */
       const input = { automerge: 'none' };
       const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();

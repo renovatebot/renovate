@@ -1,5 +1,5 @@
 const path = require('path');
-const file = require('../../lib/config/file.js');
+const file = require('../../lib/config/file');
 const customConfig = require('./config/_fixtures/file');
 
 describe('config/file', () => {

@@ -1,4 +1,4 @@
-const configValidation = require('../../lib/config/validation.js');
+const configValidation = require('../../lib/config/validation');
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -11,6 +11,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
     it('returns nested errors', async () => {
+      /** @type any */
       const config = {
         foo: 1,
         schedule: ['after 5pm'],
@@ -63,6 +64,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
     it('errors for all types', async () => {
+      /** @type any */
       const config = {
         allowedVersions: 'foo',
         enabled: 1,

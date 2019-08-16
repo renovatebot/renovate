@@ -1,9 +1,10 @@
-const configMigration = require('../../lib/config/migration.js');
+const configMigration = require('../../lib/config/migration');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('it migrates config', () => {
+      /** @type any */
       const config = {
         endpoints: [{}],
         enabled: true,
@@ -218,6 +219,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
     });
     it('it overrides existing automerge setting', () => {
+      /** @type any */
       const config = {
         automerge: 'minor',
         packages: [

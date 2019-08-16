@@ -1,4 +1,4 @@
-const massage = require('../../lib/config/massage.js');
+const massage = require('../../lib/config/massage');
 
 describe('config/massage', () => {
   describe('massageConfig', () => {

@@ -3,7 +3,8 @@ import path from 'path';
 import * as npmExtract from '../../../../lib/manager/npm/extract';
 import { getConfig } from '../../../../lib/config/defaults';
 
-const defaultConfig = getConfig();
+// TODO: fix types
+const defaultConfig = getConfig() as any;
 const platform: any = global.platform;
 
 function readFixture(fixture) {
