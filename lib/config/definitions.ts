@@ -1309,7 +1309,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['(^|/)package.json$'],
+      fileMatch: ['(^|/)esy.json$'],
       versionScheme: 'npm',
     },
     mergeable: true,
