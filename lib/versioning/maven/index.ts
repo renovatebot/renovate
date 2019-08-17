@@ -45,7 +45,7 @@ function matches(a: string, b: string) {
   }, false);
 }
 
-const getMajor = (version: string) => {
+const getMajor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const majorToken = tokens[0];
@@ -54,7 +54,7 @@ const getMajor = (version: string) => {
   return null;
 };
 
-const getMinor = (version: string) => {
+const getMinor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
@@ -66,7 +66,7 @@ const getMinor = (version: string) => {
   return null;
 };
 
-const getPatch = (version: string) => {
+const getPatch = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
@@ -85,7 +85,7 @@ const getPatch = (version: string) => {
 
 const isGreaterThan = (a: string, b: string) => compare(a, b) === 1;
 
-const isStable = (version: string) => {
+const isStable = (version: string): boolean | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const qualToken = tokens.find(token => token.type === TYPE_QUALIFIER);
@@ -103,7 +103,7 @@ const isStable = (version: string) => {
   return null;
 };
 
-const maxSatisfyingVersion = (versions: string[], range: string) => {
+const maxSatisfyingVersion = (versions: string[], range: string): string => {
   // istanbul ignore next
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
@@ -119,7 +119,7 @@ function getNewValue(
   rangeStrategy: RangeStrategy,
   _fromVersion: string,
   toVersion: string
-) {
+): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return toVersion;
   }
