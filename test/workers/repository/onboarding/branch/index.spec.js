@@ -15,6 +15,7 @@ describe('workers/repository/onboarding/branch', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
+        branchPrefix: 'renovate/',
       };
       platform.getFileList.mockReturnValue([]);
     });
@@ -95,6 +96,17 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
+      expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
+    });
+    it('updates onboarding branch with branchPrefix', async () => {
+      platform.getFileList.mockReturnValue(['package.json']);
+      platform.findPr.mockReturnValueOnce(null);
+      platform.getBranchPr.mockReturnValueOnce({});
+      config.branchPrefix = 'customprefix/';
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(false);
+      expect(res.branchList).toEqual([`${config.branchPrefix}configure`]);
       expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
       expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });

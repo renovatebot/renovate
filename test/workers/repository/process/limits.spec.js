@@ -8,7 +8,10 @@ const platform = global.platform;
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../../config/config/_fixtures') };
+  config = {
+    ...require('../../../config/config/_fixtures'),
+    onboardingBranch: 'renovate/configure',
+  };
 });
 
 describe('workers/repository/process/limits', () => {
