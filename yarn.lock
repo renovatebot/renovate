@@ -1100,10 +1100,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chai@4.1.7":
-  version "4.1.7"
-  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
-  integrity sha512-2Y8uPt0/jwjhQ6EiluT0XCri1Dbplr0ZxfFXUz+ye13gaqE8u5gL5ppao1JrUYr9cIip5S6MvQzBS7Kke7U9VA==
+"@types/chai@4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.0.tgz#2478260021408dec32c123a7cad3414beb811a07"
+  integrity sha512-zw8UvoBEImn392tLjxoavuonblX/4Yb9ha4KBU10FirCfwgzhKO0dvyJSF9ByxV1xK1r2AgnAi/tvQaLgxQqxA==
 
 "@types/convert-hrtime@2.0.0":
   version "2.0.0"
