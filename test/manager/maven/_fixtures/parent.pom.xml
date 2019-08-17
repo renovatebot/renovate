@@ -19,4 +19,12 @@
     </quuxVersion>
     <repoUrl>http://example.com/</repoUrl>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>xyz</id>
+      <name>xyz</name>
+      <url>http://example.com/nexus/xyz</url>
+    </repository>
+  </repositories>
 </project>
