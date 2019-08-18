@@ -7,7 +7,7 @@ import { ReleaseResult } from '../common';
 export async function getPkgReleases(
   feedUrl: string,
   pkgName: string
-): Promise<ReleaseResult> {
+): Promise<ReleaseResult | null> {
   const dep: ReleaseResult = {
     pkgName,
     releases: null,

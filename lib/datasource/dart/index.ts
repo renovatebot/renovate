@@ -4,7 +4,7 @@ import { ReleaseResult, PkgReleaseConfig } from '../common';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   let result: ReleaseResult = null;
   const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
   interface DartResult {

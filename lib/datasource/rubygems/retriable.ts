@@ -11,16 +11,16 @@ import {
 const RETRY_AFTER = 600;
 const NUMBER_OF_RETRIES = 5;
 
-const getDelayStep = () =>
+const getDelayStep = (): number =>
   parseInt(process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP || '1000', 10);
 
-const toMs = (value: number) => value * getDelayStep();
-const getBannedDelay = (retryAfter: string) =>
+const toMs = (value: number): number => value * getDelayStep();
+const getBannedDelay = (retryAfter: string): number =>
   (parseInt(retryAfter, 10) || RETRY_AFTER) + 1;
-const getDefaultDelay = (count: number) =>
+const getDefaultDelay = (count: number): number =>
   (NUMBER_OF_RETRIES * getDelayStep()) / count;
 
-const getDelayMessage = (delay: any) => `Retry in ${delay} seconds.`;
+const getDelayMessage = (delay: any): string => `Retry in ${delay} seconds.`;
 const getErrorMessage = (status: number) => {
   // istanbul ignore next
   switch (status) {

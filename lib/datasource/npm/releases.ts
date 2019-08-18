@@ -5,7 +5,7 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 export async function getPkgReleases({
   lookupName,
   npmrc,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   if (npmrc) {
     setNpmrc(npmrc);
   }
