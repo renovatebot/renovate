@@ -48,8 +48,7 @@ export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
   const isBanned = [TOO_MANY_REQUEST, SERVICE_UNAVAILABLE].includes(statusCode);
   const delaySec = isBanned
-    ? 
-        (headers['retry-after'])
+    ? getBannedDelay(headers['retry-after'])
     : getDefaultDelay(numberOfRetries);
 
   // eslint-disable-next-line
