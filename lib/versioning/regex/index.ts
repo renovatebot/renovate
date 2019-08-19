@@ -5,10 +5,10 @@ import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 export interface RegExpVersion extends GenericVersion {
   // prereleases are treated in the standard semver manner, if present
   prerelease: string;
-  // architectures, if present, are treated as a compatibility layer: we will
-  // never try to update to a version with a different architecture. Other than
-  // for juding compatibility (exact string match), the architecture is ignored
-  architecture: string;
+  // compatibility, if present, are treated as a compatibility layer: we will
+  // never try to update to a version with a different compatibility. Other than
+  // for juding compatibility (exact string match), the compatibility is ignored
+  compatibility: string;
 }
 
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
@@ -18,9 +18,9 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   // * emulates the "semver" configuration:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<prerelease>.*))?$')
   // * emulates the "docker" configuration:
-  //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<architecture>.*))?$')
+  //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<compatibility>.*))?$')
   // * matches the versoining scheme used by the Python images on DockerHub:
-  //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$');
+  //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$');
   private _config: RegExp = null;
 
   constructor(new_config: string) {
@@ -80,13 +80,13 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
         typeof groups.patch === 'undefined' ? 0 : Number(groups.patch),
       ],
       prerelease: groups.prerelease,
-      architecture: groups.architecture,
+      compatibility: groups.architecture,
     };
   }
 
   isCompatible(version: string, range: string): boolean {
     return (
-      this._parse(version).architecture === this._parse(range).architecture
+      this._parse(version).compatibility === this._parse(range).compatibility
     );
   }
 
