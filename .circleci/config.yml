@@ -43,7 +43,7 @@ commands:
       - run:
           name: Unit Tests
           command: |
-            yarn jest --runInBand  --ci --reporters=default --reporters=jest-junit
+            yarn jest --maxWorkers=2  --ci --reporters=default --reporters=jest-junit
           environment:
             JEST_JUNIT_OUTPUT: 'test-results/jest/results.xml'
 
