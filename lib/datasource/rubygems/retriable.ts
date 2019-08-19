@@ -9,10 +9,7 @@ import {
 } from './errors';
 
 const DEFAULT_BANNED_RETRY_AFTER = 600;
-const NUMBER_OF_RETRIES = parseInt(
-  process.env.RENOVATE_RUBYGEMS_REQUEST_RETRIES || '2',
-  10
-);
+const NUMBER_OF_RETRIES = 2;
 
 const getBannedDelay = (retryAfter: string): number =>
   (parseInt(retryAfter, 10) || DEFAULT_BANNED_RETRY_AFTER) + 1;
@@ -51,7 +48,8 @@ export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
   const isBanned = [TOO_MANY_REQUEST, SERVICE_UNAVAILABLE].includes(statusCode);
   const delaySec = isBanned
-    ? getBannedDelay(headers['retry-after'])
+    ? 
+        (headers['retry-after'])
     : getDefaultDelay(numberOfRetries);
 
   // eslint-disable-next-line
