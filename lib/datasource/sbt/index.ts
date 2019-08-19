@@ -6,7 +6,7 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 export async function getPkgReleases(
   config: PkgReleaseConfig
-): Promise<ReleaseResult> {
+): Promise<ReleaseResult | null> {
   const { lookupName, depType } = config;
 
   const registryUrls =

@@ -13,7 +13,7 @@ export function getDefaultFeed() {
   return defaultNugetFeed;
 }
 
-export async function getQueryUrl(url: string): Promise<string> {
+export async function getQueryUrl(url: string): Promise<string | null> {
   // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
   const resourceType = 'SearchQueryService';
   const cacheKey = `${url}:${resourceType}`;
@@ -63,7 +63,7 @@ export async function getPkgReleases(
   registryUrl: string,
   feedUrl: string,
   pkgName: string
-): Promise<ReleaseResult> {
+): Promise<ReleaseResult | null> {
   let queryUrl = `${feedUrl}?q=${pkgName}`;
   if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
     queryUrl = queryUrl.replace('q=', 'q=PackageId:');

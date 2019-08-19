@@ -4,7 +4,7 @@ import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   if (!lookupName) {
     return null;
   }
