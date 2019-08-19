@@ -45,7 +45,7 @@ export interface VersioningApiConstructor {
   new (config?: string): VersioningApi;
 }
 
-export function isVersionApiClass(
+export function isVersioningApiConstructor(
   obj: VersioningApi | VersioningApiConstructor
 ): obj is VersioningApiConstructor {
   return typeof obj === 'function';

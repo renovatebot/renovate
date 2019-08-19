@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8 AS tsbuild
+FROM amd64/node:10.16.3@sha256:47577703778ff7d741425c5f5c81df719b1b3bb647c4beae02a1d1d327afbe8c AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:d91842ef309155b85a9e5c59566719308fab816b40d376809c39cf1cf4de3c6a
+FROM amd64/ubuntu:18.04@sha256:ca013ac5c09f9a9f6db8370c1b759a29fe997d64d6591e9a75b71748858f7da0
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
