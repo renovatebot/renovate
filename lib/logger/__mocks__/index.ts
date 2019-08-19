@@ -16,5 +16,6 @@ loggerLevels.forEach(k => {
 export const setMeta = jest.fn();
 export const levels = jest.fn();
 export const addStream = jest.fn();
+export const getErrors = () => [];
 
 export { logger };

@@ -5,6 +5,7 @@ import * as util from 'util';
 import { Stream } from 'stream';
 import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
+import { BunyanRecord } from './utils';
 
 const bunyanFields = [
   'name',
@@ -99,10 +100,4 @@ export class RenovateStream extends Stream {
     this.emit('data', formatRecord(data));
     return true;
   }
-}
-
-export interface BunyanRecord extends Record<string, any> {
-  level: number;
-  msg: string;
-  module?: string;
 }

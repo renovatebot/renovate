@@ -11,7 +11,7 @@ process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   const git = simpleGit();
   try {
     const cachedResult = await renovateCache.get<ReleaseResult>(

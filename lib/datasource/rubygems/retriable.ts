@@ -14,12 +14,12 @@ const NUMBER_OF_RETRIES = parseInt(
   10
 );
 
-const getBannedDelay = (retryAfter: string) =>
+const getBannedDelay = (retryAfter: string): number =>
   (parseInt(retryAfter, 10) || DEFAULT_BANNED_RETRY_AFTER) + 1;
-const getDefaultDelay = (count: number) =>
+const getDefaultDelay = (count: number): number =>
   +(NUMBER_OF_RETRIES / count).toFixed(3);
 
-const getErrorMessage = status => {
+const getErrorMessage = (status: number): string => {
   // istanbul ignore next
   switch (status) {
     case UNAUTHORIZED:

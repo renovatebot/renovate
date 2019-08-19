@@ -8,7 +8,7 @@ interface DataSource {
   lookupName: string;
 }
 
-async function getDatasource(name: string): Promise<DataSource> {
+async function getDatasource(name: string): Promise<DataSource | null> {
   if (name.startsWith('gopkg.in/')) {
     const [pkg] = name.replace('gopkg.in/', '').split('.');
     if (pkg.includes('/')) {
@@ -72,7 +72,7 @@ async function getDatasource(name: string): Promise<DataSource> {
  */
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult> {
+}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
   logger.trace(`go.getPkgReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === 'github') {
@@ -100,7 +100,7 @@ export async function getPkgReleases({
 export async function getDigest(
   { lookupName }: Partial<DigestConfig>,
   value?: string
-): Promise<string> {
+): Promise<string | null> {
   const source = await getDatasource(lookupName);
   if (source && source.datasource === 'github') {
     // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead

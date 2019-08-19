@@ -43,7 +43,7 @@ interface TerraformRelease {
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls

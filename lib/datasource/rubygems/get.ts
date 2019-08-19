@@ -57,7 +57,7 @@ const fetch = async ({ dependency, registry, path }) => {
 export const getDependency = async ({
   dependency,
   registry,
-}): Promise<ReleaseResult> => {
+}): Promise<ReleaseResult | null> => {
   logger.debug({ dependency }, 'RubyGems lookup for dependency');
   try {
     const info = await fetch({ dependency, registry, path: INFO_PATH });

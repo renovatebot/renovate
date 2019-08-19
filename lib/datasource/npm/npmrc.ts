@@ -3,10 +3,10 @@ import ini from 'ini';
 import { isBase64 } from 'validator';
 import { logger } from '../../logger';
 
-let npmrc: Record<string, any> = null;
+let npmrc: Record<string, any> | null = null;
 let npmrcRaw: string;
 
-export function getNpmrc() {
+export function getNpmrc(): Record<string, any> | null {
   return npmrc;
 }
 
@@ -57,7 +57,7 @@ export function setNpmrc(input?: string) {
   }
 }
 
-function envReplace(value: any, env = process.env) {
+function envReplace(value: any, env = process.env): any {
   // istanbul ignore if
   if (!is.string(value)) {
     return value;

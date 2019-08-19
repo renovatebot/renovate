@@ -41,7 +41,7 @@ function getRegistryRepository(lookupName: string, registryUrls: string[]) {
 async function getAuthHeaders(
   registry: string,
   repository: string
-): Promise<OutgoingHttpHeaders> {
+): Promise<OutgoingHttpHeaders | null> {
   try {
     const apiCheckUrl = `${registry}/v2/`;
     const apiCheckResponse = await got(apiCheckUrl, { throwHttpErrors: false });
@@ -225,7 +225,7 @@ async function getManifestResponse(
 export async function getDigest(
   { registryUrls, lookupName }: PkgReleaseConfig,
   newValue?: string
-): Promise<string> {
+): Promise<string | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls
@@ -272,7 +272,7 @@ export async function getDigest(
 async function getTags(
   registry: string,
   repository: string
-): Promise<string[]> {
+): Promise<string[] | null> {
   let tags: string[] = [];
   try {
     const cacheNamespace = 'datasource-docker-tags';
@@ -511,7 +511,7 @@ async function getLabels(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls

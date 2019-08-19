@@ -5,7 +5,7 @@ export function updateAtPosition(
   fileContent: string,
   upgrade: Upgrade,
   endingAnchor = '"'
-) {
+): string | null {
   const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
@@ -24,7 +24,10 @@ export function updateAtPosition(
   return null;
 }
 
-export function updateDependency(fileContent: string, upgrade: Upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string | null {
   const offset = fileContent.indexOf('<');
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);
