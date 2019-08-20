@@ -43,9 +43,10 @@ const fetch = async ({ dependency, registry, path }) => {
   const retry = { retries: retriable() };
   const headers = getHeaders();
 
-  const name = `/${dependency}.json`;
-  const baseUrl = `${registry}/${path}`;
+  const name = `${path}/${dependency}.json`;
+  const baseUrl = registry;
 
+  logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
   const response = (await got(name, { retry, json, baseUrl, headers })) || {
     body: undefined,
   };
@@ -57,6 +58,7 @@ export const getDependency = async ({
   dependency,
   registry,
 }): Promise<ReleaseResult | null> => {
+  logger.debug({ dependency }, 'RubyGems lookup for dependency');
   try {
     const info = await fetch({ dependency, registry, path: INFO_PATH });
     if (!info) {
