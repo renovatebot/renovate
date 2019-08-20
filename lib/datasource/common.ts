@@ -45,7 +45,7 @@ export interface ReleaseResult {
 export type Preset = any;
 
 export interface Datasource {
-  getDigest?(config: DigestConfig, newValue?: string): Promise<string>;
+  getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getPreset?(packageName: string, presetName?: string): Promise<Preset>;
-  getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult>;
+  getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
 }

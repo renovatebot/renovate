@@ -18,7 +18,7 @@ interface HexRelease {
 
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult> {
+}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
   const hexUrl = `https://hex.pm/api/packages/${lookupName}`;
   try {
     const opts = getHostOpts();

@@ -8,20 +8,15 @@ import {
   SERVICE_UNAVAILABLE,
 } from './errors';
 
-const RETRY_AFTER = 600;
-const NUMBER_OF_RETRIES = 5;
+const DEFAULT_BANNED_RETRY_AFTER = 600;
+const NUMBER_OF_RETRIES = 2;
 
-const getDelayStep = () =>
-  parseInt(process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP || '1000', 10);
+const getBannedDelay = (retryAfter: string): number =>
+  (parseInt(retryAfter, 10) || DEFAULT_BANNED_RETRY_AFTER) + 1;
+const getDefaultDelay = (count: number): number =>
+  +(NUMBER_OF_RETRIES / count).toFixed(3);
 
-const toMs = (value: number) => value * getDelayStep();
-const getBannedDelay = (retryAfter: string) =>
-  (parseInt(retryAfter, 10) || RETRY_AFTER) + 1;
-const getDefaultDelay = (count: number) =>
-  (NUMBER_OF_RETRIES * getDelayStep()) / count;
-
-const getDelayMessage = (delay: any) => `Retry in ${delay} seconds.`;
-const getErrorMessage = (status: number) => {
+const getErrorMessage = (status: number): string => {
   // istanbul ignore next
   switch (status) {
     case UNAUTHORIZED:
@@ -49,8 +44,10 @@ export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
   }
 
   const { headers, statusCode } = err;
+
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
   const isBanned = [TOO_MANY_REQUEST, SERVICE_UNAVAILABLE].includes(statusCode);
-  const delay = isBanned
+  const delaySec = isBanned
     ? getBannedDelay(headers['retry-after'])
     : getDefaultDelay(numberOfRetries);
 
@@ -58,10 +55,9 @@ export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
   numberOfRetries--;
 
   const errorMessage = getErrorMessage(statusCode);
-  const delayMessage = getDelayMessage(delay);
-  const message = `${errorMessage} ${delayMessage}`;
+  const message = `${errorMessage} Retry in ${delaySec} seconds.`;
 
   logger.info(message);
 
-  return toMs(delay);
+  return delaySec * 1000;
 };

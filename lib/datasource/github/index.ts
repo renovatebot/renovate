@@ -70,7 +70,10 @@ function getCacheKey(repo: string, type: string) {
   return `${repo}:${type}`;
 }
 
-async function getTagCommit(githubRepo: string, tag: string): Promise<string> {
+async function getTagCommit(
+  githubRepo: string,
+  tag: string
+): Promise<string | null> {
   const cachedResult = await renovateCache.get<string>(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`)
@@ -119,7 +122,7 @@ async function getTagCommit(githubRepo: string, tag: string): Promise<string> {
 export async function getDigest(
   { lookupName: githubRepo }: Partial<DigestConfig>,
   newValue?: string
-): Promise<string> {
+): Promise<string | null> {
   if (newValue && newValue.length) {
     return getTagCommit(githubRepo, newValue);
   }
@@ -167,7 +170,7 @@ export async function getDigest(
 export async function getPkgReleases({
   lookupName: repo,
   lookupType,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,

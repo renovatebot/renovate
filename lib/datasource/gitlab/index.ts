@@ -51,7 +51,7 @@ export async function getPkgReleases({
   registryUrls,
   lookupName: repo,
   lookupType,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   // Use registryUrls if present, otherwise default to publid gitlab.com
   const depHost = is.nonEmptyArray(registryUrls)
     ? registryUrls[0].replace(/\/$/, '')

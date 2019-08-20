@@ -33,7 +33,7 @@ export async function getPkgReleases({
   return dep;
 }
 
-function detectFeedVersion(url: string) {
+function detectFeedVersion(url: string): 2 | 3 | null {
   try {
     const parsecUrl = urlApi.parse(url);
     // Official client does it in the same way

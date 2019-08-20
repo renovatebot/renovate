@@ -1,12 +1,6 @@
 import retriable from '../../../lib/datasource/rubygems/retriable';
 
 describe('datasource/rubygems/retriable', () => {
-  const { RENOVATE_RUBYGEMS_RETRY_DELAY_STEP } = process.env;
-
-  beforeEach(() => {
-    process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP = '1';
-  });
-
   it('returns 0 when numberOfRetries equals 0', () => {
     expect(retriable(0)(null, null)).toEqual(0);
   });
@@ -17,25 +11,21 @@ describe('datasource/rubygems/retriable', () => {
         statusCode: 429,
         headers: { 'retry-after': '5' },
       })
-    ).toEqual(6);
+    ).toEqual(6000);
 
     expect(
       retriable(1)(null, {
         statusCode: 503,
         headers: { 'retry-after': '9' },
       })
-    ).toEqual(10);
+    ).toEqual(10000);
   });
 
   it('returns default delay if request is not banned', () => {
-    expect(retriable(1)(null, { statusCode: 500 })).toEqual(5);
+    expect(retriable(1)(null, { statusCode: 500 })).toEqual(2000);
   });
 
   it('uses default numberOfRetries', () => {
-    expect(retriable()(null, { statusCode: 500 })).toEqual(1);
-  });
-
-  afterEach(() => {
-    process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP = RENOVATE_RUBYGEMS_RETRY_DELAY_STEP;
+    expect(retriable()(null, { statusCode: 500 })).toEqual(1000);
   });
 });
