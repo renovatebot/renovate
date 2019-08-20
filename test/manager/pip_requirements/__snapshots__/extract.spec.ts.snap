@@ -90,10 +90,10 @@ Array [
 exports[`lib/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
 Array [
   Object {
-    "currentValue": "==1.11.19",
+    "currentValue": "==1.11.23",
     "datasource": "pypi",
     "depName": "Django",
-    "fromVersion": "1.11.19",
+    "fromVersion": "1.11.23",
     "managerData": Object {
       "lineNumber": 0,
     },
