@@ -1,5 +1,6 @@
 import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
 import safe from 'safe-regex';
+import RE2 from 're2';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { logger } from '../../logger';
@@ -58,7 +59,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       // throw error;
     }
 
-    this._config = new RegExp(new_config);
+    this._config = new RE2(new_config);
   }
 
   protected _compare(version: string, other: string): number {

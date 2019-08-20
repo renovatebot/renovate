@@ -136,6 +136,7 @@
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
     "pnpm": "3.7.3",
+    "re2": "1.10.0",
     "registry-auth-token": "4.0.0",
     "safe-regex": "2.0.2",
     "semver": "6.3.0",

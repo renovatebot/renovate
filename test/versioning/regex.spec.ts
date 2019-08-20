@@ -2,7 +2,7 @@ import { get, VersioningApi } from '../../lib/versioning';
 
 describe('regex', () => {
   const regex: VersioningApi = get(
-    'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$'
+    'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
   );
 
   it('requires a valid configuration to be initialized', () => {
