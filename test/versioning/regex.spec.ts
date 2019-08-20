@@ -2,7 +2,7 @@ import { get, VersioningApi } from '../../lib/versioning';
 
 describe('regex', () => {
   const regex: VersioningApi = get(
-    'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$'
+    'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$'
   );
 
   it('requires a valid configuration to be initialized', () => {
@@ -18,7 +18,7 @@ describe('regex', () => {
   });
 
   describe('.isCompatible', () => {
-    it('returns true when the architectures are equal', () => {
+    it('returns true when the compatibilities are equal', () => {
       expect(regex.isCompatible('1.2.3', '2.3.4')).toBe(true);
       expect(regex.isCompatible('1.2.3a1', '2.3.4')).toBe(true);
       expect(regex.isCompatible('1.2.3', '2.3.4b1')).toBe(true);
@@ -27,7 +27,7 @@ describe('regex', () => {
       expect(regex.isCompatible('1.2.3-foobar', '2.3.4b1-foobar')).toBe(true);
     });
 
-    it('returns false when the architectures are different', () => {
+    it('returns false when the compatibilities are different', () => {
       expect(regex.isCompatible('1.2.3', '2.3.4-foobar')).toBe(false);
       expect(regex.isCompatible('1.2.3a1', '2.3.4-foobar')).toBe(false);
       expect(regex.isCompatible('1.2.3', '2.3.4b1-foobar')).toBe(false);
@@ -149,7 +149,7 @@ describe('regex', () => {
       expect(regex.equals('1.2.3a1-foo', '1.2.3a1-foo')).toBe(true);
     });
 
-    it('retuns true when only architecture differs', () => {
+    it('retuns true when only compatibility differs', () => {
       expect(regex.equals('1.2.3', '1.2.3-bar')).toBe(true);
       expect(regex.equals('1.2.3a1', '1.2.3a1-bar')).toBe(true);
       expect(regex.equals('1.2.3a1-foo', '1.2.3a1-bar')).toBe(true);
@@ -179,7 +179,7 @@ describe('regex', () => {
       expect(regex.isGreaterThan('3.0.0', '3.0.0b2')).toBe(true);
     });
 
-    it('ignores architecture differences', () => {
+    it('ignores compatibility differences', () => {
       expect(regex.isGreaterThan('2.0.0', '1.0.0-foo')).toBe(true);
       expect(regex.isGreaterThan('2.2.0', '2.1.0-foo')).toBe(true);
       expect(regex.isGreaterThan('2.2.1', '2.2.0-foo')).toBe(true);
