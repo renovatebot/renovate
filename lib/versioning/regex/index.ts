@@ -1,9 +1,7 @@
 import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
-import safe from 'safe-regex';
 import RE2 from 're2';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
-import { logger } from '../../logger';
 
 export interface RegExpVersion extends GenericVersion {
   /** prereleases are treated in the standard semver manner, if present */
@@ -49,15 +47,6 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
     // TODO: should we validate the user has not added extra unsupported
     // capture groups?
-
-    if (!safe(new_config)) {
-      // console.error(new_config);
-      logger.warn({ new_config }, 'Unsafe regex versionScheme found');
-      // const error = new Error('config-validation');
-      // error.configFile = new_config;
-      // error.validationError = 'Unsafe regex versionSheme found';
-      // throw error;
-    }
 
     this._config = new RE2(new_config);
   }
