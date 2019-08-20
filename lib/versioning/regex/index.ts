@@ -1,13 +1,16 @@
 import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
+import safe from 'safe-regex';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { logger } from '../../logger';
 
 export interface RegExpVersion extends GenericVersion {
-  // prereleases are treated in the standard semver manner, if present
+  /** prereleases are treated in the standard semver manner, if present */
   prerelease: string;
-  // compatibility, if present, are treated as a compatibility layer: we will
-  // never try to update to a version with a different compatibility. Other than
-  // for juding compatibility (exact string match), the compatibility is ignored
+  /**
+   * compatibility, if present, are treated as a compatibility layer: we will
+   * never try to update to a version with a different compatibility.
+   */
   compatibility: string;
 }
 
@@ -46,14 +49,14 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     // TODO: should we validate the user has not added extra unsupported
     // capture groups?
 
-    // if (!safe(new_config)) {
-    //   console.error(new_config);
-    //   logger.warn('Unsafe regex versionScheme found');
-    //   const error = new Error('config-validation');
-    //   error.configFile = new_config;
-    //   error.validationError = 'Unsafe regex versionSheme found';
-    //   throw error;
-    // }
+    if (!safe(new_config)) {
+      // console.error(new_config);
+      logger.warn({ new_config }, 'Unsafe regex versionScheme found');
+      // const error = new Error('config-validation');
+      // error.configFile = new_config;
+      // error.validationError = 'Unsafe regex versionSheme found';
+      // throw error;
+    }
 
     this._config = new RegExp(new_config);
   }
@@ -80,7 +83,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
         typeof groups.patch === 'undefined' ? 0 : Number(groups.patch),
       ],
       prerelease: groups.prerelease,
-      compatibility: groups.architecture,
+      compatibility: groups.compatibility,
     };
   }
 
