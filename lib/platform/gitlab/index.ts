@@ -329,7 +329,7 @@ export async function getBranchStatus(
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
-  const res = await api.get(url);
+  const res = await api.get(url, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   if (res.body.length === 0) {
     // Return 'pending' if we have no status checks
