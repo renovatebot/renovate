@@ -7,7 +7,7 @@ import { PoetryFile, PoetrySection } from './types';
 export function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile {
+): PackageFile | null {
   logger.trace(`poetry.extractPackageFile(${fileName})`);
   let pyprojectfile: PoetryFile;
   try {

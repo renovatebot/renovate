@@ -7,7 +7,7 @@ function extractDepFromInclude(includeObj: {
   file: any;
   project: string;
   ref: string;
-}) {
+}): PackageDependency | null {
   if (!includeObj.file || !includeObj.project) {
     return null;
   }
@@ -28,7 +28,7 @@ export function extractPackageFile(
   content: string,
   _packageFile: string,
   config: ExtractConfig
-): PackageFile {
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const doc = yaml.safeLoad(content);

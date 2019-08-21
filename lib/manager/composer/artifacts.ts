@@ -3,7 +3,7 @@ import URL from 'url';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { exec } from '../../util/exec';
-import { UpdateArtifactsConfig } from '../common';
+import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
@@ -13,7 +13,7 @@ export async function updateArtifacts(
   updatedDeps: string[],
   newPackageFileContent: string,
   config: UpdateArtifactsConfig
-) {
+): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
   process.env.COMPOSER_CACHE_DIR =
     process.env.COMPOSER_CACHE_DIR ||

@@ -7,7 +7,7 @@ function updateWithNewVersion(
   content: string,
   currentValue: string,
   newValue: string
-) {
+): string {
   const currentVersion = currentValue.replace(/^v/, '');
   const newVersion = newValue.replace(/^v/, '');
   let newContent = content;
@@ -17,7 +17,7 @@ function updateWithNewVersion(
   return newContent;
 }
 
-function extractUrl(flattened: string) {
+function extractUrl(flattened: string): string[] | null {
   const urlMatch = flattened.match(/url="(.*?)"/);
   if (!urlMatch) {
     logger.debug('Cannot locate urls in new definition');
@@ -26,7 +26,7 @@ function extractUrl(flattened: string) {
   return [urlMatch[1]];
 }
 
-function extractUrls(content: string) {
+function extractUrls(content: string): string[] | null {
   const flattened = content.replace(/\n/g, '').replace(/\s/g, '');
   const urlsMatch = flattened.match(/urls?=\[.*?\]/);
   if (!urlsMatch) {
@@ -40,9 +40,12 @@ function extractUrls(content: string) {
   return urls;
 }
 
-async function getHashFromUrl(url: string) {
+async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
-  const cachedResult = await renovateCache.get(cacheNamespace, url);
+  const cachedResult: string | null = await renovateCache.get(
+    cacheNamespace,
+    url
+  );
   /* istanbul ignore next line */
   if (cachedResult) return cachedResult;
   try {
@@ -57,7 +60,7 @@ async function getHashFromUrl(url: string) {
   }
 }
 
-async function getHashFromUrls(urls: string[]) {
+async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (await Promise.all(
     urls.map(url => getHashFromUrl(url))
   )).filter(Boolean);
@@ -73,14 +76,14 @@ async function getHashFromUrls(urls: string[]) {
   return distinctHashes[0];
 }
 
-function setNewHash(content: string, hash: string) {
+function setNewHash(content: string, hash: string): string {
   return content.replace(/(sha256\s*=\s*)"[^"]+"/, `$1"${hash}"`);
 }
 
 export async function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): Promise<string> {
+): Promise<string | null> {
   try {
     logger.debug(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`

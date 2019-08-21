@@ -7,7 +7,7 @@ import { CargoConfig, CargoSection } from './types';
 export function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile {
+): PackageFile | null {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
   let parsedContent: CargoConfig;
   try {
@@ -55,7 +55,7 @@ function extractFromSection(
   parsedContent: CargoSection,
   section: keyof CargoSection,
   target?: string
-) {
+): PackageDependency[] {
   const deps: PackageDependency[] = [];
   const sectionContent = parsedContent[section];
   if (!sectionContent) {

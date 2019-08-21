@@ -5,7 +5,7 @@ import { Upgrade } from '../common';
 export async function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): Promise<string> {
+): Promise<string | null> {
   try {
     logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');
@@ -35,11 +35,11 @@ export async function updateDependency(
   }
 }
 
-function replaceType(url: string) {
+function replaceType(url: string): string {
   return url.replace('bin', 'all');
 }
 
-async function getChecksum(url: string) {
+async function getChecksum(url: string): Promise<any> {
   try {
     const response = await got(url);
     return response.body;

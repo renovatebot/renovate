@@ -1,3 +1,5 @@
+import { RangeStrategy } from '../../versioning';
+
 /*
  * The getRangeStrategy() function is optional and can be removed if not applicable.
  * It is used when the user configures rangeStrategy=auto.
@@ -11,6 +13,6 @@
  *
  */
 
-export function getRangeStrategy() {
+export function getRangeStrategy(): RangeStrategy {
   return 'replace';
 }

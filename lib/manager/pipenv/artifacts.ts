@@ -10,7 +10,7 @@ export async function updateArtifacts(
   _updatedDeps: string[],
   newPipfileContent: string,
   config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[]> {
+): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
   process.env.PIPENV_CACHE_DIR =
     process.env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');

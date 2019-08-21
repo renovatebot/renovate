@@ -10,7 +10,7 @@ import {
   matches,
   sortVersions,
 } from '../../versioning/ruby';
-import { UpdateArtifactsConfig } from '../common';
+import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 
 // istanbul ignore next
 export async function updateArtifacts(
@@ -18,7 +18,7 @@ export async function updateArtifacts(
   updatedDeps: string[],
   newPackageFileContent: string,
   config: UpdateArtifactsConfig
-) {
+): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {

@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 
 // TODO: Maybe check if quotes/double-quotes are balanced
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('extractPackageFile()');
   /*
     1. match "class className < Formula"
@@ -57,7 +57,7 @@ export function extractPackageFile(content: string): PackageFile {
   return { deps };
 }
 
-function extractSha256(content: string) {
+function extractSha256(content: string): string | null {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   let i = content.search(sha256RegExp);
   if (isSpace(content[i])) {
@@ -66,7 +66,7 @@ function extractSha256(content: string) {
   return parseSha256(i, content);
 }
 
-function parseSha256(idx: number, content: string) {
+function parseSha256(idx: number, content: string): string | null {
   let i = idx;
   i += 'sha256'.length;
   i = skip(i, content, c => {
@@ -84,7 +84,7 @@ function parseSha256(idx: number, content: string) {
   return sha256;
 }
 
-function extractUrl(content: string) {
+function extractUrl(content: string): string | null {
   const urlRegExp = /(^|\s)url(\s)/;
   let i = content.search(urlRegExp);
   // content.search() returns -1 if not found
@@ -98,7 +98,13 @@ function extractUrl(content: string) {
   return parseUrl(i, content);
 }
 
-export function parseUrlPath(urlStr: string) {
+export function parseUrlPath(
+  urlStr: string
+): {
+  currentValue: string;
+  ownerName: string;
+  repoName: string;
+} | null {
   if (!urlStr) {
     return null;
   }
@@ -136,7 +142,7 @@ export function parseUrlPath(urlStr: string) {
   }
 }
 
-function parseUrl(idx: number, content: string) {
+function parseUrl(idx: number, content: string): string | null {
   let i = idx;
   i += 'url'.length;
   i = skip(i, content, c => {
@@ -155,7 +161,7 @@ function parseUrl(idx: number, content: string) {
   return url;
 }
 
-function extractClassName(content: string) {
+function extractClassName(content: string): string | null {
   const classRegExp = /(^|\s)class\s/;
   let i = content.search(classRegExp);
   if (isSpace(content[i])) {
@@ -166,7 +172,7 @@ function extractClassName(content: string) {
 
 /* This function parses the "class className < Formula" header
    and returns the className and index of the character just after the header */
-function parseClassHeader(idx: number, content: string) {
+function parseClassHeader(idx: number, content: string): string | null {
   let i = idx;
   i += 'class'.length;
   i = skip(i, content, c => {

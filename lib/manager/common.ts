@@ -173,15 +173,17 @@ export interface ManagerApi {
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[]
-  ): Result<PackageFile[]>;
+  ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
     config?: ExtractConfig
-  ): Result<PackageFile>;
+  ): Result<PackageFile | null>;
 
-  getPackageUpdates(config: PackageUpdateConfig): Result<PackageUpdateResult[]>;
+  getPackageUpdates?(
+    config: PackageUpdateConfig
+  ): Result<PackageUpdateResult[]>;
 
   getRangeStrategy(config: RangeConfig): RangeStrategy;
 
@@ -190,9 +192,12 @@ export interface ManagerApi {
     updatedDeps: string[],
     newPackageFileContent: string,
     config: UpdateArtifactsConfig
-  ): Result<UpdateArtifactsResult[]>;
+  ): Result<UpdateArtifactsResult[] | null>;
 
-  updateDependency(fileContent: string, upgrade: Upgrade): Result<string>;
+  updateDependency(
+    fileContent: string,
+    upgrade: Upgrade
+  ): Result<string | null>;
 }
 
 // TODO: name and properties used by npm manager
