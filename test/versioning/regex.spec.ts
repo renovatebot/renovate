@@ -16,7 +16,7 @@ describe('regex', () => {
       '^(?<major>\\d+)?(?<=y)x$',
     ]) {
       it(re, () => {
-        expect(() => get(`regex:${re}`)).toThrow();
+        expect(() => get(`regex:${re}`)).toThrow('config-validation');
       });
     }
   });
