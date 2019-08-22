@@ -19,7 +19,7 @@ export function prInfo(pr: any) {
     title: pr.title,
     state: prStateMapping[pr.state],
     createdAt: pr.createdDate,
-    canRebase: false,
+    isModified: true,
   };
 }
 
