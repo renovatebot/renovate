@@ -98,13 +98,13 @@ function extractUrl(content: string): string | null {
   return parseUrl(i, content);
 }
 
-export function parseUrlPath(
-  urlStr: string
-): {
+export interface UrlPathParsedResult {
   currentValue: string;
   ownerName: string;
   repoName: string;
-} | null {
+}
+
+export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
   if (!urlStr) {
     return null;
   }

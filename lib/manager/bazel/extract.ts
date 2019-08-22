@@ -4,9 +4,12 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 
-function parseUrl(
-  urlString: string
-): { repo: string; currentValue: string } | null {
+interface UrlParsedResult {
+  repo: string;
+  currentValue: string;
+}
+
+function parseUrl(urlString: string): UrlParsedResult | null {
   // istanbul ignore if
   if (!urlString) {
     return null;

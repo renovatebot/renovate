@@ -42,7 +42,7 @@ function extractUrls(content: string): string[] | null {
 
 async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
-  const cachedResult: string | null = await renovateCache.get(
+  const cachedResult = await renovateCache.get<string | null>(
     cacheNamespace,
     url
   );
