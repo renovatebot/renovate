@@ -9,6 +9,18 @@ describe('regex', () => {
     expect(() => get('regex:not a regex')).toThrow();
   });
 
+  describe('throws', () => {
+    for (const re of [
+      '^(?<major>\\d+)(',
+      '^(?<major>\\d+)?(?<!y)x$',
+      '^(?<major>\\d+)?(?<=y)x$',
+    ]) {
+      it(re, () => {
+        expect(() => get(`regex:${re}`)).toThrow();
+      });
+    }
+  });
+
   describe('.parse()', () => {
     it('parses invalid matches as invalid', () => {
       expect(regex.isValid('1')).toBe(false);
