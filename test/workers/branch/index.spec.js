@@ -81,7 +81,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValueOnce({
         state: 'open',
-        canRebase: true,
+        isModified: false,
       });
       await branchWorker.processBranch(config);
     });
@@ -132,7 +132,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValueOnce({
         state: 'merged',
-        canRebase: false,
+        isModified: true,
       });
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
         /repository-changed/
@@ -143,7 +143,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValueOnce({
         state: 'open',
-        canRebase: false,
+        isModified: true,
         labels: ['rebase'],
       });
       const res = await branchWorker.processBranch(config);
@@ -154,7 +154,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValueOnce({
         state: 'open',
-        canRebase: false,
+        isModified: true,
       });
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
@@ -164,7 +164,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValueOnce({
         state: 'open',
-        canRebase: true,
+        isModified: false,
         targetBranch: 'v6',
       });
       config.baseBranch = 'master';
@@ -394,7 +394,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: 'open',
-        canRebase: false,
+        isModified: true,
       });
       expect(
         await branchWorker.processBranch({ ...config, dryRun: true })
@@ -415,7 +415,7 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: 'open',
         body: `- [x] <!-- ${appSlug}-rebase -->`,
-        canRebase: false,
+        isModified: true,
       });
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -446,7 +446,7 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: 'open',
         body: `- [x] <!-- ${appSlug}-rebase -->`,
-        canRebase: false,
+        isModified: true,
       });
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -474,7 +474,7 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: 'open',
         body: `- [x] <!-- ${appSlug}-rebase -->`,
-        canRebase: false,
+        isModified: true,
       });
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
