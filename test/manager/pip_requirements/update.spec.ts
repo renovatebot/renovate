@@ -87,7 +87,7 @@ describe('manager/pip_requirements/update', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(setupPy2);
       const expectedUpdate =
-        "install_requires=['gunicorn>=19.7.0,<20.0', 'Werkzeug>=0.11.5,<0.15', 'pycryptodome==3.8.0','statsd>=3.2.1,<4.0', 'requests>=2.10.0,<3.0', 'raven>=5.27.1,<7.0','future>=0.15.2,<0.17',],";
+        "install_requires=['gunicorn>=19.7.0,<20.0', 'Werkzeug>=0.15.3,<0.16', 'pycryptodome==3.8.0','statsd>=3.2.1,<4.0', 'requests>=2.10.0,<3.0', 'raven>=5.27.1,<7.0','future>=0.15.2,<0.17',],";
       expect(res).toContain(expectedUpdate);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
