@@ -418,44 +418,6 @@ describe('platform/gitlab', () => {
       );
     });
   });
-  describe('Paginated getBranchStatus(branchName, requiredStatusChecks)', () => {
-    it('returns success if all pages contain success', async () => {
-      api.get.mockResolvedValueOnce({
-        headers: {
-          link:
-            '<URL&page=2&per_page=1>; rel="next", <URL&page=1&per_page=1>; rel="first", <URL&page=2&per_page=1>; rel="last"',
-        },
-        body: [{ status: 'success' }],
-      } as any);
-      api.get.mockResolvedValueOnce({
-        headers: {
-          link:
-            '<URL&page=1&per_page=1>; rel="first", <URL&page=2&per_page=1>; rel="last"',
-        },
-        body: [{ status: 'success' }],
-      } as any);
-      const res = await gitlab.getBranchStatus('somebranch', null);
-      expect(res).toEqual('success');
-    });
-    it('returns failed if any page contains failed', async () => {
-      api.get.mockResolvedValueOnce({
-        headers: {
-          link:
-            '<URL&page=2&per_page=1>; rel="next", <URL&page=1&per_page=1>; rel="first", <URL&page=2&per_page=1>; rel="last"',
-        },
-        body: [{ status: 'success' }],
-      } as any);
-      api.get.mockResolvedValueOnce({
-        headers: {
-          link:
-            '<URL&page=1&per_page=1>; rel="first", <URL&page=2&per_page=1>; rel="last"',
-        },
-        body: [{ status: 'failed' }],
-      } as any);
-      const res = await gitlab.getBranchStatus('somebranch', null);
-      expect(res).toEqual('failed');
-    });
-  });
   describe('getBranchStatusCheck', () => {
     beforeEach(() => initRepo());
     it('returns null if no results', async () => {
