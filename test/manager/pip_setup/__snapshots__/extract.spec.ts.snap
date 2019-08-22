@@ -76,7 +76,7 @@ Object {
       },
     },
     Object {
-      "currentValue": ">=0.11.5,<0.15",
+      "currentValue": ">=0.15.3,<0.16",
       "datasource": "pypi",
       "depName": "Werkzeug",
       "managerData": Object {

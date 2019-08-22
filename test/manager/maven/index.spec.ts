@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import {
   extractPackage,
-  resolveProps,
+  resolveParents,
 } from '../../../lib/manager/maven/extract';
 import {
   extractAllPackageFiles,
@@ -77,7 +77,7 @@ describe('manager/maven', () => {
         depName === 'org.example:quux';
       const newValue = '9.9.9.9-final';
 
-      const packages = resolveProps([
+      const packages = resolveParents([
         extractPackage(pomParent, 'parent.pom.xml'),
         extractPackage(pomChild, 'child.pom.xml'),
       ]);
@@ -85,14 +85,35 @@ describe('manager/maven', () => {
       const dep = deps.find(finder);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomParent, upgrade);
-      const [updatedPkg] = resolveProps([
+      const [updatedPkg] = resolveParents([
         extractPackage(updatedContent, 'parent.pom.xml'),
         extractPackage(pomChild, 'child.pom.xml'),
       ]);
       const updatedDep = updatedPkg.deps.find(finder);
 
-      expect(updatedDep.registryUrls.pop()).toEqual('http://example.com/');
+      expect(updatedDep.registryUrls).toContain('http://example.com/');
       expect(updatedDep.currentValue).toEqual(newValue);
+    });
+
+    it('should include registryUrls from parent pom files', async () => {
+      platform.getFile
+        .mockReturnValueOnce(pomParent)
+        .mockReturnValueOnce(pomChild);
+      const packages = await extractAllPackageFiles({}, [
+        'parent.pom.xml',
+        'child.pom.xml',
+      ]);
+      const urls = new Set([
+        'https://repo.maven.apache.org/maven2',
+        'http://example.com/',
+        'http://example.com/nexus/xyz',
+      ]);
+      packages.forEach(({ deps }) => {
+        deps.forEach(({ registryUrls }) => {
+          const depUrls = new Set([...registryUrls]);
+          expect(depUrls).toEqual(urls);
+        });
+      });
     });
 
     it('should not touch content if new and old versions are equal', () => {

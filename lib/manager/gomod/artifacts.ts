@@ -11,7 +11,7 @@ export async function updateArtifacts(
   _updatedDeps: string[],
   newGoModContent: string,
   config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[]> {
+): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
   process.env.GOPATH =
     process.env.GOPATH || join(config.cacheDir, './others/go');

@@ -1,6 +1,6 @@
 import { NpmPackage } from './common';
 
-export function mightBeABrowserLibrary(packageJson: NpmPackage) {
+export function mightBeABrowserLibrary(packageJson: NpmPackage): boolean {
   // return true unless we're sure it's not a browser library
   if (packageJson.private === true) {
     // it's not published

@@ -5,7 +5,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   currentFileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;

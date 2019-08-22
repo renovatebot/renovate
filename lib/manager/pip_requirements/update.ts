@@ -5,7 +5,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     logger.debug(`pip_requirements.updateDependency(): ${upgrade.newValue}`);
     const lines = fileContent.split('\n');

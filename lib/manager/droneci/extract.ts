@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');

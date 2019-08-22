@@ -52,7 +52,10 @@ interface ParseContext {
   depType?: string;
 }
 
-function parseDepExpr(expr: string, ctx: ParseContext) {
+function parseDepExpr(
+  expr: string,
+  ctx: ParseContext
+): PackageDependency | null {
   const { scalaVersion, fileOffset, variables } = ctx;
   let { depType } = ctx;
 
@@ -139,7 +142,7 @@ function parseSbtLine(
   line: string,
   lineIndex: number,
   lines: string[]
-): PackageFile & ParseOptions {
+): (PackageFile & ParseOptions) | null {
   const { deps, registryUrls, fileOffset, variables } = acc;
 
   let { isMultiDeps, scalaVersion } = acc;

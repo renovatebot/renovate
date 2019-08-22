@@ -2,7 +2,7 @@ import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 
-export function extractPackageFile(fileContent: string): PackageFile {
+export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
   const lines = fileContent.split('\n');
 
