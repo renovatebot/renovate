@@ -81,7 +81,10 @@ function parseRepositories(
   }
 }
 
-export async function extractPackageFile(content: string, fileName: string) {
+export async function extractPackageFile(
+  content: string,
+  fileName: string
+): Promise<PackageFile | null> {
   logger.trace(`composer.extractPackageFile(${fileName})`);
   let composerJson: ComposerConfig;
   try {

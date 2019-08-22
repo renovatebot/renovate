@@ -26,7 +26,7 @@ export function updateGradleVersion(
   buildGradleContent: string,
   dependency: GradleDependency,
   newVersion: string
-) {
+): string {
   if (dependency) {
     const updateFunctions: UpdateFunction[] = [
       updateVersionLiterals,
@@ -84,7 +84,7 @@ function updateVersionLiterals(
   dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
-) {
+): string | null {
   const regexes: RegExp[] = [
     moduleStringVersionFormatMatch(dependency),
     groovyPluginStringVersionFormatMatch(dependency),
@@ -104,7 +104,7 @@ function updateLocalVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
-) {
+): string | null {
   const regexes: RegExp[] = [
     moduleMapVariableVersionFormatMatch(dependency),
     moduleStringVariableInterpolationVersionFormatMatch(dependency),
@@ -127,7 +127,7 @@ function updateGlobalVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
-) {
+): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = variableDefinitionFormatMatch(variable);
@@ -146,7 +146,7 @@ function updatePropertyFileGlobalVariables(
   dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
-) {
+): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = new RegExp(`(${variable}\\s*=\\s*)(.*)`);
@@ -159,25 +159,29 @@ function updatePropertyFileGlobalVariables(
 }
 
 // https://github.com/patrikerdes/gradle-use-latest-versions-plugin/blob/8cf9c3917b8b04ba41038923cab270d2adda3aa6/src/main/groovy/se/patrikerdes/DependencyUpdate.groovy#L27-L29
-function moduleStringVersionFormatMatch(dependency: GradleDependency) {
+function moduleStringVersionFormatMatch(dependency: GradleDependency): RegExp {
   return new RegExp(
     `(["']${dependency.group}:${dependency.name}:)[^$].*?(([:@].*?)?["'])`
   );
 }
 
-function groovyPluginStringVersionFormatMatch(dependency: GradleDependency) {
+function groovyPluginStringVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
   return new RegExp(
     `(id\\s+["']${dependency.group}["']\\s+version\\s+["'])[^$].*?(["'])`
   );
 }
 
-function kotlinPluginStringVersionFormatMatch(dependency: GradleDependency) {
+function kotlinPluginStringVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
   return new RegExp(
     `(id\\("${dependency.group}"\\)\\s+version\\s+")[^$].*?(")`
   );
 }
 
-function moduleMapVersionFormatMatch(dependency: GradleDependency) {
+function moduleMapVersionFormatMatch(dependency: GradleDependency): RegExp {
   // prettier-ignore
   return new RegExp(
     `(group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
@@ -188,7 +192,7 @@ function moduleMapVersionFormatMatch(dependency: GradleDependency) {
 
 function moduleKotlinNamedArgumentVersionFormatMatch(
   dependency: GradleDependency
-) {
+): RegExp {
   // prettier-ignore
   return new RegExp(
     `(group\\s*=\\s*"${dependency.group}"\\s*,\\s*` +
@@ -197,7 +201,9 @@ function moduleKotlinNamedArgumentVersionFormatMatch(
   );
 }
 
-function moduleMapVariableVersionFormatMatch(dependency: GradleDependency) {
+function moduleMapVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
   // prettier-ignore
   return new RegExp(
     `group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
@@ -208,7 +214,7 @@ function moduleMapVariableVersionFormatMatch(dependency: GradleDependency) {
 
 function moduleKotlinNamedArgumentVariableVersionFormatMatch(
   dependency: GradleDependency
-) {
+): RegExp {
   // prettier-ignore
   return new RegExp(
     `group\\s*=\\s*"${dependency.group}"\\s*,\\s*` +
@@ -219,7 +225,7 @@ function moduleKotlinNamedArgumentVariableVersionFormatMatch(
 
 function moduleStringVariableInterpolationVersionFormatMatch(
   dependency: GradleDependency
-) {
+): RegExp {
   return new RegExp(
     `["']${dependency.group}:${dependency.name}:\\$([^{].*?)["']`
   );
@@ -227,12 +233,12 @@ function moduleStringVariableInterpolationVersionFormatMatch(
 
 function moduleStringVariableExpressionVersionFormatMatch(
   dependency: GradleDependency
-) {
+): RegExp {
   return new RegExp(
     `["']${dependency.group}:${dependency.name}:\\$\{([^{].*?)}["']`
   );
 }
 
-function variableDefinitionFormatMatch(variable: string) {
+function variableDefinitionFormatMatch(variable: string): RegExp {
   return new RegExp(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
 }

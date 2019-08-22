@@ -28,7 +28,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   return dep;
 }
 
-export function getDep(currentFrom: string) {
+export function getDep(currentFrom: string): PackageDependency {
   const dep = splitImageParts(currentFrom);
   dep.datasource = 'docker';
   if (
@@ -41,7 +41,7 @@ export function getDep(currentFrom: string) {
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   let lineNumber = 0;

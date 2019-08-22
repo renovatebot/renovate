@@ -10,7 +10,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   currentFileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     const delimiter =
       currentFileContent.split('"').length >

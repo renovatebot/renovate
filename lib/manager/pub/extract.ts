@@ -34,7 +34,7 @@ function getDeps(
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile {
+): PackageFile | null {
   try {
     const doc = safeLoad(content);
     const deps = [

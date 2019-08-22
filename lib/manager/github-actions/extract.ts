@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   logger.debug('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
   let lineNumber = 0;

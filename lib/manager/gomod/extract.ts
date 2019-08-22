@@ -2,7 +2,11 @@ import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
 
-function getDep(lineNumber: number, match: RegExpMatchArray, type: string) {
+function getDep(
+  lineNumber: number,
+  match: RegExpMatchArray,
+  type: string
+): PackageDependency {
   const [, , currentValue] = match;
   let [, depName] = match;
   depName = depName.replace(/"/g, '');
@@ -35,7 +39,7 @@ function getDep(lineNumber: number, match: RegExpMatchArray, type: string) {
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {

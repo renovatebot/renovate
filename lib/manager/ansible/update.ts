@@ -5,7 +5,7 @@ import { Upgrade } from '../common';
 export default function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-) {
+): string | null {
   try {
     const newFrom = getNewFrom(upgrade);
     logger.debug(`ansible.updateDependency(): ${newFrom}`);
