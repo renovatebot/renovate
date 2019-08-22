@@ -1,11 +1,12 @@
-const argv = require('./config/_fixtures/argv');
-/** @type any */
-const defaultConfig = require('../../lib/config/defaults').getConfig();
-/** @type any */
-const npm = require('../../lib/datasource/npm');
-const presetDefaults = require('./npm/_fixtures/renovate-config-default.json');
+import argv from './config/_fixtures/argv';
+import { getConfig } from '../../lib/config/defaults';
+import * as _npm from '../../lib/datasource/npm';
+import presetDefaults from './npm/_fixtures/renovate-config-default.json';
 
 jest.mock('../../lib/datasource/npm');
+
+const npm: any = _npm;
+const defaultConfig = getConfig();
 
 npm.getPkgReleases = jest.fn(() => ({
   'renovate-config':
@@ -16,8 +17,8 @@ npm.getPkgReleases = jest.fn(() => ({
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
-    let configParser;
-    let defaultArgv;
+    let configParser: typeof import('../../lib/config');
+    let defaultArgv: string[];
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index');
@@ -27,17 +28,17 @@ describe('config/index', () => {
       require('delay').mockImplementation(() => Promise.resolve());
     });
     it('supports token in env', async () => {
-      const env = { RENOVATE_TOKEN: 'abc' };
+      const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat(['--token=abc', '--pr-footer=custom']);
-      const env = {};
+      const env: NodeJS.ProcessEnv = {};
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=true']);
-      const env = { RENOVATE_TOKEN: 'abc' };
+      const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports Bitbucket username/passwod', async () => {
@@ -46,7 +47,7 @@ describe('config/index', () => {
         '--username=user',
         '--password=pass',
       ]);
-      const env = {};
+      const env: NodeJS.ProcessEnv = {};
       await configParser.parseConfigs(env, defaultArgv);
     });
   });

@@ -1,11 +1,13 @@
-const configMigration = require('../../lib/config/migration');
-const defaultConfig = require('../../lib/config/defaults').getConfig();
+import * as configMigration from '../../lib/config/migration';
+import { getConfig } from '../../lib/config/defaults';
+import { RenovateConfig } from '../../lib/config';
+
+const defaultConfig = getConfig();
 
 describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('it migrates config', () => {
-      /** @type any */
-      const config = {
+      const config: RenovateConfig = {
         endpoints: [{}],
         enabled: true,
         platform: 'github',
@@ -25,7 +27,7 @@ describe('config/migration', () => {
         gitFs: false,
         separateMajorReleases: true,
         separatePatchReleases: true,
-        automerge: 'none',
+        automerge: 'none' as any,
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
@@ -56,7 +58,7 @@ describe('config/migration', () => {
         },
         packageRules: [
           {
-            packagePatterns: '^(@angular|typescript)',
+            packagePatterns: '^(@angular|typescript)' as any,
             groupName: ['angular packages'],
             excludedPackageNames: 'foo',
           },
@@ -74,7 +76,7 @@ describe('config/migration', () => {
         lockFileMaintenance: {
           exposeEnv: false,
           gitFs: true,
-          automerge: 'any',
+          automerge: 'any' as any,
           schedule: 'before 5am every day',
         },
         devDependencies: {
@@ -219,9 +221,8 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
     });
     it('it overrides existing automerge setting', () => {
-      /** @type any */
-      const config = {
-        automerge: 'minor',
+      const config: RenovateConfig = {
+        automerge: 'minor' as any,
         packages: [
           {
             packagePatterns: '^(@angular|typescript)',
@@ -239,7 +240,7 @@ describe('config/migration', () => {
       expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
     });
     it('it does not migrate config', () => {
-      const config = {
+      const config: RenovateConfig = {
         enabled: true,
         semanticCommits: true,
         separateMinorPatch: true,
@@ -251,7 +252,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchObject(config);
     });
     it('it migrates subconfig', () => {
-      const config = {
+      const config: RenovateConfig = {
         lockFileMaintenance: {
           depTypes: [
             'dependencies',
@@ -274,7 +275,7 @@ describe('config/migration', () => {
       ).toBe(false);
     });
     it('it migrates node to travis', () => {
-      const config = {
+      const config: RenovateConfig = {
         node: {
           enabled: true,
           supportPolicy: ['lts'],
@@ -292,7 +293,7 @@ describe('config/migration', () => {
       expect(migratedConfig.node.supportPolicy).toBeDefined();
     });
     it('it migrates packageFiles', () => {
-      const config = {
+      const config: RenovateConfig = {
         packageFiles: [
           'package.json',
           { packageFile: 'backend/package.json', pinVersions: false },
@@ -317,7 +318,7 @@ describe('config/migration', () => {
       expect(migratedConfig.packageRules[1].rangeStrategy).toBe('pin');
     });
     it('it migrates more packageFiles', () => {
-      const config = {
+      const config: RenovateConfig = {
         packageFiles: [
           {
             packageFile: 'package.json',
