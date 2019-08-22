@@ -7241,6 +7241,13 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+re2@1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.10.0.tgz#8cd1b8fd555c9fec481ffd1fff46028b3c5f063b"
+  integrity sha512-8l/x8dbjI80727ORzrIn1H8zZfhKS6izoxHC+/6r7+w2Qt+tfrxz+9b0vc5hJSBWNkvlg4+VjFYNLAnuYbhI5A==
+  dependencies:
+    nan "^2.14.0"
+
 react-is@^16.8.4:
   version "16.9.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.9.0.tgz#21ca9561399aad0ff1a7701c01683e8ca981edcb"

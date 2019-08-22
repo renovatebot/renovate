@@ -531,6 +531,7 @@ const options: RenovateOptions[] = [
       'npm',
       'pep440',
       'poetry',
+      'regex',
       'ruby',
       'semver',
       'swift',
