@@ -1,8 +1,8 @@
 import { Command } from 'commander';
-import { getOptions } from './definitions';
+import { getOptions, RenovateOptions } from './definitions';
 import { version } from '../../package.json';
 
-export function getCliName(option: { cli?: boolean; name?: string }) {
+export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
     return '';
   }
@@ -81,7 +81,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
   });
 
   /* istanbul ignore next */
-  function helpConsole() {
+  function helpConsole(): void {
     /* eslint-disable no-console */
     console.log('  Examples:');
     console.log('');
