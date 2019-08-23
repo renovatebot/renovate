@@ -22,7 +22,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<prerelease>.*))?$')
   // * emulates the "docker" configuration:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<compatibility>.*))?$')
-  // * matches the versoining scheme used by the Python images on DockerHub:
+  // * matches the versioning scheme used by the Python images on DockerHub:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$');
   private _config: RegExp = null;
 

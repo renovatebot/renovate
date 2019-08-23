@@ -1175,7 +1175,7 @@ For the `regex` `versionScheme`, will accept a regex string after a colon, for e
 
 ```json
 {
-  "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<architecture>.*))?$"
+  "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$"
 }
 ```
 
@@ -1183,7 +1183,7 @@ The valid capture groups for the `regex` `versionScheme` are:
 
 - `major`, `minor`, and `patch`: at least one of these must be provided. When determining whether a package has updated, these values will be compared in the standard semantic versioning fashion. If any of these fields are omitted, they will be treated as if they were `0` -- in this way, you can describe versioning schemes with up to three incrementing values.
 - `prerelease`: this value, if captured, will mark a given release as a prerelease (eg. unstable). If this value is captured and you have set `"ignoreUnstable": true`, the given release will be skipped.
-- `architecture`: this value defines the "build architecture" of a given dependency. A proposed Renovate update will never change the specified architecture. For example, if you are pinning to `1.2.3-linux` (and `linux` is captured as the architecture), Renovate will not update you to `1.2.4-osx`.
+- `compatibility`: this value defines the "build compatibility" of a given dependency. A proposed Renovate update will never change the specified compatibility value. For example, if you are pinning to `1.2.3-linux` (and `linux` is captured as the compatbility value), Renovate will not update you to `1.2.4-osx`.
 
 ## vulnerabilityAlerts
 
