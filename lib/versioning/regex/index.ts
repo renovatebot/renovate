@@ -97,19 +97,28 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   }
 
   isLessThanRange(version: string, range: string): boolean {
-    return ltr(asSemver(this._parse(version)), range);
+    return ltr(asSemver(this._parse(version)), asSemver(this._parse(range)));
   }
 
   maxSatisfyingVersion(versions: string[], range: string): string | null {
-    return maxSatisfying(versions.map(v => asSemver(this._parse(v))), range);
+    return maxSatisfying(
+      versions.map(v => asSemver(this._parse(v))),
+      asSemver(this._parse(range))
+    );
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
-    return minSatisfying(versions.map(v => asSemver(this._parse(v))), range);
+    return minSatisfying(
+      versions.map(v => asSemver(this._parse(v))),
+      asSemver(this._parse(range))
+    );
   }
 
   matches(version: string, range: string) {
-    return satisfies(asSemver(this._parse(version)), range);
+    return satisfies(
+      asSemver(this._parse(version)),
+      asSemver(this._parse(range))
+    );
   }
 }
 
