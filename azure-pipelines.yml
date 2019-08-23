@@ -70,5 +70,5 @@ jobs:
         displayName: Build slim renovate image
 
       - script: |
-          docker run --rm --t renovate-test --version
+          docker run --rm -t renovate-test --version
         displayName: Test slim renovate image
