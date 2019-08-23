@@ -56,7 +56,7 @@ jobs:
     steps:
       - template: .azure/steps.yml
 
-  - job: 'Docker slim'
+  - job: 'DockerSlim'
     pool:
       vmImage: ubuntu-16.04
 
