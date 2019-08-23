@@ -13,13 +13,46 @@ and `exports`. We will transpile them to `commonjs` on build.
 
 ## Install
 
+#### Prerequisites
+
+For local development some dependencies are required.
+
+- git
+- nodejs `^10.13.0 || ^12.0.0`
+- yarn `^1.17.0`
+- c++ compiler
+- python `^2.7`
+
+_Linux_
+
+You can use the following commands for `Ubuntu`.
+
+```sh
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt-get update
+sudo apt-get install -y git python-minimal build-essential nodejs yarn
+```
+
+_Windows_
+
+You can use `powershell` and [chocolatey](https://chocolatey.org) to manage required dependencies on `Windows`.
+
+```ps
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+cinst git node-lts yarn python2 visualstudio2017buildtools
+```
+
+If you have build error, you have to [configure](https://github.com/nodejs/node-gyp#on-windows) `node-gyp` to use the right tools.
+
 #### Fork and Clone
 
 If you will contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
 
 #### Node version
 
-Renovate supports Node.js `>= 10.13.0 <11.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
+Renovate supports Node.js `^10.13.0 || ^12.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
 
 #### Install dependencies
 
@@ -60,7 +93,7 @@ If this is working then in future you can create other test repos to verify your
 
 ## Tests
 
-You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on CircleCI. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on CircleCI and Azure Pipelines. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
 ## Jest
 
