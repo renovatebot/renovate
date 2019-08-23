@@ -38,6 +38,7 @@ COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build:docker
 
+RUN yarn install --production --frozen-lockfile
 
 # Final image
 #============
@@ -63,11 +64,8 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
 # and back to normal
 USER ubuntu
 
-
-COPY package.json .
-COPY yarn.lock .
-RUN yarn install --production --frozen-lockfile
 COPY --from=tsbuild /usr/src/app/dist dist
+COPY --from=tsbuild /usr/src/app/node_modules node_modules
 COPY bin bin
 COPY data data
 
