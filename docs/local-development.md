@@ -42,6 +42,7 @@ You can use `powershell` and [chocolatey](https://chocolatey.org) to manage requ
 ```ps
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 cinst git node-lts yarn python2 visualstudio2017buildtools
+pip install mock
 ```
 
 If you have build error, you have to [configure](https://github.com/nodejs/node-gyp#on-windows) `node-gyp` to use the right tools.
