@@ -1,11 +1,16 @@
-const handlebars = require('handlebars');
-const { DateTime } = require('luxon');
-const semver = require('semver');
-const mdTable = require('markdown-table');
-const { logger } = require('../../../logger');
-const { mergeChildConfig } = require('../../../config');
+import { compile } from 'handlebars';
+import { DateTime } from 'luxon';
+import { valid } from 'semver';
+import mdTable from 'markdown-table';
+import { logger } from '../../../logger';
+import { mergeChildConfig, ManagerConfig } from '../../../config';
+import { PackageDependency } from '../../../manager/common';
 
-function ifTypesGroup(depNames, hasGroupName, branchUpgrades) {
+function ifTypesGroup(
+  depNames: string[],
+  hasGroupName: boolean,
+  branchUpgrades: any[]
+): boolean {
   return (
     depNames.length === 2 &&
     !hasGroupName &&
@@ -18,11 +23,10 @@ function ifTypesGroup(depNames, hasGroupName, branchUpgrades) {
   );
 }
 
-function generateBranchConfig(branchUpgrades) {
+export function generateBranchConfig(branchUpgrades) {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
-  /** @type any */
-  let config = {
+  let config: any = {
     upgrades: [],
   };
   const hasGroupName = branchUpgrades[0].groupName !== null;
@@ -39,7 +43,7 @@ function generateBranchConfig(branchUpgrades) {
       toVersions.push(upg.toVersion);
     }
     if (upg.commitMessageExtra) {
-      const extra = handlebars.compile(upg.commitMessageExtra)(upg);
+      const extra = compile(upg.commitMessageExtra)(upg);
       if (!newValue.includes(extra)) {
         newValue.push(extra);
       }
@@ -130,7 +134,7 @@ function generateBranchConfig(branchUpgrades) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
-    } else if (semver.valid(toVersions[0])) {
+    } else if (valid(toVersions[0])) {
       upgrade.isRange = false;
     }
     // extract parentDir and baseDir from packageFile
@@ -149,14 +153,12 @@ function generateBranchConfig(branchUpgrades) {
     }
     // Use templates to generate strings
     logger.trace('Compiling branchName: ' + upgrade.branchName);
-    upgrade.branchName = handlebars.compile(upgrade.branchName)(upgrade);
+    upgrade.branchName = compile(upgrade.branchName)(upgrade);
     if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
-        semanticPrefix += `(${handlebars.compile(upgrade.semanticCommitScope)(
-          upgrade
-        )})`;
+        semanticPrefix += `(${compile(upgrade.semanticCommitScope)(upgrade)})`;
       }
       upgrade.commitMessagePrefix = semanticPrefix;
       upgrade.commitMessagePrefix += semanticPrefix.endsWith(':') ? ' ' : ': ';
@@ -165,11 +167,9 @@ function generateBranchConfig(branchUpgrades) {
         !upgrade.semanticCommitType.startsWith(':');
     }
     // Compile a few times in case there are nested templates
-    upgrade.commitMessage = handlebars.compile(upgrade.commitMessage || '')(
-      upgrade
-    );
-    upgrade.commitMessage = handlebars.compile(upgrade.commitMessage)(upgrade);
-    upgrade.commitMessage = handlebars.compile(upgrade.commitMessage)(upgrade);
+    upgrade.commitMessage = compile(upgrade.commitMessage || '')(upgrade);
+    upgrade.commitMessage = compile(upgrade.commitMessage)(upgrade);
+    upgrade.commitMessage = compile(upgrade.commitMessage)(upgrade);
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
     upgrade.commitMessage = upgrade.commitMessage.replace(/\s+/g, ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
@@ -183,16 +183,15 @@ function generateBranchConfig(branchUpgrades) {
       upgrade.commitMessage = splitMessage.join('\n');
     }
     if (upgrade.commitBody) {
-      upgrade.commitMessage = `${upgrade.commitMessage}\n\n${handlebars.compile(
+      upgrade.commitMessage = `${upgrade.commitMessage}\n\n${compile(
         upgrade.commitBody
       )(upgrade)}`;
     }
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
     if (upgrade.prTitle) {
-      upgrade.prTitle = handlebars.compile(upgrade.prTitle)(upgrade);
-      upgrade.prTitle = handlebars.compile(upgrade.prTitle)(upgrade);
-      upgrade.prTitle = handlebars
-        .compile(upgrade.prTitle)(upgrade)
+      upgrade.prTitle = compile(upgrade.prTitle)(upgrade);
+      upgrade.prTitle = compile(upgrade.prTitle)(upgrade);
+      upgrade.prTitle = compile(upgrade.prTitle)(upgrade)
         .trim()
         .replace(/\s+/g, ' ');
       if (upgrade.toLowerCase) {
@@ -214,7 +213,7 @@ function generateBranchConfig(branchUpgrades) {
       upgrade.prTitle += upgrade.updateType === 'patch' ? ' (patch)' : '';
     }
     // Compile again to allow for nested handlebars templates
-    upgrade.prTitle = handlebars.compile(upgrade.prTitle)(upgrade);
+    upgrade.prTitle = compile(upgrade.prTitle)(upgrade);
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
     config.upgrades.push(upgrade);
     if (upgrade.releaseTimestamp) {
@@ -287,7 +286,9 @@ function generateBranchConfig(branchUpgrades) {
   return config;
 }
 
-function getTableValues(upgrade) {
+function getTableValues(
+  upgrade: PackageDependency & ManagerConfig
+): [string, string, string, string] | null {
   if (!upgrade.commitBodyTable) {
     return null;
   }
@@ -320,7 +321,3 @@ function getTableValues(upgrade) {
   );
   return null;
 }
-
-module.exports = {
-  generateBranchConfig,
-};
