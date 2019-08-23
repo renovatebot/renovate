@@ -224,71 +224,103 @@ describe('regex', () => {
 
   describe('.isLessThanRange', () => {
     it('returns true when version less than range', () => {
-      expect(regex.isLessThanRange('1.2.2', '> 1.2.2')).toBe(true);
-      expect(regex.isLessThanRange('1.1.4', '>= 1.1.5 < 2.0')).toBe(true);
-      expect(regex.isLessThanRange('1.2.0a1', '1.2.0')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2', '> 1.2.2 ~> 2.0.0')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2-foo', '> 1.2.2')).toBe(true);
-      expect(regex.isLessThanRange('1.1.4-foo', '>= 1.1.5 < 2.0')).toBe(true);
-      expect(regex.isLessThanRange('1.2.0a1-foo', '1.2.0')).toBe(true);
-      expect(regex.isLessThanRange('1.2.2-foo', '> 1.2.2 ~> 2.0.0')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2', '1.2.3')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2', '1.2.3-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2', '1.2.3a1')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2', '1.2.3a1-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3a1')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2-foo', '1.2.3a1-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1', '1.2.3')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1', '1.2.3-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1', '1.2.3a1')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1', '1.2.3a1-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3-bar')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3a1')).toBe(true);
+      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.3a1-bar')).toBe(true);
     });
 
-    it('returns false when version greater or satisfies range', () => {
-      expect(regex.isLessThanRange('1.2.2', '<= 1.2.2')).toBe(false);
-      expect(regex.isLessThanRange('2.0.0', '>= 1.1.5 < 2.0')).toBe(false);
-      expect(regex.isLessThanRange('1.2.0b2', '1.1.9')).toBe(false);
-      expect(regex.isLessThanRange('2.0.0', '> 1.2.2 ~> 2.0.0')).toBe(false);
-      expect(regex.isLessThanRange('1.2.2-foo', '<= 1.2.2')).toBe(false);
-      expect(regex.isLessThanRange('2.0.0-foo', '>= 1.1.5 < 2.0')).toBe(false);
-      expect(regex.isLessThanRange('1.2.0b2-foo', '1.1.9')).toBe(false);
-      expect(regex.isLessThanRange('2.0.0-foo', '> 1.2.2 ~> 2.0.0')).toBe(
-        false
-      );
+    it('returns false when version satisfies range', () => {
+      expect(regex.isLessThanRange('1.2.2', '1.2.2')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2', '1.2.2-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2-foo', '1.2.2')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2-foo', '1.2.2-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2a1', '1.2.2a1')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2a1', '1.2.2a1-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.2a1')).toBe(false);
+      expect(regex.isLessThanRange('1.2.2a1-foo', '1.2.2a1-bar')).toBe(false);
+    });
+
+    it('returns false when version greater than range', () => {
+      expect(regex.isLessThanRange('1.2.4', '1.2.3')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4', '1.2.3-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4', '1.2.3a1')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4', '1.2.3a1-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3a1')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4-foo', '1.2.3a1-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1', '1.2.3')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1', '1.2.3-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1', '1.2.3a1')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1', '1.2.3a1-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3-bar')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3a1')).toBe(false);
+      expect(regex.isLessThanRange('1.2.4a1-foo', '1.2.3a1-bar')).toBe(false);
     });
   });
 
   describe('.maxSatisfyingVersion', () => {
     it('returns greatest version that matches range', () => {
-      expect(regex.maxSatisfyingVersion(['2.1.5', '2.1.6'], '~> 2.1')).toEqual(
-        '2.1.6'
-      );
       expect(
-        regex.maxSatisfyingVersion(['2.1.6', '2.1.5'], '~> 2.1.6')
-      ).toEqual('2.1.6');
-      // Note: `maxSatisfyingVersion()` does not care about `.isCompatible()`
-      expect(
-        regex.maxSatisfyingVersion(['2.1.6-foo', '2.1.5'], '~> 2.1.6')
+        regex.maxSatisfyingVersion(
+          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
+          '2.1.6'
+        )
       ).toEqual('2.1.6');
       expect(
-        regex.maxSatisfyingVersion(['2.1.6', '2.1.6a1', '2.1.5'], '~> 2.1')
+        regex.maxSatisfyingVersion(
+          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
+          '2.1.6-foo'
+        )
+      ).toEqual('2.1.6');
+      expect(
+        regex.maxSatisfyingVersion(['2.1.5-foo', '2.1.6'], '2.1.6-foo')
       ).toEqual('2.1.6');
     });
 
-    it('returns null if version that matches range absent', () => {
+    it('returns null if version that matches is absent', () => {
       expect(
-        regex.maxSatisfyingVersion(['1.2.3', '1.2.4'], '>= 3.5.0')
+        regex.maxSatisfyingVersion(['1.2.3', '1.2.4'], '3.5.0')
       ).toBeNull();
     });
   });
 
   describe('.minSatisfyingVersion', () => {
-    it('returns greatest version that matches range', () => {
-      expect(regex.minSatisfyingVersion(['2.1.5', '2.1.6'], '~> 2.1')).toEqual(
-        '2.1.5'
-      );
+    it('returns least version that matches range', () => {
       expect(
-        regex.minSatisfyingVersion(['2.1.6', '2.1.5'], '~> 2.1.6')
+        regex.minSatisfyingVersion(
+          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
+          '2.1.6'
+        )
       ).toEqual('2.1.6');
-      // Note: `minSatisfyingVersion()` does not care about `.isCompatible()`
       expect(
-        regex.minSatisfyingVersion(['2.1.6', '2.1.5-foo'], '~> 2.1')
+        regex.minSatisfyingVersion(
+          ['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo'],
+          '2.1.6-foo'
+        )
+      ).toEqual('2.1.6');
+      expect(
+        regex.minSatisfyingVersion(['2.1.5', '2.1.6-foo'], '2.1.5-foo')
       ).toEqual('2.1.5');
     });
 
-    it('returns null if version that matches range absent', () => {
+    it('returns null if version that matches is absent', () => {
       expect(
-        regex.minSatisfyingVersion(['1.2.3', '1.2.4'], '>= 3.5.0')
+        regex.minSatisfyingVersion(['1.2.3', '1.2.4'], '3.5.0')
       ).toBeNull();
     });
   });
@@ -311,25 +343,49 @@ describe('regex', () => {
 
   describe('.matches', () => {
     it('returns true when version match range', () => {
-      expect(regex.matches('1.2.1', '>= 1.2')).toBe(true);
-      expect(regex.matches('1.2.3', '~> 1.2.1')).toBe(true);
-      expect(regex.matches('1.2.7', '1.2.7')).toBe(true);
-      expect(regex.matches('1.1.6', '> 1.1.5 < 2.0')).toBe(true);
-      expect(regex.matches('1.2.1-foo', '>= 1.2')).toBe(true);
-      expect(regex.matches('1.2.3-foo', '~> 1.2.1')).toBe(true);
-      expect(regex.matches('1.2.7-foo', '1.2.7')).toBe(true);
-      expect(regex.matches('1.1.6-foo', '> 1.1.5 < 2.0')).toBe(true);
+      expect(regex.matches('1.2.2', '1.2.2')).toBe(true);
+      expect(regex.matches('1.2.2', '1.2.2-bar')).toBe(true);
+      expect(regex.matches('1.2.2-foo', '1.2.2')).toBe(true);
+      expect(regex.matches('1.2.2-foo', '1.2.2-bar')).toBe(true);
+      expect(regex.matches('1.2.2a1', '1.2.2a1')).toBe(true);
+      expect(regex.matches('1.2.2a1', '1.2.2a1-bar')).toBe(true);
+      expect(regex.matches('1.2.2a1-foo', '1.2.2a1')).toBe(true);
+      expect(regex.matches('1.2.2a1-foo', '1.2.2a1-bar')).toBe(true);
     });
 
     it('returns false when version not match range', () => {
-      expect(regex.matches('1.2.1', '>= 1.3')).toBe(false);
-      expect(regex.matches('1.3.8', '~> 1.2.1')).toBe(false);
-      expect(regex.matches('1.3.9', '1.3.8')).toBe(false);
-      expect(regex.matches('2.0.0', '> 1.1.5 < 2.0')).toBe(false);
-      expect(regex.matches('1.2.1-foo', '>= 1.3')).toBe(false);
-      expect(regex.matches('1.3.8-foo', '~> 1.2.1')).toBe(false);
-      expect(regex.matches('1.3.9-foo', '1.3.8')).toBe(false);
-      expect(regex.matches('2.0.0-foo', '> 1.1.5 < 2.0')).toBe(false);
+      expect(regex.matches('1.2.2', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.2', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.2', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.2', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.2-foo', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.2-foo', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.2-foo', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.2-foo', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.2a1', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.2a1', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.2a1', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.2a1', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.2a1-foo', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.2a1-foo', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.2a1-foo', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.2a1-foo', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.4', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.4', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.4', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.4', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.4-foo', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.4-foo', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.4-foo', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.4-foo', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.4a1', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.4a1', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.4a1', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.4a1', '1.2.3a1-bar')).toBe(false);
+      expect(regex.matches('1.2.4a1-foo', '1.2.3')).toBe(false);
+      expect(regex.matches('1.2.4a1-foo', '1.2.3-bar')).toBe(false);
+      expect(regex.matches('1.2.4a1-foo', '1.2.3a1')).toBe(false);
+      expect(regex.matches('1.2.4a1-foo', '1.2.3a1-bar')).toBe(false);
     });
   });
 });
