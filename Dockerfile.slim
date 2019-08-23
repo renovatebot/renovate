@@ -20,6 +20,14 @@ USER ubuntu
 #============
 FROM base as tsbuild
 
+USER root
+
+# Python 2 and make are required to build node-re2
+
+RUN apt-get update && apt-get install -y python-minimal build-essential
+
+USER ubuntu
+
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --frozen-lockfile
@@ -30,6 +38,9 @@ COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build:docker
 
+# Prune node_modules to production-only so they can be copied into the final image
+
+RUN yarn install --production --frozen-lockfile
 
 # Final image
 #============
@@ -55,11 +66,10 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
 # and back to normal
 USER ubuntu
 
-
 COPY package.json .
-COPY yarn.lock .
-RUN yarn install --production --frozen-lockfile
+
 COPY --from=tsbuild /usr/src/app/dist dist
+COPY --from=tsbuild /usr/src/app/node_modules node_modules
 COPY bin bin
 COPY data data
 
