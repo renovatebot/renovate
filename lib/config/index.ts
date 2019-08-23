@@ -1,23 +1,35 @@
-const { logger, levels, addStream } = require('../logger');
-const definitions = require('./definitions');
+import { logger, levels, addStream } from '../logger';
+import * as definitions from './definitions';
+import * as defaultsParser from './defaults';
+import * as fileParser from './file';
+import * as cliParser from './cli';
+import * as envParser from './env';
 
-const defaultsParser = require('./defaults');
-const fileParser = require('./file');
-const cliParser = require('./cli');
-const envParser = require('./env');
+// eslint-disable-next-line import/no-cycle
+import { resolveConfigPresets } from './presets';
+import { get, getLanguageList, getManagerList } from '../manager';
+import { RenovateConfig, RenovateConfigStage } from './common';
 
-const { resolveConfigPresets } = require('./presets');
-const { get, getLanguageList, getManagerList } = require('../manager');
+export * from './common';
 
-const clone = input => JSON.parse(JSON.stringify(input));
+function clone<T>(input: T): T {
+  return JSON.parse(JSON.stringify(input));
+}
 
-exports.parseConfigs = parseConfigs;
-exports.mergeChildConfig = mergeChildConfig;
-exports.filterConfig = filterConfig;
-exports.getManagerConfig = getManagerConfig;
+export interface ManagerConfig extends RenovateConfig {
+  language: string;
+  manager: string;
+}
 
-function getManagerConfig(config, manager) {
-  let managerConfig = config;
+export function getManagerConfig(
+  config: RenovateConfig,
+  manager: string
+): ManagerConfig {
+  let managerConfig: ManagerConfig = {
+    ...config,
+    language: null,
+    manager: null,
+  };
   const language = get(manager, 'language');
   if (language) {
     managerConfig = mergeChildConfig(managerConfig, config[language]);
@@ -31,7 +43,10 @@ function getManagerConfig(config, manager) {
   return managerConfig;
 }
 
-async function parseConfigs(env, argv) {
+export async function parseConfigs(
+  env: NodeJS.ProcessEnv,
+  argv: string[]
+): Promise<RenovateConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
@@ -88,14 +103,17 @@ async function parseConfigs(env, argv) {
   return config;
 }
 
-function mergeChildConfig(parent, child) {
+export function mergeChildConfig<T extends RenovateConfig = RenovateConfig>(
+  parent: T,
+  child: RenovateConfig
+): T {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
     return parent;
   }
   const parentConfig = clone(parent);
   const childConfig = clone(child);
-  const config = { ...parentConfig, ...childConfig };
+  const config: Record<string, any> = { ...parentConfig, ...childConfig };
   for (const option of definitions.getOptions()) {
     if (
       option.mergeable &&
@@ -122,9 +140,12 @@ function mergeChildConfig(parent, child) {
   return Object.assign(config, config.force);
 }
 
-function filterConfig(inputConfig, targetStage) {
+export function filterConfig(
+  inputConfig: RenovateConfig,
+  targetStage: RenovateConfigStage
+): RenovateConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
-  const outputConfig = { ...inputConfig };
+  const outputConfig: RenovateConfig = { ...inputConfig };
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];
   const targetIndex = stages.indexOf(targetStage);
   for (const option of definitions.getOptions()) {

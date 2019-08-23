@@ -1,7 +1,10 @@
-import { applyPackageRules } from '../../lib/util/package-rules';
+import { applyPackageRules, Config } from '../../lib/util/package-rules';
+import { UpdateType } from '../../lib/config';
+
+type TestConfig = Config & { x?: number; y?: number };
 
 describe('applyPackageRules()', () => {
-  const config1 = {
+  const config1: TestConfig = {
     foo: 'bar',
 
     packageRules: [
@@ -18,7 +21,7 @@ describe('applyPackageRules()', () => {
     ],
   };
   it('applies', () => {
-    const config = {
+    const config: Config = {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',
@@ -98,7 +101,7 @@ describe('applyPackageRules()', () => {
     expect(res.y).toBeUndefined();
   });
   it('matches anything if missing inclusive rules', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           excludePackageNames: ['foo'],
@@ -118,7 +121,7 @@ describe('applyPackageRules()', () => {
     expect(res2.x).toBeDefined();
   });
   it('supports inclusive or', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           packageNames: ['neutrino'],
@@ -136,7 +139,7 @@ describe('applyPackageRules()', () => {
     expect(res2.x).toBeDefined();
   });
   it('filters depType', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           depTypeList: ['dependencies', 'peerDependencies'],
@@ -153,7 +156,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters depTypes', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           depTypeList: ['test'],
@@ -170,7 +173,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters managers with matching manager', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           managers: ['npm', 'meteor'],
@@ -189,7 +192,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters managers with non-matching manager', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           managers: ['dockerfile', 'npm'],
@@ -208,7 +211,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
   });
   it('filters languages with matching language', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           languages: ['js', 'node'],
@@ -227,7 +230,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters languages with non-matching language', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           languages: ['docker'],
@@ -246,7 +249,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
   });
   it('filters datasources with matching datasource', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           datasources: ['orb', 'docker'],
@@ -263,7 +266,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters branches with matching branch', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           baseBranchList: ['master', 'staging'],
@@ -280,7 +283,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters datasources with non-matching datasource', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           datasources: ['orb'],
@@ -296,7 +299,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
   });
   it('filters branches with non-matching branch', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           baseBranchList: ['master'],
@@ -312,7 +315,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
   });
   it('filters updateType', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           updateTypes: ['minor', 'patch'],
@@ -323,13 +326,13 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch',
+      updateType: 'patch' as UpdateType,
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
   it('matches sourceUrlPrefixes', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           sourceUrlPrefixes: [
@@ -343,14 +346,14 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch',
+      updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
   it('non-matches sourceUrlPrefixes', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           sourceUrlPrefixes: [
@@ -364,14 +367,14 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch',
+      updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/vuejs/vue',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
   it('handles sourceUrlPrefixes when missing sourceUrl', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           sourceUrlPrefixes: [
@@ -385,13 +388,13 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch',
+      updateType: 'patch' as UpdateType,
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
   it('filters naked depType', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           depTypeList: ['dependencies', 'peerDependencies'],
@@ -407,7 +410,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBe(1);
   });
   it('filters depType', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           depTypeList: ['dependencies', 'peerDependencies'],
@@ -424,7 +427,7 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
   });
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           packageNames: ['test'],
@@ -452,7 +455,7 @@ describe('applyPackageRules()', () => {
     expect(res2.x).toBeUndefined();
   });
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           packageNames: ['test'],
@@ -472,7 +475,7 @@ describe('applyPackageRules()', () => {
     expect(res1.x).toBeDefined();
   });
   it('checks if matchCurrentVersion selector works with static values', () => {
-    const config = {
+    const config: TestConfig = {
       packageRules: [
         {
           packageNames: ['test'],
@@ -492,7 +495,7 @@ describe('applyPackageRules()', () => {
     expect(res1.x).toBeDefined();
   });
   it('matches paths', () => {
-    const config = {
+    const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
       packageRules: [
         {

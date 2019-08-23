@@ -1,21 +1,21 @@
-/** @type any */
-const cli = require('../../lib/config/cli.js');
-const getArgv = require('./config/_fixtures/argv');
+import * as cli from '../../lib/config/cli';
+import getArgv from './config/_fixtures/argv';
+import { RenovateOptions } from '../../lib/config/definitions';
 
 describe('config/cli', () => {
-  let argv;
+  let argv: string[];
   beforeEach(() => {
     argv = getArgv();
   });
   describe('.getCliName(definition)', () => {
     it('generates CLI value', () => {
-      const option = {
+      const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
       cli.getCliName(option).should.eql('--one-two-three');
     });
     it('generates returns empty if CLI false', () => {
-      const option = {
+      const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
         cli: false,
       };

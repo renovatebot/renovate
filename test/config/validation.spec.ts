@@ -1,4 +1,5 @@
-const configValidation = require('../../lib/config/validation.js');
+import * as configValidation from '../../lib/config/validation';
+import { RenovateConfig } from '../../lib/config';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -11,6 +12,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
     it('returns nested errors', async () => {
+      /** @type any */
       const config = {
         foo: 1,
         schedule: ['after 5pm'],
@@ -63,14 +65,14 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
     it('errors for all types', async () => {
-      const config = {
+      const config: RenovateConfig = {
         allowedVersions: 'foo',
-        enabled: 1,
+        enabled: 1 as any,
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5,
-        semanticCommitType: 7,
-        lockFileMaintenance: false,
+        semanticCommitType: 7 as any,
+        lockFileMaintenance: false as any,
         extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
@@ -80,7 +82,7 @@ describe('config/validation', () => {
           {
             foo: 1,
           },
-          'what?',
+          'what?' as any,
           {
             packagePatterns: 'abc ([a-z]+) ([a-z]+))',
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],

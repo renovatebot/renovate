@@ -1,14 +1,13 @@
 import is from '@sindresorhus/is';
+import later from 'later';
+import { logger } from '../logger';
+import { clone } from './util';
+import { getOptions, RenovateOptions } from './definitions';
+import { RenovateConfig } from './common';
 
-const later = require('later');
-const { logger } = require('../logger');
-const options = require('./definitions').getOptions();
+const options = getOptions();
 
-const clone = input => JSON.parse(JSON.stringify(input));
-
-let optionTypes;
-
-export { migrateConfig };
+let optionTypes: Record<string, RenovateOptions['type']>;
 
 const removedOptions = [
   'maintainYarnLock',
@@ -24,8 +23,17 @@ const removedOptions = [
   'groupPrBody',
 ];
 
+export interface MigratedConfig {
+  isMigrated: boolean;
+  migratedConfig: RenovateConfig;
+}
+
 // Returns a migrated config
-function migrateConfig(config, parentKey) {
+export function migrateConfig(
+  config: RenovateConfig,
+  // TODO: remove any type
+  parentKey?: string | any
+): MigratedConfig {
   try {
     if (!optionTypes) {
       optionTypes = {};

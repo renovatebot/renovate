@@ -1,6 +1,6 @@
-const path = require('path');
-const file = require('../../lib/config/file.js');
-const customConfig = require('./config/_fixtures/file');
+import path from 'path';
+import * as file from '../../lib/config/file';
+import customConfig from './config/_fixtures/file';
 
 describe('config/file', () => {
   describe('.getConfig()', () => {

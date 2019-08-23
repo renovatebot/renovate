@@ -1,11 +1,7 @@
-const configDefinitions = require('./definitions');
+import { getOptions, RenovateOptions } from './definitions';
+import { RenovateConfig } from './common';
 
-module.exports = {
-  getEnvName,
-  getConfig,
-};
-
-function getEnvName(option) {
+export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
     return '';
   }
@@ -16,16 +12,16 @@ function getEnvName(option) {
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
-function getConfig(env) {
-  const options = configDefinitions.getOptions();
+export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
+  const options = getOptions();
 
-  const config = { hostRules: [] };
+  const config: RenovateConfig = { hostRules: [] };
 
   const coersions = {
-    boolean: val => val === 'true',
-    array: val => val.split(',').map(el => el.trim()),
-    string: val => val.replace(/\\n/g, '\n'),
-    object: val => JSON.parse(val),
+    boolean: (val: string) => val === 'true',
+    array: (val: string) => val.split(',').map(el => el.trim()),
+    string: (val: string) => val.replace(/\\n/g, '\n'),
+    object: (val: string) => JSON.parse(val),
     integer: parseInt,
   };
 
