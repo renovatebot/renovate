@@ -11,6 +11,15 @@ Array [
 
 exports[`platform/git/storage getFile(filePath, branchName) returns null for 404 1`] = `[Error: repository-changed]`;
 
+exports[`platform/git/storage getFileList() should exclude submodules 1`] = `
+Array [
+  ".gitmodules",
+  "file_to_delete",
+  "master_file",
+  "past_file",
+]
+`;
+
 exports[`platform/git/storage getFileList() should return the correct files 1`] = `
 Array [
   "file_to_delete",

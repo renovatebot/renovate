@@ -84,6 +84,18 @@ describe('platform/git/storage', () => {
       expect(await git.getFileList('renovate/future_branch')).toMatchSnapshot();
       expect(await git.getFileList()).toMatchSnapshot();
     });
+    it('should exclude submodules', async () => {
+      const repo = await Git(base.path).silent(true);
+      await repo.submoduleAdd(base.path, 'submodule');
+      await repo.commit('Add submodule');
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await git.getFileList()).toMatchSnapshot();
+      repo.reset(['--hard', 'HEAD^']);
+    });
   });
   describe('branchExists(branchName)', () => {
     it('should return true if found', async () => {
