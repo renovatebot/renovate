@@ -14,7 +14,7 @@
     "compile:ts": "tsc -p tsconfig.app.json",
     "compile:dts": "tsc -p tsconfig.dts.json",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
-    "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
+    "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
     "eslint": "eslint --ext .js,.ts lib/ test/",
     "eslint-fix": "eslint --ext .js,.ts --fix lib/ test/",
