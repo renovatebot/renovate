@@ -137,7 +137,6 @@
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
     "pnpm": "3.7.5",
-    "re2": "1.10.0",
     "registry-auth-token": "4.0.0",
     "safe-regex": "2.0.2",
     "semver": "6.3.0",
@@ -154,6 +153,9 @@
     "xmldoc": "1.1.2",
     "yarn": "1.17.3",
     "yawn-yaml": "1.4.0"
+  },
+  "optionalDependencies": {
+    "re2": "1.10.0"
   },
   "devDependencies": {
     "@babel/cli": "7.5.5",
