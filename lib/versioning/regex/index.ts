@@ -1,8 +1,8 @@
 import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
-import RE2 from 're2';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { logger } from '../../logger';
+import { RegEx } from '../../util/regex';
 
 export interface RegExpVersion extends GenericVersion {
   /** prereleases are treated in the standard semver manner, if present */
@@ -50,7 +50,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     // capture groups?
 
     try {
-      this._config = new RE2(new_config);
+      this._config = new RegEx(new_config);
     } catch (e) {
       logger.debug({ err: e }, 'regex error');
       const error = new Error('config-validation');
