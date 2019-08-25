@@ -136,7 +136,7 @@
     "p-all": "2.1.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "3.7.3",
+    "pnpm": "3.7.5",
     "re2": "1.10.0",
     "registry-auth-token": "4.0.0",
     "safe-regex": "2.0.2",
