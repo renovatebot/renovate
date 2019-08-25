@@ -4,6 +4,7 @@ exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
+    "depName": "@renovate/no",
     "github": "chalk/chalk",
     "githubApiBaseURL": "https://api.github.com/",
     "githubBaseURL": "https://github.com/",
@@ -54,6 +55,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and gi
 Object {
   "hasReleaseNotes": true,
   "project": Object {
+    "depName": "renovate",
     "github": "chalk/chalk",
     "githubApiBaseURL": "https://github-enterprise.example.com/",
     "githubBaseURL": "https://github-enterprise.example.com/",
@@ -104,6 +106,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and gi
 Object {
   "hasReleaseNotes": true,
   "project": Object {
+    "depName": "renovate",
     "github": "chalk/chalk",
     "githubApiBaseURL": "https://api.github.com/",
     "githubBaseURL": "https://github.com/",
@@ -154,6 +157,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
+    "depName": "renovate",
     "github": "chalk/chalk",
     "githubApiBaseURL": "https://api.github.com/",
     "githubBaseURL": "https://github.com/",
@@ -204,6 +208,7 @@ exports[`workers/pr/changelog getChangeLogJSON uses GitHub tags 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
+    "depName": "renovate",
     "github": "chalk/chalk",
     "githubApiBaseURL": "https://api.github.com/",
     "githubBaseURL": "https://github.com/",
@@ -258,6 +263,7 @@ exports[`workers/pr/changelog getChangeLogJSON works without Github 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
+    "depName": "renovate",
     "github": "chalk/chalk",
     "githubApiBaseURL": "https://api.github.com/",
     "githubBaseURL": "https://github.com/",
