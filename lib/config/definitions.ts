@@ -972,6 +972,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'stabilityDays',
+    description:
+      'Number of days required before a new release is considered to be stabilized.',
+    type: 'integer',
+    default: 0,
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
