@@ -352,6 +352,12 @@ describe('workers/repository/master-issue', () => {
           res: 'needs-pr-approval',
           branchName: 'branchName3',
         },
+        {
+          prTitle: 'pr4',
+          upgrades: [{ depName: 'dep4' }],
+          res: 'pending',
+          branchName: 'branchName4',
+        },
       ];
       config.masterIssue = true;
       config.masterIssuePrApproval = true;
