@@ -1083,6 +1083,20 @@ By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" 
 
 Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
+## stabilityDays
+
+If this is set to a non-zero value, and an update has a release date/timestamp available, then Renovate will check if the configured "stability days" have elapsed. If the days since the release is less than the configured stability days then a "pending" status check will be added to the branch. If enough days have passed then a passing status check will be added.
+
+There are a couple of uses for this:
+
+#### Suppress branch/PR creation for X days
+
+If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `masterIssue=true` so you don't lose visibility of these pending PRs.
+
+#### Await X days before Automerging
+
+If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed. This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+
 ## statusCheckVerify
 
 This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).

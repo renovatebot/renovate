@@ -81,13 +81,13 @@ export const getDependency = async ({
       ({
         number: version,
         platform: rubyPlatform,
-        created_at: releaseDate,
+        created_at: releaseTimestamp,
         rubygems_version: rubygemsVersion,
         ruby_version: rubyVersion,
       }) => ({
         version,
         rubyPlatform,
-        releaseDate,
+        releaseTimestamp,
         rubygemsVersion,
         rubyVersion,
       })
