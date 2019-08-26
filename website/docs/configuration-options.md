@@ -1085,7 +1085,15 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 ## stabilityDays
 
-If this is set, and an update has a release date/timestamp available, then Renovate will check if the stability days have elapsed. If not then a "pending" status check will be added to the branch, otherwise a passing status check will be added. This status check can be used both for (a) setting `prCreation` to "not-pending" (i.e. suppress PRs until after a branch's updates have elapsed sufficient time), or (b) preventing automerge.
+If this is set, and an update has a release date/timestamp available, then Renovate will check if the stability days have elapsed. If not then a "pending" status check will be added to the branch, otherwise a passing status check will be added. There are a couple of uses for this:
+
+#### Suppress branch/PR creation for X days
+
+If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `masterIssue=true` so you don't lose visibility of these pending PRs.
+
+#### Await X days before Automerging
+
+If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed. This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
 
 ## statusCheckVerify
 
