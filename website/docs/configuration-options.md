@@ -625,6 +625,8 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
   ]
 ```
 
+Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match. Therefore, you should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if necessary.
+
 ### allowedVersions
 
 Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
