@@ -1085,7 +1085,9 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 ## stabilityDays
 
-If this is set, and an update has a release date/timestamp available, then Renovate will check if the stability days have elapsed. If not then a "pending" status check will be added to the branch, otherwise a passing status check will be added. There are a couple of uses for this:
+If this is set to a non-zero value, and an update has a release date/timestamp available, then Renovate will check if the configured "stability days" have elapsed. If the days since the release is less than the configured stability days then a "pending" status check will be added to the branch. If enough days have passed then a passing status check will be added.
+
+There are a couple of uses for this:
 
 #### Suppress branch/PR creation for X days
 
