@@ -16,8 +16,11 @@ major=${BASH_REMATCH[1]}
 minor=${BASH_REMATCH[2]}
 slim=${BASH_REMATCH[4]}
 
+latest=${slim:1}
+latest=${latest:-latest}
+
 # Tag and push image for each additional tag
-for tag in {"${major}${slim}","${major}.${minor}${slim}"}; do
+for tag in {"${major}${slim}","${major}.${minor}${slim}","${latest}"}; do
   echo "Tagging ${DOCKER_REPO}:${tag}"
   docker tag $IMAGE_NAME ${DOCKER_REPO}:${tag}
   docker push ${DOCKER_REPO}:${tag}
