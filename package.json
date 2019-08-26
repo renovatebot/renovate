@@ -97,7 +97,7 @@
     "@sindresorhus/is": "1.0.0",
     "@snyk/ruby-semver": "2.0.4",
     "@yarnpkg/lockfile": "1.1.0",
-    "azure-devops-node-api": "8.1.1",
+    "azure-devops-node-api": "9.0.1",
     "bunyan": "1.8.12",
     "cacache": "11.3.3",
     "chalk": "2.4.2",
