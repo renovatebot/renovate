@@ -3,8 +3,7 @@ import { VersioningApi } from '../common';
 
 function parse(version: string) {
   // openjdk:8u131-jre-alpine -> 8.131-jre-alpine
-  version = version.replace(/([0-9]*)(u)([0-9]*)/, "$1.$3")
-  const versionPieces = version.replace(/^v/, '').split('-');
+  const versionPieces = version.replace(/([0-9]*)(u)([0-9]*)/, "$1.$3").replace(/^v/, '').split('-');
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
   const release = prefix.split('.').map(Number);
