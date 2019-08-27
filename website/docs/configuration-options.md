@@ -263,7 +263,7 @@ Example:
 
 ## encrypted
 
-See https://renovatebot.com/docs/private-modules for details on how this is used to encrypt npm tokens.
+See https://docs.renovatebot.com/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -281,7 +281,7 @@ Be careful you know what you're doing with this option. The initial intended use
 
 ## extends
 
-See https://renovatebot.com/docs/config-presets for details.
+See https://docs.renovatebot.com/config-presets for details.
 
 ## fileMatch
 
@@ -552,17 +552,17 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehensive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a comprehensive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovatebot.com/docs/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://docs.renovatebot.com/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovatebot.com/docs/private-modules for details on how this is used.
+See https://docs.renovatebot.com/private-modules for details on how this is used.
 
 ## nuget
 
@@ -1022,7 +1022,7 @@ The `schedule` option allows you to define times of week or month for Renovate u
 
 The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule. i.e. Renovate will run on the repository around the clock.
 
-The easiest way to define a schedule is to use a preset if one of them fits your requirements. See [Schedule presets](https://renovatebot.com/docs/presets-schedule/) for details and feel free to request a new one in the source repository if you think others would benefit from it too.
+The easiest way to define a schedule is to use a preset if one of them fits your requirements. See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think others would benefit from it too.
 
 Otherwise, here are some text schedules that are known to work:
 
@@ -1107,7 +1107,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://docs.renovatebot.com/node#configuring-support-policy)
 
 ## suppressNotifications
 
