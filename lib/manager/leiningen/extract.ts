@@ -3,7 +3,7 @@ import { PackageDependency, PackageFile } from '../common';
 
 export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
 
-export function trimAtKey(str: string, kwName: string) {
+export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
   const keyOffset = str.search(regex);
   if (keyOffset < 0) return null;
@@ -13,7 +13,7 @@ export function trimAtKey(str: string, kwName: string) {
   return withSpaces.slice(valueOffset);
 }
 
-export function expandDepName(name: string) {
+export function expandDepName(name: string): string {
   return name.indexOf('/') === -1 ? `${name}:${name}` : name.replace('/', ':');
 }
 
@@ -89,7 +89,7 @@ export function extractFromVectors(
   return result;
 }
 
-function extractLeinRepos(content: string) {
+function extractLeinRepos(content: string): string[] {
   const result = [DEFAULT_CLOJARS_REPO, DEFAULT_MAVEN_REPO];
 
   const repoContent = trimAtKey(

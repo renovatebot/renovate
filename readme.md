@@ -38,13 +38,13 @@ Renovate was released in 2017 and already is widely used in the developer commun
 The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is to install the hosted Renovate app.
 
 For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install
-it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://renovatebot.com/docs/install-github-app/).
+it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://docs.renovatebot.com/install-github-app/).
 
-For GitLab, log into [renovatebot.com/dashboard](https://renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://renovatebot.com/docs/install-gitlab-app/).
+For GitLab, log into [app.renovatebot.com/dashboard](https://app.renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://docs.renovatebot.com/install-gitlab-app/).
 
 ## Configuration
 
-Visit https://renovatebot.com/docs/ for documentation, and in particular https://renovatebot.com/docs/configuration-options/ for a list of configuration options.
+Visit https://docs.renovatebot.com/ for documentation, and in particular https://docs.renovatebot.com/configuration-options/ for a list of configuration options.
 
 You can also raise an issue in https://github.com/renovatebot/config-help if you'd like to get your config reviewed or ask any questions.
 
@@ -54,11 +54,11 @@ If you are not on github.com or gitlab.com, or you prefer to run your own instan
 
 - Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using cron)
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
-- Use [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise and GitLab, includes native scheduler
+- Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third party binaries (e.g. JS, Docker, Nuget, pip)
 
 ## Contributing
 
-If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [contributing.md](.github/contributing.md).
+If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [.github/contributing.md](.github/contributing.md).
 
 ## Security / Disclosure
 

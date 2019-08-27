@@ -75,6 +75,18 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pending');
     });
+    it('skips branch if not stabilityDays not met', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.prCreation = 'not-pending';
+      config.upgrades = [
+        {
+          releaseTimestamp: '2099-12-31',
+          stabilityDays: 1,
+        },
+      ];
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pending');
+    });
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
@@ -156,6 +168,18 @@ describe('workers/branch', () => {
         state: 'open',
         canRebase: false,
       });
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pr-edited');
+    });
+    it('skips branch if target branch changed', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: true,
+        targetBranch: 'v6',
+      });
+      config.baseBranch = 'master';
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
     });

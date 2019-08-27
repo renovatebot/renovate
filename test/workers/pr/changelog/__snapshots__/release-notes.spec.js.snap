@@ -1,8 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes 1`] = `undefined`;
-
 exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 1`] = `
+Object {
+  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
+",
+  "id": undefined,
+  "name": undefined,
+  "tag": "1.0.1",
+  "url": "https://github.com/some/other-repository/releases/1.0.1",
+}
+`;
+
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 2`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
 ",
@@ -10,6 +19,17 @@ Object {
   "name": undefined,
   "tag": "v1.0.1",
   "url": "https://github.com/some/other-repository/releases/v1.0.1",
+}
+`;
+
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 3`] = `
+Object {
+  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
+",
+  "id": undefined,
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://github.com/some/other-repository/releases/other-1.0.1",
 }
 `;
 

@@ -15,7 +15,7 @@ These updates are awaiting their schedule. Click on a checkbox to ignore the sch
 
 ## Rate Limited
 
-These updates are currently rate limited. Click on a checkbox below to override.
+These updates are currently rate limited. Click on a checkbox below to force their creation now.
 
  - [ ] <!-- unlimit-branch=branchName5 -->pr5
  - [ ] <!-- unlimit-branch=branchName6 -->pr6

@@ -44,7 +44,7 @@ Object {
       },
     },
     Object {
-      "currentValue": ">=1.10,<2.0",
+      "currentValue": ">=1.11.23,<2.0",
       "datasource": "pypi",
       "depName": "django",
       "managerData": Object {
@@ -76,7 +76,7 @@ Object {
       },
     },
     Object {
-      "currentValue": ">=0.11.5,<0.15",
+      "currentValue": ">=0.15.3,<0.16",
       "datasource": "pypi",
       "depName": "Werkzeug",
       "managerData": Object {

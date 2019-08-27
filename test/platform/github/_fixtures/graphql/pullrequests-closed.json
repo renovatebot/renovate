@@ -5,6 +5,7 @@
         "nodes": [
           {
             "number": 2500,
+            "baseRefName": "master",
             "headRefName": "renovate/jest-monorepo",
             "state": "MERGED",
             "title": "chore(deps): update dependency jest to v23.6.0",

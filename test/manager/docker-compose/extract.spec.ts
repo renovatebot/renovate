@@ -11,6 +11,9 @@ describe('lib/manager/docker-compose/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+    it('returns null for malformed YAML', () => {
+      expect(extractPackageFile('nothing here\n:::::::')).toBeNull();
+    });
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(yamlFile);
       expect(res.deps).toMatchSnapshot();

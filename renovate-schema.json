@@ -131,6 +131,11 @@
       "type": "string",
       "default": "Update Dependencies (Renovate Bot)"
     },
+    "configWarningReuseIssue": {
+      "description": "Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.",
+      "type": "boolean",
+      "default": true
+    },
     "privateKey": {
       "description": "Server-side private key",
       "type": "string"
@@ -299,6 +304,7 @@
         "npm",
         "pep440",
         "poetry",
+        "regex",
         "ruby",
         "semver",
         "swift"
@@ -561,6 +567,11 @@
       "type": "boolean",
       "default": false
     },
+    "rebaseConflictedPrs": {
+      "description": "Auto-rebase when there is conflict in PRs",
+      "type": "boolean",
+      "default": true
+    },
     "rebaseStalePrs": {
       "description": "Rebase any PRs that are not up-to-date with the base branch",
       "type": "boolean",
@@ -580,6 +591,11 @@
       "description": "Set a status check for unpublish-safe upgrades",
       "type": "boolean",
       "default": false
+    },
+    "stabilityDays": {
+      "description": "Number of days required before a new release is considered to be stabilized.",
+      "type": "integer",
+      "default": 0
     },
     "prCreation": {
       "description": "When to create the PR for a branch.",
@@ -939,11 +955,12 @@
     },
     "pub": {
       "description": "Configuration object for when renovating Dart pubspec files",
-      "type": "json",
+      "type": "object",
       "default": {
         "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
         "versionScheme": "npm"
-      }
+      },
+      "$ref": "#"
     },
     "docker": {
       "description": "Configuration object for Docker language",
@@ -1077,11 +1094,12 @@
     },
     "poetry": {
       "description": "Configuration object for pyproject.toml files",
-      "type": "toml",
+      "type": "object",
       "default": {
         "versionScheme": "poetry",
         "fileMatch": ["(^|/)pyproject\\.toml$"]
-      }
+      },
+      "$ref": "#"
     },
     "python": {
       "description": "Configuration object for python",

@@ -109,7 +109,7 @@ module.exports = {
 
 Alternatively, configure `DOCKER_USERNAME` and `DOCKER_PASSWORD` in env to achieve the same.
 
-The above two approaches create an identical host rule in renovatebot. It is possible to add additional host rules following the [documentation](https://renovatebot.com/docs/configuration-options/#hostrules)
+The above two approaches create an identical host rule in renovatebot. It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules)
 
 For example if you have some images you host yourself and some images you pull from docker hub without logging in you can configure that like this:
 

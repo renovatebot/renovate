@@ -4,7 +4,7 @@ import { PackageFile, PackageDependency } from '../common';
 
 export { extractPackageFile };
 
-function extractPackageFile(content: string): PackageFile {
+function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');

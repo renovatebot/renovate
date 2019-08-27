@@ -5,7 +5,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];

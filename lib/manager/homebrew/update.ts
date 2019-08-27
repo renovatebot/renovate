@@ -77,7 +77,11 @@ export async function updateDependency(
   return newContent;
 }
 
-function updateUrl(content: string, oldUrl: string, newUrl: string) {
+function updateUrl(
+  content: string,
+  oldUrl: string,
+  newUrl: string
+): string | null {
   const urlRegExp = /(^|\s)url(\s)/;
   let i = content.search(urlRegExp);
   if (i === -1) {
@@ -102,7 +106,11 @@ function updateUrl(content: string, oldUrl: string, newUrl: string) {
   return newContent;
 }
 
-function getUrlTestContent(content: string, oldUrl: string, newUrl: string) {
+function getUrlTestContent(
+  content: string,
+  oldUrl: string,
+  newUrl: string
+): string {
   const urlRegExp = /(^|\s)url(\s)/;
   const cleanContent = removeComments(content);
   let j = cleanContent.search(urlRegExp);
@@ -118,7 +126,7 @@ function replaceUrl(
   content: string,
   oldUrl: string,
   newUrl: string
-) {
+): string | null {
   let i = idx;
   i += 'url'.length;
   i = skip(i, content, c => isSpace(c));
@@ -132,7 +140,11 @@ function replaceUrl(
   return newContent;
 }
 
-function updateSha256(content: string, oldSha256: string, newSha256: string) {
+function updateSha256(
+  content: string,
+  oldSha256: string,
+  newSha256: string
+): string | null {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   let i = content.search(sha256RegExp);
   if (i === -1) {
@@ -161,7 +173,7 @@ function getSha256TestContent(
   content: string,
   oldSha256: string,
   newSha256: string
-) {
+): string | null {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   const cleanContent = removeComments(content);
   let j = cleanContent.search(sha256RegExp);
@@ -177,7 +189,7 @@ function replaceSha256(
   content: string,
   oldSha256: string,
   newSha256: string
-) {
+): string | null {
   let i = idx;
   i += 'sha256'.length;
   i = skip(i, content, c => isSpace(c));

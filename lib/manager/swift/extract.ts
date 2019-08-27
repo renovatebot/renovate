@@ -47,7 +47,7 @@ const searchLabels = {
   exactVersion: EXACT_VERSION,
 };
 
-function searchKeysForState(state) {
+function searchKeysForState(state): string[] {
   switch (state) {
     case 'dependencies':
       return [SPACE, COLON, WILDCARD];
@@ -94,7 +94,7 @@ interface MatchResult {
   substr: string;
 }
 
-function getMatch(str: string, state: string): MatchResult {
+function getMatch(str: string, state: string): MatchResult | null {
   const keys = searchKeysForState(state);
   let result = null;
   for (let i = 0; i < keys.length; i += 1) {
@@ -117,7 +117,7 @@ function getMatch(str: string, state: string): MatchResult {
   return result;
 }
 
-function getDepName(url: string) {
+function getDepName(url: string): string | null {
   try {
     const { host, pathname } = new URL(url);
     if (host === 'github.com' || host === 'gitlab.com') {
@@ -135,7 +135,7 @@ function getDepName(url: string) {
 export function extractPackageFile(
   content: string,
   packageFile: string = null
-): PackageFile {
+): PackageFile | null {
   if (!content) return null;
 
   const result: PackageFile = {
