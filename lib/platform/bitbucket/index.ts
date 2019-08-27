@@ -328,7 +328,7 @@ export async function findIssue(title: string) {
 
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.debug('Issues are disabled - cannot findIssue');
     return null;
   }
   const issues = await findOpenIssues(title);
@@ -357,7 +357,7 @@ export async function ensureIssue(title: string, body: string) {
 
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.warn('Issues are disabled - cannot ensureIssue');
     logger.info({ title, body }, 'Failed to ensure Issue');
     return null;
   }
@@ -411,7 +411,7 @@ export /* istanbul ignore next */ async function getIssueList() {
 
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.debug('Issues are disabled - cannot getIssueList');
     return [];
   }
   try {
@@ -435,7 +435,7 @@ export /* istanbul ignore next */ async function getIssueList() {
 export async function ensureIssueClosing(title: string) {
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
   }
   const issues = await findOpenIssues(title);
