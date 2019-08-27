@@ -1,31 +1,61 @@
-const { logger } = require('../../../../logger');
-const versioning = require('../../../../versioning');
-const { getRollbackUpdate } = require('./rollback');
-const { getRangeStrategy } = require('../../../../manager');
-const { filterVersions } = require('./filter');
-const {
+import { logger } from '../../../../logger';
+import { get } from '../../../../versioning';
+import { getRollbackUpdate, RollbackConfig } from './rollback';
+import { getRangeStrategy } from '../../../../manager';
+import { filterVersions } from './filter';
+import {
   getPkgReleases,
   supportsDigests,
   getDigest,
-} = require('../../../../datasource');
+  Release,
+} from '../../../../datasource';
+import { LookupUpdate } from './common';
+import { RangeConfig } from '../../../../manager/common';
 
-const clone = input => JSON.parse(JSON.stringify(input));
+const clone = <T>(input: T): T => JSON.parse(JSON.stringify(input));
 
-module.exports = {
-  lookupUpdates,
-};
+export interface LookupWarning {
+  updateType: 'warning';
+  message: string;
+}
 
-async function lookupUpdates(config) {
+export interface UpdateResult {
+  sourceDirectory?: string;
+  dockerRepository?: string;
+  dockerRegistry?: string;
+  changelogUrl?: string;
+  homepage?: string;
+  deprecationMessage?: string;
+  sourceUrl?: string;
+  skipReason?: string;
+  releases: Release[];
+
+  updates: LookupUpdate[];
+  warnings: LookupWarning[];
+}
+
+export interface LookupUpdateConfig extends RollbackConfig, RangeConfig {
+  separateMinorPatch?: boolean;
+  digestOneAndOnly?: boolean;
+  pinDigests?: boolean;
+  rollbackPrs?: boolean;
+  followTag?: string;
+  currentDigest?: string;
+  lockedVersion?: string;
+}
+
+export async function lookupUpdates(
+  config: LookupUpdateConfig
+): Promise<UpdateResult> {
   const { depName, currentValue, lockedVersion } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = versioning.get(config.versionScheme);
-  /** @type any */
-  const res = { updates: [], warnings: [] };
+  const version = get(config.versionScheme);
+  const res: UpdateResult = { updates: [], warnings: [] } as any;
   if (version.isValid(currentValue)) {
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
-      const result = {
+      const result: LookupWarning = {
         updateType: 'warning',
         message: `Failed to look up dependency ${depName}`,
       };
@@ -93,12 +123,10 @@ async function lookupUpdates(config) {
       const rollback = getRollbackUpdate(config, allVersions);
       // istanbul ignore if
       if (!rollback) {
-        res.warnings.push([
-          {
-            updateType: 'warning',
-            message: `Can't find version matching ${currentValue} for ${depName}`,
-          },
-        ]);
+        res.warnings.push({
+          updateType: 'warning',
+          message: `Can't find version matching ${currentValue} for ${depName}`,
+        });
         return res;
       }
       res.updates.push(rollback);
@@ -140,7 +168,7 @@ async function lookupUpdates(config) {
     );
     const buckets = {};
     for (const toVersion of filteredVersions) {
-      const update = { fromVersion, toVersion };
+      const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
         update.newValue = version.getNewValue(
           currentValue,
@@ -296,7 +324,7 @@ async function lookupUpdates(config) {
 
 function getType(config, fromVersion, toVersion) {
   const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = versioning.get(versionScheme);
+  const version = get(versionScheme);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
     return 'bump';
   }
@@ -336,7 +364,7 @@ function getBucket(config, update) {
 
 function getFromVersion(config, rangeStrategy, allVersions) {
   const { currentValue, lockedVersion, versionScheme } = config;
-  const version = versioning.get(versionScheme);
+  const version = get(versionScheme);
   if (version.isVersion(currentValue)) {
     return currentValue;
   }

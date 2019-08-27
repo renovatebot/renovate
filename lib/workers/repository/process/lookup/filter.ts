@@ -1,18 +1,15 @@
-const semver = require('semver');
-const { logger } = require('../../../../logger');
-const versioning = require('../../../../versioning');
+import { validRange, satisfies, coerce } from 'semver';
+import { logger } from '../../../../logger';
+import { get } from '../../../../versioning';
+import { Release } from '../../../../datasource';
 
-module.exports = {
-  filterVersions,
-};
-
-function filterVersions(
-  config,
-  fromVersion,
-  latestVersion,
-  versions,
-  releases
-) {
+export function filterVersions(
+  config: any,
+  fromVersion: string,
+  latestVersion: string,
+  versions: string[],
+  releases: Release[]
+): string[] {
   const {
     versionScheme,
     ignoreUnstable,
@@ -20,7 +17,7 @@ function filterVersions(
     respectLatest,
     allowedVersions,
   } = config;
-  const version = versioning.get(versionScheme);
+  const version = get(versionScheme);
   if (!fromVersion) {
     return [];
   }
@@ -50,13 +47,13 @@ function filterVersions(
       filteredVersions = filteredVersions.filter(v =>
         version.matches(v, allowedVersions)
       );
-    } else if (versionScheme !== 'npm' && semver.validRange(allowedVersions)) {
+    } else if (versionScheme !== 'npm' && validRange(allowedVersions)) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter(v =>
-        semver.satisfies(semver.coerce(v), allowedVersions)
+        satisfies(coerce(v), allowedVersions)
       );
     } else {
       logger.warn(
