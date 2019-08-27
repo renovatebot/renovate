@@ -43,8 +43,7 @@ describe('util/host-rules', () => {
   });
   describe('find()', () => {
     it('warns and returns empty for bad search', () => {
-      // @ts-ignore
-      expect(find({ abc: 'def' })).toEqual({});
+      expect(find({ abc: 'def' } as any)).toEqual({});
     });
     it('needs exact host matches', () => {
       add({
