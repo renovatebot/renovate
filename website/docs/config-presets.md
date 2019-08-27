@@ -9,7 +9,7 @@ Renovate's "config presets" are a convenient way to distribute config that is re
 
 In short:
 
-- Browse [Renovate's default presets](https://renovatebot.com/docs/presets-default/) to find any that are useful to you
+- Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you
 - Publish your own if you wish to reuse them across repositories
 
 ## Goals of Preset Configs

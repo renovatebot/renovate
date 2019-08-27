@@ -17,4 +17,4 @@ Renovate supports upgrading dependencies in PHP's `composer.json` files and thei
 
 ## Enabling
 
-Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) or [Renovate Pro](https://renovatebot.com/pro) for self-hosted options.
+Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
