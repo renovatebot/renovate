@@ -1,10 +1,20 @@
-import { validRange, satisfies, coerce } from 'semver';
+import * as semver from 'semver';
 import { logger } from '../../../../logger';
-import { get } from '../../../../versioning';
+import * as versioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 
+export interface FilterConfig {
+  allowedVersions?: string;
+  depName?: string;
+  followTag?: string;
+  ignoreDeprecated?: boolean;
+  ignoreUnstable?: boolean;
+  respectLatest?: boolean;
+  versionScheme: string;
+}
+
 export function filterVersions(
-  config: any,
+  config: FilterConfig,
   fromVersion: string,
   latestVersion: string,
   versions: string[],
@@ -17,7 +27,7 @@ export function filterVersions(
     respectLatest,
     allowedVersions,
   } = config;
-  const version = get(versionScheme);
+  const version = versioning.get(versionScheme);
   if (!fromVersion) {
     return [];
   }
@@ -47,13 +57,13 @@ export function filterVersions(
       filteredVersions = filteredVersions.filter(v =>
         version.matches(v, allowedVersions)
       );
-    } else if (versionScheme !== 'npm' && validRange(allowedVersions)) {
+    } else if (versionScheme !== 'npm' && semver.validRange(allowedVersions)) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter(v =>
-        satisfies(coerce(v), allowedVersions)
+        semver.satisfies(semver.coerce(v), allowedVersions)
       );
     } else {
       logger.warn(

@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import { get } from '../../../../versioning';
+import * as versioning from '../../../../versioning';
 import { LookupUpdate } from './common';
 
 export interface RollbackConfig {
@@ -14,7 +14,7 @@ export function getRollbackUpdate(
   versions: string[]
 ): LookupUpdate {
   const { packageFile, versionScheme, depName, currentValue } = config;
-  const version = get(versionScheme);
+  const version = versioning.get(versionScheme);
   // istanbul ignore if
   if (!version.isLessThanRange) {
     logger.info(

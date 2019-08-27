@@ -1,8 +1,8 @@
 import { logger } from '../../../../logger';
-import { get } from '../../../../versioning';
+import * as versioning from '../../../../versioning';
 import { getRollbackUpdate, RollbackConfig } from './rollback';
 import { getRangeStrategy } from '../../../../manager';
-import { filterVersions } from './filter';
+import { filterVersions, FilterConfig } from './filter';
 import {
   getPkgReleases,
   supportsDigests,
@@ -11,6 +11,7 @@ import {
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
+import { RenovateConfig } from '../../../../config';
 
 const clone = <T>(input: T): T => JSON.parse(JSON.stringify(input));
 
@@ -34,14 +35,20 @@ export interface UpdateResult {
   warnings: LookupWarning[];
 }
 
-export interface LookupUpdateConfig extends RollbackConfig, RangeConfig {
+export interface LookupUpdateConfig
+  extends RollbackConfig,
+    FilterConfig,
+    RangeConfig,
+    RenovateConfig {
   separateMinorPatch?: boolean;
   digestOneAndOnly?: boolean;
   pinDigests?: boolean;
   rollbackPrs?: boolean;
-  followTag?: string;
   currentDigest?: string;
   lockedVersion?: string;
+
+  separateMajorMinor?: boolean;
+  separateMultipleMajor?: boolean;
 }
 
 export async function lookupUpdates(
@@ -49,7 +56,7 @@ export async function lookupUpdates(
 ): Promise<UpdateResult> {
   const { depName, currentValue, lockedVersion } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = get(config.versionScheme);
+  const version = versioning.get(config.versionScheme);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
   if (version.isValid(currentValue)) {
     const dependency = clone(await getPkgReleases(config));
@@ -322,9 +329,13 @@ export async function lookupUpdates(
   return res;
 }
 
-function getType(config, fromVersion, toVersion) {
+function getType(
+  config: LookupUpdateConfig,
+  fromVersion: string,
+  toVersion: string
+): string {
   const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = get(versionScheme);
+  const version = versioning.get(versionScheme);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
     return 'bump';
   }
@@ -343,7 +354,7 @@ function getType(config, fromVersion, toVersion) {
   return 'minor';
 }
 
-function getBucket(config, update) {
+function getBucket(config: LookupUpdateConfig, update: LookupUpdate) {
   const { separateMajorMinor, separateMultipleMajor } = config;
   const { updateType, newMajor } = update;
   if (updateType === 'lockfileUpdate') {
@@ -362,9 +373,13 @@ function getBucket(config, update) {
   return updateType;
 }
 
-function getFromVersion(config, rangeStrategy, allVersions) {
+function getFromVersion(
+  config: LookupUpdateConfig,
+  rangeStrategy: string,
+  allVersions: string[]
+): string {
   const { currentValue, lockedVersion, versionScheme } = config;
-  const version = get(versionScheme);
+  const version = versioning.get(versionScheme);
   if (version.isVersion(currentValue)) {
     return currentValue;
   }
