@@ -51,6 +51,7 @@ describe('workers/repository/onboarding/pr', () => {
         title: 'Configure Renovate',
         body: createPrBody,
         isConflicted: true,
+        isModified: true,
       });
       await ensureOnboardingPr(config, [], branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -61,6 +62,7 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getBranchPr.mockReturnValue({
         title: 'Configure Renovate',
         body: createPrBody,
+        isModified: true,
       });
       await ensureOnboardingPr(config, [], branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
