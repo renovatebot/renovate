@@ -1,11 +1,12 @@
-const fs = require('fs');
-const { decryptConfig } = require('../../lib/config/decrypt.js');
+import fs from 'fs';
+import { decryptConfig } from '../../lib/config/decrypt';
+import { RenovateConfig } from '../../lib/config';
 
 const privateKey = fs.readFileSync('test/config/keys/_fixtures/private.pem');
 
 describe('config/decrypt', () => {
   describe('decryptConfig()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       config = {};
     });

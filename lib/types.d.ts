@@ -46,6 +46,6 @@ declare let renovateCache: Renovate.Cache;
 
 // can't use `resolveJsonModule` because it will copy json files and change dist path
 declare module '*.json' {
-  const value: any;
+  const value: { version: string } & Record<string, any>;
   export = value;
 }

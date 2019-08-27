@@ -5,7 +5,7 @@
     ":automergeMinor",
     ":label(ready)",
     "group:linters",
-    ":masterIssueApproval",
+    ":masterIssue",
     ":maintainLockFilesWeekly",
     ":assignee(rarkins)"
   ],
@@ -19,7 +19,12 @@
     "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
   },
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Sourcegraph"],
+  "stabilityDays": 3,
   "packageRules": [
+    {
+      "updateTypes": ["major"],
+      "masterIssueApproval": true
+    },
     {
       "packageNames": ["npm", "yarn"],
       "automerge": false

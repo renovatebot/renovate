@@ -7,7 +7,7 @@ export { extractPackageFile };
 async function extractPackageFile(
   content: string,
   fileName?: string
-): Promise<PackageFile> {
+): Promise<PackageFile | null> {
   const res: PackageFile = {
     registryUrls: [],
     deps: [],

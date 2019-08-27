@@ -1,7 +1,10 @@
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
-export function updateDependency(currentFileContent: string, upgrade: Upgrade) {
+export function updateDependency(
+  currentFileContent: string,
+  upgrade: Upgrade
+): string | null {
   try {
     const lineIdx = upgrade.managerData.lineNumber - 1;
     logger.debug(`buildkite.updateDependency: ${upgrade.newValue}`);

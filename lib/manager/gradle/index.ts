@@ -21,7 +21,7 @@ const TIMEOUT_CODE = 143;
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[]> {
+): Promise<PackageFile[] | null> {
   if (
     !packageFiles.some(packageFile =>
       ['build.gradle', 'build.gradle.kts'].includes(packageFile)
@@ -117,7 +117,7 @@ async function executeGradle(config: ExtractConfig) {
   logger.info('Gradle report complete');
 }
 
-async function getGradleCommandLine(config: ExtractConfig) {
+async function getGradleCommandLine(config: ExtractConfig): Promise<string> {
   let cmd: string;
   const gradlewExists = await exists(config.localDir + '/gradlew');
   if (config.binarySource === 'docker') {
@@ -129,4 +129,5 @@ async function getGradleCommandLine(config: ExtractConfig) {
   }
   return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
 }
+
 export const language = 'java';

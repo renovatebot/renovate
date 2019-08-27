@@ -4,7 +4,12 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 
-function parseUrl(urlString: string) {
+interface UrlParsedResult {
+  repo: string;
+  currentValue: string;
+}
+
+function parseUrl(urlString: string): UrlParsedResult | null {
   // istanbul ignore if
   if (!urlString) {
     return null;
@@ -29,7 +34,7 @@ function parseUrl(urlString: string) {
   return null;
 }
 
-function findBalancedParenIndex(longString: string) {
+function findBalancedParenIndex(longString: string): number {
   /**
    * Minimalistic string parser with single task -> find last char in def.
    * It treats [)] as the last char.
@@ -63,7 +68,7 @@ function findBalancedParenIndex(longString: string) {
   });
 }
 
-function parseContent(content: string) {
+function parseContent(content: string): string[] {
   return [
     'container_pull',
     'http_archive',
@@ -86,7 +91,7 @@ function parseContent(content: string) {
   );
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   const definitions = parseContent(content);
   if (!definitions.length) {
     logger.debug('No matching WORKSPACE definitions found');

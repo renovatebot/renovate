@@ -460,6 +460,7 @@ export /* istanbul ignore next */ function ensureIssue(
   body: string
 ) {
   logger.debug(`ensureIssue(${title}, body={${body}})`);
+  logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
   // BB Server doesnt have issues

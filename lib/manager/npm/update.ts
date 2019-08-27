@@ -6,7 +6,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   const { depType, depName } = upgrade;
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
@@ -137,7 +137,7 @@ export function updateDependency(
 }
 
 // Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string) {
+function matchAt(content: string, index: number, match: string): boolean {
   return content.substring(index, index + match.length) === match;
 }
 
@@ -147,7 +147,7 @@ function replaceAt(
   index: number,
   oldString: string,
   newString: string
-) {
+): string {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -160,7 +160,7 @@ export function bumpPackageVersion(
   content: string,
   currentValue: string,
   bumpVersion: ReleaseType | string
-) {
+): string {
   if (!bumpVersion) {
     return content;
   }

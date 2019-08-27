@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
 // Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string) {
+function matchAt(content: string, index: number, match: string): boolean {
   return content.substring(index, index + match.length) === match;
 }
 
@@ -14,7 +14,7 @@ function replaceAt(
   index: number,
   oldString: string,
   newString: string
-) {
+): string {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -26,7 +26,7 @@ function replaceAt(
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     const { depType, depName, newValue, managerData = {} } = upgrade;
     const { nestedVersion } = managerData;

@@ -5,7 +5,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     const newFrom = getNewFrom(upgrade);
     logger.debug(`kubernetes.updateDependency(): ${newFrom}`);

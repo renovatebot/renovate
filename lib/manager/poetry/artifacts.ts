@@ -11,7 +11,7 @@ export async function updateArtifacts(
   updatedDeps: string[],
   newPackageFileContent: string,
   config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[]> {
+): Promise<UpdateArtifactsResult[] | null> {
   await logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
     logger.debug('No updated poetry deps - returning null');

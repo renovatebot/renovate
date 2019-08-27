@@ -1,9 +1,5 @@
-const configDefinitions = require('./definitions');
-
-module.exports = {
-  getDefault,
-  getConfig,
-};
+import { getOptions, RenovateOptions } from './definitions';
+import { RenovateConfig } from './common';
 
 const defaultValues = {
   boolean: true,
@@ -12,15 +8,15 @@ const defaultValues = {
   object: null,
 };
 
-function getDefault(option) {
+export function getDefault(option: RenovateOptions): any {
   return option.default === undefined
     ? defaultValues[option.type]
     : option.default;
 }
 
-function getConfig() {
-  const options = configDefinitions.getOptions();
-  const config = {};
+export function getConfig(): RenovateConfig {
+  const options = getOptions();
+  const config: RenovateConfig = {};
   options.forEach(option => {
     if (!option.parent) {
       config[option.name] = getDefault(option);

@@ -191,11 +191,12 @@ export function extractPackage(
   return result;
 }
 
-export function resolveProps(packages: PackageFile[]): PackageFile[] {
+export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, PackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
+  const registryUrls: Record<string, Set<string>> = {};
   packages.forEach(pkg => {
     const name = pkg.packageFile;
     packageFileNames.push(name);
@@ -207,21 +208,42 @@ export function resolveProps(packages: PackageFile[]): PackageFile[] {
   // and merge them in reverse order,
   // which allows inheritance/overriding.
   packageFileNames.forEach(name => {
-    const hierarchy: Record<string, MavenProp>[] = [];
-    const alreadyExtracted: Record<string, boolean> = {};
+    registryUrls[name] = new Set();
+    const propsHierarchy: Record<string, MavenProp>[] = [];
+    const visitedPackages: Set<string> = new Set();
     let pkg = extractedPackages[name];
     while (pkg) {
-      hierarchy.unshift(pkg.mavenProps);
-      if (pkg.parent && !alreadyExtracted[pkg.parent]) {
-        alreadyExtracted[pkg.parent] = true;
+      propsHierarchy.unshift(pkg.mavenProps);
+
+      if (pkg.deps) {
+        pkg.deps.forEach(dep => {
+          if (dep.registryUrls) {
+            dep.registryUrls.forEach(url => {
+              registryUrls[name].add(url);
+            });
+          }
+        });
+      }
+
+      if (pkg.parent && !visitedPackages.has(pkg.parent)) {
+        visitedPackages.add(pkg.parent);
         pkg = extractedPackages[pkg.parent];
       } else {
         pkg = null;
       }
     }
-    hierarchy.unshift({});
+    propsHierarchy.unshift({});
     // @ts-ignore
-    extractedProps[name] = Object.assign.apply(null, hierarchy);
+    extractedProps[name] = Object.assign.apply(null, propsHierarchy);
+  });
+
+  // Resolve registryUrls
+  packageFileNames.forEach(name => {
+    const pkg = extractedPackages[name];
+    pkg.deps.forEach(rawDep => {
+      const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
+      rawDep.registryUrls = [...urlsSet]; // eslint-disable-line no-param-reassign
+    });
   });
 
   // Resolve placeholders
@@ -270,6 +292,5 @@ export async function extractAllPackageFiles(
       logger.info({ packageFile }, 'packageFile has no content');
     }
   }
-
-  return cleanResult(resolveProps(packages));
+  return cleanResult(resolveParents(packages));
 }

@@ -1,24 +1,23 @@
 import is from '@sindresorhus/is';
+import safe from 'safe-regex';
+import { getOptions, RenovateOptions } from './definitions';
+import { resolveConfigPresets } from './presets';
+import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
+import * as managerValidator from './validation-helpers/managers';
+import { RenovateConfig, ValidationMessage } from './common';
 
-const safe = require('safe-regex');
-const options = require('./definitions').getOptions();
-const { resolveConfigPresets } = require('./presets');
-const {
-  hasValidSchedule,
-  hasValidTimezone,
-} = require('../workers/branch/schedule');
-const managerValidator = require('./validation-helpers/managers');
+const options = getOptions();
 
-let optionTypes;
-
-export { validateConfig };
+let optionTypes: Record<string, RenovateOptions['type']>;
 
 // istanbul ignore next
-async function validateBaseBranches(config) {
+async function validateBaseBranches(
+  config: RenovateConfig
+): Promise<ValidationMessage[]> {
   if (!is.nonEmptyArray(config.baseBranches)) {
     return [];
   }
-  const missingBranches = [];
+  const missingBranches: string[] = [];
   for (const baseBranch of config.baseBranches) {
     if (!(await platform.branchExists(baseBranch))) {
       missingBranches.push(baseBranch);
@@ -37,19 +36,28 @@ async function validateBaseBranches(config) {
   return [];
 }
 
-async function validateConfig(config, isPreset, parentPath) {
+export interface ValidationResult {
+  errors: ValidationMessage[];
+  warnings: ValidationMessage[];
+}
+
+export async function validateConfig(
+  config: RenovateConfig,
+  isPreset?: boolean,
+  parentPath?: string
+): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
     options.forEach(option => {
       optionTypes[option.name] = option.type;
     });
   }
-  let errors = [];
-  let warnings = [];
+  let errors: ValidationMessage[] = [];
+  let warnings: ValidationMessage[] = [];
 
   errors = errors.concat(await validateBaseBranches(config));
 
-  function getDeprecationMessage(option) {
+  function getDeprecationMessage(option: string): string {
     const deprecatedOptions = {
       branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, managerBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
@@ -58,7 +66,7 @@ async function validateConfig(config, isPreset, parentPath) {
     return deprecatedOptions[option];
   }
 
-  function isIgnored(key) {
+  function isIgnored(key: string): boolean {
     const ignoredNodes = [
       '$schema',
       'prBanner',
@@ -205,6 +213,7 @@ async function validateConfig(config, isPreset, parentPath) {
               try {
                 // @ts-ignore
                 RegExp(val);
+                // @ts-ignore
                 if (!safe(val)) {
                   errors.push({
                     depName: 'Configuration Error',
@@ -278,7 +287,7 @@ async function validateConfig(config, isPreset, parentPath) {
       }
     }
   }
-  function sortAll(a, b) {
+  function sortAll(a: ValidationMessage, b: ValidationMessage): number {
     if (a.depName === b.depName) {
       return a.message > b.message ? 1 : -1;
     }

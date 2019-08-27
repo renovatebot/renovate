@@ -37,11 +37,11 @@ export async function getPkgReleases(
       if (columns.length) {
         const version = columns[0].replace('Ruby ', '');
         if (isVersion(version)) {
-          const releaseDate = columns[1];
+          const releaseTimestamp = columns[1];
           const changelogUrl = columns[2]
             .replace('<a href="', 'https://www.ruby-lang.org')
             .replace('">more...</a>', '');
-          res.releases.push({ version, releaseDate, changelogUrl });
+          res.releases.push({ version, releaseTimestamp, changelogUrl });
         }
       }
     }

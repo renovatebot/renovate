@@ -7,7 +7,7 @@ const getPkgReleases: any = _getPkgReleases;
 
 jest.mock('../../../lib/datasource/github');
 
-describe('lib/manager/node/package', () => {
+describe('lib/manager/travis/package', () => {
   describe('getPackageUpdates', () => {
     // TODO: should be `PackageUpdateConfig`
     let config: any;

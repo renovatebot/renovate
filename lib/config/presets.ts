@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
-
-const { logger } = require('../logger');
-const configParser = require('./index');
-const massage = require('./massage');
-const migration = require('./migration');
-const github = require('../datasource/github');
-const npm = require('../datasource/npm');
-const gitlab = require('../datasource/gitlab');
+import { logger } from '../logger';
+// eslint-disable-next-line import/no-cycle
+import * as configParser from './index';
+import * as massage from './massage';
+import * as migration from './migration';
+import * as github from '../datasource/github';
+import * as npm from '../datasource/npm';
+import * as gitlab from '../datasource/gitlab';
+import { RenovateConfig } from './common';
 
 const datasources = {
   github,
@@ -14,13 +15,11 @@ const datasources = {
   gitlab,
 };
 
-export { resolveConfigPresets, replaceArgs, parsePreset, getPreset };
-
-async function resolveConfigPresets(
-  inputConfig,
-  ignorePresets,
-  existingPresets = []
-) {
+export async function resolveConfigPresets(
+  inputConfig: RenovateConfig,
+  ignorePresets?: string[],
+  existingPresets: string[] = []
+): Promise<RenovateConfig> {
   if (!ignorePresets) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
@@ -28,7 +27,7 @@ async function resolveConfigPresets(
     { config: inputConfig, existingPresets },
     'resolveConfigPresets'
   );
-  let config = {};
+  let config: RenovateConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends && inputConfig.extends.length) {
     for (const preset of inputConfig.extends) {
@@ -121,7 +120,10 @@ async function resolveConfigPresets(
   return config;
 }
 
-function replaceArgs(obj, argMapping) {
+export function replaceArgs(
+  obj: string | string[] | object | object[],
+  argMapping: Record<string, any>
+) {
   if (is.string(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
@@ -147,12 +149,19 @@ function replaceArgs(obj, argMapping) {
   return obj;
 }
 
-function parsePreset(input) {
+export interface ParsedPreset {
+  datasource: string;
+  packageName: string;
+  presetName: string;
+  params?: string[];
+}
+
+export function parsePreset(input: string): ParsedPreset {
   let str = input;
-  let datasource;
-  let packageName;
-  let presetName;
-  let params;
+  let datasource: string;
+  let packageName: string;
+  let presetName: string;
+  let params: string[];
   if (str.startsWith('github>')) {
     datasource = 'github';
     str = str.substring('github>'.length);
@@ -199,7 +208,7 @@ function parsePreset(input) {
   return { datasource, packageName, presetName, params };
 }
 
-async function getPreset(preset) {
+export async function getPreset(preset: string): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   const { datasource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await datasources[datasource].getPreset(

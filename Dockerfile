@@ -23,7 +23,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
 
 ## Gradle
 
@@ -137,11 +137,11 @@ USER ubuntu
 # Cargo
 
 ENV RUST_BACKTRACE=1 \
-    PATH=/home/ubuntu/.cargo/bin:$PATH
+  PATH=/home/ubuntu/.cargo/bin:$PATH
 
 RUN set -ex ;\
-    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
-    rustup toolchain install 1.36.0
+  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+  rustup toolchain install 1.36.0
 
 # Pipenv
 

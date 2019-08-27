@@ -2,7 +2,7 @@ export function skip(
   idx: number,
   content: string,
   cond: (s: string) => boolean
-) {
+): number {
   let i = idx;
   while (i < content.length) {
     if (!cond(content[i])) {
@@ -13,18 +13,18 @@ export function skip(
   return i;
 }
 
-export function isSpace(c: string) {
+export function isSpace(c: string): boolean {
   return /\s/.test(c);
 }
 
-export function removeComments(content: string) {
+export function removeComments(content: string): string {
   let newContent = removeLineComments(content);
   newContent = removeMultiLineComments(newContent);
   return newContent;
 }
 
 // Remove line comments starting with #
-function removeLineComments(content: string) {
+function removeLineComments(content: string): string {
   let newContent = '';
   let comment = false;
   for (let i = 0; i < content.length; i += 1) {
@@ -45,7 +45,7 @@ function removeLineComments(content: string) {
 }
 
 // Remove multi-line comments enclosed between =begin and =end
-function removeMultiLineComments(content: string) {
+function removeMultiLineComments(content: string): string {
   const beginRegExp = /(^|\n)=begin\s/;
   const endRegExp = /(^|\n)=end\s/;
   let newContent = content;

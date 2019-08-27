@@ -6,7 +6,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../common';
 
-function matchesAnyPattern(val: string, patterns: string[]) {
+function matchesAnyPattern(val: string, patterns: string[]): boolean {
   const res = patterns.some(
     pattern => pattern === val + '/' || minimatch(val, pattern, { dot: true })
   );

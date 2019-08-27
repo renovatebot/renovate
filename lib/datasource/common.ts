@@ -19,7 +19,6 @@ export interface Release {
   gitref?: string;
   isDeprecated?: boolean;
 
-  releaseDate?: string;
   releaseTimestamp?: any;
   version: string;
 }
