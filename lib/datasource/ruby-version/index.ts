@@ -27,8 +27,7 @@ export async function getPkgReleases(
       releases: [],
     };
     const response = await got(rubyVersionsUrl);
-    const root = parse(response.body);
-    // @ts-ignore
+    const root: any = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     for (const row of rows) {
       const columns: string[] = Array.from(

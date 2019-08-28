@@ -14,8 +14,7 @@ export async function getPreset(
   if (presetName !== 'default') {
     // TODO: proper error contructor
     throw new Error(
-      { pkgName, presetName },
-      // @ts-ignore
+      // { pkgName, presetName },
       'Sub-preset names are not supported with Gitlab datasource'
     );
   }
