@@ -139,9 +139,7 @@ export async function extractPackageFile(
     .filter(Boolean)
     .sort((a, b) =>
       a.managerData.lineNumber === b.managerData.lineNumber
-        ? // TODO: dummy comment for prettier
-          // @ts-ignore
-          (a.depName > b.depName) - (a.depName < b.depName)
+        ? a.depName.localeCompare(b.depName)
         : a.managerData.lineNumber - b.managerData.lineNumber
     );
   // istanbul ignore if

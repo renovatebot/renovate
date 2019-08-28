@@ -69,6 +69,7 @@ export async function getDependency(
     cacheNamespace,
     pkgUrl
   );
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }

@@ -436,7 +436,7 @@ export class Storage {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line
   cleanRepo() {}
 
   static getUrl({

@@ -357,9 +357,10 @@ describe('semverRuby', () => {
         ['1.2.3', '<= 1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '~> 1.0.3', 'pin', '1.0.4', '1.2.3'],
         ['4.7.8', '~> 4.7, >= 4.7.4', 'pin', '4.7.5', '4.7.8'],
-      ].forEach(([expected, ...params]) => {
-        // @ts-ignore
-        expect(semverRuby.getNewValue(...params)).toEqual(expected);
+      ].forEach(([expected, current, range, from, to]) => {
+        expect(semverRuby.getNewValue(current, range as any, from, to)).toEqual(
+          expected
+        );
       });
     });
 
@@ -379,9 +380,10 @@ describe('semverRuby', () => {
         ['~> 1.2.0', '~> 1.0.3', 'bump', '1.0.3', '1.2.3'],
         ['~> 1.0.0', '~> 1.0.3', 'bump', '1.0.3', '1.0.4'],
         ['~> 4.7.0, >= 4.7.9', '~> 4.7, >= 4.7.4', 'bump', '4.7.5', '4.7.9'],
-      ].forEach(([expected, ...params]) => {
-        // @ts-ignore
-        expect(semverRuby.getNewValue(...params)).toEqual(expected);
+      ].forEach(([expected, current, range, from, to]) => {
+        expect(semverRuby.getNewValue(current, range as any, from, to)).toEqual(
+          expected
+        );
       });
     });
 
@@ -415,9 +417,10 @@ describe('semverRuby', () => {
           '2.15.0',
           '2.20.0',
         ],
-      ].forEach(([expected, ...params]) => {
-        // @ts-ignore
-        expect(semverRuby.getNewValue(...params)).toEqual(expected);
+      ].forEach(([expected, current, range, from, to]) => {
+        expect(semverRuby.getNewValue(current, range as any, from, to)).toEqual(
+          expected
+        );
       });
     });
   });

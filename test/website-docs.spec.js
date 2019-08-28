@@ -86,7 +86,6 @@ describe('docs', () => {
   // Lists through each option in the relatedOptions array to be able to locate the exact element which causes error, in case of one
   it('has valid relateOptions values', () => {
     relatedOptions.forEach(relOption => {
-      // @ts-ignore
       expect(allOptionNames).toContainOption(relOption);
     });
   });

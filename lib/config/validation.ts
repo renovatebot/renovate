@@ -86,8 +86,7 @@ export async function validateConfig(
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
-      // @ts-ignore
-      !is.function(val) // Ignore all functions
+      !(is as any).function(val) // Ignore all functions
     ) {
       if (getDeprecationMessage(key)) {
         warnings.push({
@@ -211,10 +210,8 @@ export async function validateConfig(
               !(val && val.length === 1 && val[0] === '*')
             ) {
               try {
-                // @ts-ignore
-                RegExp(val);
-                // @ts-ignore
-                if (!safe(val)) {
+                RegExp(val as any);
+                if (!safe(val as any)) {
                   errors.push({
                     depName: 'Configuration Error',
                     message: `Unsafe regExp for ${currentPath}: \`${val}\``,
