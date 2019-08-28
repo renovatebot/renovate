@@ -502,6 +502,7 @@ export /* istanbul ignore next */ function ensureIssue() {
   logger.warn(`ensureIssue() is not implemented`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export /* istanbul ignore next */ function ensureIssueClosing() {}
 
 export /* istanbul ignore next */ function getIssueList() {

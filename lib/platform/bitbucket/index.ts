@@ -497,7 +497,7 @@ function matchesState(state: string, desiredState: string) {
 export async function findPr(
   branchName: string,
   prTitle?: string | null,
-  state: string = 'all'
+  state = 'all'
 ) {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
