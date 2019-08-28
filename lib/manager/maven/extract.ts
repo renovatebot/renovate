@@ -233,8 +233,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       }
     }
     propsHierarchy.unshift({});
-    // @ts-ignore
-    extractedProps[name] = Object.assign.apply(null, propsHierarchy);
+    extractedProps[name] = Object.assign.apply(null, propsHierarchy as any);
   });
 
   // Resolve registryUrls

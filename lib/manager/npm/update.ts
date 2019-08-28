@@ -33,7 +33,7 @@ export function updateDependency(
     // Save the old version
     const oldVersion = parsedContents[depType][depName];
     if (oldVersion === newValue) {
-      logger.debug('Version is already updated');
+      logger.trace('Version is already updated');
       return bumpPackageVersion(
         fileContent,
         upgrade.packageJsonVersion,
@@ -161,7 +161,6 @@ export function bumpPackageVersion(
   currentValue: string,
   bumpVersion: ReleaseType | string
 ): string {
-  logger.debug('bumpVersion()');
   if (!bumpVersion) {
     return content;
   }

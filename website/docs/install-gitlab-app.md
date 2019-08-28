@@ -15,7 +15,7 @@ Renovate runs as the user [@renovate-bot](https://gitlab.com/renovate-bot) on [g
 
 ### Dashboard
 
-First, sign into the [Dashboard](https://renovatebot.com/dashboard) using GitLab OAuth.
+First, sign into the [Dashboard](https://app.renovatebot.com/dashboard) using GitLab OAuth.
 
 ![Renovate Dashboard Sign In Screenshot](assets/images/dashboard-login.png)
 

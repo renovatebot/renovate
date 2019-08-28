@@ -208,7 +208,7 @@ function moduleMapVariableVersionFormatMatch(
   return new RegExp(
     `group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
     `name\\s*:\\s*["']${dependency.name}["']\\s*,\\s*` +
-    `version\\s*:\\s*([^\\s"']+?)\\s`
+    `version\\s*:\\s*([^\\s"')]+)\\s*`
   );
 }
 

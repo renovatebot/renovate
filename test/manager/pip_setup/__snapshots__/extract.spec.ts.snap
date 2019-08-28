@@ -76,17 +76,17 @@ Object {
       },
     },
     Object {
-      "currentValue": ">=0.15.3,<0.16",
+      "currentValue": ">=3.2.1,<4.0",
       "datasource": "pypi",
-      "depName": "Werkzeug",
+      "depName": "statsd",
       "managerData": Object {
         "lineNumber": 62,
       },
     },
     Object {
-      "currentValue": ">=3.2.1,<4.0",
+      "currentValue": ">=0.15.3,<0.16",
       "datasource": "pypi",
-      "depName": "statsd",
+      "depName": "Werkzeug",
       "managerData": Object {
         "lineNumber": 62,
       },

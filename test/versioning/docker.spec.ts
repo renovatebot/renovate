@@ -110,8 +110,9 @@ describe('docker.', () => {
         ['2.0.1', '1.2.3'],
         ['1.2.3', '0.9.5'],
       ].forEach(pair => {
-        // @ts-ignore
-        expect(docker.sortVersions(...pair)).toBe(semver.sortVersions(...pair));
+        expect(docker.sortVersions(pair[0], pair[1])).toBe(
+          semver.sortVersions(pair[0], pair[1])
+        );
       });
     });
   });
