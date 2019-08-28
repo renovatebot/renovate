@@ -23,6 +23,19 @@ $ docker run renovate/renovate:13.1
 $ docker run renovate/renovate:13
 ```
 
+We also have a `slim` image, which doesn't include the third party binaries (eg Python, Java ...).
+The `slim` image can use [podman](https://podman.io) to start child containers to use these third party tool.
+For this to work you have to start the container with the `--privileged` argument.
+
+Here are some working tags for the `slim` image.
+
+```
+$ docker run renovate/renovate:slim
+$ docker run renovate/renovate:19.34.5-slim
+$ docker run renovate/renovate:19.34-slim
+$ docker run renovate/renovate:19-slim
+```
+
 (Please look up what the latest actual tags are though, do not use the above literally).
 
 If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
