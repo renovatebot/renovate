@@ -9,14 +9,14 @@ import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
-const Graphql = require('./gh-graphql-wrapper').default;
-
 import {
   appName,
   appSlug,
   configFileNames,
   urls,
 } from '../../config/app-strings';
+
+const Graphql = require('./gh-graphql-wrapper').default;
 
 const defaultConfigFile = configFileNames[0];
 

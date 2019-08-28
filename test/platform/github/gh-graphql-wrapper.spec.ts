@@ -1,5 +1,7 @@
-import get from '../../../lib/platform/github/gh-got-wrapper';
 import Graphql from '../../../lib/platform/github/gh-graphql-wrapper';
+
+/** @type any */
+const get = require('../../../lib/platform/github/gh-got-wrapper').default;
 
 jest.mock('../../../lib/platform/github/gh-got-wrapper');
 

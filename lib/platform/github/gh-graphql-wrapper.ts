@@ -2,17 +2,17 @@ import { logger } from '../../logger';
 import get from './gh-got-wrapper';
 
 export default class Graphql {
-  repoOwner: string = '';
+  repoOwner = '';
 
-  repoName: string = '';
+  repoName = '';
 
-  repoItem: string = '';
+  repoItem = '';
 
-  repoItemFilterBy: string = '';
+  repoItemFilterBy = '';
 
   repoItemNodeList: string[] = [];
 
-  repoResultNumEls: number = 100;
+  repoResultNumEls = 100;
 
   setRepoOwner(owner: string): void {
     this.repoOwner = owner;
