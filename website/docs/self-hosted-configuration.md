@@ -15,10 +15,6 @@ Be cautious when using this option - it will run Renovate over _every_ repositor
 
 A [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern for filtering `autodiscover`ed repositories. Ex: `project/*`
 
-## prCommitsPerRunLimit
-
-Parameter to reduce CI load. CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events. Set as an integer. Default is no limit.
-
 ## baseDir
 
 Configure this directory if you want to change which directory Renovate uses for storing data. If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/`.
@@ -81,6 +77,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 Set this to true if you wish for Renovate to persist repo data between runs. The intention is that this allows Renovate to do a faster `git fetch` between runs rather than `git clone`. It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
 ## platform
+
+## prCommitsPerRunLimit
+
+Parameter to reduce CI load. CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events. Set as an integer. Default is no limit.
 
 ## prFooter
 
