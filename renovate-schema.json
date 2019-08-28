@@ -230,6 +230,11 @@
       "type": "string",
       "default": null
     },
+    "prCommitsPerRunLimit": {
+      "description": "Set a maximum number of commits per Renovate run. Default is no limit.",
+      "type": "integer",
+      "default": null
+    },
     "repositories": {
       "description": "List of Repositories",
       "type": "array"
