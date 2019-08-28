@@ -1,8 +1,8 @@
 import { logger } from '../../logger';
 
 const limitsToInit = ['prCommitsPerRunLimit'];
-const l: Record<string, numnber> = {};
-const v: Record<string, numnber> = {};
+const l: Record<string, number> = {};
+const v: Record<string, number> = {};
 
 export function init(config: Record<string, any>) {
   let i;
