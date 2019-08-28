@@ -24,7 +24,6 @@ describe('config/index', () => {
       configParser = require('../../lib/config/index');
       defaultArgv = argv();
       jest.mock('delay');
-      // @ts-ignore
       require('delay').mockImplementation(() => Promise.resolve());
     });
     it('supports token in env', async () => {

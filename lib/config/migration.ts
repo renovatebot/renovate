@@ -90,14 +90,12 @@ export function migrateConfig(
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {
-            // @ts-ignore
-            fileList.push(packageFile.packageFile);
+            fileList.push((packageFile as any).packageFile);
             if (Object.keys(packageFile).length > 1) {
               migratedConfig.packageRules = migratedConfig.packageRules || [];
               const payload = migrateConfig(packageFile, key).migratedConfig;
               for (const subrule of payload.packageRules || []) {
-                // @ts-ignore
-                subrule.paths = [packageFile.packageFile];
+                subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
               }
               delete payload.packageFile;
@@ -105,8 +103,7 @@ export function migrateConfig(
               if (Object.keys(payload).length) {
                 migratedConfig.packageRules.push({
                   ...payload,
-                  // @ts-ignore
-                  paths: [packageFile.packageFile],
+                  paths: [(packageFile as any).packageFile],
                 });
               }
             }
@@ -354,8 +351,7 @@ export function migrateConfig(
       } else if (key === 'depTypes' && is.array(val)) {
         val.forEach(depType => {
           if (is.object(depType) && !is.array(depType)) {
-            // @ts-ignore
-            const depTypeName = depType.depType;
+            const depTypeName = (depType as any).depType;
             if (depTypeName) {
               migratedConfig.packageRules = migratedConfig.packageRules || [];
               const newPackageRule = migrateConfig(depType, key).migratedConfig;
