@@ -1,25 +1,25 @@
 import { logger } from '../../logger';
 
 const limitsToInit = ['prCommitsPerRunLimit'];
-const l = {};
-const v = {};
+const l: Record<string, numnber> = {};
+const v: Record<string, numnber> = {};
 
-export function init() {
+export function init(config: Record<string, any>) {
   let i;
   for (i = 0; i < limitsToInit.length; i += 1) {
-    if (process.env[limitsToInit[i]]) {
-      setLimit(limitsToInit[i], parseInt(process.env[limitsToInit[i]], 10));
+    if (config[limitsToInit[i]]) {
+      setLimit(limitsToInit[i], config[limitsToInit[i]]);
       v[limitsToInit[i]] = 0;
     } else {
-      logger.info(
-        `4279 feat - Limits.init ${limitsToInit[i]} environment variable is not set. Ignoring ${limitsToInit[i]}`
+      logger.debug(
+        `Limits.init ${limitsToInit[i]} variable is not set. Ignoring ${limitsToInit[i]}`
       );
     }
   }
 }
 
 export function setLimit(name: string, value: number) {
-  logger.info(`4279 feat - Limits.setLimit h[${name}] = ${value}`);
+  logger.debug(`Limits.setLimit l[${name}] = ${value}`);
   l[name] = value;
 }
 
