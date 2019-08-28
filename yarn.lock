@@ -7903,19 +7903,19 @@ semver-regex@^2.0.0:
   resolved "https://registry.yarnpkg.com/semver-regex/-/semver-regex-2.0.0.tgz#a93c2c5844539a770233379107b38c7b4ac9d338"
   integrity sha512-mUdIBBvdn0PLOeP3TEkMH7HHeUP3GjsXCwKarjv/kGmUFOYg1VqEemKhoQpWMu6X2I8kHeuVdGibLGkVK+/5Qw==
 
-semver-stable@2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/semver-stable/-/semver-stable-2.0.4.tgz#47be279f68a224b5873470029be04155926eaab8"
-  integrity sha1-R74nn2iiJLWHNHACm+BBVZJuqrg=
+semver-stable@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/semver-stable/-/semver-stable-3.0.0.tgz#6e783a40ea6483ac0aa4ee05ddeb272f451f01ac"
+  integrity sha512-lolq9k0lqdnZ0C4+QJvrPBWiAHGhLaVSMTPJajn527ptOHAcZnEhj0n2r6ALnryNiRKPO9AIO9iBI3ZSheHCaw==
   dependencies:
-    semver "^5.0.1"
+    semver "^6.3.0"
 
 semver-utils@1.1.4:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/semver-utils/-/semver-utils-1.1.4.tgz#cf0405e669a57488913909fc1c3f29bf2a4871e2"
   integrity sha512-EjnoLE5OGmDAVV/8YDoN5KiajNadjzIp9BAHOhYeQHt7j0UWxjmgsx4YD48wp4Ue1Qogq38F1GNUJNqF1kKKxA==
 
-"semver@2 || 3 || 4 || 5", "semver@2.x || 3.x || 4 || 5", "semver@^2.3.0 || 3.x || 4 || 5", semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.5.1, semver@^5.6.0, semver@^5.7.0, semver@^5.7.1:
+"semver@2 || 3 || 4 || 5", "semver@2.x || 3.x || 4 || 5", "semver@^2.3.0 || 3.x || 4 || 5", semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.5.1, semver@^5.6.0, semver@^5.7.0, semver@^5.7.1:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
