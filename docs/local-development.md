@@ -3,7 +3,49 @@
 This document serves to give tips and tricks on how to run Renovate locally to add features or fix bugs.
 Please submit PRs to improve it if you think anything is unclear or you can think of something that should be added.
 
+## General notes
+
+We are currently migrating to [typescript](https://www.typescriptlang.org), so please write all new files as `ts` files
+and feel free to help us to convert existing files.
+
+If you have to modify existing `js` files, please use modern [esm](https://nodejs.org/api/esm.html) `imports`
+and `exports`. We will transpile them to `commonjs` on build.
+
 ## Install
+
+#### Prerequisites
+
+For local development some dependencies are required.
+
+- git
+- nodejs `^10.13.0 || ^12.0.0`
+- yarn `^1.17.0`
+- c++ compiler
+- python `^2.7`
+
+_Linux_
+
+You can use the following commands for `Ubuntu`.
+
+```sh
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt-get update
+sudo apt-get install -y git python-minimal build-essential nodejs yarn
+```
+
+_Windows_
+
+You can use `powershell` and [chocolatey](https://chocolatey.org) to manage required dependencies on `Windows`.
+
+```ps
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+cinst git node-lts yarn python2 visualstudio2017buildtools
+pip install mock
+```
+
+If you have build error, you have to [configure](https://github.com/nodejs/node-gyp#on-windows) `node-gyp` to use the right tools.
 
 #### Fork and Clone
 
@@ -11,7 +53,7 @@ If you will contribute to the project, you should first "fork" the main project 
 
 #### Node version
 
-Renovate supports Node.js `>= 10.13.0 <11.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
+Renovate supports Node.js `^10.13.0 || ^12.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
 
 #### Install dependencies
 
@@ -52,7 +94,7 @@ If this is working then in future you can create other test repos to verify your
 
 ## Tests
 
-You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on TravisCI. `yarn test` runs an `eslint` check, a `prettier` check, and then all the unit tests using `jest`.
+You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on CircleCI and Azure Pipelines. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
 ## Jest
 
@@ -90,7 +132,7 @@ Then, make sure your fork is up to date with `master` each time before creating 
 
 ## Tips and tricks
 
-#### Runnign Renovate against forked repositories
+#### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
 However, by default Renovate skips over repositories that are forked.
@@ -103,7 +145,7 @@ Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
 
-When logging at debug, it's usually easiest to view the logs in a text editor, so in that case you can run like this:
+When logging at debug, it's usually easiest to view the logs in a text editor, so in that case, you can run like this:
 
 ```
 $ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
@@ -117,7 +159,7 @@ We wish to keep backwards-compatibility as often as possible, as well as make
 the code configurable, so most new functionality should be controllable via
 configuration options.
 
-If you wish to add one, add it to `lib/config/definitions.js` and then add documentation to `website/docs/_posts/2017-10-05-configuration-options.md`.
+If you wish to add one, add it to `lib/config/definitions.js` and then add documentation to `website/docs/configuration-options.md`.
 
 ## Debugging
 
@@ -127,3 +169,18 @@ It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
 2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
 3. Run Renovate using `yarn debug ...` instead of `yarn start ...`
 4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+
+If you are using VS Code, try like this:
+
+1. In the configuration file, i.e `config.js` in the root directory of the project, add `token` with your personal access token.
+2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
+
+```javascript
+module.exports = {
+  token: 'xxxxxxxx',
+  repositories: ['r4harry/testrepo1'],
+};
+```
+
+3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`.
+4. Wait for your breakpoint to be triggered.

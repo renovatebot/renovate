@@ -59,7 +59,7 @@ services:
       restart_policy:
         condition: on-failure
 
-  worker:
+  votingworker:
     image: dockersamples/examplevotingapp_worker
     networks:
       - frontend
@@ -89,6 +89,12 @@ services:
 
   edplugins:
     image: ${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}
+
+  debugapp:
+    image: app-local-debug
+    build:
+      context: .
+      dockerfile: Dockerfile.local
 
 networks:
   frontend:

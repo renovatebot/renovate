@@ -1,10 +1,13 @@
-const fs = require('fs-extra');
-const ghGot = require('../../../../lib/util/got');
-const {
+import fs from 'fs-extra';
+import got from '../../../../lib/util/got';
+import {
   addReleaseNotes,
   getReleaseNotes,
   getReleaseNotesMd,
-} = require('../../../../lib/workers/pr/changelog/release-notes');
+} from '../../../../lib/workers/pr/changelog/release-notes';
+
+/** @type any */
+const ghGot = got;
 
 const angularJsChangelogMd = fs.readFileSync(
   'test/workers/pr/_fixtures/angular.js.md',
@@ -36,37 +39,42 @@ describe('workers/pr/release-notes', () => {
     });
   });
   describe('getReleaseNotes()', () => {
-    it('gets release notes', async () => {
+    it('should return undefined for release notes without body', async () => {
       ghGot.mockReturnValueOnce({
         body: [{ tag_name: 'v1.0.0' }, { tag_name: 'v1.0.1' }],
       });
       const res = await getReleaseNotes(
         'some/repository',
         '1.0.0',
+        'some',
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toBeUndefined();
     });
-    it('gets release notes with body', async () => {
-      ghGot.mockReturnValueOnce({
-        body: [
-          { tag_name: 'v1.0.0' },
-          {
-            tag_name: 'v1.0.1',
-            body:
-              'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-          },
-        ],
-      });
-      const res = await getReleaseNotes(
-        'some/other-repository',
-        '1.0.1',
-        'https://github.com/',
-        'https://api.github.com/'
-      );
-      expect(res).toMatchSnapshot();
-    });
+    it.each([[''], ['v'], ['other-']])(
+      'gets release notes with body',
+      async prefix => {
+        ghGot.mockReturnValueOnce({
+          body: [
+            { tag_name: `${prefix}1.0.0` },
+            {
+              tag_name: `${prefix}1.0.1`,
+              body:
+                'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+            },
+          ],
+        });
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://github.com/',
+          'https://api.github.com/'
+        );
+        expect(res).toMatchSnapshot();
+      }
+    );
   });
   describe('getReleaseNotesMd()', () => {
     it('handles not found', async () => {

@@ -7,6 +7,7 @@ const webpackJson = require('../../../../config/npm/_fixtures/webpack.json');
 const nextJson = require('../../../../config/npm/_fixtures/next.json');
 const vueJson = require('../../../../config/npm/_fixtures/vue.json');
 const typescriptJson = require('../../../../config/npm/_fixtures/typescript.json');
+/** @type any */
 const docker = require('../../../../../lib/datasource/docker');
 const defaults = require('../../../../../lib/config/defaults');
 
@@ -14,6 +15,7 @@ jest.mock('../../../../../lib/datasource/docker');
 
 qJson.latestVersion = '1.4.1';
 
+/** @type any */
 let config;
 
 describe('workers/repository/process/lookup', () => {
@@ -979,6 +981,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = 'packagist';
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
+      config.registryUrls = ['https://packagist.org'];
       nock('https://packagist.org')
         .get('/packages/foo/bar.json')
         .reply(404);

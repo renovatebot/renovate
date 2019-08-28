@@ -1,6 +1,9 @@
 const { tryBranchAutomerge } = require('../../../lib/workers/branch/automerge');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
+/** @type any */
+const platform = global.platform;
+
 describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     let config;
@@ -51,6 +54,13 @@ describe('workers/branch/automerge', () => {
     it('returns true if automerge succeeds', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
+    });
+    it('returns true if automerge succeeds (dry-run)', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.dryRun = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });

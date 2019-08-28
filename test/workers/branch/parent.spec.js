@@ -1,5 +1,8 @@
 const { getParentBranch } = require('../../../lib/workers/branch/parent');
 
+/** @type any */
+const platform = global.platform;
+
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
     let config;
@@ -7,6 +10,7 @@ describe('workers/branch/parent', () => {
       config = {
         branchName: 'renovate/some-branch',
         rebaseLabel: 'rebase',
+        rebaseConflictedPrs: true,
       };
     });
     afterEach(() => {
@@ -36,6 +40,16 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockReturnValue({
         isConflicted: true,
         canRebase: false,
+      });
+      const res = await getParentBranch(config);
+      expect(res.parentBranch).toBe(config.branchName);
+    });
+    it('returns branchName if unmergeable and can rebase, but rebaseConflictedPrs is disabled', async () => {
+      config.rebaseConflictedPrs = false;
+      platform.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockReturnValue({
+        isConflicted: true,
+        canRebase: true,
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);

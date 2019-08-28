@@ -3,20 +3,21 @@ import fs from 'fs-extra';
 import { join } from 'path';
 import Git from 'simple-git/promise';
 import URL from 'url';
+import { logger } from '../../logger';
 
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
 }
 
-interface IStorageConfig {
+interface StorageConfig {
   localDir: string;
   baseBranch?: string;
   url: string;
   gitPrivateKey?: string;
 }
 
-interface ILocalConfig extends IStorageConfig {
+interface LocalConfig extends StorageConfig {
   baseBranch: string;
   baseBranchSha: string;
   branchExists: { [branch: string]: boolean };
@@ -24,7 +25,7 @@ interface ILocalConfig extends IStorageConfig {
 }
 
 export class Storage {
-  private _config: ILocalConfig = {} as any;
+  private _config: LocalConfig = {} as any;
 
   private _git: Git.SimpleGit | undefined;
 
@@ -50,10 +51,10 @@ export class Storage {
     }
   }
 
-  async initRepo(args: IStorageConfig) {
+  async initRepo(args: StorageConfig) {
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
-    const config: ILocalConfig = (this._config = { ...args } as any);
+    const config: LocalConfig = (this._config = { ...args } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
@@ -169,7 +170,9 @@ export class Storage {
   // Return the commit SHA for a branch
   async getBranchCommit(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      throw Error('Cannot fetch commit for branch that does not exist');
+      throw Error(
+        'Cannot fetch commit for branch that does not exist: ' + branchName
+      );
     }
     const res = await this._git!.revparse(['origin/' + branchName]);
     return res.trim();
@@ -188,7 +191,8 @@ export class Storage {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
         throw new Error(
-          'Cannot set baseBranch to something that does not exist'
+          'Cannot set baseBranch to something that does not exist: ' +
+            branchName
         );
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
@@ -202,6 +206,8 @@ export class Storage {
         }
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');
+        const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
+        logger.debug({ branchName, latestCommitDate }, 'latest commit');
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
         if (
@@ -229,7 +235,12 @@ export class Storage {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     this._config.branchPrefix = branchPrefix;
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+    try {
+      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      throw err;
+    }
   }
 
   async getFileList(branchName?: string) {
@@ -291,7 +302,9 @@ export class Storage {
 
   async isBranchStale(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      throw Error('Cannot check staleness for branch that does not exist');
+      throw Error(
+        'Cannot check staleness for branch that does not exist: ' + branchName
+      );
     }
     const branches = await this._git!.branch([
       '--remotes',
@@ -330,7 +343,7 @@ export class Storage {
     await this._git!.reset('hard');
     await this._git!.checkout(['-B', branchName, 'origin/' + branchName]);
     await this._git!.checkout(this._config.baseBranch);
-    await this._git!.merge([branchName]);
+    await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
   }
 
@@ -423,7 +436,7 @@ export class Storage {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line
   cleanRepo() {}
 
   static getUrl({
@@ -458,17 +471,22 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CIRCLECI) {
+  if (process.env.CI) {
     return;
   }
-  const platformErrorStrings = [
+  const platformFailureStrings = [
+    'remote: Invalid username or password',
+    'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
+    'Could not write new index file',
+    'Failed to connect to',
+    'Connection timed out',
   ];
-  for (const errorStr of platformErrorStrings) {
+  for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-error');
+      throw new Error('platform-failure');
     }
   }
 }

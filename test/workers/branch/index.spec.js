@@ -1,14 +1,22 @@
 const branchWorker = require('../../../lib/workers/branch');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
+/** @type any */
 const schedule = require('../../../lib/workers/branch/schedule');
+/** @type any */
 const checkExisting = require('../../../lib/workers/branch/check-existing');
+/** @type any */
 const parent = require('../../../lib/workers/branch/parent');
+/** @type any */
 const npmPostExtract = require('../../../lib/manager/npm/post-update');
+/** @type any */
 const commit = require('../../../lib/workers/branch/commit');
 const statusChecks = require('../../../lib/workers/branch/status-checks');
+/** @type any */
 const automerge = require('../../../lib/workers/branch/automerge');
+/** @type any */
 const prWorker = require('../../../lib/workers/pr');
+/** @type any */
 const getUpdated = require('../../../lib/workers/branch/get-updated');
 const { appSlug } = require('../../../lib/config/app-strings');
 
@@ -21,6 +29,9 @@ jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/pr');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
@@ -61,6 +72,18 @@ describe('workers/branch', () => {
       config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
       platform.branchExists.mockReturnValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pending');
+    });
+    it('skips branch if not stabilityDays not met', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.prCreation = 'not-pending';
+      config.upgrades = [
+        {
+          releaseTimestamp: '2099-12-31',
+          stabilityDays: 1,
+        },
+      ];
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pending');
     });
@@ -148,6 +171,18 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
     });
+    it('skips branch if target branch changed', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: true,
+        targetBranch: 'v6',
+      });
+      config.baseBranch = 'master';
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pr-edited');
+    });
     it('returns if pr creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],
@@ -187,6 +222,36 @@ describe('workers/branch', () => {
       expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+    it('returns if branch automerged (dry-run)', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      });
+      platform.branchExists.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('automerged');
+      await branchWorker.processBranch({ ...config, dryRun: true });
+      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+    it('returns if branch exists and prCreation set to approval', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      });
+      platform.branchExists.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
+      prWorker.ensurePr.mockReturnValueOnce('needs-pr-approval');
+      expect(await branchWorker.processBranch(config)).toEqual(
+        'needs-pr-approval'
+      );
     });
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({

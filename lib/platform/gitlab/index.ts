@@ -1,11 +1,14 @@
-import URL from 'url';
+import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
-import api from './gl-got-wrapper';
+import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { configFileNames } from '../../config/app-strings';
+import { logger } from '../../logger';
 
+const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
   repository: string;
@@ -15,12 +18,15 @@ let config: {
   email: string;
   prList: any[];
   issueList: any[];
+  optimizeForDisabled: boolean;
 } = {} as any;
 
 const defaults = {
   hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
 };
+
+let authorId: number;
 
 export async function initPlatform({
   endpoint,
@@ -32,17 +38,17 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  const res = {} as any;
   if (endpoint) {
-    res.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
-    api.setBaseUrl(res.endpoint);
-    defaults.endpoint = res.endpoint;
+    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    api.setBaseUrl(defaults.endpoint);
   } else {
-    res.endpoint = defaults.endpoint;
-    logger.info('Using default GitLab endpoint: ' + res.endpoint);
+    logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
   }
+  let gitAuthor: string;
   try {
-    res.gitAuthor = (await api.get(`user`, { token })).body.email;
+    const user = (await api.get(`user`, { token })).body;
+    gitAuthor = user.email;
+    authorId = user.id;
   } catch (err) {
     logger.info(
       { err },
@@ -50,7 +56,11 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  return res;
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -86,15 +96,12 @@ export function cleanRepo() {
 export async function initRepo({
   repository,
   localDir,
-}: {
-  repository: string;
-  localDir: string;
-}) {
+  optimizeForDisabled,
+}: RepoParams) {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
   let res;
-  const platformConfig: PlatformConfig = {} as any;
   try {
     res = await api.get(`projects/${config.repository}`);
     if (res.body.archived) {
@@ -112,9 +119,26 @@ export async function initRepo({
     if (res.body.default_branch === null) {
       throw new Error('empty');
     }
+    if (optimizeForDisabled) {
+      let renovateConfig;
+      try {
+        renovateConfig = JSON.parse(
+          Buffer.from(
+            (await api.get(
+              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+            )).body.content,
+            'base64'
+          ).toString()
+        );
+      } catch (err) {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
+    }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
-    platformConfig.isFork = !!res.body.forked_from_project;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
@@ -160,10 +184,17 @@ export async function initRepo({
     if (err.statusCode === 404) {
       throw new Error('not-found');
     }
+    if (err.message === 'disabled') {
+      throw err;
+    }
     logger.info({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
-  return platformConfig;
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
+    isFork: !!res.body.forked_from_project,
+  };
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {
@@ -203,7 +234,12 @@ export async function getBranchPr(branchName: string) {
   if (!(await branchExists(branchName))) {
     return null;
   }
-  const urlString = `projects/${config.repository}/merge_requests?state=opened&per_page=100`;
+  const query = new URLSearchParams({
+    per_page: '100',
+    state: 'opened',
+    source_branch: branchName,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
   const res = await api.get(urlString, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
@@ -293,7 +329,7 @@ export async function getBranchStatus(
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
-  const res = await api.get(url);
+  const res = await api.get(url, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   if (res.body.length === 0) {
     // Return 'pending' if we have no status checks
@@ -590,25 +626,33 @@ export async function ensureCommentRemoval(issueNo: number, topic: string) {
   }
 }
 
+const mapPullRequests = (pr: {
+  iid: number;
+  source_branch: string;
+  title: string;
+  state: string;
+  created_at: string;
+}) => ({
+  number: pr.iid,
+  branchName: pr.source_branch,
+  title: pr.title,
+  state: pr.state === 'opened' ? 'open' : pr.state,
+  createdAt: pr.created_at,
+});
+
+async function fetchPrList() {
+  const query = new URLSearchParams({
+    per_page: '100',
+    author_id: `${authorId}`,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  const res = await api.get(urlString, { paginate: true });
+  return res.body.map(mapPullRequests);
+}
+
 export async function getPrList() {
   if (!config.prList) {
-    const urlString = `projects/${config.repository}/merge_requests?per_page=100`;
-    const res = await api.get(urlString, { paginate: true });
-    config.prList = res.body.map(
-      (pr: {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }) => ({
-        number: pr.iid,
-        branchName: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? 'open' : pr.state,
-        createdAt: pr.created_at,
-      })
-    );
+    config.prList = await fetchPrList();
   }
   return config.prList;
 }
@@ -665,6 +709,7 @@ export async function createPr(
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
+  pr.canRebase = true;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -678,6 +723,7 @@ export async function getPr(iid: number) {
   const pr = (await api.get(url)).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;
+  pr.targetBranch = pr.target_branch;
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;

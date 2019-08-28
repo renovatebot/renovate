@@ -1,4 +1,4 @@
-const configSerializer = require('../../lib/logger/err-serializer');
+import configSerializer from '../../lib/logger/err-serializer';
 
 describe('logger/err-serializer', () => {
   it('expands errors', () => {
@@ -13,6 +13,7 @@ describe('logger/err-serializer', () => {
         headers: {
           authorization: 'Bearer abc',
         },
+        auth: 'test:token',
       },
     };
     expect(configSerializer(err)).toMatchSnapshot();

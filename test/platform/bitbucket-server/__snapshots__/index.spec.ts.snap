@@ -16,9 +16,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -28,9 +34,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -80,9 +92,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -136,9 +154,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -186,9 +210,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -229,7 +259,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -460,7 +490,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -475,6 +505,7 @@ Object {
   "createdAt": 1547853840016,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -489,7 +520,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -504,7 +535,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -526,6 +557,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -540,7 +572,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
   Array [
@@ -551,9 +583,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -686,6 +724,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -707,6 +746,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -728,6 +768,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -749,9 +790,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -761,9 +808,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -773,9 +826,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -796,6 +855,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -817,9 +877,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -835,6 +901,7 @@ Object {
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
+  "targetBranch": undefined,
   "title": undefined,
   "version": 0,
 }
@@ -861,6 +928,20 @@ exports[`platform/bitbucket-server endpoint with no path getPr() returns null fo
 
 exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with no path getPrBody() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
 exports[`platform/bitbucket-server endpoint with no path getPrFiles() returns one file 1`] = `
 Array [
   Array [
@@ -886,6 +967,7 @@ Array [
     "createdAt": 1547853840016,
     "number": 5,
     "state": "open",
+    "targetBranch": "master",
     "title": "title",
     "version": 1,
   },
@@ -901,7 +983,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -922,11 +1004,17 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
 exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 
@@ -946,21 +1034,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -989,9 +1071,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1026,9 +1114,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1057,9 +1151,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1188,21 +1288,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1245,9 +1339,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1296,9 +1396,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1341,9 +1447,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1386,9 +1498,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -1398,9 +1516,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -1450,9 +1574,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1506,9 +1636,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1556,9 +1692,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1599,7 +1741,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1830,7 +1972,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1845,6 +1987,7 @@ Object {
   "createdAt": 1547853840016,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -1859,7 +2002,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1874,7 +2017,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1896,6 +2039,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -1910,7 +2054,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
   Array [
@@ -1921,9 +2065,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2056,6 +2206,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2077,6 +2228,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2098,6 +2250,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2119,9 +2272,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -2131,9 +2290,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -2143,9 +2308,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2166,6 +2337,7 @@ Object {
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2187,9 +2359,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2205,6 +2383,7 @@ Object {
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
+  "targetBranch": undefined,
   "title": undefined,
   "version": 0,
 }
@@ -2231,6 +2410,20 @@ exports[`platform/bitbucket-server endpoint with path getPr() returns null for n
 
 exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with path getPrBody() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
 exports[`platform/bitbucket-server endpoint with path getPrFiles() returns one file 1`] = `
 Array [
   Array [
@@ -2256,6 +2449,7 @@ Array [
     "createdAt": 1547853840016,
     "number": 5,
     "state": "open",
+    "targetBranch": "master",
     "title": "title",
     "version": 1,
   },
@@ -2271,7 +2465,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -2292,11 +2486,17 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
 exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 
@@ -2316,21 +2516,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2359,9 +2553,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2396,9 +2596,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2427,9 +2633,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2558,21 +2770,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2615,9 +2821,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2666,9 +2878,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2711,9 +2929,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;

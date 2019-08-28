@@ -28,6 +28,10 @@ Set this to `docker` instead to use docker-based binaries.
 
 Configure this directory if you want to change which directory Renovate uses for storing cache data. If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/cache/`. If you configure this to be different to the `baseDir`, it means you can have one location for repo data and another for cache data.
 
+## dockerMapDotfiles
+
+This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files. Currently applicable to `.npmrc` only.
+
 ## dryRun
 
 ## endpoint
@@ -63,6 +67,8 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
 
 ## onboardingConfig
+
+## optimizeForDisabled
 
 ## password
 

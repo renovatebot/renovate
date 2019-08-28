@@ -1,14 +1,21 @@
+/** @type any */
 const fs = require('fs-extra');
 const lockFiles = require('../../../../lib/manager/npm/post-update');
 const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 // const upath = require('upath');
 
+/** @type any */
 const npm = require('../../../../lib/manager/npm/post-update/npm');
+/** @type any */
 const yarn = require('../../../../lib/manager/npm/post-update/yarn');
+/** @type any */
 const pnpm = require('../../../../lib/manager/npm/post-update/pnpm');
 const lerna = require('../../../../lib/manager/npm/post-update/lerna');
 
 const hostRules = require('../../../../lib/util/host-rules');
+
+/** @type any */
+const platform = global.platform;
 
 hostRules.find = jest.fn(() => ({
   token: 'abc',

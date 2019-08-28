@@ -1,10 +1,22 @@
 import url from 'url';
 import delay from 'delay';
 
-import api from './bb-got-wrapper';
+import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { logger } from '../../logger';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+
+/*
+ * Version: 5.3 (EOL Date: 15 Aug 2019)
+ * See following docs for api information:
+ * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-rest.html
+ * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-build-rest.html
+ *
+ * See following page for uptodate supported versions
+ * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
+ */
 
 interface BbsConfig {
   baseBranch: string;
@@ -18,6 +30,10 @@ interface BbsConfig {
   repository: string;
   repositorySlug: string;
   storage: GitStorage;
+
+  prVersions: Map<number, number>;
+
+  username: string;
 }
 
 let config: BbsConfig = {} as any;
@@ -25,6 +41,13 @@ let config: BbsConfig = {} as any;
 const defaults: any = {
   hostType: 'bitbucket-server',
 };
+
+/* istanbul ignore next */
+function updatePrVersion(pr: number, version: number) {
+  const res = Math.max(config.prVersions.get(pr) || 0, version);
+  config.prVersions.set(pr, res);
+  return res;
+}
 
 export function initPlatform({
   endpoint,
@@ -44,12 +67,12 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+  defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+  api.setBaseUrl(defaults.endpoint);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
   };
-  api.setBaseUrl(res.endpoint);
-  defaults.endpoint = res.endpoint;
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -84,13 +107,9 @@ export async function initRepo({
   repository,
   gitPrivateKey,
   localDir,
+  optimizeForDisabled,
   bbUseDefaultReviewers,
-}: {
-  repository: string;
-  gitPrivateKey?: string;
-  localDir: string;
-  bbUseDefaultReviewers?: boolean;
-}) {
+}: RepoParams) {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -100,7 +119,43 @@ export async function initRepo({
   });
 
   const [projectKey, repositorySlug] = repository.split('/');
-  config = { projectKey, repositorySlug, gitPrivateKey, repository } as any;
+
+  if (optimizeForDisabled) {
+    interface RenovateConfig {
+      enabled: boolean;
+    }
+
+    interface FileData {
+      isLastPage: boolean;
+
+      lines: string[];
+
+      size: number;
+    }
+
+    let renovateConfig: RenovateConfig;
+    try {
+      const { body } = await api.get<FileData>(
+        `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
+      );
+      if (!body.isLastPage) logger.warn('Renovate config to big: ' + body.size);
+      else renovateConfig = JSON.parse(body.lines.join());
+    } catch {
+      // Do nothing
+    }
+    if (renovateConfig && renovateConfig.enabled === false) {
+      throw new Error('disabled');
+    }
+  }
+
+  config = {
+    projectKey,
+    repositorySlug,
+    gitPrivateKey,
+    repository,
+    prVersions: new Map<number, number>(),
+    username: opts!.username,
+  } as any;
 
   /* istanbul ignore else */
   if (bbUseDefaultReviewers !== false) {
@@ -125,15 +180,10 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: any = {};
-
   try {
     const info = (await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
     )).body;
-    platformConfig.privateRepo = info.is_private;
-    platformConfig.isFork = !!info.parent;
-    platformConfig.repoFullName = info.name;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
@@ -141,6 +191,11 @@ export async function initRepo({
     )).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
+    const repoConfig: RepoConfig = {
+      baseBranch: config.baseBranch,
+      isFork: !!info.parent,
+    };
+    return repoConfig;
   } catch (err) /* istanbul ignore next */ {
     logger.debug(err);
     if (err.statusCode === 404) {
@@ -149,13 +204,6 @@ export async function initRepo({
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
-  delete config.prList;
-  delete config.fileList;
-  logger.debug(
-    { platformConfig },
-    `platformConfig for ${config.projectKey}/${config.repositorySlug}`
-  );
-  return platformConfig;
 }
 
 export function getRepoForceRebase() {
@@ -250,11 +298,11 @@ export async function deleteBranch(branchName: string, closePr = false) {
     // getBranchPr
     const pr = await getBranchPr(branchName);
     if (pr) {
-      await api.post(
+      const { body } = await api.post(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
       );
 
-      await getPr(pr.number, true);
+      updatePrVersion(pr, body);
     }
   }
   return config.storage.deleteBranch(branchName);
@@ -412,6 +460,7 @@ export /* istanbul ignore next */ function ensureIssue(
   body: string
 ) {
   logger.debug(`ensureIssue(${title}, body={${body}})`);
+  logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
   // BB Server doesnt have issues
@@ -570,7 +619,10 @@ export async function ensureComment(
     }
     if (!commentId) {
       await addComment(prNo, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment added');
+      logger.info(
+        { repository: config.repository, prNo, topic },
+        'Comment added'
+      );
     } else if (commentNeedsUpdating) {
       await editComment(prNo, commentId, body);
       logger.info({ repository: config.repository, prNo }, 'Comment updated');
@@ -608,8 +660,13 @@ export async function getPrList(_args?: any) {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList) {
+    const query = new URLSearchParams({
+      state: 'ALL',
+      'role.1': 'AUTHOR',
+      'username.1': config.username,
+    }).toString();
     const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?state=ALL&limit=100`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );
 
     config.prList = values.map(utils.prInfo);
@@ -728,8 +785,11 @@ export async function createPr(
   const pr = {
     id: prInfoRes.body.id,
     displayNumber: `Pull Request #${prInfoRes.body.id}`,
+    canRebase: true,
     ...utils.prInfo(prInfoRes.body),
   };
+
+  updatePrVersion(pr.number, pr.version);
 
   // istanbul ignore if
   if (config.prList) {
@@ -759,15 +819,19 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
     ),
   };
 
+  pr.version = updatePrVersion(pr.number, pr.version);
+
   if (pr.state === 'open') {
     const mergeRes = await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
+      { useCache: !refreshCache }
     );
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
 
     const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
+      { useCache: !refreshCache }
     )).body;
 
     if (prCommits.totalCount === 1) {
@@ -837,7 +901,7 @@ export async function updatePr(
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
 
-    await api.put(
+    const { body } = await api.put(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       {
         body: {
@@ -848,7 +912,8 @@ export async function updatePr(
         },
       }
     );
-    await getPr(prNo, true);
+
+    updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error('not-found');
@@ -870,15 +935,16 @@ export async function mergePr(prNo: number, branchName: string) {
     if (!pr) {
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
-    await api.post(
+    const { body } = await api.post(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
     );
-    await getPr(prNo, true);
+    updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error('not-found');
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      logger.warn({ err }, `Failed to merge PR`);
+      return false;
     } else {
       logger.warn({ err }, `Failed to merge PR`);
       return false;
@@ -898,6 +964,7 @@ export function getPrBody(input: string) {
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
+    .replace(new RegExp('<!--.*?-->', 'g'), '')
     .substring(0, 30000);
 }
 

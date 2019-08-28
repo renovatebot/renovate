@@ -1,9 +1,11 @@
+import * as _hostRules from '../../../lib/util/host-rules';
+
 describe('platform/gitlab', () => {
   let gitlab: typeof import('../../../lib/platform/gitlab');
   let api: jest.Mocked<
     typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api
   >;
-  let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
+  let hostRules: jest.Mocked<typeof _hostRules>;
   let GitStorage: jest.Mocked<
     typeof import('../../../lib/platform/git/storage')
   > &
@@ -145,6 +147,7 @@ describe('platform/gitlab', () => {
           },
         } as any)
     );
+    // getBranchCommit
     // user
     api.get.mockImplementationOnce(
       () =>
@@ -160,10 +163,37 @@ describe('platform/gitlab', () => {
     return gitlab.initRepo({
       repository: 'some/repo',
       localDir: '',
+      optimizeForDisabled: false,
     });
   }
 
   describe('initRepo', () => {
+    it(`should throw error if disabled in renovate.json`, async () => {
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              default_branch: 'master',
+              http_url_to_repo: 'https://gitlab.com/some/repo.git',
+            },
+          } as any)
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              content: Buffer.from('{"enabled": false}').toString('base64'),
+            },
+          } as any)
+      );
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: true,
+        })
+      ).rejects.toThrow(Error('disabled'));
+    });
     it(`should escape all forward slashes in project names`, async () => {
       api.get.mockReturnValue({ body: [] } as any);
       await initRepo({ repository: 'some/repo/project', token: 'some-token' });
@@ -174,25 +204,41 @@ describe('platform/gitlab', () => {
         throw new Error('always error');
       });
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('always error'));
     });
     it('should throw an error if repository is archived', async () => {
       api.get.mockReturnValue({ body: { archived: true } } as any);
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('archived'));
     });
     it('should throw an error if repository is a mirror', async () => {
       api.get.mockReturnValue({ body: { mirror: true } } as any);
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('mirror'));
     });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('empty'));
     });
     it('should fall back if http_url_to_repo is empty', async () => {
@@ -258,13 +304,20 @@ describe('platform/gitlab', () => {
         // branchExists
         body: [],
       } as any);
-      const pr = await gitlab.getBranchPr('somebranch');
+      const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
     });
     it('should return the PR object', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
-        body: [{ number: 91, source_branch: 'somebranch' }],
+        body: [
+          {
+            iid: 91,
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ],
       } as any);
       api.get.mockReturnValueOnce({
         body: {
@@ -274,6 +327,7 @@ describe('platform/gitlab', () => {
           deletions: 1,
           commits: 1,
           source_branch: 'some-branch',
+          target_branch: 'master',
           base: {
             sha: '1234',
           },
@@ -282,7 +336,7 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({ body: [] } as any); // get branch commit
       api.get.mockReturnValueOnce({ body: [{ status: 'success' }] } as any); // get commit statuses
       api.get.mockReturnValueOnce({ body: 'foo' } as any);
-      const pr = await gitlab.getBranchPr('somebranch');
+      const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
     });
   });
@@ -631,7 +685,7 @@ describe('platform/gitlab', () => {
       api.get.mockResolvedValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'opened',
@@ -645,7 +699,7 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'merged',
@@ -655,25 +709,35 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr('branch-a', null, '!open');
       expect(res).toBeDefined();
     });
-    it('caches pr list', async () => {
+
+    it('returns true if open and with title', async () => {
       api.get.mockReturnValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'opened',
           },
         ],
       } as any);
-      let res = await gitlab.findPr('branch-a', null);
+      const res = await gitlab.findPr('branch-a', 'branch a pr', 'open');
       expect(res).toBeDefined();
-      res = await gitlab.findPr('branch-a', 'branch a pr');
+    });
+
+    it('returns true with title', async () => {
+      api.get.mockReturnValueOnce({
+        body: [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ],
+      } as any);
+      const res = await gitlab.findPr('branch-a', 'branch a pr');
       expect(res).toBeDefined();
-      res = await gitlab.findPr('branch-a', 'branch a pr', 'open');
-      expect(res).toBeDefined();
-      res = await gitlab.findPr('branch-b');
-      expect(res).not.toBeDefined();
     });
   });
   describe('createPr(branchName, title, body)', () => {
@@ -722,6 +786,7 @@ describe('platform/gitlab', () => {
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
         },
       } as any);
       api.get.mockReturnValueOnce({
@@ -742,6 +807,7 @@ describe('platform/gitlab', () => {
           state: 'open',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
+          target_branch: 'master',
         },
       } as any);
       api.get.mockReturnValueOnce({ body: [{ status: 'success' }] } as any); // get commit statuses
@@ -761,6 +827,7 @@ describe('platform/gitlab', () => {
               merge_status: 'cannot_be_merged',
               diverged_commits_count: 2,
               source_branch: 'some-branch',
+              target_branch: 'master',
             },
           } as any)
       );

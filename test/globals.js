@@ -4,7 +4,7 @@ const os = require('os');
 const cache = require('../lib/workers/global/cache');
 
 global.platform = jest.genMockFromModule('../lib/platform/github');
-global.logger = require('./logger/_fixtures');
+jest.mock('../lib/logger');
 
 global.repoCache = {};
 

@@ -1,9 +1,12 @@
-const {
-  fetchUpdates,
-} = require('../../../../lib/workers/repository/process/fetch');
+import { fetchUpdates } from '../../../../lib/workers/repository/process/fetch';
+import * as _npm from '../../../../lib/manager/npm';
+import { lookupUpdates as _lookupUpdates } from '../../../../lib/workers/repository/process/lookup';
 
-const npm = require('../../../../lib/manager/npm');
-const lookup = require('../../../../lib/workers/repository/process/lookup');
+/** @type any */
+const npm = _npm;
+
+/** @type any */
+const lookupUpdates = _lookupUpdates;
 
 jest.mock('../../../../lib/workers/repository/process/lookup');
 
@@ -72,7 +75,7 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookup.lookupUpdates.mockReturnValue(['a', 'b']);
+      lookupUpdates.mockReturnValue(['a', 'b']);
       npm.getPackageUpdates = jest.fn(() => ['a', 'b']);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();

@@ -30,8 +30,10 @@ commands:
       - run:
           name: Lint
           command: |
-            yarn lint
+            yarn eslint --format junit -o test-results/lint/results.xml
+            yarn prettier
             yarn test-schema
+            yarn type-check
 
       - run:
           name: Build
@@ -41,7 +43,14 @@ commands:
       - run:
           name: Unit Tests
           command: |
-            yarn jest --runInBand
+            yarn jest --maxWorkers=2  --ci --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: 'test-results/jest/results.xml'
+
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
 
       - run:
           name: E2E Tests
@@ -52,23 +61,24 @@ commands:
           name: Coverage
           command: |
             bash <(curl -s https://codecov.io/bash) -Z -C $CIRCLE_SHA1
+          when: always
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.16.0@sha256:7af3328e235a92c949e0b7c3c738b4c3d05ceb82306fddbe75136f2e7842e6f4
+      - image: amd64/node:10.16.3@sha256:47577703778ff7d741425c5f5c81df719b1b3bb647c4beae02a1d1d327afbe8c
     steps:
       - test
   test_node_12:
     docker:
-      - image: amd64/node:12.4.0@sha256:037bdec2ce002e81700100d246d687bc9cf2fc04d03713f28d2ad28dd68bd1d5
+      - image: amd64/node:12.9.0@sha256:6ba76256984bcc65f86ad6e2675d71eca3df5b2825a24829d22f54db08f0d1b2
     steps:
       - test
   release:
     docker:
-      - image: amd64/node:10.16.0@sha256:7af3328e235a92c949e0b7c3c738b4c3d05ceb82306fddbe75136f2e7842e6f4
+      - image: amd64/node:10.16.3@sha256:47577703778ff7d741425c5f5c81df719b1b3bb647c4beae02a1d1d327afbe8c
     steps:
       - checkout
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn semantic-release
       - run: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK

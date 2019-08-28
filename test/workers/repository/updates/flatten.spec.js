@@ -2,6 +2,7 @@ const {
   flattenUpdates,
 } = require('../../../../lib/workers/repository/updates/flatten');
 
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();

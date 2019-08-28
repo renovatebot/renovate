@@ -3,7 +3,6 @@
     "javascript",
     { "language": "typescript", "autoFix": true }
   ],
-  "eslint.options": { "configFile": ".tslintrc.js" },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -12,5 +11,8 @@
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "Dockerfile.*": "dockerfile"
   }
 }

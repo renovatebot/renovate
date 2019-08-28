@@ -1,13 +1,15 @@
 const { getInstalledPath } = require('get-installed-path');
 
 jest.mock('fs-extra');
-jest.mock('child-process-promise');
+jest.mock('../../../../lib/util/exec');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 
+/** @type any */
 const fs = require('fs-extra');
-const { exec } = require('child-process-promise');
+/** @type any */
+const { exec } = require('../../../../lib/util/exec');
 const yarnHelper = require('../../../../lib/manager/npm/post-update/yarn');
 
 describe('generateLockFile', () => {
@@ -22,6 +24,7 @@ describe('generateLockFile', () => {
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents');
+    /** @type {NodeJS.ProcessEnv} */
     const env = {};
     const config = {
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],

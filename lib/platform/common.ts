@@ -1,36 +1,38 @@
 import got from 'got';
 
-export interface IGotApiOptions {
+export interface GotApiOptions {
   useCache?: boolean;
   hostType?: string;
   body?: any;
 }
 
-export interface IGotApi<TOptions extends object = any> {
+export type GotResponse<T extends object = any> = got.Response<T>;
+
+export interface GotApi<TOptions extends object = any> {
   get<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+    options?: GotApiOptions & TOptions
+  ): Promise<GotResponse<T>>;
   post<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+    options?: GotApiOptions & TOptions
+  ): Promise<GotResponse<T>>;
   put<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+    options?: GotApiOptions & TOptions
+  ): Promise<GotResponse<T>>;
   patch<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+    options?: GotApiOptions & TOptions
+  ): Promise<GotResponse<T>>;
   head<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+    options?: GotApiOptions & TOptions
+  ): Promise<GotResponse<T>>;
   delete<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+    options?: GotApiOptions & TOptions
+  ): Promise<GotResponse<T>>;
 
   reset(): void;
 
@@ -38,5 +40,29 @@ export interface IGotApi<TOptions extends object = any> {
 }
 
 export interface PlatformConfig {
+  endpoint: string;
+  renovateUsername?: any;
+  gitAuthor?: any;
+}
+
+export interface RepoConfig {
+  baseBranch: string;
+  endpoint?: string;
+  renovateUsername?: any;
+  gitAuthor?: any;
   isFork: boolean;
+}
+
+export interface RepoParams {
+  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
+  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
+  gitPrivateKey?: string;
+  localDir: string;
+  optimizeForDisabled: boolean;
+  repository: string;
+  endpoint?: string;
+  forkMode?: string;
+  forkToken?: string;
+  includeForks?: boolean;
+  renovateUsername?: string;
 }

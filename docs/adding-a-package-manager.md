@@ -1,6 +1,6 @@
 # Adding a Package Manager
 
-This document describes the steps to take if you are interest in adding new language/package manager support.
+This document describes the steps to take if you are interested in adding new language/package manager support.
 
 ### Background
 
@@ -37,7 +37,7 @@ This function is mandatory unless you use `extractAllPackageFiles` instead. It t
 - currentValue
 - version scheme used (e.g. semver, pep440)
 
-The fields returned here can be customised to suit the package manager, e.g. Docker uses `currentFrom`
+The fields returned here can be customised to suit the package manager, e.g. Dockerfile uses `lineNumber`. Custom fields should be added within a `managerData` object.
 
 This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract the list of dependencies.
 
@@ -71,4 +71,4 @@ Set to true if this package manager needs to update lock files in addition to pa
 
 ##### `updateDependency(fileContent, upgrade)`
 
-This function is the final one called for most managers. It's purpose is to patch the package file with the new value (described in the upgrade) and return an updated file. If the file was already updated then it would return the same contents as it was provided.
+This function is the final one called for most managers. Its purpose is to patch the package file with the new value (described in the upgrade) and return an updated file. If the file was already updated then it would return the same contents as it was provided.

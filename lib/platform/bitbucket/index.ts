@@ -1,24 +1,16 @@
 import parseDiff from 'parse-diff';
-import api from './bb-got-wrapper';
+import addrs from 'email-addresses';
+import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
+import { logger } from '../../logger';
 import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
+import * as comments from './comments';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
-interface Config {
-  baseBranch: string;
-  baseCommitSHA: string;
-  defaultBranch: string;
-  fileList: any[];
-  mergeMethod: string;
-  owner: string;
-  prList: any[];
-  repository: string;
-  storage: GitStorage;
-}
-
-let config: Config = {} as any;
+let config: utils.Config = {} as any;
 
 export function initPlatform({
   endpoint,
@@ -40,11 +32,10 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
+  const platformConfig: PlatformConfig = {
     endpoint: 'https://api.bitbucket.org/',
   };
-  logger.info('Using default Bitbucket Cloud endpoint: ' + res.endpoint);
-  return res;
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -65,19 +56,57 @@ export async function getRepos() {
 export async function initRepo({
   repository,
   localDir,
-}: {
-  repository: string;
-  localDir: string;
-}) {
+  optimizeForDisabled,
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: 'bitbucket',
     url: 'https://api.bitbucket.org/',
   });
-  config = {} as any;
-  // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  config.repository = repository;
-  const platformConfig: any = {};
+  config = {
+    repository,
+    username: opts!.username,
+  } as any;
+  let info;
+  try {
+    info = utils.repoInfoTransformer(
+      (await api.get(`/2.0/repositories/${repository}`)).body
+    );
+
+    if (optimizeForDisabled) {
+      interface RenovateConfig {
+        enabled: boolean;
+      }
+
+      let renovateConfig: RenovateConfig;
+      try {
+        renovateConfig = (await api.get<RenovateConfig>(
+          `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
+        )).body;
+      } catch {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
+    }
+
+    Object.assign(config, {
+      owner: info.owner,
+      defaultBranch: info.mainbranch,
+      baseBranch: info.mainbranch,
+      mergeMethod: info.mergeMethod,
+      has_issues: info.has_issues,
+    });
+
+    logger.debug(`${repository} owner = ${config.owner}`);
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      throw new Error('not-found');
+    }
+    logger.info({ err }, 'Unknown Bitbucket initRepo error');
+    throw err;
+  }
 
   const url = GitStorage.getUrl({
     protocol: 'https',
@@ -92,30 +121,11 @@ export async function initRepo({
     localDir,
     url,
   });
-
-  try {
-    const info = utils.repoInfoTransformer(
-      (await api.get(`/2.0/repositories/${repository}`)).body
-    );
-    platformConfig.privateRepo = info.privateRepo;
-    platformConfig.isFork = info.isFork;
-    platformConfig.repoFullName = info.repoFullName;
-    config.owner = info.owner;
-    logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = info.mainbranch;
-    config.baseBranch = config.defaultBranch;
-    config.mergeMethod = info.mergeMethod;
-  } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
-      throw new Error('not-found');
-    }
-    logger.info({ err }, 'Unknown Bitbucket initRepo error');
-    throw err;
-  }
-  delete config.prList;
-  delete config.fileList;
-  await Promise.all([getPrList(), getFileList()]);
-  return platformConfig;
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
+    isFork: info.isFork,
+  };
+  return repoConfig;
 }
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
@@ -295,12 +305,11 @@ export async function setBranchStatus(
 
 async function findOpenIssues(title: string) {
   try {
-    const currentUser = (await api.get('/2.0/user')).body.username;
     const filter = encodeURIComponent(
       [
         `title=${JSON.stringify(title)}`,
         '(state = "new" OR state = "open")',
-        `reporter.username="${currentUser}"`,
+        `reporter.username="${config.username}"`,
       ].join(' AND ')
     );
     return (
@@ -309,13 +318,19 @@ async function findOpenIssues(title: string) {
       )).body.values || /* istanbul ignore next */ []
     );
   } catch (err) /* istanbul ignore next */ {
-    logger.warn('Error finding issues');
+    logger.warn({ err }, 'Error finding issues');
     return [];
   }
 }
 
 export async function findIssue(title: string) {
   logger.debug(`findIssue(${title})`);
+
+  /* istanbul ignore if */
+  if (!config.has_issues) {
+    logger.debug('Issues are disabled - cannot findIssue');
+    return null;
+  }
   const issues = await findOpenIssues(title);
   if (!issues.length) {
     return null;
@@ -338,6 +353,14 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
+  const description = getPrBody(body);
+
+  /* istanbul ignore if */
+  if (!config.has_issues) {
+    logger.warn('Issues are disabled - cannot ensureIssue');
+    logger.info({ title, body }, 'Failed to ensure Issue');
+    return null;
+  }
   try {
     const issues = await findOpenIssues(title);
     if (issues.length) {
@@ -346,13 +369,16 @@ export async function ensureIssue(title: string, body: string) {
         await closeIssue(issue.id);
       }
       const [issue] = issues;
-      if (String(issue.content.raw).trim() !== body.trim()) {
+      if (String(issue.content.raw).trim() !== description.trim()) {
         logger.info('Issue updated');
         await api.put(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
-              content: { raw: readOnlyIssueBody(body), markup: 'markdown' },
+              content: {
+                raw: readOnlyIssueBody(description),
+                markup: 'markdown',
+              },
             },
           }
         );
@@ -363,7 +389,7 @@ export async function ensureIssue(title: string, body: string) {
       await api.post(`/2.0/repositories/${config.repository}/issues`, {
         body: {
           title,
-          content: { raw: readOnlyIssueBody(body), markup: 'markdown' },
+          content: { raw: readOnlyIssueBody(description), markup: 'markdown' },
         },
       });
       return 'created';
@@ -380,13 +406,38 @@ export async function ensureIssue(title: string, body: string) {
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList() {
+export /* istanbul ignore next */ async function getIssueList() {
   logger.debug(`getIssueList()`);
-  // TODO: Needs implementation
-  return [];
+
+  /* istanbul ignore if */
+  if (!config.has_issues) {
+    logger.debug('Issues are disabled - cannot getIssueList');
+    return [];
+  }
+  try {
+    const filter = encodeURIComponent(
+      [
+        '(state = "new" OR state = "open")',
+        `reporter.username="${config.username}"`,
+      ].join(' AND ')
+    );
+    return (
+      (await api.get(
+        `/2.0/repositories/${config.repository}/issues?q=${filter}`
+      )).body.values || /* istanbul ignore next */ []
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error finding issues');
+    return [];
+  }
 }
 
 export async function ensureIssueClosing(title: string) {
+  /* istanbul ignore if */
+  if (!config.has_issues) {
+    logger.debug('Issues are disabled - cannot ensureIssueClosing');
+    return;
+  }
   const issues = await findOpenIssues(title);
   for (const issue of issues) {
     await closeIssue(issue.id);
@@ -419,22 +470,18 @@ export /* istanbul ignore next */ function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export function ensureComment(
-  _prNo: number,
-  _topic: string | null,
-  _content: string
+  prNo: number,
+  topic: string | null,
+  content: string
 ) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  logger.warn('Comment functionality not implemented yet');
-  return Promise.resolve();
+  return comments.ensureComment(config, prNo, topic, content);
 }
 
-export function ensureCommentRemoval(_prNo: number, _topic: string) {
-  // The api does not support removing comments
-  return Promise.resolve();
+export function ensureCommentRemoval(prNo: number, topic: string) {
+  return comments.ensureCommentRemoval(config, prNo, topic);
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string) {
@@ -450,7 +497,7 @@ function matchesState(state: string, desiredState: string) {
 export async function findPr(
   branchName: string,
   prTitle?: string | null,
-  state: string = 'all'
+  state = 'all'
 ) {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -502,7 +549,11 @@ export async function createPr(
     `/2.0/repositories/${config.repository}/pullrequests`,
     { body }
   )).body;
-  const pr = { number: prInfo.id, displayNumber: `Pull Request #${prInfo.id}` };
+  const pr = {
+    number: prInfo.id,
+    displayNumber: `Pull Request #${prInfo.id}`,
+    canRebase: true,
+  };
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -519,6 +570,9 @@ async function isPrConflicted(prNo: number) {
   return utils.isConflicted(parseDiff(diff));
 }
 
+interface Commit {
+  author: { raw: string };
+}
 // Gets details for a PR
 export async function getPr(prNo: number) {
   const pr = (await api.get(
@@ -537,9 +591,47 @@ export async function getPr(prNo: number) {
 
   if (utils.prStates.open.includes(pr.state)) {
     res.isConflicted = await isPrConflicted(prNo);
-    const commits = await utils.accumulateValues(pr.links.commits.href);
-    if (commits.length === 1) {
+
+    // TODO: Is that correct? Should we check getBranchStatus like gitlab?
+    res.canMerge = !res.isConflicted;
+
+    // we only want the first two commits, because size tells us the overall number
+    const url = pr.links.commits.href + '?pagelen=2';
+    const { body } = await api.get<utils.PagedResult<Commit>>(url);
+    const size = body.size || body.values.length;
+
+    // istanbul ignore if
+    if (size === undefined) {
+      logger.warn({ prNo, url, body }, 'invalid response so can rebase');
       res.canRebase = true;
+    } else if (size === 1) {
+      if (global.gitAuthor) {
+        const author = addrs.parseOneAddress(
+          body.values[0].author.raw
+        ) as addrs.ParsedMailbox;
+        if (author.address === global.gitAuthor.email) {
+          logger.debug(
+            { prNo },
+            '1 commit matches configured gitAuthor so can rebase'
+          );
+          res.canRebase = true;
+        } else {
+          logger.debug(
+            { prNo },
+            '1 commit and not by configured gitAuthor so cannot rebase'
+          );
+          res.canRebase = false;
+        }
+      } else {
+        logger.debug(
+          { prNo },
+          '1 commit and no configured gitAuthor so can rebase'
+        );
+        res.canRebase = true;
+      }
+    } else {
+      logger.debug({ prNo }, `${size} commits so cannot rebase`);
+      res.canRebase = false;
     }
   }
   if (await branchExists(pr.source.branch.name)) {
@@ -599,6 +691,7 @@ export function getPrBody(input: string) {
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
+    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/')
     .substring(0, 50000);
 }
 

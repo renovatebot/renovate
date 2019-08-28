@@ -1,3 +1,4 @@
+import { logger } from '../../logger';
 import get from './gh-got-wrapper';
 
 export default class Graphql {

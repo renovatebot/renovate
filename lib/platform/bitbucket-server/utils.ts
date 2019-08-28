@@ -1,6 +1,6 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
-import api from './bb-got-wrapper';
+import { api } from './bb-got-wrapper';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
@@ -15,6 +15,7 @@ export function prInfo(pr: any) {
     number: pr.id,
     body: pr.description,
     branchName: pr.fromRef.displayId,
+    targetBranch: pr.toRef.displayId,
     title: pr.title,
     state: prStateMapping[pr.state],
     createdAt: pr.createdDate,

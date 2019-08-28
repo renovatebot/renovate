@@ -5,6 +5,7 @@
         "nodes": [
           {
             "number": 2433,
+            "baseRefName": "master",
             "headRefName": "renovate/major-got-packages",
             "title": "build(deps): update got packages (major)",
             "mergeable": "MERGEABLE",
@@ -44,6 +45,7 @@
           },
           {
             "number": 2500,
+            "baseRefName": "master",
             "headRefName": "renovate/jest-monorepo",
             "title": "chore(deps): update dependency jest to v23.6.0",
             "mergeable": "UNKNOWN",

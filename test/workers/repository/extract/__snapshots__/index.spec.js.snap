@@ -32,10 +32,16 @@ Object {
   "dockerfile": Array [
     Object {},
   ],
+  "droneci": Array [
+    Object {},
+  ],
   "github-actions": Array [
     Object {},
   ],
   "gitlabci": Array [
+    Object {},
+  ],
+  "gitlabci-include": Array [
     Object {},
   ],
   "gomod": Array [
@@ -90,6 +96,9 @@ Object {
     Object {},
   ],
   "sbt": Array [
+    Object {},
+  ],
+  "swift": Array [
     Object {},
   ],
   "terraform": Array [

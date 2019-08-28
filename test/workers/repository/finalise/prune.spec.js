@@ -1,5 +1,9 @@
 const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 
+/** @type any */
+const platform = global.platform;
+
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
@@ -50,6 +54,47 @@ describe('workers/repository/finalise/prune', () => {
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+    it('does nothing on prune stale branches disabled', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.dryRun = false;
+      config.pruneStaleBranches = false;
+      platform.getAllRenovateBranches.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+    it('posts comment if someone pushed to PR', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.dryRun = false;
+      platform.getAllRenovateBranches.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.getBranchPr.mockReturnValueOnce({ canRebase: false });
+      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+    it('skips comment if dry run', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.dryRun = true;
+      platform.getAllRenovateBranches.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.getBranchPr.mockReturnValueOnce({ canRebase: false });
+      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(0);
     });
   });
 });

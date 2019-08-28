@@ -1,6 +1,7 @@
-const pr = {
-  id: 5,
+const pr = id => ({
+  id,
   source: { branch: { name: 'branch' } },
+  destination: { branch: { name: 'master' } },
   title: 'title',
   summary: { raw: 'summary' },
   state: 'OPEN',
@@ -8,10 +9,10 @@ const pr = {
   links: {
     commits: {
       href:
-        'https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits',
+        `https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/${id}/commits`,
     },
   },
-};
+});
 const issue = {
   id: 25,
   title: 'title',
@@ -21,6 +22,7 @@ const issue = {
 const repo = {
   is_private: false,
   full_name: 'some/repo',
+  has_issues: true,
   owner: { username: 'some' },
   mainbranch: { name: 'master' },
 };
@@ -39,13 +41,19 @@ module.exports = {
   '/2.0/repositories/some/empty/issues': {
     values: [],
   },
+  '/2.0/repositories/some/empty/src/master/renovate.json': { enabled: false },
   '/2.0/repositories/some/repo/issues': {
     values: [issue, { ...issue, id: 26 }],
   },
   '/2.0/repositories/some/repo/pullrequests': {
-    values: [pr],
+    values: [pr(5)],
   },
-  '/2.0/repositories/some/repo/pullrequests/5': pr,
+  '/2.0/repositories/some/repo/pullrequests/3': pr(3),
+  '/2.0/repositories/some/repo/pullrequests/3/commits': {
+    size: 2,
+  },
+  '/2.0/repositories/some/repo/pullrequests/3/diff': ' ',
+  '/2.0/repositories/some/repo/pullrequests/5': pr(5),
   '/2.0/repositories/some/repo/pullrequests/5/diff': `
     diff --git a/requirements.txt b/requirements.txt
     index 7e08d70..f5283ca 100644
@@ -64,8 +72,17 @@ module.exports = {
     .trim()
     .replace(/^\s+/g, ''),
   '/2.0/repositories/some/repo/pullrequests/5/commits': {
-    values: [{}],
+    size: 1,
+    values: [{ author: { raw: 'Renovate Bot <bot@renovateapp.com>' } }],
   },
+  '/2.0/repositories/some/repo/pullrequests/5/comments': {
+    values: [
+      { id: 21, content: { raw: '### some-subject\n\nblablabla' } },
+      { id: 22, content: { raw: '!merge' } }
+    ],
+  },
+  '/2.0/repositories/some/repo/pullrequests/5/comments/21': {},
+  '/2.0/repositories/some/repo/pullrequests/5/comments/22': {},
   '/2.0/repositories/some/repo/refs/branches': {
     values: [
       { name: 'master' },

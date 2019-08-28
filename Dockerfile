@@ -1,17 +1,17 @@
-FROM amd64/node:10.16.0-alpine@sha256:f59303fb3248e5d992586c76cc83e1d3700f641cbcd7c0067bc7ad5bb2e5b489 AS tsbuild
+FROM amd64/node:10.16.3@sha256:47577703778ff7d741425c5f5c81df719b1b3bb647c4beae02a1d1d327afbe8c AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY lib lib
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.app.json tsconfig.app.json
 
-RUN yarn build
+RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:b36667c98cf8f68d4b7f1fb8e01f742c2ed26b5f0c965a788e98dfe589a4b3e4
+FROM amd64/ubuntu:18.04@sha256:ca013ac5c09f9a9f6db8370c1b759a29fe997d64d6591e9a75b71748858f7da0
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -23,7 +23,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
 
 ## Gradle
 
@@ -125,7 +125,7 @@ RUN chmod -R a+rw /usr
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-ENV DOCKER_VERSION=18.09.2
+ENV DOCKER_VERSION=19.03.1
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
   && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
@@ -133,6 +133,15 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
+
+# Cargo
+
+ENV RUST_BACKTRACE=1 \
+  PATH=/home/ubuntu/.cargo/bin:$PATH
+
+RUN set -ex ;\
+  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+  rustup toolchain install 1.36.0
 
 # Pipenv
 
@@ -149,13 +158,13 @@ RUN poetry config settings.virtualenvs.create false
 
 # npm
 
-ENV NPM_VERSION=6.9.0
+ENV NPM_VERSION=6.10.2
 
 RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.16.0
+ENV YARN_VERSION=1.17.3
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
@@ -163,7 +172,7 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install --production && yarn cache clean
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data

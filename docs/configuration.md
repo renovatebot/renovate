@@ -70,6 +70,6 @@ any other settings above.
 
 ## Configuration Options
 
-Please see [https://renovatebot.com/docs/configuration-options/](https://renovatebot.com/docs/configuration-options/) for a list of user-facing configuration options.
+Please see [https://docs.renovatebot.com/configuration-options/](https://docs.renovatebot.com/configuration-options/) for a list of user-facing configuration options.
 
 For further options when running your own instance of Renovate, please see the full config definitions file at `lib/config/definitions.js`.

@@ -1,3 +1,4 @@
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
@@ -9,9 +10,13 @@ beforeEach(() => {
 const {
   mergeRenovateConfig,
 } = require('../../../../lib/workers/repository/init/config');
+/** @type any */
 const migrateValidate = require('../../../../lib/config/migrate-validate');
 
 jest.mock('../../../../lib/config/migrate-validate');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/repository/init/config', () => {
   describe('mergeRenovateConfig()', () => {

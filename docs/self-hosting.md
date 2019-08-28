@@ -2,10 +2,7 @@
 
 ## Open Source vs Commercial versions
 
-Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the same core functionality as in the app.
-
-There is also a commercially-licensed "Professional Edition" of Renovate available for GitHub Enterprise, that includes a stateful priority job queue, background scheduler and webhook listener.
-For details and documentation on Renovate Pro, please visit [renovatebot.com/pro](https://renovatebot.com/pro).
+Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the same core functionality as in the app. The main feature that's missing is the responsiveness that comes from the app's use of a webhook listener (something not possible in a CLI tool).
 
 ## Installing Renovate OSS
 
@@ -71,6 +68,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       key: github-token
+                      name: renovate-env
                 - name: RENOVATE_AUTODISCOVER
                   valueFrom:
                     secretKeyRef:
@@ -137,7 +135,7 @@ If you are running on any platform except github.com, it's important to also con
 
 ## File/directory usage
 
-By default, Renovate will store all files within a `renovate/` subdirectory of the operating system's tempororary directory, e.g. `/tmp/renovate/`.
+By default, Renovate will store all files within a `renovate/` subdirectory of the operating system's temporary directory, e.g. `/tmp/renovate/`.
 
 Repository data will be copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 

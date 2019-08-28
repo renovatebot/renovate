@@ -1,33 +1,51 @@
 declare namespace Renovate {
-  // TODO: refactor logger
-  interface ILogger {
-    trace(...args: any[]): void;
-    debug(...args: any[]): void;
-    info(...args: any[]): void;
-    warn(...args: any[]): void;
-    error(...args: any[]): void;
-    fatal(...args: any[]): void;
-    child(...args: any[]): void;
+  interface Cache {
+    get<T = any>(namespace: string, key: string): Promise<T>;
+    rm(namespace: string, key: string): Promise<void>;
+    rmAll(): Promise<void>;
 
-    setMeta(obj: any): void;
-  }
-
-  interface IDict<T> {
-    [key: string]: T;
+    set<T = any>(
+      namespace: string,
+      key: string,
+      value: T,
+      ttlMinutes?: number
+    ): Promise<void>;
   }
 }
 
-// eslint-disable-next-line no-var, vars-on-top
-declare var logger: Renovate.ILogger;
-
 declare interface Error {
+  configFile?: string;
+
+  statusCode?: number;
+
   validationError?: string;
   validationMessage?: string;
 }
 
 declare namespace NodeJS {
   interface Global {
+    appMode?: boolean;
     gitAuthor?: { name: string; email: string };
-    logger: Renovate.ILogger;
+    renovateVersion: string;
+    // TODO: declare interface for all platforms
+    platform: typeof import('./platform/github');
+
+    renovateCache: Renovate.Cache;
+
+    repoCache: Record<string, any>;
+
+    trustLevel?: string;
+
+    updateRubyGemsVersions?: Promise<void>;
   }
+}
+
+declare let platform: typeof import('./platform/github');
+
+declare let renovateCache: Renovate.Cache;
+
+// can't use `resolveJsonModule` because it will copy json files and change dist path
+declare module '*.json' {
+  const value: { version: string } & Record<string, any>;
+  export = value;
 }

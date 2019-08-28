@@ -1,14 +1,14 @@
 import responses from './_fixtures/responses';
-import { IGotApi } from '../../../lib/platform/common';
-import Storage from '../../../lib/platform/git/storage';
+import { GotApi, RepoParams } from '../../../lib/platform/common';
+import { Storage } from '../../../lib/platform/git/storage';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
     describe(scenarioName, () => {
-      let bitbucket: typeof import('../../../lib/platform/bitbucket-server');
-      let api: jest.Mocked<IGotApi>;
+      let bitbucket: BbsApi;
+      let api: jest.Mocked<GotApi>;
       let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
       let GitStorage: jest.Mock<Storage> & {
         getUrl: jest.MockInstance<any, any>;
@@ -83,10 +83,11 @@ describe('platform/bitbucket-server', () => {
         bitbucket.cleanRepo();
       });
 
-      function initRepo() {
+      function initRepo(config?: Partial<RepoParams>) {
         return bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
+          ...config,
         } as any);
       }
 
@@ -125,6 +126,29 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(1);
           const res = await initRepo();
           expect(res).toMatchSnapshot();
+        });
+        it('does not throw', async () => {
+          expect.assertions(1);
+          api.get.mockResolvedValueOnce({
+            body: {
+              isLastPage: false,
+              lines: ['{'],
+              size: 50000,
+            },
+          } as any);
+
+          const res = await initRepo({ optimizeForDisabled: true });
+          expect(res).toMatchSnapshot();
+        });
+
+        it('throws disabled', async () => {
+          expect.assertions(1);
+          api.get.mockResolvedValueOnce({
+            body: { isLastPage: true, lines: ['{ "enabled": false }'] },
+          } as any);
+          await expect(initRepo({ optimizeForDisabled: true })).rejects.toThrow(
+            'disabled'
+          );
         });
       });
 
@@ -509,6 +533,7 @@ describe('platform/bitbucket-server', () => {
               state: 'MERGED',
               reviewers: [],
               fromRef: {},
+              toRef: {},
             },
           } as any);
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
@@ -630,14 +655,10 @@ describe('platform/bitbucket-server', () => {
         it('throws conflicted', async () => {
           expect.assertions(3);
           await initRepo();
-          api.post.mockReturnValueOnce(
-            Promise.reject({
-              statusCode: 409,
-            })
-          );
-          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
-            'repository-changed'
-          );
+          api.post.mockRejectedValueOnce({
+            statusCode: 409,
+          });
+          expect(await bitbucket.mergePr(5, 'branch')).toBeFalsy();
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
         });
@@ -663,6 +684,21 @@ describe('platform/bitbucket-server', () => {
               '<details><summary>foo</summary>bar</details>text<details>'
             )
           ).toMatchSnapshot();
+        });
+
+        it('sanitizes HTML comments in the body', () => {
+          const prBody = bitbucket.getPrBody(`---
+
+- [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
+
+---
+<!---->
+Empty comment.
+<!-- This is another comment -->
+Followed by some information.
+<!-- followed by some more comments -->`);
+          expect(prBody).toMatchSnapshot();
         });
       });
 
