@@ -5,8 +5,11 @@ const {
 const branchWorker = require('../../../../lib/workers/branch');
 /** @type any */
 const limits = require('../../../../lib/workers/repository/process/limits');
+/** @type any */
+const globalLimits = require('../../../../lib/workers/global/limits');
 
 branchWorker.processBranch = jest.fn();
+
 limits.getPrsRemaining = jest.fn(() => 99);
 
 let config;
@@ -35,10 +38,12 @@ describe('workers/repository/write', () => {
     });
     it('commits creation limit break', async () => {
       const branches = [{}, {}, {}, {}];
-      limits.getLimitRemaining = jest.fn(() => 0);
-      branchWorker.processBranch.mockReturnValue('pr-created');
+      branchWorker.processBranch.mockReturnValueOnce('delete');
+      branchWorker.processBranch.mockReturnValueOnce('pr-created');
+      globalLimits.getLimitRemaining = jest.fn(() => 0);
+      globalLimits.incrementLimit = jest.fn();
       await writeUpdates(config, packageFiles, branches);
-      expect(limits.getLimitRemaining).toHaveBeenCalledTimes(0);
+      expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
   });
 });
