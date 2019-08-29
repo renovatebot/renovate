@@ -33,5 +33,12 @@ describe('workers/repository/write', () => {
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(3);
     });
+    it('commits creation limit break', async () => {
+      const branches = [{}, {}, {}, {}];
+      limits.getLimitRemaining = jest.fn(() => 0);
+      branchWorker.processBranch.mockReturnValue('pr-created');
+      await writeUpdates(config, packageFiles, branches);
+      expect(limits.getLimitRemaining).toHaveBeenCalledTimes(0);
+    });
   });
 });
