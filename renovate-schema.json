@@ -439,11 +439,6 @@
               "allowedVersions": {
                 "description": "A semver range defining allowed versions for dependencies",
                 "type": "string"
-              },
-              "prPriority": {
-                "description": "Set default priority of PRs. 0 (default) means normal priority, 1 or greater is higher priority and -1 or less is lower priority.",
-                "type": "integer",
-                "default": 0
               }
             }
           }
@@ -624,7 +619,7 @@
       "default": 0
     },
     "prPriority": {
-      "description": "Set default priority of PRs. 0 (default) means normal priority, 1 or greater is higher priority and -1 or less is lower priority.",
+      "description": "Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.",
       "type": "integer",
       "default": 0
     },
