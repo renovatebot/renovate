@@ -709,7 +709,7 @@ export async function createPr(
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.canRebase = true;
+  pr.isModified = false;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -729,6 +729,7 @@ export async function getPr(iid: number) {
   pr.body = pr.description;
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? 'open' : pr.state;
+  pr.isModified = true;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -750,13 +751,13 @@ export async function getPr(iid: number) {
       branch && branch.commit ? branch.commit.author_email : null;
     // istanbul ignore if
     if (branchCommitEmail === config.email) {
-      pr.canRebase = true;
+      pr.isModified = false;
     } else {
       logger.debug(
         { branchCommitEmail, configEmail: config.email, iid: pr.iid },
         'Last committer to branch does not match bot email, so PR cannot be rebased.'
       );
-      pr.canRebase = false;
+      pr.isModified = true;
     }
   } catch (err) {
     logger.debug({ err }, 'Error getting PR branch');

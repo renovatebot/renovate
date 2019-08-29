@@ -785,7 +785,7 @@ export async function createPr(
   const pr = {
     id: prInfoRes.body.id,
     displayNumber: `Pull Request #${prInfoRes.body.id}`,
-    canRebase: true,
+    isModified: false,
     ...utils.prInfo(prInfoRes.body),
   };
 
@@ -817,6 +817,7 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
     reviewers: res.body.reviewers.map(
       (r: { user: { name: any } }) => r.user.name
     ),
+    isModified: false,
   };
 
   pr.version = updatePrVersion(pr.number, pr.version);
@@ -837,32 +838,20 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
     if (prCommits.totalCount === 1) {
       if (global.gitAuthor) {
         const commitAuthorEmail = prCommits.values[0].author.emailAddress;
-        if (commitAuthorEmail === global.gitAuthor.email) {
+        if (commitAuthorEmail !== global.gitAuthor.email) {
           logger.debug(
             { prNo },
-            '1 commit matches configured gitAuthor so can rebase'
+            'PR is modified: 1 commit but not by configured gitAuthor'
           );
-          pr.canRebase = true;
-        } else {
-          logger.debug(
-            { prNo },
-            '1 commit and not by configured gitAuthor so cannot rebase'
-          );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
-      } else {
-        logger.debug(
-          { prNo },
-          '1 commit and no configured gitAuthor so can rebase'
-        );
-        pr.canRebase = true;
       }
     } else {
       logger.debug(
         { prNo },
-        `${prCommits.totalCount} commits so cannot rebase`
+        `PR is modified: Found ${prCommits.totalCount} commits`
       );
-      pr.canRebase = false;
+      pr.isModified = true;
     }
   }
 
