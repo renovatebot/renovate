@@ -1020,12 +1020,12 @@
       },
       "$ref": "#"
     },
-    "helm": {
-      "description": "Configuration object for helm (kubernetes package manager) renovation.",
+    "helm-requirements": {
+      "description": "Configuration object for helm requirements.yaml files.",
       "type": "object",
       "default": {
         "commitMessageTopic": "helm chart {{depName}}",
-        "fileMatch": ["(^|/)requirements.ya?ml$"]
+        "fileMatch": ["(^|/)requirements.yaml$"]
       },
       "$ref": "#"
     },

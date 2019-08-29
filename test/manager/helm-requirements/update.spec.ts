@@ -1,4 +1,4 @@
-import { updateDependency } from '../../../lib/manager/helm/update';
+import { updateDependency } from '../../../lib/manager/helm-requirements/update';
 
 describe('lib/manager/helm/extract', () => {
   describe('updateDependency()', () => {

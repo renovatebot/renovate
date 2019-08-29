@@ -1549,14 +1549,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'helm',
-    description:
-      'Configuration object for helm (kubernetes package manager) renovation.',
+    name: 'helm-requirements',
+    description: 'Configuration object for helm requirements.yaml files.',
     stage: 'package',
     type: 'object',
     default: {
       commitMessageTopic: 'helm chart {{depName}}',
-      fileMatch: ['(^|/)requirements.ya?ml$'],
+      fileMatch: ['(^|/)requirements.yaml$'],
     },
     mergeable: true,
     cli: false,

@@ -1,4 +1,4 @@
-import { extractPackageFile } from '../../../lib/manager/helm/extract';
+import { extractPackageFile } from '../../../lib/manager/helm-requirements/extract';
 
 const platform: any = global.platform;
 
@@ -29,6 +29,17 @@ describe('lib/manager/helm/extract', () => {
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
+    it('parses simple requirements.yaml but skips if necessary fields missing', async () => {
+      platform.getFile.mockReturnValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      `);
+      const fileName = 'requirements.yaml';
+      const result = await extractPackageFile('', fileName);
+      expect(result).toBeNull();
+    });
     it("doesn't fail if Chart.yaml is invalid", async () => {
       platform.getFile.mockReturnValueOnce(`
       Invalid Chart.yaml content.
@@ -46,8 +57,7 @@ describe('lib/manager/helm/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = await extractPackageFile(content, fileName);
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toBeNull();
     });
     it('skips local dependencies', async () => {
       platform.getFile.mockReturnValueOnce(`
@@ -71,7 +81,29 @@ describe('lib/manager/helm/extract', () => {
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
+    it('returns null if no dependencies', async () => {
+      platform.getFile.mockReturnValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      hello: world
+      `;
+      const fileName = 'requirements.yaml';
+      const result = await extractPackageFile(content, fileName);
+      expect(result).toBeNull();
+    });
     it('returns null if requirements.yaml is invalid', async () => {
+      platform.getFile.mockReturnValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
       const content = `
       Invalid requirements.yaml content.
       dependencies:
@@ -81,7 +113,7 @@ describe('lib/manager/helm/extract', () => {
       const result = await extractPackageFile(content, fileName);
       expect(result).toBeNull();
     });
-    it('returns null if requirements.yaml is empty', async () => {
+    it('returns null if Chart.yaml is empty', async () => {
       const content = '';
       const fileName = 'requirements.yaml';
       const result = await extractPackageFile(content, fileName);

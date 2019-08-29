@@ -27,7 +27,7 @@ const managerList = [
   'gomod',
   'gradle',
   'gradle-wrapper',
-  'helm',
+  'helm-requirements',
   'homebrew',
   'kubernetes',
   'leiningen',
