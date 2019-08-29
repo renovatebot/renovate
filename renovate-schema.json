@@ -439,6 +439,11 @@
               "allowedVersions": {
                 "description": "A semver range defining allowed versions for dependencies",
                 "type": "string"
+              },
+              "prPriority": {
+                "description": "Set default priority of PRs. 0 (default) means normal priority, 1 or greater is higher priority and -1 or less is lower priority.",
+                "type": "integer",
+                "default": 0
               }
             }
           }
@@ -615,6 +620,11 @@
     },
     "prConcurrentLimit": {
       "description": "Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.",
+      "type": "integer",
+      "default": 0
+    },
+    "prPriority": {
+      "description": "Set default priority of PRs. 0 (default) means normal priority, 1 or greater is higher priority and -1 or less is lower priority.",
       "type": "integer",
       "default": 0
     },
