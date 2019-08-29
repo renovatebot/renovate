@@ -55,8 +55,6 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     matchCurrentVersion,
     sourceUrlPrefixes,
     updateTypes,
-    // eslint-disable-next-line prefer-const
-    prPriority,
   } = packageRule;
   // Setting empty arrays simplifies our logic later
   paths = paths || [];
@@ -79,13 +77,6 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     !(packageNames.length || packagePatterns.length)
   ) {
     packagePatterns = ['.*'];
-  }
-  if (prPriority > 0) {
-    positiveMatch = true;
-  } else if (prPriority < 0) {
-    positiveMatch = true;
-  } else {
-    return false;
   }
   if (paths.length) {
     const isMatch = paths.some(
