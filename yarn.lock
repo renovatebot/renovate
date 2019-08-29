@@ -1199,10 +1199,10 @@
   resolved "https://registry.yarnpkg.com/@types/later/-/later-1.2.5.tgz#56297f82ea0002549159219d75844a9380ad18bd"
   integrity sha512-oROpXZfXR+6uQyz4wBs2gZYxvZJ5Zp+iSEJWrIWgvipSnzLcHCpR9br4XUqRBPFS1EP971JlnWfXhr5so5E1sg==
 
-"@types/lodash@4.14.137":
-  version "4.14.137"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.137.tgz#8a4804937dc6462274ffcc088df8f14fc1b368e2"
-  integrity sha512-g4rNK5SRKloO+sUGbuO7aPtwbwzMgjK+bm9BBhLD7jGUiGR7zhwYEhSln/ihgYQBeIJ5j7xjyaYzrWTcu3UotQ==
+"@types/lodash@4.14.138":
+  version "4.14.138"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.138.tgz#34f52640d7358230308344e579c15b378d91989e"
+  integrity sha512-A4uJgHz4hakwNBdHNPdxOTkYmXNgmUAKLbXZ7PKGslgeV0Mb8P3BlbYfPovExek1qnod4pDfRbxuzcVs3dlFLg==
 
 "@types/luxon@1.15.2":
   version "1.15.2"

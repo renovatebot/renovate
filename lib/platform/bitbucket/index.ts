@@ -552,7 +552,7 @@ export async function createPr(
   const pr = {
     number: prInfo.id,
     displayNumber: `Pull Request #${prInfo.id}`,
-    canRebase: true,
+    isModified: false,
   };
   // istanbul ignore if
   if (config.prList) {
@@ -587,6 +587,7 @@ export async function getPr(prNo: number) {
   const res: any = {
     displayNumber: `Pull Request #${pr.id}`,
     ...utils.prInfo(pr),
+    isModified: false,
   };
 
   if (utils.prStates.open.includes(pr.state)) {
@@ -603,35 +604,22 @@ export async function getPr(prNo: number) {
     // istanbul ignore if
     if (size === undefined) {
       logger.warn({ prNo, url, body }, 'invalid response so can rebase');
-      res.canRebase = true;
     } else if (size === 1) {
       if (global.gitAuthor) {
         const author = addrs.parseOneAddress(
           body.values[0].author.raw
         ) as addrs.ParsedMailbox;
-        if (author.address === global.gitAuthor.email) {
+        if (author.address !== global.gitAuthor.email) {
           logger.debug(
             { prNo },
-            '1 commit matches configured gitAuthor so can rebase'
+            'PR is modified: 1 commit but not by configured gitAuthor'
           );
-          res.canRebase = true;
-        } else {
-          logger.debug(
-            { prNo },
-            '1 commit and not by configured gitAuthor so cannot rebase'
-          );
-          res.canRebase = false;
+          res.isModified = true;
         }
-      } else {
-        logger.debug(
-          { prNo },
-          '1 commit and no configured gitAuthor so can rebase'
-        );
-        res.canRebase = true;
       }
     } else {
-      logger.debug({ prNo }, `${size} commits so cannot rebase`);
-      res.canRebase = false;
+      logger.debug({ prNo }, `PR is modified: Found ${size} commits`);
+      res.isModified = true;
     }
   }
   if (await branchExists(pr.source.branch.name)) {
