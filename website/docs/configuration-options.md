@@ -751,22 +751,20 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### prPriority
 
-Here's an example of how you would define PR priority for any specific dependency. For all other PR dependencies a default sorting priority value is assigned. Default value is `0`.
+Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits. In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major). If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting. The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
+
+Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
 
 ```json
 {
   "packageRules": [
     {
-      "prPriority": -1,
-      "packageNames": ["debug"]
+      "depTypeList": ["devDependencies"],
+      "prPriority": -1
     },
     {
-      "prPriority": 0,
-      "packageNames": ["cookie-parser"]
-    },
-    {
-      "prPriority": 5,
-      "packageNames": ["react"]
+      "packageNames": ["react"],
+      "prPriority": 5
     }
   ]
 }
