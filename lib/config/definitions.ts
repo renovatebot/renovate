@@ -761,17 +761,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'prPriority',
-    description:
-      'Set default priority of PRs. 0 (default) means normal priority, 1 or greater is higher priority and -1 or less is lower priority.',
-    type: 'integer',
-    default: 0,
-    parent: 'packageRules',
-    stage: 'branch',
-    cli: false,
-    env: false,
-  },
-  {
     name: 'pinDigests',
     description: 'Whether to add digests to Dockerfile source images',
     stage: 'package',
@@ -1020,9 +1009,11 @@ const options: RenovateOptions[] = [
   {
     name: 'prPriority',
     description:
-      'Set default priority of PRs. 0 (default) means normal priority, 1 or greater is higher priority and -1 or less is lower priority.',
+      'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
     type: 'integer',
-    default: 0, // no limit
+    default: 0,
+    cli: false,
+    env: false,
   },
   {
     name: 'bbUseDefaultReviewers',
