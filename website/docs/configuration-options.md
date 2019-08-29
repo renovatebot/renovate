@@ -749,6 +749,29 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### paths
 
+### prPriority
+
+Here's an example of how you would define PR priority for any specific dependency.
+
+```json
+{
+  "packageRules": [
+    {
+      "prPriority": -1,
+      "packageNames": ["debug"]
+    },
+    {
+      "prPriority": 0,
+      "packageNames": ["cookie-parser"]
+    },
+    {
+      "prPriority": 5,
+      "packageNames": ["react"]
+    }
+  ]
+}
+```
+
 ### sourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:
@@ -922,6 +945,10 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## prPriority
+
+Sets default sorting priority value for all PR creation. Default value is `0`.
 
 ## pruneStaleBranches
 
