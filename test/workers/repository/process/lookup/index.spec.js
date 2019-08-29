@@ -1018,7 +1018,6 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
       expect(res.sourceUrl).toBeDefined();
     });
     it('ignores deprecated', async () => {
@@ -1033,7 +1032,6 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
       expect(res.updates[0].toVersion).toEqual('1.4.0');
     });
     it('is deprecated', async () => {
@@ -1052,7 +1050,6 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
       expect(res.updates[0].toVersion).toEqual('1.4.1');
     });
     it('skips unsupported values', async () => {

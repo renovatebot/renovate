@@ -20,6 +20,7 @@
   },
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Sourcegraph"],
   "stabilityDays": 3,
+  "prCreation": "not-pending",
   "packageRules": [
     {
       "updateTypes": ["major"],

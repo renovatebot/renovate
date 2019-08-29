@@ -3,7 +3,7 @@ import { api } from '../../lib/platform/github/gh-got-wrapper';
 import * as datasource from '../../lib/datasource';
 import * as github from '../../lib/datasource/github';
 import _got from '../../lib/util/got';
-import * as hostRules from '../../lib/util/host-rules';
+import * as _hostRules from '../../lib/util/host-rules';
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
@@ -11,6 +11,7 @@ jest.mock('../../lib/util/host-rules');
 
 const got: any = _got;
 const ghGot: any = api.get;
+const hostRules: any = _hostRules;
 
 describe('datasource/github', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -90,7 +91,6 @@ describe('datasource/github', () => {
       await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
     it('should return default.json', async () => {
-      // @ts-ignore
       hostRules.find.mockReturnValueOnce({ token: 'abc' });
       got.mockImplementationOnce(() => ({
         body: {
@@ -101,7 +101,6 @@ describe('datasource/github', () => {
       expect(content).toEqual({ foo: 'bar' });
     });
     it('should return custom.json', async () => {
-      // @ts-ignore
       hostRules.find.mockReturnValueOnce({ token: 'abc' });
       got.mockImplementationOnce(() => ({
         body: {
