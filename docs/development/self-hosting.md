@@ -24,7 +24,7 @@ $ docker run renovate/renovate:13
 ```
 
 We also have a `slim` image, which doesn't include the third party binaries (eg Python, Java ...).
-The `slim` image can use [podman](https://podman.io) to start child containers to use these third party tool.
+The `slim` image can use [podman](https://podman.io) to start child containers to use these third party tools.
 For this to work you have to start the container with the `--privileged` argument.
 
 Here are some working tags for the `slim` image.
