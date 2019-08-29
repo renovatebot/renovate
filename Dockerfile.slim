@@ -66,10 +66,13 @@ RUN  echo "Installing podman ..." \
   && rm -rf /var/lib/apt/lists/* \
   && ln -s /usr/bin/podman /usr/bin/docker \
   && echo "[registries.search]\nregistries = ['docker.io']" | tee /etc/containers/registries.conf \
-  && sed -i 's/# events_logger = "journald"/events_logger = "file"/' /usr/share/containers/libpod.conf
+  && podman --events-backend=none info 2> /dev/null || echo ''
 
 # and back to normal
 USER ubuntu
+
+# creating initial podman config to suppress event errors
+RUN podman --events-backend=none info 2> /dev/null || echo
 
 COPY package.json .
 
