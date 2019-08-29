@@ -35,7 +35,7 @@ function isConnectionError(err: { code: string }) {
 export async function downloadHttpProtocol(
   pkgUrl: url.URL | string,
   hostType = 'maven'
-) {
+): Promise<string | null> {
   let raw: { body: string };
   try {
     raw = await got(pkgUrl, { hostType });

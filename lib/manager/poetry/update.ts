@@ -6,7 +6,7 @@ import { PoetryFile } from './types';
 
 // TODO: Maybe factor out common code from pipenv.updateDependency and poetry.updateDependency
 // Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string) {
+function matchAt(content: string, index: number, match: string): boolean {
   return content.substring(index, index + match.length) === match;
 }
 
@@ -16,7 +16,7 @@ function replaceAt(
   index: number,
   oldString: string,
   newString: string
-) {
+): string {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -28,7 +28,7 @@ function replaceAt(
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade<{ nestedVersion?: boolean }>
-): string {
+): string | null {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return null;

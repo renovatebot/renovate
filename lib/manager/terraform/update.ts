@@ -4,7 +4,7 @@ import { Upgrade } from '../common';
 export function updateDependency(
   currentFileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     logger.debug(`terraform.updateDependency: ${upgrade.newValue}`);
     const lines = currentFileContent.split('\n');

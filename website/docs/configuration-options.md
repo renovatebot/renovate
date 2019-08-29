@@ -263,7 +263,7 @@ Example:
 
 ## encrypted
 
-See https://renovatebot.com/docs/private-modules for details on how this is used to encrypt npm tokens.
+See https://docs.renovatebot.com/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -281,7 +281,7 @@ Be careful you know what you're doing with this option. The initial intended use
 
 ## extends
 
-See https://renovatebot.com/docs/config-presets for details.
+See https://docs.renovatebot.com/config-presets for details.
 
 ## fileMatch
 
@@ -554,17 +554,17 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehensive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a comprehensive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovatebot.com/docs/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://docs.renovatebot.com/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovatebot.com/docs/private-modules for details on how this is used.
+See https://docs.renovatebot.com/private-modules for details on how this is used.
 
 ## nuget
 
@@ -626,6 +626,8 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
     }
   ]
 ```
+
+Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match. Therefore, you should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if necessary.
 
 ### allowedVersions
 
@@ -1022,7 +1024,7 @@ The `schedule` option allows you to define times of week or month for Renovate u
 
 The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule. i.e. Renovate will run on the repository around the clock.
 
-The easiest way to define a schedule is to use a preset if one of them fits your requirements. See [Schedule presets](https://renovatebot.com/docs/presets-schedule/) for details and feel free to request a new one in the source repository if you think others would benefit from it too.
+The easiest way to define a schedule is to use a preset if one of them fits your requirements. See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think others would benefit from it too.
 
 Otherwise, here are some text schedules that are known to work:
 
@@ -1085,6 +1087,20 @@ By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" 
 
 Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
+## stabilityDays
+
+If this is set to a non-zero value, and an update has a release date/timestamp available, then Renovate will check if the configured "stability days" have elapsed. If the days since the release is less than the configured stability days then a "pending" status check will be added to the branch. If enough days have passed then a passing status check will be added.
+
+There are a couple of uses for this:
+
+#### Suppress branch/PR creation for X days
+
+If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `masterIssue=true` so you don't lose visibility of these pending PRs.
+
+#### Await X days before Automerging
+
+If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed. This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+
 ## statusCheckVerify
 
 This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
@@ -1093,7 +1109,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://docs.renovatebot.com/node#configuring-support-policy)
 
 ## suppressNotifications
 
@@ -1172,6 +1188,20 @@ This defaults to true, meaning that Renovate will perform certain "desirable" up
 Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
 
 By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
+
+For the `regex` `versionScheme`, will accept a regex string after a colon, for example:
+
+```json
+{
+  "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$"
+}
+```
+
+The valid capture groups for the `regex` `versionScheme` are:
+
+- `major`, `minor`, and `patch`: at least one of these must be provided. When determining whether a package has updated, these values will be compared in the standard semantic versioning fashion. If any of these fields are omitted, they will be treated as if they were `0` -- in this way, you can describe versioning schemes with up to three incrementing values.
+- `prerelease`: this value, if captured, will mark a given release as a prerelease (eg. unstable). If this value is captured and you have set `"ignoreUnstable": true`, the given release will be skipped.
+- `compatibility`: this value defines the "build compatibility" of a given dependency. A proposed Renovate update will never change the specified compatibility value. For example, if you are pinning to `1.2.3-linux` (and `linux` is captured as the compatbility value), Renovate will not update you to `1.2.4-osx`.
 
 ## vulnerabilityAlerts
 

@@ -1,11 +1,10 @@
-import { DateTime } from 'luxon';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
 export function updateDependency(
   currentFileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
@@ -57,9 +56,10 @@ export function updateDependency(
         { depName, lineToChange, newDigestRightSized },
         'gomod: need to update digest'
       );
-      const currentDateTime = DateTime.local().toFormat('yyyyMMddHHmmss');
-      const newValue = `v0.0.0-${currentDateTime}-${newDigestRightSized}`;
-      newLine = lineToChange.replace(updateLineExp, `$1$2${newValue}`);
+      newLine = lineToChange.replace(
+        updateLineExp,
+        `$1$2${newDigestRightSized}`
+      );
     } else {
       newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
     }

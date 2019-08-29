@@ -95,7 +95,9 @@ function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   return global.repoCache[cacheKey];
 }
 
-async function fetchReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
+async function fetchReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
   const { datasource } = config;
   if (!datasource) {
     logger.warn('No datasource found');
@@ -113,7 +115,10 @@ export function supportsDigests(config: DigestConfig) {
   return !!datasources[config.datasource].getDigest;
 }
 
-export function getDigest(config: DigestConfig, value?: string) {
+export function getDigest(
+  config: DigestConfig,
+  value?: string
+): Promise<string | null> {
   const lookupName = config.lookupName || config.depName;
   const { registryUrls } = config;
   return datasources[config.datasource].getDigest(

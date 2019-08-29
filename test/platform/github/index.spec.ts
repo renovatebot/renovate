@@ -1736,7 +1736,7 @@ describe('platform/github', () => {
           } as any)
       );
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(true);
+      expect(pr.isModified).toBe(false);
       expect(pr).toMatchSnapshot();
     });
     it('should return a rebaseable PR if gitAuthor matches 1 commit', async () => {
@@ -1785,7 +1785,7 @@ describe('platform/github', () => {
           } as any)
       );
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(true);
+      expect(pr.isModified).toBe(false);
       expect(pr).toMatchSnapshot();
     });
     it('should return a not rebaseable PR if gitAuthor does not match 1 commit', async () => {
@@ -1834,7 +1834,7 @@ describe('platform/github', () => {
           } as any)
       );
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(false);
+      expect(pr.isModified).toBe(true);
       expect(pr).toMatchSnapshot();
     });
   });

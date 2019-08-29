@@ -236,7 +236,7 @@ export function getRenovatePRFormat(azurePr: {
     pr.isConflicted = true;
   }
 
-  pr.canRebase = true;
+  pr.isModified = false;
 
   return pr;
 }

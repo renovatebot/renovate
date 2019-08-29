@@ -16,7 +16,7 @@ interface OrbRelease {
  */
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   logger.debug({ lookupName }, 'orb.getPkgReleases()');
   const cacheNamespace = 'orb';
   const cacheKey = lookupName;

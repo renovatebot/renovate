@@ -328,7 +328,7 @@ export async function findIssue(title: string) {
 
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.debug('Issues are disabled - cannot findIssue');
     return null;
   }
   const issues = await findOpenIssues(title);
@@ -357,7 +357,8 @@ export async function ensureIssue(title: string, body: string) {
 
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.warn('Issues are disabled - cannot ensureIssue');
+    logger.info({ title, body }, 'Failed to ensure Issue');
     return null;
   }
   try {
@@ -410,7 +411,7 @@ export /* istanbul ignore next */ async function getIssueList() {
 
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.debug('Issues are disabled - cannot getIssueList');
     return [];
   }
   try {
@@ -434,7 +435,7 @@ export /* istanbul ignore next */ async function getIssueList() {
 export async function ensureIssueClosing(title: string) {
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled');
+    logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
   }
   const issues = await findOpenIssues(title);
@@ -496,7 +497,7 @@ function matchesState(state: string, desiredState: string) {
 export async function findPr(
   branchName: string,
   prTitle?: string | null,
-  state: string = 'all'
+  state = 'all'
 ) {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -551,7 +552,7 @@ export async function createPr(
   const pr = {
     number: prInfo.id,
     displayNumber: `Pull Request #${prInfo.id}`,
-    canRebase: true,
+    isModified: false,
   };
   // istanbul ignore if
   if (config.prList) {
@@ -586,6 +587,7 @@ export async function getPr(prNo: number) {
   const res: any = {
     displayNumber: `Pull Request #${pr.id}`,
     ...utils.prInfo(pr),
+    isModified: false,
   };
 
   if (utils.prStates.open.includes(pr.state)) {
@@ -602,35 +604,22 @@ export async function getPr(prNo: number) {
     // istanbul ignore if
     if (size === undefined) {
       logger.warn({ prNo, url, body }, 'invalid response so can rebase');
-      res.canRebase = true;
     } else if (size === 1) {
       if (global.gitAuthor) {
         const author = addrs.parseOneAddress(
           body.values[0].author.raw
         ) as addrs.ParsedMailbox;
-        if (author.address === global.gitAuthor.email) {
+        if (author.address !== global.gitAuthor.email) {
           logger.debug(
             { prNo },
-            '1 commit matches configured gitAuthor so can rebase'
+            'PR is modified: 1 commit but not by configured gitAuthor'
           );
-          res.canRebase = true;
-        } else {
-          logger.debug(
-            { prNo },
-            '1 commit and not by configured gitAuthor so cannot rebase'
-          );
-          res.canRebase = false;
+          res.isModified = true;
         }
-      } else {
-        logger.debug(
-          { prNo },
-          '1 commit and no configured gitAuthor so can rebase'
-        );
-        res.canRebase = true;
       }
     } else {
-      logger.debug({ prNo }, `${size} commits so cannot rebase`);
-      res.canRebase = false;
+      logger.debug({ prNo }, `PR is modified: Found ${size} commits`);
+      res.isModified = true;
     }
   }
   if (await branchExists(pr.source.branch.name)) {

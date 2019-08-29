@@ -27,8 +27,7 @@ export async function getPkgReleases(
       releases: [],
     };
     const response = await got(rubyVersionsUrl);
-    const root = parse(response.body);
-    // @ts-ignore
+    const root: any = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     for (const row of rows) {
       const columns: string[] = Array.from(
@@ -37,11 +36,11 @@ export async function getPkgReleases(
       if (columns.length) {
         const version = columns[0].replace('Ruby ', '');
         if (isVersion(version)) {
-          const releaseDate = columns[1];
+          const releaseTimestamp = columns[1];
           const changelogUrl = columns[2]
             .replace('<a href="', 'https://www.ruby-lang.org')
             .replace('">more...</a>', '');
-          res.releases.push({ version, releaseDate, changelogUrl });
+          res.releases.push({ version, releaseTimestamp, changelogUrl });
         }
       }
     }

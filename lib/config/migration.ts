@@ -1,14 +1,13 @@
 import is from '@sindresorhus/is';
+import later from 'later';
+import { logger } from '../logger';
+import { clone } from './util';
+import { getOptions, RenovateOptions } from './definitions';
+import { RenovateConfig } from './common';
 
-const later = require('later');
-const { logger } = require('../logger');
-const options = require('./definitions').getOptions();
+const options = getOptions();
 
-const clone = input => JSON.parse(JSON.stringify(input));
-
-let optionTypes;
-
-export { migrateConfig };
+let optionTypes: Record<string, RenovateOptions['type']>;
 
 const removedOptions = [
   'maintainYarnLock',
@@ -24,8 +23,17 @@ const removedOptions = [
   'groupPrBody',
 ];
 
+export interface MigratedConfig {
+  isMigrated: boolean;
+  migratedConfig: RenovateConfig;
+}
+
 // Returns a migrated config
-function migrateConfig(config, parentKey) {
+export function migrateConfig(
+  config: RenovateConfig,
+  // TODO: remove any type
+  parentKey?: string | any
+): MigratedConfig {
   try {
     if (!optionTypes) {
       optionTypes = {};
@@ -82,14 +90,12 @@ function migrateConfig(config, parentKey) {
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {
-            // @ts-ignore
-            fileList.push(packageFile.packageFile);
+            fileList.push((packageFile as any).packageFile);
             if (Object.keys(packageFile).length > 1) {
               migratedConfig.packageRules = migratedConfig.packageRules || [];
               const payload = migrateConfig(packageFile, key).migratedConfig;
               for (const subrule of payload.packageRules || []) {
-                // @ts-ignore
-                subrule.paths = [packageFile.packageFile];
+                subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
               }
               delete payload.packageFile;
@@ -97,8 +103,7 @@ function migrateConfig(config, parentKey) {
               if (Object.keys(payload).length) {
                 migratedConfig.packageRules.push({
                   ...payload,
-                  // @ts-ignore
-                  paths: [packageFile.packageFile],
+                  paths: [(packageFile as any).packageFile],
                 });
               }
             }
@@ -346,8 +351,7 @@ function migrateConfig(config, parentKey) {
       } else if (key === 'depTypes' && is.array(val)) {
         val.forEach(depType => {
           if (is.object(depType) && !is.array(depType)) {
-            // @ts-ignore
-            const depTypeName = depType.depType;
+            const depTypeName = (depType as any).depType;
             if (depTypeName) {
               migratedConfig.packageRules = migratedConfig.packageRules || [];
               const newPackageRule = migrateConfig(depType, key).migratedConfig;

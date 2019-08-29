@@ -33,7 +33,7 @@ interface PipRequirement {
   git?: string;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   logger.debug('pipenv.extractPackageFile()');
 
   let pipfile: PipFile;

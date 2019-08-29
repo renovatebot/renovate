@@ -6,14 +6,14 @@ import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 
 export const pythonVersions = ['python', 'python3', 'python3.7'];
-let pythonAlias: string = null;
+let pythonAlias: string | null = null;
 
-export function parsePythonVersion(str: string) {
+export function parsePythonVersion(str: string): number[] {
   const arr = str.split(' ')[1].split('.');
   return [parseInt(arr[0], 10), parseInt(arr[1], 10)];
 }
 
-export async function getPythonAlias() {
+export async function getPythonAlias(): Promise<string> {
   if (pythonAlias) {
     return pythonAlias;
   }
@@ -89,7 +89,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig
-): Promise<PackageFile> {
+): Promise<PackageFile | null> {
   logger.debug('pip_setup.extractPackageFile()');
   let setup: PythonSetup;
   try {
@@ -139,9 +139,7 @@ export async function extractPackageFile(
     .filter(Boolean)
     .sort((a, b) =>
       a.managerData.lineNumber === b.managerData.lineNumber
-        ? // TODO: dummy comment for prettier
-          // @ts-ignore
-          (a.depName > b.depName) - (a.depName < b.depName)
+        ? a.depName.localeCompare(b.depName)
         : a.managerData.lineNumber - b.managerData.lineNumber
     );
   // istanbul ignore if

@@ -61,7 +61,7 @@ describe('workers/pr', () => {
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
-      pr.canRebase = true;
+      pr.isModified = false;
       platform.getBranchStatus.mockReturnValueOnce('success');
       platform.mergePr.mockReturnValueOnce(true);
       await prWorker.checkAutoMerge(pr, config);
@@ -71,14 +71,14 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
-      pr.canRebase = true;
+      pr.isModified = false;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
-      pr.canRebase = false;
+      pr.isModified = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
@@ -110,7 +110,7 @@ describe('workers/pr', () => {
       title: 'Update dependency dummy to v1.1.0',
       body:
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
-      canRebase: true,
+      isModified: false,
     };
     beforeEach(() => {
       config = {

@@ -206,6 +206,26 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     expect(updatedGradleFile).toEqual('mysqlVersion=7.0.0');
   });
 
+  it('should replace a external property variable assigned to a specific dependency parenthesis syntax', () => {
+    const gradleFile =
+      "implementation platform(group: 'mysql', name: 'mysql-connector-java', version: mysqlVersion)"; // eslint-disable-line no-template-curly-in-string
+    const mysqlDependency = {
+      group: 'mysql',
+      depGroup: 'mysql',
+      name: 'mysql-connector-java',
+      version: '6.0.5',
+    };
+    collectVersionVariables([mysqlDependency], gradleFile);
+
+    const propertyFile = 'mysqlVersion=6.0.5';
+    const updatedGradleFile = updateGradleVersion(
+      propertyFile,
+      mysqlDependency,
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual('mysqlVersion=7.0.0');
+  });
+
   it('should replace a external variable assigned to a map dependency', () => {
     const gradleFile = `compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',

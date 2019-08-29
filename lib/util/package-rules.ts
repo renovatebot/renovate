@@ -1,11 +1,10 @@
 import minimatch from 'minimatch';
-import { Range } from 'semver';
 import { logger } from '../logger';
 import * as versioning from '../versioning';
-import { mergeChildConfig } from '../config';
+import { mergeChildConfig, PackageRule, UpdateType } from '../config';
 
 // TODO: move to `../config`
-interface Config extends Record<string, any> {
+export interface Config extends Record<string, any> {
   versionScheme?: string;
   packageFile?: string;
   depType?: string;
@@ -14,7 +13,7 @@ interface Config extends Record<string, any> {
   currentValue?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  updateType?: string;
+  updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string;
   language?: string;
@@ -22,23 +21,6 @@ interface Config extends Record<string, any> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & Config)[];
-}
-
-// TODO: move to `../config`
-interface PackageRule {
-  paths?: string[];
-  languages?: string[];
-  baseBranchList?: string[];
-  managers?: string[];
-  datasources?: string[];
-  depTypeList?: string[];
-  packageNames?: string[];
-  packagePatterns?: string[];
-  excludePackageNames?: string[];
-  excludePackagePatterns?: string[];
-  matchCurrentVersion?: string | Range;
-  sourceUrlPrefixes?: string[];
-  updateTypes?: string[];
 }
 
 function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
@@ -226,7 +208,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   return positiveMatch;
 }
 
-export function applyPackageRules(inputConfig: Config): Config {
+export function applyPackageRules<T extends Config>(inputConfig: T): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules || [];
   logger.trace(

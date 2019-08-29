@@ -1,13 +1,8 @@
-const commander = require('commander');
-const configDefinitions = require('./definitions');
-const { version } = require('../../package.json');
+import { Command } from 'commander';
+import { getOptions, RenovateOptions } from './definitions';
+import { version } from '../../package.json';
 
-module.exports = {
-  getCliName,
-  getConfig,
-};
-
-function getCliName(option) {
+export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
     return '';
   }
@@ -15,7 +10,11 @@ function getCliName(option) {
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
-function getConfig(input) {
+export interface RenovateCliConfig extends Record<string, any> {
+  repositories?: string[];
+}
+
+export function getConfig(input: string[]): RenovateCliConfig {
   // massage migrated configuration keys
   const argv = input
     .map(a =>
@@ -29,12 +28,12 @@ function getConfig(input) {
         .replace('"host":"', '"hostName":"')
     )
     .filter(a => !a.startsWith('--git-fs'));
-  const options = configDefinitions.getOptions();
+  const options = getOptions();
 
-  const config = {};
+  const config: RenovateCliConfig = {};
 
   const coersions = {
-    boolean: val => {
+    boolean: (val: string) => {
       if (val === 'true' || val === '') return true;
       if (val === 'false') return false;
       throw new Error(
@@ -43,7 +42,7 @@ function getConfig(input) {
           "'"
       );
     },
-    array: val => {
+    array: (val: string) => {
       if (val === '') {
         return [];
       }
@@ -53,7 +52,7 @@ function getConfig(input) {
         return val.split(',').map(el => el.trim());
       }
     },
-    object: val => {
+    object: (val: string) => {
       if (val === '') {
         return {};
       }
@@ -63,11 +62,11 @@ function getConfig(input) {
         throw new Error("Invalid JSON value: '" + val + "'");
       }
     },
-    string: val => val,
+    string: (val: string) => val,
     integer: parseInt,
   };
 
-  let program = new commander.Command().arguments('[repositories...]');
+  let program = new Command().arguments('[repositories...]');
 
   options.forEach(option => {
     if (option.cli !== false) {
@@ -82,7 +81,7 @@ function getConfig(input) {
   });
 
   /* istanbul ignore next */
-  function helpConsole() {
+  function helpConsole(): void {
     /* eslint-disable no-console */
     console.log('  Examples:');
     console.log('');

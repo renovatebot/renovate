@@ -17,7 +17,7 @@ export function extractPackageFile(
   content: string,
   _: string,
   config: ExtractConfig
-) {
+): PackageFile | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
   let indexUrl: string;

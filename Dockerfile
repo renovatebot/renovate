@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.1@sha256:fdcdf519622ff8d3cb8000a77e69fc44e7d5ebe8c39f8d89885ffba337b193f8 AS tsbuild
+FROM amd64/node:10.16.3@sha256:47577703778ff7d741425c5f5c81df719b1b3bb647c4beae02a1d1d327afbe8c AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:d91842ef309155b85a9e5c59566719308fab816b40d376809c39cf1cf4de3c6a
+FROM amd64/ubuntu:18.04@sha256:ca013ac5c09f9a9f6db8370c1b759a29fe997d64d6591e9a75b71748858f7da0
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -23,7 +23,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
 
 ## Gradle
 
@@ -137,11 +137,11 @@ USER ubuntu
 # Cargo
 
 ENV RUST_BACKTRACE=1 \
-    PATH=/home/ubuntu/.cargo/bin:$PATH
+  PATH=/home/ubuntu/.cargo/bin:$PATH
 
 RUN set -ex ;\
-    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
-    rustup toolchain install 1.36.0
+  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+  rustup toolchain install 1.36.0
 
 # Pipenv
 

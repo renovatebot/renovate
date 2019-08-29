@@ -1,6 +1,7 @@
-const { migrateAndValidate } = require('../../lib/config/migrate-validate');
+import { migrateAndValidate } from '../../lib/config/migrate-validate';
+import { RenovateConfig } from '../../lib/config';
 
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = { ...require('./config/_fixtures') };
@@ -13,12 +14,12 @@ describe('config/migrate-validate', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles migration', async () => {
-      const input = { automerge: 'none' };
+      const input: RenovateConfig = { automerge: 'none' as any };
       const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();
     });
     it('handles invalid', async () => {
-      const input = { foo: 'none' };
+      const input: RenovateConfig = { foo: 'none' };
       const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();
       expect(res.errors).toHaveLength(1);

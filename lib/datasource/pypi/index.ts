@@ -32,7 +32,7 @@ export async function getPkgReleases({
   compatibility,
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   let hostUrls = ['https://pypi.org/pypi/'];
   if (is.nonEmptyArray(registryUrls)) {
     hostUrls = registryUrls;
@@ -59,7 +59,7 @@ async function getDependency(
   depName: string,
   hostUrl: string,
   compatibility: Record<string, string>
-) {
+): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${depName}/json`);
   try {
     const dependency: ReleaseResult = { releases: null };
@@ -111,7 +111,7 @@ async function getDependency(
 async function getSimpleDependency(
   depName: string,
   hostUrl: string
-): Promise<ReleaseResult> {
+): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${depName}`);
   try {
     const dependency: ReleaseResult = { releases: null };
@@ -147,7 +147,10 @@ async function getSimpleDependency(
   }
 }
 
-function extractVersionFromLinkText(text: string, depName: string) {
+function extractVersionFromLinkText(
+  text: string,
+  depName: string
+): string | null {
   const prefix = `${depName}-`;
   const suffix = '.tar.gz';
   if (!(text.startsWith(prefix) && text.endsWith(suffix))) {

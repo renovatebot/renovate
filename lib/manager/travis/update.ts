@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
-): string {
+): string | null {
   try {
     logger.debug(`travis.updateDependency(): ${upgrade.newValue}`);
     const indent = detectIndent(fileContent).indent || '  ';

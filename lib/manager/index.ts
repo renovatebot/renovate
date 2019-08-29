@@ -1,9 +1,13 @@
 import {
-  ManagerApi,
   ExtractConfig,
-  RangeConfig,
+  ManagerApi,
+  PackageFile,
   PackageUpdateConfig,
+  RangeConfig,
+  Result,
+  PackageUpdateResult,
 } from './common';
+import { RangeStrategy } from '../versioning';
 
 const managerList = [
   'ansible',
@@ -64,25 +68,25 @@ const languageList = [
 
 export const get = <T extends keyof ManagerApi>(manager: string, name: T) =>
   managers[manager][name];
-export const getLanguageList = () => languageList;
-export const getManagerList = () => managerList;
+export const getLanguageList = (): string[] => languageList;
+export const getManagerList = (): string[] => managerList;
 
 export function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
   files: string[]
-) {
-  return managers[manager] && get(manager, 'extractAllPackageFiles')
-    ? get(manager, 'extractAllPackageFiles')(config, files)
+): Result<PackageFile[] | null> {
+  return managers[manager] && managers[manager].extractAllPackageFiles
+    ? managers[manager].extractAllPackageFiles(config, files)
     : null;
 }
 
 export function getPackageUpdates(
   manager: string,
   config: PackageUpdateConfig
-) {
-  return managers[manager] && get(manager, 'getPackageUpdates')
-    ? get(manager, 'getPackageUpdates')(config)
+): Result<PackageUpdateResult[]> | null {
+  return managers[manager] && managers[manager].getPackageUpdates
+    ? managers[manager].getPackageUpdates(config)
     : null;
 }
 
@@ -91,13 +95,13 @@ export function extractPackageFile(
   content: string,
   fileName?: string,
   config?: ExtractConfig
-) {
-  return managers[manager] && get(manager, 'extractPackageFile')
-    ? get(manager, 'extractPackageFile')(content, fileName, config)
+): Result<PackageFile | null> {
+  return managers[manager] && managers[manager].extractPackageFile
+    ? managers[manager].extractPackageFile(content, fileName, config)
     : null;
 }
 
-export function getRangeStrategy(config: RangeConfig) {
+export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const { manager, rangeStrategy } = config;
   if (managers[manager].getRangeStrategy) {
     // Use manager's own function if it exists

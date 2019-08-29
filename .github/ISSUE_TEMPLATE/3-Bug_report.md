@@ -4,13 +4,13 @@ about: You've found a bug with Renovate
 ---
 
 **What Renovate type are you using?**
-Renovate CLI, Renovate GitHub App, or Renovate Pro?
+Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too if you think it's relevant.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
 
 **Did you see anything helpful in debug logs?**
-If you are using the Renovate App, log into https://renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
 
 **To Reproduce**
 Steps to reproduce the behavior:

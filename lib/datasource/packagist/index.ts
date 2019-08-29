@@ -39,7 +39,7 @@ interface RegistryMeta {
   packages?: Record<string, RegistryFile>;
 }
 
-async function getRegistryMeta(regUrl: string) {
+async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
   try {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
@@ -154,7 +154,7 @@ interface AllPackages {
   includesPackages: Record<string, ReleaseResult>;
 }
 
-async function getAllPackages(regUrl: string): Promise<AllPackages> {
+async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   let repoCacheResult = global.repoCache[`packagist-${regUrl}`];
   // istanbul ignore if
   if (repoCacheResult) {
@@ -231,7 +231,10 @@ async function packagistOrgLookup(name: string) {
   return dep;
 }
 
-async function packageLookup(regUrl: string, name: string) {
+async function packageLookup(
+  regUrl: string,
+  name: string
+): Promise<ReleaseResult | null> {
   try {
     if (regUrl === 'https://packagist.org') {
       const packagistResult = await packagistOrgLookup(name);

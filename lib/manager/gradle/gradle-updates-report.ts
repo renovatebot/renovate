@@ -67,7 +67,9 @@ gradle.buildFinished {
   await writeFile(gradleInitFile, content);
 }
 
-async function extractDependenciesFromUpdatesReport(localDir: string) {
+async function extractDependenciesFromUpdatesReport(
+  localDir: string
+): Promise<BuildDependency[]> {
   const gradleProjectConfigurations = await readGradleReport(localDir);
 
   const dependencies = gradleProjectConfigurations
@@ -111,7 +113,7 @@ function mergeDependenciesWithRepositories(
 function flatternDependencies(
   accumulator: GradleDependencyWithRepos[],
   currentValue: GradleDependencyWithRepos[]
-) {
+): GradleDependencyWithRepos[] {
   accumulator.push(...currentValue);
   return accumulator;
 }

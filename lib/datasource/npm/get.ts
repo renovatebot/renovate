@@ -40,7 +40,9 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
-export async function getDependency(name: string): Promise<NpmDependency> {
+export async function getDependency(
+  name: string
+): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${name})`);
 
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
@@ -67,6 +69,7 @@ export async function getDependency(name: string): Promise<NpmDependency> {
     cacheNamespace,
     pkgUrl
   );
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
