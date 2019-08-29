@@ -36,7 +36,7 @@ interface Pr {
   sha: string;
 
   sourceRepo: string;
-  canRebase: boolean;
+  isModified: boolean;
 }
 
 interface LocalRepoConfig {
@@ -1216,7 +1216,7 @@ export async function createPr(
       urls.homepage
     );
   }
-  pr.canRebase = true;
+  pr.isModified = false;
   return pr;
 }
 
@@ -1324,7 +1324,7 @@ async function getOpenPrs() {
             // Check against gitAuthor
             const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
             if (commitAuthorEmail === global.gitAuthor.email) {
-              pr.canRebase = true;
+              pr.isModified = false;
             } else {
               logger.trace(
                 {
@@ -1333,14 +1333,14 @@ async function getOpenPrs() {
                   commitAuthorEmail,
                   gitAuthorEmail: global.gitAuthor.email,
                 },
-                'PR canRebase=false: last committer has different email to the bot'
+                'PR isModified=true: last committer has different email to the bot'
               );
-              pr.canRebase = false;
+              pr.isModified = true;
             }
           } else {
             // assume the author is us
             // istanbul ignore next
-            pr.canRebase = true;
+            pr.isModified = false;
           }
         } else {
           // assume we can't rebase if more than 1
@@ -1349,9 +1349,9 @@ async function getOpenPrs() {
               branchName,
               prNo,
             },
-            'PR canRebase=false: PR has more than one commit'
+            'PR isModified=true: PR has more than one commit'
           );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
         pr.isStale = false;
         if (pr.mergeStateStatus === 'BEHIND') {
@@ -1480,6 +1480,7 @@ export async function getPr(prNo: number) {
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
   if (pr.state === 'open') {
+    pr.isModified = true;
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
@@ -1501,7 +1502,7 @@ export async function getPr(prNo: number) {
             { prNo },
             '1 commit matches configured gitAuthor so can rebase'
           );
-          pr.canRebase = true;
+          pr.isModified = false;
         } else {
           logger.trace(
             {
@@ -1509,16 +1510,16 @@ export async function getPr(prNo: number) {
               commitAuthorEmail,
               gitAuthorEmail: global.gitAuthor.email,
             },
-            'PR canRebase=false: 1 commit and not by configured gitAuthor so cannot rebase'
+            'PR isModified=true: 1 commit and not by configured gitAuthor so cannot rebase'
           );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
       } else {
         logger.debug(
           { prNo },
           '1 commit and no configured gitAuthor so can rebase'
         );
-        pr.canRebase = true;
+        pr.isModified = false;
       }
     } else {
       // Check if only one author of all commits
@@ -1551,7 +1552,7 @@ export async function getPr(prNo: number) {
         }
       );
       if (remainingCommits.length <= 1) {
-        pr.canRebase = true;
+        pr.isModified = false;
       }
     }
     const baseCommitSHA = await getBaseCommitSHA();
