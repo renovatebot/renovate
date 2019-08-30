@@ -117,13 +117,22 @@ describe('manager/gradle', () => {
       });
     });
 
-    it('should return null and gradle should not be executed if no build.gradle', async () => {
+    it('should return null and gradle should not be executed if no root build.gradle', async () => {
+      fs.exists.mockResolvedValue(false);
+
       const packageFiles = ['foo/build.gradle'];
       expect(
         await manager.extractAllPackageFiles(config, packageFiles)
       ).toBeNull();
 
       expect(exec).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'foo/build.gradle',
+      ]);
+      expect(dependencies).toMatchSnapshot();
     });
 
     it('should configure the renovate report plugin', async () => {
