@@ -749,27 +749,6 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### paths
 
-### prPriority
-
-Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits. In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major). If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting. The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
-
-Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
-
-```json
-{
-  "packageRules": [
-    {
-      "depTypeList": ["devDependencies"],
-      "prPriority": -1
-    },
-    {
-      "packageNames": ["react"],
-      "prPriority": 5
-    }
-  ]
-}
-```
-
 ### sourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:
@@ -939,6 +918,27 @@ The above can result in swamping CI systems, as well as a lot of retesting if br
 ## prNotPendingHours
 
 If you set `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are set to pending indefinitely. Therefore we set an upper limit - default 24 hours - for how long we wait until creating a PR. Note also this is the same length of time as for Renovate's own `unpublishSafe` status check for npm.
+
+## prPriority
+
+Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits. In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major). If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting. The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
+
+Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
+
+```json
+{
+  "packageRules": [
+    {
+      "depTypeList": ["devDependencies"],
+      "prPriority": -1
+    },
+    {
+      "packageNames": ["react"],
+      "prPriority": 5
+    }
+  ]
+}
+```
 
 ## prTitle
 
