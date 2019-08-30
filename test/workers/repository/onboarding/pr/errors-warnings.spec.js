@@ -27,8 +27,12 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
     });
   });
   describe('getDepWarnings()', () => {
+    let config;
     beforeEach(() => {
       jest.resetAllMocks();
+      config = {
+        ...defaultConfig,
+      };
     });
     it('returns warning text', () => {
       const packageFiles = {
@@ -62,7 +66,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarnings(packageFiles);
+      const res = getDepWarnings(packageFiles, config);
       expect(res).toMatchSnapshot();
     });
   });

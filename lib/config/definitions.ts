@@ -1981,6 +1981,12 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
   },
+  {
+    name: 'unicodeEmoji',
+    description: 'Enable or disable Unicode emoji',
+    type: 'boolean',
+    default: false,
+  },
 ];
 
 export function getOptions() {
