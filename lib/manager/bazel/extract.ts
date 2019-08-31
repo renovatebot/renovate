@@ -172,10 +172,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (commit) {
         dep.currentDigest = commit;
       }
-      const repo = parse(remote).substring('https://github.com/'.length);
-      dep.datasource = 'github';
-      dep.lookupName = repo;
-      deps.push(dep);
+      const githubURL = parse(remote);
+      if (githubURL) {
+        const repo = githubURL.substring('https://github.com/'.length);
+        dep.datasource = 'github';
+        dep.lookupName = repo;
+        deps.push(dep);
+      }
     } else if (
       depType === 'go_repository' &&
       depName &&
