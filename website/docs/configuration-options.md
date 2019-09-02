@@ -893,6 +893,8 @@ e.g. if you wish to add an extra Warning to major updates:
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
 
+Note that this limit is enforced on a per-repository basis.
+
 ## prCreation
 
 This setting tells Renovate when you would like it to raise PRs:
@@ -914,6 +916,8 @@ This setting - if enabled - helps slow down Renovate, particularly during the on
 5.  Renovate then creates every single upgrade PR necessary - potentially dozens
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged. Instead, if `prHourlyLimit` is set to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59). So the project should still result in all PRs created perhaps within the first 24 hours maximum, but at a rate that may allow users to merge them once they pass tests. It does not place a limit on the number of _concurrently open_ PRs - only on the rate they are created.
+
+Note that this limit is enforced on a per-repository basis.
 
 ## prNotPendingHours
 
