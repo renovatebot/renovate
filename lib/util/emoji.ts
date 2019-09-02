@@ -1,6 +1,12 @@
 import emoji from 'node-emoji';
 import { RenovateConfig } from '../config';
 
-export function emojify(text: string, config: RenovateConfig): string {
-  return config.unicodeEmoji ? emoji.emojify(text) : text;
+let unicodeEmoji = false;
+
+export function setEmojiConfig(_config: RenovateConfig) {
+  unicodeEmoji = _config.unicodeEmoji;
+}
+
+export function emojify(text: string): string {
+  return unicodeEmoji ? emoji.emojify(text) : text;
 }
