@@ -487,12 +487,12 @@ The default behaviour for Renovate is to only use group names for branches and P
 
 ## lockFileMaintenance
 
-By setting enabled=true, this means that the default behaviour is to "maintain" lock files for each `package.json` if they exist already. "Maintaining" a lock file means recreating it to get an up-to-date version and committing that. Supported lock files include `package-lock.json` (npm >= 5) and `yarn.lock` (yarn).
+This feature can be used to "maintain" lock files for each `package.json` if they exist already. "Maintaining" a lock file means recreating it to get an up-to-date version and committing that. Supported lock files include `package-lock.json` (npm >= 5) and `yarn.lock` (yarn).
 
-If you wish to disable this feature then you could add this to your configuration:
+This feature is off by default. If you wish to enable this feature then you could add this to your configuration:
 
 ```json
-  "lockFileMaintenance": { "enabled": false }
+  "lockFileMaintenance": { "enabled": true }
 ```
 
 To reduce "noise" in the repository, it defaults its schedule to "before 5am on monday", i.e. to achieve once per week semantics. Renovate may run a few times within that time - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
