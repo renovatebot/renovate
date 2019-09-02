@@ -134,7 +134,7 @@
     "node-html-parser": "1.1.16",
     "npm": "6.11.2",
     "p-all": "2.1.0",
-    "parse-diff": "0.5.1",
+    "parse-diff": "0.6.0",
     "parse-link-header": "1.0.1",
     "pnpm": "3.7.5",
     "registry-auth-token": "4.0.0",
