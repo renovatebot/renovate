@@ -178,7 +178,7 @@
     "@types/lodash": "4.14.138",
     "@types/luxon": "1.15.2",
     "@types/nock": "10.0.3",
-    "@types/node": "11.13.19",
+    "@types/node": "11.13.20",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "3.3.0",
     "@types/safe-regex": "1.1.2",
