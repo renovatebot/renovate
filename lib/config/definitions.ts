@@ -1591,7 +1591,10 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['^\\.github/main.workflow$'],
+      fileMatch: [
+        '^\\.github/main.workflow$',
+        '^\\.github/workflows/[^/]+\\.ya?ml$',
+      ],
       pinDigests: true,
     },
     mergeable: true,

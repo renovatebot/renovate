@@ -1048,7 +1048,10 @@
       "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "default": {
-        "fileMatch": ["^\\.github/main.workflow$"],
+        "fileMatch": [
+          "^\\.github/main.workflow$",
+          "^\\.github/workflows/[^/]+\\.ya?ml$"
+        ],
         "pinDigests": true
       },
       "$ref": "#"
