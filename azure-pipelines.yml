@@ -68,4 +68,5 @@ jobs:
       vmImage: macOS-10.14
 
     steps:
+      - template: .azure/docker.macos.yml
       - template: .azure/docker.yml
