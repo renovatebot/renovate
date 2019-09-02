@@ -56,14 +56,14 @@ jobs:
     steps:
       - template: .azure/steps.yml
 
-  - job: 'Linux-DockerSlim'
+  - job: 'Linux_DockerSlim'
     pool:
       vmImage: ubuntu-16.04
 
     steps:
       - template: .azure/docker.yml
 
-  - job: 'MacOS-DockerSlim'
+  - job: 'MacOS_DockerSlim'
     pool:
       vmImage: macOS-10.14
 
