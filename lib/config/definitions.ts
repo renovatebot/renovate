@@ -1007,6 +1007,15 @@ const options: RenovateOptions[] = [
     default: 0, // no limit
   },
   {
+    name: 'prPriority',
+    description:
+      'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
+    type: 'integer',
+    default: 0,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'bbUseDefaultReviewers',
     description: 'Use the default reviewers (Bitbucket server only).',
     type: 'boolean',

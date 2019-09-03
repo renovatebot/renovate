@@ -618,6 +618,11 @@
       "type": "integer",
       "default": 0
     },
+    "prPriority": {
+      "description": "Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.",
+      "type": "integer",
+      "default": 0
+    },
     "bbUseDefaultReviewers": {
       "description": "Use the default reviewers (Bitbucket server only).",
       "type": "boolean",
