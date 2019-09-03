@@ -24,6 +24,8 @@ export interface Release {
 }
 
 export interface ReleaseResult {
+  sourceDirectory?: string;
+  latestVersion?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   deprecationMessage?: string;

@@ -1,18 +1,25 @@
-const semver = require('semver');
-const { logger } = require('../../../../logger');
-const versioning = require('../../../../versioning');
+import * as semver from 'semver';
+import { logger } from '../../../../logger';
+import * as versioning from '../../../../versioning';
+import { Release } from '../../../../datasource';
 
-module.exports = {
-  filterVersions,
-};
+export interface FilterConfig {
+  allowedVersions?: string;
+  depName?: string;
+  followTag?: string;
+  ignoreDeprecated?: boolean;
+  ignoreUnstable?: boolean;
+  respectLatest?: boolean;
+  versionScheme: string;
+}
 
-function filterVersions(
-  config,
-  fromVersion,
-  latestVersion,
-  versions,
-  releases
-) {
+export function filterVersions(
+  config: FilterConfig,
+  fromVersion: string,
+  latestVersion: string,
+  versions: string[],
+  releases: Release[]
+): string[] {
   const {
     versionScheme,
     ignoreUnstable,
