@@ -1,11 +1,18 @@
-const { logger } = require('../../../../logger');
-const versioning = require('../../../../versioning');
+import { logger } from '../../../../logger';
+import * as versioning from '../../../../versioning';
+import { LookupUpdate } from './common';
 
-module.exports = {
-  getRollbackUpdate,
-};
+export interface RollbackConfig {
+  currentValue?: string;
+  depName?: string;
+  packageFile: Record<string, any>;
+  versionScheme: string;
+}
 
-function getRollbackUpdate(config, versions) {
+export function getRollbackUpdate(
+  config: RollbackConfig,
+  versions: string[]
+): LookupUpdate {
   const { packageFile, versionScheme, depName, currentValue } = config;
   const version = versioning.get(versionScheme);
   // istanbul ignore if
@@ -42,7 +49,7 @@ function getRollbackUpdate(config, versions) {
     logger.info('No toVersion to roll back to');
     return null;
   }
-  let fromVersion;
+  let fromVersion: string;
   const newValue = version.getNewValue(
     currentValue,
     'replace',

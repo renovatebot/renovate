@@ -1,11 +1,11 @@
 import slugify from 'slugify';
+import handlebars from 'handlebars';
+import { clean as cleanGitRef } from 'clean-git-ref';
+import { logger, setMeta } from '../../../logger';
 
-const handlebars = require('handlebars');
-const cleanGitRef = require('clean-git-ref').clean;
-const { logger, setMeta } = require('../../../logger');
-
-const { generateBranchConfig } = require('./generate');
-const { flattenUpdates } = require('./flatten');
+import { generateBranchConfig } from './generate';
+import { flattenUpdates } from './flatten';
+import { RenovateConfig, ValidationMessage } from '../../../config';
 
 /**
  * Clean git branch name
@@ -15,14 +15,17 @@ const { flattenUpdates } = require('./flatten');
  * - trailing dot
  * - whitespace
  */
-function cleanBranchName(branchName) {
+function cleanBranchName(branchName: string): string {
   return cleanGitRef(branchName)
     .replace(/^\.|\.$/, '') // leading or trailing dot
     .replace(/\/\./g, '/') // leading dot after slash
     .replace(/\s/g, ''); // whitespace
 }
 
-function branchifyUpgrades(config, packageFiles) {
+export function branchifyUpgrades(
+  config: RenovateConfig,
+  packageFiles: Record<string, any[]>
+) {
   logger.debug('branchifyUpgrades');
   const updates = flattenUpdates(config, packageFiles);
   logger.debug(
@@ -30,8 +33,8 @@ function branchifyUpgrades(config, packageFiles) {
       .map(u => u.depName)
       .join(', ')}`
   );
-  const errors = [];
-  const warnings = [];
+  const errors: ValidationMessage[] = [];
+  const warnings: ValidationMessage[] = [];
   const branchUpgrades = {};
   const branches = [];
   for (const u of updates) {
@@ -40,7 +43,7 @@ function branchifyUpgrades(config, packageFiles) {
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;
     // massage for handlebars
-    const upper = str => str.charAt(0).toUpperCase() + str.substr(1);
+    const upper = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
     if (update.updateType) {
       update[`is${upper(update.updateType)}`] = true;
     }
@@ -132,5 +135,3 @@ function branchifyUpgrades(config, packageFiles) {
     branchList,
   };
 }
-
-export { branchifyUpgrades };
