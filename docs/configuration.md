@@ -10,7 +10,7 @@ Configuration is supported via any or all of the below:
 - `renovate.json`, `renovate.json5`, `.github/renovate.json`, `.github/renovate.json5`, `.renovaterc.json`, or `.renovaterc` in target repository
 - `renovate` field of `package.json` in target repository
 
-The above are listed in reverse order of preference. i.e. `package.json`
+The above are listed in **_reverse order_** of preference. i.e. `package.json`
 settings will override `renovate.json` settings, CLI, which overrides env, which
 overrides the config file, which overrides defaults.
 

@@ -40,7 +40,7 @@ How to use: Add `"gradle": { "enabled": true }` to either your bot config or you
 
 Status: beta
 
-Maven support has been implemented, initially supporting exact/pinned versions only, which should still be useful for hte majority of users who don't specify ranges in their `pom.xml` files.
+Maven support has been implemented, initially supporting exact/pinned versions only, which should still be useful for the majority of users who don't specify ranges in their `pom.xml` files.
 
 How to use: Add `"maven": { "enabled": true }` to either your bot config or your repository's `renovate.json`. If your repository contains _only_ Maven package files and no others then you'll need to add the `renovate.json` manually as otherwise Renovate won't detect any package files by default and will skip the Onboarding PR.
 
