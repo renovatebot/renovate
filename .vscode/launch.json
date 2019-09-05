@@ -22,7 +22,8 @@
       "args": [
         "--runInBand",
         "--collectCoverage=false",
-        "${fileBasenameNoExtension}"
+        "--runTestsByPath",
+        "${relativeFile}"
       ],
       "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
