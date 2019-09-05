@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import later from 'later';
 import { logger } from '../logger';
-import { clone } from './util';
+import { clone } from '../util/clone';
 import { getOptions, RenovateOptions } from './definitions';
 import { RenovateConfig } from './common';
 

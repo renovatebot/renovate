@@ -12,8 +12,7 @@ import {
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
 import { RenovateConfig } from '../../../../config';
-
-const clone = <T>(input: T): T => JSON.parse(JSON.stringify(input));
+import { clone } from '../../../../util/clone';
 
 export interface LookupWarning {
   updateType: 'warning';
