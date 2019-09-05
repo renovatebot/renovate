@@ -651,13 +651,21 @@ export async function getBranchStatusCheck(
 ) {
   const branchCommit = await config.storage.getBranchCommit(branchName);
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
-  const res = await api.get(url);
-  for (const check of res.body) {
-    if (check.context === context) {
-      return check.state;
+  try {
+    const res = await api.get(url);
+    for (const check of res.body) {
+      if (check.context === context) {
+        return check.state;
+      }
     }
+    return null;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.info('Commit not found when checking statuses');
+      throw new Error('repository-changed');
+    }
+    throw err;
   }
-  return null;
 }
 
 export async function setBranchStatus(
