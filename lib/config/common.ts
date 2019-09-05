@@ -32,8 +32,10 @@ export interface RenovateConfig
   extends RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, any> {
+  baseBranch?: string;
   baseBranches?: string[];
   branchList?: string[];
+  description?: string[];
   dryRun?: boolean;
   errors?: ValidationMessage[];
   includeForks?: boolean;

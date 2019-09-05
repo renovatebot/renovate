@@ -1,15 +1,16 @@
-const { emojify } = require('../../../../util/emoji');
-
-const { logger } = require('../../../../logger');
-const {
+import { emojify } from '../../../../util/emoji';
+import { logger } from '../../../../logger';
+import {
   appName,
   configFileNames,
   onboardingPrTitle,
-} = require('../../../../config/app-strings');
+} from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { PackageFile } from '../../../../manager/common';
 
 const defaultConfigFile = configFileNames[0];
 
-function getScheduleDesc(config) {
+export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
   logger.trace({ config });
   if (
@@ -24,13 +25,16 @@ function getScheduleDesc(config) {
   return [desc];
 }
 
-function getDescriptionArray(config) {
+function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
   return (config.description || []).concat(getScheduleDesc(config));
 }
 
-function getConfigDesc(config, packageFiles) {
+export function getConfigDesc(
+  config: RenovateConfig,
+  packageFiles?: Record<string, PackageFile[]>
+): string {
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   let descriptionArr = getDescriptionArray(config);
@@ -62,8 +66,3 @@ function getConfigDesc(config, packageFiles) {
   desc += '\n\n---\n';
   return desc;
 }
-
-module.exports = {
-  getScheduleDesc,
-  getConfigDesc,
-};
