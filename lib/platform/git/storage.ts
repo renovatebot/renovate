@@ -190,10 +190,7 @@ export class Storage {
   async setBaseBranch(branchName: string) {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
-        throw new Error(
-          'Cannot set baseBranch to something that does not exist: ' +
-            branchName
-        );
+        throwBaseBranchValidationError(branchName);
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
@@ -215,12 +212,7 @@ export class Storage {
             'unknown revision or path not in the working tree'
           )
         ) {
-          const error = new Error('config-validation');
-          error.validationError = 'baseBranch not found';
-          error.validationMessage =
-            'The following configured baseBranch could not be found: ' +
-            branchName;
-          throw error;
+          throwBaseBranchValidationError(branchName);
         }
         throw err;
       }
@@ -489,6 +481,14 @@ function checkForPlatformFailure(err: Error) {
       throw new Error('platform-failure');
     }
   }
+}
+
+function throwBaseBranchValidationError(branchName) {
+  const error = new Error('config-validation');
+  error.validationError = 'baseBranch not found';
+  error.validationMessage =
+    'The following configured baseBranch could not be found: ' + branchName;
+  throw error;
 }
 
 export default Storage;
