@@ -1,14 +1,13 @@
 import is from '@sindresorhus/is';
 import { clone } from '../../../../util/clone';
 import { platform } from '../../../../platform';
+import { logger } from '../../../../logger';
+import { appSlug } from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
 
-const { logger } = require('../../../../logger');
-
-const { appSlug } = require('../../../../config/app-strings');
-
-export { getOnboardingConfig };
-
-async function getOnboardingConfig(config) {
+export async function getOnboardingConfig(
+  config: RenovateConfig
+): Promise<string> {
   const onboardingConfig = clone(config.onboardingConfig);
   try {
     logger.debug('Checking for greenkeeper config');
