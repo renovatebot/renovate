@@ -9,12 +9,9 @@ import * as envParser from './env';
 import { resolveConfigPresets } from './presets';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { RenovateConfig, RenovateConfigStage } from './common';
+import { clone } from '../util/clone';
 
 export * from './common';
-
-function clone<T>(input: T): T {
-  return JSON.parse(JSON.stringify(input));
-}
 
 export interface ManagerConfig extends RenovateConfig {
   language: string;
