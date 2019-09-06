@@ -1,11 +1,16 @@
-const handlebars = require('handlebars');
-const { DateTime } = require('luxon');
-const semver = require('semver');
-const mdTable = require('markdown-table');
-const { logger } = require('../../../logger');
-const { mergeChildConfig } = require('../../../config');
+import * as handlebars from 'handlebars';
+import { DateTime } from 'luxon';
+import semver from 'semver';
+import mdTable from 'markdown-table';
+import { logger } from '../../../logger';
+import { mergeChildConfig, ManagerConfig } from '../../../config';
+import { PackageDependency } from '../../../manager/common';
 
-function ifTypesGroup(depNames, hasGroupName, branchUpgrades) {
+function ifTypesGroup(
+  depNames: string[],
+  hasGroupName: boolean,
+  branchUpgrades: any[]
+): boolean {
   return (
     depNames.length === 2 &&
     !hasGroupName &&
@@ -18,11 +23,10 @@ function ifTypesGroup(depNames, hasGroupName, branchUpgrades) {
   );
 }
 
-function generateBranchConfig(branchUpgrades) {
+export function generateBranchConfig(branchUpgrades) {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
-  /** @type any */
-  let config = {
+  let config: any = {
     upgrades: [],
   };
   const hasGroupName = branchUpgrades[0].groupName !== null;
@@ -287,7 +291,9 @@ function generateBranchConfig(branchUpgrades) {
   return config;
 }
 
-function getTableValues(upgrade) {
+function getTableValues(
+  upgrade: PackageDependency & ManagerConfig
+): [string, string, string, string] | null {
   if (!upgrade.commitBodyTable) {
     return null;
   }
@@ -320,7 +326,3 @@ function getTableValues(upgrade) {
   );
   return null;
 }
-
-module.exports = {
-  generateBranchConfig,
-};

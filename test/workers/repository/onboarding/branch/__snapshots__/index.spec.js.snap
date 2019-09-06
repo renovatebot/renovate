@@ -6,9 +6,7 @@ exports[`workers/repository/onboarding/branch checkOnboardingBranch creates onbo
   \\"labels\\": [
     \\"renovate\\"
   ],
-  \\"branchName\\": [
-    \\"renovate--\\"
-  ],
+  \\"branchName\\": \\"renovate--\\",
   \\"ignoreDeps\\": [
     \\"foo\\",
     \\"bar\\"

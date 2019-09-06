@@ -1,7 +1,6 @@
 import crypto from 'crypto';
 import { create } from './util';
-
-const clone = (input: any) => JSON.parse(JSON.stringify(input));
+import { clone } from '../clone';
 
 // global.repoCache is reset to {} every time a repository is initialized
 // With this caching, it means every GET request is cached during each repository run

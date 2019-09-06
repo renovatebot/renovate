@@ -487,12 +487,12 @@ The default behaviour for Renovate is to only use group names for branches and P
 
 ## lockFileMaintenance
 
-By setting enabled=true, this means that the default behaviour is to "maintain" lock files for each `package.json` if they exist already. "Maintaining" a lock file means recreating it to get an up-to-date version and committing that. Supported lock files include `package-lock.json` (npm >= 5) and `yarn.lock` (yarn).
+This feature can be used to "maintain" lock files for each `package.json` if they exist already. "Maintaining" a lock file means recreating it to get an up-to-date version and committing that. Supported lock files include `package-lock.json` (npm >= 5) and `yarn.lock` (yarn).
 
-If you wish to disable this feature then you could add this to your configuration:
+This feature is off by default. If you wish to enable this feature then you could add this to your configuration:
 
 ```json
-  "lockFileMaintenance": { "enabled": false }
+  "lockFileMaintenance": { "enabled": true }
 ```
 
 To reduce "noise" in the repository, it defaults its schedule to "before 5am on monday", i.e. to achieve once per week semantics. Renovate may run a few times within that time - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
@@ -893,6 +893,8 @@ e.g. if you wish to add an extra Warning to major updates:
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
 
+Note that this limit is enforced on a per-repository basis.
+
 ## prCreation
 
 This setting tells Renovate when you would like it to raise PRs:
@@ -915,9 +917,32 @@ This setting - if enabled - helps slow down Renovate, particularly during the on
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged. Instead, if `prHourlyLimit` is set to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59). So the project should still result in all PRs created perhaps within the first 24 hours maximum, but at a rate that may allow users to merge them once they pass tests. It does not place a limit on the number of _concurrently open_ PRs - only on the rate they are created.
 
+Note that this limit is enforced on a per-repository basis.
+
 ## prNotPendingHours
 
 If you set `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are set to pending indefinitely. Therefore we set an upper limit - default 24 hours - for how long we wait until creating a PR. Note also this is the same length of time as for Renovate's own `unpublishSafe` status check for npm.
+
+## prPriority
+
+Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits. In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major). If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting. The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
+
+Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
+
+```json
+{
+  "packageRules": [
+    {
+      "depTypeList": ["devDependencies"],
+      "prPriority": -1
+    },
+    {
+      "packageNames": ["react"],
+      "prPriority": 5
+    }
+  ]
+}
+```
 
 ## prTitle
 

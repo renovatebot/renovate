@@ -1,21 +1,23 @@
 import is from '@sindresorhus/is';
-
-const {
+import {
   getManagerConfig,
   mergeChildConfig,
   filterConfig,
-} = require('../../../config');
-const { applyPackageRules } = require('../../../util/package-rules');
-const { get } = require('../../../manager');
-
-export { flattenUpdates };
+  RenovateConfig,
+  PackageRule,
+} from '../../../config';
+import { applyPackageRules } from '../../../util/package-rules';
+import { get } from '../../../manager';
 
 // Return only rules that contain an updateType
-function getUpdateTypeRules(packageRules) {
+function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
   return packageRules.filter(rule => is.nonEmptyArray(rule.updateTypes));
 }
 
-function flattenUpdates(config, packageFiles) {
+export function flattenUpdates(
+  config: RenovateConfig,
+  packageFiles: Record<string, any[]>
+) {
   const updates = [];
   const updateTypes = [
     'major',

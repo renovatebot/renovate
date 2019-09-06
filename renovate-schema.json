@@ -623,6 +623,11 @@
       "type": "integer",
       "default": 0
     },
+    "prPriority": {
+      "description": "Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.",
+      "type": "integer",
+      "default": 0
+    },
     "bbUseDefaultReviewers": {
       "description": "Use the default reviewers (Bitbucket server only).",
       "type": "boolean",
@@ -1053,7 +1058,10 @@
       "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "default": {
-        "fileMatch": ["^\\.github/main.workflow$"],
+        "fileMatch": [
+          "^\\.github/main.workflow$",
+          "^\\.github/workflows/[^/]+\\.ya?ml$"
+        ],
         "pinDigests": true
       },
       "$ref": "#"
