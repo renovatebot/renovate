@@ -19,6 +19,7 @@ describe('platform/gitlab', () => {
     api = require('../../../lib/platform/gitlab/gl-got-wrapper').api;
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
+    hostRules.sanitize = jest.fn(input => input);
     jest.mock('../../../lib/platform/git/storage');
     GitStorage = require('../../../lib/platform/git/storage').Storage;
     GitStorage.mockImplementation(() => ({

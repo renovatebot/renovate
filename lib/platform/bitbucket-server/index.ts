@@ -459,7 +459,6 @@ export /* istanbul ignore next */ function ensureIssue(
   title: string,
   body: string
 ) {
-  logger.debug(`ensureIssue(${title}, body={${body}})`);
   logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -591,8 +590,9 @@ async function deleteComment(prNo: number, commentId: number) {
 export async function ensureComment(
   prNo: number,
   topic: string | null,
-  content: string
+  rawContent: string
 ) {
+  const content = hostRules.sanitize(rawContent);
   try {
     const comments = await getComments(prNo);
     let body: string;
@@ -724,10 +724,11 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  description: string,
+  rawDescription: string,
   _labels?: string[] | null,
   useDefaultBranch?: boolean
 ) {
+  const description = hostRules.sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   let reviewers = [];
@@ -880,8 +881,9 @@ export async function getPrFiles(prNo: number) {
 export async function updatePr(
   prNo: number,
   title: string,
-  description: string
+  rawDescription: string
 ) {
+  const description = hostRules.sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
   try {

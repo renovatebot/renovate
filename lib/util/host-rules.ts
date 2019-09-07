@@ -15,6 +15,8 @@ export interface HostRule {
   timeout?: number;
 }
 
+let secrets: string[] = [];
+
 let hostRules: HostRule[] = [];
 
 export function add(params: HostRule) {
@@ -28,6 +30,18 @@ export function add(params: HostRule) {
     throw new Error('hostRules cannot contain both a hostName and baseUrl');
   }
   hostRules.push(params);
+  const confidentialFields = ['password', 'token'];
+  confidentialFields.forEach(field => {
+    const secret = params[field];
+    if (secret && secret.length > 3 && !secrets.includes(secret))
+      secrets.push(secret);
+  });
+  if (params.username && params.password) {
+    const secret = Buffer.from(
+      `${params.username}:${params.password}`
+    ).toString('base64');
+    if (!secrets.includes(secret)) secrets.push(secret);
+  }
 }
 
 export interface HostRuleSearch {
@@ -152,6 +166,18 @@ export function hosts({ hostType }: { hostType: string }) {
     .filter(Boolean);
 }
 
+export function sanitize(input: string) {
+  if (!input) return input;
+  let output: string = input;
+  secrets.forEach(secret => {
+    while (output.includes(secret)) {
+      output = output.replace(secret, '**redacted**');
+    }
+  });
+  return output;
+}
+
 export function clear() {
   hostRules = [];
+  secrets = [];
 }

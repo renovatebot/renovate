@@ -353,7 +353,7 @@ export async function createPr(
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
   );
-  const description = azureHelper.max4000Chars(body);
+  const description = azureHelper.max4000Chars(hostRules.sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -405,7 +405,9 @@ export async function updatePr(prNo: number, title: string, body?: string) {
     title,
   };
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(body);
+    objToUpdate.description = azureHelper.max4000Chars(
+      hostRules.sanitize(body)
+    );
   }
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
@@ -416,7 +418,7 @@ export async function ensureComment(
   content: string
 ) {
   logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${content}`;
+  const body = `### ${topic}\n\n${hostRules.sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
     {

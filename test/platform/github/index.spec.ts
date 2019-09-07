@@ -17,6 +17,7 @@ describe('platform/github', () => {
       .api as any;
     github = await import('../../../lib/platform/github');
     hostRules = (await import('../../../lib/util/host-rules')) as any;
+    hostRules.sanitize = jest.fn(input => input);
     jest.mock('../../../lib/platform/git/storage');
     GitStorage = (await import('../../../lib/platform/git/storage'))
       .Storage as any;
