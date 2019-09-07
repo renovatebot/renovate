@@ -132,7 +132,7 @@
     "moment": "2.24.0",
     "moment-timezone": "0.5.26",
     "node-html-parser": "1.1.16",
-    "npm": "6.11.2",
+    "npm": "6.11.3",
     "p-all": "2.1.0",
     "parse-diff": "0.6.0",
     "parse-link-header": "1.0.1",
