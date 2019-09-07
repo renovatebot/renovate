@@ -1043,7 +1043,7 @@ export async function ensureComment(
     let commentNeedsUpdating = false;
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${issueNo}`);
-      body = hostRules.sanitize(`### ${topic}\n\n${content}`);
+      body = `### ${topic}\n\n${content}`;
       comments.forEach(comment => {
         if (comment.body.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -1588,7 +1588,7 @@ export async function getPrFiles(prNo: number) {
 
 export async function updatePr(prNo: number, title: string, rawBody?: string) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
-  const body = rawBody ? hostRules.sanitize(rawBody) : null;
+  const body = hostRules.sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
