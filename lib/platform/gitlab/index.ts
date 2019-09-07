@@ -453,7 +453,7 @@ export async function findIssue(title: string) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(body);
+  const description = getPrBody(hostRules.sanitize(body));
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
@@ -572,8 +572,9 @@ async function deleteComment(issueNo: number, commentId: number) {
 export async function ensureComment(
   issueNo: number,
   topic: string | null | undefined,
-  content: string
+  rawContent: string
 ) {
+  const content = hostRules.sanitize(rawContent);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
@@ -687,10 +688,11 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  description: string,
+  rawDescription: string,
   labels?: string[] | null,
   useDefaultBranch?: boolean
 ) {
+  const description = hostRules.sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch
     : config.baseBranch;
@@ -798,7 +800,7 @@ export async function updatePr(
   await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
     body: {
       title,
-      description,
+      description: hostRules.sanitize(description),
     },
   });
 }

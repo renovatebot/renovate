@@ -353,12 +353,12 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(body);
+  const description = getPrBody(hostRules.sanitize(body));
 
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.info({ title, body }, 'Failed to ensure Issue');
+    logger.info({ title }, 'Failed to ensure Issue');
     return null;
   }
   try {
@@ -476,7 +476,12 @@ export function ensureComment(
   content: string
 ) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  return comments.ensureComment(config, prNo, topic, content);
+  return comments.ensureComment(
+    config,
+    prNo,
+    topic,
+    hostRules.sanitize(content)
+  );
 }
 
 export function ensureCommentRemoval(prNo: number, topic: string) {
@@ -531,7 +536,7 @@ export async function createPr(
 
   const body = {
     title,
-    description,
+    description: hostRules.sanitize(description),
     source: {
       branch: {
         name: branchName,
@@ -647,7 +652,7 @@ export async function updatePr(
 ) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`, {
-    body: { title, description },
+    body: { title, description: hostRules.sanitize(description) },
   });
 }
 
