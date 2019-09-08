@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from '../../../lib/manager/composer/extract';
+import { platform as _platform, Platform } from '../../../lib/platform';
 
-const platform: jest.Mocked<typeof global.platform> = global.platform as any;
+const platform: jest.Mocked<Platform> = _platform as any;
 
 const requirements1 = readFileSync(
   'test/manager/composer/_fixtures/composer1.json',

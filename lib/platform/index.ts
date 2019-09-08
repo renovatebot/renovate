@@ -2,10 +2,14 @@ import URL from 'url';
 import addrs from 'email-addresses';
 import * as hostRules from '../util/host-rules';
 import { logger } from '../logger';
+import { Platform } from './common';
+import { RenovateConfig } from '../config/common';
+
+export * from './common';
 
 // TODO: move to definitions: platform.allowedValues
 /* eslint-disable global-require */
-const platforms = new Map([
+const platforms = new Map<string, Platform>([
   ['azure', require('./azure')],
   ['bitbucket', require('./bitbucket')],
   ['bitbucket-server', require('./bitbucket-server')],
@@ -14,22 +18,25 @@ const platforms = new Map([
 ]);
 /* eslint-enable global-require */
 
+// eslint-disable-next-line import/no-mutable-exports
+export let platform: Platform;
+
 // TODO: lazy load platform
-export function setPlatformApi(platform: string) {
-  global.platform = platforms.get(platform);
+export function setPlatformApi(name: string) {
+  platform = platforms.get(name);
 }
 
-export async function initPlatform(config: any) {
+export async function initPlatform(config: RenovateConfig) {
   setPlatformApi(config.platform);
-  if (!global.platform) {
+  if (!platform) {
     const supportedPlatforms = [...platforms.keys()].join(', ');
     throw new Error(
       `Init: Platform "${config.platform}" not found. Must be one of: ${supportedPlatforms}`
     );
   }
   // TODO: types
-  const platformInfo: any = await global.platform.initPlatform(config);
-  const returnConfig = { ...config, ...platformInfo };
+  const platformInfo = await platform.initPlatform(config);
+  const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
   if (config && config.gitAuthor) {
     logger.info(`Using configured gitAuthor (${config.gitAuthor})`);

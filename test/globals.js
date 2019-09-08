@@ -1,9 +1,11 @@
 const upath = require('upath');
 const os = require('os');
-
 const cache = require('../lib/workers/global/cache');
 
-global.platform = jest.genMockFromModule('../lib/platform/github');
+jest.mock('../lib/platform', () => ({
+  platform: jest.genMockFromModule('../lib/platform/github'),
+  initPlatform: jest.fn(),
+}));
 jest.mock('../lib/logger');
 
 global.repoCache = {};
