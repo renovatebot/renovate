@@ -1,12 +1,22 @@
 import is from '@sindresorhus/is';
 import { platform } from '../../platform';
+import minimatch from 'minimatch';
+import { logger } from '../../logger';
+import { RenovateConfig } from '../../config';
+import { FileData } from '../../platform/common';
 
-const minimatch = require('minimatch');
-const { logger } = require('../../logger');
+export type CommitConfig = RenovateConfig & {
+  baseBranch?: string;
+  branchName: string;
+  commitMessage: string;
+  excludeCommitPaths?: string[];
+  updatedPackageFiles: FileData[];
+  updatedArtifacts: FileData[];
+};
 
-export { commitFilesToBranch };
-
-async function commitFilesToBranch(config) {
+export async function commitFilesToBranch(
+  config: CommitConfig
+): Promise<boolean> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
