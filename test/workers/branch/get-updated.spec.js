@@ -6,12 +6,11 @@ const {
   getUpdatedPackageFiles,
 } = require('../../../lib/workers/branch/get-updated');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+/** @type any */
+const { platform } = require('../../../lib/platform');
 
 jest.mock('../../../lib/manager/composer');
 jest.mock('../../../lib/manager/npm');
-
-/** @type any */
-const platform = global.platform;
 
 describe('workers/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
