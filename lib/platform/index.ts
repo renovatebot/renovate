@@ -19,11 +19,11 @@ const platforms = new Map<string, Platform>([
 /* eslint-enable global-require */
 
 // eslint-disable-next-line import/no-mutable-exports
-export const platform: Platform = {} as any;
+export let platform: Platform;
 
 // TODO: lazy load platform
 export function setPlatformApi(name: string) {
-  Object.assign(platform, platforms.get(name));
+  platform = platforms.get(name);
 }
 
 export async function initPlatform(config: RenovateConfig) {
