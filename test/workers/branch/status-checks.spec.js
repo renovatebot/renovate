@@ -5,7 +5,7 @@ const {
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 /** @type any */
-const { platform } = require('../../../lib/platform');
+const platform = global.platform;
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {

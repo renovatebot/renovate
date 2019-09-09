@@ -11,7 +11,6 @@ import {
   sortVersions,
 } from '../../versioning/ruby';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
-import { platform } from '../../platform';
 
 // istanbul ignore next
 export async function updateArtifacts(

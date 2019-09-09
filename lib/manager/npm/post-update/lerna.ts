@@ -1,6 +1,5 @@
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 
 export interface GenerateLockFileResult {
   error?: boolean;

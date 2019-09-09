@@ -12,10 +12,11 @@ const {
 } = require('../../../../lib/workers/repository/init/config');
 /** @type any */
 const migrateValidate = require('../../../../lib/config/migrate-validate');
-/** @type any */
-const { platform } = require('../../../../lib/platform');
 
 jest.mock('../../../../lib/config/migrate-validate');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/repository/init/config', () => {
   describe('mergeRenovateConfig()', () => {

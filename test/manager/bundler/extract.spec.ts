@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from '../../../lib/manager/bundler/extract';
-import { platform as _platform } from '../../../lib/platform';
 
-const platform: any = _platform;
+const platform: any = global.platform;
 
 const railsGemfile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.rails',

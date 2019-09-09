@@ -15,7 +15,6 @@ import {
   NpmLockFiles,
 } from '../../common';
 import { NpmPackage } from './common';
-import { platform } from '../../../platform';
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,

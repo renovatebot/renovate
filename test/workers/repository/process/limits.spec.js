@@ -3,7 +3,7 @@ const moment = require('moment');
 const limits = require('../../../../lib/workers/repository/process/limits');
 
 /** @type any */
-const { platform } = require('../../../../lib/platform');
+const platform = global.platform;
 
 let config;
 beforeEach(() => {

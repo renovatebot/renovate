@@ -1,10 +1,11 @@
 /** @type any */
 const { exec } = require('../../../../lib/util/exec');
 const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
-/** @type any */
-const { platform } = require('../../../../lib/platform');
 
 jest.mock('../../../../lib/util/exec');
+
+/** @type any */
+const platform = global.platform;
 
 describe('generateLockFiles()', () => {
   it('returns if no lernaClient', async () => {
