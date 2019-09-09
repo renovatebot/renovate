@@ -19,6 +19,6 @@ describe('util/regex', () => {
     });
 
     const regex = require('../../lib/util/regex');
-    expect(regex.regEx('foo') instanceof RegExp).toBe(true);
+    expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 });
