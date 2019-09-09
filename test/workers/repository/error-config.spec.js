@@ -3,7 +3,7 @@ const {
 } = require('../../../lib/workers/repository/error-config');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 let config;
 beforeEach(() => {

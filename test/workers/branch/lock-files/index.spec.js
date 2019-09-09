@@ -15,7 +15,7 @@ const lerna = require('../../../../lib/manager/npm/post-update/lerna');
 const hostRules = require('../../../../lib/util/host-rules');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../lib/platform');
 
 hostRules.find = jest.fn(() => ({
   token: 'abc',

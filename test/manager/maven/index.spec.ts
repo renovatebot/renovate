@@ -8,8 +8,9 @@ import {
   updateDependency,
 } from '../../../lib/manager/maven/index';
 import { PackageDependency, PackageFile } from '../../../lib/manager/common';
+import { platform as _platform } from '../../../lib/platform';
 
-const platform: any = global.platform;
+const platform: any = _platform;
 
 const pomContent = readFileSync(
   'test/manager/maven/_fixtures/simple.pom.xml',
