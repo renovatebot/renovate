@@ -4,36 +4,40 @@ import * as hostRules from '../util/host-rules';
 import { logger } from '../logger';
 import { Platform } from './common';
 import { RenovateConfig } from '../config/common';
+import { getOptions } from '../config/definitions';
 
 export * from './common';
 
-// TODO: move to definitions: platform.allowedValues
-/* eslint-disable global-require */
-const platforms = new Map<string, Platform>([
-  ['azure', require('./azure')],
-  ['bitbucket', require('./bitbucket')],
-  ['bitbucket-server', require('./bitbucket-server')],
-  ['github', require('./github')],
-  ['gitlab', require('./gitlab')],
-]);
-/* eslint-enable global-require */
+const supportedPlatforms = getOptions().find(
+  option => option.name === 'platform'
+).allowedValues;
 
-// eslint-disable-next-line import/no-mutable-exports
-export let platform: Platform;
+let _platform: Platform;
 
-// TODO: lazy load platform
-export function setPlatformApi(name: string) {
-  platform = platforms.get(name);
+const handler: ProxyHandler<Platform> = {
+  get(_target: Platform, prop: keyof Platform) {
+    if (!_platform) throw new Error(`platform-not-found`);
+
+    // TODO: add more validation
+
+    return _platform[prop];
+  },
+};
+
+export const platform = new Proxy<Platform>({} as any, handler);
+
+export async function setPlatformApi(name: string): Promise<void> {
+  if (!supportedPlatforms.includes(name))
+    throw new Error(
+      `Init: Platform "${name}" not found. Must be one of: ${supportedPlatforms.join(
+        ', '
+      )}`
+    );
+  _platform = await import('./' + name);
 }
 
 export async function initPlatform(config: RenovateConfig) {
-  setPlatformApi(config.platform);
-  if (!platform) {
-    const supportedPlatforms = [...platforms.keys()].join(', ');
-    throw new Error(
-      `Init: Platform "${config.platform}" not found. Must be one of: ${supportedPlatforms}`
-    );
-  }
+  await setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };

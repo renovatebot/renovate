@@ -9,6 +9,14 @@ import * as platform from '../../lib/platform';
 jest.unmock('../../lib/platform');
 
 describe('platform', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+  it('throws if no platform', () => {
+    expect(() => platform.platform.initPlatform({})).toThrow(
+      'platform-not-found'
+    );
+  });
   it('throws if wrong platform', async () => {
     const config = { platform: 'wrong', username: 'abc', password: '123' };
     await expect(platform.initPlatform(config)).rejects.toThrow();
@@ -17,6 +25,14 @@ describe('platform', () => {
     const config = {
       platform: 'bitbucket',
       gitAuthor: 'user@domain.com',
+      username: 'abc',
+      password: '123',
+    };
+    expect(await platform.initPlatform(config)).toMatchSnapshot();
+  });
+  it('initializes no author', async () => {
+    const config = {
+      platform: 'bitbucket',
       username: 'abc',
       password: '123',
     };

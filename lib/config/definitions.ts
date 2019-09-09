@@ -349,6 +349,13 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
+    allowedValues: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'github',
+      'gitlab',
+    ],
     default: 'github',
     admin: true,
   },
