@@ -5,7 +5,7 @@ This document describes the steps to take if you are interested in adding new la
 ### Background
 
 Renovate began life as a JavaScript-only, specifically for the npmjs ecosystem.
-Over time, additional "package managers" (e.g. Meteor.js, Dockerfile, nvm) have been added and the codebase incrementally refactored and improved with many of those to make it easier to add newer ones in future.
+Over time, additional "package managers" (e.g. Pip, Dockerfile, nvm) have been added and the codebase incrementally refactored and improved with many of those to make it easier to add newer ones in future.
 
 ### Code structure
 
