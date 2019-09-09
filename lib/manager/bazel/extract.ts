@@ -3,6 +3,7 @@ import parse from 'github-url-from-git';
 import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
+import { regEx } from '../../util/regex';
 
 interface UrlParsedResult {
   repo: string;
@@ -78,7 +79,7 @@ function parseContent(content: string): string[] {
     (acc, prefix) => [
       ...acc,
       ...content
-        .split(new RegExp(prefix + '\\s*\\(', 'g'))
+        .split(regEx(prefix + '\\s*\\(', 'g'))
         .slice(1)
         .map(base => {
           const ind = findBalancedParenIndex(base);
