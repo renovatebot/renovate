@@ -7,7 +7,7 @@ describe('util/regex', () => {
   });
 
   it('uses RE2', () => {
-    expect(regEx('foo') instanceof RE2).toBe(true);
+    expect(regEx('foo')).toBeInstanceOf(RE2);
   });
   it('throws unsafe 2', () => {
     expect(() => regEx(`x++`)).toThrow('config-validation');
