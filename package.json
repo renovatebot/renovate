@@ -204,6 +204,7 @@
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
     "jest-silent-reporter": "0.1.2",
+    "lint-staged": "^9.2.5",
     "mockdate": "2.0.5",
     "nock": "11.3.3",
     "npm-run-all": "4.1.5",
@@ -265,9 +266,16 @@
   "publishConfig": {
     "tag": "latest"
   },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "pretty-quick --staged",
+      "git add"
+    ]
+  },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged"
+      "pre-commit": "lint-staged"
     }
   },
   "release": {
