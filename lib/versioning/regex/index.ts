@@ -1,7 +1,6 @@
 import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
-import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 
 export interface RegExpVersion extends GenericVersion {
