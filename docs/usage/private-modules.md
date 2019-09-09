@@ -33,13 +33,9 @@ The recommended approaches in order of preference are:
 
 All the various approaches are described below:
 
-### Add/authenticate the "renovate" npm user to your private npm modules
-
-The Renovate app itself runs with credentials for the "renovate" user on npm. Therefore, a simple solution to enabling private modules is to treat Renovate as another account on your team and add the npm user "renovate" to the necessary projects that Renovate needs to access. Renovate will then use its own npm authentication if it finds none configured in your repository.
-
 ### Commit .npmrc file into repository
 
-One approach that many projects use for private repositories is to simply check in an authenticated `.npmrc` or `.yarnrc` into the repository that is then shared between all developers. Therefore anyone running `npm install` or `yarn install` from the project root will be automatically authenticated with npm without having to distribute npm logins to every developer and make sure they've run `npm login` first before installing.
+One approach that many projects use for private repositories is to simply check in an authenticated `.npmrc` into the repository that is then shared between all developers. Therefore anyone running `npm install` or `yarn install` from the project root will be automatically authenticated with npm without having to distribute npm logins to every developer and make sure they've run `npm login` first before installing.
 
 The good news is that this works for Renovate too. If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
 
