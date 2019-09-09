@@ -7,7 +7,6 @@ import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
-import { platform } from '../../platform';
 
 export async function updateArtifacts(
   packageFileName: string,

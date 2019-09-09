@@ -1,12 +1,11 @@
 import _fs from 'fs-extra';
 import { exec as _exec } from '../../../lib/util/exec';
 import { updateArtifacts } from '../../../lib/manager/poetry/artifacts';
-import { platform as _platform } from '../../../lib/platform';
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 
-const platform: any = _platform;
+const platform: any = global.platform;
 const exec: any = _exec;
 const fs: any = _fs;
 

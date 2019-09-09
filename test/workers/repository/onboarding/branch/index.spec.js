@@ -2,10 +2,11 @@ const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
 const {
   checkOnboardingBranch,
 } = require('../../../../../lib/workers/repository/onboarding/branch');
-/** @type any */
-const { platform } = require('../../../../../lib/platform');
 
 jest.mock('../../../../../lib/workers/repository/onboarding/branch/rebase');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/repository/onboarding/branch', () => {
   describe('checkOnboardingBranch', () => {

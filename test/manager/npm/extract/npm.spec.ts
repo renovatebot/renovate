@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs';
 import { getNpmLock } from '../../../../lib/manager/npm/extract/npm';
-import { platform as _platform } from '../../../../lib/platform';
 
-const platform: any = _platform;
+const platform: any = global.platform;
 
 describe('manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {

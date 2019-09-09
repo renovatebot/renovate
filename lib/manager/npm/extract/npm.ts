@@ -1,6 +1,5 @@
 import { logger } from '../../../logger';
 import { LockFileEntry } from './common';
-import { platform } from '../../../platform';
 
 export async function getNpmLock(
   filePath: string

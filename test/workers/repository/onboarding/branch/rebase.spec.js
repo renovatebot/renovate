@@ -4,7 +4,7 @@ const {
 } = require('../../../../../lib/workers/repository/onboarding/branch/rebase');
 
 /** @type any */
-const { platform } = require('../../../../../lib/platform');
+const platform = global.platform;
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {

@@ -2,11 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import * as npmExtract from '../../../../lib/manager/npm/extract';
 import { getConfig } from '../../../../lib/config/defaults';
-import { platform as _platform } from '../../../../lib/platform';
 
 // TODO: fix types
 const defaultConfig = getConfig() as any;
-const platform: any = _platform;
+const platform: any = global.platform;
 
 function readFixture(fixture) {
   return fs.readFileSync(

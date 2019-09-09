@@ -27,6 +27,8 @@ declare namespace NodeJS {
     appMode?: boolean;
     gitAuthor?: { name: string; email: string };
     renovateVersion: string;
+    // TODO: declare interface for all platforms
+    platform: typeof import('./platform/github');
 
     renovateCache: Renovate.Cache;
 
@@ -37,6 +39,8 @@ declare namespace NodeJS {
     updateRubyGemsVersions?: Promise<void>;
   }
 }
+
+declare let platform: typeof import('./platform/github');
 
 declare let renovateCache: Renovate.Cache;
 

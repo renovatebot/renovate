@@ -1,12 +1,11 @@
 import _fs from 'fs-extra';
 import * as cargo from '../../../lib/manager/cargo/artifacts';
-import { platform as _platform } from '../../../lib/platform';
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 const { exec } = require('../../../lib/util/exec');
 
-const platform: any = _platform;
+const platform: any = global.platform;
 const fs: any = _fs;
 
 const config = {

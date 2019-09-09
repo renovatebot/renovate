@@ -6,8 +6,6 @@ import * as bitbucketServer from '../../lib/platform/bitbucket-server';
 
 import * as platform from '../../lib/platform';
 
-jest.unmock('../../lib/platform');
-
 describe('platform', () => {
   it('throws if wrong platform', async () => {
     const config = { platform: 'wrong', username: 'abc', password: '123' };

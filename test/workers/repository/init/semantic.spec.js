@@ -12,7 +12,7 @@ const {
 } = require('../../../../lib/workers/repository/init/semantic');
 
 /** @type any */
-const { platform } = require('../../../../lib/platform');
+const platform = global.platform;
 
 describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {

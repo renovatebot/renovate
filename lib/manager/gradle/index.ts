@@ -15,7 +15,6 @@ import {
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
-import { platform } from '../../platform';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
