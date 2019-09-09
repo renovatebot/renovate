@@ -1,7 +1,7 @@
 const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../lib/platform');
 
 /** @type any */
 let config;

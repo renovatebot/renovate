@@ -4,6 +4,7 @@ import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsResult, UpdateArtifactsConfig } from '../common';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   pipfileName: string,
