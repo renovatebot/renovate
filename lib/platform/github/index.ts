@@ -830,11 +830,12 @@ export async function findIssue(title: string) {
 
 export async function ensureIssue(
   title: string,
-  body: string,
+  rawbody: string,
   once = false,
   reopen = true
 ) {
-  logger.debug(`ensureIssue()`);
+  logger.debug(`ensureIssue(${title})`);
+  const body = hostRules.sanitize(rawbody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -1032,8 +1033,9 @@ async function deleteComment(commentId: number) {
 export async function ensureComment(
   issueNo: number,
   topic: string | null,
-  content: string
+  rawContent: string
 ) {
+  const content = hostRules.sanitize(rawContent);
   try {
     const comments = await getComments(issueNo);
     let body: string;
@@ -1180,11 +1182,12 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  body: string,
+  rawBody: string,
   labels: string[] | null,
   useDefaultBranch: boolean,
   platformOptions: { statusCheckVerify?: boolean } = {}
 ) {
+  const body = hostRules.sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
   const head = `${config.repository!.split('/')[0]}:${branchName}`;
@@ -1583,8 +1586,9 @@ export async function getPrFiles(prNo: number) {
   return files.map((f: { filename: string }) => f.filename);
 }
 
-export async function updatePr(prNo: number, title: string, body?: string) {
+export async function updatePr(prNo: number, title: string, rawBody?: string) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  const body = hostRules.sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;

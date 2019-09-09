@@ -159,7 +159,7 @@ We wish to keep backwards-compatibility as often as possible, as well as make
 the code configurable, so most new functionality should be controllable via
 configuration options.
 
-If you wish to add one, add it to `lib/config/definitions.js` and then add documentation to `website/docs/configuration-options.md`.
+If you wish to add one, add it to `lib/config/definitions.ts` and then add documentation to `website/docs/configuration-options.md`.
 
 ## Debugging
 

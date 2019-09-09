@@ -2,7 +2,7 @@
 
 This file documents the design choices as well as configuration options.
 
-#### Stateless
+## Stateless
 
 No state storage is needed on `renovate` or the source code repository apart
 from what you see publicly (branches, Pull Requests). It, therefore, doesn't
@@ -10,28 +10,12 @@ matter if you stop/restart the script and would even still work if you had it
 running from two different locations, as long as their configuration was the
 same.
 
-#### API only
-
-So far, nothing we need to do requires a full `git clone` of the repository.
-e.g. we do not need to perform a git clone of the entire repository. Therefore,
-all operations are performed via the API.
-
 ## Synchronous Operation
 
-The script current processes repositories, package files, and dependencies
-within them all synchronously.
+The script current processes repositories and branches within them all synchronously.
 
 - Greatly reduces the chance of hitting simultaneous API rate limits
 - Simplifies logging
-
-Note: Initial queries to NPM are done in parallel.
-
-## Multiple Configuration Methods
-
-The script supports multiple [configuration methods](configuration.md)
-concurrently, and processed in order of priority. This allows examples such as
-token configured via environment variable and labels configured via target
-`package.json`.
 
 ## Cascading Configuration
 
@@ -39,12 +23,9 @@ Configuration options applied per-package (e.g. with package rules) override tho
 package-type, which override those per-repository, which override those which
 are global (all repositories).
 
-## Automatic discovery of package.json locations
+## Automatic discovery of package file locations
 
-The default behaviour is to auto-discover all `package.json` locations in a
-repository and process them all. Doing so means that "monorepos" are supported
-by default. This can be overridden by the configuration option `includePaths`,
-where you list the file paths manually (e.g. limit to just `package.json` in the root of the repository).
+The default behaviour is to auto-discover all package file (e.g. `package.json`) locations in a repository and process them all. Doing so means that "monorepos" are supported by default. This can be overridden by the configuration option `includePaths`, where you list the file paths manually (e.g. limit to just `package.json` in the root of the repository).
 
 ## Separate Branches per dependency
 
@@ -66,23 +47,18 @@ are available. For example, if the current example is 1.6.0 and upgrades to 1.7.
 and 2.0.0 exist, then `renovate` will raise PRs for both the 1.x upgrade(s) and
 2.x upgrade(s).
 
-- It's often the case that projects can't upgrade major dependency versions
-  immediately.
-- It's also often the case that previous major versions continue receiving Minor
-  or Patch updates.
-- Projects should get Minor and Patch updates for their current Major release
-  even if a new Major release exists
+- It's often the case that projects can't upgrade major dependency versions immediately.
+- It's also often the case that previous major versions continue receiving Minor or Patch updates.
+- Projects should get Minor and Patch updates for their current Major release even if a new Major release exists
 
 This can be overridden via the config option `separateMajorMinor`.
 
 ## Branch naming
 
-Branches are named like `renovate/webpack-1.x` instead of
-`renovate/webpack-1.2.0`.
+Branches are named like `renovate/webpack-1.x` instead of `renovate/webpack-1.2.0`.
 
 - Branches often receive updates (e.g. new patches) before they're merged.
-- Naming the branch like `1.x` means its name still names sense if a `1.2.1`
-  release happens
+- Naming the branch like `1.x` means its name still names sense if a `1.2.1` release happens
 
 Note: Branch names are configurable using string templates.
 

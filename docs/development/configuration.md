@@ -10,14 +10,12 @@ Configuration is supported via any or all of the below:
 - `renovate.json`, `renovate.json5`, `.github/renovate.json`, `.github/renovate.json5`, `.renovaterc.json`, or `.renovaterc` in target repository
 - `renovate` field of `package.json` in target repository
 
-The above are listed in **_reverse order_** of preference. i.e. `package.json`
-settings will override `renovate.json` settings, CLI, which overrides env, which
-overrides the config file, which overrides defaults.
+The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.
 
 ### Default Configuration
 
 Default configuration values can be found in
-[lib/config/definitions.js](../lib/config/definitions.js)
+[lib/config/definitions.ts](../../lib/config/definitions.ts)
 
 ### Configuration File
 
@@ -50,9 +48,7 @@ To configure any `<list>` items, separate with commas. E.g. `renovate --labels=r
 
 ### renovate.json
 
-If you add a `renovate.json` file to the root of your repository, you can use
-this to override default settings. `renovate` will still auto-discover all `package.json` files in the
-repository.
+If you add a `renovate.json` file to the root of your repository, you can use this to override default settings.
 
 ### package.json
 
@@ -72,4 +68,4 @@ any other settings above.
 
 Please see [https://docs.renovatebot.com/configuration-options/](https://docs.renovatebot.com/configuration-options/) for a list of user-facing configuration options.
 
-For further options when running your own instance of Renovate, please see the full config definitions file at `lib/config/definitions.js`.
+For further options when running your own instance of Renovate, please see the full config definitions file at `lib/config/definitions.ts`.

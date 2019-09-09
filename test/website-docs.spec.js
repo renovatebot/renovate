@@ -2,9 +2,9 @@ const fs = require('fs');
 const options = require('../lib/config/definitions').getOptions();
 
 describe('docs', () => {
-  const doc = fs.readFileSync('website/docs/configuration-options.md', 'utf8');
+  const doc = fs.readFileSync('docs/usage/configuration-options.md', 'utf8');
   const selfHostDoc = fs.readFileSync(
-    'website/docs/self-hosted-configuration.md',
+    'docs/usage/self-hosted-configuration.md',
     'utf8'
   );
   const headers = doc
