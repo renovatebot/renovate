@@ -2,7 +2,7 @@ const fs = require('fs');
 const masterIssue = require('../../../lib/workers/repository/master-issue');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 /** @type any */
 let config;

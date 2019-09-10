@@ -10,6 +10,7 @@ import * as pnpm from './pnpm';
 import * as hostRules from '../../../util/host-rules';
 import { getChildProcessEnv } from '../../../util/env';
 import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
+import { platform } from '../../../platform';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next

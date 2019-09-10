@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageFile, PackageDependency } from '../common';
+import { platform } from '../../platform';
 
 interface Repo {
   name?: string;

@@ -150,3 +150,18 @@ Object {
   "platform": "bitbucket",
 }
 `;
+
+exports[`platform initializes no author 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+  "hostRules": Array [
+    Object {
+      "hostName": "api.bitbucket.org",
+      "hostType": "bitbucket",
+      "password": "123",
+      "username": "abc",
+    },
+  ],
+  "platform": "bitbucket",
+}
+`;

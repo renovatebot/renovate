@@ -175,6 +175,7 @@
     "platform": {
       "description": "Platform type of repository",
       "type": "string",
+      "enum": ["azure", "bitbucket", "bitbucket-server", "github", "gitlab"],
       "default": "github"
     },
     "endpoint": {

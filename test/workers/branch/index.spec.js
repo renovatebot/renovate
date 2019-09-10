@@ -19,6 +19,8 @@ const prWorker = require('../../../lib/workers/pr');
 /** @type any */
 const getUpdated = require('../../../lib/workers/branch/get-updated');
 const { appSlug } = require('../../../lib/config/app-strings');
+/** @type any */
+const { platform } = require('../../../lib/platform');
 
 jest.mock('../../../lib/workers/branch/get-updated');
 jest.mock('../../../lib/workers/branch/schedule');
@@ -29,9 +31,6 @@ jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/pr');
-
-/** @type any */
-const platform = global.platform;
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
