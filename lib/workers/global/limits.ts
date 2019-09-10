@@ -33,7 +33,7 @@ export function getLimitRemaining(name: string) {
   return result;
 }
 
-export function incrementLimit(name: string, value: number = 1) {
+export function incrementLimit(name: string, value = 1) {
   if (typeof v[name] !== 'undefined') {
     v[name] += value;
   }
