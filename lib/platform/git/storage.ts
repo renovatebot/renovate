@@ -5,6 +5,8 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 import { logger } from '../../logger';
 
+const limits = require('../../workers/global/limits');
+
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
@@ -421,6 +423,7 @@ export class Storage {
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
       await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
       this._config.branchExists[branchName] = true;
+      limits.incrementLimit('prCommitsPerRunLimit');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');
