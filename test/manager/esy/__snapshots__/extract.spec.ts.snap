@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/esy/extract extractPackageFile() parses a simple JSON object 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@opam/dune",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@reason-native/console",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@reason-native/pastel",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@reason-native/rely",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": ">= 3.4.0 < 3.5.0",
+      "datasource": "esy",
+      "depName": "@esy-ocaml/reason",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "refmterr",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "~4.6.0",
+      "datasource": "esy",
+      "depName": "ocaml",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@opam/merlin",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentValue": "~4.6.0",
+      "datasource": "esy",
+      "depName": "ocaml",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@opam/odoc",
+      "depType": "devDependencies",
+    },
+  ],
+}
+`;

@@ -5,10 +5,9 @@ import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
 export async function getPkgReleases({
   lookupName,
 }: PkgReleaseConfig): Promise<ReleaseResult> {
-  const path: string = `/repos/ocaml/opam-repository/contents/packages/${lookupName}/`;
-  const baseUrl: string = 'https://api.github.com';
-  const packageUrl: string = baseUrl + path;
-  console.log(packageUrl);
+  const path = `/repos/ocaml/opam-repository/contents/packages/${lookupName}/`;
+  const baseUrl = 'https://api.github.com';
+  const packageUrl = baseUrl + path;
   let res: any = await got(packageUrl, {
     hostType: 'esy',
     json: true,
@@ -18,7 +17,17 @@ export async function getPkgReleases({
   const versions: string[] = res.body.map(file =>
     file.name.substring(file.name.indexOf('.') + 1)
   );
+  /*
+  const packageVersionBaseUrl =
+    'https://raw.githubusercontent.com/ocaml/opam-repository/master/';
+  const packageVersionPath = `packages/${lookupName}/${lookupName}.${versions[0]}/opam`
+  const packageVersionUrl = packageVersionBaseUrl + packageVersionPath;
+  res = await got(packageVersionUrl, {
+    hostType: 'esy',
+  });
+  console.log(res.body);
+  */
   const releases: Release[] = versions.map(version => ({ version }));
-  const result: ReleaseResult = { releases };
+  const result: ReleaseResult = { name: lookupName, releases };
   return result;
 }
