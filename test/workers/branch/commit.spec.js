@@ -1,8 +1,7 @@
 const { commitFilesToBranch } = require('../../../lib/workers/branch/commit');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 describe('workers/branch/automerge', () => {
   describe('commitFilesToBranch', () => {

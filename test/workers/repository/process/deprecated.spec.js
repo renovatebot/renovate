@@ -3,7 +3,7 @@ const {
 } = require('../../../../lib/workers/repository/process/deprecated');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../lib/platform');
 
 describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {

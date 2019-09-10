@@ -2,11 +2,10 @@ const prWorker = require('../../../lib/workers/pr');
 /** @type any */
 const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+/** @type any */
+const { platform } = require('../../../lib/platform');
 
 jest.mock('../../../lib/workers/pr/changelog');
-
-/** @type any */
-const platform = global.platform;
 
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({

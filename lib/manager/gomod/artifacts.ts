@@ -5,6 +5,7 @@ import { find } from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   goModFileName: string,

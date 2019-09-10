@@ -1,7 +1,6 @@
 const { getParentBranch } = require('../../../lib/workers/branch/parent');
-
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
