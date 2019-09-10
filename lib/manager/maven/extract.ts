@@ -3,6 +3,7 @@ import { XmlDocument, XmlElement } from 'xmldoc';
 import { isValid } from '../../versioning/maven';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
+import { platform } from '../../platform';
 
 export const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
 

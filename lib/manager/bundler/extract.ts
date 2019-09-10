@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
+import { platform } from '../../platform';
 
 export { extractPackageFile };
 

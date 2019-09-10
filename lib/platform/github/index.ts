@@ -1617,7 +1617,7 @@ export async function updatePr(prNo: number, title: string, rawBody?: string) {
 export async function mergePr(prNo: number, branchName: string) {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
-  if (config.pushProtection) {
+  if (config.isGhe && config.pushProtection) {
     logger.info(
       { branch: branchName, prNo },
       'Branch protection: Cannot automerge PR when push protection is enabled'

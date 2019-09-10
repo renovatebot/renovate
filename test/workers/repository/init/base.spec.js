@@ -12,7 +12,7 @@ const {
 } = require('../../../../lib/workers/repository/init/base');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../lib/platform');
 
 describe('workers/repository/init/base', () => {
   describe('checkBaseBranch()', () => {
