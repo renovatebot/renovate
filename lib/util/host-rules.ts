@@ -1,5 +1,6 @@
 import URL from 'url';
 import merge from 'deepmerge';
+// eslint-disable-next-line import/no-cycle
 import { logger } from '../logger';
 
 export interface HostRule {

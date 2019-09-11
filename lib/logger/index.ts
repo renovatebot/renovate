@@ -1,10 +1,12 @@
 import * as bunyan from 'bunyan';
 
 import is from '@sindresorhus/is';
+// eslint-disable-next-line import/no-cycle
 import { RenovateStream } from './pretty-stdout';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import cmdSerializer from './cmd-serializer';
+// eslint-disable-next-line import/no-cycle
 import { ErrorStream, withSanitizer } from './utils';
 
 let meta = {};
