@@ -34,11 +34,13 @@ async function get(path: string, options: any) {
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new Error('platform-failure');
     }
-    if (
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'ECONNRESET' ||
-      err.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
-    ) {
+    const platformFailureCodes = [
+      'EAI_AGAIN',
+      'ECONNRESET',
+      'ETIMEDOUT',
+      'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+    ];
+    if (platformFailureCodes.includes(err.code)) {
       throw new Error('platform-failure');
     }
     throw err;
