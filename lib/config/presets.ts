@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-// eslint-disable-next-line import/no-cycle
-import * as configParser from './index';
 import * as massage from './massage';
 import * as migration from './migration';
 import * as github from '../datasource/github';
 import * as npm from '../datasource/npm';
 import * as gitlab from '../datasource/gitlab';
 import { RenovateConfig } from './common';
+import { mergeChildConfig } from './utils';
 
 const datasources = {
   github,
@@ -81,13 +80,13 @@ export async function resolveConfigPresets(
         ) {
           delete presetConfig.description;
         }
-        config = configParser.mergeChildConfig(config, presetConfig);
+        config = mergeChildConfig(config, presetConfig);
       }
     }
   }
   logger.trace({ config }, `Post-preset resolve config`);
   // Now assign "regular" config on top
-  config = configParser.mergeChildConfig(config, inputConfig);
+  config = mergeChildConfig(config, inputConfig);
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
