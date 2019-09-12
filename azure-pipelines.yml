@@ -27,7 +27,7 @@ jobs:
     pool:
       vmImage: vs2017-win2016
     steps:
-      - script: |
+      - bash: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
         displayName: 'Preserve LF endings and symbolic links on check out'
@@ -62,15 +62,15 @@ jobs:
       vmImage: ubuntu-16.04
 
     steps:
-      - script: |
+      - bash: |
           docker pull renovate/renovate:slim
         displayName: Pull old slim renovate image as cache
 
-      - script: |
+      - bash: |
           export DOCKER_BUILDKIT=1
           docker build --cache-from renovate/renovate:slim -t renovate-test -f Dockerfile.slim .
         displayName: Build slim renovate image
 
-      - script: |
+      - bash: |
           docker run --rm -t renovate-test --version
         displayName: Test slim renovate image
