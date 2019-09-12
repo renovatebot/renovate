@@ -1,6 +1,7 @@
 import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
+import * as sanitize from './sanitize';
 
 export interface HostRule {
   hostType?: string;
@@ -14,8 +15,6 @@ export interface HostRule {
 
   timeout?: number;
 }
-
-let secrets: string[] = [];
 
 let hostRules: HostRule[] = [];
 
@@ -33,14 +32,13 @@ export function add(params: HostRule) {
   const confidentialFields = ['password', 'token'];
   confidentialFields.forEach(field => {
     const secret = params[field];
-    if (secret && secret.length > 3 && !secrets.includes(secret))
-      secrets.push(secret);
+    if (secret && secret.length > 3) sanitize.add(secret);
   });
   if (params.username && params.password) {
     const secret = Buffer.from(
       `${params.username}:${params.password}`
     ).toString('base64');
-    if (!secrets.includes(secret)) secrets.push(secret);
+    sanitize.add(secret);
   }
 }
 
@@ -166,18 +164,7 @@ export function hosts({ hostType }: { hostType: string }) {
     .filter(Boolean);
 }
 
-export function sanitize(input: string) {
-  if (!input) return input;
-  let output: string = input;
-  secrets.forEach(secret => {
-    while (output.includes(secret)) {
-      output = output.replace(secret, '**redacted**');
-    }
-  });
-  return output;
-}
-
 export function clear() {
   hostRules = [];
-  secrets = [];
+  sanitize.clear();
 }

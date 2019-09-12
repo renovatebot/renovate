@@ -1,4 +1,4 @@
-import { add, find, clear, hosts, sanitize } from '../../lib/util/host-rules';
+import { add, find, clear, hosts } from '../../lib/util/host-rules';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
@@ -142,27 +142,6 @@ describe('util/host-rules', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
-    });
-    it('sanitizes empty string', () => {
-      expect(sanitize(null)).toEqual(null);
-    });
-    it('sanitizes secrets from strings', () => {
-      const token = 'abc123token';
-      const username = 'userabc';
-      const password = 'password123';
-      add({
-        token,
-      });
-      add({
-        username,
-        password,
-      });
-      const hashed = Buffer.from(`${username}:${password}`).toString('base64');
-      expect(
-        sanitize(
-          `My token is ${token}, username is "${username}" and password is "${password}" (hashed: ${hashed})`
-        )
-      ).toMatchSnapshot();
     });
   });
 });

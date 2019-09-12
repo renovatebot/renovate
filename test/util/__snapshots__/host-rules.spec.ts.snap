@@ -33,5 +33,3 @@ Array [
   "my.local.registry",
 ]
 `;
-
-exports[`util/host-rules find() sanitizes secrets from strings 1`] = `"My token is **redacted**, username is \\"userabc\\" and password is \\"**redacted**\\" (hashed: **redacted**)"`;

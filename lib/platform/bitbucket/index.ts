@@ -9,6 +9,7 @@ import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
 
 let config: utils.Config = {} as any;
 
@@ -353,7 +354,7 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(hostRules.sanitize(body));
+  const description = getPrBody(sanitize(body));
 
   /* istanbul ignore if */
   if (!config.has_issues) {
@@ -476,12 +477,7 @@ export function ensureComment(
   content: string
 ) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  return comments.ensureComment(
-    config,
-    prNo,
-    topic,
-    hostRules.sanitize(content)
-  );
+  return comments.ensureComment(config, prNo, topic, sanitize(content));
 }
 
 export function ensureCommentRemoval(prNo: number, topic: string) {
@@ -536,7 +532,7 @@ export async function createPr(
 
   const body = {
     title,
-    description: hostRules.sanitize(description),
+    description: sanitize(description),
     source: {
       branch: {
         name: branchName,
@@ -652,7 +648,7 @@ export async function updatePr(
 ) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`, {
-    body: { title, description: hostRules.sanitize(description) },
+    body: { title, description: sanitize(description) },
   });
 }
 
