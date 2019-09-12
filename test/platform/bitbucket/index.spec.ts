@@ -17,7 +17,6 @@ describe('platform/bitbucket', () => {
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
-    hostRules.sanitize = jest.fn(input => input);
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
     bitbucket = require('../../../lib/platform/bitbucket');
     GitStorage = require('../../../lib/platform/git/storage').Storage;

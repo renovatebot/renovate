@@ -5,6 +5,7 @@ import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
 
 interface Config {
   storage: GitStorage;
@@ -353,7 +354,7 @@ export async function createPr(
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
   );
-  const description = azureHelper.max4000Chars(hostRules.sanitize(body));
+  const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -405,9 +406,7 @@ export async function updatePr(prNo: number, title: string, body?: string) {
     title,
   };
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(
-      hostRules.sanitize(body)
-    );
+    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
   }
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
@@ -418,7 +417,7 @@ export async function ensureComment(
   content: string
 ) {
   logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${hostRules.sanitize(content)}`;
+  const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
     {

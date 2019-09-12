@@ -7,6 +7,7 @@ import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -592,7 +593,7 @@ export async function ensureComment(
   topic: string | null,
   rawContent: string
 ) {
-  const content = hostRules.sanitize(rawContent);
+  const content = sanitize(rawContent);
   try {
     const comments = await getComments(prNo);
     let body: string;
@@ -728,7 +729,7 @@ export async function createPr(
   _labels?: string[] | null,
   useDefaultBranch?: boolean
 ) {
-  const description = hostRules.sanitize(rawDescription);
+  const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   let reviewers = [];
@@ -883,7 +884,7 @@ export async function updatePr(
   title: string,
   rawDescription: string
 ) {
-  const description = hostRules.sanitize(rawDescription);
+  const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
   try {
