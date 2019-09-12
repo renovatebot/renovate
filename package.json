@@ -27,7 +27,7 @@
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
-    "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
+    "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "babel-node --extensions \".ts,.js\" -- test/json-schema.ts",
     "test": "run-s lint test-schema type-check jest",
     "type-check": "tsc --noEmit"
