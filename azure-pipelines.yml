@@ -12,6 +12,7 @@ pr:
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   CI: true
+  AZP_CACHING_TAR: true
 
 jobs:
   - job: 'Windows'
