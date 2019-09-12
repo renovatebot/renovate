@@ -339,6 +339,7 @@ export class Storage {
     await this._git!.checkout(this._config.baseBranch);
     await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
+    limits.incrementLimit('prCommitsPerRunLimit');
   }
 
   async getBranchLastCommitTime(branchName: string) {
