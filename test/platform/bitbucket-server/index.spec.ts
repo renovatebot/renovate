@@ -34,7 +34,6 @@ describe('platform/bitbucket-server', () => {
         jest.mock('../../../lib/platform/git/storage');
         jest.mock('../../../lib/util/host-rules');
         hostRules = require('../../../lib/util/host-rules');
-        hostRules.sanitize = jest.fn(input => input);
         api = require('../../../lib/platform/bitbucket-server/bb-got-wrapper')
           .api;
         jest.spyOn(api, 'get');

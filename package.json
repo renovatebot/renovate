@@ -27,7 +27,7 @@
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
-    "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
+    "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "babel-node --extensions \".ts,.js\" -- test/json-schema.ts",
     "test": "run-s lint test-schema type-check jest",
     "type-check": "tsc --noEmit"
@@ -143,7 +143,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "simple-git": "1.126.0",
-    "slugify": "1.3.4",
+    "slugify": "1.3.5",
     "toml": "3.0.0",
     "traverse": "0.6.6",
     "upath": "1.2.0",
@@ -155,7 +155,7 @@
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
-    "re2": "1.10.0"
+    "re2": "1.10.1"
   },
   "devDependencies": {
     "@babel/cli": "7.6.0",

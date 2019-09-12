@@ -15,6 +15,7 @@ import {
   configFileNames,
   urls,
 } from '../../config/app-strings';
+import { sanitize } from '../../util/sanitize';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -835,7 +836,7 @@ export async function ensureIssue(
   reopen = true
 ) {
   logger.debug(`ensureIssue(${title})`);
-  const body = hostRules.sanitize(rawbody);
+  const body = sanitize(rawbody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -1035,7 +1036,7 @@ export async function ensureComment(
   topic: string | null,
   rawContent: string
 ) {
-  const content = hostRules.sanitize(rawContent);
+  const content = sanitize(rawContent);
   try {
     const comments = await getComments(issueNo);
     let body: string;
@@ -1187,7 +1188,7 @@ export async function createPr(
   useDefaultBranch: boolean,
   platformOptions: { statusCheckVerify?: boolean } = {}
 ) {
-  const body = hostRules.sanitize(rawBody);
+  const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
   const head = `${config.repository!.split('/')[0]}:${branchName}`;
@@ -1588,7 +1589,7 @@ export async function getPrFiles(prNo: number) {
 
 export async function updatePr(prNo: number, title: string, rawBody?: string) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
-  const body = hostRules.sanitize(rawBody);
+  const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
