@@ -15,6 +15,7 @@ describe('util/sanitize', () => {
     add(token);
     const hashed = Buffer.from(`${username}:${password}`).toString('base64');
     add(hashed);
+    add(password);
     expect(
       sanitize(
         `My token is ${token}, username is "${username}" and password is "${password}" (hashed: ${hashed})`
