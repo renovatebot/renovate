@@ -22,8 +22,8 @@ export function mergeChildConfig<T extends RenovateConfig = RenovateConfig>(
     ) {
       logger.trace(`mergeable option: ${option.name}`);
       if (option.type === 'array') {
-        config[option.name] = (parentConfig[option.name] || []).concat(
-          config[option.name] || []
+        config[option.name] = parentConfig[option.name].concat(
+          config[option.name]
         );
       } else {
         config[option.name] = mergeChildConfig(
