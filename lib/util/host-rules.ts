@@ -1,9 +1,7 @@
 import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import * as san from './sanitize';
-
-export const sanitize = san.sanitize;
+import * as sanitize from './sanitize';
 
 export interface HostRule {
   hostType?: string;
@@ -34,13 +32,13 @@ export function add(params: HostRule) {
   const confidentialFields = ['password', 'token'];
   confidentialFields.forEach(field => {
     const secret = params[field];
-    if (secret && secret.length > 3) san.add(secret);
+    if (secret && secret.length > 3) sanitize.add(secret);
   });
   if (params.username && params.password) {
     const secret = Buffer.from(
       `${params.username}:${params.password}`
     ).toString('base64');
-    san.add(secret);
+    sanitize.add(secret);
   }
 }
 
@@ -168,5 +166,5 @@ export function hosts({ hostType }: { hostType: string }) {
 
 export function clear() {
   hostRules = [];
-  san.clear();
+  sanitize.clear();
 }
