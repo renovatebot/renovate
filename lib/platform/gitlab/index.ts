@@ -7,6 +7,7 @@ import GitStorage from '../git/storage';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
+import { sanitize } from '../../util/sanitize';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -453,7 +454,7 @@ export async function findIssue(title: string) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(hostRules.sanitize(body));
+  const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
@@ -574,7 +575,7 @@ export async function ensureComment(
   topic: string | null | undefined,
   rawContent: string
 ) {
-  const content = hostRules.sanitize(rawContent);
+  const content = sanitize(rawContent);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
@@ -692,7 +693,7 @@ export async function createPr(
   labels?: string[] | null,
   useDefaultBranch?: boolean
 ) {
-  const description = hostRules.sanitize(rawDescription);
+  const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch
     : config.baseBranch;
@@ -800,7 +801,7 @@ export async function updatePr(
   await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
     body: {
       title,
-      description: hostRules.sanitize(description),
+      description: sanitize(description),
     },
   });
 }
