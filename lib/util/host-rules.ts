@@ -1,6 +1,5 @@
 import URL from 'url';
 import merge from 'deepmerge';
-// eslint-disable-next-line import/no-cycle
 import { logger } from '../logger';
 import * as sanitize from './sanitize';
 
