@@ -1,8 +1,7 @@
 import fs from 'fs-extra';
 import bunyan from 'bunyan';
-import { Stream, Writable } from 'stream';
-// eslint-disable-next-line import/no-cycle
-import { sanitize } from '../util/host-rules';
+import { Stream } from 'stream';
+import { sanitize } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {
   level: number;
@@ -37,26 +36,41 @@ export class ErrorStream extends Stream {
   }
 }
 
+function sanitizeObject(obj, seen = new WeakMap()) {
+  const result = {};
+  seen.set(obj, result);
+  for (const [key, val] of Object.entries(obj)) {
+    const valType = typeof val;
+    if (valType === 'string') {
+      result[key] = sanitize(val as string);
+    } else if (val != null && valType !== 'function' && valType === 'object') {
+      result[key] = seen.has(val as object)
+        ? seen.get(val as object)
+        : sanitizeObject(val, seen);
+    } else {
+      result[key] = val;
+    }
+  }
+  seen.set(obj, result);
+  return result;
+}
+
 export function withSanitizer(streamConfig): bunyan.Stream {
   const stream = streamConfig.stream;
   if (stream && stream.writable) {
-    const write = (chunk, enc, cb) => {
-      let value;
-      try {
-        const sanitized = sanitize(chunk);
-        value = streamConfig.type === 'raw' ? JSON.parse(sanitized) : sanitized;
-      } catch (e) {
-        // FIXME: write something anyway?
-        value = streamConfig.type === 'raw' ? {} : '{}';
-      }
-      stream.write(value, enc, cb);
-      cb();
+    const write = (chunk: BunyanRecord, enc, cb) => {
+      const sanitizedRaw = sanitizeObject(chunk);
+      const sanitizedChunk =
+        streamConfig.type === 'raw'
+          ? sanitizedRaw
+          : JSON.stringify(sanitizedRaw);
+      stream.write(sanitizedChunk, enc, cb);
     };
 
     return {
       ...streamConfig,
-      type: 'stream',
-      stream: new Writable({ write }),
+      type: 'raw',
+      stream: { write },
     };
   }
 

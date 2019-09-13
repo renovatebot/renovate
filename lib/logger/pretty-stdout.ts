@@ -5,7 +5,6 @@ import * as util from 'util';
 import { Stream } from 'stream';
 import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
-// eslint-disable-next-line import/no-cycle
 import { BunyanRecord } from './utils';
 
 const bunyanFields = [
