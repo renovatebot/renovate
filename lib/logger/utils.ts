@@ -56,15 +56,18 @@ function sanitizeObject(obj, seen = new WeakMap()) {
 }
 
 export function withSanitizer(streamConfig): bunyan.Stream {
+  if (streamConfig.type === 'rotating-file')
+    throw new Error("Rotating files aren't supported");
+
   const stream = streamConfig.stream;
   if (stream && stream.writable) {
     const write = (chunk: BunyanRecord, enc, cb) => {
-      const sanitizedRaw = sanitizeObject(chunk);
-      const sanitizedChunk =
+      const raw = sanitizeObject(chunk);
+      const result =
         streamConfig.type === 'raw'
-          ? sanitizedRaw
-          : JSON.stringify(sanitizedRaw);
-      stream.write(sanitizedChunk, enc, cb);
+          ? raw
+          : JSON.stringify(raw, bunyan.safeCycles());
+      stream.write(result, enc, cb);
     };
 
     return {
@@ -74,9 +77,7 @@ export function withSanitizer(streamConfig): bunyan.Stream {
     };
   }
 
-  if (streamConfig.path && streamConfig.type !== 'rotating-file') {
-    // Rotating files aren't supported well
-
+  if (streamConfig.path) {
     const fileStream = fs.createWriteStream(streamConfig.path, {
       flags: 'a',
       encoding: 'utf8',
@@ -85,6 +86,5 @@ export function withSanitizer(streamConfig): bunyan.Stream {
     return withSanitizer({ ...streamConfig, stream: fileStream });
   }
 
-  // FIXME: dummy stream maybe?
-  throw new Error("Can't create sanitized stream");
+  throw new Error("Missing 'stream' or 'path' for bunyan stream");
 }

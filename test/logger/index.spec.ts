@@ -43,7 +43,27 @@ describe('logger', () => {
     expect(getErrors()).toMatchSnapshot();
   });
 
-  it('supports log sanitization', () => {
+  it('should contain path or stream parameters', () => {
+    expect(() =>
+      addStream({
+        name: 'logfile',
+        level: 'error',
+      })
+    ).toThrow("Missing 'stream' or 'path' for bunyan stream");
+  });
+
+  it("doesn't support rotating files", () => {
+    expect(() =>
+      addStream({
+        name: 'logfile',
+        path: 'file.log',
+        level: 'error',
+        type: 'rotating-file',
+      })
+    ).toThrow("Rotating files aren't supported");
+  });
+
+  it('supports file-based logging', () => {
     let chunk = null;
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
@@ -63,21 +83,12 @@ describe('logger', () => {
     expect(JSON.parse(chunk).msg).toEqual('foo');
   });
 
-  it('supports sanitization', () => {
-    expect(() =>
-      addStream({
-        name: 'logfile',
-        path: 'file.log',
-        level: 'error',
-        type: 'rotating-file',
-      })
-    ).toThrow("Can't create sanitized stream");
-
-    let chunk = null;
+  it('sanitizes secrets', () => {
+    let logged = null;
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
       write(x) {
-        chunk = x;
+        logged = JSON.parse(x);
       },
     });
 
@@ -86,13 +97,21 @@ describe('logger', () => {
       path: 'file.log',
       level: 'error',
     });
-    logger.error('foo');
-    expect(JSON.parse(chunk).msg).toEqual('foo');
+    add({ password: 'secret"password' });
 
-    add({
-      password: 'coincidence',
+    const meta = { foo: null };
+    meta.foo = meta;
+    logger.error(meta, 'foo');
+    expect(logged.msg).toEqual('foo');
+    expect(logged.foo.foo).toEqual('[Circular]');
+
+    logger.error({
+      foo: 'secret"password',
+      bar: 'somethingelse',
     });
-    logger.error('coincidence');
-    expect(JSON.parse(chunk).msg).not.toEqual('foo');
+
+    expect(logged.foo).not.toEqual('secret"password');
+    expect(logged.foo).toContain('redacted');
+    expect(logged.bar).toEqual('somethingelse');
   });
 });
