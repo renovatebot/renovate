@@ -1,4 +1,14 @@
+import { readFileSync } from 'fs';
 import { extractPackageFile } from '../../../lib/manager/esy/extract';
+
+const package1json = readFileSync(
+  'test/manager/esy/_fixtures/package.1.json',
+  'utf8'
+);
+const package2json = readFileSync(
+  'test/manager/esy/_fixtures/package.1.json',
+  'utf8'
+);
 
 describe('lib/manager/esy/extract', () => {
   describe('extractPackageFile()', () => {
@@ -8,23 +18,13 @@ describe('lib/manager/esy/extract', () => {
       expect(await extractPackageFile(content, fileName)).toBeNull();
     });
     it('parses a simple JSON object', async () => {
-      const contentObject = {
-        dependencies: {
-          '@opam/dune': '*',
-          '@reason-native/console': '*',
-          '@reason-native/pastel': '*',
-          '@reason-native/rely': '*',
-          '@esy-ocaml/reason': '>= 3.4.0 < 3.5.0',
-          refmterr: '*',
-          ocaml: '~4.6.0',
-        },
-        devDependencies: {
-          '@opam/merlin': '*',
-          ocaml: '~4.6.0',
-          '@opam/odoc': '*',
-        },
-      };
-      const content = JSON.stringify(contentObject);
+      const content = package1json;
+      const fileName = 'package.json';
+      expect(await extractPackageFile(content, fileName)).not.toBeNull();
+      expect(await extractPackageFile(content, fileName)).toMatchSnapshot();
+    });
+    it('parses a simple JSON object', async () => {
+      const content = package2json;
       const fileName = 'package.json';
       expect(await extractPackageFile(content, fileName)).not.toBeNull();
       expect(await extractPackageFile(content, fileName)).toMatchSnapshot();

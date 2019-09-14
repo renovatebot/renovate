@@ -12,31 +12,13 @@ Object {
     Object {
       "currentValue": "*",
       "datasource": "esy",
-      "depName": "@reason-native/console",
+      "depName": "@opam/lambda-term",
       "depType": "dependencies",
     },
     Object {
-      "currentValue": "*",
+      "currentValue": "^4.0.0",
       "datasource": "esy",
-      "depName": "@reason-native/pastel",
-      "depType": "dependencies",
-    },
-    Object {
-      "currentValue": "*",
-      "datasource": "esy",
-      "depName": "@reason-native/rely",
-      "depType": "dependencies",
-    },
-    Object {
-      "currentValue": ">= 3.4.0 < 3.5.0",
-      "datasource": "esy",
-      "depName": "@esy-ocaml/reason",
-      "depType": "dependencies",
-    },
-    Object {
-      "currentValue": "*",
-      "datasource": "esy",
-      "depName": "refmterr",
+      "depName": "@opam/lwt",
       "depType": "dependencies",
     },
     Object {
@@ -46,7 +28,7 @@ Object {
       "depType": "dependencies",
     },
     Object {
-      "currentValue": "*",
+      "currentValue": "^3.0.3",
       "datasource": "esy",
       "depName": "@opam/merlin",
       "depType": "devDependencies",
@@ -57,10 +39,47 @@ Object {
       "depName": "ocaml",
       "depType": "devDependencies",
     },
+  ],
+}
+`;
+
+exports[`lib/manager/esy/extract extractPackageFile() parses a simple JSON object 2`] = `
+Object {
+  "deps": Array [
     Object {
       "currentValue": "*",
       "datasource": "esy",
-      "depName": "@opam/odoc",
+      "depName": "@opam/dune",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "*",
+      "datasource": "esy",
+      "depName": "@opam/lambda-term",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "^4.0.0",
+      "datasource": "esy",
+      "depName": "@opam/lwt",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "~4.6.0",
+      "datasource": "esy",
+      "depName": "ocaml",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentValue": "^3.0.3",
+      "datasource": "esy",
+      "depName": "@opam/merlin",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentValue": "~4.6.0",
+      "datasource": "esy",
+      "depName": "ocaml",
       "depType": "devDependencies",
     },
   ],
