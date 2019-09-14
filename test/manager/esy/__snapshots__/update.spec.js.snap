@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/esy/update updateDependency() updates a dependency correctly 1`] = `
+"{
+  \\"name\\": \\"hello-ocaml\\",
+  \\"version\\": \\"0.1.0\\",
+  \\"description\\": \\"OCaml workflow with Esy\\",
+  \\"license\\": \\"MIT\\",
+  \\"esy\\": {
+    \\"build\\": \\"dune build -p #{self.name}\\",
+    \\"release\\": {
+      \\"bin\\": \\"hello\\",
+      \\"includePackages\\": [
+        \\"root\\",
+        \\"@opam/camomile\\"
+      ]
+    }
+  },
+  \\"scripts\\": {
+    \\"test\\": \\"esy x hello\\"
+  },
+  \\"dependencies\\": {
+    \\"@opam/dune\\": \\"*\\",
+    \\"@opam/lambda-term\\": \\"*\\",
+    \\"@opam/lwt\\": \\"^4.0.0\\",
+    \\"ocaml\\": \\"5.0.0\\"
+  },
+  \\"devDependencies\\": {
+    \\"@opam/merlin\\": \\"^3.0.3\\",
+    \\"ocaml\\": \\"~4.6.0\\"
+  }
+}
+"
+`;
+
+exports[`lib/manager/esy/update updateDependency() updates a dependency correctly 2`] = `
+"{
+  \\"name\\": \\"hello-ocaml\\",
+  \\"version\\": \\"0.1.0\\",
+  \\"description\\": \\"OCaml workflow with Esy\\",
+  \\"license\\": \\"MIT\\",
+  \\"esy\\": {
+    \\"build\\": \\"dune build -p #{self.name}\\",
+    \\"release\\": {
+      \\"bin\\": \\"hello\\",
+      \\"includePackages\\": [
+        \\"root\\",
+        \\"@opam/camomile\\"
+      ]
+    }
+  },
+  \\"scripts\\": {
+    \\"test\\": \\"esy x hello\\"
+  },
+  \\"dependencies\\": {
+    \\"@opam/dune\\": \\"*\\",
+    \\"@opam/lambda-term\\": \\"*\\",
+    \\"@opam/lwt\\": \\"^4.0.0\\",
+    \\"ocaml\\": \\"5.0.0\\"
+  },
+  \\"devDependencies\\": {
+    \\"@opam/merlin\\": \\"^3.0.3\\",
+    \\"ocaml\\": \\"~4.6.0\\"
+  }
+}
+"
+`;
