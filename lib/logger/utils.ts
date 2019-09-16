@@ -36,8 +36,8 @@ export class ErrorStream extends Stream {
   }
 }
 
-function sanitizeObject(obj, seen = new WeakMap()) {
-  const result = {};
+function sanitizeObject(obj: Record<string, any>, seen = new WeakMap()) {
+  const result: Record<string, any> = {};
   seen.set(obj, result);
   for (const [key, val] of Object.entries(obj)) {
     const valType = typeof val;
