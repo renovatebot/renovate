@@ -325,7 +325,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     };
     collectVersionVariables([mysqlDependency], gradleFile);
 
-    const gradleWithVersionFile = 'val mysqlVersion by extra {  "6.0.5" }';
+    const gradleWithVersionFile = 'val mysqlVersion by extra { "6.0.5" }';
     const updatedGradleFile = updateGradleVersion(
       gradleWithVersionFile,
       mysqlDependency,
