@@ -1,6 +1,6 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
 
-function updateDependency(currentFileContent, upgrade) {
+export function updateDependency(currentFileContent, upgrade) {
   try {
     logger.debug(`mix.updateDependency: ${upgrade.newValue}`);
 
@@ -28,7 +28,3 @@ function updateDependency(currentFileContent, upgrade) {
     return null;
   }
 }
-
-module.exports = {
-  updateDependency,
-};

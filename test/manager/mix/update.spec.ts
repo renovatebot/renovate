@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const tfUpdate = require('../../../lib/manager/mix/update');
+import fs from 'fs-extra';
+import path from 'path';
+import { updateDependency } from '../../../lib/manager/mix';
 
 const sample = fs.readFileSync(
   path.resolve(__dirname, './_fixtures/mix.exs'),
@@ -16,7 +16,7 @@ describe('lib/manager/mix/update', () => {
         lineNumber: 18,
         newValue: '~> 0.8.2',
       };
-      const res = tfUpdate.updateDependency(sample, upgrade);
+      const res = updateDependency(sample, upgrade);
       expect(res).not.toEqual(sample);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -27,7 +27,7 @@ describe('lib/manager/mix/update', () => {
         lineNumber: 18,
         newValue: '~> 0.8.1',
       };
-      const res = tfUpdate.updateDependency(sample, upgrade);
+      const res = updateDependency(sample, upgrade);
       expect(res).toEqual(sample);
     });
     it('returns null if wrong line', () => {
@@ -37,7 +37,7 @@ describe('lib/manager/mix/update', () => {
         lineNumber: 19,
         newValue: '~> 0.8.2',
       };
-      const res = tfUpdate.updateDependency(sample, upgrade);
+      const res = updateDependency(sample, upgrade);
       expect(res).toBeNull();
     });
     it('returns null for unsupported depType', () => {
@@ -47,7 +47,7 @@ describe('lib/manager/mix/update', () => {
         lineNumber: 19,
         newValue: '~> 0.8.2',
       };
-      const res = tfUpdate.updateDependency(sample, upgrade);
+      const res = updateDependency(sample, upgrade);
       expect(res).toBeNull();
     });
   });

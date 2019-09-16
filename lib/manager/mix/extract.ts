@@ -1,12 +1,8 @@
-/** @type any */
-const { api } = require('../../versioning/hex');
-const { logger } = require('../../logger');
+import { isValid } from '../../versioning/hex';
+import { logger } from '../../logger';
+import { PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
+export function extractPackageFile(content) {
   logger.trace('mix.extractPackageFile()');
   const deps = [];
   const contentArr = content.split('\n');
@@ -30,7 +26,7 @@ function extractPackageFile(content) {
           const currentValue = depMatch[3];
           const organization = depMatch[5];
 
-          const dep = {
+          const dep: PackageDependency = {
             depName,
             currentValue,
           };
@@ -46,7 +42,7 @@ function extractPackageFile(content) {
             dep.lookupName += ':' + organization;
           }
 
-          if (!api.isValid(currentValue)) {
+          if (!isValid(currentValue)) {
             dep.skipReason = 'unsupported-version';
           }
 

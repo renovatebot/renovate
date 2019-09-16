@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const { extractPackageFile } = require('../../../lib/manager/mix');
+import fs from 'fs-extra';
+import path from 'path';
+import { extractPackageFile } from '../../../lib/manager/mix';
 
 const sample = fs.readFileSync(
   path.resolve(__dirname, './_fixtures/mix.exs'),

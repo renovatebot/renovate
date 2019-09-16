@@ -1,14 +1,10 @@
-const upath = require('upath');
-const fs = require('fs-extra');
-const { platform } = require('../../platform');
-const { exec } = require('../../../lib/util/exec');
-const { logger } = require('../../logger');
+import upath from 'upath';
+import fs from 'fs-extra';
+import { platform } from '../../platform';
+import { exec } from '../../util/exec';
+import { logger } from '../../logger';
 
-module.exports = {
-  getArtifacts,
-};
-
-async function getArtifacts(
+export async function getArtifacts(
   packageFileName,
   updatedDeps,
   newPackageFileContent,

@@ -1,13 +1,15 @@
-/** @type any */
-const fs = require('fs-extra');
-/** @type any */
-const { exec } = require('../../../lib/util/exec');
-const mix = require('../../../lib/manager/mix/artifacts');
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import _fs from 'fs-extra';
+import { exec as _exec } from '../../../lib/util/exec';
+import { platform as _platform } from '../../../lib/platform';
+import { getArtifacts } from '../../../lib/manager/mix';
+
+const fs: any = _fs;
+const exec: any = _exec;
+const platform: any = _platform;
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
+jest.mock('../../../lib/platform');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -24,9 +26,7 @@ describe('.getArtifacts()', () => {
         currentValue: '1.6.0',
       },
     ];
-    expect(
-      await mix.getArtifacts('mix.exs', updatedDeps, '', config)
-    ).toBeNull();
+    expect(await getArtifacts('mix.exs', updatedDeps, '', config)).toBeNull();
   });
   it('returns null if no local directory found', async () => {
     const updatedDeps = [
@@ -39,11 +39,11 @@ describe('.getArtifacts()', () => {
       localDir: null,
     };
     expect(
-      await mix.getArtifacts('mix.exs', updatedDeps, '', noLocalDirConfig)
+      await getArtifacts('mix.exs', updatedDeps, '', noLocalDirConfig)
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
-    expect(await mix.getArtifacts('mix.exs', [], '', config)).toBeNull();
+    expect(await getArtifacts('mix.exs', [], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current mix.lock');
@@ -58,9 +58,7 @@ describe('.getArtifacts()', () => {
         currentValue: '1.6.0',
       },
     ];
-    expect(
-      await mix.getArtifacts('mix.exs', updatedDeps, '', config)
-    ).toBeNull();
+    expect(await getArtifacts('mix.exs', updatedDeps, '', config)).toBeNull();
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockReturnValueOnce('Old mix.lock');
@@ -76,7 +74,7 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await mix.getArtifacts('mix.exs', updatedDeps, '{}', config)
+      await getArtifacts('mix.exs', updatedDeps, '{}', config)
     ).not.toBeNull();
   });
   it('catches errors', async () => {
@@ -91,7 +89,7 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await mix.getArtifacts('mix.exs', updatedDeps, '{}', config)
+      await getArtifacts('mix.exs', updatedDeps, '{}', config)
     ).toMatchSnapshot();
   });
 });

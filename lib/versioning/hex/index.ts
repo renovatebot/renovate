@@ -68,6 +68,8 @@ const getNewValue = (
   return newSemver;
 };
 
+export { isValid };
+
 export const api: VersioningApi = {
   ...npm,
   isLessThanRange,
