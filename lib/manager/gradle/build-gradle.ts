@@ -150,7 +150,9 @@ function updateVariablesByExtra(
 ): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
-    const regex = new RegExp(`(val ${variable} by extra {\\s*["'])(.*)(["']\\s*})`);
+    const regex = new RegExp(
+      `(val ${variable} by extra(?: {|\\()\\s*["'])(.*)(["']\\s*[})])`
+    );
     const match = buildGradleContent.match(regex);
     if (match) {
       return buildGradleContent.replace(regex, `$1${newVersion}$3`);
