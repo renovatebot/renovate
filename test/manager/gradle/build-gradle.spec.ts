@@ -289,4 +289,27 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
     expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
   });
+
+  it('should replace a external extra variable assigned to a Kotlin named argument dependency', () => {
+    const gradleFile = `compile(group  = "mysql"               ,
+               name           = "mysql-connector-java",
+               version        = mysqlVersion)
+               `;
+    const mysqlDependency = {
+      group: 'mysql',
+      depGroup: 'mysql',
+      name: 'mysql-connector-java',
+      version: '6.0.5',
+    };
+    collectVersionVariables([mysqlDependency], gradleFile);
+
+    const gradleWithVersionFile = 'val mysqlVersion by extra {  "6.0.5" }';
+    const updatedGradleFile = updateGradleVersion(
+      gradleWithVersionFile,
+      mysqlDependency,
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual('val mysqlVersion by extra { "7.0.0" }');
+  });
+
 });
