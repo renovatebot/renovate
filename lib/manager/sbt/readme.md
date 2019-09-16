@@ -31,7 +31,7 @@ As far as I know, there is 2 package files:
 
 ---
 
-#### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
+#### What [fileMatch](https://docs.renovatebot.com/configuration-options/#filematch) pattern(s) should be used?
 
 `['build\\.sbt', 'plugins\\.sbt']`
 

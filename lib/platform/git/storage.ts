@@ -190,10 +190,7 @@ export class Storage {
   async setBaseBranch(branchName: string) {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
-        throw new Error(
-          'Cannot set baseBranch to something that does not exist: ' +
-            branchName
-        );
+        throwBaseBranchValidationError(branchName);
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
@@ -215,12 +212,7 @@ export class Storage {
             'unknown revision or path not in the working tree'
           )
         ) {
-          const error = new Error('config-validation');
-          error.validationError = 'baseBranch not found';
-          error.validationMessage =
-            'The following configured baseBranch could not be found: ' +
-            branchName;
-          throw error;
+          throwBaseBranchValidationError(branchName);
         }
         throw err;
       }
@@ -235,7 +227,12 @@ export class Storage {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     this._config.branchPrefix = branchPrefix;
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+    try {
+      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      throw err;
+    }
   }
 
   async getFileList(branchName?: string) {
@@ -338,7 +335,7 @@ export class Storage {
     await this._git!.reset('hard');
     await this._git!.checkout(['-B', branchName, 'origin/' + branchName]);
     await this._git!.checkout(this._config.baseBranch);
-    await this._git!.merge([branchName]);
+    await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
   }
 
@@ -431,7 +428,7 @@ export class Storage {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line
   cleanRepo() {}
 
   static getUrl({
@@ -466,21 +463,32 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CIRCLECI) {
+  if (process.env.CI) {
     return;
   }
-  const platformErrorStrings = [
+  const platformFailureStrings = [
+    'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
     'Could not write new index file',
+    'Failed to connect to',
+    'Connection timed out',
   ];
-  for (const errorStr of platformErrorStrings) {
+  for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-error');
+      throw new Error('platform-failure');
     }
   }
+}
+
+function throwBaseBranchValidationError(branchName) {
+  const error = new Error('config-validation');
+  error.validationError = 'baseBranch not found';
+  error.validationMessage =
+    'The following configured baseBranch could not be found: ' + branchName;
+  throw error;
 }
 
 export default Storage;

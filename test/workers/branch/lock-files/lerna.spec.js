@@ -1,10 +1,10 @@
-const { exec } = require('child-process-promise');
-const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
-
-jest.mock('child-process-promise');
-
 /** @type any */
-const platform = global.platform;
+const { exec } = require('../../../../lib/util/exec');
+const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
+/** @type any */
+const { platform } = require('../../../../lib/platform');
+
+jest.mock('../../../../lib/util/exec');
 
 describe('generateLockFiles()', () => {
   it('returns if no lernaClient', async () => {

@@ -7,6 +7,7 @@ import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 
 import {
   appName,
@@ -14,6 +15,7 @@ import {
   configFileNames,
   urls,
 } from '../../config/app-strings';
+import { sanitize } from '../../util/sanitize';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -35,9 +37,10 @@ interface Pr {
   sha: string;
 
   sourceRepo: string;
+  isModified: boolean;
 }
 
-interface RepoConfig {
+interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
@@ -62,7 +65,7 @@ interface RepoConfig {
   renovateUsername: string;
 }
 
-let config: RepoConfig = {} as any;
+let config: LocalRepoConfig = {} as any;
 
 const defaults = {
   hostType: 'github',
@@ -79,48 +82,48 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
-  interface PlatformConfig {
-    gitAuthor: string;
-    renovateUsername: string;
-    endpoint: string;
-  }
 
-  const res: PlatformConfig = {} as any;
   if (endpoint) {
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.info('Using default github endpoint: ' + defaults.endpoint);
   }
-  res.endpoint = defaults.endpoint;
+  let gitAuthor: string;
+  let renovateUsername: string;
   try {
-    const userData = (await api.get(res.endpoint + 'user', {
+    const userData = (await api.get(defaults.endpoint + 'user', {
       token,
     })).body;
-    res.renovateUsername = userData.login;
-    res.gitAuthor = userData.name;
+    renovateUsername = userData.login;
+    gitAuthor = userData.name;
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');
     throw new Error('Init: Authentication failure');
   }
   try {
-    const userEmail = (await api.get(res.endpoint + 'user/emails', {
+    const userEmail = (await api.get(defaults.endpoint + 'user/emails', {
       token,
     })).body;
     if (userEmail.length && userEmail[0].email) {
-      res.gitAuthor += ` <${userEmail[0].email}>`;
+      gitAuthor += ` <${userEmail[0].email}>`;
     } else {
       logger.debug('Cannot find an email address for Renovate user');
-      delete res.gitAuthor;
+      gitAuthor = undefined;
     }
   } catch (err) {
     logger.debug(
       'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
     );
-    delete res.gitAuthor;
+    gitAuthor = undefined;
   }
-  logger.info('Authenticated as GitHub user: ' + res.renovateUsername);
-  return res;
+  logger.info('Authenticated as GitHub user: ' + renovateUsername);
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+    renovateUsername,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -155,17 +158,7 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
-}: {
-  endpoint: string;
-  repository: string;
-  forkMode?: boolean;
-  forkToken?: string;
-  gitPrivateKey?: string;
-  localDir: string;
-  includeForks: boolean;
-  renovateUsername: string;
-  optimizeForDisabled: boolean;
-}) {
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   logger.info('Authenticated as user: ' + renovateUsername);
   logger.info('Using renovate version: ' + global.renovateVersion);
@@ -188,8 +181,6 @@ export async function initRepo({
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
-  // platformConfig is passed back to the app layer and contains info about the platform they require
-  const platformConfig: { privateRepo: boolean; isFork: boolean } = {} as any;
   let res;
   try {
     res = await api.get(`repos/${repository}`);
@@ -245,8 +236,6 @@ export async function initRepo({
         throw new Error('disabled');
       }
     }
-    platformConfig.privateRepo = res.body.private === true;
-    platformConfig.isFork = res.body.fork === true;
     const owner = res.body.owner.login;
     logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
@@ -385,8 +374,11 @@ export async function initRepo({
     ...config,
     url,
   });
-
-  return platformConfig;
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
+    isFork: res.body.fork === true,
+  };
+  return repoConfig;
 }
 
 export async function getRepoForceRebase() {
@@ -623,6 +615,9 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
+      if (err.message === 'platform-failure') {
+        throw err;
+      }
       if (
         err.statusCode === 403 ||
         err.message === 'integration-unauthorized'
@@ -657,13 +652,21 @@ export async function getBranchStatusCheck(
 ) {
   const branchCommit = await config.storage.getBranchCommit(branchName);
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
-  const res = await api.get(url);
-  for (const check of res.body) {
-    if (check.context === context) {
-      return check.state;
+  try {
+    const res = await api.get(url);
+    for (const check of res.body) {
+      if (check.context === context) {
+        return check.state;
+      }
     }
+    return null;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.info('Commit not found when checking statuses');
+      throw new Error('repository-changed');
+    }
+    throw err;
   }
-  return null;
 }
 
 export async function setBranchStatus(
@@ -826,8 +829,14 @@ export async function findIssue(title: string) {
   };
 }
 
-export async function ensureIssue(title: string, body: string, once = false) {
-  logger.debug(`ensureIssue()`);
+export async function ensureIssue(
+  title: string,
+  rawbody: string,
+  once = false,
+  reopen = true
+) {
+  logger.debug(`ensureIssue(${title})`);
+  const body = sanitize(rawbody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -838,7 +847,9 @@ export async function ensureIssue(title: string, body: string, once = false) {
           logger.debug('Issue already closed - skipping recreation');
           return null;
         }
-        logger.info('Reopening previously closed issue');
+        if (reopen) {
+          logger.info('Reopening previously closed issue');
+        }
         issue = issues[issues.length - 1];
       }
       for (const i of issues) {
@@ -854,17 +865,19 @@ export async function ensureIssue(title: string, body: string, once = false) {
         logger.info('Issue is open and up to date - nothing to do');
         return null;
       }
-      logger.info('Patching issue');
-      await api.patch(
-        `repos/${config.parentRepo || config.repository}/issues/${
-          issue.number
-        }`,
-        {
-          body: { body, state: 'open' },
-        }
-      );
-      logger.info('Issue updated');
-      return 'updated';
+      if (reopen) {
+        logger.info('Patching issue');
+        await api.patch(
+          `repos/${config.parentRepo || config.repository}/issues/${
+            issue.number
+          }`,
+          {
+            body: { body, state: 'open' },
+          }
+        );
+        logger.info('Issue updated');
+        return 'updated';
+      }
     }
     await api.post(`repos/${config.parentRepo || config.repository}/issues`, {
       body: {
@@ -1021,8 +1034,9 @@ async function deleteComment(commentId: number) {
 export async function ensureComment(
   issueNo: number,
   topic: string | null,
-  content: string
+  rawContent: string
 ) {
+  const content = sanitize(rawContent);
   try {
     const comments = await getComments(issueNo);
     let body: string;
@@ -1049,7 +1063,10 @@ export async function ensureComment(
     }
     if (!commentId) {
       await addComment(issueNo, body);
-      logger.info({ repository: config.repository, issueNo }, 'Comment added');
+      logger.info(
+        { repository: config.repository, issueNo, topic },
+        'Comment added'
+      );
     } else if (commentNeedsUpdating) {
       await editComment(commentId, body);
       logger.info(
@@ -1061,6 +1078,9 @@ export async function ensureComment(
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === 'platform-failure') {
+      throw err;
+    }
     if (
       err.message === 'Unable to create comment because issue is locked. (403)'
     ) {
@@ -1163,11 +1183,12 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  body: string,
+  rawBody: string,
   labels: string[] | null,
   useDefaultBranch: boolean,
   platformOptions: { statusCheckVerify?: boolean } = {}
 ) {
+  const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
   const head = `${config.repository!.split('/')[0]}:${branchName}`;
@@ -1207,6 +1228,7 @@ export async function createPr(
       urls.homepage
     );
   }
+  pr.isModified = false;
   return pr;
 }
 
@@ -1235,6 +1257,7 @@ async function getOpenPrs() {
             nodes {
               number
               headRefName
+              baseRefName
               title
               mergeable
               mergeStateStatus
@@ -1294,6 +1317,8 @@ async function getOpenPrs() {
         const branchName = pr.branchName;
         const prNo = pr.number;
         delete pr.headRefName;
+        pr.targetBranch = pr.baseRefName;
+        delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
         const canMergeStates = ['BEHIND', 'CLEAN'];
         const hasNegativeReview =
@@ -1311,7 +1336,7 @@ async function getOpenPrs() {
             // Check against gitAuthor
             const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
             if (commitAuthorEmail === global.gitAuthor.email) {
-              pr.canRebase = true;
+              pr.isModified = false;
             } else {
               logger.trace(
                 {
@@ -1320,14 +1345,14 @@ async function getOpenPrs() {
                   commitAuthorEmail,
                   gitAuthorEmail: global.gitAuthor.email,
                 },
-                'PR canRebase=false: last committer has different email to the bot'
+                'PR isModified=true: last committer has different email to the bot'
               );
-              pr.canRebase = false;
+              pr.isModified = true;
             }
           } else {
             // assume the author is us
             // istanbul ignore next
-            pr.canRebase = true;
+            pr.isModified = false;
           }
         } else {
           // assume we can't rebase if more than 1
@@ -1336,9 +1361,9 @@ async function getOpenPrs() {
               branchName,
               prNo,
             },
-            'PR canRebase=false: PR has more than one commit'
+            'PR isModified=true: PR has more than one commit'
           );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
         pr.isStale = false;
         if (pr.mergeStateStatus === 'BEHIND') {
@@ -1467,6 +1492,7 @@ export async function getPr(prNo: number) {
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
   if (pr.state === 'open') {
+    pr.isModified = true;
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
@@ -1488,7 +1514,7 @@ export async function getPr(prNo: number) {
             { prNo },
             '1 commit matches configured gitAuthor so can rebase'
           );
-          pr.canRebase = true;
+          pr.isModified = false;
         } else {
           logger.trace(
             {
@@ -1496,16 +1522,16 @@ export async function getPr(prNo: number) {
               commitAuthorEmail,
               gitAuthorEmail: global.gitAuthor.email,
             },
-            'PR canRebase=false: 1 commit and not by configured gitAuthor so cannot rebase'
+            'PR isModified=true: 1 commit and not by configured gitAuthor so cannot rebase'
           );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
       } else {
         logger.debug(
           { prNo },
           '1 commit and no configured gitAuthor so can rebase'
         );
-        pr.canRebase = true;
+        pr.isModified = false;
       }
     } else {
       // Check if only one author of all commits
@@ -1538,7 +1564,7 @@ export async function getPr(prNo: number) {
         }
       );
       if (remainingCommits.length <= 1) {
-        pr.canRebase = true;
+        pr.isModified = false;
       }
     }
     const baseCommitSHA = await getBaseCommitSHA();
@@ -1561,8 +1587,9 @@ export async function getPrFiles(prNo: number) {
   return files.map((f: { filename: string }) => f.filename);
 }
 
-export async function updatePr(prNo: number, title: string, body?: string) {
+export async function updatePr(prNo: number, title: string, rawBody?: string) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
@@ -1591,7 +1618,7 @@ export async function updatePr(prNo: number, title: string, body?: string) {
 export async function mergePr(prNo: number, branchName: string) {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
-  if (config.pushProtection) {
+  if (config.isGhe && config.pushProtection) {
     logger.info(
       { branch: branchName, prNo },
       'Branch protection: Cannot automerge PR when push protection is enabled'

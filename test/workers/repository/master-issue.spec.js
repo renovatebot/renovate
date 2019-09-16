@@ -2,7 +2,7 @@ const fs = require('fs');
 const masterIssue = require('../../../lib/workers/repository/master-issue');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 /** @type any */
 let config;
@@ -351,6 +351,12 @@ describe('workers/repository/master-issue', () => {
           upgrades: [{ depName: 'dep3' }],
           res: 'needs-pr-approval',
           branchName: 'branchName3',
+        },
+        {
+          prTitle: 'pr4',
+          upgrades: [{ depName: 'dep4' }],
+          res: 'pending',
+          branchName: 'branchName4',
         },
       ];
       config.masterIssue = true;

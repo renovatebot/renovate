@@ -501,10 +501,11 @@ Object {
   "body": "* Line 1
 * Line 2",
   "branchName": "userName1/pullRequest5",
-  "canRebase": false,
   "createdAt": 1547853840016,
+  "isModified": true,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -546,16 +547,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": true,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -712,16 +714,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -733,16 +736,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": true,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -754,16 +758,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -840,16 +845,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": true,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -888,13 +894,14 @@ exports[`platform/bitbucket-server endpoint with no path getPr() gets a closed P
 Object {
   "body": undefined,
   "branchName": undefined,
-  "canRebase": false,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
+  "isModified": false,
   "isStale": false,
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
+  "targetBranch": undefined,
   "title": undefined,
   "version": 0,
 }
@@ -921,6 +928,20 @@ exports[`platform/bitbucket-server endpoint with no path getPr() returns null fo
 
 exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with no path getPrBody() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
 exports[`platform/bitbucket-server endpoint with no path getPrFiles() returns one file 1`] = `
 Array [
   Array [
@@ -942,10 +963,11 @@ Array [
     "body": "* Line 1
 * Line 2",
     "branchName": "userName1/pullRequest5",
-    "canRebase": false,
     "createdAt": 1547853840016,
+    "isModified": true,
     "number": 5,
     "state": "open",
+    "targetBranch": "master",
     "title": "title",
     "version": 1,
   },
@@ -982,11 +1004,17 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
 exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 
@@ -1955,10 +1983,11 @@ Object {
   "body": "* Line 1
 * Line 2",
   "branchName": "userName1/pullRequest5",
-  "canRebase": false,
   "createdAt": 1547853840016,
+  "isModified": true,
   "number": 5,
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2000,16 +2029,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": true,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2166,16 +2196,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2187,16 +2218,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": true,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2208,16 +2240,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2294,16 +2327,17 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "canMerge": false,
-  "canRebase": true,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
   ],
   "state": "open",
+  "targetBranch": "master",
   "title": "title",
   "version": 1,
 }
@@ -2342,13 +2376,14 @@ exports[`platform/bitbucket-server endpoint with path getPr() gets a closed PR 1
 Object {
   "body": undefined,
   "branchName": undefined,
-  "canRebase": false,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
+  "isModified": false,
   "isStale": false,
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
+  "targetBranch": undefined,
   "title": undefined,
   "version": 0,
 }
@@ -2375,6 +2410,20 @@ exports[`platform/bitbucket-server endpoint with path getPr() returns null for n
 
 exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with path getPrBody() sanitizes HTML comments in the body 1`] = `
+"---
+
+- [ ] If you want to rebase/retry this PR, check this box
+- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+
+---
+
+Empty comment.
+
+Followed by some information.
+"
+`;
+
 exports[`platform/bitbucket-server endpoint with path getPrFiles() returns one file 1`] = `
 Array [
   Array [
@@ -2396,10 +2445,11 @@ Array [
     "body": "* Line 1
 * Line 2",
     "branchName": "userName1/pullRequest5",
-    "canRebase": false,
     "createdAt": 1547853840016,
+    "isModified": true,
     "number": 5,
     "state": "open",
+    "targetBranch": "master",
     "title": "title",
     "version": 1,
   },
@@ -2436,11 +2486,17 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
 exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 

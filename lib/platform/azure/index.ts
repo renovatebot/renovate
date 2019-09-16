@@ -4,8 +4,10 @@ import * as hostRules from '../../util/host-rules';
 import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
 
-interface RepoConfig {
+interface Config {
   storage: GitStorage;
   repoForceRebase: boolean;
   mergeMethod: string;
@@ -20,7 +22,7 @@ interface RepoConfig {
   repository: string;
 }
 
-let config: RepoConfig = {} as any;
+let config: Config = {} as any;
 
 const defaults: any = {
   hostType: 'azure',
@@ -45,7 +47,10 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  return res;
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+  };
+  return platformConfig;
 }
 
 export async function getRepos() {
@@ -59,16 +64,10 @@ export async function initRepo({
   repository,
   localDir,
   azureWorkItemId,
-}: {
-  repository: string;
-  localDir: string;
-  azureWorkItemId: any;
-}) {
+  optimizeForDisabled,
+}: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
-  config.repository = repository;
-  config.fileList = null;
-  config.prList = null;
-  config.azureWorkItemId = azureWorkItemId;
+  config = { repository, azureWorkItemId } as any;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
@@ -88,6 +87,27 @@ export async function initRepo({
   config.baseCommitSHA = await getBranchCommit(config.baseBranch);
   config.mergeMethod = 'merge';
   config.repoForceRebase = false;
+
+  if (optimizeForDisabled) {
+    interface RenovateConfig {
+      enabled: boolean;
+    }
+    let renovateConfig: RenovateConfig;
+    try {
+      const json = await azureHelper.getFile(
+        repo.id,
+        'renovate.json',
+        config.defaultBranch
+      );
+      renovateConfig = JSON.parse(json);
+    } catch {
+      // Do nothing
+    }
+    if (renovateConfig && renovateConfig.enabled === false) {
+      throw new Error('disabled');
+    }
+  }
+
   config.storage = new GitStorage();
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
@@ -102,11 +122,11 @@ export async function initRepo({
     localDir,
     url,
   });
-  const platformConfig = {
-    privateRepo: true,
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
     isFork: false,
   };
-  return platformConfig;
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {
@@ -334,7 +354,7 @@ export async function createPr(
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
   );
-  const description = azureHelper.max4000Chars(body);
+  const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -386,7 +406,7 @@ export async function updatePr(prNo: number, title: string, body?: string) {
     title,
   };
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(body);
+    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
   }
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
@@ -397,7 +417,7 @@ export async function ensureComment(
   content: string
 ) {
   logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${content}`;
+  const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
     {
@@ -483,6 +503,7 @@ export /* istanbul ignore next */ function ensureIssue() {
   logger.warn(`ensureIssue() is not implemented`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export /* istanbul ignore next */ function ensureIssueClosing() {}
 
 export /* istanbul ignore next */ function getIssueList() {

@@ -135,8 +135,7 @@ describe('platform/azure/helpers', () => {
           },
         ],
         '123',
-        'repository',
-        'branchName'
+        'repository'
       );
       expect(res).toMatchSnapshot();
     });
@@ -156,8 +155,7 @@ describe('platform/azure/helpers', () => {
           },
         ],
         '123',
-        'repository',
-        'branchName'
+        'repository'
       );
       expect(res).toMatchSnapshot();
     });
@@ -189,8 +187,7 @@ describe('platform/azure/helpers', () => {
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test',
-        'branchName'
+        './myFilePath/test'
       );
       expect(res).toBeNull();
     });
@@ -220,8 +217,7 @@ describe('platform/azure/helpers', () => {
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test',
-        'branchName'
+        './myFilePath/test'
       );
       expect(res).toBeNull();
     });
@@ -251,8 +247,7 @@ describe('platform/azure/helpers', () => {
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test',
-        'branchName'
+        './myFilePath/test'
       );
       expect(res).toMatchSnapshot();
     });
@@ -270,8 +265,7 @@ describe('platform/azure/helpers', () => {
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test',
-        'branchName'
+        './myFilePath/test'
       );
       expect(res).toBeNull();
     });

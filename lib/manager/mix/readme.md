@@ -22,7 +22,7 @@ Mix is main Elixir build tool
 
 mix.exs
 
-#### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
+#### What [fileMatch](https://docs.renovatebot.com/configuration-options/#filematch) pattern(s) should be used?
 
 File names are static
 

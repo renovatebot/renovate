@@ -1,0 +1,28 @@
+{
+  "name": "acme/git-sources",
+  "description": "Fetch Packages via git",
+  "repositories": {
+    "awesome/vcs": {
+      "type": "vcs",
+      "url": "https://my-vcs.example/my-vcs-repo"
+    },
+    "awesome/git": {
+      "type": "git",
+      "url": "git@my-git.example:my-git-repo"
+    },
+    "wpackagist": {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    }
+  },
+  "require": {
+    "aws/aws-sdk-php": "*",
+    "awesome/vcs": "dev-trunk",
+    "awesome/git": ">=7.0.2"
+  },
+  "autoload": {
+    "psr-0": {
+      "Acme": "src/"
+    }
+  }
+}

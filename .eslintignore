@@ -1,1 +1,2 @@
 test/**/**/_fixtures
+lib/types/**/*.d.ts

@@ -26,5 +26,31 @@ describe('workers/repository/process/sort', () => {
       sortBranches(branches);
       expect(branches).toMatchSnapshot();
     });
+    it('sorts based on prPriority', () => {
+      const branches = [
+        {
+          updateType: 'major',
+          prTitle: 'some major update',
+          prPriority: 1,
+        },
+        {
+          updateType: 'pin',
+          prTitle: 'some pin',
+          prPriority: -1,
+        },
+        {
+          updateType: 'pin',
+          prTitle: 'some other pin',
+          prPriority: 0,
+        },
+        {
+          updateType: 'minor',
+          prTitle: 'a minor update',
+          prPriority: -1,
+        },
+      ];
+      sortBranches(branches);
+      expect(branches).toMatchSnapshot();
+    });
   });
 });

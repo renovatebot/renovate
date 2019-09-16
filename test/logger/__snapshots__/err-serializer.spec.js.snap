@@ -6,6 +6,7 @@ Object {
   "b": 2,
   "body": "some response body",
   "gotOptions": Object {
+    "auth": "test:***********",
     "headers": Object {
       "authorization": "** redacted **",
     },

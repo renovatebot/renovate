@@ -66,8 +66,9 @@ export async function getRefs(repoId: string, branchName?: string) {
 
 /**
  *
- * @param {string} branchName
- * @param {string} from
+ * @param repoId
+ * @param branchName
+ * @param from
  */
 export async function getAzureBranchObj(
   repoId: string,
@@ -88,31 +89,17 @@ export async function getAzureBranchObj(
     oldObjectId: refs[0].objectId,
   };
 }
-/**
- *
- * @param {string} msg
- * @param {string} filePath
- * @param {string} fileContent
- * @param {string} repoId
- * @param {string} repository
- * @param {string} branchName
- */
+
 export async function getChanges(
-  files: any,
-  repoId: any,
-  repository: any,
-  branchName: any
+  files: { name: string; contents: any }[],
+  repoId: string,
+  branchName: string
 ) {
   const changes = [];
   for (const file of files) {
     // Add or update
     let changeType = 1;
-    const fileAlreadyThere = await getFile(
-      repoId,
-      repository,
-      file.name,
-      branchName
-    );
+    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
     if (fileAlreadyThere) {
       changeType = 2;
     }
@@ -135,15 +122,13 @@ export async function getChanges(
 /**
  * if no branchName, look globaly
  * @param {string} repoId
- * @param {string} repository
  * @param {string} filePath
  * @param {string} branchName
  */
 export async function getFile(
   repoId: string,
-  repository: any,
   filePath: string,
-  branchName: any
+  branchName: string
 ) {
   logger.trace(`getFile(filePath=${filePath}, branchName=${branchName})`);
   const azureApiGit = await azureApi.gitApi();
@@ -213,12 +198,14 @@ export function getRenovatePRFormat(azurePr: {
   description: any;
   status: number;
   mergeStatus: number;
+  targetRefName: string;
 }) {
   const pr = azurePr as any;
 
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
+  pr.targetBranch = azurePr.targetRefName;
 
   // status
   // export declare enum PullRequestStatus {
@@ -249,7 +236,7 @@ export function getRenovatePRFormat(azurePr: {
     pr.isConflicted = true;
   }
 
-  pr.canRebase = true;
+  pr.isModified = false;
 
   return pr;
 }

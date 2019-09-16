@@ -48,7 +48,7 @@ async function get(
     if (opts.paginate) {
       // Check if result is paginated
       const pageLimit = opts.pageLimit || 10;
-      const linkHeader = parseLinkHeader(res.headers.link);
+      const linkHeader = parseLinkHeader(res.headers.link as string);
       if (linkHeader && linkHeader.next && linkHeader.last) {
         let lastPage = +linkHeader.last.page;
         if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
@@ -166,10 +166,6 @@ for (const x of helpers) {
   (get as any)[x] = (url: string, opts: any) =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
-
-get.setAppMode = function setAppMode() {
-  // no-op
-};
 
 get.setBaseUrl = (u: string) => {
   baseUrl = u;

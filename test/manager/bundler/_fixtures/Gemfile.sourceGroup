@@ -1,9 +1,9 @@
 source "https://rubygems.org"
-ruby "~> 1.5.3"
+ruby '~> 1.5.3'
 
-source "https://gems.example.com" do
+source 'https://gems.example.com' do
   gem "some_internal_gem"
-  gem "another_internal_gem"
+  gem 'another_internal_gem'
 end
 
 platforms :ruby do
@@ -12,6 +12,6 @@ platforms :ruby do
 end
 
 group :development, :optional => true do
-  gem "wirble"
+  gem 'wirble'
   gem "faker"
 end

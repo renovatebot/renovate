@@ -2,35 +2,46 @@ import URL from 'url';
 import addrs from 'email-addresses';
 import * as hostRules from '../util/host-rules';
 import { logger } from '../logger';
+import { Platform } from './common';
+import { RenovateConfig } from '../config/common';
+import { getOptions } from '../config/definitions';
 
-// TODO: move to definitions: platform.allowedValues
-/* eslint-disable global-require */
-const platforms = new Map([
-  ['azure', require('./azure')],
-  ['bitbucket', require('./bitbucket')],
-  ['bitbucket-server', require('./bitbucket-server')],
-  ['github', require('./github')],
-  ['gitlab', require('./gitlab')],
-]);
-/* eslint-enable global-require */
+export * from './common';
 
-// TODO: lazy load platform
-export function setPlatformApi(platform: string) {
-  global.platform = platforms.get(platform);
+const supportedPlatforms = getOptions().find(
+  option => option.name === 'platform'
+).allowedValues;
+
+let _platform: Platform;
+
+const handler: ProxyHandler<Platform> = {
+  get(_target: Platform, prop: keyof Platform) {
+    if (!_platform) throw new Error(`platform-not-found`);
+
+    // TODO: add more validation
+
+    return _platform[prop];
+  },
+};
+
+export const platform = new Proxy<Platform>({} as any, handler);
+
+export async function setPlatformApi(name: string): Promise<void> {
+  if (!supportedPlatforms.includes(name))
+    throw new Error(
+      `Init: Platform "${name}" not found. Must be one of: ${supportedPlatforms.join(
+        ', '
+      )}`
+    );
+  _platform = await import('./' + name);
 }
 
-export async function initPlatform(config: any) {
-  setPlatformApi(config.platform);
-  if (!global.platform) {
-    const supportedPlatforms = [...platforms.keys()].join(', ');
-    throw new Error(
-      `Init: Platform "${config.platform}" not found. Must be one of: ${supportedPlatforms}`
-    );
-  }
+export async function initPlatform(config: RenovateConfig) {
+  await setPlatformApi(config.platform);
   // TODO: types
-  const platformInfo: any = await global.platform.initPlatform(config);
-  const returnConfig = { ...config, ...platformInfo };
-  let gitAuthor;
+  const platformInfo = await platform.initPlatform(config);
+  const returnConfig: any = { ...config, ...platformInfo };
+  let gitAuthor: string;
   if (config && config.gitAuthor) {
     logger.info(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;

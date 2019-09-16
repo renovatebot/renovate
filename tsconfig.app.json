@@ -3,7 +3,8 @@
   "compilerOptions": {
     "resolveJsonModule": false,
     "isolatedModules": true,
-    "sourceMap": false,
+    "sourceMap": true,
+    "inlineSources": true,
     "types": ["node"]
   },
   "include": ["lib/**/*"]

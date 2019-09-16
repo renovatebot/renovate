@@ -9,6 +9,7 @@ describe('platform/github', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
+    jest.unmock('../../../lib/platform');
     jest.mock('delay');
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     jest.mock('../../../lib/util/host-rules');
@@ -1175,6 +1176,76 @@ describe('platform/github', () => {
       const res = await github.ensureIssue('title-1', 'newer-content');
       expect(res).toBeNull();
     });
+    it('creates issue if reopen flag false and issue is not open', async () => {
+      api.post.mockImplementationOnce(
+        () =>
+          ({
+            body: JSON.stringify({
+              data: {
+                repository: {
+                  issues: {
+                    pageInfo: {
+                      startCursor: null,
+                      hasNextPage: false,
+                      endCursor: null,
+                    },
+                    nodes: [
+                      {
+                        number: 2,
+                        state: 'close',
+                        title: 'title-2',
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          } as any)
+      );
+      api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
+      const res = await github.ensureIssue(
+        'title-2',
+        'new-content',
+        false,
+        false
+      );
+      expect(res).toEqual('created');
+    });
+    it('does not create issue if reopen flag false and issue is already open', async () => {
+      api.post.mockImplementationOnce(
+        () =>
+          ({
+            body: JSON.stringify({
+              data: {
+                repository: {
+                  issues: {
+                    pageInfo: {
+                      startCursor: null,
+                      hasNextPage: false,
+                      endCursor: null,
+                    },
+                    nodes: [
+                      {
+                        number: 2,
+                        state: 'open',
+                        title: 'title-2',
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          } as any)
+      );
+      api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
+      const res = await github.ensureIssue(
+        'title-2',
+        'new-content',
+        false,
+        false
+      );
+      expect(res).toEqual(null);
+    });
   });
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
@@ -1666,7 +1737,7 @@ describe('platform/github', () => {
           } as any)
       );
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(true);
+      expect(pr.isModified).toBe(false);
       expect(pr).toMatchSnapshot();
     });
     it('should return a rebaseable PR if gitAuthor matches 1 commit', async () => {
@@ -1715,7 +1786,7 @@ describe('platform/github', () => {
           } as any)
       );
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(true);
+      expect(pr.isModified).toBe(false);
       expect(pr).toMatchSnapshot();
     });
     it('should return a not rebaseable PR if gitAuthor does not match 1 commit', async () => {
@@ -1764,7 +1835,7 @@ describe('platform/github', () => {
           } as any)
       );
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(false);
+      expect(pr.isModified).toBe(true);
       expect(pr).toMatchSnapshot();
     });
   });

@@ -30,7 +30,8 @@ commands:
       - run:
           name: Lint
           command: |
-            yarn lint
+            yarn eslint --format junit -o test-results/lint/results.xml
+            yarn prettier
             yarn test-schema
             yarn type-check
 
@@ -42,7 +43,14 @@ commands:
       - run:
           name: Unit Tests
           command: |
-            yarn jest --runInBand
+            yarn jest --maxWorkers=2  --ci --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: 'test-results/jest/results.xml'
+
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
 
       - run:
           name: E2E Tests
@@ -53,20 +61,21 @@ commands:
           name: Coverage
           command: |
             bash <(curl -s https://codecov.io/bash) -Z -C $CIRCLE_SHA1
+          when: always
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4
+      - image: amd64/node:10.16.3@sha256:e0f7dabe991810057aee6ba7a7d4136fe7fc70e99235d79e6c7ae0177656a5c8
     steps:
       - test
   test_node_12:
     docker:
-      - image: amd64/node:12.6.0@sha256:4200e3ad25e147903a2fce5273ccbf2ec4300162bc199b4963dc5bf5046c1eb8
+      - image: amd64/node:12.10.0@sha256:c953b001ea2acf18a6ef99a90fc50630e70a7c0a6b49d774a7aee1f9c937b645
     steps:
       - test
   release:
     docker:
-      - image: amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4
+      - image: amd64/node:10.16.3@sha256:e0f7dabe991810057aee6ba7a7d4136fe7fc70e99235d79e6c7ae0177656a5c8
     steps:
       - checkout
       - run: yarn install --frozen-lockfile

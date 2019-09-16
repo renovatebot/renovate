@@ -61,6 +61,11 @@
       "description": "The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.",
       "type": "string"
     },
+    "dockerMapDotfiles": {
+      "description": "Map relevant home directory dotfiles into containers when binarySource=docker.",
+      "type": "boolean",
+      "default": false
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
@@ -126,6 +131,11 @@
       "type": "string",
       "default": "Update Dependencies (Renovate Bot)"
     },
+    "configWarningReuseIssue": {
+      "description": "Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.",
+      "type": "boolean",
+      "default": true
+    },
     "privateKey": {
       "description": "Server-side private key",
       "type": "string"
@@ -165,6 +175,7 @@
     "platform": {
       "description": "Platform type of repository",
       "type": "string",
+      "enum": ["azure", "bitbucket", "bitbucket-server", "github", "gitlab"],
       "default": "github"
     },
     "endpoint": {
@@ -294,6 +305,7 @@
         "npm",
         "pep440",
         "poetry",
+        "regex",
         "ruby",
         "semver",
         "swift"
@@ -462,11 +474,6 @@
       "type": "boolean",
       "default": true
     },
-    "unstablePattern": {
-      "description": "Regex for identifying unstable versions (docker only)",
-      "type": "string",
-      "format": "regex"
-    },
     "followTag": {
       "description": "If defined, packages will follow this release tag exactly.",
       "type": "string"
@@ -561,13 +568,18 @@
       "type": "boolean",
       "default": false
     },
+    "rebaseConflictedPrs": {
+      "description": "Auto-rebase when there is conflict in PRs",
+      "type": "boolean",
+      "default": true
+    },
     "rebaseStalePrs": {
-      "description": "Rebase stale PRs (GitHub only)",
+      "description": "Rebase any PRs that are not up-to-date with the base branch",
       "type": "boolean",
       "default": null
     },
     "rebaseLabel": {
-      "description": "Label to use to request the bot to rebase a PR manually (GitHub only)",
+      "description": "Label to use to request the bot to rebase a PR manually",
       "type": "string",
       "default": "rebase"
     },
@@ -580,6 +592,11 @@
       "description": "Set a status check for unpublish-safe upgrades",
       "type": "boolean",
       "default": false
+    },
+    "stabilityDays": {
+      "description": "Number of days required before a new release is considered to be stabilized.",
+      "type": "integer",
+      "default": 0
     },
     "prCreation": {
       "description": "When to create the PR for a branch.",
@@ -599,6 +616,11 @@
     },
     "prConcurrentLimit": {
       "description": "Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.",
+      "type": "integer",
+      "default": 0
+    },
+    "prPriority": {
+      "description": "Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.",
       "type": "integer",
       "default": 0
     },
@@ -756,14 +778,19 @@
       }
     },
     "assignees": {
-      "description": "Assignees for Pull Request (username in GitHub/GitLab, email address in Azure DevOps)",
+      "description": "Assignees for Pull Request (either username or email address depending on the platform)",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
+    "assignAutomerge": {
+      "description": "Assign reviewers and assignees even if the PR is to be automerged",
+      "type": "boolean",
+      "default": false
+    },
     "reviewers": {
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab/Bitbucket, email or username in Azure DevOps)",
+      "description": "Requested reviewers for Pull Requests (either username or email address depending on the platform)",
       "type": "array",
       "items": {
         "type": "string"
@@ -944,11 +971,12 @@
     },
     "pub": {
       "description": "Configuration object for when renovating Dart pubspec files",
-      "type": "json",
+      "type": "object",
       "default": {
         "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
         "versionScheme": "npm"
-      }
+      },
+      "$ref": "#"
     },
     "docker": {
       "description": "Configuration object for Docker language",
@@ -1016,6 +1044,14 @@
       },
       "$ref": "#"
     },
+    "droneci": {
+      "description": "Configuration object for DroneCI yml renovation. Also inherits settings from `docker` object.",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/).drone.yml$"]
+      },
+      "$ref": "#"
+    },
     "ansible": {
       "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "type": "object",
@@ -1028,7 +1064,10 @@
       "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "default": {
-        "fileMatch": ["^\\.github/main.workflow$"],
+        "fileMatch": [
+          "^\\.github/main.workflow$",
+          "^\\.github/workflows/[^/]+\\.ya?ml$"
+        ],
         "pinDigests": true
       },
       "$ref": "#"
@@ -1074,11 +1113,12 @@
     },
     "poetry": {
       "description": "Configuration object for pyproject.toml files",
-      "type": "toml",
+      "type": "object",
       "default": {
         "versionScheme": "poetry",
         "fileMatch": ["(^|/)pyproject\\.toml$"]
-      }
+      },
+      "$ref": "#"
     },
     "python": {
       "description": "Configuration object for python",
@@ -1132,7 +1172,7 @@
       "description": "Configuration object for build.gradle files",
       "type": "object",
       "default": {
-        "fileMatch": ["\\.gradle$", "(^|/)gradle.properties$"],
+        "fileMatch": ["\\.gradle(\\.kts)?$", "(^|/)gradle.properties$"],
         "timeout": 300,
         "versionScheme": "maven"
       },
@@ -1275,6 +1315,11 @@
         "rangeStrategy": "bump"
       },
       "$ref": "#"
+    },
+    "pruneStaleBranches": {
+      "description": "Enable or disable pruning of stale branches",
+      "type": "boolean",
+      "default": true
     }
   }
 }

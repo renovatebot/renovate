@@ -33,6 +33,7 @@ Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
+  "isModified": false,
   "number": 12345,
 }
 `;
@@ -61,6 +62,7 @@ Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
+  "isModified": false,
   "number": 12345,
 }
 `;
@@ -136,15 +138,17 @@ Object {
   },
   "body": undefined,
   "branchName": "some-branch",
-  "canRebase": false,
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
   "iid": 91,
+  "isModified": true,
   "isStale": false,
   "number": 91,
   "source_branch": "some-branch",
   "state": "open",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 
@@ -153,18 +157,20 @@ Object {
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": false,
-  "canRebase": true,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
+  "isModified": false,
   "isStale": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
   "source_branch": "some-branch",
   "state": "merged",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 
@@ -179,11 +185,14 @@ Object {
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
+  "isModified": true,
   "isStale": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
   "source_branch": "some-branch",
   "state": "open",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 
@@ -192,16 +201,18 @@ Object {
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": true,
-  "canRebase": false,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
   "id": 1,
   "iid": 12345,
+  "isModified": true,
   "isStale": true,
   "number": 12345,
   "source_branch": "some-branch",
   "state": "open",
+  "targetBranch": "master",
+  "target_branch": "master",
 }
 `;
 

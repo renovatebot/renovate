@@ -4,9 +4,10 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
+import { sanitize } from '../../util/sanitize';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -38,18 +39,16 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  const res = {} as any;
   if (endpoint) {
-    res.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
-    api.setBaseUrl(res.endpoint);
-    defaults.endpoint = res.endpoint;
+    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    api.setBaseUrl(defaults.endpoint);
   } else {
-    res.endpoint = defaults.endpoint;
-    logger.info('Using default GitLab endpoint: ' + res.endpoint);
+    logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
   }
+  let gitAuthor: string;
   try {
     const user = (await api.get(`user`, { token })).body;
-    res.gitAuthor = user.email;
+    gitAuthor = user.email;
     authorId = user.id;
   } catch (err) {
     logger.info(
@@ -58,7 +57,11 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  return res;
+  const platformConfig: PlatformConfig = {
+    endpoint: defaults.endpoint,
+    gitAuthor,
+  };
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -95,16 +98,11 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: {
-  repository: string;
-  localDir: string;
-  optimizeForDisabled: boolean;
-}) {
+}: RepoParams) {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
   let res;
-  const platformConfig: PlatformConfig = {} as any;
   try {
     res = await api.get(`projects/${config.repository}`);
     if (res.body.archived) {
@@ -142,7 +140,6 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
-    platformConfig.isFork = !!res.body.forked_from_project;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
@@ -194,7 +191,11 @@ export async function initRepo({
     logger.info({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
-  return platformConfig;
+  const repoConfig: RepoConfig = {
+    baseBranch: config.baseBranch,
+    isFork: !!res.body.forked_from_project,
+  };
+  return repoConfig;
 }
 
 export function getRepoForceRebase() {
@@ -329,7 +330,7 @@ export async function getBranchStatus(
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
-  const res = await api.get(url);
+  const res = await api.get(url, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   if (res.body.length === 0) {
     // Return 'pending' if we have no status checks
@@ -453,7 +454,7 @@ export async function findIssue(title: string) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(body);
+  const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
@@ -572,8 +573,9 @@ async function deleteComment(issueNo: number, commentId: number) {
 export async function ensureComment(
   issueNo: number,
   topic: string | null | undefined,
-  content: string
+  rawContent: string
 ) {
+  const content = sanitize(rawContent);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
@@ -687,10 +689,11 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  description: string,
+  rawDescription: string,
   labels?: string[] | null,
   useDefaultBranch?: boolean
 ) {
+  const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch
     : config.baseBranch;
@@ -709,6 +712,7 @@ export async function createPr(
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
+  pr.isModified = false;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -722,11 +726,13 @@ export async function getPr(iid: number) {
   const pr = (await api.get(url)).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;
+  pr.targetBranch = pr.target_branch;
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? 'open' : pr.state;
+  pr.isModified = true;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -748,13 +754,13 @@ export async function getPr(iid: number) {
       branch && branch.commit ? branch.commit.author_email : null;
     // istanbul ignore if
     if (branchCommitEmail === config.email) {
-      pr.canRebase = true;
+      pr.isModified = false;
     } else {
       logger.debug(
         { branchCommitEmail, configEmail: config.email, iid: pr.iid },
         'Last committer to branch does not match bot email, so PR cannot be rebased.'
       );
-      pr.canRebase = false;
+      pr.isModified = true;
     }
   } catch (err) {
     logger.debug({ err }, 'Error getting PR branch');
@@ -795,7 +801,7 @@ export async function updatePr(
   await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
     body: {
       title,
-      description,
+      description: sanitize(description),
     },
   });
 }

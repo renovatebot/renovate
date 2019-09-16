@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4 AS tsbuild
+FROM amd64/node:10.16.3@sha256:e0f7dabe991810057aee6ba7a7d4136fe7fc70e99235d79e6c7ae0177656a5c8 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -8,10 +8,10 @@ COPY lib lib
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.app.json tsconfig.app.json
 
-RUN yarn build
+RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:eb70667a801686f914408558660da753cde27192cd036148e58258819b927395
+FROM amd64/ubuntu:18.04@sha256:ca013ac5c09f9a9f6db8370c1b759a29fe997d64d6591e9a75b71748858f7da0
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -23,7 +23,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
 
 ## Gradle
 
@@ -150,7 +150,7 @@ RUN chmod -R a+rw /usr
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-ENV DOCKER_VERSION=18.09.2
+ENV DOCKER_VERSION=19.03.1
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
   && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
@@ -158,6 +158,15 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
+
+# Cargo
+
+ENV RUST_BACKTRACE=1 \
+  PATH=/home/ubuntu/.cargo/bin:$PATH
+
+RUN set -ex ;\
+  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+  rustup toolchain install 1.36.0
 
 # Mix and Rebar
 
@@ -179,13 +188,13 @@ RUN poetry config settings.virtualenvs.create false
 
 # npm
 
-ENV NPM_VERSION=6.9.0
+ENV NPM_VERSION=6.10.2
 
 RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.16.0
+ENV YARN_VERSION=1.17.3
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
@@ -194,9 +203,14 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production --frozen-lockfile && yarn cache clean
+RUN rm -f yarn.lock
 COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data
+
+USER root
+RUN chown -R ubuntu:ubuntu /usr/src/app
+USER ubuntu
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []

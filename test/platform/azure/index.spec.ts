@@ -1,4 +1,6 @@
+import is from '@sindresorhus/is';
 import * as _hostRules from '../../../lib/util/host-rules';
+import { RepoParams } from '../../../lib/platform/common';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -18,6 +20,7 @@ describe('platform/azure', () => {
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
+    require('../../../lib/util/sanitize').sanitize = jest.fn(input => input);
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
@@ -122,7 +125,7 @@ describe('platform/azure', () => {
       azure.cleanRepo();
     });
   });
-  function initRepo(...args: any[]) {
+  function initRepo(args?: Partial<RepoParams> | string) {
     azureApi.gitApi.mockImplementationOnce(
       () =>
         ({
@@ -157,28 +160,33 @@ describe('platform/azure', () => {
       repo: 'some-repo',
     }));
 
-    if (typeof args[0] === 'string') {
+    if (is.string(args)) {
       return azure.initRepo({
-        repository: args[0] as string,
+        repository: args,
       } as any);
     }
 
     return azure.initRepo({
-      endpoint: 'https://dev.azure.com/renovate12345',
       repository: 'some/repo',
-      ...args[0],
-    });
+      ...args,
+    } as any);
   }
 
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
       const config = await initRepo({
         repository: 'some-repo',
-        token: 'token',
-        endpoint: 'https://dev.azure.com/renovate12345',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
+    });
+
+    it('throws disabled', async () => {
+      expect.assertions(1);
+      azureHelper.getFile.mockResolvedValueOnce('{ "enabled": false }');
+      await expect(
+        initRepo({ repository: 'some-repo', optimizeForDisabled: true })
+      ).rejects.toThrow('disabled');
     });
   });
 
@@ -302,7 +310,7 @@ describe('platform/azure', () => {
 
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -316,7 +324,7 @@ describe('platform/azure', () => {
       expect(pr).toBeNull();
     });
     it('should return the pr', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -347,17 +355,17 @@ describe('platform/azure', () => {
 
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some-repo', 'token');
+      await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', null);
       expect(res).toEqual('success');
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some-repo', 'token');
+      await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual('failed');
     });
     it('should pass through success', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -368,7 +376,7 @@ describe('platform/azure', () => {
       expect(res).toEqual('success');
     });
     it('should pass through failed', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -386,7 +394,7 @@ describe('platform/azure', () => {
       expect(pr).toBeNull();
     });
     it('should return null if no PR is returned from azure', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -397,7 +405,7 @@ describe('platform/azure', () => {
       expect(pr).toBeNull();
     });
     it('should return a pr in the right format', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -418,7 +426,7 @@ describe('platform/azure', () => {
 
   describe('createPr()', () => {
     it('should create and return a PR object', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -443,7 +451,7 @@ describe('platform/azure', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should create and return a PR object from base branch', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -469,7 +477,7 @@ describe('platform/azure', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should create and return a PR object with auto-complete set', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
         displayNumber: `Pull Request #456`,
@@ -514,7 +522,7 @@ describe('platform/azure', () => {
 
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -526,7 +534,7 @@ describe('platform/azure', () => {
     });
 
     it('should update the PR without description', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -540,7 +548,7 @@ describe('platform/azure', () => {
 
   describe('ensureComment', () => {
     it('add comment', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -554,7 +562,7 @@ describe('platform/azure', () => {
 
   describe('ensureCommentRemoval', () => {
     it('deletes comment if found', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -575,7 +583,7 @@ describe('platform/azure', () => {
       expect(azureApi.gitApi).toHaveBeenCalledTimes(0);
     });
     it('comment not found', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -592,7 +600,7 @@ describe('platform/azure', () => {
 
   describe('Assignees', () => {
     it('addAssignees', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -606,7 +614,7 @@ describe('platform/azure', () => {
 
   describe('Reviewers', () => {
     it('addReviewers', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
@@ -666,7 +674,7 @@ describe('platform/azure', () => {
 
   describe('deleteLabel()', () => {
     it('Should delete a label', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({

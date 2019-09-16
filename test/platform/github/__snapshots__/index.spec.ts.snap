@@ -39,6 +39,7 @@ exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
+  "isModified": false,
   "number": 123,
 }
 `;
@@ -83,6 +84,7 @@ exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
+  "isModified": false,
   "number": 123,
 }
 `;
@@ -168,13 +170,13 @@ Object {
     "sha": "1234",
   },
   "branchName": "somebranch",
-  "canRebase": true,
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Pull Request #91",
   "head": Object {
     "ref": "somebranch",
   },
+  "isModified": false,
   "isStale": true,
   "number": 91,
   "sha": undefined,
@@ -209,12 +211,13 @@ exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = 
 Object {
   "branchName": "renovate/jest-monorepo",
   "canMerge": false,
-  "canRebase": true,
   "displayNumber": "Pull Request #2500",
   "isConflicted": true,
+  "isModified": false,
   "isStale": true,
   "number": 2500,
   "state": "open",
+  "targetBranch": "master",
   "title": "chore(deps): update dependency jest to v23.6.0",
 }
 `;
@@ -238,10 +241,10 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
-  "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
+  "isModified": false,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -256,9 +259,9 @@ Object {
   },
   "branchName": undefined,
   "canMerge": true,
-  "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
+  "isModified": false,
   "isStale": true,
   "mergeable": true,
   "number": 1,
@@ -273,10 +276,10 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
-  "canRebase": false,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
+  "isModified": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -290,10 +293,10 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
-  "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
+  "isModified": false,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -307,10 +310,10 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
-  "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
+  "isModified": false,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -324,10 +327,10 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
-  "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
+  "isModified": false,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -344,6 +347,7 @@ Object {
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
+  "isModified": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -381,6 +385,7 @@ Array [
 exports[`platform/github initPlatform() should support custom endpoint 1`] = `
 Object {
   "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -388,6 +393,7 @@ Object {
 exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -395,6 +401,7 @@ Object {
 exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -409,43 +416,43 @@ Object {
 
 exports[`platform/github initRepo should forks when forkMode 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
 exports[`platform/github initRepo should merge 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
 exports[`platform/github initRepo should rebase 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
 exports[`platform/github initRepo should squash 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
+  "baseBranch": "master",
   "isFork": false,
-  "privateRepo": false,
 }
 `;
 

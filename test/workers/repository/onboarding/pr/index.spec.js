@@ -5,7 +5,7 @@ const {
 } = require('../../../../../lib/workers/repository/onboarding/pr');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../../lib/platform');
 
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getBranchPr.mockReturnValue({
         title: 'Configure Renovate',
         body: createPrBody,
-        canRebase: true,
+        isModified: false,
       });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -51,6 +51,7 @@ describe('workers/repository/onboarding/pr', () => {
         title: 'Configure Renovate',
         body: createPrBody,
         isConflicted: true,
+        isModified: true,
       });
       await ensureOnboardingPr(config, [], branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -61,6 +62,7 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getBranchPr.mockReturnValue({
         title: 'Configure Renovate',
         body: createPrBody,
+        isModified: true,
       });
       await ensureOnboardingPr(config, [], branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
