@@ -558,7 +558,11 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
         resolve(null);
       }
       logger.debug({ data }, 'getAuthorizationToken response');
-      const authorizationToken = data.authorizationData[0].authorizationToken;
+      const authorizationToken =
+        data &&
+        data.authorizationData &&
+        data.authorizationData[0] &&
+        data.authorizationData[0].authorizationToken;
       if (authorizationToken) {
         resolve(authorizationToken);
       } else {
