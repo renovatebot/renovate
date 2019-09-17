@@ -44,16 +44,36 @@ function extractFromSection(
     return [];
   }
   Object.keys(sectionContent).forEach(depName => {
+    const parsedDepName = parseDepName(depName);
     const currentValue = sectionContent[depName];
     if (currentValue) {
       const dep: PackageDependency = {
-        depName,
+        depName: parsedDepName.depName,
         depType: section,
         currentValue: currentValue as any,
-        datasource: 'esy',
+        datasource: parsedDepName.npmScope ? parsedDepName.npmScope : 'npm',
       };
       deps.push(dep);
     }
   });
   return deps;
+}
+
+function parseDepName(depName) {
+  const strs = depName.split('/');
+  if (strs.length === 1) {
+    return {
+      depName: strs[0],
+    };
+  } else if (strs.length === 2) {
+    if (strs[0][0] === '@') {
+      strs[0] = strs[0].substring(1);
+    } else {
+      return null;
+    }
+    return {
+      npmScope: strs[0],
+      depName: strs[1],
+    };
+  }
 }

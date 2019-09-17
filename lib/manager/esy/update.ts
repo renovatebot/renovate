@@ -2,11 +2,7 @@ import { isEqual } from 'lodash';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(fileContent: string, upgrade: Upgrade) {
+export function updateDependency(fileContent: string, upgrade: Upgrade) {
   logger.trace(`updateDependency(${upgrade.depName})`);
   const { depType, depName, currentValue, newValue } = upgrade;
   try {
