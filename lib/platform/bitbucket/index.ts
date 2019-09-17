@@ -538,7 +538,9 @@ export async function createPr(
     const reviewersResponse = (await api.get<utils.PagedResult<Reviewer>>(
       `/2.0/repositories/${config.repository}/default-reviewers`
     )).body;
-    reviewers = reviewersResponse.values.map((reviewer: Reviewer) => ({uuid: reviewer.uuid}));
+    reviewers = reviewersResponse.values.map((reviewer: Reviewer) => ({
+      uuid: reviewer.uuid,
+    }));
   }
 
   const body = {
