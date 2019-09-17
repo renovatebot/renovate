@@ -390,10 +390,8 @@ describe('platform/bitbucket', () => {
       await initRepo();
       api.get.mockReturnValueOnce({
         body: {
-          values: [
-            { uuid: "{1234-5678}"},
-          ],
-        }
+          values: [{ uuid: '{1234-5678}' }],
+        },
       } as any);
       api.post.mockReturnValueOnce({
         body: { id: 5 },
