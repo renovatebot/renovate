@@ -70,7 +70,7 @@ export async function updateArtifacts(
       logger.info('Running go via global command');
       cmd = 'go';
     }
-    let args = 'get ./...';
+    let args = 'get -d ./...';
     if (cmd.includes('.insteadOf')) {
       args += '"';
     }
