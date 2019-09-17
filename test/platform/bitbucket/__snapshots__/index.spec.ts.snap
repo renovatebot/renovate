@@ -34,6 +34,11 @@ Array [
             "name": "master",
           },
         },
+        "reviewers": Array [
+          Object {
+            "uuid": "{1234-5678}",
+          },
+        ],
         "source": Object {
           "branch": Object {
             "name": "branch",
