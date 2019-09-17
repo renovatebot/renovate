@@ -1,9 +1,9 @@
+import AWSMock from 'aws-sdk-mock';
+import AWS from 'aws-sdk';
 import _got from '../../lib/util/got';
 import * as docker from '../../lib/datasource/docker';
 import { getPkgReleases } from '../../lib/datasource';
 import * as _hostRules from '../../lib/util/host-rules';
-import AWSMock from 'aws-sdk-mock';
-import AWS from 'aws-sdk';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
