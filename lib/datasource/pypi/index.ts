@@ -43,7 +43,7 @@ export async function getPkgReleases({
   for (let hostUrl of hostUrls) {
     hostUrl += hostUrl.endsWith('/') ? '' : '/';
     let dep: ReleaseResult;
-    if (hostUrl.endsWith('/simple/')) {
+    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
       dep = await getSimpleDependency(lookupName, hostUrl);
     } else {
       dep = await getDependency(lookupName, hostUrl, compatibility);
