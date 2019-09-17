@@ -60,8 +60,11 @@ async function getAuthHeaders(
     } = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
-      const auth = await getECRAuthToken(registry.match(ecrRegex)[1], opts);
-      opts.headers = { authorization: `Basic ${auth}` };
+      const region = registry.match(ecrRegex)[1];
+      const auth = await getECRAuthToken(region, opts);
+      if (auth) {
+        opts.headers = { authorization: `Basic ${auth}` };
+      }
     } else if (opts.username && opts.password) {
       const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
         'base64'
@@ -555,7 +558,16 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
         reject(err);
       }
       logger.debug({ data }, 'getAuthorizationToken response');
-      resolve(data.authorizationData[0].authorizationToken);
+      const authorizationToken = data.authorizationData[0].authorizationToken;
+      if (authorizationToken) {
+        resolve(authorizationToken);
+      } else {
+        logger.error(
+          { data },
+          'Could not extract authorizationToken from getAuthorizationToken response'
+        );
+        reject();
+      }
     });
   });
 }
