@@ -530,6 +530,10 @@ export async function createPr(
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
+  const reviewers = (await api.get<utils.PagedResult<Reviewer>>(
+    `/2.0/repositories/${config.repository}/default-reviewers`
+  )).body;
+
   const body = {
     title,
     description: sanitize(description),
@@ -544,6 +548,7 @@ export async function createPr(
       },
     },
     close_source_branch: true,
+    reviewers: reviewers.values.map((reviewer: Reviewer) => ({uuid: reviewer.uuid}))
   };
 
   const prInfo = (await api.post(
@@ -569,6 +574,10 @@ async function isPrConflicted(prNo: number) {
   )).body;
 
   return utils.isConflicted(parseDiff(diff));
+}
+
+interface Reviewer {
+  uuid: { raw: string };
 }
 
 interface Commit {
