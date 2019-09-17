@@ -201,6 +201,29 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });
+
+  it('should parse repo url (string)', async () => {
+    const pkg = {
+      name: 'foobar',
+      versions: {
+        '0.0.1': {
+          repository: 'git:github.com/renovateapp/dummy',
+        },
+      },
+      'dist-tags': {
+        latest: '0.0.1',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+      },
+    };
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, pkg);
+    const res = await npm.getPkgReleases({ lookupName: 'foobar' });
+    expect(res).toMatchSnapshot();
+    expect(res.sourceUrl).toBeDefined();
+  });
   it('should return deprecated', async () => {
     const deprecatedPackage = {
       name: 'foobar',
