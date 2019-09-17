@@ -5,6 +5,7 @@ import registryAuthToken from 'registry-auth-token';
 import parse from 'github-url-from-git';
 import { isBase64 } from 'validator';
 import { OutgoingHttpHeaders } from 'http';
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
@@ -144,6 +145,10 @@ export async function getDependency(
 
     // Determine repository URL
     let sourceUrl: string;
+
+    if (is.string(res.repository)) {
+      res.repository = { url: res.repository };
+    }
 
     if (res.repository && res.repository.url) {
       const extraBaseUrls = [];
