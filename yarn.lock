@@ -5674,10 +5674,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-luxon@1.17.2:
-  version "1.17.2"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.17.2.tgz#95189c450341cfddf5f826ef8c32b5b022943fd5"
-  integrity sha512-qELKtIj3HD41N+MvgoxArk8DZGUb4Gpiijs91oi+ZmKJzRlxY6CoyTwNoUwnogCVs4p8HuxVJDik9JbnYgrCng==
+luxon@1.17.3:
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.17.3.tgz#12ed5157a7e8f705759ce2f4d840410643081409"
+  integrity sha512-gG894ALYdWB3izyTGDypF6ffablXs5oleJLRNboL/xxYa0Dm5apXihaCnHecMXNqQ3vW1qjCCZ+fXAX5Azgx3Q==
 
 macos-release@^2.2.0:
   version "2.3.0"
