@@ -99,6 +99,7 @@
     "@snyk/ruby-semver": "2.0.4",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.528.0",
+    "aws-sdk-mock": "^4.5.0",
     "azure-devops-node-api": "9.0.1",
     "bunyan": "1.8.12",
     "cacache": "12.0.3",

@@ -555,7 +555,7 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
         logger.error({ err });
-        reject(err);
+        resolve(null);
       }
       logger.debug({ data }, 'getAuthorizationToken response');
       const authorizationToken = data.authorizationData[0].authorizationToken;
@@ -566,7 +566,7 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
           { data },
           'Could not extract authorizationToken from getAuthorizationToken response'
         );
-        reject();
+        resolve(null);
       }
     });
   });
