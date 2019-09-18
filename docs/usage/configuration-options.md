@@ -33,6 +33,10 @@ By default, Renovate will not assign reviewers and assignees if the PR is to be 
 
 Must be valid usernames.
 
+## assigneesSampleSize
+
+Take a random sample of given size from assignees.
+
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone/something else to merge them. By configuring this setting, you can enable Renovate to automerge branches or PRs itself, therefore reducing the amount of human intervention required.
@@ -1027,6 +1031,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 ## reviewers
 
 Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
+
+## reviewersSampleSize
+
+Take a random sample of given size from reviewers.
 
 ## rollbackPrs
 
