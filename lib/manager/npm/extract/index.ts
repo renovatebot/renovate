@@ -183,7 +183,7 @@ export async function extractPackageFile(
       return dep;
     }
 
-    // support for votla
+    // support for volta
     if (depType === 'volta') {
       if (depName === 'node') {
         dep.datasource = 'github';
