@@ -110,7 +110,7 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 ## bbUseDefaultReviewers
 
-Apply the default reviewers rules to PR's (Bitbucket server only).
+Apply the default reviewers rules to PR's (Bitbucket only).
 
 ## branchName
 

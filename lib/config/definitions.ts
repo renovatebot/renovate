@@ -1033,7 +1033,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bbUseDefaultReviewers',
-    description: 'Use the default reviewers (Bitbucket server only).',
+    description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
   },
