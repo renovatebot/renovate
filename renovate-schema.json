@@ -910,7 +910,7 @@
       "description": "Configuration object for Mix module renovation",
       "type": "object",
       "default": {
-        "enabled": true,
+        "enabled": false,
         "fileMatch": ["(^|/)mix\\.exs$"],
         "versionScheme": "hex"
       },
