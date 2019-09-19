@@ -1417,7 +1417,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       enabled: true,
-      commitMessageTopic: 'Hex module {{depNameShort}}',
       fileMatch: ['(^|/)mix\\.exs$'],
       versionScheme: 'hex',
     },
