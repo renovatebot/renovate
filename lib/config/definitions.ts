@@ -1416,7 +1416,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'object',
     default: {
-      enabled: true,
+      enabled: false,
       fileMatch: ['(^|/)mix\\.exs$'],
       versionScheme: 'hex',
     },
