@@ -908,13 +908,14 @@
     },
     "mix": {
       "description": "Configuration object for Mix module renovation",
-      "type": "json",
+      "type": "object",
       "default": {
         "enabled": true,
         "commitMessageTopic": "Hex module {{depNameShort}}",
         "fileMatch": ["(^|/)mix\\.exs$"],
         "versionScheme": "hex"
-      }
+      },
+      "$ref": "#"
     },
     "rust": {
       "description": "Configuration option for Rust package management.",
