@@ -1414,7 +1414,7 @@ const options: RenovateOptions[] = [
     releaseStatus: 'beta',
     description: 'Configuration object for Mix module renovation',
     stage: 'repository',
-    type: 'json',
+    type: 'object',
     default: {
       enabled: true,
       commitMessageTopic: 'Hex module {{depNameShort}}',
