@@ -8,11 +8,11 @@ This versioning syntax is used for Elixir and Erlang hex dependencies
 
 ## What type of versioning is used?
 
-Hex versions are base on [Semantic Versioning 2.0](https://semver.org)
+Hex versions are based on [Semantic Versioning 2.0](https://semver.org)
 
 ## Are ranges supported? How?
 
-Hex supports a subset of npm's range syntax.
+Hex supports a [subset of npm range syntax](https://hexdocs.pm/elixir/Version.html).
 
 ## Range Strategy support
 

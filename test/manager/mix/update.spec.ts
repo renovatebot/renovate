@@ -11,7 +11,6 @@ describe('lib/manager/mix/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        depType: 'hex',
         depName: 'postgrex',
         lineNumber: 18,
         newValue: '~> 0.8.2',
@@ -22,7 +21,6 @@ describe('lib/manager/mix/update', () => {
     });
     it('return the same', () => {
       const upgrade = {
-        depType: 'hex',
         depName: 'postgrex',
         lineNumber: 18,
         newValue: '~> 0.8.1',
@@ -32,7 +30,6 @@ describe('lib/manager/mix/update', () => {
     });
     it('returns null if wrong line', () => {
       const upgrade = {
-        depType: 'hex',
         depName: 'postgrex',
         lineNumber: 19,
         newValue: '~> 0.8.2',
@@ -42,7 +39,6 @@ describe('lib/manager/mix/update', () => {
     });
     it('returns null for unsupported depType', () => {
       const upgrade = {
-        depType: 'github',
         depName: 'cowboy',
         lineNumber: 19,
         newValue: '~> 0.8.2',

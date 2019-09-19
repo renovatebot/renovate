@@ -1,30 +1,22 @@
 import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-export function updateDependency(currentFileContent, upgrade) {
-  try {
-    logger.debug(`mix.updateDependency: ${upgrade.newValue}`);
+export function updateDependency(fileContent: string, upgrade: Upgrade) {
+  logger.debug(`mix.updateDependency: ${upgrade.newValue}`);
 
-    if (upgrade.datasource !== 'hex')
-      throw new Error('Unsupported dependency type');
+  const lines = fileContent.split('\n');
+  const lineToChange = lines[upgrade.lineNumber];
+  let newLine = lineToChange;
 
-    const lines = currentFileContent.split('\n');
-    const lineToChange = lines[upgrade.lineNumber];
-    let newLine = lineToChange;
+  if (!lineToChange.includes(upgrade.depName)) return null;
 
-    if (!lineToChange.includes(upgrade.depName))
-      throw new Error('Wrong dependency line');
+  newLine = lineToChange.replace(/"(.*?)"/, `"${upgrade.newValue}"`);
 
-    newLine = lineToChange.replace(/"(.*?)"/, `"${upgrade.newValue}"`);
-
-    if (newLine === lineToChange) {
-      logger.debug('No changes necessary');
-      return currentFileContent;
-    }
-
-    lines[upgrade.lineNumber] = newLine;
-    return lines.join('\n');
-  } catch (err) {
-    logger.info({ err }, 'Error setting new mix module version');
-    return null;
+  if (newLine === lineToChange) {
+    logger.debug('No changes necessary');
+    return fileContent;
   }
+
+  lines[upgrade.lineNumber] = newLine;
+  return lines.join('\n');
 }
