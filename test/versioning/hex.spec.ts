@@ -65,7 +65,6 @@ describe('lib/versioning/hex', () => {
       expect(api.getNewValue('~> 1.2', 'pin', '1.2.3', '2.0.7')).toEqual(
         '2.0.7'
       );
-      debugger;
       expect(api.getNewValue('~> 1.2', 'bump', '1.2.3', '2.0.7')).toEqual(
         '~> 2'
       );
