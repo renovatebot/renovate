@@ -88,12 +88,12 @@ function extractFromSection(
 
 function extractRegistries(pyprojectfile: PoetryFile): string[] {
   const sources = pyprojectfile.tool.poetry.source;
+  const registryUrls: string[] = ['https://pypi.org/pypi/'];
 
   if (!Array.isArray(sources)) {
-    return [];
+    return registryUrls;
   }
 
-  const registryUrls: string[] = [];
   for (const source of sources) {
     if (source.url) {
       registryUrls.push(source.url);
