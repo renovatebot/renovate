@@ -74,13 +74,11 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('can parse empty registries', () => {
       const res = extractPackageFile(pyproject7toml, config);
-      expect(res.registryUrls).toMatchSnapshot();
-      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).toEqual([]);
     });
     it('can parse missing registries', () => {
       const res = extractPackageFile(pyproject1toml, config);
-      expect(res.registryUrls).toMatchSnapshot();
-      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).toEqual([]);
     });
     it('skips git dependencies', () => {
       const content =
