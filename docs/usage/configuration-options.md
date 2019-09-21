@@ -17,7 +17,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
-Also, be sure to check out Renovate's [shareable config presets](./config-presets/) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
@@ -110,7 +110,7 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 ## bbUseDefaultReviewers
 
-Apply the default reviewers rules to PR's (Bitbucket server only).
+Apply the default reviewers rules to PR's (Bitbucket only).
 
 ## branchName
 

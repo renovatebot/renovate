@@ -186,6 +186,22 @@ describe('datasource/pypi', () => {
         })
       ).toMatchSnapshot();
     });
+    it('process data from +simple endpoint', async () => {
+      got.mockReturnValueOnce({
+        body: htmlResponse + '',
+      });
+      const config = {
+        registryUrls: ['https://some.registry.org/+simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+        })
+      ).toMatchSnapshot();
+    });
     it('returns null for empty resonse', async () => {
       got.mockReturnValueOnce({});
       const config = {

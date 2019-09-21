@@ -1,0 +1,6 @@
+<feed xml:base="https://www.nuget.org/api/v2" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml">
+  <id>http://schemas.datacontract.org/2004/07/</id>
+  <title/>
+  <updated>2019-02-04T12:51:36Z</updated>
+  <link rel="self" href="https://www.nuget.org/api/v2/Packages"/>
+</feed>

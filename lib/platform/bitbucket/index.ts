@@ -58,6 +58,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
+  bbUseDefaultReviewers,
 }: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -67,6 +68,7 @@ export async function initRepo({
   config = {
     repository,
     username: opts!.username,
+    bbUseDefaultReviewers: bbUseDefaultReviewers !== false,
   } as any;
   let info;
   try {
@@ -530,6 +532,17 @@ export async function createPr(
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
+  let reviewers = [];
+
+  if (config.bbUseDefaultReviewers) {
+    const reviewersResponse = (await api.get<utils.PagedResult<Reviewer>>(
+      `/2.0/repositories/${config.repository}/default-reviewers`
+    )).body;
+    reviewers = reviewersResponse.values.map((reviewer: Reviewer) => ({
+      uuid: reviewer.uuid,
+    }));
+  }
+
   const body = {
     title,
     description: sanitize(description),
@@ -544,6 +557,7 @@ export async function createPr(
       },
     },
     close_source_branch: true,
+    reviewers,
   };
 
   const prInfo = (await api.post(
@@ -569,6 +583,10 @@ async function isPrConflicted(prNo: number) {
   )).body;
 
   return utils.isConflicted(parseDiff(diff));
+}
+
+interface Reviewer {
+  uuid: { raw: string };
 }
 
 interface Commit {
