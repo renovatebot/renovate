@@ -26,6 +26,11 @@ const pyproject5toml = readFileSync(
   'utf8'
 );
 
+const pyproject6toml = readFileSync(
+  'test/manager/poetry/_fixtures/pyproject.6.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -56,6 +61,11 @@ describe('lib/manager/poetry/extract', () => {
       const res = extractPackageFile(pyproject4toml, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
+    });
+    it('extracts registries', () => {
+      const res = extractPackageFile(pyproject6toml, config);
+      expect(res.registryUrls).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(2);
     });
     it('skips git dependencies', () => {
       const content =

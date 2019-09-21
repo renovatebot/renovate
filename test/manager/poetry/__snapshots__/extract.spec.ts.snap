@@ -157,6 +157,13 @@ Array [
 ]
 `;
 
+exports[`lib/manager/poetry/extract extractPackageFile() extracts registries 1`] = `
+Array [
+  "https://foo.bar/simple/",
+  "https://bar.baz/+simple/",
+]
+`;
+
 exports[`lib/manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
 Array [
   Object {
