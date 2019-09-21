@@ -159,9 +159,9 @@ Array [
 
 exports[`lib/manager/poetry/extract extractPackageFile() extracts registries 1`] = `
 Array [
+  "https://pypi.org/pypi/",
   "https://foo.bar/simple/",
   "https://bar.baz/+simple/",
-  "https://pypi.org/pypi/",
 ]
 `;
 
