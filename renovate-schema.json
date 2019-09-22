@@ -784,6 +784,11 @@
         "type": "string"
       }
     },
+    "assigneesSampleSize": {
+      "description": "Take a random sample of given size from assignees.",
+      "type": "integer",
+      "default": null
+    },
     "assignAutomerge": {
       "description": "Assign reviewers and assignees even if the PR is to be automerged",
       "type": "boolean",
@@ -795,6 +800,11 @@
       "items": {
         "type": "string"
       }
+    },
+    "reviewersSampleSize": {
+      "description": "Take a random sample of given size from reviewers.",
+      "type": "integer",
+      "default": null
     },
     "fileMatch": {
       "description": "JS RegExp pattern for matching manager files",
