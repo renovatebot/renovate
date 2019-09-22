@@ -36,23 +36,34 @@ export class ErrorStream extends Stream {
   }
 }
 
-function sanitizeObject(obj: Record<string, any>, seen = new WeakMap()) {
-  const result: Record<string, any> = {};
-  seen.set(obj, result);
-  for (const [key, val] of Object.entries(obj)) {
-    const valType = typeof val;
-    if (valType === 'string') {
-      result[key] = sanitize(val as string);
-    } else if (val != null && valType !== 'function' && valType === 'object') {
-      result[key] = seen.has(val as object)
+function sanitizeValue(value: any, seen = new WeakMap()) {
+  if (Array.isArray(value)) {
+    const length = value.length;
+    const arrayResult = Array(length);
+    seen.set(value, arrayResult);
+    for (let idx = 0; idx < length; idx += 1) {
+      const val = value[idx];
+      arrayResult[idx] = seen.has(val as object)
         ? seen.get(val as object)
-        : sanitizeObject(val, seen);
-    } else {
-      result[key] = val;
+        : sanitizeValue(val, seen);
     }
+    return arrayResult;
   }
-  seen.set(obj, result);
-  return result;
+
+  const valueType = typeof value;
+
+  if (value != null && valueType !== 'function' && valueType === 'object') {
+    const objectResult: Record<string, any> = {};
+    seen.set(value, objectResult);
+    for (const [key, val] of Object.entries(value)) {
+      objectResult[key] = seen.has(val as object)
+        ? seen.get(val as object)
+        : sanitizeValue(val, seen);
+    }
+    return objectResult;
+  }
+
+  return valueType === 'string' ? sanitize(value) : value;
 }
 
 export function withSanitizer(streamConfig): bunyan.Stream {
@@ -62,7 +73,7 @@ export function withSanitizer(streamConfig): bunyan.Stream {
   const stream = streamConfig.stream;
   if (stream && stream.writable) {
     const write = (chunk: BunyanRecord, enc, cb) => {
-      const raw = sanitizeObject(chunk);
+      const raw = sanitizeValue(chunk);
       const result =
         streamConfig.type === 'raw'
           ? raw

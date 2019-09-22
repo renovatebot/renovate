@@ -83,6 +83,31 @@ describe('logger', () => {
     expect(JSON.parse(chunk).msg).toEqual('foo');
   });
 
+  it('handles cycles', () => {
+    let logged = null;
+    fs.createWriteStream.mockReturnValueOnce({
+      writable: true,
+      write(x) {
+        logged = JSON.parse(x);
+      },
+    });
+
+    addStream({
+      name: 'logfile',
+      path: 'file.log',
+      level: 'error',
+    });
+
+    const meta = { foo: null, bar: [] };
+    meta.foo = meta;
+    meta.bar.push(meta);
+    logger.error(meta, 'foo');
+    expect(logged.msg).toEqual('foo');
+    expect(logged.foo.foo).toEqual('[Circular]');
+    expect(logged.foo.bar).toEqual(['[Circular]']);
+    expect(logged.bar).toEqual('[Circular]');
+  });
+
   it('sanitizes secrets', () => {
     let logged = null;
     fs.createWriteStream.mockReturnValueOnce({
@@ -99,19 +124,14 @@ describe('logger', () => {
     });
     add({ password: 'secret"password' });
 
-    const meta = { foo: null };
-    meta.foo = meta;
-    logger.error(meta, 'foo');
-    expect(logged.msg).toEqual('foo');
-    expect(logged.foo.foo).toEqual('[Circular]');
-
     logger.error({
       foo: 'secret"password',
-      bar: 'somethingelse',
+      bar: ['somethingelse', 'secret"password'],
     });
 
     expect(logged.foo).not.toEqual('secret"password');
+    expect(logged.bar[0]).toEqual('somethingelse');
     expect(logged.foo).toContain('redacted');
-    expect(logged.bar).toEqual('somethingelse');
+    expect(logged.bar[1]).toContain('redacted');
   });
 });
