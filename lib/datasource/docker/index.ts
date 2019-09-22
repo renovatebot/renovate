@@ -551,10 +551,10 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
     config.secretAccessKey = opts.password;
   }
   const ecr = new AWS.ECR(config);
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<string>(resolve => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
-        logger.warn({ err });
+        logger.warn({ err }, 'ECR getAuthorizationToken error');
         resolve(null);
       }
       const authorizationToken =
@@ -565,9 +565,8 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
       if (authorizationToken) {
         resolve(authorizationToken);
       } else {
-        logger.error(
-          { data },
-          'Could not extract authorizationToken from getAuthorizationToken response'
+        logger.warn(
+          'Could not extract authorizationToken from ECR getAuthorizationToken response'
         );
         resolve(null);
       }
