@@ -16,6 +16,7 @@ import {
   urls,
 } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -1709,29 +1710,6 @@ export async function mergePr(prNo: number, branchName: string) {
   // Delete branch
   await deleteBranch(branchName);
   return true;
-}
-
-// istanbul ignore next
-function smartTruncate(input: string) {
-  if (input.length < 60000) {
-    return input;
-  }
-  const releaseNotesMatch = input.match(
-    new RegExp(`### Release Notes.*### ${appName} configuration`, 'ms')
-  );
-  // istanbul ignore if
-  if (releaseNotesMatch) {
-    const divider = `</details>\n\n---\n\n### ${appName} configuration`;
-    const [releaseNotes] = releaseNotesMatch;
-    const nonReleaseNotesLength =
-      input.length - releaseNotes.length - divider.length;
-    const availableLength = 60000 - nonReleaseNotesLength;
-    return input.replace(
-      releaseNotes,
-      releaseNotes.slice(0, availableLength) + divider
-    );
-  }
-  return input.substring(0, 60000);
 }
 
 export function getPrBody(input: string) {
