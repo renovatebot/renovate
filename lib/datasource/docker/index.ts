@@ -554,10 +554,9 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
   return new Promise<string>((resolve, reject) => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
-        logger.error({ err });
+        logger.warn({ err });
         resolve(null);
       }
-      logger.debug({ data }, 'getAuthorizationToken response');
       const authorizationToken =
         data &&
         data.authorizationData &&

@@ -191,7 +191,7 @@
     "@types/xmldoc": "1.1.4",
     "@typescript-eslint/eslint-plugin": "2.3.0",
     "@typescript-eslint/parser": "2.3.0",
-    "aws-sdk-mock": "^4.5.0",
+    "aws-sdk-mock": "4.5.0",
     "babel-jest": "24.9.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
     "chai": "4.2.0",
