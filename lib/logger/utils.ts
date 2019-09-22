@@ -43,8 +43,8 @@ function sanitizeValue(value: any, seen = new WeakMap()) {
     seen.set(value, arrayResult);
     for (let idx = 0; idx < length; idx += 1) {
       const val = value[idx];
-      arrayResult[idx] = seen.has(val as object)
-        ? seen.get(val as object)
+      arrayResult[idx] = seen.has(val)
+        ? seen.get(val)
         : sanitizeValue(val, seen);
     }
     return arrayResult;
