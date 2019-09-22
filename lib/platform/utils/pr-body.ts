@@ -1,6 +1,5 @@
 import { appName } from '../../config/app-strings';
 
-// istanbul ignore next
 export function smartTruncate(input: string, len = 60000): string {
   if (input.length < len) {
     return input;
@@ -8,7 +7,6 @@ export function smartTruncate(input: string, len = 60000): string {
   const releaseNotesMatch = input.match(
     new RegExp(`### Release Notes.*### ${appName} configuration`, 'ms')
   );
-  // istanbul ignore if
   if (releaseNotesMatch) {
     const divider = `</details>\n\n---\n\n### ${appName} configuration`;
     const [releaseNotes] = releaseNotesMatch;
