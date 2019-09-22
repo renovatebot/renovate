@@ -1,5 +1,7 @@
-const fs = require('fs');
-const options = require('../lib/config/definitions').getOptions();
+import fs from 'fs';
+import { RenovateOptions } from '../lib/config/definitions';
+
+const options: RenovateOptions[] = require('../lib/config/definitions').getOptions();
 
 describe('docs', () => {
   const doc = fs.readFileSync('docs/usage/configuration-options.md', 'utf8');
