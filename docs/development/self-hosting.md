@@ -17,15 +17,19 @@ $ npm install -g renovate
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
 
 ```
-$ docker run renovate/renovate
-$ docker run renovate/renovate:13.1.1
-$ docker run renovate/renovate:13.1
-$ docker run renovate/renovate:13
+$ docker run --rm renovate/renovate
+$ docker run --rm renovate/renovate:13.1.1
+$ docker run --rm renovate/renovate:13.1
+$ docker run --rm renovate/renovate:13
 ```
 
 (Please look up what the latest actual tags are though, do not use the above literally).
 
-If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
+If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes. For example:
+
+```
+$ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
+```
 
 #### Kubernetes
 
