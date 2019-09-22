@@ -6,9 +6,13 @@
     ":label(ready)",
     "group:linters",
     ":masterIssue",
-    ":maintainLockFilesWeekly",
     ":assignee(rarkins)"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": "at any time",
+    "masterIssueApproval": true
+  },
   "postUpdateOptions": ["yarnDedupeHighest"],
   "semanticCommitScope": "deps",
   "docker": {
