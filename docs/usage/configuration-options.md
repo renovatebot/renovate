@@ -17,7 +17,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
-Also, be sure to check out Renovate's [shareable config presets](./config-presets/) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
@@ -32,6 +32,10 @@ By default, Renovate will not assign reviewers and assignees if the PR is to be 
 ## assignees
 
 Must be valid usernames.
+
+## assigneesSampleSize
+
+Take a random sample of given size from assignees.
 
 ## automerge
 
@@ -1040,6 +1044,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 ## reviewers
 
 Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
+
+## reviewersSampleSize
+
+Take a random sample of given size from reviewers.
 
 ## rollbackPrs
 

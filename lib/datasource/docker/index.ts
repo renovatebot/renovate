@@ -4,6 +4,7 @@ import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
 import { OutgoingHttpHeaders } from 'http';
+import AWS from 'aws-sdk';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
@@ -11,6 +12,8 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+
+const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
 function getRegistryRepository(lookupName: string, registryUrls: string[]) {
   let registry: string;
@@ -56,7 +59,13 @@ async function getAuthHeaders(
       headers?: Record<string, string>;
     } = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
     opts.json = true;
-    if (opts.username && opts.password) {
+    if (ecrRegex.test(registry)) {
+      const region = registry.match(ecrRegex)[1];
+      const auth = await getECRAuthToken(region, opts);
+      if (auth) {
+        opts.headers = { authorization: `Basic ${auth}` };
+      }
+    } else if (opts.username && opts.password) {
       const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
         'base64'
       );
@@ -287,7 +296,6 @@ async function getTags(
     }
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    const ecrRegex = /\d+\.dkr\.ecr\.[-a-z0-9]+\.amazonaws\.com/;
     const limit = ecrRegex.test(registry) ? 1000 : 10000;
     let url = `${registry}/v2/${repository}/tags/list?n=${limit}`;
     const headers = await getAuthHeaders(registry, repository);
@@ -534,4 +542,34 @@ export async function getPkgReleases({
     ret.sourceUrl = labels['org.opencontainers.image.source'];
   }
   return ret;
+}
+
+function getECRAuthToken(region: string, opts: hostRules.HostRule) {
+  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
+  if (opts.username && opts.password) {
+    config.accessKeyId = opts.username;
+    config.secretAccessKey = opts.password;
+  }
+  const ecr = new AWS.ECR(config);
+  return new Promise<string>(resolve => {
+    ecr.getAuthorizationToken({}, (err, data) => {
+      if (err) {
+        logger.warn({ err }, 'ECR getAuthorizationToken error');
+        resolve(null);
+      }
+      const authorizationToken =
+        data &&
+        data.authorizationData &&
+        data.authorizationData[0] &&
+        data.authorizationData[0].authorizationToken;
+      if (authorizationToken) {
+        resolve(authorizationToken);
+      } else {
+        logger.warn(
+          'Could not extract authorizationToken from ECR getAuthorizationToken response'
+        );
+        resolve(null);
+      }
+    });
+  });
 }

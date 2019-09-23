@@ -1242,6 +1242,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
   },
   {
+    name: 'assigneesSampleSize',
+    description: 'Take a random sample of given size from assignees.',
+    type: 'integer',
+    default: null,
+  },
+  {
     name: 'assignAutomerge',
     description:
       'Assign reviewers and assignees even if the PR is to be automerged',
@@ -1254,6 +1260,12 @@ const options: RenovateOptions[] = [
       'Requested reviewers for Pull Requests (either username or email address depending on the platform)',
     type: 'array',
     subType: 'string',
+  },
+  {
+    name: 'reviewersSampleSize',
+    description: 'Take a random sample of given size from reviewers.',
+    type: 'integer',
+    default: null,
   },
   {
     name: 'fileMatch',
