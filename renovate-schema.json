@@ -281,12 +281,6 @@
       "default": {},
       "$ref": "#"
     },
-    "volta": {
-      "description": "Configuration specifically for `package.json`>`volta`",
-      "type": "object",
-      "default": {},
-      "$ref": "#"
-    },
     "registryUrls": {
       "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "type": "array",

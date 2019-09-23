@@ -1226,21 +1226,6 @@ The valid capture groups for the `regex` `versionScheme` are:
 - `prerelease`: this value, if captured, will mark a given release as a prerelease (eg. unstable). If this value is captured and you have set `"ignoreUnstable": true`, the given release will be skipped.
 - `compatibility`: this value defines the "build compatibility" of a given dependency. A proposed Renovate update will never change the specified compatibility value. For example, if you are pinning to `1.2.3-linux` (and `linux` is captured as the compatbility value), Renovate will not update you to `1.2.4-osx`.
 
-## volta
-
-Extend this if you wish to configure rules specifically for `volta` definitions. Currently only `node` and `yarn` are supported. Example:
-
-```json
-{
-  "volta": {
-    "node": "10.16.3",
-    "yarn": "1.17.3"
-  }
-}
-```
-
-More info here: https://docs.volta.sh/guide/understanding
-
 ## vulnerabilityAlerts
 
 Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only). For example, to set custom labels and assignees:

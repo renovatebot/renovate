@@ -511,15 +511,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'volta',
-    description: 'Configuration specifically for `package.json`>`volta`',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
     name: 'registryUrls',
     description:
       'List of URLs to try for dependency lookup. Package manager-specific',
