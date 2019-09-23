@@ -560,19 +560,6 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npm
 
-Extend this if you wish to configure rules specifically for `volta` definitions. Currently only `node` and `yarn` are supported. Example:
-
-```json
-{
-  "volta": {
-    "node": "10.16.3",
-    "yarn": "1.17.3"
-  }
-}
-```
-
-More info here : https://docs.volta.sh/guide/understanding
-
 ## npmToken
 
 See https://docs.renovatebot.com/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
