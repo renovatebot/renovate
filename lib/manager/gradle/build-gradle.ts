@@ -33,7 +33,7 @@ export function updateGradleVersion(
       updateLocalVariables,
       updateGlobalVariables,
       updatePropertyFileGlobalVariables,
-      updateVariablesByExtra,
+      updateKotlinVariablesByExtra,
     ];
 
     // eslint-disable-next-line guard-for-in
@@ -143,7 +143,7 @@ function updateGlobalVariables(
   return null;
 }
 
-function updateVariablesByExtra(
+function updateKotlinVariablesByExtra(
   dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
@@ -151,7 +151,7 @@ function updateVariablesByExtra(
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = new RegExp(
-      `(val ${variable} by extra(?: {|\\()\\s*["'])(.*)(["']\\s*[})])`
+      `(val ${variable} by extra(?: {|\\()\\s*")(.*)("\\s*[})])`
     );
     const match = buildGradleContent.match(regex);
     if (match) {
