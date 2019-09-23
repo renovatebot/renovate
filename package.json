@@ -79,6 +79,7 @@
     "Nicolas Byl <nico@nicolas-byl.eu>",
     "Pravesh Tora <pravesh.tora@gmail.com>",
     "Rishabh Jain <contact@rishabh1403.com>",
+    "Ryan Murfitt <rmurfitt@gmail.com>",
     "Sam Bull <lsb@pocketuniverse.ca>",
     "Sam Neirinck <sam@samneirinck.com>",
     "Tanuel <tanuel.mategi@gmail.com>",
@@ -90,13 +91,15 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^10.13.0 || ^12.0.0"
+    "node": "^10.13.0 || ^12.0.0",
+    "yarn": ">=1.10.1"
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@sindresorhus/is": "1.0.0",
     "@snyk/ruby-semver": "2.0.4",
     "@yarnpkg/lockfile": "1.1.0",
+    "aws-sdk": "2.528.0",
     "azure-devops-node-api": "9.0.1",
     "bunyan": "1.8.12",
     "cacache": "12.0.3",
@@ -189,6 +192,7 @@
     "@types/xmldoc": "1.1.4",
     "@typescript-eslint/eslint-plugin": "2.3.0",
     "@typescript-eslint/parser": "2.3.0",
+    "aws-sdk-mock": "4.5.0",
     "babel-jest": "24.9.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
     "chai": "4.2.0",
