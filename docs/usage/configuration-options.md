@@ -571,7 +571,7 @@ Extend this if you wish to configure rules specifically for `volta` definitions.
 }
 ```
 
-More info here: https://docs.volta.sh/guide/understanding
+More info here : https://docs.volta.sh/guide/understanding
 
 ## npmToken
 
