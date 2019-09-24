@@ -1,10 +1,12 @@
-import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
+import * as azureHelper from './azure-helper';
 import * as hostRules from '../../util/host-rules';
-import { appSlug } from '../../config/app-strings';
+
+import { PlatformConfig, RepoConfig, RepoParams } from '../common';
+
 import GitStorage from '../git/storage';
+import { appSlug } from '../../config/app-strings';
 import { logger } from '../../logger';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { sanitize } from '../../util/sanitize';
 
 interface Config {
@@ -115,7 +117,7 @@ export async function initRepo({
     url: defaults.endpoint,
   });
   const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+    defaults.endpoint.replace('https://', `https://:${opts.token}@`) +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
   await config.storage.initRepo({
     ...config,
