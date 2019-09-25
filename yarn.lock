@@ -7381,10 +7381,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.10.1:
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.10.1.tgz#4b9f5da771a40da20850f9ef8bfb38f49f9a21e4"
-  integrity sha512-5i42cjJnoXNhCI7A4aABTYcczS4H6sBwlGDEJpTZIL1N74jTozcXK+mV3iWfWlzBn/utnVjSkxBITig/f6Zt8g==
+re2@1.10.2:
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.10.2.tgz#5079d41b2b398c04836be3728a2d989af61b6ce4"
+  integrity sha512-PEP7A8VdYMI88Ze80yJKgtdiAf2/eOuXID/HJaqbqfn5WCGmOxA0TBclzILXbxNMLtaVxn2wRFZQlH+uJt2GjQ==
   dependencies:
     nan "^2.14.0"
 
