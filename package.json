@@ -197,7 +197,6 @@
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "24.9.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
-    "chai": "4.2.0",
     "copyfiles": "2.1.1",
     "cross-env": "5.2.1",
     "eslint": "6.4.0",
@@ -256,13 +255,10 @@
       }
     },
     "setupFiles": [
-      "./test/globals.js"
-    ],
-    "setupFilesAfterEnv": [
-      "./test/chai.js"
+      "./test/globals.ts"
     ],
     "snapshotSerializers": [
-      "./test/newline-snapshot-serializer.js"
+      "./test/newline-snapshot-serializer.ts"
     ],
     "transform": {
       "^.+\\.(j|t)s$": "babel-jest"

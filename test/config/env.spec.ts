@@ -112,20 +112,20 @@ describe('config/env', () => {
         name: 'foo',
         env: false,
       };
-      env.getEnvName(option).should.eql('');
+      expect(env.getEnvName(option)).toEqual('');
     });
     it('returns existing env', () => {
       const option: Partial<RenovateOptions> = {
         name: 'foo',
         env: 'FOO',
       };
-      env.getEnvName(option).should.eql('FOO');
+      expect(env.getEnvName(option)).toEqual('FOO');
     });
     it('generates RENOVATE_ env', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
-      env.getEnvName(option).should.eql('RENOVATE_ONE_TWO_THREE');
+      expect(env.getEnvName(option)).toEqual('RENOVATE_ONE_TWO_THREE');
     });
   });
 });

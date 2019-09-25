@@ -1,17 +1,18 @@
-const util = require('util');
+import util from 'util';
+
 const glob = util.promisify(require('glob'));
 
 const ignoredExtensions = ['js', 'ts', 'md', 'pyc', 'DS_Store', 'map'];
 
-function filterFiles(files) {
+function filterFiles(files: string[]) {
   return files.filter(file =>
     ignoredExtensions.every(extension => !file.endsWith(`.${extension}`))
   );
 }
 
-async function getFiles(dir) {
+async function getFiles(dir: string) {
   return filterFiles(await glob(`${dir}/**/*`, { dot: true, nodir: true })).map(
-    file => file.replace(`${dir}/`, '')
+    (file: string) => file.replace(`${dir}/`, '')
   );
 }
 
