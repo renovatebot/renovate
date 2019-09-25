@@ -22,11 +22,19 @@ export async function getPkgReleases({
     hostType: 'esy',
     json: true,
   });
-  const opamContent = Buffer.from(res.body.content, 'base64').toString('utf8');
-  // const opamContent = atob(res.body.content);
-  const homepage = extractHomepage(opamContent);
+  let homepage: string;
+  if (res.body.content) {
+    const opamContent = Buffer.from(res.body.content, 'base64').toString(
+      'utf8'
+    );
+    // const opamContent = atob(res.body.content);
+    homepage = extractHomepage(opamContent);
+  }
   const releases: Release[] = versions.map(version => ({ version }));
-  const result: ReleaseResult = { name: depName, homepage, releases };
+  const result: ReleaseResult = { name: depName, releases };
+  if (homepage) {
+    result.homepage = homepage;
+  }
   return result;
 }
 

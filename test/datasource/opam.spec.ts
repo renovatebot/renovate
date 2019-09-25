@@ -15,6 +15,11 @@ const packageResBody = fs.readFileSync(
   'utf8'
 );
 
+const notFoundResBody = fs.readFileSync(
+  'test/datasource/opam/_fixtures/not-found-res.json',
+  'utf8'
+);
+
 jest.mock('../../lib/util/got');
 
 describe('datasource/opam', () => {
@@ -25,6 +30,20 @@ describe('datasource/opam', () => {
       };
       const packageRes = {
         body: JSON.parse(packageResBody),
+      };
+      got.mockReturnValueOnce(versionsRes).mockReturnValueOnce(packageRes);
+      let res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if second request to GitHub API has failed with not found error', async () => {
+      const versionsRes = {
+        body: JSON.parse(versionsResBody),
+      };
+      // TODO: Check how got actually handles 404 not foudn errors
+      const packageRes = {
+        body: JSON.parse(notFoundResBody),
+        statusCode: 404,
       };
       got.mockReturnValueOnce(versionsRes).mockReturnValueOnce(packageRes);
       let res = await getPkgReleases({ lookupName: '0install' });
