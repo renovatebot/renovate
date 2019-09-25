@@ -1,13 +1,12 @@
-import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
+import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-
-import { PlatformConfig, RepoConfig, RepoParams } from '../common';
-
-import GitStorage from '../git/storage';
 import { appSlug } from '../../config/app-strings';
+import GitStorage from '../git/storage';
 import { logger } from '../../logger';
+import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 interface Config {
   storage: GitStorage;
