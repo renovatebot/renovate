@@ -1,5 +1,6 @@
 import upath from 'upath';
 import fs from 'fs-extra';
+import { hrtime } from 'process';
 import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
@@ -58,10 +59,10 @@ export async function getArtifacts(
   let unlockCmd = `${cmd} deps.unlock `;
   const getCmd = `${cmd} deps.get`;
   for (let i = 0; i < updatedDeps.length; i += 1) {
-    unlockCmd += updatedDeps[i];
+    unlockCmd += updatedDeps[i].depName;
   }
 
-  const startTime = process.hrtime();
+  const startTime = hrtime();
   /* istanbul ignore next */
   try {
     const { stdout, stderr } = await exec(unlockCmd, {
@@ -100,7 +101,7 @@ export async function getArtifacts(
       },
     };
   }
-  const duration = process.hrtime(startTime);
+  const duration = hrtime(startTime);
   const seconds = Math.round(duration[0] + duration[1] / 1e9);
   logger.info({ seconds, type: 'mix.lock' }, 'Updated lockfile');
   logger.debug('Returning updated mix.lock');
