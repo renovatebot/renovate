@@ -119,7 +119,7 @@
     "global-agent": "2.1.1",
     "got": "9.6.0",
     "handlebars": "4.2.1",
-    "hasha": "5.0.0",
+    "hasha": "5.1.0",
     "ini": "1.3.5",
     "js-yaml": "3.13.1",
     "json-dup-key-validator": "1.0.2",
