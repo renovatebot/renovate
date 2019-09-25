@@ -1714,7 +1714,7 @@ export async function mergePr(prNo: number, branchName: string) {
 
 export function getPrBody(input: string) {
   if (config.isGhe) {
-    return smartTruncate(input);
+    return smartTruncate(input, 60000);
   }
   const massagedInput = input
     // to be safe, replace all github.com links with renovatebot redirector
