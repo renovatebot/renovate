@@ -550,7 +550,16 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 ## mix
 
-Warning: Elixir mix support is in alpha stage
+Elixir support is in beta stage.
+It should be explicitly enabled in configuration file:
+
+```json
+{
+  "mix": {
+    "enabled": true
+  }
+}
+```
 
 ## node
 
