@@ -116,7 +116,7 @@ export async function initRepo({
     url: defaults.endpoint,
   });
   const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+    defaults.endpoint.replace('https://', `https://:${opts.token}@`) +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
   await config.storage.initRepo({
     ...config,
