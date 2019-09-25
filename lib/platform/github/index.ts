@@ -1721,7 +1721,7 @@ export function getPrBody(input: string) {
     .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
     .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
     .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
-  return smartTruncate(massagedInput);
+  return smartTruncate(massagedInput, 60000);
 }
 
 export async function getVulnerabilityAlerts() {
