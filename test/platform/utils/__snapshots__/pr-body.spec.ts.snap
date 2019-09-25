@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/utils/pr-body .smartTruncate truncates to 300 not smart 1`] = `
+"This PR contains the following updates:
+
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | minor | \`19.46.0-slim\` -> \`19.47.0-slim\` |
+
+---
+
+### Release Notes
+
+<details>
+<summary>renovatebot/renovate</summary>
+
+### [\`v19."
+`;
+
 exports[`platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 "This PR contains the following updates:
 

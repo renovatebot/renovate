@@ -16,6 +16,12 @@ describe('platform/utils/pr-body', () => {
       expect(body.length < prBody.length).toEqual(true);
     });
 
+    it('truncates to 300 not smart', () => {
+      const body = smartTruncate(prBody, 300);
+      expect(body).toMatchSnapshot();
+      expect(body.length).toEqual(300);
+    });
+
     it('truncates to 10', () => {
       const body = smartTruncate('Lorem ipsum dolor sit amet', 10);
       expect(body).toEqual('Lorem ipsu');
