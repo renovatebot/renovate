@@ -12,7 +12,7 @@ describe('lib/manager/mix/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         depName: 'postgrex',
-        lineNumber: 18,
+        managerData: { lineNumber: 18 },
         newValue: '~> 0.8.2',
       };
       const res = updateDependency(sample, upgrade);
@@ -22,7 +22,7 @@ describe('lib/manager/mix/update', () => {
     it('return the same', () => {
       const upgrade = {
         depName: 'postgrex',
-        lineNumber: 18,
+        managerData: { lineNumber: 18 },
         newValue: '~> 0.8.1',
       };
       const res = updateDependency(sample, upgrade);
@@ -31,7 +31,7 @@ describe('lib/manager/mix/update', () => {
     it('returns null if wrong line', () => {
       const upgrade = {
         depName: 'postgrex',
-        lineNumber: 19,
+        managerData: { lineNumber: 19 },
         newValue: '~> 0.8.2',
       };
       const res = updateDependency(sample, upgrade);
@@ -40,7 +40,7 @@ describe('lib/manager/mix/update', () => {
     it('returns null for unsupported depType', () => {
       const upgrade = {
         depName: 'cowboy',
-        lineNumber: 19,
+        managerData: { lineNumber: 19 },
         newValue: '~> 0.8.2',
       };
       const res = updateDependency(sample, upgrade);

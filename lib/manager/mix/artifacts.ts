@@ -4,13 +4,14 @@ import { hrtime } from 'process';
 import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
+import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 
-export async function getArtifacts(
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config
-) {
+export async function updateArtifacts(
+  packageFileName: string,
+  updatedDeps: string[],
+  newPackageFileContent: string,
+  config: UpdateArtifactsConfig
+): Promise<UpdateArtifactsResult[] | null> {
   await logger.debug(`mix.getArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
     logger.debug('No updated mix deps - returning null');
@@ -26,13 +27,15 @@ export async function getArtifacts(
     const localPackageFileName = upath.join(config.localDir, packageFileName);
     await fs.outputFile(localPackageFileName, newPackageFileContent);
   } catch (err) {
-    logger.warn({ err, message: err.message }, 'mix.exs is not found');
-    return {
-      lockFileError: {
-        lockFile: lockFileName,
-        stderr: err.message,
+    logger.warn({ err }, 'mix.exs could not be written');
+    return [
+      {
+        lockFileError: {
+          lockFile: lockFileName,
+          stderr: err.message,
+        },
       },
-    };
+    ];
   }
 
   const existingLockFileContent = await platform.getFile(lockFileName);
@@ -59,7 +62,7 @@ export async function getArtifacts(
   let unlockCmd = `${cmd} deps.unlock `;
   const getCmd = `${cmd} deps.get`;
   for (let i = 0; i < updatedDeps.length; i += 1) {
-    unlockCmd += updatedDeps[i].depName;
+    unlockCmd += updatedDeps[i];
   }
 
   const startTime = hrtime();
@@ -75,12 +78,14 @@ export async function getArtifacts(
       { err, message: err.message },
       'Failed to unlock Mix lock file'
     );
-    return {
-      lockFileError: {
-        lockFile: lockFileName,
-        stderr: err.message,
+    return [
+      {
+        lockFileError: {
+          lockFile: lockFileName,
+          stderr: err.message,
+        },
       },
-    };
+    ];
   }
   /* istanbul ignore next */
   try {
@@ -94,19 +99,21 @@ export async function getArtifacts(
       { err, message: err.message },
       'Failed to update Mix lock file'
     );
-    return {
-      lockFileError: {
-        lockFile: lockFileName,
-        stderr: err.message,
+    return [
+      {
+        lockFileError: {
+          lockFile: lockFileName,
+          stderr: err.message,
+        },
       },
-    };
+    ];
   }
   const duration = hrtime(startTime);
   const seconds = Math.round(duration[0] + duration[1] / 1e9);
   logger.info({ seconds, type: 'mix.lock' }, 'Updated lockfile');
   logger.debug('Returning updated mix.lock');
-  const newCargoLockContent = await fs.readFile(localLockFileName, 'utf8');
-  if (existingLockFileContent === newCargoLockContent) {
+  const newMixLockContent = await fs.readFile(localLockFileName, 'utf8');
+  if (existingLockFileContent === newMixLockContent) {
     logger.debug('mix.lock is unchanged');
     return null;
   }
@@ -114,7 +121,7 @@ export async function getArtifacts(
     {
       file: {
         name: lockFileName,
-        contents: newCargoLockContent,
+        contents: newMixLockContent,
       },
     },
   ];

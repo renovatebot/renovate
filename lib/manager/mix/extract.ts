@@ -1,13 +1,13 @@
 import { isValid } from '../../versioning/hex';
 import { logger } from '../../logger';
-import { PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
 
-export function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   logger.trace('mix.extractPackageFile()');
-  const deps = [];
+  const deps: PackageDependency[] = [];
   const contentArr = content.split('\n');
 
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
@@ -18,7 +18,7 @@ export function extractPackageFile(content) {
         depBuffer += contentArr[lineNumber] + '\n';
         lineNumber += 1;
       } while (!contentArr[lineNumber].includes('end'));
-      let depMatch;
+      let depMatch: RegExpMatchArray;
       do {
         depMatch = depMatchRegExp.exec(depBuffer);
         if (depMatch) {
@@ -30,6 +30,7 @@ export function extractPackageFile(content) {
           const dep: PackageDependency = {
             depName,
             currentValue,
+            managerData: {},
           };
 
           dep.datasource = datasource || 'hex';
@@ -53,7 +54,8 @@ export function extractPackageFile(content) {
 
           // Find dep's line number
           for (let i = 0; i < contentArr.length; i += 1)
-            if (contentArr[i].includes(`:${depName},`)) dep.lineNumber = i;
+            if (contentArr[i].includes(`:${depName},`))
+              dep.managerData.lineNumber = i;
 
           deps.push(dep);
         }

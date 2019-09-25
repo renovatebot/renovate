@@ -1,7 +1,7 @@
 import _fs from 'fs-extra';
 import { exec as _exec } from '../../../lib/util/exec';
 import { platform as _platform } from '../../../lib/platform';
-import { getArtifacts } from '../../../lib/manager/mix';
+import { updateArtifacts } from '../../../lib/manager/mix';
 
 const fs: any = _fs;
 const exec: any = _exec;
@@ -15,35 +15,23 @@ const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-describe('.getArtifacts()', () => {
+describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
   it('returns null if no mix.lock found', async () => {
-    const updatedDeps = [
-      {
-        depName: 'plug',
-        currentValue: '1.6.0',
-      },
-    ];
-    expect(await getArtifacts('mix.exs', updatedDeps, '', config)).toBeNull();
+    expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
   });
   it('returns null if no local directory found', async () => {
-    const updatedDeps = [
-      {
-        depName: 'plug',
-        currentValue: '1.6.0',
-      },
-    ];
     const noLocalDirConfig = {
       localDir: null,
     };
     expect(
-      await getArtifacts('mix.exs', updatedDeps, '', noLocalDirConfig)
+      await updateArtifacts('mix.exs', ['plug'], '', noLocalDirConfig)
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
-    expect(await getArtifacts('mix.exs', [], '', config)).toBeNull();
+    expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current mix.lock');
@@ -52,13 +40,7 @@ describe('.getArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'Current mix.lock');
-    const updatedDeps = [
-      {
-        depName: 'plug',
-        currentValue: '1.6.0',
-      },
-    ];
-    expect(await getArtifacts('mix.exs', updatedDeps, '', config)).toBeNull();
+    expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockReturnValueOnce('Old mix.lock');
@@ -67,14 +49,8 @@ describe('.getArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'New mix.lock');
-    const updatedDeps = [
-      {
-        depName: 'plug',
-        currentValue: '1.6.0',
-      },
-    ];
     expect(
-      await getArtifacts('mix.exs', updatedDeps, '{}', config)
+      await updateArtifacts('mix.exs', ['plug'], '{}', config)
     ).not.toBeNull();
   });
   it('catches errors', async () => {
@@ -82,14 +58,8 @@ describe('.getArtifacts()', () => {
     fs.outputFile = jest.fn(() => {
       throw new Error('not found');
     });
-    const updatedDeps = [
-      {
-        depName: 'plug',
-        currentValue: '1.6.0',
-      },
-    ];
     expect(
-      await getArtifacts('mix.exs', updatedDeps, '{}', config)
+      await updateArtifacts('mix.exs', ['plug'], '{}', config)
     ).toMatchSnapshot();
   });
 });
