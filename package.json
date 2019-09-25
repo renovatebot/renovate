@@ -119,7 +119,7 @@
     "global-agent": "2.1.1",
     "got": "9.6.0",
     "handlebars": "4.2.1",
-    "hasha": "5.0.0",
+    "hasha": "5.1.0",
     "ini": "1.3.5",
     "js-yaml": "3.13.1",
     "json-dup-key-validator": "1.0.2",
@@ -134,6 +134,7 @@
     "minimatch": "3.0.4",
     "moment": "2.24.0",
     "moment-timezone": "0.5.26",
+    "node-emoji": "1.10.0",
     "node-html-parser": "1.1.16",
     "npm": "6.11.3",
     "p-all": "2.1.0",
@@ -158,7 +159,7 @@
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
-    "re2": "1.10.1"
+    "re2": "1.10.2"
   },
   "devDependencies": {
     "@babel/cli": "7.6.0",
@@ -182,6 +183,7 @@
     "@types/luxon": "1.15.2",
     "@types/nock": "10.0.3",
     "@types/node": "11.13.20",
+    "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "3.3.0",
     "@types/safe-regex": "1.1.2",
@@ -195,7 +197,6 @@
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "24.9.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
-    "chai": "4.2.0",
     "copyfiles": "2.1.1",
     "cross-env": "5.2.1",
     "eslint": "6.4.0",
@@ -254,13 +255,10 @@
       }
     },
     "setupFiles": [
-      "./test/globals.js"
-    ],
-    "setupFilesAfterEnv": [
-      "./test/chai.js"
+      "./test/globals.ts"
     ],
     "snapshotSerializers": [
-      "./test/newline-snapshot-serializer.js"
+      "./test/newline-snapshot-serializer.ts"
     ],
     "transform": {
       "^.+\\.(j|t)s$": "babel-jest"

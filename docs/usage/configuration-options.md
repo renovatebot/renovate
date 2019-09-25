@@ -1200,6 +1200,10 @@ For settings common to all node.js version updates (e.g. travis, nvm, etc) you c
 
 Note: Travis renovation is disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
 
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
+
 ## unpublishSafe
 
 It is not known by many that npm package authors and collaborators can _delete_ an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.

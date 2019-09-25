@@ -488,7 +488,7 @@ export async function mergePr(pr: number) {
 
 export function getPrBody(input: string) {
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 4000)
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
     .replace('<summary>', '**')
     .replace('</summary>', '**')
