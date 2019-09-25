@@ -2,12 +2,13 @@ import { isValid } from '../../versioning/hex';
 import { logger } from '../../logger';
 import { PackageDependency } from '../common';
 
+const depSectionRegExp = /defp\s+deps.*do/g;
+const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
+
 export function extractPackageFile(content) {
   logger.trace('mix.extractPackageFile()');
   const deps = [];
   const contentArr = content.split('\n');
-  const depSectionRegExp = /defp\s+deps.*do/g;
-  const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
 
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
