@@ -1,0 +1,18 @@
+{
+  "name": "opam",
+  "path": "packages/0install/0install.2.10/opam",
+  "sha": "10fdb6295b86b7f8eeeee2e0db280a7708220919",
+  "size": 1197,
+  "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.10/opam?ref=master",
+  "html_url": "https://github.com/ocaml/opam-repository/blob/master/packages/0install/0install.2.10/opam",
+  "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/blobs/10fdb6295b86b7f8eeeee2e0db280a7708220919",
+  "download_url": "https://raw.githubusercontent.com/ocaml/opam-repository/master/packages/0install/0install.2.10/opam",
+  "type": "file",
+  "content": "b3BhbS12ZXJzaW9uOiAiMi4wIgptYWludGFpbmVyOiAidGFsZXg1QGdtYWls\nLmNvbSIKYXV0aG9yczogInplcm8taW5zdGFsbC1kZXZlbEBsaXN0cy5zb3Vy\nY2Vmb3JnZS5uZXQiCmhvbWVwYWdlOiAiaHR0cDovLzBpbnN0YWxsLm5ldC8i\nCmJ1Zy1yZXBvcnRzOiAiaHR0cHM6Ly9naXRodWIuY29tLzBpbnN0YWxsLzBp\nbnN0YWxsL2lzc3VlcyIKZGV2LXJlcG86ICJnaXQraHR0cHM6Ly9naXRodWIu\nY29tLzBpbnN0YWxsLzBpbnN0YWxsLmdpdCIKYnVpbGQ6IFsKICBbbWFrZV0K\nXQpkZXBlbmRzOiBbCiAgIm9jYW1sIiB7Pj0gIjQuMDAuMCIgJiA8ICI0LjA2\nLjAifQogICJ5b2pzb24iCiAgInhtbG0iCiAgIm91bml0IgogICJyZWFjdCIK\nICAibHd0IiB7PCAiMy4wLjAifQogICJleHRsaWIiCiAgIm9jdXJsIgogICJz\naGEiIHs+PSAiMS45In0KICAiY2FtbHA0IgogICJvY2FtbGJ1aWxkIiB7YnVp\nbGQgJiA8PSAiMC45LjMifQpdCmRlcG9wdHM6IFsgIm9idXMiICJsYWJsZ3Rr\nIiBdCmRlcGV4dHM6IFsKICBbInVuemlwIl0ge29zLWZhbWlseSA9ICJkZWJp\nYW4ifQpdCnN5bm9wc2lzOiAiVGhlIGFudGlkb3RlIHRvIGFwcC1zdG9yZXMi\nCmRlc2NyaXB0aW9uOiAiIiIKWmVybyBJbnN0YWxsIGlzIGEgZGVjZW50cmFs\naXNlZCBjcm9zcy1kaXN0cmlidXRpb24gc29mdHdhcmUgaW5zdGFsbGF0aW9u\nIHN5c3RlbS4KT3RoZXIgZmVhdHVyZXMgaW5jbHVkZSBmdWxsIHN1cHBvcnQg\nZm9yIHNoYXJlZCBsaWJyYXJpZXMgKHdpdGggYSBTQVQgc29sdmVyIGZvcgpk\nZXBlbmRlbmN5IHJlc29sdXRpb24pLCBzaGFyaW5nIGJldHdlZW4gdXNlcnMs\nIGFuZCBpbnRlZ3JhdGlvbiB3aXRoIG5hdGl2ZSBwbGF0Zm9ybQpwYWNrYWdl\nIG1hbmFnZXJzLiBJdCBzdXBwb3J0cyBib3RoIGJpbmFyeSBhbmQgc291cmNl\nIHBhY2thZ2VzLCBhbmQgd29ya3Mgb24gTGludXgsCk1hYyBPUyBYLCBVbml4\nIGFuZCBXaW5kb3dzIHN5c3RlbXMuIiIiCmV4dHJhLWZpbGVzOiBbIjBpbnN0\nYWxsLmluc3RhbGwiICJtZDU9ZGI2ZWU3YTM1ZGE1ZDk4MTM2ZTVhNTZiYWQw\nODQ5NmUiXQp1cmwgewogIHNyYzoKICAgICJodHRwczovL2Rvd25sb2Fkcy5z\nZi5uZXQvcHJvamVjdC96ZXJvLWluc3RhbGwvMGluc3RhbGwvMi4xMC8waW5z\ndGFsbC0yLjEwLnRhci5iejIiCiAgY2hlY2tzdW06ICJtZDU9M2RiNWJjYTdk\nZjJjMDFmOWM3NGU1N2I1MDNkOWRkMzkiCn0K\n",
+  "encoding": "base64",
+  "_links": {
+    "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.10/opam?ref=master",
+    "git": "https://api.github.com/repos/ocaml/opam-repository/git/blobs/10fdb6295b86b7f8eeeee2e0db280a7708220919",
+    "html": "https://github.com/ocaml/opam-repository/blob/master/packages/0install/0install.2.10/opam"
+  }
+}

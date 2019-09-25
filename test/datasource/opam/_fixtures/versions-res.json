@@ -1,0 +1,162 @@
+[
+  {
+    "name": "0install.2.10",
+    "path": "packages/0install/0install.2.10",
+    "sha": "4d0e8994a84ada6a624824e5ca8208a06247b2b5",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.10?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.10",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/4d0e8994a84ada6a624824e5ca8208a06247b2b5",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.10?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/4d0e8994a84ada6a624824e5ca8208a06247b2b5",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.10"
+    }
+  },
+  {
+    "name": "0install.2.11",
+    "path": "packages/0install/0install.2.11",
+    "sha": "8d5637c2db89302d5c90fd43ea47c0c0783116c8",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.11?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.11",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/8d5637c2db89302d5c90fd43ea47c0c0783116c8",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.11?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/8d5637c2db89302d5c90fd43ea47c0c0783116c8",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.11"
+    }
+  },
+  {
+    "name": "0install.2.12.1",
+    "path": "packages/0install/0install.2.12.1",
+    "sha": "79c1f42d03eda8a6e87fd16c06c2a6b0ee27065c",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.12.1?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.12.1",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/79c1f42d03eda8a6e87fd16c06c2a6b0ee27065c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.12.1?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/79c1f42d03eda8a6e87fd16c06c2a6b0ee27065c",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.12.1"
+    }
+  },
+  {
+    "name": "0install.2.12.3",
+    "path": "packages/0install/0install.2.12.3",
+    "sha": "06c58b6509f15295e16922727a44f4461a900fd4",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.12.3?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.12.3",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/06c58b6509f15295e16922727a44f4461a900fd4",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.12.3?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/06c58b6509f15295e16922727a44f4461a900fd4",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.12.3"
+    }
+  },
+  {
+    "name": "0install.2.12",
+    "path": "packages/0install/0install.2.12",
+    "sha": "e0019fe64b0ca998d51b8371c2df1075695a1ea6",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.12?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.12",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/e0019fe64b0ca998d51b8371c2df1075695a1ea6",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.12?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/e0019fe64b0ca998d51b8371c2df1075695a1ea6",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.12"
+    }
+  },
+  {
+    "name": "0install.2.14.1",
+    "path": "packages/0install/0install.2.14.1",
+    "sha": "9f88c5ac6470d48a147b6a5e02098551cbc61323",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.14.1?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.14.1",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/9f88c5ac6470d48a147b6a5e02098551cbc61323",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.14.1?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/9f88c5ac6470d48a147b6a5e02098551cbc61323",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.14.1"
+    }
+  },
+  {
+    "name": "0install.2.14",
+    "path": "packages/0install/0install.2.14",
+    "sha": "a424f2deb232dd251a7d70d9b5add2b709502800",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.14?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.14",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/a424f2deb232dd251a7d70d9b5add2b709502800",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.14?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/a424f2deb232dd251a7d70d9b5add2b709502800",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.14"
+    }
+  },
+  {
+    "name": "0install.2.6.2",
+    "path": "packages/0install/0install.2.6.2",
+    "sha": "cbdc5d8108a54d1d381616a63f424a506d9600c2",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.6.2?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.6.2",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/cbdc5d8108a54d1d381616a63f424a506d9600c2",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.6.2?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/cbdc5d8108a54d1d381616a63f424a506d9600c2",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.6.2"
+    }
+  },
+  {
+    "name": "0install.2.8",
+    "path": "packages/0install/0install.2.8",
+    "sha": "4f4564c7b80f46bee5e50e6a9f2d1c46edc9d1f6",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.8?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.8",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/4f4564c7b80f46bee5e50e6a9f2d1c46edc9d1f6",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.8?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/4f4564c7b80f46bee5e50e6a9f2d1c46edc9d1f6",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.8"
+    }
+  },
+  {
+    "name": "0install.2.9.1",
+    "path": "packages/0install/0install.2.9.1",
+    "sha": "799ba66b6968ff848623f172c241c2172863f193",
+    "size": 0,
+    "url": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.9.1?ref=master",
+    "html_url": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.9.1",
+    "git_url": "https://api.github.com/repos/ocaml/opam-repository/git/trees/799ba66b6968ff848623f172c241c2172863f193",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/ocaml/opam-repository/contents/packages/0install/0install.2.9.1?ref=master",
+      "git": "https://api.github.com/repos/ocaml/opam-repository/git/trees/799ba66b6968ff848623f172c241c2172863f193",
+      "html": "https://github.com/ocaml/opam-repository/tree/master/packages/0install/0install.2.9.1"
+    }
+  }
+]

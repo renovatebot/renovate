@@ -14,8 +14,6 @@ export async function getPkgReleases({
     hostType: 'esy',
     json: true,
   });
-  // TODO: Read homepage, name, and maybe other metadata from /packages/${depName}/${lookupName.1.2.3}/opam
-  // where 1.2.3 can be any existing version, check if there is a mechanism for deprication
   const versions: string[] = res.body.map(file =>
     file.name.substring(file.name.indexOf('.') + 1)
   );
