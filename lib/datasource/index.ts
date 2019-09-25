@@ -21,6 +21,7 @@ import * as rubygems from './rubygems';
 import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as terraform from './terraform';
+import * as opam from './opam';
 import {
   Datasource,
   PkgReleaseConfig,
@@ -51,6 +52,7 @@ const datasources: Record<string, Datasource> = {
   rubyVersion,
   sbt,
   terraform,
+  opam,
 };
 
 const cacheNamespace = 'datasource-releases';
