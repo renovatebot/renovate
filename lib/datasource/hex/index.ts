@@ -2,17 +2,9 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
 
-function getHostOpts() {
-  return {
-    json: true,
-    hostType: 'hex',
-  };
-}
-
 interface HexRelease {
   html_url: string;
   meta?: { links?: Record<string, string> };
-  name?: string;
   releases?: { version: string }[];
 }
 
@@ -33,50 +25,48 @@ export async function getPkgReleases({
   const depName = lookupName.split(':')[0];
   const hexUrl = `https://hex.pm/api/packages/${depName}`;
   try {
-    const opts = getHostOpts();
-    const res: HexRelease = (await got(hexUrl, {
+    const response = await got(hexUrl, {
       json: true,
-      ...opts,
-    })).body;
-    if (!(res && res.releases && res.name)) {
-      logger.warn({ depName }, `Received invalid hex package data`);
+      hostType: 'hex',
+    });
+
+    const hexRelease: HexRelease = response.body;
+
+    if (!hexRelease) {
+      logger.warn({ depName }, `Invalid response body`);
       return null;
     }
+
+    const { releases = [], html_url: homepage, meta } = hexRelease;
+
+    if (releases.length === 0) {
+      logger.info(`No versions found for ${depName} (${hexUrl})`); // prettier-ignore
+      return null;
+    }
+
     const result: ReleaseResult = {
-      releases: [],
+      releases: releases.map(({ version }) => ({ version })),
     };
-    if (res.releases) {
-      result.releases = res.releases.map(version => ({
-        version: version.version,
-      }));
+
+    if (homepage) {
+      result.homepage = homepage;
     }
-    if (res.meta && res.meta.links) {
-      result.sourceUrl = res.meta.links.Github;
+
+    if (meta && meta.links && meta.links.Github) {
+      result.sourceUrl = hexRelease.meta.links.Github;
     }
-    result.homepage = res.html_url;
+
     return result;
   } catch (err) {
+    const errorData = { depName, err };
     if (err.statusCode === 401) {
-      logger.info({ depName }, `Authorization failure: not authorized`);
-      logger.debug(
-        {
-          err,
-        },
-        'Authorization error'
-      );
-      return null;
+      logger.debug(errorData, 'Authorization error');
+    } else if (err.statusCode === 404) {
+      logger.debug(errorData, 'Package lookup error');
+    } else {
+      logger.warn(errorData, 'hex lookup failure: Unknown error');
     }
-    if (err.statusCode === 404) {
-      logger.info({ depName }, `Dependency lookup failure: not found`);
-      logger.debug(
-        {
-          err,
-        },
-        'Package lookup error'
-      );
-      return null;
-    }
-    logger.warn({ err, depName }, 'hex lookup failure: Unknown error');
-    return null;
   }
+
+  return null;
 }
