@@ -1154,6 +1154,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/github-url-from-git@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@types/github-url-from-git/-/github-url-from-git-1.5.0.tgz#cfb8fda460cf22402d4465e1caee6f9063a30fdf"
+  integrity sha512-iz6JdiKBQdaBMznEtcDna4s8rSef4e71zJ45AMTpPl3ka1JhswOLdmKgjxPO0z3S+Zk5gi3HDtbJ77PD+TfoUQ==
+
 "@types/glob@*", "@types/glob@^7.1.1":
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.1.tgz#aa59a1c6e3fbc421e07ccd31a944c30eba521575"
