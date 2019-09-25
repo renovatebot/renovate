@@ -22,7 +22,7 @@ describe('platform/utils/pr-body', () => {
     });
 
     it('does not truncate', () => {
-      expect(smartTruncate(prBody)).toEqual(prBody);
+      expect(smartTruncate(prBody, 60000)).toEqual(prBody);
     });
   });
 });

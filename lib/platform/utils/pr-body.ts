@@ -1,6 +1,6 @@
 import { appName } from '../../config/app-strings';
 
-export function smartTruncate(input: string, len = 60000): string {
+export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
   }
