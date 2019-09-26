@@ -59,6 +59,15 @@ export async function getPkgReleases({
     return result;
   } catch (err) {
     const errorData = { depName, err };
+
+    if (
+      err.statusCode === 429 ||
+      (err.statusCode >= 500 && err.statusCode < 600)
+    ) {
+      logger.warn({ lookupName, err }, `hex.pm registry failure`);
+      throw new Error('registry-failure');
+    }
+
     if (err.statusCode === 401) {
       logger.debug(errorData, 'Authorization error');
     } else if (err.statusCode === 404) {
