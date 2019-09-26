@@ -12,7 +12,7 @@ function isTemporalError(err: { code: string; statusCode: number }) {
   return (
     err.code === 'ECONNRESET' ||
     err.statusCode === 429 ||
-    (err.statusCode > 500 && err.statusCode < 600)
+    (err.statusCode >= 500 && err.statusCode < 600)
   );
 }
 
