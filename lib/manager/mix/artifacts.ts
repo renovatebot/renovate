@@ -13,7 +13,7 @@ export async function updateArtifacts(
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
   await logger.debug(`mix.getArtifacts(${packageFileName})`);
-  if (updatedDeps === undefined || updatedDeps.length < 1) {
+  if (updatedDeps.length < 1) {
     logger.debug('No updated mix deps - returning null');
     return null;
   }

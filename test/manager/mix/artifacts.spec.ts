@@ -22,6 +22,9 @@ describe('.updateArtifacts()', () => {
   it('returns null if no mix.lock found', async () => {
     expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
   });
+  it('returns null if no updatedDeps were provided', async () => {
+    expect(await updateArtifacts('mix.exs', [], '', config)).toBeNull();
+  });
   it('returns null if no local directory found', async () => {
     const noLocalDirConfig = {
       localDir: null,
