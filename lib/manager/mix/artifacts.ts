@@ -46,7 +46,7 @@ export async function updateArtifacts(
   let cmd;
   // istanbul ignore if
   if (config.binarySource === 'docker') {
-    logger.info('Running mix via docker');
+    logger.info('Running mix from docker');
     cmd = `docker run --rm `;
     const volumes = [cwd];
     cmd += volumes.map(v => `-v ${v}:${v} `).join('');
@@ -55,38 +55,16 @@ export async function updateArtifacts(
     cmd += `-w ${cwd} `;
     cmd += `renovate/mix mix`;
   } else {
-    logger.info('Running mix via global mix');
+    logger.info('Running globally installed mix');
     cmd = 'mix';
   }
   const localLockFileName = upath.join(config.localDir, lockFileName);
-  let unlockCmd = `${cmd} deps.unlock `;
-  const getCmd = `${cmd} deps.get`;
+  let getCmd = `${cmd} deps.update `;
   for (let i = 0; i < updatedDeps.length; i += 1) {
-    unlockCmd += updatedDeps[i];
+    getCmd += updatedDeps[i];
   }
 
   const startTime = hrtime();
-  /* istanbul ignore next */
-  try {
-    const { stdout, stderr } = await exec(unlockCmd, {
-      cwd: config.localDir,
-    });
-    logger.debug(stdout);
-    if (stderr) logger.warn('error: ' + stderr);
-  } catch (err) {
-    logger.warn(
-      { err, message: err.message },
-      'Failed to unlock Mix lock file'
-    );
-    return [
-      {
-        lockFileError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
-  }
   /* istanbul ignore next */
   try {
     const { stdout, stderr } = await exec(getCmd, {
