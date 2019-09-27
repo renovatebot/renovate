@@ -8,6 +8,7 @@ import GitStorage from '../git/storage';
 import { logger } from '../../logger';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -952,12 +953,11 @@ export async function mergePr(prNo: number, branchName: string) {
 export function getPrBody(input: string) {
   logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 30000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
-    .replace(new RegExp('<!--.*?-->', 'g'), '')
-    .substring(0, 30000);
+    .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 
 export function getCommitMessages() {

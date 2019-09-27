@@ -209,6 +209,46 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('extracts volta', async () => {
+      const pJson = {
+        main: 'index.js',
+        engines: {
+          node: '8.9.2',
+        },
+        volta: {
+          node: '8.9.2',
+          yarn: '1.12.3',
+          npm: '5.9.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts volta yarn unknown-version', async () => {
+      const pJson = {
+        main: 'index.js',
+        engines: {
+          node: '8.9.2',
+        },
+        volta: {
+          node: '8.9.2',
+          yarn: 'unknown',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
     it('extracts non-npmjs', async () => {
       const pJson = {
         dependencies: {

@@ -16,6 +16,7 @@ import {
   urls,
 } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -1711,39 +1712,16 @@ export async function mergePr(prNo: number, branchName: string) {
   return true;
 }
 
-// istanbul ignore next
-function smartTruncate(input: string) {
-  if (input.length < 60000) {
-    return input;
-  }
-  const releaseNotesMatch = input.match(
-    new RegExp(`### Release Notes.*### ${appName} configuration`, 'ms')
-  );
-  // istanbul ignore if
-  if (releaseNotesMatch) {
-    const divider = `</details>\n\n---\n\n### ${appName} configuration`;
-    const [releaseNotes] = releaseNotesMatch;
-    const nonReleaseNotesLength =
-      input.length - releaseNotes.length - divider.length;
-    const availableLength = 60000 - nonReleaseNotesLength;
-    return input.replace(
-      releaseNotes,
-      releaseNotes.slice(0, availableLength) + divider
-    );
-  }
-  return input.substring(0, 60000);
-}
-
 export function getPrBody(input: string) {
   if (config.isGhe) {
-    return smartTruncate(input);
+    return smartTruncate(input, 60000);
   }
   const massagedInput = input
     // to be safe, replace all github.com links with renovatebot redirector
     .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
     .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
     .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
-  return smartTruncate(massagedInput);
+  return smartTruncate(massagedInput, 60000);
 }
 
 export async function getVulnerabilityAlerts() {

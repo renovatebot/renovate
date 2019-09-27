@@ -1,3 +1,5 @@
+import AWSMock from 'aws-sdk-mock';
+import AWS from 'aws-sdk';
 import _got from '../../lib/util/got';
 import * as docker from '../../lib/datasource/docker';
 import { getPkgReleases } from '../../lib/datasource';
@@ -124,6 +126,84 @@ describe('api/docker', () => {
         'some-tag'
       );
       expect(res).toBeNull();
+    });
+    it('supports ECR authentication', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      AWSMock.setSDKInstance(AWS);
+      AWSMock.mock(
+        'ECR',
+        'getAuthorizationToken',
+        (params: {}, callback: Function) => {
+          callback(null, {
+            authorizationData: [{ authorizationToken: 'abcdef' }],
+          });
+        }
+      );
+      got.mockReturnValueOnce({
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        headers: { 'docker-content-digest': 'some-digest' },
+      });
+      const res = await docker.getDigest(
+        { lookupName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node' },
+        'some-tag'
+      );
+      expect(got.mock.calls[1][1].headers.authorization).toBe('Basic abcdef');
+      expect(res).toBe('some-digest');
+      AWSMock.restore('ECR');
+    });
+    it('continues without token if ECR authentication could not be extracted', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      AWSMock.setSDKInstance(AWS);
+      AWSMock.mock(
+        'ECR',
+        'getAuthorizationToken',
+        (params: {}, callback: Function) => {
+          callback(null, {});
+        }
+      );
+      got.mockReturnValueOnce({
+        statusCode: 403,
+      });
+      const res = await docker.getDigest(
+        { lookupName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node' },
+        'some-tag'
+      );
+      expect(res).toBe(null);
+      AWSMock.restore('ECR');
+    });
+    it('continues without token if ECR authentication fails', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      AWSMock.setSDKInstance(AWS);
+      AWSMock.mock(
+        'ECR',
+        'getAuthorizationToken',
+        (params: {}, callback: Function) => {
+          callback(Error('some error'), null);
+        }
+      );
+      got.mockReturnValueOnce({
+        statusCode: 403,
+      });
+      const res = await docker.getDigest(
+        { lookupName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node' },
+        'some-tag'
+      );
+      expect(res).toBe(null);
+      AWSMock.restore('ECR');
     });
     it('continues without token, when no header is present', async () => {
       got.mockReturnValueOnce({

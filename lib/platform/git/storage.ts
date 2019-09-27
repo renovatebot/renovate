@@ -110,7 +110,10 @@ export class Storage {
       const cloneStart = process.hrtime();
       try {
         // clone only the default branch
-        await this._git.clone(config.url, '.', ['--depth=2']);
+        await this._git.clone(config.url, '.', [
+          '--depth=2',
+          '--recurse-submodules',
+        ]);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
         throw new Error('platform-failure');
@@ -241,7 +244,19 @@ export class Storage {
     if (!exists) {
       return [];
     }
-    const files = await this._git!.raw([
+    const submodules: string[] = (
+      (await this._git!.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
+    const files: string = await this._git!.raw([
       'ls-tree',
       '-r',
       '--name-only',
@@ -251,7 +266,12 @@ export class Storage {
     if (!files) {
       return [];
     }
-    return files.split('\n').filter(Boolean);
+    return files
+      .split('\n')
+      .filter(Boolean)
+      .filter((file: string) =>
+        submodules.every((submodule: string) => !file.startsWith(submodule))
+      );
   }
 
   async branchExists(branchName: string) {

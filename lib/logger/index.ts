@@ -5,7 +5,7 @@ import { RenovateStream } from './pretty-stdout';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import cmdSerializer from './cmd-serializer';
-import { ErrorStream } from './utils';
+import { ErrorStream, withSanitizer } from './utils';
 
 let meta = {};
 export interface LogError {
@@ -49,7 +49,7 @@ const bunyanLogger = bunyan.createLogger({
       stream: errors as any,
       type: 'raw',
     },
-  ],
+  ].map(withSanitizer),
 });
 
 const logFactory = (level: bunyan.LogLevelString): any => {
@@ -105,7 +105,7 @@ export function setMeta(obj: any) {
 export /* istanbul ignore next */ function addStream(
   stream: bunyan.Stream
 ): void {
-  bunyanLogger.addStream(stream);
+  bunyanLogger.addStream(withSanitizer(stream));
 }
 
 export function levels(name: string, level: bunyan.LogLevel): void {
