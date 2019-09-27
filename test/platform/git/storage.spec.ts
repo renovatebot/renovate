@@ -351,11 +351,7 @@ describe('platform/git/storage', () => {
       const repo = Git(base.path).silent(true);
       await fs.writeFile(
         base.path + '/.gitmodules',
-        `
-      [submodule "test"]
-        path = test
-        url = ssh://0.0.0.0
-      `.trim()
+        '[submodule "test"]\npath=test\nurl=ssh://0.0.0.0'
       );
       await repo.add('.gitmodules');
       await repo.raw([
