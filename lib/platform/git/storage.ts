@@ -121,13 +121,13 @@ export class Storage {
       logger.info({ cloneSeconds }, 'git clone completed');
     }
     const submodules = await this.getSubmodules();
-    submodules.forEach(async submodule => {
+    for (const submodule of submodules) {
       try {
         await this._git.submoduleUpdate(['--init', '--', submodule]);
       } catch (err) {
         logger.warn(`Unable to initialise git submodule at ${submodule}`);
       }
-    });
+    }
     try {
       const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
       logger.debug({ latestCommitDate }, 'latest commit');
