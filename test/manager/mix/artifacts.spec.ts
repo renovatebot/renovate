@@ -40,25 +40,25 @@ describe('.updateArtifacts()', () => {
     platform.getFile.mockReturnValueOnce('Current mix.lock');
     exec.mockReturnValue({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'Current mix.lock');
+    fs.readFile.mockReturnValueOnce('Current mix.lock');
     expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockReturnValueOnce('Old mix.lock');
     exec.mockReturnValue({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'New mix.lock');
+    fs.readFile.mockImplementationOnce(() => 'New mix.lock');
     expect(
       await updateArtifacts('mix.exs', ['plug'], '{}', config)
-    ).not.toBeNull();
+    ).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current mix.lock');
-    fs.outputFile = jest.fn(() => {
+    fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(

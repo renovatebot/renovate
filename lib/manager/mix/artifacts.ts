@@ -17,14 +17,16 @@ export async function updateArtifacts(
     logger.debug('No updated mix deps - returning null');
     return null;
   }
-  if (!config.localDir) {
+
+  const cwd = config.localDir;
+  if (!cwd) {
     logger.debug('No local dir specified');
     return null;
   }
-  const cwd = config.localDir;
+
   const lockFileName = 'mix.lock';
   try {
-    const localPackageFileName = upath.join(config.localDir, packageFileName);
+    const localPackageFileName = upath.join(cwd, packageFileName);
     await fs.outputFile(localPackageFileName, newPackageFileContent);
   } catch (err) {
     logger.warn({ err }, 'mix.exs could not be written');
@@ -43,33 +45,25 @@ export async function updateArtifacts(
     logger.debug('No mix.lock found');
     return null;
   }
-  let cmd;
-  // istanbul ignore if
-  if (config.binarySource === 'docker') {
-    logger.info('Running mix from docker');
-    cmd = `docker run --rm `;
-    const volumes = [cwd];
-    cmd += volumes.map(v => `-v ${v}:${v} `).join('');
-    const envVars = [];
-    cmd += envVars.map(e => `-e ${e} `);
-    cmd += `-w ${cwd} `;
-    cmd += `renovate/mix mix`;
-  } else {
-    logger.info('Running globally installed mix');
-    cmd = 'mix';
-  }
-  const localLockFileName = upath.join(config.localDir, lockFileName);
-  let getCmd = `${cmd} deps.update `;
-  for (let i = 0; i < updatedDeps.length; i += 1) {
-    getCmd += updatedDeps[i];
-  }
+
+  const cmdParts =
+    config.binarySource === 'docker'
+      ? [
+          'docker',
+          'run',
+          '--rm',
+          `-v ${cwd}:${cwd}`,
+          `-w ${cwd}`,
+          'renovate/mix mix',
+        ]
+      : ['mix'];
+  cmdParts.push('deps.update');
 
   const startTime = hrtime();
   /* istanbul ignore next */
   try {
-    const { stdout, stderr } = await exec(getCmd, {
-      cwd: config.localDir,
-    });
+    const command = [...cmdParts, ...updatedDeps].join(' ');
+    const { stdout, stderr } = await exec(command, { cwd });
     logger.debug(stdout);
     if (stderr) logger.warn('error: ' + stderr);
   } catch (err) {
@@ -77,6 +71,7 @@ export async function updateArtifacts(
       { err, message: err.message },
       'Failed to update Mix lock file'
     );
+
     return [
       {
         lockFileError: {
@@ -86,15 +81,19 @@ export async function updateArtifacts(
       },
     ];
   }
+
   const duration = hrtime(startTime);
   const seconds = Math.round(duration[0] + duration[1] / 1e9);
   logger.info({ seconds, type: 'mix.lock' }, 'Updated lockfile');
   logger.debug('Returning updated mix.lock');
+
+  const localLockFileName = upath.join(cwd, lockFileName);
   const newMixLockContent = await fs.readFile(localLockFileName, 'utf8');
   if (existingLockFileContent === newMixLockContent) {
     logger.debug('mix.lock is unchanged');
     return null;
   }
+
   return [
     {
       file: {

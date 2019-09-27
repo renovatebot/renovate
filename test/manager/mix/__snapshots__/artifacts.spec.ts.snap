@@ -10,3 +10,14 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() returns updated mix.lock 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New mix.lock",
+      "name": "mix.lock",
+    },
+  },
+]
+`;
