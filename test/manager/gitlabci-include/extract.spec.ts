@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { extractPackageFile } from '../../../lib/manager/gitlabci-include/extract';
-import { ExtractConfig } from '../../../lib/manager/common';
 
 const yamlFile = fs.readFileSync(
   'test/manager/gitlabci-include/_fixtures/gitlab-ci.yaml',
@@ -9,21 +8,27 @@ const yamlFile = fs.readFileSync(
 
 describe('lib/manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
-    let config: ExtractConfig;
-    beforeEach(() => {
-      config = {
-        endpoint: 'http://gitlab.test/api/v4/',
-      };
-    });
     it('returns null for empty', () => {
       expect(
-        extractPackageFile('nothing here', '.gitlab-ci.yml', config)
+        extractPackageFile('nothing here', '.gitlab-ci.yml', {})
       ).toBeNull();
     });
     it('extracts multiple include blocks', () => {
-      const res = extractPackageFile(yamlFile, '.gitlab-ci.yml', config);
+      const res = extractPackageFile(yamlFile, '.gitlab-ci.yml', {});
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
+    });
+    it('normalizes configured endpoints', () => {
+      const endpoints = [
+        'http://gitlab.test/api/v4',
+        'http://gitlab.test/api/v4/',
+      ];
+      endpoints.forEach(endpoint => {
+        const res = extractPackageFile(yamlFile, '.gitlab-ci.yml', {
+          endpoint,
+        });
+        expect(res.deps[0].registryUrls[0]).toEqual('http://gitlab.test');
+      });
     });
   });
 });
