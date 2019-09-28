@@ -45,6 +45,7 @@ export interface PlatformConfig {
   endpoint: string;
   renovateUsername?: any;
   gitAuthor?: any;
+  allowMergeWhenPipelineSucceeds?: boolean;
 }
 
 export interface RepoConfig {
@@ -89,6 +90,7 @@ export type BranchStatus = 'pending' | 'success' | 'failed';
 export type PlatformPrOptions = {
   azureAutoComplete: boolean;
   statusCheckVerify: boolean;
+  mergeWhenPipelineSucceeds: boolean;
 };
 
 /**

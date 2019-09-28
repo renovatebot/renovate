@@ -774,6 +774,34 @@ describe('platform/gitlab', () => {
       expect(pr).toMatchSnapshot();
       expect(api.post.mock.calls).toMatchSnapshot();
     });
+    it('auto-accepts the MR when requested', async () => {
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              email: 'a@b.com',
+            },
+          } as any)
+      );
+      await gitlab.initPlatform({
+        token: 'some-token',
+        allowMergeWhenPipelineSucceeds: true,
+      });
+
+      api.post.mockReturnValueOnce({
+        body: {
+          id: 1,
+          iid: 12345,
+        },
+      } as any);
+      await gitlab.createPr('some-branch', 'some-title', 'the-body', [], true, {
+        azureAutoComplete: false,
+        statusCheckVerify: false,
+        mergeWhenPipelineSucceeds: true,
+      });
+      // expect(api.post.mock.calls).toMatchSnapshot();
+      expect(api.put.mock.calls).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {

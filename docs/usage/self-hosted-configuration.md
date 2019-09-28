@@ -7,6 +7,10 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+## allowMergeWhenPipelineSucceeds
+
+When this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
+
 ## autodiscover
 
 Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to. To filter this list, use `autodiscoverFilter`.

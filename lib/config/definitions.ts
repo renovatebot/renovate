@@ -1999,6 +1999,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'allowMergeWhenPipelineSucceeds',
+    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs`,
+    type: 'boolean',
+    default: false,
+    stage: 'global',
+  },
 ];
 
 export function getOptions() {

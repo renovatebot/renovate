@@ -4,7 +4,12 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import {
+  PlatformConfig,
+  RepoParams,
+  RepoConfig,
+  PlatformPrOptions,
+} from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
@@ -26,6 +31,7 @@ let config: {
 const defaults = {
   hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
+  allowMergeWhenPipelineSucceeds: false,
 };
 
 let authorId: number;
@@ -33,9 +39,11 @@ let authorId: number;
 export async function initPlatform({
   endpoint,
   token,
+  allowMergeWhenPipelineSucceeds,
 }: {
-  endpoint: string;
   token: string;
+  endpoint?: string;
+  allowMergeWhenPipelineSucceeds?: boolean;
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -57,6 +65,9 @@ export async function initPlatform({
       'Error authenticating with GitLab. Check that your token includes "user" permissions'
     );
     throw new Error('Init: Authentication failure');
+  }
+  if (allowMergeWhenPipelineSucceeds) {
+    defaults.allowMergeWhenPipelineSucceeds = allowMergeWhenPipelineSucceeds;
   }
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
@@ -692,7 +703,8 @@ export async function createPr(
   title: string,
   rawDescription: string,
   labels?: string[] | null,
-  useDefaultBranch?: boolean
+  useDefaultBranch?: boolean,
+  platformOptions?: PlatformPrOptions
 ) {
   const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
@@ -718,6 +730,26 @@ export async function createPr(
   if (config.prList) {
     config.prList.push(pr);
   }
+  if (
+    platformOptions &&
+    platformOptions.mergeWhenPipelineSucceeds &&
+    defaults.allowMergeWhenPipelineSucceeds
+  ) {
+    try {
+      await api.put(
+        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
+        {
+          body: {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          },
+        }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Automerge on PR creation failed');
+    }
+  }
+
   return pr;
 }
 
