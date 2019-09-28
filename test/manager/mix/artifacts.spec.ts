@@ -53,7 +53,10 @@ describe('.updateArtifacts()', () => {
     });
     fs.readFile.mockImplementationOnce(() => 'New mix.lock');
     expect(
-      await updateArtifacts('mix.exs', ['plug'], '{}', config)
+      await updateArtifacts('mix.exs', ['plug'], '{}', {
+        ...config,
+        binarySource: 'docker',
+      })
     ).toMatchSnapshot();
   });
   it('catches errors', async () => {
