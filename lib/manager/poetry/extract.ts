@@ -96,12 +96,13 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
     return null;
   }
 
-  const registryUrls: string[] = ['https://pypi.org/pypi/'];
+  const registryUrls = new Set<string>();
   for (const source of sources) {
     if (source.url) {
-      registryUrls.push(source.url);
+      registryUrls.add(source.url);
     }
   }
+  registryUrls.add('https://pypi.org/pypi/');
 
-  return registryUrls;
+  return Array.from(registryUrls);
 }
