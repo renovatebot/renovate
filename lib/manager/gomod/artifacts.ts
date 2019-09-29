@@ -133,26 +133,6 @@ export async function updateArtifacts(
       duration = process.hrtime(startTime);
       seconds = Math.round(duration[0] + duration[1] / 1e9);
       logger.info({ seconds, stdout, stderr }, 'Vendored modules');
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('gomodTidy')
-      ) {
-        args = 'mod tidy';
-        if (cmd.includes('.insteadOf')) {
-          args += '"';
-        }
-        logger.debug({ cmd, args }, 'go mod tidy command');
-        ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
-          cwd,
-          env,
-        }));
-        duration = process.hrtime(startTime);
-        seconds = Math.round(duration[0] + duration[1] / 1e9);
-        logger.info(
-          { seconds, stdout, stderr },
-          'Tidied Go Modules after vendoring'
-        );
-      }
       status = await platform.getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
         if (f.startsWith(vendorDir)) {
