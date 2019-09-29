@@ -337,6 +337,124 @@ Object {
 }
 `;
 
+exports[`manager/npm/extract .extractPackageFile() extracts volta 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "8.9.2",
+      "datasource": "github",
+      "depName": "node",
+      "depType": "engines",
+      "lookupName": "nodejs/node",
+      "major": Object {
+        "enabled": false,
+      },
+      "prettyDepType": "engine",
+      "versionScheme": "node",
+    },
+    Object {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "8.9.2",
+      "datasource": "github",
+      "depName": "node",
+      "depType": "volta",
+      "lookupName": "nodejs/node",
+      "major": Object {
+        "enabled": false,
+      },
+      "prettyDepType": "volta",
+      "versionScheme": "node",
+    },
+    Object {
+      "commitMessageTopic": "Yarn",
+      "currentValue": "1.12.3",
+      "datasource": "npm",
+      "depName": "yarn",
+      "depType": "volta",
+      "prettyDepType": "volta",
+    },
+    Object {
+      "currentValue": "5.9.0",
+      "depName": "npm",
+      "depType": "volta",
+      "prettyDepType": "volta",
+      "skipReason": "unknown-volta",
+    },
+  ],
+  "ignoreNpmrcFile": undefined,
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "library",
+  "packageJsonVersion": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
+exports[`manager/npm/extract .extractPackageFile() extracts volta yarn unknown-version 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "8.9.2",
+      "datasource": "github",
+      "depName": "node",
+      "depType": "engines",
+      "lookupName": "nodejs/node",
+      "major": Object {
+        "enabled": false,
+      },
+      "prettyDepType": "engine",
+      "versionScheme": "node",
+    },
+    Object {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "8.9.2",
+      "datasource": "github",
+      "depName": "node",
+      "depType": "volta",
+      "lookupName": "nodejs/node",
+      "major": Object {
+        "enabled": false,
+      },
+      "prettyDepType": "volta",
+      "versionScheme": "node",
+    },
+    Object {
+      "commitMessageTopic": "Yarn",
+      "currentValue": "unknown",
+      "datasource": "npm",
+      "depName": "yarn",
+      "depType": "volta",
+      "prettyDepType": "volta",
+      "skipReason": "unknown-version",
+    },
+  ],
+  "ignoreNpmrcFile": undefined,
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "library",
+  "packageJsonVersion": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
 Object {
   "deps": Array [

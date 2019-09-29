@@ -10,6 +10,7 @@ import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 let config: utils.Config = {} as any;
 
@@ -694,12 +695,11 @@ export async function mergePr(prNo: number, branchName: string) {
 
 export function getPrBody(input: string) {
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 50000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/')
-    .substring(0, 50000);
+    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
 }
 
 // Return the commit SHA for a branch

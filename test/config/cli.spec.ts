@@ -12,29 +12,29 @@ describe('config/cli', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
-      cli.getCliName(option).should.eql('--one-two-three');
+      expect(cli.getCliName(option)).toEqual('--one-two-three');
     });
     it('generates returns empty if CLI false', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
         cli: false,
       };
-      cli.getCliName(option).should.eql('');
+      expect(cli.getCliName(option)).toEqual('');
     });
   });
   describe('.getConfig(argv)', () => {
     it('returns empty argv', () => {
-      cli.getConfig(argv).should.eql({});
+      expect(cli.getConfig(argv)).toEqual({});
     });
     it('supports boolean no value', () => {
       argv.push('--recreate-closed');
-      cli.getConfig(argv).should.eql({ recreateClosed: true });
+      expect(cli.getConfig(argv)).toEqual({ recreateClosed: true });
       argv = argv.slice(0, -1);
     });
     it('supports boolean space true', () => {
       argv.push('--recreate-closed');
       argv.push('true');
-      cli.getConfig(argv).should.eql({ recreateClosed: true });
+      expect(cli.getConfig(argv)).toEqual({ recreateClosed: true });
     });
     it('throws exception for invalid boolean value', () => {
       argv.push('--recreate-closed');
@@ -48,38 +48,38 @@ describe('config/cli', () => {
     it('supports boolean space false', () => {
       argv.push('--recreate-closed');
       argv.push('false');
-      cli.getConfig(argv).should.eql({ recreateClosed: false });
+      expect(cli.getConfig(argv)).toEqual({ recreateClosed: false });
     });
     it('supports boolean equals true', () => {
       argv.push('--recreate-closed=true');
-      cli.getConfig(argv).should.eql({ recreateClosed: true });
+      expect(cli.getConfig(argv)).toEqual({ recreateClosed: true });
     });
     it('supports boolean equals false', () => {
       argv.push('--recreate-closed=false');
-      cli.getConfig(argv).should.eql({ recreateClosed: false });
+      expect(cli.getConfig(argv)).toEqual({ recreateClosed: false });
     });
     it('supports list single', () => {
       argv.push('--labels=a');
-      cli.getConfig(argv).should.eql({ labels: ['a'] });
+      expect(cli.getConfig(argv)).toEqual({ labels: ['a'] });
     });
     it('supports list multiple', () => {
       argv.push('--labels=a,b,c');
-      cli.getConfig(argv).should.eql({ labels: ['a', 'b', 'c'] });
+      expect(cli.getConfig(argv)).toEqual({ labels: ['a', 'b', 'c'] });
     });
     it('supports string', () => {
       argv.push('--token=a');
-      cli.getConfig(argv).should.eql({ token: 'a' });
+      expect(cli.getConfig(argv)).toEqual({ token: 'a' });
     });
     it('supports repositories', () => {
       argv.push('foo');
       argv.push('bar');
-      cli.getConfig(argv).should.eql({ repositories: ['foo', 'bar'] });
+      expect(cli.getConfig(argv)).toEqual({ repositories: ['foo', 'bar'] });
     });
     it('parses json lists correctly', () => {
       argv.push(
         `--host-rules=[{"domainName":"docker.io","hostType":"docker","username":"user","password":"password"}]`
       );
-      cli.getConfig(argv).should.deep.equal({
+      expect(cli.getConfig(argv)).toEqual({
         hostRules: [
           {
             domainName: 'docker.io',
@@ -92,37 +92,37 @@ describe('config/cli', () => {
     });
     it('parses [] correctly as empty list of hostRules', () => {
       argv.push(`--host-rules=[]`);
-      cli.getConfig(argv).should.eql({
+      expect(cli.getConfig(argv)).toEqual({
         hostRules: [],
       });
     });
     it('parses an empty string correctly as empty list of hostRules', () => {
       argv.push(`--host-rules=`);
-      cli.getConfig(argv).should.eql({
+      expect(cli.getConfig(argv)).toEqual({
         hostRules: [],
       });
     });
     it('migrates --endpoints', () => {
       argv.push(`--endpoints=`);
-      cli.getConfig(argv).should.eql({
+      expect(cli.getConfig(argv)).toEqual({
         hostRules: [],
       });
     });
     it('parses json object correctly when empty', () => {
       argv.push(`--onboarding-config=`);
-      cli.getConfig(argv).should.deep.equal({
+      expect(cli.getConfig(argv)).toEqual({
         onboardingConfig: {},
       });
     });
     it('parses json {} object correctly', () => {
       argv.push(`--onboarding-config={}`);
-      cli.getConfig(argv).should.deep.equal({
+      expect(cli.getConfig(argv)).toEqual({
         onboardingConfig: {},
       });
     });
     it('parses json object correctly', () => {
       argv.push(`--onboarding-config={"extends": ["config:base"]}`);
-      cli.getConfig(argv).should.deep.equal({
+      expect(cli.getConfig(argv)).toEqual({
         onboardingConfig: {
           extends: ['config:base'],
         },

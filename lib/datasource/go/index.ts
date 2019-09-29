@@ -30,7 +30,7 @@ async function getDatasource(name: string): Promise<DataSource | null> {
       hostType: 'go',
     })).body;
     const sourceMatch = res.match(
-      new RegExp(`<meta name="go-source" content="${name}\\s+([^\\s]+)`)
+      new RegExp(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
     );
     if (sourceMatch) {
       const [, goSourceUrl] = sourceMatch;

@@ -33,6 +33,10 @@ By default, Renovate will not assign reviewers and assignees if the PR is to be 
 
 Must be valid usernames.
 
+## assigneesSampleSize
+
+Take a random sample of given size from assignees.
+
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone/something else to merge them. By configuring this setting, you can enable Renovate to automerge branches or PRs itself, therefore reducing the amount of human intervention required.
@@ -1028,6 +1032,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
 
+## reviewersSampleSize
+
+Take a random sample of given size from reviewers.
+
 ## rollbackPrs
 
 Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
@@ -1191,6 +1199,10 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
 Note: Travis renovation is disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
+
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
 
 ## unpublishSafe
 

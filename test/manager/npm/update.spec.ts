@@ -23,7 +23,7 @@ describe('workers/branch/package-json', () => {
       };
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
-      testContent.should.equal(outputContent);
+      expect(testContent).toEqual(outputContent);
     });
     it('replaces a github dependency value', () => {
       const upgrade = {
@@ -124,7 +124,7 @@ describe('workers/branch/package-json', () => {
       };
       const outputContent = readFixture('outputs/012.json');
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
-      testContent.should.equal(outputContent);
+      expect(testContent).toEqual(outputContent);
     });
     it('replaces only the second instance of a value', () => {
       const upgrade = {
@@ -134,7 +134,7 @@ describe('workers/branch/package-json', () => {
       };
       const outputContent = readFixture('outputs/013.json');
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
-      testContent.should.equal(outputContent);
+      expect(testContent).toEqual(outputContent);
     });
     it('handles the case where the desired version is already supported', () => {
       const upgrade = {
@@ -143,7 +143,7 @@ describe('workers/branch/package-json', () => {
         newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
-      testContent.should.equal(input01Content);
+      expect(testContent).toEqual(input01Content);
     });
     it('returns null if throws error', () => {
       const upgrade = {
