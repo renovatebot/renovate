@@ -775,19 +775,6 @@ describe('platform/gitlab', () => {
       expect(api.post.mock.calls).toMatchSnapshot();
     });
     it('auto-accepts the MR when requested', async () => {
-      api.get.mockImplementationOnce(
-        () =>
-          ({
-            body: {
-              email: 'a@b.com',
-            },
-          } as any)
-      );
-      await gitlab.initPlatform({
-        token: 'some-token',
-        allowMergeWhenPipelineSucceeds: true,
-      });
-
       api.post.mockReturnValueOnce({
         body: {
           id: 1,
@@ -797,7 +784,7 @@ describe('platform/gitlab', () => {
       await gitlab.createPr('some-branch', 'some-title', 'the-body', [], true, {
         azureAutoComplete: false,
         statusCheckVerify: false,
-        mergeWhenPipelineSucceeds: true,
+        gitLabAutomerge: true,
       });
       // expect(api.post.mock.calls).toMatchSnapshot();
       expect(api.put.mock.calls).toMatchSnapshot();

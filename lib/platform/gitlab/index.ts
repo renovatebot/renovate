@@ -31,7 +31,6 @@ let config: {
 const defaults = {
   hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
-  allowMergeWhenPipelineSucceeds: false,
 };
 
 let authorId: number;
@@ -39,11 +38,9 @@ let authorId: number;
 export async function initPlatform({
   endpoint,
   token,
-  allowMergeWhenPipelineSucceeds,
 }: {
   token: string;
   endpoint?: string;
-  allowMergeWhenPipelineSucceeds?: boolean;
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -65,9 +62,6 @@ export async function initPlatform({
       'Error authenticating with GitLab. Check that your token includes "user" permissions'
     );
     throw new Error('Init: Authentication failure');
-  }
-  if (allowMergeWhenPipelineSucceeds) {
-    defaults.allowMergeWhenPipelineSucceeds = allowMergeWhenPipelineSucceeds;
   }
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
@@ -730,11 +724,7 @@ export async function createPr(
   if (config.prList) {
     config.prList.push(pr);
   }
-  if (
-    platformOptions &&
-    platformOptions.mergeWhenPipelineSucceeds &&
-    defaults.allowMergeWhenPipelineSucceeds
-  ) {
+  if (platformOptions && platformOptions.gitLabAutomerge) {
     try {
       await api.put(
         `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
