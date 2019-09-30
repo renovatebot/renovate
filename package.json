@@ -180,7 +180,7 @@
     "@types/jest": "24.0.18",
     "@types/js-yaml": "3.12.1",
     "@types/later": "1.2.5",
-    "@types/lodash": "4.14.139",
+    "@types/lodash": "4.14.141",
     "@types/luxon": "1.15.2",
     "@types/nock": "10.0.3",
     "@types/node": "11.13.21",
