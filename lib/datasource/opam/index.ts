@@ -7,6 +7,15 @@ export async function getPkgReleases({
   lookupName,
 }: PkgReleaseConfig): Promise<ReleaseResult> {
   const { depName } = parseDepName(lookupName);
+  const cacheNamespace = 'datasource-opam';
+  const cacheKey = lookupName;
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    cacheKey
+  );
+  if (cachedResult) {
+    return cachedResult;
+  }
   const path = `/repos/ocaml/opam-repository/contents/packages/${depName}/`;
   const baseUrl = 'https://api.github.com';
   const packageUrl = baseUrl + path;
@@ -35,6 +44,8 @@ export async function getPkgReleases({
   if (homepage) {
     result.homepage = homepage;
   }
+  const cacheMinutes = 10;
+  await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
   return result;
 }
 

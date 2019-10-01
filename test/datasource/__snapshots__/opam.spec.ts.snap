@@ -41,6 +41,7 @@ Object {
 
 exports[`datasource/opam getPkgReleases returns versions without homepage field if second request to GitHub API has failed with not found error 1`] = `
 Object {
+  "homepage": "http://0install.net/",
   "name": "0install",
   "releases": Array [
     Object {

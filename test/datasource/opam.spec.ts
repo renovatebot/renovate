@@ -24,6 +24,9 @@ jest.mock('../../lib/util/got');
 
 describe('datasource/opam', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      global.repoCache = {};
+    });
     it('returns versions if both requests to GitHub API are successful', async () => {
       const versionsRes = {
         body: JSON.parse(versionsResBody),
