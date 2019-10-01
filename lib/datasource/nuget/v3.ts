@@ -71,7 +71,7 @@ export async function getPkgReleases(
   }
   const dep: ReleaseResult = {
     pkgName,
-    releases: null,
+    releases: [],
   };
   try {
     const pkgUrlListRaw = await got(queryUrl, {
@@ -89,11 +89,12 @@ export async function getPkgReleases(
     const match = pkgUrlListRaw.body.data.find(
       item => item.id.toLowerCase() === pkgName.toLowerCase()
     );
+    // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#search-result
     if (!match) {
-      // There are no pkgName is current feed
+      // There are no pkgName or releases in current feed
       return null;
     }
-    dep.releases = (match.versions || []).map(item => ({
+    dep.releases = match.versions.map(item => ({
       version: item.version,
     }));
 
@@ -124,21 +125,14 @@ export async function getPkgReleases(
           return dep;
         }
         const nuspec = new XmlDocument(metaresult.body);
-        if (nuspec) {
-          const sourceUrl = parse(
-            nuspec.valueWithPath('metadata.repository@url')
-          );
-          if (sourceUrl) {
-            dep.sourceUrl = sourceUrl;
-          }
+        const sourceUrl = parse(
+          nuspec.valueWithPath('metadata.repository@url')
+        );
+        if (sourceUrl) {
+          dep.sourceUrl = sourceUrl;
         }
-      } else if (
-        Object.prototype.hasOwnProperty.call(
-          pkgUrlListRaw.body.data[0],
-          'projectUrl'
-        )
-      ) {
-        dep.sourceUrl = parse(pkgUrlListRaw.body.data[0].projectUrl);
+      } else if (match.projectUrl) {
+        dep.sourceUrl = parse(match.projectUrl);
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug(

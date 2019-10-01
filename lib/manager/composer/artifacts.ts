@@ -7,6 +7,7 @@ import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -117,8 +118,10 @@ export async function updateArtifacts(
       args =
         ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
     }
-    args +=
-      ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader';
+    args += ' --ignore-platform-reqs --no-ansi --no-interaction';
+    if (global.trustLevel !== 'high') {
+      args += ' --no-scripts --no-autoloader';
+    }
     logger.debug({ cmd, args }, 'composer command');
     ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
       cwd,

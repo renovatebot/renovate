@@ -3,11 +3,12 @@ import _fs from 'fs-extra';
 import fsReal from 'fs';
 import { exec as _exec } from '../../../lib/util/exec';
 import * as manager from '../../../lib/manager/gradle';
+import { platform as _platform, Platform } from '../../../lib/platform';
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 
-const _platform: jest.Mocked<typeof global.platform> = global.platform as any;
+const platform: jest.Mocked<Platform> = _platform as any;
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 
@@ -30,7 +31,7 @@ describe('manager/gradle', () => {
     fs.mkdir.mockResolvedValue();
     fs.exists.mockResolvedValue(true);
     exec.mockResolvedValue({ stdout: 'gradle output', stderr: '' } as never);
-    _platform.getFile.mockResolvedValue('some content');
+    platform.getFile.mockResolvedValue('some content');
   });
 
   describe('extractPackageFile', () => {
@@ -117,13 +118,22 @@ describe('manager/gradle', () => {
       });
     });
 
-    it('should return null and gradle should not be executed if no build.gradle', async () => {
+    it('should return null and gradle should not be executed if no root build.gradle', async () => {
+      fs.exists.mockResolvedValue(false);
+
       const packageFiles = ['foo/build.gradle'];
       expect(
         await manager.extractAllPackageFiles(config, packageFiles)
       ).toBeNull();
 
       expect(exec).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'foo/build.gradle',
+      ]);
+      expect(dependencies).toMatchSnapshot();
     });
 
     it('should configure the renovate report plugin', async () => {

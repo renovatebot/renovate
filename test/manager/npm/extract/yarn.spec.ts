@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { getYarnLock } from '../../../../lib/manager/npm/extract/yarn';
+import { platform as _platform } from '../../../../lib/platform';
 
-const platform: any = global.platform;
+const platform: any = _platform;
 
 describe('manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {

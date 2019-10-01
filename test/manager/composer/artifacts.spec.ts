@@ -1,5 +1,6 @@
 import _fs from 'fs-extra';
 import * as composer from '../../../lib/manager/composer/artifacts';
+import { platform as _platform } from '../../../lib/platform';
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
@@ -8,7 +9,7 @@ jest.mock('../../../lib/util/host-rules');
 const { exec } = require('../../../lib/util/exec');
 const hostRules = require('../../../lib/util/host-rules');
 
-const platform: any = global.platform;
+const platform: any = _platform;
 const fs: any = _fs;
 
 const config = {

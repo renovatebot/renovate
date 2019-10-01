@@ -5,6 +5,8 @@ import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 interface Config {
   storage: GitStorage;
@@ -114,7 +116,7 @@ export async function initRepo({
     url: defaults.endpoint,
   });
   const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+    defaults.endpoint.replace('https://', `https://:${opts.token}@`) +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
   await config.storage.initRepo({
     ...config,
@@ -353,7 +355,7 @@ export async function createPr(
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
   );
-  const description = azureHelper.max4000Chars(body);
+  const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -405,7 +407,7 @@ export async function updatePr(prNo: number, title: string, body?: string) {
     title,
   };
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(body);
+    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
   }
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
@@ -416,7 +418,7 @@ export async function ensureComment(
   content: string
 ) {
   logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${content}`;
+  const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
     {
@@ -486,7 +488,7 @@ export async function mergePr(pr: number) {
 
 export function getPrBody(input: string) {
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 4000)
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
     .replace('<summary>', '**')
     .replace('</summary>', '**')

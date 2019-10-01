@@ -7,26 +7,17 @@ Array [
     "datasource": "gitlab",
     "depName": "mikebryant/include-source-example",
     "depType": "repository",
-    "registryUrls": Array [
-      "http://gitlab.test",
-    ],
   },
   Object {
     "currentValue": "master",
     "datasource": "gitlab",
     "depName": "mikebryant/include-source-example2",
     "depType": "repository",
-    "registryUrls": Array [
-      "http://gitlab.test",
-    ],
   },
   Object {
     "datasource": "gitlab",
     "depName": "mikebryant/include-source-example3",
     "depType": "repository",
-    "registryUrls": Array [
-      "http://gitlab.test",
-    ],
     "skipReason": "unknown-version",
   },
 ]

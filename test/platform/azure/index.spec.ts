@@ -20,6 +20,7 @@ describe('platform/azure', () => {
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
+    require('../../../lib/util/sanitize').sanitize = jest.fn(input => input);
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');

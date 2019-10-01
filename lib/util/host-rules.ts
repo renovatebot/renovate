@@ -1,6 +1,7 @@
 import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
+import * as sanitize from './sanitize';
 
 export interface HostRule {
   hostType?: string;
@@ -28,6 +29,17 @@ export function add(params: HostRule) {
     throw new Error('hostRules cannot contain both a hostName and baseUrl');
   }
   hostRules.push(params);
+  const confidentialFields = ['password', 'token'];
+  confidentialFields.forEach(field => {
+    const secret = params[field];
+    if (secret && secret.length > 3) sanitize.add(secret);
+  });
+  if (params.username && params.password) {
+    const secret = Buffer.from(
+      `${params.username}:${params.password}`
+    ).toString('base64');
+    sanitize.add(secret);
+  }
 }
 
 export interface HostRuleSearch {
@@ -154,4 +166,5 @@ export function hosts({ hostType }: { hostType: string }) {
 
 export function clear() {
   hostRules = [];
+  sanitize.clear();
 }

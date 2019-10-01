@@ -15,6 +15,7 @@ import {
   NpmLockFiles,
 } from '../../common';
 import { NpmPackage } from './common';
+import { platform } from '../../../platform';
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
@@ -148,6 +149,7 @@ export async function extractPackageFile(
     optionalDependencies: 'optionalDependency',
     peerDependencies: 'peerDependency',
     engines: 'engine',
+    volta: 'volta',
   };
 
   function extractDependency(depType: string, depName: string, input: string) {
@@ -180,6 +182,25 @@ export async function extractPackageFile(
       }
       return dep;
     }
+
+    // support for volta
+    if (depType === 'volta') {
+      if (depName === 'node') {
+        dep.datasource = 'github';
+        dep.lookupName = 'nodejs/node';
+        dep.versionScheme = 'node';
+      } else if (depName === 'yarn') {
+        dep.datasource = 'npm';
+        dep.commitMessageTopic = 'Yarn';
+      } else {
+        dep.skipReason = 'unknown-volta';
+      }
+      if (!isValid(dep.currentValue)) {
+        dep.skipReason = 'unknown-version';
+      }
+      return dep;
+    }
+
     if (dep.currentValue.startsWith('npm:')) {
       dep.npmPackageAlias = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
@@ -311,6 +332,7 @@ export async function extractPackageFile(
       skipInstalls = true;
     }
   }
+
   return {
     deps,
     packageJsonName,

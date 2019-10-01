@@ -349,6 +349,13 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
+    allowedValues: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'github',
+      'gitlab',
+    ],
     default: 'github',
     admin: true,
   },
@@ -1007,8 +1014,17 @@ const options: RenovateOptions[] = [
     default: 0, // no limit
   },
   {
+    name: 'prPriority',
+    description:
+      'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
+    type: 'integer',
+    default: 0,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'bbUseDefaultReviewers',
-    description: 'Use the default reviewers (Bitbucket server only).',
+    description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
   },
@@ -1226,6 +1242,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
   },
   {
+    name: 'assigneesSampleSize',
+    description: 'Take a random sample of given size from assignees.',
+    type: 'integer',
+    default: null,
+  },
+  {
     name: 'assignAutomerge',
     description:
       'Assign reviewers and assignees even if the PR is to be automerged',
@@ -1238,6 +1260,12 @@ const options: RenovateOptions[] = [
       'Requested reviewers for Pull Requests (either username or email address depending on the platform)',
     type: 'array',
     subType: 'string',
+  },
+  {
+    name: 'reviewersSampleSize',
+    description: 'Take a random sample of given size from reviewers.',
+    type: 'integer',
+    default: null,
   },
   {
     name: 'fileMatch',
@@ -1603,7 +1631,10 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['^\\.github/main.workflow$'],
+      fileMatch: [
+        '^\\.github/main.workflow$',
+        '^\\.github/workflows/[^/]+\\.ya?ml$',
+      ],
       pinDigests: true,
     },
     mergeable: true,
@@ -1973,6 +2004,12 @@ const options: RenovateOptions[] = [
     description: `Enable or disable pruning of stale branches`,
     type: 'boolean',
     default: true,
+  },
+  {
+    name: 'unicodeEmoji',
+    description: 'Enable or disable Unicode emoji',
+    type: 'boolean',
+    default: false,
   },
 ];
 

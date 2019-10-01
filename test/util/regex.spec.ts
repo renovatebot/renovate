@@ -1,5 +1,5 @@
 import RE2 from 're2';
-import { RegEx } from '../../lib/util/regex';
+import { regEx } from '../../lib/util/regex';
 
 describe('util/regex', () => {
   beforeEach(() => {
@@ -7,7 +7,10 @@ describe('util/regex', () => {
   });
 
   it('uses RE2', () => {
-    expect(RegEx).toEqual(RE2);
+    expect(regEx('foo')).toBeInstanceOf(RE2);
+  });
+  it('throws unsafe 2', () => {
+    expect(() => regEx(`x++`)).toThrow('config-validation');
   });
 
   it('Falls back to RegExp', () => {
@@ -16,6 +19,6 @@ describe('util/regex', () => {
     });
 
     const regex = require('../../lib/util/regex');
-    expect(regex.RegEx).toEqual(RegExp);
+    expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 });

@@ -2,11 +2,10 @@ const prWorker = require('../../../lib/workers/pr');
 /** @type any */
 const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+/** @type any */
+const { platform } = require('../../../lib/platform');
 
 jest.mock('../../../lib/workers/pr/changelog');
-
-/** @type any */
-const platform = global.platform;
 
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
@@ -300,6 +299,23 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+    });
+    it('should add random sample of assignees and reviewers to new PR', async () => {
+      config.assignees = ['foo', 'bar', 'baz'];
+      config.assigneesSampleSize = 2;
+      config.reviewers = ['baz', 'boo', 'bor'];
+      config.reviewersSampleSize = 2;
+      await prWorker.ensurePr(config);
+
+      expect(platform.addAssignees).toHaveBeenCalledTimes(1);
+      const assignees = platform.addAssignees.mock.calls[0][1];
+      expect(assignees.length).toEqual(2);
+      expect(config.assignees).toEqual(expect.arrayContaining(assignees));
+
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      const reviewers = platform.addReviewers.mock.calls[0][1];
+      expect(reviewers.length).toEqual(2);
+      expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
     });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);

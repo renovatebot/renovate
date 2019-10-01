@@ -98,7 +98,7 @@ export async function getPkgReleases({
     }
     if (
       err.statusCode === 429 ||
-      (err.statusCode > 500 && err.statusCode < 600)
+      (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       logger.warn({ lookupName, err }, `cargo crates.io registry failure`);
       throw new Error('registry-failure');

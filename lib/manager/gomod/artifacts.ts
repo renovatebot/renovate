@@ -5,6 +5,7 @@ import { find } from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   goModFileName: string,
@@ -69,7 +70,7 @@ export async function updateArtifacts(
       logger.info('Running go via global command');
       cmd = 'go';
     }
-    let args = 'get';
+    let args = 'get -d ./...';
     if (cmd.includes('.insteadOf')) {
       args += '"';
     }

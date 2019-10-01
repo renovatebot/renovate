@@ -7,6 +7,8 @@ import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -459,7 +461,6 @@ export /* istanbul ignore next */ function ensureIssue(
   title: string,
   body: string
 ) {
-  logger.debug(`ensureIssue(${title}, body={${body}})`);
   logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -591,8 +592,9 @@ async function deleteComment(prNo: number, commentId: number) {
 export async function ensureComment(
   prNo: number,
   topic: string | null,
-  content: string
+  rawContent: string
 ) {
+  const content = sanitize(rawContent);
   try {
     const comments = await getComments(prNo);
     let body: string;
@@ -724,10 +726,11 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  description: string,
+  rawDescription: string,
   _labels?: string[] | null,
   useDefaultBranch?: boolean
 ) {
+  const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   let reviewers = [];
@@ -880,8 +883,9 @@ export async function getPrFiles(prNo: number) {
 export async function updatePr(
   prNo: number,
   title: string,
-  description: string
+  rawDescription: string
 ) {
+  const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
   try {
@@ -949,12 +953,11 @@ export async function mergePr(prNo: number, branchName: string) {
 export function getPrBody(input: string) {
   logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 30000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
-    .replace(new RegExp('<!--.*?-->', 'g'), '')
-    .substring(0, 30000);
+    .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 
 export function getCommitMessages() {

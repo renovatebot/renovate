@@ -9,6 +9,8 @@ import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 let config: utils.Config = {} as any;
 
@@ -57,6 +59,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
+  bbUseDefaultReviewers,
 }: RepoParams) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -66,6 +69,7 @@ export async function initRepo({
   config = {
     repository,
     username: opts!.username,
+    bbUseDefaultReviewers: bbUseDefaultReviewers !== false,
   } as any;
   let info;
   try {
@@ -353,12 +357,12 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(body);
+  const description = getPrBody(sanitize(body));
 
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.info({ title, body }, 'Failed to ensure Issue');
+    logger.info({ title }, 'Failed to ensure Issue');
     return null;
   }
   try {
@@ -476,7 +480,7 @@ export function ensureComment(
   content: string
 ) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  return comments.ensureComment(config, prNo, topic, content);
+  return comments.ensureComment(config, prNo, topic, sanitize(content));
 }
 
 export function ensureCommentRemoval(prNo: number, topic: string) {
@@ -529,9 +533,20 @@ export async function createPr(
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
+  let reviewers = [];
+
+  if (config.bbUseDefaultReviewers) {
+    const reviewersResponse = (await api.get<utils.PagedResult<Reviewer>>(
+      `/2.0/repositories/${config.repository}/default-reviewers`
+    )).body;
+    reviewers = reviewersResponse.values.map((reviewer: Reviewer) => ({
+      uuid: reviewer.uuid,
+    }));
+  }
+
   const body = {
     title,
-    description,
+    description: sanitize(description),
     source: {
       branch: {
         name: branchName,
@@ -543,6 +558,7 @@ export async function createPr(
       },
     },
     close_source_branch: true,
+    reviewers,
   };
 
   const prInfo = (await api.post(
@@ -568,6 +584,10 @@ async function isPrConflicted(prNo: number) {
   )).body;
 
   return utils.isConflicted(parseDiff(diff));
+}
+
+interface Reviewer {
+  uuid: { raw: string };
 }
 
 interface Commit {
@@ -647,7 +667,7 @@ export async function updatePr(
 ) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`, {
-    body: { title, description },
+    body: { title, description: sanitize(description) },
   });
 }
 
@@ -675,12 +695,11 @@ export async function mergePr(prNo: number, branchName: string) {
 
 export function getPrBody(input: string) {
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 50000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/')
-    .substring(0, 50000);
+    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
 }
 
 // Return the commit SHA for a branch

@@ -4,17 +4,13 @@ import * as defaultsParser from './defaults';
 import * as fileParser from './file';
 import * as cliParser from './cli';
 import * as envParser from './env';
-
-// eslint-disable-next-line import/no-cycle
 import { resolveConfigPresets } from './presets';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { RenovateConfig, RenovateConfigStage } from './common';
+import { mergeChildConfig } from './utils';
 
 export * from './common';
-
-function clone<T>(input: T): T {
-  return JSON.parse(JSON.stringify(input));
-}
+export { mergeChildConfig };
 
 export interface ManagerConfig extends RenovateConfig {
   language: string;
@@ -101,43 +97,6 @@ export async function parseConfigs(
   delete config.logFile;
   delete config.logFileLevel;
   return config;
-}
-
-export function mergeChildConfig<T extends RenovateConfig = RenovateConfig>(
-  parent: T,
-  child: RenovateConfig
-): T {
-  logger.trace({ parent, child }, `mergeChildConfig`);
-  if (!child) {
-    return parent;
-  }
-  const parentConfig = clone(parent);
-  const childConfig = clone(child);
-  const config: Record<string, any> = { ...parentConfig, ...childConfig };
-  for (const option of definitions.getOptions()) {
-    if (
-      option.mergeable &&
-      childConfig[option.name] &&
-      parentConfig[option.name]
-    ) {
-      logger.trace(`mergeable option: ${option.name}`);
-      if (option.type === 'array') {
-        config[option.name] = (parentConfig[option.name] || []).concat(
-          config[option.name] || []
-        );
-      } else {
-        config[option.name] = mergeChildConfig(
-          parentConfig[option.name],
-          childConfig[option.name]
-        );
-      }
-      logger.trace(
-        { result: config[option.name] },
-        `Merged config.${option.name}`
-      );
-    }
-  }
-  return Object.assign(config, config.force);
 }
 
 export function filterConfig(

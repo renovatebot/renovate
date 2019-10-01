@@ -2,10 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import * as npmExtract from '../../../../lib/manager/npm/extract';
 import { getConfig } from '../../../../lib/config/defaults';
+import { platform as _platform } from '../../../../lib/platform';
 
 // TODO: fix types
 const defaultConfig = getConfig() as any;
-const platform: any = global.platform;
+const platform: any = _platform;
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -199,6 +200,46 @@ describe('manager/npm/extract', () => {
           yarn: 'disabled',
         },
         main: 'index.js',
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('extracts volta', async () => {
+      const pJson = {
+        main: 'index.js',
+        engines: {
+          node: '8.9.2',
+        },
+        volta: {
+          node: '8.9.2',
+          yarn: '1.12.3',
+          npm: '5.9.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts volta yarn unknown-version', async () => {
+      const pJson = {
+        main: 'index.js',
+        engines: {
+          node: '8.9.2',
+        },
+        volta: {
+          node: '8.9.2',
+          yarn: 'unknown',
+        },
       };
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(

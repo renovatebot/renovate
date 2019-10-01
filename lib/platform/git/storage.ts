@@ -110,7 +110,10 @@ export class Storage {
       const cloneStart = process.hrtime();
       try {
         // clone only the default branch
-        await this._git.clone(config.url, '.', ['--depth=2']);
+        await this._git.clone(config.url, '.', [
+          '--depth=2',
+          '--recurse-submodules',
+        ]);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
         throw new Error('platform-failure');
@@ -190,10 +193,7 @@ export class Storage {
   async setBaseBranch(branchName: string) {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
-        throw new Error(
-          'Cannot set baseBranch to something that does not exist: ' +
-            branchName
-        );
+        throwBaseBranchValidationError(branchName);
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
@@ -215,12 +215,7 @@ export class Storage {
             'unknown revision or path not in the working tree'
           )
         ) {
-          const error = new Error('config-validation');
-          error.validationError = 'baseBranch not found';
-          error.validationMessage =
-            'The following configured baseBranch could not be found: ' +
-            branchName;
-          throw error;
+          throwBaseBranchValidationError(branchName);
         }
         throw err;
       }
@@ -249,7 +244,19 @@ export class Storage {
     if (!exists) {
       return [];
     }
-    const files = await this._git!.raw([
+    const submodules: string[] = (
+      (await this._git!.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
+    const files: string = await this._git!.raw([
       'ls-tree',
       '-r',
       '--name-only',
@@ -259,7 +266,12 @@ export class Storage {
     if (!files) {
       return [];
     }
-    return files.split('\n').filter(Boolean);
+    return files
+      .split('\n')
+      .filter(Boolean)
+      .filter((file: string) =>
+        submodules.every((submodule: string) => !file.startsWith(submodule))
+      );
   }
 
   async branchExists(branchName: string) {
@@ -489,6 +501,14 @@ function checkForPlatformFailure(err: Error) {
       throw new Error('platform-failure');
     }
   }
+}
+
+function throwBaseBranchValidationError(branchName) {
+  const error = new Error('config-validation');
+  error.validationError = 'baseBranch not found';
+  error.validationMessage =
+    'The following configured baseBranch could not be found: ' + branchName;
+  throw error;
 }
 
 export default Storage;

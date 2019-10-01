@@ -56,6 +56,8 @@ If you are not on github.com or gitlab.com, or you prefer to run your own instan
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
 - Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third party binaries (e.g. JS, Docker, Nuget, pip)
 
+[More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/master/docs/development/self-hosting.md).
+
 ## Contributing
 
 If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [.github/contributing.md](.github/contributing.md).

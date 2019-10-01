@@ -9,6 +9,7 @@ describe('platform/github', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
+    jest.unmock('../../../lib/platform');
     jest.mock('delay');
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     jest.mock('../../../lib/util/host-rules');
