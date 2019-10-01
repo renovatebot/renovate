@@ -155,7 +155,7 @@
     "validator": "11.1.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.17.3",
+    "yarn": "1.19.0",
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
