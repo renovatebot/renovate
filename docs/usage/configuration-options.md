@@ -317,7 +317,7 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
-You might interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
+You might be interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
 
 ## gradle
 
@@ -1201,6 +1201,10 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
 Note: Travis renovation is disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
+
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
 
 ## unpublishSafe
 

@@ -1,7 +1,8 @@
-const renovateWorker = require('../lib/workers/global');
+import * as renovateWorker from '../lib/workers/global';
+
 require('../lib/.eslintrc');
 
-renovateWorker.start = jest.fn();
+Object.defineProperty(renovateWorker, 'start', { value: jest.fn() });
 
 describe('renovate', () => {
   it('starts', () => {

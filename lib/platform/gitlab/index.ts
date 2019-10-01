@@ -8,6 +8,7 @@ import { PlatformConfig, RepoParams, RepoConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -830,10 +831,13 @@ export async function mergePr(iid: number) {
 }
 
 export function getPrBody(input: string) {
-  return input
-    .replace(/Pull Request/g, 'Merge Request')
-    .replace(/PR/g, 'MR')
-    .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/');
+  return smartTruncate(
+    input
+      .replace(/Pull Request/g, 'Merge Request')
+      .replace(/PR/g, 'MR')
+      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
+    1000000
+  );
 }
 
 export function getCommitMessages() {
