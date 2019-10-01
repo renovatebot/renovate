@@ -6,19 +6,19 @@ Object {
     Object {
       "currentValue": "*",
       "datasource": "opam",
-      "depName": "dune",
+      "depName": "@opam/dune",
       "depType": "dependencies",
     },
     Object {
       "currentValue": "*",
       "datasource": "opam",
-      "depName": "lambda-term",
+      "depName": "@opam/lambda-term",
       "depType": "dependencies",
     },
     Object {
       "currentValue": "^4.0.0",
       "datasource": "opam",
-      "depName": "lwt",
+      "depName": "@opam/lwt",
       "depType": "dependencies",
     },
     Object {
@@ -30,7 +30,7 @@ Object {
     Object {
       "currentValue": "^3.0.3",
       "datasource": "opam",
-      "depName": "merlin",
+      "depName": "@opam/merlin",
       "depType": "devDependencies",
     },
     Object {
@@ -49,19 +49,19 @@ Object {
     Object {
       "currentValue": "*",
       "datasource": "opam",
-      "depName": "dune",
+      "depName": "@opam/dune",
       "depType": "dependencies",
     },
     Object {
       "currentValue": "*",
       "datasource": "opam",
-      "depName": "lambda-term",
+      "depName": "@opam/lambda-term",
       "depType": "dependencies",
     },
     Object {
       "currentValue": "^4.0.0",
       "datasource": "opam",
-      "depName": "lwt",
+      "depName": "@opam/lwt",
       "depType": "dependencies",
     },
     Object {
@@ -73,7 +73,7 @@ Object {
     Object {
       "currentValue": "^3.0.3",
       "datasource": "opam",
-      "depName": "merlin",
+      "depName": "@opam/merlin",
       "depType": "devDependencies",
     },
     Object {
