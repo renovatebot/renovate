@@ -1,6 +1,7 @@
 import { extractPackageFile } from '../../../lib/manager/helm-requirements/extract';
+import { platform as _platform } from '../../../lib/platform';
 
-const platform: any = global.platform;
+const platform: any = _platform;
 
 describe('lib/manager/helm/extract', () => {
   describe('extractPackageFile()', () => {

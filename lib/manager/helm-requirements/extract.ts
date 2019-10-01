@@ -4,6 +4,7 @@ import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
+import { platform } from '../../platform';
 
 export async function extractPackageFile(
   content: string,
