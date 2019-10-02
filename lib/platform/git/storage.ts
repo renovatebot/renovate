@@ -483,7 +483,7 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CI) {
+  if (process.env.NODE_ENV === 'test') {
     return;
   }
   const platformFailureStrings = [
