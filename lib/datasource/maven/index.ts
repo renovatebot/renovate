@@ -91,10 +91,19 @@ async function downloadMavenXml(
   repoUrl: string,
   dependencyFilePath: string
 ): Promise<XmlDocument | null> {
-  const pkgUrl = new url.URL(
-    `${dependency.dependencyUrl}/${dependencyFilePath}`,
-    repoUrl
-  );
+  let pkgUrl;
+  try {
+    pkgUrl = new url.URL(
+      `${dependency.dependencyUrl}/${dependencyFilePath}`,
+      repoUrl
+    );
+  } catch (err) {
+    logger.debug(
+      { err, dependency, repoUrl, dependencyFilePath },
+      `Error constructing URL for ${dependency.display}`
+    );
+    return null;
+  }
 
   let rawContent: string;
   switch (pkgUrl.protocol) {
