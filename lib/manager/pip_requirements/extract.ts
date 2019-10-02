@@ -11,7 +11,14 @@ const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
 const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+export const dependencyPattern = `(?<depName>${packagePattern})(${extrasPattern})(?<currentValue>${specifierPattern})`;
+
+const digestsRegex = new RegExp(`--hash=(sha256|md5):[a-fA-F0-9]+`, 'g');
+
+function extractDigests(line: string): string[] {
+  const match = line.match(digestsRegex) || [];
+  return match.map(arg => arg.replace('--hash=', ''));
+}
 
 export function extractPackageFile(
   content: string,
@@ -47,27 +54,53 @@ export function extractPackageFile(
   registryUrls = registryUrls.concat(extraUrls);
 
   const regex = new RegExp(`^${dependencyPattern}$`, 'g');
-  const deps = content
-    .split('\n')
-    .map((rawline, lineNumber) => {
-      let dep: PackageDependency = {};
-      const [line, comment] = rawline.split('#').map(part => part.trim());
-      if (isSkipComment(comment)) {
-        dep.skipReason = 'ignored';
+  const deps = [];
+  const lines = content.split('\n');
+
+  let dep: PackageDependency = null;
+  let digests: string[] = [];
+  const flush = () => {
+    if (dep) {
+      const digestCount = digests.length;
+      if (digestCount === 1) {
+        deps.push({ ...dep, currentDigest: digests[0] });
+      } else if (digestCount > 1) {
+        digests
+          .map(currentDigest => ({
+            ...dep,
+            currentDigest,
+            groupName: dep.depName,
+          }))
+          .forEach(d => deps.push(d));
+      } else {
+        deps.push(dep);
       }
-      regex.lastIndex = 0;
-      const matches = regex.exec(line);
-      if (!matches) {
-        return null;
-      }
-      const [, depName, , currentValue] = matches;
+    }
+    dep = null;
+    digests = [];
+  };
+
+  for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
+    const rawline = lines[lineNumber].replace(/\s*\\$/, '');
+    const [line, comment] = rawline.split('#').map(part => part.trim());
+
+    regex.lastIndex = 0;
+    const matches = regex.exec(line);
+    if (matches) {
+      flush();
+      const { depName, currentValue } = matches.groups;
+
       dep = {
-        ...dep,
         depName,
         currentValue,
         managerData: { lineNumber },
         datasource: 'pypi',
       };
+
+      if (isSkipComment(comment)) {
+        dep.skipReason = 'ignored';
+      }
+
       if (
         isValid(currentValue) &&
         isSingleVersion(currentValue) &&
@@ -75,9 +108,12 @@ export function extractPackageFile(
       ) {
         dep.fromVersion = currentValue.replace(/^==/, '');
       }
-      return dep;
-    })
-    .filter(Boolean);
+    }
+
+    digests = [...digests, ...extractDigests(line)];
+  }
+  flush();
+
   if (!deps.length) {
     return null;
   }
@@ -85,5 +121,6 @@ export function extractPackageFile(
   if (registryUrls.length > 0) {
     res.registryUrls = registryUrls;
   }
+
   return res;
 }
