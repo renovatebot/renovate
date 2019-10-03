@@ -40,7 +40,7 @@ export async function initPlatform({
   token,
 }: {
   token: string;
-  endpoint?: string;
+  endpoint: string;
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
