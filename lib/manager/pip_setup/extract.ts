@@ -42,7 +42,7 @@ export async function extractSetupFile(
 ): Promise<PythonSetup> {
   const cwd = config.localDir;
   let cmd: string;
-  const args = [join(__dirname, 'extract.py'), packageFile];
+  const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
   // istanbul ignore if
   if (config.binarySource === 'docker') {
     logger.info('Running python via docker');
