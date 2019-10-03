@@ -118,7 +118,7 @@
     "github-url-from-git": "1.5.0",
     "global-agent": "2.1.1",
     "got": "9.6.0",
-    "handlebars": "4.2.1",
+    "handlebars": "4.4.0",
     "hasha": "5.1.0",
     "ini": "1.3.5",
     "js-yaml": "3.13.1",
@@ -155,7 +155,7 @@
     "validator": "11.1.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.17.3",
+    "yarn": "1.19.0",
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
