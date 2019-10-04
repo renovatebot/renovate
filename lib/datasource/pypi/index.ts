@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import url from 'url';
-import { parse } from 'node-html-parser';
+import { HTMLElement, parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
 
 function normalizeName(input: string) {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
@@ -28,22 +28,32 @@ function compatibleVersions(
   );
 }
 
+function getHostUrls(registryUrls?: string[]) {
+  const result = new Set<string>();
+  if (process.env.PIP_INDEX_URL) {
+    result.add(process.env.PIP_INDEX_URL);
+  } else if (is.nonEmptyArray(registryUrls)) {
+    registryUrls.forEach(registryUrl => {
+      result.add(registryUrl);
+    });
+  } else {
+    result.add('https://pypi.org/pypi/');
+  }
+  return [...result].map(hostUrl => hostUrl.replace(/\/*$/, '/'));
+}
+
+function isSimple(hostUrl: string) {
+  return /\/\+?simple\/$/.test(hostUrl);
+}
+
 export async function getPkgReleases({
   compatibility,
   lookupName,
   registryUrls,
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  let hostUrls = ['https://pypi.org/pypi/'];
-  if (is.nonEmptyArray(registryUrls)) {
-    hostUrls = registryUrls;
-  }
-  if (process.env.PIP_INDEX_URL) {
-    hostUrls = [process.env.PIP_INDEX_URL];
-  }
-  for (let hostUrl of hostUrls) {
-    hostUrl += hostUrl.endsWith('/') ? '' : '/';
+  for (const hostUrl of getHostUrls(registryUrls)) {
     let dep: ReleaseResult;
-    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+    if (isSimple(hostUrl)) {
       dep = await getSimpleDependency(lookupName, hostUrl);
     } else {
       dep = await getDependency(lookupName, hostUrl, compatibility);
@@ -55,19 +65,26 @@ export async function getPkgReleases({
   return null;
 }
 
+function getLookupUrl(depName: string, hostUrl: string, json: boolean) {
+  const depUrl = json ? `${depName}/json` : depName;
+  return url.resolve(hostUrl, depUrl);
+}
+
+async function requestDepData(depName: string, hostUrl: string, json: boolean) {
+  const lookupUrl = getLookupUrl(depName, hostUrl, json);
+  const opts = { json, hostType: 'pypi' };
+  const resp = await got(url.parse(lookupUrl), opts);
+  return resp && resp.body;
+}
+
 async function getDependency(
   depName: string,
   hostUrl: string,
   compatibility: Record<string, string>
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${depName}/json`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const rep = await got(url.parse(lookupUrl), {
-      json: true,
-      hostType: 'pypi',
-    });
-    const dep = rep && rep.body;
+    const dep = await requestDepData(depName, hostUrl, true);
     if (!dep) {
       logger.debug({ dependency: depName }, 'pip package not found');
       return null;
@@ -76,7 +93,11 @@ async function getDependency(
       !(dep.info && normalizeName(dep.info.name) === normalizeName(depName))
     ) {
       logger.warn(
-        { lookupUrl, lookupName: depName, returnedName: dep.info.name },
+        {
+          lookupUrl: getLookupUrl(depName, hostUrl, true),
+          lookupName: depName,
+          returnedName: dep.info.name,
+        },
         'Returned name does not match with requested name'
       );
       return null;
@@ -112,13 +133,9 @@ async function getSimpleDependency(
   depName: string,
   hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${depName}`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const response = await got<string>(url.parse(lookupUrl), {
-      hostType: 'pypi',
-    });
-    const dep = response && response.body;
+    const dep = await requestDepData(depName, hostUrl, false);
     if (!dep) {
       logger.debug({ dependency: depName }, 'pip package not found');
       return null;
@@ -157,4 +174,62 @@ function extractVersionFromLinkText(
     return null;
   }
   return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+}
+
+function getPackageKey({ packagetype, python_version }) {
+  if (packagetype && python_version) {
+    return `${packagetype}:${python_version}`;
+  }
+  return null;
+}
+
+function packageKeyForDigest(releases, currentDigest) {
+  const [alg, digest] = currentDigest.split(':');
+  let result = null;
+  if (releases) {
+    Object.keys(releases).forEach(v => {
+      const items = releases[v] || [];
+      items.forEach(release => {
+        const { digests } = release;
+        if (digests && digests[alg] === digest) {
+          result = getPackageKey(release);
+        }
+      });
+    });
+  }
+  return result;
+}
+
+export async function getDigest(
+  config: Partial<DigestConfig>,
+  value?: string
+): Promise<string | null> {
+  const { lookupName, registryUrls } = config;
+  for (const hostUrl of getHostUrls(registryUrls)) {
+    let data;
+    let result = null;
+    if (isSimple(hostUrl)) {
+      // data = await requestDepData(lookupName, hostUrl, false);
+      // TODO: handle this branch
+    } else {
+      data = await requestDepData(lookupName, hostUrl, true);
+      if (data) {
+        const currentDigest = config.currentDigest;
+        const [alg] = currentDigest.split(':');
+        const packageKey = packageKeyForDigest(data.releases, currentDigest);
+        if (packageKey) {
+          const newReleases = data.releases[value.replace(/^==/, '')];
+          newReleases.forEach(newRelease => {
+            const key = getPackageKey(newRelease);
+            if (key === packageKey && newRelease.digests) {
+              result = `${alg}:${newRelease.digests[alg]}`;
+            }
+          });
+          if (result) logger.info(`${currentDigest} -> ${result}`);
+        }
+      }
+    }
+    return result;
+  }
+  return null;
 }

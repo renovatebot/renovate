@@ -118,9 +118,7 @@ export function getDigest(
   value?: string
 ): Promise<string | null> {
   const lookupName = config.lookupName || config.depName;
-  const { registryUrls } = config;
-  return datasources[config.datasource].getDigest(
-    { lookupName, registryUrls },
-    value
-  );
+  const { registryUrls, currentDigest } = config;
+  const digestConfig = { lookupName, registryUrls, currentDigest };
+  return datasources[config.datasource].getDigest(digestConfig, value);
 }

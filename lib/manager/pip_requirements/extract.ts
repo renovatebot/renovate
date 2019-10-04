@@ -61,17 +61,17 @@ export function extractPackageFile(
   let digests: string[] = [];
   const flush = () => {
     if (dep) {
-      const digestCount = digests.length;
-      if (digestCount === 1) {
-        deps.push({ ...dep, currentDigest: digests[0] });
-      } else if (digestCount > 1) {
-        digests
-          .map(currentDigest => ({
+      if (digests.length) {
+        dep.groupName = dep.depName;
+        deps.push(dep);
+
+        digests.forEach(currentDigest =>
+          deps.push({
             ...dep,
             currentDigest,
-            groupName: dep.depName,
-          }))
-          .forEach(d => deps.push(d));
+            digestOneAndOnly: true,
+          })
+        );
       } else {
         deps.push(dep);
       }

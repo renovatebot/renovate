@@ -12,7 +12,9 @@ export interface PkgReleaseConfig extends Config {
   versionScheme?: string;
 }
 
-export type DigestConfig = Config;
+export interface DigestConfig extends Config {
+  currentDigest?: string;
+}
 
 export interface Release {
   changelogUrl?: string;
