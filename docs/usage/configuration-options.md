@@ -315,7 +315,7 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
-You might interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
+You might be interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
 
 ## gradle
 
@@ -551,6 +551,19 @@ Set enabled to `true` to enable meteor package updating.
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
+
+## mix
+
+Elixir support is in beta stage.
+It should be explicitly enabled in configuration file:
+
+```json
+{
+  "mix": {
+    "enabled": true
+  }
+}
+```
 
 ## node
 

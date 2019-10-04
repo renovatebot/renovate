@@ -37,7 +37,7 @@ export function extractPackageFile(
         const dep = extractDepFromInclude(includeObj);
         if (dep) {
           if (config.endpoint) {
-            dep.registryUrls = [config.endpoint.replace('/api/v4/', '')];
+            dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
           }
           deps.push(dep);
         }

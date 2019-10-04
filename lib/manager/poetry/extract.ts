@@ -28,7 +28,8 @@ export function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  return { deps };
+
+  return { deps, registryUrls: extractRegistries(pyprojectfile) };
 }
 
 function extractFromSection(
@@ -83,4 +84,25 @@ function extractFromSection(
     deps.push(dep);
   });
   return deps;
+}
+
+function extractRegistries(pyprojectfile: PoetryFile): string[] {
+  const sources =
+    pyprojectfile.tool &&
+    pyprojectfile.tool.poetry &&
+    pyprojectfile.tool.poetry.source;
+
+  if (!Array.isArray(sources) || sources.length === 0) {
+    return null;
+  }
+
+  const registryUrls = new Set<string>();
+  for (const source of sources) {
+    if (source.url) {
+      registryUrls.add(source.url);
+    }
+  }
+  registryUrls.add('https://pypi.org/pypi/');
+
+  return Array.from(registryUrls);
 }
