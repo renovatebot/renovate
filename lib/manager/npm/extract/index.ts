@@ -158,10 +158,6 @@ export async function extractPackageFile(
       dep.skipReason = 'invalid-name';
       return dep;
     }
-    if (typeof input !== 'string') {
-      dep.skipReason = 'invalid-value';
-      return dep;
-    }
     dep.currentValue = input.trim();
     if (depType === 'engines') {
       if (depName === 'node') {
