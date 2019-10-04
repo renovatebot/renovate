@@ -552,6 +552,19 @@ Set enabled to `true` to enable meteor package updating.
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
+## mix
+
+Elixir support is in beta stage.
+It should be explicitly enabled in configuration file:
+
+```json
+{
+  "mix": {
+    "enabled": true
+  }
+}
+```
+
 ## node
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).

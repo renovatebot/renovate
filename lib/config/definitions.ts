@@ -1422,6 +1422,19 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'mix',
+    releaseStatus: 'beta',
+    description: 'Configuration object for Mix module renovation',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      enabled: false,
+      fileMatch: ['(^|/)mix\\.exs$'],
+      versionScheme: 'hex',
+    },
+    mergeable: true,
+  },
+  {
     name: 'rust',
     releaseStatus: 'unpublished',
     description: 'Configuration option for Rust package management.',

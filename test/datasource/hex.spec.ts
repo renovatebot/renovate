@@ -27,7 +27,12 @@ describe('datasource/hex', () => {
       ).toBeNull();
     });
     it('returns null for missing fields', async () => {
-      got.mockReturnValueOnce({ res: {} });
+      got.mockReturnValueOnce({});
+      expect(
+        await getPkgReleases({ lookupName: 'non_existent_package' })
+      ).toBeNull();
+
+      got.mockReturnValueOnce({ body: {} });
       expect(
         await getPkgReleases({ lookupName: 'non_existent_package' })
       ).toBeNull();
@@ -47,6 +52,26 @@ describe('datasource/hex', () => {
         })
       );
       expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
+    });
+    it('throws for 429', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 429,
+        })
+      );
+      await expect(
+        getPkgReleases({ lookupName: 'some_crate' })
+      ).rejects.toThrowError('registry-failure');
+    });
+    it('throws for 5xx', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      await expect(
+        getPkgReleases({ lookupName: 'some_crate' })
+      ).rejects.toThrowError('registry-failure');
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
