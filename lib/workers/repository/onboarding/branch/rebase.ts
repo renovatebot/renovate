@@ -1,15 +1,16 @@
-const { logger } = require('../../../../logger');
-const { getOnboardingConfig } = require('./config');
-const {
+import { logger } from '../../../../logger';
+import { getOnboardingConfig } from './config';
+import {
   configFileNames,
   onboardingBranch,
-} = require('../../../../config/app-strings');
-const { platform } = require('../../../../platform');
+} from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { platform } from '../../../../platform';
 
 const defaultConfigFile = configFileNames[0];
 
-function getCommitMessage(config) {
-  let commitMessage;
+function getCommitMessage(config: RenovateConfig): string {
+  let commitMessage: string;
   // istanbul ignore if
   if (config.semanticCommits) {
     commitMessage = config.semanticCommitType;
@@ -24,7 +25,9 @@ function getCommitMessage(config) {
   return commitMessage;
 }
 
-async function rebaseOnboardingBranch(config) {
+export async function rebaseOnboardingBranch(
+  config: RenovateConfig
+): Promise<void> {
   logger.debug('Checking if onboarding branch needs rebasing');
   const pr = await platform.getBranchPr(onboardingBranch);
   if (pr.isModified) {
@@ -60,7 +63,3 @@ async function rebaseOnboardingBranch(config) {
     );
   }
 }
-
-module.exports = {
-  rebaseOnboardingBranch,
-};

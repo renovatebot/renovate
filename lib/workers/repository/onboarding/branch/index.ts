@@ -1,12 +1,15 @@
-const { logger } = require('../../../../logger');
-const { extractAllDependencies } = require('../../extract');
-const { createOnboardingBranch } = require('./create');
-const { rebaseOnboardingBranch } = require('./rebase');
-const { isOnboarded, onboardingPrExists } = require('./check');
-const { onboardingBranch } = require('../../../../config/app-strings');
-const { platform } = require('../../../../platform');
+import { logger } from '../../../../logger';
+import { extractAllDependencies } from '../../extract';
+import { createOnboardingBranch } from './create';
+import { rebaseOnboardingBranch } from './rebase';
+import { isOnboarded, onboardingPrExists } from './check';
+import { onboardingBranch } from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { platform } from '../../../../platform';
 
-async function checkOnboardingBranch(config) {
+export async function checkOnboardingBranch(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
   const repoIsOnboarded = await isOnboarded(config);
@@ -35,7 +38,3 @@ async function checkOnboardingBranch(config) {
   const branchList = [onboardingBranch];
   return { ...config, repoIsOnboarded, branchList };
 }
-
-module.exports = {
-  checkOnboardingBranch,
-};

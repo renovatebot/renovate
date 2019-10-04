@@ -1,20 +1,21 @@
-const { logger } = require('../../../../logger');
-const { platform } = require('../../../../platform');
-const {
+import { logger } from '../../../../logger';
+import { platform } from '../../../../platform';
+import {
   appName,
   appSlug,
   configFileNames,
   onboardingBranch,
   onboardingPrTitle,
-} = require('../../../../config/app-strings');
+} from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
 
-const findFile = async fileName => {
+const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
   const fileList = await platform.getFileList();
   return fileList.includes(fileName);
 };
 
-const configFileExists = async () => {
+const configFileExists = async (): Promise<boolean> => {
   for (const fileName of configFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
       return true;
@@ -23,7 +24,7 @@ const configFileExists = async () => {
   return false;
 };
 
-const packageJsonConfigExists = async () => {
+const packageJsonConfigExists = async (): Promise<boolean> => {
   try {
     const pJson = JSON.parse(await platform.getFile('package.json'));
     if (pJson[appSlug]) {
@@ -38,7 +39,7 @@ const packageJsonConfigExists = async () => {
 const closedPrExists = () =>
   platform.findPr(onboardingBranch, onboardingPrTitle, '!open');
 
-const isOnboarded = async config => {
+export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a ${appName} config`;
   // Repo is onboarded if admin is bypassing onboarding and does not require a
@@ -87,9 +88,4 @@ const isOnboarded = async config => {
   throw new Error('disabled');
 };
 
-const onboardingPrExists = () => platform.getBranchPr(onboardingBranch);
-
-module.exports = {
-  isOnboarded,
-  onboardingPrExists,
-};
+export const onboardingPrExists = () => platform.getBranchPr(onboardingBranch);
