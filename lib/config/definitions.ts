@@ -1942,6 +1942,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'insecureRegistry',
+    description: 'explicity turn on insecure docker registry access (http)',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',
