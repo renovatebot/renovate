@@ -7,6 +7,7 @@ export function updateDependency(
   upgrade: Upgrade
 ): string | null {
   try {
+    if (upgrade.currentValue === upgrade.newValue) return fileContent;
     logger.debug(`pip_requirements.updateDependency(): ${upgrade.newValue}`);
     const lines = fileContent.split('\n');
     const oldValue = lines[upgrade.managerData.lineNumber];
@@ -33,7 +34,14 @@ export function updateDependency(
       );
     }
     lines[upgrade.managerData.lineNumber] = newValue;
-    return lines.join('\n');
+    const result = lines.join('\n');
+
+    const { currentDigest, newDigest } = upgrade;
+    if (currentDigest && newDigest) {
+      return result.replace(currentDigest, newDigest);
+    }
+
+    return result;
   } catch (err) {
     logger.info({ err }, 'Error setting new package version');
     return null;

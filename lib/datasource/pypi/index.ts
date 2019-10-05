@@ -225,7 +225,6 @@ export async function getDigest(
               result = `${alg}:${newRelease.digests[alg]}`;
             }
           });
-          if (result) logger.info(`${currentDigest} -> ${result}`);
         }
       }
     }

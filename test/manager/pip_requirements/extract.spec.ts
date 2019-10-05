@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { extractPackageFile } from '../../../lib/manager/pip_requirements/extract';
+import { extractPackageFile } from '../../../lib/manager/pip_requirements';
 
 const requirements1 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements1.txt',
@@ -26,6 +26,11 @@ const requirements5 = readFileSync(
 
 const requirements6 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements6.txt',
+  'utf8'
+);
+
+const requirements7 = readFileSync(
+  'test/manager/pip_requirements/_fixtures/requirements7.txt',
   'utf8'
 );
 
@@ -92,6 +97,15 @@ describe('lib/manager/pip_requirements/extract', () => {
         'http://example.com/private-pypi/',
       ]);
       expect(res.deps).toHaveLength(6);
+    });
+    it('extracts hashes', () => {
+      const { deps } = extractPackageFile(
+        requirements7,
+        'unused_file_name',
+        config
+      );
+      expect(deps).toMatchSnapshot(deps);
+      expect(deps).toHaveLength(8);
     });
   });
 });

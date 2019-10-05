@@ -13,7 +13,8 @@ const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(?<depName>${packagePattern})(${extrasPattern})(?<currentValue>${specifierPattern})`;
 
-const digestsRegex = new RegExp(`--hash=(sha256|md5):[a-fA-F0-9]+`, 'g');
+const digestPattern = `--hash=sha256:[a-fA-F0-9]+`;
+const digestsRegex = new RegExp(digestPattern, 'g');
 
 function extractDigests(line: string): string[] {
   const match = line.match(digestsRegex) || [];
@@ -53,7 +54,10 @@ export function extractPackageFile(
   }
   registryUrls = registryUrls.concat(extraUrls);
 
-  const regex = new RegExp(`^${dependencyPattern}$`, 'g');
+  const regex = new RegExp(
+    `^${dependencyPattern}(\\s+${digestPattern})*$`,
+    'g'
+  );
   const deps = [];
   const lines = content.split('\n');
 
@@ -81,11 +85,12 @@ export function extractPackageFile(
   };
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-    const rawline = lines[lineNumber].replace(/\s*\\$/, '');
+    const rawline = lines[lineNumber];
     const [line, comment] = rawline.split('#').map(part => part.trim());
+    const trimmedLine = comment ? line : line.replace(/\s*\\$/, '');
 
     regex.lastIndex = 0;
-    const matches = regex.exec(line);
+    const matches = regex.exec(trimmedLine);
     if (matches) {
       flush();
       const { depName, currentValue } = matches.groups;
@@ -110,7 +115,7 @@ export function extractPackageFile(
       }
     }
 
-    digests = [...digests, ...extractDigests(line)];
+    digests = [...digests, ...extractDigests(trimmedLine)];
   }
   flush();
 
