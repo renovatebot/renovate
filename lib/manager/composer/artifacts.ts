@@ -101,6 +101,10 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [config.localDir, process.env.COMPOSER_CACHE_DIR];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = ['COMPOSER_CACHE_DIR'];

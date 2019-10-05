@@ -178,6 +178,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'dockerUser',
+    description:
+      'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
+    admin: true,
+    type: 'string',
+  },
   // Log options
   {
     name: 'logLevel',
