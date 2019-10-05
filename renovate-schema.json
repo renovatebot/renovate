@@ -1335,6 +1335,11 @@
       "description": "Enable or disable Unicode emoji",
       "type": "boolean",
       "default": false
+    },
+    "gitLabAutomerge": {
+      "description": "Enable or disable usage of GitLab's \"merge when pipeline succeeds\" feature when automerging PRs",
+      "type": "boolean",
+      "default": false
     }
   }
 }

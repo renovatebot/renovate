@@ -293,6 +293,10 @@ See https://docs.renovatebot.com/config-presets for details.
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## gitLabAutomerge
+
+Please note that when this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
+
 ## github-actions
 
 **Important note**: For security reasons, GitHub has blocked integrations/apps from editing GitHub Actions workflow files in _any_ branch, so this only works on GitHub if using a Personal Access Token.

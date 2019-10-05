@@ -68,6 +68,7 @@ Array [
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -115,6 +116,7 @@ Array [
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -179,6 +181,7 @@ note 2
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -226,6 +229,7 @@ Array [
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
