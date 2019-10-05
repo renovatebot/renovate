@@ -1,3 +1,5 @@
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
@@ -11,7 +13,7 @@ import { smartTruncate } from '../utils/pr-body';
 interface Config {
   storage: GitStorage;
   repoForceRebase: boolean;
-  mergeMethod: string;
+  mergeMethod: GitPullRequestMergeStrategy;
   baseCommitSHA: string | undefined;
   baseBranch: string;
   defaultBranch: string;
@@ -86,7 +88,7 @@ export async function initRepo({
   config.baseBranch = config.defaultBranch;
   logger.debug(`${repository} default branch = ${config.defaultBranch}`);
   config.baseCommitSHA = await getBranchCommit(config.baseBranch);
-  config.mergeMethod = 'merge';
+  config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
 
   if (optimizeForDisabled) {
@@ -379,7 +381,7 @@ export async function createPr(
           id: pr.createdBy!.id,
         },
         completionOptions: {
-          squashMerge: true,
+          mergeStrategy: config.mergeMethod,
           deleteSourceBranch: true,
         },
       },
