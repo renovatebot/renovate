@@ -70,6 +70,10 @@ export async function generateLockFile(
     if (config.binarySource === 'docker') {
       logger.info('Running npm via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [cwd];
       if (config.cacheDir) {
         volumes.push(config.cacheDir);

@@ -66,6 +66,10 @@
       "type": "boolean",
       "default": false
     },
+    "dockerUser": {
+      "description": "Specify UID and GID for docker-based binaries when binarySource=docker is used.",
+      "type": "string"
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
