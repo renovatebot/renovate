@@ -255,7 +255,7 @@ This is a way to "whitelist" certain package managers and disable all others.
 
 By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
 
-This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" managers (docker or node).
+Possible managers are: `'ansible', 'bazel', 'buildkite', 'bundler', 'cargo', 'circleci', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'homebrew', 'kubernetes', 'leiningen', 'maven', 'meteor', 'mix', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'sbt', 'swift', 'terraform', 'travis', 'ruby-version'`
 
 Example:
 
