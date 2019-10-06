@@ -159,7 +159,7 @@
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
-    "re2": "1.10.3"
+    "re2": "1.10.4"
   },
   "devDependencies": {
     "@babel/cli": "7.6.2",
