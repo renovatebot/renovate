@@ -420,6 +420,9 @@ export class Storage {
         // istanbul ignore if
         if (file.name === '|delete|') {
           deleted.push(file.contents);
+        } else if (await isDirectory(join(this._cwd!, file.name))) {
+          fileNames.push(file.name);
+          await this._git!.add(file.name);
         } else {
           fileNames.push(file.name);
           await fs.outputFile(
@@ -521,6 +524,14 @@ function throwBaseBranchValidationError(branchName) {
   error.validationMessage =
     'The following configured baseBranch could not be found: ' + branchName;
   throw error;
+}
+
+async function isDirectory(dir: string): Promise<boolean> {
+  try {
+    return (await fs.stat(dir)).isDirectory();
+  } catch (err) {
+    return false;
+  }
 }
 
 export default Storage;

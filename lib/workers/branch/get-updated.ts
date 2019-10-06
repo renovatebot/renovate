@@ -70,6 +70,12 @@ export async function getUpdatedPackageFiles(
         logger.debug('Updating packageFile content');
         updatedFileContents[packageFile] = newContent;
       }
+      if (
+        newContent === existingContent &&
+        config.datasource === 'gitSubmodules'
+      ) {
+        updatedFileContents[packageFile] = newContent;
+      }
     }
   }
   const updatedPackageFiles = Object.keys(updatedFileContents).map(name => ({

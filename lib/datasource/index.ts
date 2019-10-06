@@ -9,6 +9,7 @@ import * as hex from './hex';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as gitTags from './git-tags';
+import * as gitSubmodules from './git-submodules';
 import * as go from './go';
 import * as gradleVersion from './gradle-version';
 import * as helm from './helm';
@@ -41,6 +42,7 @@ const datasources: Record<string, Datasource> = {
   github,
   gitlab,
   gitTags,
+  gitSubmodules,
   go,
   gradleVersion,
   maven,

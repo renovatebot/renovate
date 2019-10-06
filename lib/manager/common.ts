@@ -144,6 +144,7 @@ export interface Upgrade<T = Record<string, any>>
   currentVersion?: string;
   depGroup?: string;
   downloadUrl?: string;
+  localDir?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;

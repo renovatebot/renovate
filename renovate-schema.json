@@ -305,6 +305,7 @@
         "cargo",
         "composer",
         "docker",
+        "git",
         "hashicorp",
         "hex",
         "ivy",
@@ -1105,6 +1106,15 @@
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)composer.json$"],
         "versionScheme": "composer"
+      },
+      "$ref": "#"
+    },
+    "git-submodules": {
+      "description": "Configuration object for git submodule files",
+      "type": "object",
+      "default": {
+        "versionScheme": "git",
+        "fileMatch": ["(^|/).gitmodules$"]
       },
       "$ref": "#"
     },
