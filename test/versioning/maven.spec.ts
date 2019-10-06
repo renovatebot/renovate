@@ -57,6 +57,7 @@ describe('versioning/maven/compare', () => {
     expect(compare('0.0-1552', '0.0-1552')).toEqual(0);
     expect(compare('v0.0-1552', '0.0-1552')).toEqual(0);
     expect(compare('v0.0.1', '0.0.1')).toEqual(0);
+    expect(compare('5.0.7', '5.0.7.RELEASE')).toEqual(0);
   });
   it('returns less than', () => {
     expect(compare('1', '1.1')).toEqual(-1);
