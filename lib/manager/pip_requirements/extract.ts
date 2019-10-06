@@ -68,7 +68,6 @@ export function extractPackageFile(
       if (digests.length) {
         dep.groupName = dep.depName;
         deps.push(dep);
-
         digests.forEach(currentDigest =>
           deps.push({
             ...dep,

@@ -176,7 +176,10 @@ function extractVersionFromLinkText(
   return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
 }
 
-function getPackageKey({ packagetype, python_version }) {
+function getPackageKey({ packagetype, python_version, packageKey }) {
+  if (packageKey) {
+    return packageKey;
+  }
   if (packagetype && python_version) {
     return `${packagetype}:${python_version}`;
   }
@@ -205,29 +208,58 @@ export async function getDigest(
   value?: string
 ): Promise<string | null> {
   const { lookupName, registryUrls } = config;
+  const currentDigest = config.currentDigest;
+  const [alg] = currentDigest.split(':');
   for (const hostUrl of getHostUrls(registryUrls)) {
     let data;
     let result = null;
     if (isSimple(hostUrl)) {
-      // data = await requestDepData(lookupName, hostUrl, false);
-      // TODO: handle this branch
+      data = await requestDepData(lookupName, hostUrl, false);
+      if (data) {
+        const root: HTMLElement = parse(data) as any;
+        const links = root.querySelectorAll('a');
+        data = {
+          releases: links.reduce((acc, link) => {
+            const href = link.attributes.href.replace(/^.*\//, '');
+            const [urlPart, hashPart] = href.split(`#${alg}=`);
+            const version = urlPart
+              .replace(`${lookupName}-`, '')
+              .replace(`${normalizeName(lookupName)}-`, '')
+              .replace('.tar.gz', '')
+              .replace('.whl', '')
+              .replace(/-.*$/, '');
+            const packageKey = urlPart;
+
+            if (!acc[version]) acc[version] = [];
+
+            acc[version].push({
+              packageKey,
+              digests: {
+                [alg]: hashPart,
+              },
+            });
+
+            return acc;
+          }, {}),
+        };
+      }
     } else {
       data = await requestDepData(lookupName, hostUrl, true);
-      if (data) {
-        const currentDigest = config.currentDigest;
-        const [alg] = currentDigest.split(':');
-        const packageKey = packageKeyForDigest(data.releases, currentDigest);
-        if (packageKey) {
-          const newReleases = data.releases[value.replace(/^==/, '')];
-          newReleases.forEach(newRelease => {
-            const key = getPackageKey(newRelease);
-            if (key === packageKey && newRelease.digests) {
-              result = `${alg}:${newRelease.digests[alg]}`;
-            }
-          });
-        }
+    }
+
+    if (data) {
+      const packageKey = packageKeyForDigest(data.releases, currentDigest);
+      if (packageKey) {
+        const newReleases = data.releases[value.replace(/^==/, '')];
+        newReleases.forEach(newRelease => {
+          const key = getPackageKey(newRelease);
+          if (key === packageKey && newRelease.digests) {
+            result = `${alg}:${newRelease.digests[alg]}`;
+          }
+        });
       }
     }
+
     return result;
   }
   return null;
