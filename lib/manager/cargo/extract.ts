@@ -95,6 +95,7 @@ function extractFromSection(
       currentValue: currentValue as any,
       managerData: { nestedVersion },
       datasource: 'cargo',
+      versionScheme: 'cargo',
     };
     if (skipReason) {
       dep.skipReason = skipReason;
