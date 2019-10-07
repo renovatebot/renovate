@@ -576,38 +576,66 @@ describe('platform/github', () => {
       const res = await github.getBranchStatus('somebranch', null);
       expect(res).toEqual('success');
     });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo({
-        repository: 'some/repo',
-      });
-      const res = await github.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual('failed');
-    });
-    it('should pass through success', async () => {
+    // it('return failed if unsupported requiredStatusChecks', async () => {
+    //   await initRepo({
+    //     repository: 'some/repo',
+    //   });
+    //   const res = await github.getBranchStatus('somebranch', ['foo']);
+    //   expect(res).toEqual('failed');
+    // });
+    it('should pass through success (with empty array)', async () => {
       await initRepo({
         repository: 'some/repo',
       });
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: {
-              state: 'success',
-            },
+            body: [
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+            ],
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
       expect(res).toEqual('success');
     });
-    it('should pass through failed', async () => {
+    it('should pass through failed (with empty array)', async () => {
       await initRepo({
         repository: 'some/repo',
       });
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: {
-              state: 'failed',
-            },
+            body: [
+              {
+                state: 'failure',
+              },
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+              {
+                state: 'success',
+              },
+            ],
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
@@ -620,10 +648,7 @@ describe('platform/github', () => {
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: {
-              state: 'pending',
-              statuses: [],
-            },
+            body: [],
           } as any)
       );
       api.get.mockImplementationOnce(
@@ -658,10 +683,7 @@ describe('platform/github', () => {
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: {
-              state: 'pending',
-              statuses: [],
-            },
+            body: [],
           } as any)
       );
       api.get.mockImplementationOnce(
@@ -696,10 +718,7 @@ describe('platform/github', () => {
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: {
-              state: 'pending',
-              statuses: [],
-            },
+            body: [],
           } as any)
       );
       api.get.mockImplementationOnce(
@@ -721,6 +740,167 @@ describe('platform/github', () => {
                 },
               ],
             },
+          } as any)
+      );
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual('pending');
+    });
+    it('should pass through success (with non-empty array)', async () => {
+      await initRepo({
+        repository: 'some/repo',
+      });
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [
+              {
+                state: 'failure',
+                context: 'context1',
+              },
+              {
+                state: 'success',
+                context: 'context2',
+              },
+              {
+                state: 'success',
+                context: 'context3',
+              },
+              {
+                state: 'failure',
+                context: 'context4',
+              },
+              {
+                state: 'success',
+                context: 'context5',
+              },
+            ],
+          } as any)
+      );
+      const res = await github.getBranchStatus('somebranch', [
+        'context2',
+        'context3',
+        'context5',
+      ]);
+      expect(res).toEqual('success');
+    });
+    it('should pass through failed (with non-empty array)', async () => {
+      await initRepo({
+        repository: 'some/repo',
+      });
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [
+              {
+                state: 'failure',
+                context: 'context1',
+              },
+              {
+                state: 'success',
+                context: 'context2',
+              },
+              {
+                state: 'success',
+                context: 'context3',
+              },
+              {
+                state: 'failure',
+                context: 'context4',
+              },
+              {
+                state: 'success',
+                context: 'context5',
+              },
+            ],
+          } as any)
+      );
+      const res = await github.getBranchStatus('somebranch', [
+        'context1',
+        'context3',
+        'context5',
+      ]);
+      expect(res).toEqual('failed');
+    });
+    it('should pass through pending (with non-empty array)', async () => {
+      await initRepo({
+        repository: 'some/repo',
+      });
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [
+              {
+                state: 'pending',
+                context: 'context1',
+              },
+              {
+                state: 'success',
+                context: 'context2',
+              },
+              {
+                state: 'success',
+                context: 'context3',
+              },
+              {
+                state: 'failure',
+                context: 'context4',
+              },
+              {
+                state: 'success',
+                context: 'context5',
+              },
+            ],
+          } as any)
+      );
+      const res = await github.getBranchStatus('somebranch', [
+        'context1',
+        'context3',
+        'context5',
+      ]);
+      expect(res).toEqual('pending');
+    });
+    it('should pass through pending when not all required statuses exists (with non-empty array)', async () => {
+      await initRepo({
+        repository: 'some/repo',
+      });
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [
+              {
+                state: 'success',
+                context: 'context1',
+              },
+              {
+                state: 'success',
+                context: 'context2',
+              },
+              {
+                state: 'success',
+                context: 'context3',
+              },
+              {
+                state: 'failure',
+                context: 'context4',
+              },
+            ],
+          } as any)
+      );
+      const res = await github.getBranchStatus('somebranch', [
+        'context1',
+        'context3',
+        'context5',
+      ]);
+      expect(res).toEqual('pending');
+    });
+    it('should pass through pending with empty statuses and empty `requiredStatusChecks`', async () => {
+      await initRepo({
+        repository: 'some/repo',
+      });
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [],
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);

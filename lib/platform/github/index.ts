@@ -561,7 +561,7 @@ export async function getBranchPr(branchName: string) {
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any
+  requiredStatusChecks: string[] | null
 ) {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
@@ -569,15 +569,18 @@ export async function getBranchStatus(
     logger.debug('Status checks disabled = returning "success"');
     return 'success';
   }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
-  }
-  const commitStatusUrl = `repos/${config.repository}/commits/${branchName}/status`;
-  let commitStatus;
+  const commitStatusUrl = `repos/${config.repository}/commits/${branchName}/statuses`;
+  let commitStatuses: {
+    context: string;
+    state: string;
+  }[];
   try {
-    commitStatus = (await api.get(commitStatusUrl)).body;
+    commitStatuses = (await api.get<
+      {
+        context: string;
+        state: string;
+      }[]
+    >(commitStatusUrl)).body;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.info(
@@ -588,10 +591,7 @@ export async function getBranchStatus(
     logger.info('Unknown error when checking branch status');
     throw err;
   }
-  logger.debug(
-    { state: commitStatus.state, statuses: commitStatus.statuses },
-    'branch status check result'
-  );
+  logger.debug({ statuses: commitStatuses }, 'branch status check result');
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
   if (!config.isGhe) {
     try {
@@ -629,17 +629,44 @@ export async function getBranchStatus(
       }
     }
   }
-  if (checkRuns.length === 0) {
-    return commitStatus.state;
+
+  const filteredStatuses = commitStatuses.filter(
+    status =>
+      requiredStatusChecks.includes(status.context) ||
+      requiredStatusChecks.length === 0
+  );
+  const contexts = filteredStatuses.map(s => s.context);
+  const states = filteredStatuses.map(s => s.state);
+  const allStatusesExists = requiredStatusChecks.every(s =>
+    contexts.includes(s)
+  );
+
+  let filteredStatusesCombined: string;
+  if (states.includes('failure') || states.includes('error')) {
+    filteredStatusesCombined = 'failed';
+  } else if (
+    states.includes('pending') ||
+    !allStatusesExists ||
+    (requiredStatusChecks.length === 0 && filteredStatuses.length === 0)
+  ) {
+    filteredStatusesCombined = 'pending';
+  } else {
+    filteredStatusesCombined = 'success';
   }
+
+  if (checkRuns.length === 0) {
+    return filteredStatusesCombined;
+  }
+
   if (
-    commitStatus.state === 'failed' ||
+    filteredStatusesCombined === 'failed' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
     return 'failed';
   }
+
   if (
-    (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
+    (filteredStatusesCombined === 'success' || filteredStatuses.length === 0) &&
     checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
   ) {
     return 'success';
