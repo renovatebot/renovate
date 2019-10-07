@@ -322,11 +322,6 @@ export async function getBranchStatus(
     // null means disable status checks, so it always succeeds
     return 'success';
   }
-  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
-  }
 
   if (!(await branchExists(branchName))) {
     throw new Error('repository-changed');
@@ -336,27 +331,40 @@ export async function getBranchStatus(
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
-  const res = await api.get(url, { paginate: true });
-  logger.debug(`Got res with ${res.body.length} results`);
-  if (res.body.length === 0) {
-    // Return 'pending' if we have no status checks
-    return 'pending';
+  const res = await api.get<
+    { status: string; name: string; allow_failure?: boolean }[]
+  >(url, { paginate: true });
+  const commitStatuses = res.body;
+  logger.debug(`Got res with ${commitStatuses.length} results`);
+  const filteredCommitStatuses = commitStatuses.filter(
+    status =>
+      requiredStatusChecks.length === 0 ||
+      requiredStatusChecks.includes(status.name)
+  );
+
+  const names = filteredCommitStatuses.map(s => s.name);
+  const statuses = filteredCommitStatuses
+    .filter(s => !s.allow_failure)
+    .map(s => s.status);
+  const allRequiredStatusExists = requiredStatusChecks.every(s =>
+    names.includes(s)
+  );
+
+  let combinedStatuses: string;
+  if (statuses.includes('failed') || statuses.includes('canceled')) {
+    combinedStatuses = 'failed';
+  } else if (
+    statuses.includes('pending') ||
+    statuses.includes('running') ||
+    !allRequiredStatusExists ||
+    (requiredStatusChecks.length === 0 && filteredCommitStatuses.length === 0)
+  ) {
+    combinedStatuses = 'pending';
+  } else {
+    combinedStatuses = 'success';
   }
-  let status = 'success';
-  // Return 'success' if all are success
-  res.body.forEach((check: { status: string; allow_failure?: boolean }) => {
-    // If one is failed then don't overwrite that
-    if (status !== 'failure') {
-      if (!check.allow_failure) {
-        if (check.status === 'failed') {
-          status = 'failure';
-        } else if (check.status !== 'success') {
-          ({ status } = check);
-        }
-      }
-    }
-  });
-  return status;
+
+  return combinedStatuses;
 }
 
 export async function getBranchStatusCheck(

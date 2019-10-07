@@ -354,10 +354,6 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getBranchStatus('somebranch', null);
       expect(res).toEqual('success');
     });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      const res = await gitlab.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual('failed');
-    });
     it('returns pending if no results', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
@@ -385,7 +381,7 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('success');
     });
-    it('returns failure if any mandatory jobs fails', async () => {
+    it('returns failed if any mandatory jobs fails', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
         body: [
@@ -395,15 +391,78 @@ describe('platform/gitlab', () => {
         ],
       } as any);
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('failure');
+      expect(res).toEqual('failed');
     });
-    it('returns custom statuses', async () => {
+    it('returns pending if any mandatory jobs are on pending', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
-        body: [{ status: 'success' }, { status: 'foo' }],
+        body: [
+          { status: 'pending' },
+          { status: 'failed', allow_failure: true },
+          { status: 'success' },
+        ],
       } as any);
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('foo');
+      expect(res).toEqual('pending');
+    });
+    it('returns success if all specified are success', async () => {
+      await initRepo();
+      api.get.mockReturnValueOnce({
+        body: [
+          { status: 'success', name: 'test1' },
+          { status: 'success', name: 'test2' },
+          { status: 'failed', name: 'test3' },
+        ],
+      } as any);
+      const res = await gitlab.getBranchStatus('somebranch', [
+        'test1',
+        'test2',
+      ]);
+      expect(res).toEqual('success');
+    });
+    it('returns failed if not all specified are success', async () => {
+      await initRepo();
+      api.get.mockReturnValueOnce({
+        body: [
+          { status: 'success', name: 'test1' },
+          { status: 'success', name: 'test2' },
+          { status: 'failed', name: 'test3' },
+        ],
+      } as any);
+      const res = await gitlab.getBranchStatus('somebranch', [
+        'test1',
+        'test3',
+      ]);
+      expect(res).toEqual('failed');
+    });
+    it('returns pending if some specified are pending', async () => {
+      await initRepo();
+      api.get.mockReturnValueOnce({
+        body: [
+          { status: 'success', name: 'test1' },
+          { status: 'pending', name: 'test2' },
+          { status: 'failed', name: 'test3' },
+        ],
+      } as any);
+      const res = await gitlab.getBranchStatus('somebranch', [
+        'test1',
+        'test2',
+      ]);
+      expect(res).toEqual('pending');
+    });
+    it('returns pending if some specified are not exists', async () => {
+      await initRepo();
+      api.get.mockReturnValueOnce({
+        body: [
+          { status: 'success', name: 'test1' },
+          { status: 'pending', name: 'test2' },
+        ],
+      } as any);
+      const res = await gitlab.getBranchStatus('somebranch', [
+        'test1',
+        'test3',
+      ]);
+      expect(res).toEqual('pending');
     });
     it('throws repository-changed', async () => {
       expect.assertions(1);
