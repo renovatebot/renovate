@@ -1026,10 +1026,10 @@
     lodash "^4.17.4"
     read-pkg-up "^6.0.0"
 
-"@sindresorhus/is@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-1.0.0.tgz#4f475ff3f32b0a309b7faffd33328e93d7953330"
-  integrity sha512-3rlOB53XCVO7LfjXFx4bCGrZPPjkgYD7pP0E/yo4d57H32aYqD/QNmeXcVnx7CM5SxGScwl2P0b1kCDYZgNWqw==
+"@sindresorhus/is@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-1.2.0.tgz#63ce3638cb85231f3704164c90a18ef816da3fb7"
+  integrity sha512-mwhXGkRV5dlvQc4EgPDxDxO6WuMBVymGFd1CA+2Y+z5dG9MNspoQ+AWjl/Ld1MnpCL8AKbosZlDVohqcIwuWsw==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
