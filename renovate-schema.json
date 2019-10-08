@@ -1283,6 +1283,10 @@
               "timeout": {
                 "description": "timeout (in milliseconds) for queries to external endpoints",
                 "type": "integer"
+              },
+              "insecureRegistry": {
+                "description": "explicity turn on insecure docker registry access (http)",
+                "type": "boolean"
               }
             }
           }

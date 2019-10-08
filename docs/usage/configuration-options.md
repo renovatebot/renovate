@@ -378,6 +378,23 @@ Renovate will match against all baseUrls. It does not do a "longest match" algor
 
 ### hostType
 
+### insecureRegistry
+
+Enable this option to allow Renovate to connect to an [insecure docker registry](https://docs.docker.com/registry/insecure/) that is http only.
+Warning: This is insecure and is not recommended.
+Example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "reg.insecure.com",
+      "insecureRegistry": true
+    }
+  ]
+}
+```
+
 ### timeout
 
 Use this figure to adjust the timeout for queries. The default is 60s, which is quite high. To adjust it down to 10s for all queries, do this:

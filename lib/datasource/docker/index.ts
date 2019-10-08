@@ -32,6 +32,10 @@ function getRegistryRepository(lookupName: string, registryUrls: string[]) {
   if (!registry.match('^https?://')) {
     registry = `https://${registry}`;
   }
+  const opts = hostRules.find({ url: registry });
+  if (opts.insecureRegistry) {
+    registry = registry.replace('https', 'http');
+  }
   if (registry.endsWith('.docker.io') && !repository.includes('/')) {
     repository = 'library/' + repository;
   }
