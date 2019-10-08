@@ -1460,6 +1460,7 @@ const options: RenovateOptions[] = [
       commitMessageTopic: 'Rust crate {{depName}}',
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
+      versionScheme: 'cargo',
     },
     mergeable: true,
   },

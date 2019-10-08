@@ -942,7 +942,8 @@
       "default": {
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
-        "fileMatch": ["(^|/)Cargo.toml$"]
+        "fileMatch": ["(^|/)Cargo.toml$"],
+        "versionScheme": "cargo"
       },
       "$ref": "#"
     },
