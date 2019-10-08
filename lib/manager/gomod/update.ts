@@ -27,6 +27,13 @@ export function updateDependency(
       );
       return null;
     }
+    if (lineToChange.endsWith('// indirect')) {
+      logger.debug(
+        { lineToChange, depName },
+        'will not update indirect dependency'
+      );
+      return null;
+    }
     let updateLineExp: RegExp;
     if (depType === 'replace') {
       updateLineExp = new RegExp(

@@ -3,6 +3,7 @@ import { updateDependency } from '../../../lib/manager/gomod/update';
 
 const gomod1 = readFileSync('test/manager/gomod/_fixtures/1/go.mod', 'utf8');
 const gomod2 = readFileSync('test/manager/gomod/_fixtures/2/go.mod', 'utf8');
+const gomod3 = readFileSync('test/manager/gomod/_fixtures/3/go.mod', 'utf8');
 
 describe('manager/gomod/update', () => {
   describe('updateDependency', () => {
@@ -234,6 +235,16 @@ describe('manager/gomod/update', () => {
       const res = updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod1);
       expect(res.includes(upgrade.newDigest.substring(0, 12))).toBe(true);
+    });
+    it('do not replace indirect dependency', () => {
+      const upgrade = {
+        depName: 'golang.org/x/net',
+        managerData: { lineNumber: 3 },
+        newValue: 'v0.0.0-20191003171128-d98b1b443829',
+        depType: 'require',
+      };
+      const res = updateDependency(gomod3, upgrade);
+      expect(res).toBeNull();
     });
   });
 });
