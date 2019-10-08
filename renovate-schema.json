@@ -66,6 +66,10 @@
       "type": "boolean",
       "default": false
     },
+    "dockerUser": {
+      "description": "Specify UID and GID for docker-based binaries when binarySource=docker is used.",
+      "type": "string"
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
@@ -916,6 +920,16 @@
       },
       "$ref": "#"
     },
+    "mix": {
+      "description": "Configuration object for Mix module renovation",
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["(^|/)mix\\.exs$"],
+        "versionScheme": "hex"
+      },
+      "$ref": "#"
+    },
     "rust": {
       "description": "Configuration option for Rust package management.",
       "type": "object",
@@ -928,7 +942,8 @@
       "default": {
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
-        "fileMatch": ["(^|/)Cargo.toml$"]
+        "fileMatch": ["(^|/)Cargo.toml$"],
+        "versionScheme": "cargo"
       },
       "$ref": "#"
     },
@@ -1277,6 +1292,10 @@
               "timeout": {
                 "description": "timeout (in milliseconds) for queries to external endpoints",
                 "type": "integer"
+              },
+              "insecureRegistry": {
+                "description": "explicity turn on insecure docker registry access (http)",
+                "type": "boolean"
               }
             }
           }
@@ -1332,6 +1351,11 @@
     },
     "unicodeEmoji": {
       "description": "Enable or disable Unicode emoji",
+      "type": "boolean",
+      "default": false
+    },
+    "gitLabAutomerge": {
+      "description": "Enable or disable usage of GitLab's \"merge when pipeline succeeds\" feature when automerging PRs",
       "type": "boolean",
       "default": false
     }

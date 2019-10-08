@@ -1,9 +1,21 @@
-const { emojify } = require('../../../../util/emoji');
+import { emojify } from '../../../../util/emoji';
+import { logger } from '../../../../logger';
+import { appName } from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { Upgrade } from '../../../../manager/common';
 
-const { logger } = require('../../../../logger');
-const { appName } = require('../../../../config/app-strings');
+export interface BranchConfig {
+  upgrades: Upgrade[];
+  baseBranch?: string;
+  branchName: string;
+  schedule?: string[];
+  prTitle: string;
+}
 
-function getPrList(config, branches) {
+export function getPrList(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): string {
   logger.debug('getPrList()');
   logger.trace({ config });
   let prDesc = `\n### What to Expect\n\n`;
@@ -66,7 +78,3 @@ function getPrList(config, branches) {
   }
   return prDesc;
 }
-
-module.exports = {
-  getPrList,
-};

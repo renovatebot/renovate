@@ -53,7 +53,7 @@ describe('workers/repository/onboarding/pr', () => {
         isConflicted: true,
         isModified: true,
       });
-      await ensureOnboardingPr(config, [], branches);
+      await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
@@ -64,7 +64,7 @@ describe('workers/repository/onboarding/pr', () => {
         body: createPrBody,
         isModified: true,
       });
-      await ensureOnboardingPr(config, [], branches);
+      await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });

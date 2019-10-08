@@ -10,12 +10,17 @@ export type RenovateConfigStage =
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   automerge?: boolean;
+  branchName?: string;
   enabled?: boolean;
+  ignoreDeps?: string[];
+  labels?: string[];
   managers?: string | string[];
-
   schedule?: string | string[];
 
+  semanticCommits?: boolean;
+  semanticCommitScope?: string;
   semanticCommitType?: string;
+  statusCheckVerify?: boolean;
 }
 
 type UpdateConfig<
@@ -27,13 +32,20 @@ export interface RenovateConfig
   extends RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, any> {
+  baseBranch?: string;
   baseBranches?: string[];
-
+  branchList?: string[];
+  description?: string[];
+  dryRun?: boolean;
   errors?: ValidationMessage[];
+  includeForks?: boolean;
+  isFork?: boolean;
+  onboarding?: boolean;
+  onboardingConfig?: RenovateSharedConfig;
   packageRules?: PackageRule[];
-
   privateKey?: string | Buffer;
-
+  repoIsOnboarded?: boolean;
+  requireConfig?: boolean;
   warnings?: ValidationMessage[];
 }
 

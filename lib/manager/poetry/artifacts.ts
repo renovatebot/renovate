@@ -48,6 +48,10 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running poetry via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [cwd];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = [];

@@ -93,6 +93,10 @@ export async function updateArtifacts(
         bundlerVersion = ' -v ' + bundlerConstraint;
       }
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [config.localDir];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = [];

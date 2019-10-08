@@ -141,7 +141,13 @@ async function getGradleCommandLine(
   let cmd: string;
   const gradlewExists = await exists(upath.join(cwd, 'gradlew'));
   if (config.binarySource === 'docker') {
-    cmd = `docker run --rm -v ${cwd}:${cwd} -w ${cwd} renovate/gradle gradle`;
+    cmd = `docker run --rm `;
+    // istanbul ignore if
+    if (config.dockerUser) {
+      cmd += `--user=${config.dockerUser} `;
+    }
+    cmd += `-v ${cwd}:${cwd} -w ${cwd} `;
+    cmd += `renovate/gradle gradle`;
   } else if (gradlewExists) {
     cmd = 'sh gradlew';
   } else {

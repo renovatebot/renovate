@@ -85,7 +85,7 @@ describe('platform/git/storage', () => {
       expect(await git.getFileList()).toMatchSnapshot();
     });
     it('should exclude submodules', async () => {
-      const repo = await Git(base.path).silent(true);
+      const repo = Git(base.path).silent(true);
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.commit('Add submodule');
       await git.initRepo({
@@ -345,6 +345,30 @@ describe('platform/git/storage', () => {
       await git.setBranchPrefix('renovate/');
       expect(await git.branchExists('renovate/test')).toBe(true);
       expect(await git.getBranchCommit('renovate/test')).not.toEqual(cid);
+    });
+
+    it('should fail clone ssh submodule', async () => {
+      const repo = Git(base.path).silent(true);
+      await fs.writeFile(
+        base.path + '/.gitmodules',
+        '[submodule "test"]\npath=test\nurl=ssh://0.0.0.0'
+      );
+      await repo.add('.gitmodules');
+      await repo.raw([
+        'update-index',
+        '--add',
+        '--cacheinfo',
+        '160000',
+        '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+        'test',
+      ]);
+      await repo.commit('Add submodule');
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      repo.reset(['--hard', 'HEAD^']);
     });
   });
 });
