@@ -24,7 +24,7 @@ export function updateDependency(fileContent, upgrade) {
   const searchString = `${oldVersion}`;
   const newString = `${newValue}`;
   let newFileContent = fileContent;
-  // Search starts at 'dependencies' instaed of `${depName}` because fields in a YAML record
+  // Search starts at 'dependencies' instead of `${depName}` because fields in a YAML record
   // can be in arbitrary order for example like this:
   /*
   dependencies:
@@ -47,7 +47,7 @@ export function updateDependency(fileContent, upgrade) {
         searchString,
         newString
       );
-      // Compare the parsed toml structure of old and new
+      // Compare the parsed yaml structure of old and new
       if (_.isEqual(doc, yaml.safeLoad(testContent))) {
         newFileContent = testContent;
         break;
