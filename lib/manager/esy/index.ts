@@ -1,5 +1,5 @@
-const { extractPackageFile } = require('./extract');
-const { updateDependency } = require('./update');
+import { extractPackageFile } from './extract';
+import { updateDependency } from './update';
 
 module.exports = {
   extractPackageFile,
