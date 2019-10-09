@@ -36,7 +36,6 @@ export function updateDependency(fileContent: string, upgrade: Upgrade) {
         }
       }
     }
-    // istanbul ignore if
     if (!newFileContent) {
       logger.info(
         { fileContent, parsedContents, depType, depName, newValue },

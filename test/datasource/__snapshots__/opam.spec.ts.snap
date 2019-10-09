@@ -1,8 +1,352 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/opam getPkgReleases returns versions if both requests to GitHub API are successful 1`] = `
+exports[`datasource/opam getPkgReleases handles line comments in opam files 1`] = `
+Object {
+  "homepage": "http://0install.net",
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases handles multi-line comments in opam files 1`] = `
+Object {
+  "homepage": "http://0install.net",
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions and homepage if both requests to GitHub API are successful 1`] = `
 Object {
   "homepage": "http://0install.net/",
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 1`] = `
+Object {
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 2`] = `
+Object {
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 3`] = `
+Object {
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 4`] = `
+Object {
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 5`] = `
+Object {
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 6`] = `
+Object {
+  "name": "0install",
+  "releases": Array [
+    Object {
+      "version": "2.10",
+    },
+    Object {
+      "version": "2.11",
+    },
+    Object {
+      "version": "2.12.1",
+    },
+    Object {
+      "version": "2.12.3",
+    },
+    Object {
+      "version": "2.12",
+    },
+    Object {
+      "version": "2.14.1",
+    },
+    Object {
+      "version": "2.14",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.8",
+    },
+    Object {
+      "version": "2.9.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/opam getPkgReleases returns versions without homepage field if homepage field is invalid 7`] = `
+Object {
   "name": "0install",
   "releases": Array [
     Object {

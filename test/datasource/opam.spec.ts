@@ -15,11 +15,6 @@ const packageResBody = fs.readFileSync(
   'utf8'
 );
 
-const notFoundResBody = fs.readFileSync(
-  'test/datasource/opam/_fixtures/not-found-res.json',
-  'utf8'
-);
-
 jest.mock('../../lib/util/got');
 
 describe('datasource/opam', () => {
@@ -60,8 +55,161 @@ describe('datasource/opam', () => {
       expect(res.homepage).not.toBeDefined();
       expect(res).toMatchSnapshot();
     });
-    it('returns versions if both requests to GitHub API are successful', async () => {
-      global.repoCache = {};
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from(
+            'homep_INVALID_age: "http://0install.net"'
+          ).toString('base64'),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from('homepage http://0install.net').toString(
+            'base64'
+          ),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from('homepage: http://0install.net').toString(
+            'base64'
+          ),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from('homepage: "http://0install.net').toString(
+            'base64'
+          ),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from('homepage  "http://0install.net" :').toString(
+            'base64'
+          ),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from(
+            'homepage: \' some_thing \' homepage: "http://0install.net"'
+          ).toString('base64'),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions without homepage field if homepage field is invalid', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from('homepage:\n other_thing: "some data"').toString(
+            'base64'
+          ),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('handles line comments in opam files', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from(
+            `
+# comment
+# homepage: "http://commented.out"
+homepage: "http://0install.net"
+`
+          ).toString('base64'),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('handles multi-line comments in opam files', async () => {
+      got.mockResolvedValueOnce({
+        body: JSON.parse(versionsResBody),
+      });
+      got.mockResolvedValueOnce({
+        body: {
+          content: Buffer.from(
+            `
+(*
+Multi line comment
+homepage "http://commented.out"
+*)
+homepage: "http://0install.net"
+`
+          ).toString('base64'),
+        },
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).not.toBeNull();
+      expect(res.homepage).toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns versions and homepage if both requests to GitHub API are successful', async () => {
       got.mockResolvedValueOnce({
         body: JSON.parse(versionsResBody),
       });

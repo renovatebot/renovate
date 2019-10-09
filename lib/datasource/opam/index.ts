@@ -69,21 +69,89 @@ export async function getPkgReleases({
   return result;
 }
 
-function extractHomepage(opamContent) {
+function extractHomepage(opamContentWithComments) {
+  let opamContent = opamContentWithComments;
+  opamContent = removeLineComments(opamContent);
+  opamContent = removeMultiLineComments(opamContent);
   const homepageIndex = opamContent.indexOf('homepage');
   if (homepageIndex < 0) {
     return null;
   }
   let homepage = opamContent.substring(homepageIndex);
-  const firstQuoteIndex = homepage.indexOf('"');
-  if (firstQuoteIndex < 0) {
+  homepage = homepage.substring('homepage'.length);
+  const colonIndex = skip(0, homepage, isSpace);
+  if (homepage[colonIndex] !== ':') {
     return null;
   }
-  homepage = homepage.substring(firstQuoteIndex + 1);
-  const secondQuoteIndex = homepage.indexOf('"');
-  if (secondQuoteIndex < 0) {
+  homepage = homepage.substring(colonIndex + 1);
+  // According to opam docs https://opam.ocaml.org/doc/1.2/Manual.html
+  // strings are enclosed in "double quotes"
+  const doubleQuoteIndex = skip(0, homepage, isSpace);
+  if (homepage[doubleQuoteIndex] !== '"') {
     return null;
   }
-  homepage = homepage.substring(0, secondQuoteIndex);
+  homepage = homepage.substring(doubleQuoteIndex + 1);
+  const secondDoubleQuoteIndex = homepage.indexOf('"');
+  if (secondDoubleQuoteIndex < 0) {
+    return null;
+  }
+  homepage = homepage.substring(0, secondDoubleQuoteIndex);
   return homepage;
+}
+
+function skip(
+  idx: number,
+  content: string,
+  cond: (s: string) => boolean
+): number {
+  let i = idx;
+  while (i < content.length) {
+    if (!cond(content[i])) {
+      return i;
+    }
+    i += 1;
+  }
+  // istanbul ignore next
+  return i;
+}
+
+function isSpace(c: string): boolean {
+  return /\s/.test(c);
+}
+
+// Remove multi-line comments enclosed between (* and *)
+function removeMultiLineComments(content: string): string {
+  const beginRegExp = /\(\*/;
+  const endRegExp = /\*\)/;
+  let newContent = content;
+  let i = newContent.search(beginRegExp);
+  let j = newContent.search(endRegExp);
+  while (i !== -1 && j !== -1) {
+    j += '*)'.length;
+    newContent = newContent.substring(0, i) + newContent.substring(j);
+    i = newContent.search(beginRegExp);
+    j = newContent.search(endRegExp);
+  }
+  return newContent;
+}
+
+// Remove line comments starting with #
+function removeLineComments(content: string): string {
+  let newContent = '';
+  let comment = false;
+  for (let i = 0; i < content.length; i += 1) {
+    const c = content[i];
+    if (c === '#') {
+      comment = true;
+    }
+    if (comment) {
+      if (c === '\n') {
+        comment = false;
+      }
+    }
+    if (!comment) {
+      newContent += c;
+    }
+  }
+  return newContent;
 }
