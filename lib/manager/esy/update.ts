@@ -4,9 +4,9 @@ import { Upgrade } from '../common';
 
 export function updateDependency(fileContent: string, upgrade: Upgrade) {
   logger.trace(`updateDependency(${upgrade.depName})`);
-  const { depType, depName, currentValue, newValue } = upgrade;
+  const { depType, depName, newValue } = upgrade;
   try {
-    let parsedContents = JSON.parse(fileContent);
+    const parsedContents = JSON.parse(fileContent);
     const oldVersion = parsedContents[depType][depName];
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');

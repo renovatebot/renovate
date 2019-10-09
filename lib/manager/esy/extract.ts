@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
-import { EsyDeps, EsySection } from './types';
+import { EsySection } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -12,22 +12,18 @@ export function extractPackageFile(
     if (doc.esy) {
       logger.info('esy field is present');
     }
-    const dependencies = doc.dependencies;
-    const devDependencies = doc.devDependencies;
-    const buildDependencies = doc.buildDependencies;
     const deps = [
       ...extractFromSection(doc, 'dependencies'),
       ...extractFromSection(doc, 'devDependencies'),
       ...extractFromSection(doc, 'buildDependencies'),
     ];
-    if (deps.length == 0) {
+    if (deps.length === 0) {
       return null;
     }
     return { deps };
   } catch (err) {
     return null;
   }
-  return null;
 }
 
 function extractFromSection(
@@ -45,9 +41,9 @@ function extractFromSection(
     if (currentValue) {
       const npmScope = parsedDepName.npmScope;
       const dep: PackageDependency = {
-        depName: depName,
+        depName,
+        currentValue,
         depType: section,
-        currentValue: currentValue as any,
         datasource: npmScope === 'opam' ? 'opam' : 'npm',
       };
       deps.push(dep);
@@ -62,7 +58,8 @@ export function parseDepName(depName) {
     return {
       depName: strs[0],
     };
-  } else if (strs.length === 2) {
+  }
+  if (strs.length === 2) {
     if (strs[0][0] === '@') {
       strs[0] = strs[0].substring(1);
     } else {
@@ -73,4 +70,5 @@ export function parseDepName(depName) {
       depName: strs[1],
     };
   }
+  return null;
 }

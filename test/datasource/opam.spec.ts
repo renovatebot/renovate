@@ -30,7 +30,7 @@ describe('datasource/opam', () => {
       const res = await getPkgReleases({ lookupName: '0install' });
       expect(res).toBeNull();
     });
-    it('throws for 5xx errors', async () => {
+    it('throws for 5xx errors', () => {
       got.mockRejectedValueOnce({
         statusCode: 500,
       });

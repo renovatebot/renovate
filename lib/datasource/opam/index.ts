@@ -58,7 +58,9 @@ export async function getPkgReleases({
       'utf8'
     );
     homepage = extractHomepage(opamContent);
-  } catch (err) {}
+  } catch (err) {
+    logger.warn({ lookupName }, `Couldn't lookup dependency homepage`);
+  }
   const releases: Release[] = versions.map(version => ({ version }));
   const result: ReleaseResult = { name: depName, releases };
   if (homepage) {
