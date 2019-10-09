@@ -1,20 +1,25 @@
 import is from '@sindresorhus/is';
 import { platform } from '../../../../platform';
-
-const { logger } = require('../../../../logger');
-const { getConfigDesc } = require('./config-description');
-const { getErrors, getWarnings, getDepWarnings } = require('./errors-warnings');
-const { getBaseBranchDesc } = require('./base-branch');
-const { getPrList } = require('./pr-list');
-const {
+import { logger } from '../../../../logger';
+import { getConfigDesc } from './config-description';
+import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
+import { getBaseBranchDesc } from './base-branch';
+import { getPrList, BranchConfig } from './pr-list';
+import {
   appName,
   onboardingBranch,
   onboardingPrTitle,
   urls,
-} = require('../../../../config/app-strings');
-const { emojify } = require('../../../../util/emoji');
+} from '../../../../config/app-strings';
+import { emojify } from '../../../../util/emoji';
+import { RenovateConfig } from '../../../../config';
+import { PackageFile } from '../../../../manager/common';
 
-async function ensureOnboardingPr(config, packageFiles, branches) {
+export async function ensureOnboardingPr(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]> | null,
+  branches: BranchConfig[]
+): Promise<void> {
   if (config.repoIsOnboarded) {
     return;
   }
@@ -148,5 +153,3 @@ If you need any further assistance then you can also [request help here](${urls.
     throw err;
   }
 }
-
-export { ensureOnboardingPr };

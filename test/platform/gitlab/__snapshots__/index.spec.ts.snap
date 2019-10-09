@@ -27,6 +27,20 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests/12345/merge",
+    Object {
+      "body": Object {
+        "merge_when_pipeline_succeeds": true,
+        "should_remove_source_branch": true,
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
   "branchName": "some-branch",

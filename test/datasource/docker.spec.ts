@@ -91,6 +91,17 @@ describe('api/docker', () => {
         'sha256:b3d6068234f3a18ebeedd2dab81e67b6a192e81192a099df4112ecfc7c3be84f'
       );
     });
+    it('supports docker insecure registry', async () => {
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({
+        headers: { 'docker-content-digest': 'some-digest' },
+      });
+      hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
+      const res = await docker.getDigest({ lookupName: 'some-dep' });
+      expect(res).toBe('some-digest');
+    });
     it('supports basic authentication', async () => {
       got.mockReturnValueOnce({
         headers: {

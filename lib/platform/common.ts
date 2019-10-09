@@ -89,6 +89,7 @@ export type BranchStatus = 'pending' | 'success' | 'failed';
 export type PlatformPrOptions = {
   azureAutoComplete: boolean;
   statusCheckVerify: boolean;
+  gitLabAutomerge: boolean;
 };
 
 /**

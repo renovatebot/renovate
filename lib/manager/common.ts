@@ -5,6 +5,7 @@ export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
   binarySource?: string;
+  dockerUser?: string;
   localDir?: string;
   registryUrls?: string[];
 }
@@ -116,6 +117,7 @@ export interface Package<T> extends ManagerData<T> {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+  warnings?: { message: string }[];
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;

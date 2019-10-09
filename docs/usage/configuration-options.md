@@ -255,7 +255,7 @@ This is a way to "whitelist" certain package managers and disable all others.
 
 By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
 
-This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" managers (docker or node).
+Possible managers are: `'ansible', 'bazel', 'buildkite', 'bundler', 'cargo', 'circleci', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'homebrew', 'kubernetes', 'leiningen', 'maven', 'meteor', 'mix', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'sbt', 'swift', 'terraform', 'travis', 'ruby-version'`
 
 Example:
 
@@ -294,6 +294,10 @@ See https://docs.renovatebot.com/config-presets for details.
 ## followTag
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
+
+## gitLabAutomerge
+
+Please note that when this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 ## github-actions
 
@@ -375,6 +379,23 @@ Renovate will match against all baseUrls. It does not do a "longest match" algor
 ### hostName
 
 ### hostType
+
+### insecureRegistry
+
+Enable this option to allow Renovate to connect to an [insecure docker registry](https://docs.docker.com/registry/insecure/) that is http only.
+Warning: This is insecure and is not recommended.
+Example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "reg.insecure.com",
+      "insecureRegistry": true
+    }
+  ]
+}
+```
 
 ### timeout
 
@@ -553,6 +574,19 @@ Set enabled to `true` to enable meteor package updating.
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
+
+## mix
+
+Elixir support is in beta stage.
+It should be explicitly enabled in configuration file:
+
+```json
+{
+  "mix": {
+    "enabled": true
+  }
+}
+```
 
 ## node
 
