@@ -841,7 +841,7 @@
       "description": "Configuration object for esy package.json renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)package.json$"],
+        "fileMatch": ["(^|/)esy.json$"],
         "versionScheme": "npm"
       },
       "$ref": "#"
