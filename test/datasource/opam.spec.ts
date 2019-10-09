@@ -26,31 +26,51 @@ describe('datasource/opam', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       global.repoCache = {};
+      return global.renovateCache.rmAll();
     });
-    it('returns versions if both requests to GitHub API are successful', async () => {
-      const versionsRes = {
+    it('returns null if first requests to GitHub API has failed with 404 not found error', async () => {
+      got.mockRejectedValueOnce({
+        statusCode: 404,
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).toBeNull();
+    });
+    it('throws for 5xx errors', async () => {
+      got.mockRejectedValueOnce({
+        statusCode: 500,
+      });
+      expect(getPkgReleases({ lookupName: '0install' })).rejects.toThrow();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
+      expect(res).toBeNull();
+    });
+    it('returns versions without homepage field if second request to GitHub API has failed with 404 not found error', async () => {
+      got.mockResolvedValueOnce({
         body: JSON.parse(versionsResBody),
-      };
-      const packageRes = {
-        body: JSON.parse(packageResBody),
-      };
-      got.mockReturnValueOnce(versionsRes).mockReturnValueOnce(packageRes);
-      let res = await getPkgReleases({ lookupName: '0install' });
+      });
+      got.mockRejectedValueOnce({
+        statusCode: 404,
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
       expect(res).not.toBeNull();
+      expect(res.homepage).not.toBeDefined();
       expect(res).toMatchSnapshot();
     });
-    it('returns versions without homepage field if second request to GitHub API has failed with not found error', async () => {
-      const versionsRes = {
+    it('returns versions if both requests to GitHub API are successful', async () => {
+      global.repoCache = {};
+      got.mockResolvedValueOnce({
         body: JSON.parse(versionsResBody),
-      };
-      // TODO: Check how got actually handles 404 not foudn errors
-      const packageRes = {
-        body: JSON.parse(notFoundResBody),
-        statusCode: 404,
-      };
-      got.mockReturnValueOnce(versionsRes).mockReturnValueOnce(packageRes);
-      let res = await getPkgReleases({ lookupName: '0install' });
+      });
+      got.mockResolvedValueOnce({
+        body: JSON.parse(packageResBody),
+      });
+      const res = await getPkgReleases({ lookupName: '0install' });
       expect(res).not.toBeNull();
+      expect(res.homepage).toBeDefined();
       expect(res).toMatchSnapshot();
     });
   });
