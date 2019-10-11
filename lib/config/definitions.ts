@@ -453,7 +453,7 @@ const options: RenovateOptions[] = [
       'Set a maximum number of commits per Renovate run. Default is no limit.',
     stage: 'global',
     type: 'integer',
-    default: null,
+    default: 0,
   },
   {
     name: 'repositories',

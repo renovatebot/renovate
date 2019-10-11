@@ -5,14 +5,13 @@ const l: Record<string, number> = {};
 const v: Record<string, number> = {};
 
 export function init(config: Record<string, any>) {
-  let i;
-  for (i = 0; i < limitsToInit.length; i += 1) {
-    if (config[limitsToInit[i]]) {
-      setLimit(limitsToInit[i], config[limitsToInit[i]]);
-      v[limitsToInit[i]] = 0;
+  for (const limit in limitsToInit) {
+    if (config[limit]) {
+      setLimit(limit, config[limit]);
+      v[limit] = 0;
     } else {
       logger.debug(
-        `Limits.init ${limitsToInit[i]} variable is not set. Ignoring ${limitsToInit[i]}`
+        `Limits.init ${limit} variable is not set. Ignoring ${limit}`
       );
     }
   }
