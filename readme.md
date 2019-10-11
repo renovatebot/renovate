@@ -42,7 +42,7 @@ it now. A GitHub Marketplace plan is required only for private repositories. [Mo
 
 For GitLab, log into [app.renovatebot.com/dashboard](https://app.renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://docs.renovatebot.com/install-gitlab-app/).
 
-For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organisation. From there you can create a pipeline with the `RenovateMe` task. [More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me).
+For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organisation. From there you can create a pipeline with the `RenovateMe` task. [More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me). Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
 
 ## Configuration
 
