@@ -66,6 +66,10 @@
       "type": "boolean",
       "default": false
     },
+    "dockerUser": {
+      "description": "Specify UID and GID for docker-based binaries when binarySource=docker is used.",
+      "type": "string"
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
@@ -630,7 +634,7 @@
       "default": 0
     },
     "bbUseDefaultReviewers": {
-      "description": "Use the default reviewers (Bitbucket server only).",
+      "description": "Use the default reviewers (Bitbucket only).",
       "type": "boolean",
       "default": true
     },
@@ -789,6 +793,11 @@
         "type": "string"
       }
     },
+    "assigneesSampleSize": {
+      "description": "Take a random sample of given size from assignees.",
+      "type": "integer",
+      "default": null
+    },
     "assignAutomerge": {
       "description": "Assign reviewers and assignees even if the PR is to be automerged",
       "type": "boolean",
@@ -800,6 +809,11 @@
       "items": {
         "type": "string"
       }
+    },
+    "reviewersSampleSize": {
+      "description": "Take a random sample of given size from reviewers.",
+      "type": "integer",
+      "default": null
     },
     "fileMatch": {
       "description": "JS RegExp pattern for matching manager files",
@@ -911,6 +925,16 @@
       },
       "$ref": "#"
     },
+    "mix": {
+      "description": "Configuration object for Mix module renovation",
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["(^|/)mix\\.exs$"],
+        "versionScheme": "hex"
+      },
+      "$ref": "#"
+    },
     "rust": {
       "description": "Configuration option for Rust package management.",
       "type": "object",
@@ -923,7 +947,8 @@
       "default": {
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
-        "fileMatch": ["(^|/)Cargo.toml$"]
+        "fileMatch": ["(^|/)Cargo.toml$"],
+        "versionScheme": "cargo"
       },
       "$ref": "#"
     },
@@ -1263,6 +1288,10 @@
               "timeout": {
                 "description": "timeout (in milliseconds) for queries to external endpoints",
                 "type": "integer"
+              },
+              "insecureRegistry": {
+                "description": "explicity turn on insecure docker registry access (http)",
+                "type": "boolean"
               }
             }
           }
@@ -1315,6 +1344,16 @@
       "description": "Enable or disable pruning of stale branches",
       "type": "boolean",
       "default": true
+    },
+    "unicodeEmoji": {
+      "description": "Enable or disable Unicode emoji",
+      "type": "boolean",
+      "default": false
+    },
+    "gitLabAutomerge": {
+      "description": "Enable or disable usage of GitLab's \"merge when pipeline succeeds\" feature when automerging PRs",
+      "type": "boolean",
+      "default": false
     }
   }
 }

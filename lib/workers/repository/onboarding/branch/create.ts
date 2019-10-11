@@ -1,14 +1,17 @@
-const { logger } = require('../../../../logger');
-const { getOnboardingConfig } = require('./config');
-const {
+import { logger } from '../../../../logger';
+import { getOnboardingConfig } from './config';
+import {
   configFileNames,
   onboardingBranch,
-} = require('../../../../config/app-strings');
-const { platform } = require('../../../../platform');
+} from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { platform } from '../../../../platform';
 
 const defaultConfigFile = configFileNames[0];
 
-async function createOnboardingBranch(config) {
+export async function createOnboardingBranch(
+  config: Partial<RenovateConfig>
+): Promise<void> {
   logger.debug('createOnboardingBranch()');
   const contents = await getOnboardingConfig(config);
   logger.info('Creating onboarding branch');
@@ -40,8 +43,3 @@ async function createOnboardingBranch(config) {
     );
   }
 }
-
-module.exports = {
-  getOnboardingConfig,
-  createOnboardingBranch,
-};

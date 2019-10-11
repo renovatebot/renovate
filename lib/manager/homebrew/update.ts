@@ -61,9 +61,14 @@ export async function updateDependency(
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return content;
   }
-  const newSha256 = createHash('sha256')
-    .update(file)
-    .digest('hex');
+  let newSha256;
+  try {
+    newSha256 = createHash('sha256')
+      .update(file)
+      .digest('hex');
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Failed to generate new sha256 for homebrew');
+  }
   newContent = updateUrl(content, upgrade.managerData.url, newUrl);
   if (!newContent) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);

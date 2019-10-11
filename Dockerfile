@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:ca013ac5c09f9a9f6db8370c1b759a29fe997d64d6591e9a75b71748858f7da0
+FROM amd64/ubuntu:18.04@sha256:1bbdea4846231d91cce6c7ff3907d26fca444fd6b7e3c282b90c7fe4251f9f86
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -73,6 +73,31 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 ## END copy Node.js
+
+# Erlang
+
+RUN cd /tmp && \
+    curl https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb -o erlang-solutions_1.0_all.deb && \
+    dpkg -i erlang-solutions_1.0_all.deb && \
+    rm -f erlang-solutions_1.0_all.deb
+
+ENV ERLANG_VERSION=22.0.2-1
+
+RUN apt-get update && \
+    apt-cache policy esl-erlang && \
+    apt-get install -y esl-erlang=1:$ERLANG_VERSION && \
+    apt-get clean
+
+# Elixir
+
+ENV ELIXIR_VERSION 1.8.2
+
+RUN curl -L https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip -o Precompiled.zip && \
+    mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
+    unzip Precompiled.zip -d /opt/elixir-${ELIXIR_VERSION}/ && \
+    rm Precompiled.zip
+
+ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
@@ -142,6 +167,11 @@ ENV RUST_BACKTRACE=1 \
 RUN set -ex ;\
   curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
   rustup toolchain install 1.36.0
+
+# Mix and Rebar
+
+RUN mix local.hex --force
+RUN mix local.rebar --force
 
 # Pipenv
 

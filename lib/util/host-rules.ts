@@ -12,7 +12,7 @@ export interface HostRule {
   token?: string;
   username?: string;
   password?: string;
-
+  insecureRegistry?: boolean;
   timeout?: number;
 }
 

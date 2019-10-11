@@ -95,7 +95,14 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void) {
 
 function isNull(token: Token) {
   const val = token.val;
-  return val === 0 || val === '' || val === 'final' || val === 'ga';
+  return (
+    val === 0 ||
+    val === '' ||
+    val === 'final' ||
+    val === 'ga' ||
+    val === 'release' ||
+    val === 'latest'
+  );
 }
 
 const zeroToken: NumberToken = {
@@ -170,7 +177,13 @@ function qualifierOrder(token: Token) {
   if (val === 'snapshot') {
     return 5;
   }
-  if (val === '' || val === 'final' || val === 'ga') {
+  if (
+    val === '' ||
+    val === 'final' ||
+    val === 'ga' ||
+    val === 'release' ||
+    val === 'latest'
+  ) {
     return 6;
   }
   if (val === 'sp') {

@@ -10,11 +10,9 @@ export async function getPkgReleases(
 ): Promise<ReleaseResult | null> {
   const dep: ReleaseResult = {
     pkgName,
-    releases: null,
+    releases: [],
   };
   try {
-    dep.releases = [];
-
     let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
     do {
       const pkgVersionsListRaw = await got(pkgUrlList, { hostType: 'nuget' });
@@ -30,7 +28,7 @@ export async function getPkgReleases(
 
       const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
 
-      for (const pkgInfo of pkgInfoList || []) {
+      for (const pkgInfo of pkgInfoList) {
         const pkgVersion = getPkgProp(pkgInfo, 'Version');
         dep.releases.push({
           version: pkgVersion,
@@ -54,6 +52,9 @@ export async function getPkgReleases(
 
       pkgUrlList = nextPkgUrlListLink ? nextPkgUrlListLink.attr.href : null;
     } while (pkgUrlList !== null);
+
+    // dep not found if no release, so we can try next registry
+    if (dep.releases.length === 0) return null;
 
     return dep;
   } catch (err) {

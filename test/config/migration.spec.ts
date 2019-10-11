@@ -22,7 +22,7 @@ describe('config/migration', () => {
         ],
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
-        onboarding: 'false',
+        onboarding: 'false' as any,
         multipleMajorPrs: true,
         gitFs: false,
         separateMajorReleases: true,

@@ -122,6 +122,14 @@ export class Storage {
         10;
       logger.info({ cloneSeconds }, 'git clone completed');
     }
+    const submodules = await this.getSubmodules();
+    for (const submodule of submodules) {
+      try {
+        await this._git.submoduleUpdate(['--init', '--', submodule]);
+      } catch (err) {
+        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+      }
+    }
     try {
       const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
       logger.debug({ latestCommitDate }, 'latest commit');
@@ -243,7 +251,8 @@ export class Storage {
     if (!exists) {
       return [];
     }
-    const files = await this._git!.raw([
+    const submodules = await this.getSubmodules();
+    const files: string = await this._git!.raw([
       'ls-tree',
       '-r',
       '--name-only',
@@ -253,7 +262,27 @@ export class Storage {
     if (!files) {
       return [];
     }
-    return files.split('\n').filter(Boolean);
+    return files
+      .split('\n')
+      .filter(Boolean)
+      .filter((file: string) =>
+        submodules.every((submodule: string) => !file.startsWith(submodule))
+      );
+  }
+
+  async getSubmodules() {
+    return (
+      (await this._git!.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
   }
 
   async branchExists(branchName: string) {
@@ -467,7 +496,7 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CI) {
+  if (process.env.NODE_ENV === 'test') {
     return;
   }
   const platformFailureStrings = [

@@ -4,6 +4,11 @@ import * as _npm from '../../lib/datasource/npm';
 import presetDefaults from './npm/_fixtures/renovate-config-default.json';
 
 jest.mock('../../lib/datasource/npm');
+try {
+  jest.mock('../../config.js');
+} catch (err) {
+  // file does not exist
+}
 
 const npm: any = _npm;
 const defaultConfig = getConfig();

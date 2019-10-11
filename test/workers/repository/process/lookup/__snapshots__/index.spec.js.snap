@@ -1678,6 +1678,22 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() uses minimum version for vulnerabilityAlerts 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "1.0.0",
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 0,
+    "newValue": "1.0.1",
+    "releaseTimestamp": "2014-03-11T18:47:17.560Z",
+    "toVersion": "1.0.1",
+    "updateType": "minor",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() uses the locked version for pinning 1`] = `
 Array [
   Object {

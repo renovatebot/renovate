@@ -178,6 +178,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'dockerUser',
+    description:
+      'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
+    admin: true,
+    type: 'string',
+  },
   // Log options
   {
     name: 'logLevel',
@@ -1032,7 +1039,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bbUseDefaultReviewers',
-    description: 'Use the default reviewers (Bitbucket server only).',
+    description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
   },
@@ -1250,6 +1257,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
   },
   {
+    name: 'assigneesSampleSize',
+    description: 'Take a random sample of given size from assignees.',
+    type: 'integer',
+    default: null,
+  },
+  {
     name: 'assignAutomerge',
     description:
       'Assign reviewers and assignees even if the PR is to be automerged',
@@ -1262,6 +1275,12 @@ const options: RenovateOptions[] = [
       'Requested reviewers for Pull Requests (either username or email address depending on the platform)',
     type: 'array',
     subType: 'string',
+  },
+  {
+    name: 'reviewersSampleSize',
+    description: 'Take a random sample of given size from reviewers.',
+    type: 'integer',
+    default: null,
   },
   {
     name: 'fileMatch',
@@ -1418,6 +1437,19 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'mix',
+    releaseStatus: 'beta',
+    description: 'Configuration object for Mix module renovation',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      enabled: false,
+      fileMatch: ['(^|/)mix\\.exs$'],
+      versionScheme: 'hex',
+    },
+    mergeable: true,
+  },
+  {
     name: 'rust',
     releaseStatus: 'unpublished',
     description: 'Configuration option for Rust package management.',
@@ -1436,6 +1468,7 @@ const options: RenovateOptions[] = [
       commitMessageTopic: 'Rust crate {{depName}}',
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
+      versionScheme: 'cargo',
     },
     mergeable: true,
   },
@@ -1918,6 +1951,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'insecureRegistry',
+    description: 'explicity turn on insecure docker registry access (http)',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',
@@ -1988,6 +2030,18 @@ const options: RenovateOptions[] = [
     description: `Enable or disable pruning of stale branches`,
     type: 'boolean',
     default: true,
+  },
+  {
+    name: 'unicodeEmoji',
+    description: 'Enable or disable Unicode emoji',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'gitLabAutomerge',
+    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs`,
+    type: 'boolean',
+    default: false,
   },
 ];
 

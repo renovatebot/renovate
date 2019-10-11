@@ -1,7 +1,21 @@
-const { logger } = require('../../../../logger');
-const { appName } = require('../../../../config/app-strings');
+import { emojify } from '../../../../util/emoji';
+import { logger } from '../../../../logger';
+import { appName } from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { Upgrade } from '../../../../manager/common';
 
-function getPrList(config, branches) {
+export interface BranchConfig {
+  upgrades: Upgrade[];
+  baseBranch?: string;
+  branchName: string;
+  schedule?: string[];
+  prTitle: string;
+}
+
+export function getPrList(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): string {
   logger.debug('getPrList()');
   logger.trace({ config });
   let prDesc = `\n### What to Expect\n\n`;
@@ -58,11 +72,9 @@ function getPrList(config, branches) {
     config.prHourlyLimit < 5 &&
     config.prHourlyLimit < branches.length
   ) {
-    prDesc += `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${config.prHourlyLimit} per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.\n\n`;
+    prDesc += emojify(
+      `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${config.prHourlyLimit} per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.\n\n`
+    );
   }
   return prDesc;
 }
-
-module.exports = {
-  getPrList,
-};

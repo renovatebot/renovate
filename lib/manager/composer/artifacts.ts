@@ -101,6 +101,10 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [config.localDir, process.env.COMPOSER_CACHE_DIR];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = ['COMPOSER_CACHE_DIR'];
@@ -118,8 +122,10 @@ export async function updateArtifacts(
       args =
         ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
     }
-    args +=
-      ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader';
+    args += ' --ignore-platform-reqs --no-ansi --no-interaction';
+    if (global.trustLevel !== 'high') {
+      args += ' --no-scripts --no-autoloader';
+    }
     logger.debug({ cmd, args }, 'composer command');
     ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
       cwd,

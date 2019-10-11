@@ -17,7 +17,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
-Also, be sure to check out Renovate's [shareable config presets](./config-presets/) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
@@ -32,6 +32,10 @@ By default, Renovate will not assign reviewers and assignees if the PR is to be 
 ## assignees
 
 Must be valid usernames.
+
+## assigneesSampleSize
+
+Take a random sample of given size from assignees.
 
 ## automerge
 
@@ -110,7 +114,7 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 ## bbUseDefaultReviewers
 
-Apply the default reviewers rules to PR's (Bitbucket server only).
+Apply the default reviewers rules to PR's (Bitbucket only).
 
 ## branchName
 
@@ -251,7 +255,7 @@ This is a way to "whitelist" certain package managers and disable all others.
 
 By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
 
-This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" managers (docker or node).
+Possible managers are: `'ansible', 'bazel', 'buildkite', 'bundler', 'cargo', 'circleci', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'homebrew', 'kubernetes', 'leiningen', 'maven', 'meteor', 'mix', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'sbt', 'swift', 'terraform', 'travis', 'ruby-version'`
 
 Example:
 
@@ -289,6 +293,10 @@ See https://docs.renovatebot.com/config-presets for details.
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## gitLabAutomerge
+
+Please note that when this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
+
 ## github-actions
 
 **Important note**: For security reasons, GitHub has blocked integrations/apps from editing GitHub Actions workflow files in _any_ branch, so this only works on GitHub if using a Personal Access Token.
@@ -311,7 +319,7 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
-You might interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
+You might be interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
 
 ## gradle
 
@@ -369,6 +377,23 @@ Renovate will match against all baseUrls. It does not do a "longest match" algor
 ### hostName
 
 ### hostType
+
+### insecureRegistry
+
+Enable this option to allow Renovate to connect to an [insecure docker registry](https://docs.docker.com/registry/insecure/) that is http only.
+Warning: This is insecure and is not recommended.
+Example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "reg.insecure.com",
+      "insecureRegistry": true
+    }
+  ]
+}
+```
 
 ### timeout
 
@@ -547,6 +572,19 @@ Set enabled to `true` to enable meteor package updating.
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
+
+## mix
+
+Elixir support is in beta stage.
+It should be explicitly enabled in configuration file:
+
+```json
+{
+  "mix": {
+    "enabled": true
+  }
+}
+```
 
 ## node
 
@@ -1028,6 +1066,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
 
+## reviewersSampleSize
+
+Take a random sample of given size from reviewers.
+
 ## rollbackPrs
 
 Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
@@ -1191,6 +1233,10 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
 Note: Travis renovation is disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
+
+## unicodeEmoji
+
+If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
 
 ## unpublishSafe
 

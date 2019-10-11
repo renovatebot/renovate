@@ -21,7 +21,9 @@ For local development some dependencies are required.
 - nodejs `^10.13.0 || ^12.0.0`
 - yarn `^1.17.0`
 - c++ compiler
-- python `^2.7`
+- python `^2.7` with `mock` library
+
+Python 2.7 is required in development in order to support installing with `node-gyp`, which does not yet support Python 3. `mock` is used by Renovate in production and is now part of the Python standard library, but only from 3.3 onwards.
 
 _Linux_
 
@@ -37,27 +39,47 @@ sudo apt-get install -y git python-minimal build-essential nodejs yarn
 
 _Windows_
 
-You can use `powershell` and [chocolatey](https://chocolatey.org) to manage required dependencies on `Windows`.
+The following steps work to set up a brand new Windows 10 installation for developing Renovate. If you already have some components installed, you can naturally skip them.
 
-```ps
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-cinst git node-lts yarn python2 visualstudio2017buildtools
-pip install mock
-```
+- Install [git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
+- Install [Node.js LTS](https://nodejs.org/en/download/)
+- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
+- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
+- Install `mock` for Python:
 
-If you have build error, you have to [configure](https://github.com/nodejs/node-gyp#on-windows) `node-gyp` to use the right tools.
+  - `curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py`
+  - `python get-pip.py`
+  - `rm get-pip.py`
+  - `python -m pip install mock`
+
+  Verify you have everything installed with appropriate versions, e.g.:
+
+  ```
+  PS C:\Windows\system32> git --version
+  git version 2.23.0.windows.1
+  PS C:\Windows\system32> node --version
+  v10.16.3
+  PS C:\Windows\system32> yarn --version
+  1.19.0
+  PS C:\Windows\system32> python --version
+  Python 2.7.16
+  ```
 
 #### Fork and Clone
 
 If you will contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
 
-#### Node version
-
-Renovate supports Node.js `^10.13.0 || ^12.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
-
 #### Install dependencies
 
 We use [yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install dependencies instead of `npm install`.
+
+#### Build Renovate
+
+Run `yarn build`. You should get no errors.
+
+#### Verify tests
+
+Run `yarn test`. You should see it pass with 100% test coverage. Make sure you've run `yarn build` first.
 
 #### Verify installation
 

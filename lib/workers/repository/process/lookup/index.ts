@@ -45,7 +45,7 @@ export interface LookupUpdateConfig
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
-
+  vulnerabilityAlert?: boolean;
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
 }
@@ -53,7 +53,7 @@ export interface LookupUpdateConfig
 export async function lookupUpdates(
   config: LookupUpdateConfig
 ): Promise<UpdateResult> {
-  const { depName, currentValue, lockedVersion } = config;
+  const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   const version = versioning.get(config.versionScheme);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
@@ -162,7 +162,7 @@ export async function lookupUpdates(
       filterStart = lockedVersion;
     }
     // Filter latest, unstable, etc
-    const filteredVersions = filterVersions(
+    let filteredVersions = filterVersions(
       config,
       filterStart,
       dependency.latestVersion,
@@ -172,6 +172,9 @@ export async function lookupUpdates(
       // Leave only compatible versions
       version.isCompatible(v, currentValue)
     );
+    if (vulnerabilityAlert) {
+      filteredVersions = filteredVersions.slice(0, 1);
+    }
     const buckets = {};
     for (const toVersion of filteredVersions) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;

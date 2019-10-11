@@ -1,19 +1,25 @@
 import is from '@sindresorhus/is';
 import { platform } from '../../../../platform';
-
-const { logger } = require('../../../../logger');
-const { getConfigDesc } = require('./config-description');
-const { getErrors, getWarnings, getDepWarnings } = require('./errors-warnings');
-const { getBaseBranchDesc } = require('./base-branch');
-const { getPrList } = require('./pr-list');
-const {
+import { logger } from '../../../../logger';
+import { getConfigDesc } from './config-description';
+import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
+import { getBaseBranchDesc } from './base-branch';
+import { getPrList, BranchConfig } from './pr-list';
+import {
   appName,
   onboardingBranch,
   onboardingPrTitle,
   urls,
-} = require('../../../../config/app-strings');
+} from '../../../../config/app-strings';
+import { emojify } from '../../../../util/emoji';
+import { RenovateConfig } from '../../../../config';
+import { PackageFile } from '../../../../manager/common';
 
-async function ensureOnboardingPr(config, packageFiles, branches) {
+export async function ensureOnboardingPr(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]> | null,
+  branches: BranchConfig[]
+): Promise<void> {
   if (config.repoIsOnboarded) {
     return;
   }
@@ -23,9 +29,14 @@ async function ensureOnboardingPr(config, packageFiles, branches) {
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [${appName}](${urls.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate += config.requireConfig
-    ? `:vertical_traffic_light: To activate ${appName}, merge this Pull Request. To disable ${appName}, simply close this Pull Request unmerged.\n\n`
-    : `:vertical_traffic_light: ${appName} will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`;
-  prTemplate += `
+    ? emojify(
+        `:vertical_traffic_light: To activate ${appName}, merge this Pull Request. To disable ${appName}, simply close this Pull Request unmerged.\n\n`
+      )
+    : emojify(
+        `:vertical_traffic_light: ${appName} will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+      );
+  prTemplate += emojify(
+    `
 
 ---
 {{PACKAGE FILES}}
@@ -39,7 +50,8 @@ async function ensureOnboardingPr(config, packageFiles, branches) {
 
 :question: Got questions? Check out ${appName}'s [Docs](${urls.documentation}), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](${urls.help}).
-`;
+`
+  );
   let prBody = prTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
     let files = [];
@@ -60,9 +72,13 @@ If you need any further assistance then you can also [request help here](${urls.
   if (!(existingPr && existingPr.isModified)) {
     configDesc = getConfigDesc(config, packageFiles);
   } else {
-    configDesc = `### Configuration\n\n:abcd: ${appName} has detected a custom config for this PR. Feel free to ask for [help](${urls.help}) if you have any doubts and would like it reviewed.\n\n`;
+    configDesc = emojify(
+      `### Configuration\n\n:abcd: ${appName} has detected a custom config for this PR. Feel free to ask for [help](${urls.help}) if you have any doubts and would like it reviewed.\n\n`
+    );
     if (existingPr.isConflicted) {
-      configDesc += `:warning: This PR has a merge conflict, however ${appName} is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`;
+      configDesc += emojify(
+        `:warning: This PR has a merge conflict, however ${appName} is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+      );
     } else {
       configDesc += `Important: Now that this branch is edited, ${appName} can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
     }
@@ -137,5 +153,3 @@ If you need any further assistance then you can also [request help here](${urls.
     throw err;
   }
 }
-
-export { ensureOnboardingPr };

@@ -14,6 +14,7 @@ export interface Config {
   prList: any[];
   repository: string;
   storage: Storage;
+  bbUseDefaultReviewers: boolean;
 
   username: string;
 }

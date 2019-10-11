@@ -1,7 +1,10 @@
-const { logger } = require('../../../../logger');
-const { appName } = require('../../../../config/app-strings');
+import { emojify } from '../../../../util/emoji';
+import { logger } from '../../../../logger';
+import { appName } from '../../../../config/app-strings';
+import { RenovateConfig } from '../../../../config';
+import { PackageFile } from '../../../../manager/common';
 
-function getWarnings(config) {
+export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings.length) {
     return '';
   }
@@ -14,7 +17,7 @@ function getWarnings(config) {
   return warningText;
 }
 
-function getErrors(config) {
+export function getErrors(config: RenovateConfig): string {
   let errorText = '';
   if (!config.errors.length) {
     return '';
@@ -28,7 +31,9 @@ function getErrors(config) {
   return errorText;
 }
 
-function getDepWarnings(packageFiles) {
+export function getDepWarnings(
+  packageFiles: Record<string, PackageFile[]>
+): string {
   let warningText = '';
   try {
     const warnings = [];
@@ -56,7 +61,9 @@ function getDepWarnings(packageFiles) {
       { warnings, warningFiles },
       'Found package lookup warnings in onboarding'
     );
-    warningText = `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`;
+    warningText = emojify(
+      `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+    );
     warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
     warnings.forEach(w => {
       warningText += `-   \`${w}\`\n`;
@@ -71,9 +78,3 @@ function getDepWarnings(packageFiles) {
   }
   return warningText;
 }
-
-module.exports = {
-  getWarnings,
-  getErrors,
-  getDepWarnings,
-};
