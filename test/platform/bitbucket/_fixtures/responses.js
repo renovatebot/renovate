@@ -150,4 +150,12 @@ module.exports = {
       },
     ],
   },
+  '/2.0/repositories/some/repo/commit/branch_hash/statuses': {
+    values: [
+      {
+        key: 'foo',
+        state: 'SUCCESSFUL',
+      },
+    ],
+  },
 };

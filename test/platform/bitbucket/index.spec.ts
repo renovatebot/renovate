@@ -198,6 +198,9 @@ describe('platform/bitbucket', () => {
       expect(await getBranchStatus('master', ['foo'])).toBe('failed');
       expect(await getBranchStatus('master', true)).toBe('failed');
       expect(await getBranchStatus('branch', true)).toBe('success');
+      expect(await getBranchStatus('branch-with-empty-status', true)).toBe(
+        'pending'
+      );
     });
   });
 
