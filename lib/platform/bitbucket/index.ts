@@ -256,6 +256,10 @@ export async function getBranchStatus(
     { branch: branchName, sha, statuses },
     'branch status check result'
   );
+  if (!statuses.length) {
+    logger.debug('empty branch status check result = returning "pending"');
+    return 'pending';
+  }
   if (noOfFailures) {
     return 'failed';
   }
