@@ -234,6 +234,19 @@ describe('datasource/maven', () => {
       });
       expect(releases.sourceUrl).toEqual('https://github.com/realm/realm-java');
     });
+    it('should fetch info from parent artifacts if needed', async () => {
+      const releases = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'org.liquibase:liquibase-core',
+        registryUrls: [
+          'file://test/datasource/gradle/_fixtures/maven/jcenter/',
+        ],
+      });
+      expect(releases.homepage).toEqual('http://www.liquibase.org');
+      expect(releases.sourceUrl).toEqual(
+        'https://github.com/liquibase/liquibase'
+      );
+    });
   });
 });
 

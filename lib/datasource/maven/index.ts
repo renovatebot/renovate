@@ -170,12 +170,29 @@ async function getDependencyInfo(
   const pomContent = await downloadMavenXml(dependency, repoUrl, path);
   if (!pomContent) return result;
 
-  const homepage = pomContent.valueWithPath('url');
+  let homepage = pomContent.valueWithPath('url');
+  let sourceUrl = pomContent.valueWithPath('scm.url');
+  if (!homepage || !sourceUrl) {
+    const parentGroupId = pomContent.valueWithPath('parent.groupId');
+    const parentArtifactId = pomContent.valueWithPath('parent.artifactId');
+    const parentVersion = pomContent.valueWithPath('parent.version');
+    if (parentGroupId && parentArtifactId && parentVersion) {
+      const parentLookupName = `${parentGroupId}:${parentArtifactId}`;
+      const parentDependency = getDependencyParts(parentLookupName);
+      const parentInfo = await getDependencyInfo(
+        parentDependency,
+        repoUrl,
+        parentVersion
+      );
+      if (!homepage && parentInfo.homepage) homepage = parentInfo.homepage;
+      if (!sourceUrl && parentInfo.sourceUrl) sourceUrl = parentInfo.sourceUrl;
+    }
+  }
+
   if (homepage && !containsPlaceholder(homepage)) {
     result.homepage = homepage;
   }
 
-  const sourceUrl = pomContent.valueWithPath('scm.url');
   if (sourceUrl && !containsPlaceholder(sourceUrl)) {
     result.sourceUrl = sourceUrl.replace(/^scm:/, '');
   }
