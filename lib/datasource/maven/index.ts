@@ -162,8 +162,11 @@ function getLatestVersion(versions: string[]): string | null {
 async function getDependencyInfo(
   dependency: MavenDependency,
   repoUrl: string,
-  version: string
+  version: string,
+  visited = new Set<string>()
 ): Promise<Partial<ReleaseResult>> {
+  visited.add(dependency.display);
+
   const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
 
@@ -179,13 +182,17 @@ async function getDependencyInfo(
     if (parentGroupId && parentArtifactId && parentVersion) {
       const parentLookupName = `${parentGroupId}:${parentArtifactId}`;
       const parentDependency = getDependencyParts(parentLookupName);
-      const parentInfo = await getDependencyInfo(
-        parentDependency,
-        repoUrl,
-        parentVersion
-      );
-      if (!homepage && parentInfo.homepage) homepage = parentInfo.homepage;
-      if (!sourceUrl && parentInfo.sourceUrl) sourceUrl = parentInfo.sourceUrl;
+      if (!visited.has(parentDependency.display)) {
+        const parentInfo = await getDependencyInfo(
+          parentDependency,
+          repoUrl,
+          parentVersion,
+          visited
+        );
+        if (!homepage && parentInfo.homepage) homepage = parentInfo.homepage;
+        if (!sourceUrl && parentInfo.sourceUrl)
+          sourceUrl = parentInfo.sourceUrl;
+      }
     }
   }
 
