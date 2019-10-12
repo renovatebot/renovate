@@ -1221,10 +1221,10 @@
   resolved "https://registry.yarnpkg.com/@types/later/-/later-1.2.5.tgz#56297f82ea0002549159219d75844a9380ad18bd"
   integrity sha512-oROpXZfXR+6uQyz4wBs2gZYxvZJ5Zp+iSEJWrIWgvipSnzLcHCpR9br4XUqRBPFS1EP971JlnWfXhr5so5E1sg==
 
-"@types/lodash@4.14.141":
-  version "4.14.141"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.141.tgz#d81f4d0c562abe28713406b571ffb27692a82ae6"
-  integrity sha512-v5NYIi9qEbFEUpCyikmnOYe4YlP8BMUdTcNCAquAKzu+FA7rZ1onj9x80mbnDdOW/K5bFf3Tv5kJplP33+gAbQ==
+"@types/lodash@4.14.144":
+  version "4.14.144"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.144.tgz#12e57fc99064bce45e5ab3c8bc4783feb75eab8e"
+  integrity sha512-ogI4g9W5qIQQUhXAclq6zhqgqNUr7UlFaqDHbch7WLSLeeM/7d3CRaw7GLajxvyFvhJqw4Rpcz5bhoaYtIx6Tg==
 
 "@types/luxon@1.15.2":
   version "1.15.2"
