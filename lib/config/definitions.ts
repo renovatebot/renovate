@@ -1795,7 +1795,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
-      timeout: 300,
+      timeout: 600,
       versionScheme: 'maven',
     },
     mergeable: true,
