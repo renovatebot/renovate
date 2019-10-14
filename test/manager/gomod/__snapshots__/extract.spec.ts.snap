@@ -720,16 +720,6 @@ Array [
   Object {
     "currentValue": "v1.0.0",
     "datasource": "go",
-    "depName": "github.com/davecgh/go-spew",
-    "depNameShort": "davecgh/go-spew",
-    "depType": "require",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
-  },
-  Object {
-    "currentValue": "v1.0.0",
-    "datasource": "go",
     "depName": "golang.org/x/foo",
     "depNameShort": "golang.org/x/foo",
     "depType": "require",
