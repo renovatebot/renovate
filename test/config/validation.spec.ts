@@ -138,6 +138,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(0);
     });
+
     it('errors for unsafe fileMatches', async () => {
       const config = {
         npm: {
@@ -151,8 +152,20 @@ describe('config/validation', () => {
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+    });
+
+    it('validates regEx for each fileMatch', async () => {
+      const config = {
+        fileMatch: ['js', '***$}{]]['],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
     });
   });
 });

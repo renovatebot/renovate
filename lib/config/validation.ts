@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import safe from 'safe-regex';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import * as managerValidator from './validation-helpers/managers';
 import { RenovateConfig, ValidationMessage } from './common';
+import { regEx } from '../util/regex';
 
 const options = getOptions();
 
@@ -183,13 +183,7 @@ export async function validateConfig(
               !(val && val.length === 1 && val[0] === '*')
             ) {
               try {
-                RegExp(val as any);
-                if (!safe(val as any)) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Unsafe regExp for ${currentPath}: \`${val}\``,
-                  });
-                }
+                regEx(val as any);
               } catch (e) {
                 errors.push({
                   depName: 'Configuration Error',
@@ -198,21 +192,15 @@ export async function validateConfig(
               }
             }
             if (key === 'fileMatch') {
-              try {
-                for (const fileMatch of val) {
-                  RegExp(fileMatch);
-                  if (!safe(fileMatch)) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `Unsafe regExp for ${currentPath}: \`${fileMatch}\``,
-                    });
-                  }
+              for (const fileMatch of val) {
+                try {
+                  regEx(fileMatch);
+                } catch (e) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
+                  });
                 }
-              } catch (e) {
-                errors.push({
-                  depName: 'Configuration Error',
-                  message: `Invalid regExp for ${currentPath}: \`${val}\``,
-                });
               }
             }
             if (
