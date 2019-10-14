@@ -267,7 +267,7 @@ Example:
 
 ## encrypted
 
-See https://docs.renovatebot.com/private-modules for details on how this is used to encrypt npm tokens.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -623,11 +623,11 @@ Currently `volta` supports only `node` and `yarn` to be pinned. Check out this g
 
 ## npmToken
 
-See https://docs.renovatebot.com/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://docs.renovatebot.com/private-modules for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
 
 ## nuget
 
