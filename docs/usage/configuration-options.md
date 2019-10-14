@@ -596,12 +596,23 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 The following dep types are currently supported by the npm manager :
 
-1. `dependencies`
-2. `devDependencies`
-3. `optionalDependencies`
-4. `peerDependencies`
-5. `engines`
-6. `volta` : Renovate will update any node and yarn version specified under `volta`.
+- `dependencies`
+- `devDependencies`
+- `optionalDependencies`
+- `peerDependencies`
+- `engines` : Renovate will update any `node`, `npm` and `yarn` version specified under `engines`.
+
+```json
+{
+  "engines": {
+    "node": "10.15.3",
+    "npm": "6.9.0",
+    "yarn": "1.14.0"
+  }
+}
+```
+
+- `volta` : Renovate will update any `node` and `yarn` version specified under `volta`.
 
 ```json
 {
