@@ -285,7 +285,7 @@ Be careful you know what you're doing with this option. The initial intended use
 
 ## extends
 
-See https://docs.renovatebot.com/config-presets for details.
+See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
 
 ## fileMatch
 
