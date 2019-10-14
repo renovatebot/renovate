@@ -5,7 +5,7 @@ exports[`manager/gomod/update updateDependency replaces major gopkg.in updates 1
 
 require github.com/pkg/errors v0.7.0
 require github.com/aws/aws-sdk-go v1.15.21
-require github.com/davecgh/go-spew v1.0.0
+require github.com/davecgh/go-spew v1.0.0 // indirect
 require golang.org/x/foo v1.0.0
 require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v2 v2.0.0
@@ -79,7 +79,7 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.0.0-20180807092216-43d17e14b714
 	gopkg.in/warnings.v0 v0.1.2
 	gopkg.in/yaml.v2 v2.2.1
-
+	golang.org/x/net v0.0.0-20191003171128-d98b1b443823 // indirect
 )
 "
 `;
@@ -89,7 +89,7 @@ exports[`manager/gomod/update updateDependency replaces two values in one file 1
 
 require github.com/pkg/errors v0.8.0
 require github.com/aws/aws-sdk-go v1.15.36
-require github.com/davecgh/go-spew v1.0.0
+require github.com/davecgh/go-spew v1.0.0 // indirect
 require golang.org/x/foo v1.0.0
 require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
