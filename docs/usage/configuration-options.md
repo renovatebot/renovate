@@ -594,36 +594,14 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npm
 
-The following dep types are currently supported by the npm manager :
+The following `depTypes` are currently supported by the npm manager :
 
 - `dependencies`
 - `devDependencies`
 - `optionalDependencies`
 - `peerDependencies`
 - `engines` : Renovate will update any `node`, `npm` and `yarn` version specified under `engines`.
-
-```json
-{
-  "engines": {
-    "node": "10.15.3",
-    "npm": "6.9.0",
-    "yarn": "1.14.0"
-  }
-}
-```
-
 - `volta` : Renovate will update any `node` and `yarn` version specified under `volta`.
-
-```json
-{
-  "volta": {
-    "node": "10.15.3",
-    "yarn": "1.14.0"
-  }
-}
-```
-
-Currently `volta` supports only `node` and `yarn` to be pinned. Check out this guide [Understanding Volta](https://docs.volta.sh/guide/understanding) to learn more.
 
 ## npmToken
 
