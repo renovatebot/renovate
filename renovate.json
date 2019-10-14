@@ -16,7 +16,7 @@
   },
   "postUpdateOptions": ["yarnDedupeHighest"],
   "semanticCommitScope": "deps",
-  "docker": {
+  "dockerfile": {
     "pinDigests": true,
     "semanticCommitType": "build"
   },

@@ -70,7 +70,7 @@ describe('config/validation', () => {
         enabled: 1 as any,
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
-        labels: 5,
+        labels: 5 as any,
         semanticCommitType: 7 as any,
         lockFileMaintenance: false as any,
         extends: [':timezone(Europe/Brussel)'],

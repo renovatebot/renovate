@@ -32,6 +32,10 @@ function getRegistryRepository(lookupName: string, registryUrls: string[]) {
   if (!registry.match('^https?://')) {
     registry = `https://${registry}`;
   }
+  const opts = hostRules.find({ url: registry });
+  if (opts.insecureRegistry) {
+    registry = registry.replace('https', 'http');
+  }
   if (registry.endsWith('.docker.io') && !repository.includes('/')) {
     repository = 'library/' + repository;
   }
@@ -554,21 +558,23 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
   return new Promise<string>(resolve => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
-        logger.warn({ err }, 'ECR getAuthorizationToken error');
+        logger.trace({ err }, 'err');
+        logger.info('ECR getAuthorizationToken error');
         resolve(null);
-      }
-      const authorizationToken =
-        data &&
-        data.authorizationData &&
-        data.authorizationData[0] &&
-        data.authorizationData[0].authorizationToken;
-      if (authorizationToken) {
-        resolve(authorizationToken);
       } else {
-        logger.warn(
-          'Could not extract authorizationToken from ECR getAuthorizationToken response'
-        );
-        resolve(null);
+        const authorizationToken =
+          data &&
+          data.authorizationData &&
+          data.authorizationData[0] &&
+          data.authorizationData[0].authorizationToken;
+        if (authorizationToken) {
+          resolve(authorizationToken);
+        } else {
+          logger.warn(
+            'Could not extract authorizationToken from ECR getAuthorizationToken response'
+          );
+          resolve(null);
+        }
       }
     });
   });

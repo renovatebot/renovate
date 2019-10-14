@@ -281,7 +281,10 @@ async function packageLookup(
       });
       return null;
     }
-    if (err.code === 'ETIMEDOUT' && err.host === 'packagist.org') {
+    if (
+      (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') &&
+      err.host === 'packagist.org'
+    ) {
       logger.info('Packagist.org timeout');
       throw new Error('registry-failure');
     }

@@ -4,7 +4,12 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import {
+  PlatformConfig,
+  RepoParams,
+  RepoConfig,
+  PlatformPrOptions,
+} from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
@@ -34,8 +39,8 @@ export async function initPlatform({
   endpoint,
   token,
 }: {
-  endpoint: string;
   token: string;
+  endpoint: string;
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -396,11 +401,13 @@ export async function setBranchStatus(
     await api.post(url, { body: options });
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.message &&
-      err.message.startsWith(
+      err.body &&
+      err.body.message &&
+      err.body.message.startsWith(
         'Cannot transition status via :enqueue from :pending'
       )
     ) {
+      // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
       logger.info('Ignoring status transition error');
     } else {
       logger.debug({ err });
@@ -692,7 +699,8 @@ export async function createPr(
   title: string,
   rawDescription: string,
   labels?: string[] | null,
-  useDefaultBranch?: boolean
+  useDefaultBranch?: boolean,
+  platformOptions?: PlatformPrOptions
 ) {
   const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
@@ -718,6 +726,22 @@ export async function createPr(
   if (config.prList) {
     config.prList.push(pr);
   }
+  if (platformOptions && platformOptions.gitLabAutomerge) {
+    try {
+      await api.put(
+        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
+        {
+          body: {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          },
+        }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Automerge on PR creation failed');
+    }
+  }
+
   return pr;
 }
 

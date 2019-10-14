@@ -178,6 +178,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'dockerUser',
+    description:
+      'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
+    admin: true,
+    type: 'string',
+  },
   // Log options
   {
     name: 'logLevel',
@@ -439,6 +446,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'prCommitsPerRunLimit',
+    description:
+      'Set a maximum number of commits per Renovate run. Default is no limit.',
+    stage: 'global',
+    type: 'integer',
+    default: 0,
   },
   {
     name: 'repositories',
@@ -1422,6 +1437,19 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'mix',
+    releaseStatus: 'beta',
+    description: 'Configuration object for Mix module renovation',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      enabled: false,
+      fileMatch: ['(^|/)mix\\.exs$'],
+      versionScheme: 'hex',
+    },
+    mergeable: true,
+  },
+  {
     name: 'rust',
     releaseStatus: 'unpublished',
     description: 'Configuration option for Rust package management.',
@@ -1440,6 +1468,7 @@ const options: RenovateOptions[] = [
       commitMessageTopic: 'Rust crate {{depName}}',
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
+      versionScheme: 'cargo',
     },
     mergeable: true,
   },
@@ -1572,6 +1601,18 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: [],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'helm-requirements',
+    description: 'Configuration object for helm requirements.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)requirements.yaml$'],
     },
     mergeable: true,
     cli: false,
@@ -1774,7 +1815,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
-      timeout: 300,
+      timeout: 600,
       versionScheme: 'maven',
     },
     mergeable: true,
@@ -1922,6 +1963,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'insecureRegistry',
+    description: 'explicity turn on insecure docker registry access (http)',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',
@@ -1996,6 +2046,12 @@ const options: RenovateOptions[] = [
   {
     name: 'unicodeEmoji',
     description: 'Enable or disable Unicode emoji',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'gitLabAutomerge',
+    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs`,
     type: 'boolean',
     default: false,
   },

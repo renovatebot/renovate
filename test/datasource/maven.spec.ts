@@ -215,7 +215,15 @@ describe('datasource/maven', () => {
       });
       expect(releases).toBeNull();
     });
-
+    it('should return null for invalid registryUrls', async () => {
+      const releases = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'mysql:mysql-connector-java',
+        // eslint-disable-next-line no-template-curly-in-string
+        registryUrls: ['${project.baseUri}../../repository/'],
+      });
+      expect(releases).toBeNull();
+    });
     it('should support scm.url values prefixed with "scm:"', async () => {
       const releases = await datasource.getPkgReleases({
         ...config,

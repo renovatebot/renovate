@@ -5,6 +5,8 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 import { logger } from '../../logger';
 
+const limits = require('../../workers/global/limits');
+
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
@@ -110,10 +112,7 @@ export class Storage {
       const cloneStart = process.hrtime();
       try {
         // clone only the default branch
-        await this._git.clone(config.url, '.', [
-          '--depth=2',
-          '--recurse-submodules',
-        ]);
+        await this._git.clone(config.url, '.', ['--depth=2']);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
         throw new Error('platform-failure');
@@ -122,6 +121,14 @@ export class Storage {
         Math.round(1 + 10 * convertHrtime(process.hrtime(cloneStart)).seconds) /
         10;
       logger.info({ cloneSeconds }, 'git clone completed');
+    }
+    const submodules = await this.getSubmodules();
+    for (const submodule of submodules) {
+      try {
+        await this._git.submoduleUpdate(['--init', '--', submodule]);
+      } catch (err) {
+        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+      }
     }
     try {
       const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
@@ -244,18 +251,7 @@ export class Storage {
     if (!exists) {
       return [];
     }
-    const submodules: string[] = (
-      (await this._git!.raw([
-        'config',
-        '--file',
-        '.gitmodules',
-        '--get-regexp',
-        'path',
-      ])) || ''
-    )
-      .trim()
-      .split(/[\n\s]/)
-      .filter((_e: string, i: number) => i % 2);
+    const submodules = await this.getSubmodules();
     const files: string = await this._git!.raw([
       'ls-tree',
       '-r',
@@ -272,6 +268,21 @@ export class Storage {
       .filter((file: string) =>
         submodules.every((submodule: string) => !file.startsWith(submodule))
       );
+  }
+
+  async getSubmodules() {
+    return (
+      (await this._git!.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
   }
 
   async branchExists(branchName: string) {
@@ -357,6 +368,7 @@ export class Storage {
     await this._git!.checkout(this._config.baseBranch);
     await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
+    limits.incrementLimit('prCommitsPerRunLimit');
   }
 
   async getBranchLastCommitTime(branchName: string) {
@@ -441,6 +453,7 @@ export class Storage {
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
       await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
       this._config.branchExists[branchName] = true;
+      limits.incrementLimit('prCommitsPerRunLimit');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');
@@ -483,7 +496,7 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CI) {
+  if (process.env.NODE_ENV === 'test') {
     return;
   }
   const platformFailureStrings = [

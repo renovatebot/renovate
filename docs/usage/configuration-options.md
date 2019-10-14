@@ -255,7 +255,7 @@ This is a way to "whitelist" certain package managers and disable all others.
 
 By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
 
-This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" managers (docker or node).
+Possible managers are: `'ansible', 'bazel', 'buildkite', 'bundler', 'cargo', 'circleci', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'homebrew', 'kubernetes', 'leiningen', 'maven', 'meteor', 'mix', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'sbt', 'swift', 'terraform', 'travis', 'ruby-version'`
 
 Example:
 
@@ -267,7 +267,7 @@ Example:
 
 ## encrypted
 
-See https://docs.renovatebot.com/private-modules for details on how this is used to encrypt npm tokens.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -285,13 +285,17 @@ Be careful you know what you're doing with this option. The initial intended use
 
 ## extends
 
-See https://docs.renovatebot.com/config-presets for details.
+See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
 
 ## fileMatch
 
 ## followTag
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
+
+## gitLabAutomerge
+
+Please note that when this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 ## github-actions
 
@@ -315,7 +319,7 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
-You might interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
+You might be interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
 
 ## gradle
 
@@ -343,6 +347,8 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## helm-requirements
 
 ## homebrew
 
@@ -373,6 +379,23 @@ Renovate will match against all baseUrls. It does not do a "longest match" algor
 ### hostName
 
 ### hostType
+
+### insecureRegistry
+
+Enable this option to allow Renovate to connect to an [insecure docker registry](https://docs.docker.com/registry/insecure/) that is http only.
+Warning: This is insecure and is not recommended.
+Example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "reg.insecure.com",
+      "insecureRegistry": true
+    }
+  ]
+}
+```
 
 ### timeout
 
@@ -552,6 +575,19 @@ Set enabled to `true` to enable meteor package updating.
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
+## mix
+
+Elixir support is in beta stage.
+It should be explicitly enabled in configuration file:
+
+```json
+{
+  "mix": {
+    "enabled": true
+  }
+}
+```
+
 ## node
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
@@ -560,13 +596,22 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npm
 
+The following `depTypes` are currently supported by the npm manager :
+
+- `dependencies`
+- `devDependencies`
+- `optionalDependencies`
+- `peerDependencies`
+- `engines` : Renovate will update any `node`, `npm` and `yarn` version specified under `engines`.
+- `volta` : Renovate will update any `node` and `yarn` version specified under `volta`.
+
 ## npmToken
 
-See https://docs.renovatebot.com/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://docs.renovatebot.com/private-modules for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
 
 ## nuget
 

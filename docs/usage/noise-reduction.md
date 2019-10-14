@@ -82,7 +82,7 @@ It is recommended that you enable automerge for any types of dependency updates 
 
 Automerge works particularly well for `devDependencies` and for production `dependencies` that have great test coverage.
 
-For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests.. automerge them! If you have a linter like `eslint` or `tslint` and its update passess.. automerge them! If you have an API with 100% test coverage and `express` is updated.. automerge it!
+For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests.. automerge them! If you have a linter like `eslint` or `tslint` and its update passes.. automerge them! If you have an API with 100% test coverage and `express` is updated.. automerge it!
 
 #### Branch automerging
 
@@ -98,7 +98,7 @@ The result is that passing updates are essentially "silent" - the only sign of t
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates. And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
-- At start of schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
+- At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
 - After `abc` passes tests, `Renovate` will automerge it to `master`
 - The `xyz` branch probably now has `yarn.lock` conflicts
 - Renovate will immediately check all other branches and rebase them
@@ -125,7 +125,7 @@ Have you come up with a rule that you think others would benefit from? How about
 
 ## Lock file considerations
 
-As mentioned earlier. using lock files greatly increase the chance that merging one PR will result in a second PR becoming conflicted with `master`. Therefore:
+As mentioned earlier, using lock files greatly increases the chance that merging one PR will result in a second PR becoming conflicted with `master`. Therefore:
 
 - The more groups you use, the separate PRs you have, and hence the less overall chance at lock file conflicts
 - The less your schedule, the more chance that you pile up concurrent PRs, which increases the chance of lock file conflicts
@@ -133,7 +133,7 @@ As mentioned earlier. using lock files greatly increase the chance that merging 
 
 ## The Future of Noise Reduction
 
-First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovatebot/renovate). Our philosophy is:
+First of all, if you ever have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovatebot/renovate). Our philosophy is:
 
 1.  Nearly everyone should probably use Renovate-like dependency update automation
 2.  Over time, you should "see" Renovate less and less

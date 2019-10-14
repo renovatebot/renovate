@@ -147,7 +147,7 @@ setting version to =1.3.4
 
 #### Is a new datasource required? Provide details
 
-New crate versions can be fetched from [crates.io](crates.io).
+New crate versions can be fetched from [crates.io](https://crates.io).
 
 ---
 

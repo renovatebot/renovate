@@ -70,7 +70,7 @@ jobs:
       - test
   test_node_12:
     docker:
-      - image: amd64/node:12.10.0@sha256:c953b001ea2acf18a6ef99a90fc50630e70a7c0a6b49d774a7aee1f9c937b645
+      - image: amd64/node:12.11.1@sha256:aef1338c8538d8bf1163a75723ba64dc0299c3ba521e0b18b1a4af12df99f622
     steps:
       - test
   release:

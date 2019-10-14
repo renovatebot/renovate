@@ -56,7 +56,8 @@ export function extractPackageFile(
       return null;
     }
   } catch (err) {
-    logger.warn({ fileName, err }, 'Parsing Docker Compose config YAML');
+    logger.debug({ err }, 'err');
+    logger.info({ fileName }, 'Parsing Docker Compose config YAML');
     return null;
   }
   try {

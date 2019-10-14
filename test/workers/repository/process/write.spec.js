@@ -5,8 +5,10 @@ const {
 const branchWorker = require('../../../../lib/workers/branch');
 /** @type any */
 const limits = require('../../../../lib/workers/repository/process/limits');
+/** @type any */
 
 branchWorker.processBranch = jest.fn();
+
 limits.getPrsRemaining = jest.fn(() => 99);
 
 let config;

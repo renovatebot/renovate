@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "example 6"
+version = "0.1.0"
+description = ""
+authors = ["John Doe <john.doe@gmail.com>"]
+
+[tool.poetry.dependencies]
+dep0 = "0.0.0"
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://foo.bar/simple/"
+
+[[tool.poetry.source]]
+name = "bar"
+url = "https://bar.baz/+simple/"

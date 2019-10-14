@@ -415,5 +415,15 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+
+    it('should trigger GitLab automerge when configured', async () => {
+      config.gitLabAutomerge = true;
+      config.automerge = true;
+      await prWorker.ensurePr(config);
+      const args = platform.createPr.mock.calls[0];
+      expect(args[5]).toMatchObject({
+        gitLabAutomerge: true,
+      });
+    });
   });
 });

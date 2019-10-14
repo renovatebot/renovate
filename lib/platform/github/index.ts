@@ -1660,14 +1660,14 @@ export async function mergePr(prNo: number, branchName: string) {
       await api.put(url, options);
       automerged = true;
     } catch (err) {
-      if (err.statusCode === 405) {
+      if (err.statusCode === 404 || err.statusCode === 405) {
         // istanbul ignore next
         logger.info(
           { response: err.response ? err.response.body : undefined },
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${options.body.merge_method} PR`);
+        logger.warn({ err }, `Failed to ${options.body.merge_method} merge PR`);
         return false;
       }
     }
@@ -1679,7 +1679,10 @@ export async function mergePr(prNo: number, branchName: string) {
       logger.debug({ options, url }, `mergePr`);
       await api.put(url, options);
     } catch (err1) {
-      logger.debug({ err: err1 }, `Failed to ${options.body.merge_method} PR`);
+      logger.debug(
+        { err: err1 },
+        `Failed to ${options.body.merge_method} merge PR`
+      );
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
@@ -1687,7 +1690,7 @@ export async function mergePr(prNo: number, branchName: string) {
       } catch (err2) {
         logger.debug(
           { err: err2 },
-          `Failed to ${options.body.merge_method} PR`
+          `Failed to ${options.body.merge_method} merge PR`
         );
         try {
           options.body.merge_method = 'merge';
@@ -1696,7 +1699,7 @@ export async function mergePr(prNo: number, branchName: string) {
         } catch (err3) {
           logger.debug(
             { err: err3 },
-            `Failed to ${options.body.merge_method} PR`
+            `Failed to ${options.body.merge_method} merge PR`
           );
           logger.debug({ pr: prNo }, 'All merge attempts failed');
           return false;
