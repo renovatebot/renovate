@@ -83,6 +83,10 @@ Set this to true if you wish for Renovate to persist repo data between runs. The
 
 ## platform
 
+## prCommitsPerRunLimit
+
+Parameter to reduce CI load. CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events. Set as an integer. Default is no limit.
+
 ## prFooter
 
 ## printConfig
