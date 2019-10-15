@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { platform } from '../../platform';
+import { FileData, platform } from '../../platform';
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
-import { FileData } from '../../platform';
 
 export type CommitConfig = RenovateConfig & {
   baseBranch?: string;

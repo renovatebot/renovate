@@ -1,10 +1,9 @@
 import is from '@sindresorhus/is';
-import { platform } from '../../platform';
+import { FileData, platform } from '../../platform';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
-import { FileData } from '../../platform';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
