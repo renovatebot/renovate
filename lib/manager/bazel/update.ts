@@ -133,9 +133,7 @@ export async function updateDependency(
       newDef = setNewHash(newDef, hash);
     } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
       const [, shortRepo] = upgrade.repo.split('/');
-      const url = `https://github.com/${upgrade.repo}/archive/${
-        upgrade.newDigest
-      }.tar.gz`;
+      const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
       const hash = await getHashFromUrl(url);
       newDef = setNewHash(upgrade.managerData.def, hash);
       newDef = newDef.replace(
@@ -149,9 +147,7 @@ export async function updateDependency(
       });
     }
     logger.debug({ oldDef: upgrade.managerData.def, newDef });
-    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${
-      upgrade.depName
-    }"(.*\\n)+?\\s*\\)`;
+    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }
