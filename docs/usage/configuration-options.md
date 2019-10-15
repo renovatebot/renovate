@@ -267,7 +267,7 @@ Example:
 
 ## encrypted
 
-See https://docs.renovatebot.com/private-modules for details on how this is used to encrypt npm tokens.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -287,7 +287,7 @@ Be careful you know what you're doing with this option. The initial intended use
 
 ## extends
 
-See https://docs.renovatebot.com/config-presets for details.
+See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
 
 ## fileMatch
 
@@ -349,6 +349,8 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## helm-requirements
 
 ## homebrew
 
@@ -596,13 +598,22 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npm
 
+The following `depTypes` are currently supported by the npm manager :
+
+- `dependencies`
+- `devDependencies`
+- `optionalDependencies`
+- `peerDependencies`
+- `engines` : Renovate will update any `node`, `npm` and `yarn` version specified under `engines`.
+- `volta` : Renovate will update any `node` and `yarn` version specified under `volta`.
+
 ## npmToken
 
-See https://docs.renovatebot.com/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://docs.renovatebot.com/private-modules for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
 
 ## nuget
 

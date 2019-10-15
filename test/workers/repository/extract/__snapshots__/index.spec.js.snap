@@ -56,6 +56,9 @@ Object {
   "gradle-wrapper": Array [
     Object {},
   ],
+  "helm-requirements": Array [
+    Object {},
+  ],
   "homebrew": Array [
     Object {},
   ],

@@ -249,15 +249,25 @@ export async function getBranchStatus(
   const statuses = await utils.accumulateValues(
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
   );
-  const noOfFailures = statuses.filter(
-    (status: { state: string }) => status.state === 'FAILED'
-  ).length;
   logger.debug(
     { branch: branchName, sha, statuses },
     'branch status check result'
   );
+  if (!statuses.length) {
+    logger.debug('empty branch status check result = returning "pending"');
+    return 'pending';
+  }
+  const noOfFailures = statuses.filter(
+    (status: { state: string }) => status.state === 'FAILED'
+  ).length;
   if (noOfFailures) {
     return 'failed';
+  }
+  const noOfPending = statuses.filter(
+    (status: { state: string }) => status.state === 'INPROGRESS'
+  ).length;
+  if (noOfPending) {
+    return 'pending';
   }
   return 'success';
 }

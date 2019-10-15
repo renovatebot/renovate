@@ -558,21 +558,23 @@ function getECRAuthToken(region: string, opts: hostRules.HostRule) {
   return new Promise<string>(resolve => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
-        logger.warn({ err }, 'ECR getAuthorizationToken error');
+        logger.trace({ err }, 'err');
+        logger.info('ECR getAuthorizationToken error');
         resolve(null);
-      }
-      const authorizationToken =
-        data &&
-        data.authorizationData &&
-        data.authorizationData[0] &&
-        data.authorizationData[0].authorizationToken;
-      if (authorizationToken) {
-        resolve(authorizationToken);
       } else {
-        logger.warn(
-          'Could not extract authorizationToken from ECR getAuthorizationToken response'
-        );
-        resolve(null);
+        const authorizationToken =
+          data &&
+          data.authorizationData &&
+          data.authorizationData[0] &&
+          data.authorizationData[0].authorizationToken;
+        if (authorizationToken) {
+          resolve(authorizationToken);
+        } else {
+          logger.warn(
+            'Could not extract authorizationToken from ECR getAuthorizationToken response'
+          );
+          resolve(null);
+        }
       }
     });
   });
