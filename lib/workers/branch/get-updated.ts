@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
-import { FileData } from '../../platform/common';
+import { FileData } from '../../platform';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];

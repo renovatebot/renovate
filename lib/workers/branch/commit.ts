@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import { platform } from '../../platform';
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
-import { FileData } from '../../platform/common';
+import { FileData } from '../../platform';
 
 export type CommitConfig = RenovateConfig & {
   baseBranch?: string;
