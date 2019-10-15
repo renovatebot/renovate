@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Automated dependency updates. Flexible so you don't need to be.",
-  "version": "0.0.0-semantic-release",
+  "version": "0.0.0",
   "bin": {
     "renovate": "lib/renovate.js",
     "renovate-config-validator": "bin/config-validator.js"
