@@ -2,7 +2,6 @@ import { fromStream } from 'hasha';
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
-import { regEx } from '../../util/regex';
 
 function updateWithNewVersion(
   content: string,
@@ -134,11 +133,13 @@ export async function updateDependency(
       newDef = setNewHash(newDef, hash);
     } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
       const [, shortRepo] = upgrade.repo.split('/');
-      const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
+      const url = `https://github.com/${upgrade.repo}/archive/${
+        upgrade.newDigest
+      }.tar.gz`;
       const hash = await getHashFromUrl(url);
       newDef = setNewHash(upgrade.managerData.def, hash);
       newDef = newDef.replace(
-        regEx(`(strip_prefix\\s*=\\s*)"[^"]*"`),
+        new RegExp(`(strip_prefix\\s*=\\s*)"[^"]*"`),
         `$1"${shortRepo}-${upgrade.newDigest}"`
       );
       const match =
@@ -148,11 +149,13 @@ export async function updateDependency(
       });
     }
     logger.debug({ oldDef: upgrade.managerData.def, newDef });
-    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
+    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${
+      upgrade.depName
+    }"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }
-    const existingDef = regEx(existingRegExStr);
+    const existingDef = new RegExp(existingRegExStr);
     // istanbul ignore if
     if (!fileContent.match(existingDef)) {
       logger.info('Cannot match existing string');

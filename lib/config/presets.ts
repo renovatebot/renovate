@@ -7,7 +7,6 @@ import * as npm from '../datasource/npm';
 import * as gitlab from '../datasource/gitlab';
 import { RenovateConfig } from './common';
 import { mergeChildConfig } from './utils';
-import { regEx } from '../util/regex';
 
 const datasources = {
   github,
@@ -127,7 +126,7 @@ export function replaceArgs(
   if (is.string(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
-      const re = regEx(`{{${arg}}}`, 'g');
+      const re = new RegExp(`{{${arg}}}`, 'g');
       returnStr = returnStr.replace(re, argVal);
     }
     return returnStr;

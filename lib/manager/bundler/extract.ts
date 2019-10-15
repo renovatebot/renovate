@@ -2,7 +2,6 @@ import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
-import { regEx } from '../../util/regex';
 
 export { extractPackageFile };
 
@@ -23,7 +22,7 @@ async function extractPackageFile(
       sourceMatch =
         sourceMatch ||
         line.match(
-          regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`)
+          new RegExp(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`)
         );
     }
     if (sourceMatch) {
@@ -33,7 +32,9 @@ async function extractPackageFile(
     for (const delimiter of delimiters) {
       rubyMatch =
         rubyMatch ||
-        line.match(regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`));
+        line.match(
+          new RegExp(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`)
+        );
     }
     if (rubyMatch) {
       res.compatibility = { ruby: rubyMatch[1] };
@@ -42,9 +43,9 @@ async function extractPackageFile(
     let gemDelimiter: string;
     for (const delimiter of delimiters) {
       const gemMatchRegex = `^gem ${delimiter}([^${delimiter}]+)${delimiter}(,\\s+${delimiter}([^${delimiter}]+)${delimiter}){0,2}`;
-      if (line.match(regEx(gemMatchRegex))) {
+      if (line.match(new RegExp(gemMatchRegex))) {
         gemDelimiter = delimiter;
-        gemMatch = gemMatch || line.match(regEx(gemMatchRegex));
+        gemMatch = gemMatch || line.match(new RegExp(gemMatchRegex));
       }
     }
     if (gemMatch) {
@@ -55,7 +56,7 @@ async function extractPackageFile(
       if (gemMatch[3]) {
         dep.currentValue = gemMatch[0]
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
-          .replace(regEx(gemDelimiter, 'g'), '')
+          .replace(new RegExp(gemDelimiter, 'g'), '')
           .trim();
         if (!isValid(dep.currentValue)) {
           dep.skipReason = 'invalid-value';
@@ -99,7 +100,7 @@ async function extractPackageFile(
     }
     for (const delimiter of delimiters) {
       const sourceBlockMatch = line.match(
-        regEx(`^source\\s+${delimiter}(.*?)${delimiter}\\s+do`)
+        new RegExp(`^source\\s+${delimiter}(.*?)${delimiter}\\s+do`)
       );
       if (sourceBlockMatch) {
         const repositoryUrl = sourceBlockMatch[1];

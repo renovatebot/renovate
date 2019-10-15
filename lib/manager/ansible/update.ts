@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
 import { Upgrade } from '../common';
-import { regEx } from '../../util/regex';
 
 export default function updateDependency(
   fileContent: string,
@@ -12,7 +11,7 @@ export default function updateDependency(
     logger.debug(`ansible.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    const imageLine = regEx(`^(\\s*image:\\s*'?"?)[^\\s'"]+('?"?\\s*)$`);
+    const imageLine = new RegExp(/^(\s*image:\s*'?"?)[^\s'"]+('?"?\s*)$/);
     if (!lineToChange.match(imageLine)) {
       logger.debug('No image line found');
       return null;
