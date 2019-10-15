@@ -40,6 +40,7 @@ Array [
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
         "fileReplacePosition": 1485,
+        "groupName": "org.apache.maven.scm:maven-*",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -115,6 +116,7 @@ Array [
         "datasource": "maven",
         "depName": "org.example:hard-range",
         "fileReplacePosition": 3130,
+        "groupName": "org.example:hard-*",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -125,6 +127,7 @@ Array [
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
         "fileReplacePosition": 3392,
+        "groupName": "org.example:profile-*",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -136,6 +139,7 @@ Array [
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
         "fileReplacePosition": 3668,
+        "groupName": "org.apache.maven.plugins:maven-*",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",

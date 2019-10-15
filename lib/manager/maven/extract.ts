@@ -111,6 +111,11 @@ function applyProps(
 
   if (groupName) {
     result.groupName = groupName;
+  } else {
+    groupName = depName.replace(/(?<=^.*:[a-z]+-).*$/, '*');
+    if (groupName.endsWith('-*')) {
+      result.groupName = groupName;
+    }
   }
 
   if (containsPlaceholder(depName)) {

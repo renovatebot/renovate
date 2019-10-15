@@ -1,6 +1,13 @@
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
+function isGroupedByPlaceholder(groupName?: string): boolean {
+  if (groupName) {
+    return !groupName.endsWith('-*');
+  }
+  return false;
+}
+
 export function updateAtPosition(
   fileContent: string,
   upgrade: Upgrade,
@@ -16,7 +23,7 @@ export function updateAtPosition(
   if (version === newValue) {
     return fileContent;
   }
-  if (version === currentValue || upgrade.groupName) {
+  if (version === currentValue || isGroupedByPlaceholder(upgrade.groupName)) {
     const replacedPart = versionPart.replace(version, newValue);
     return leftPart + replacedPart + restPart;
   }
