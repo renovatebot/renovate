@@ -173,6 +173,14 @@ RUN set -ex ;\
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
+# CocoaPods
+
+USER root
+RUN apt-get update && apt-get install -y ruby-full && apt-get clean
+USER ubuntu
+ENV COCOAPODS_VERSION 1.8.3
+RUN gem install cocoapods -v ${COCOAPODS_VERSION}
+
 # Pipenv
 
 ENV PATH="/home/ubuntu/.local/bin:$PATH"
