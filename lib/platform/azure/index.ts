@@ -537,7 +537,7 @@ export async function addAssignees(issueNo: number, assignees: string[]) {
 export async function addReviewers(prNo: number, reviewers: string[]) {
   logger.trace(`addReviewers(${prNo}, ${reviewers})`);
   const azureApiGit = await azureApi.gitApi();
-  const azureApiCore = await azureApi.getCoreApi();
+  const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter(c => c.id === config.repoId)[0];
   const teams = await azureApiCore.getTeams(repo!.project!.id!);

@@ -241,9 +241,9 @@ export async function getMergeMethod(
   repoId: string,
   project: string
 ): Promise<GitPullRequestMergeStrategy> {
-  const policyConfigurations = (await (await azureApi
-    .azureObj()
-    .getPolicyApi()).getPolicyConfigurations(project))
+  const policyConfigurations = (await (await azureApi.policyApi()).getPolicyConfigurations(
+    project
+  ))
     .filter(
       p =>
         p.settings.scope.some(s => s.repositoryId === repoId) &&
@@ -251,13 +251,13 @@ export async function getMergeMethod(
     )
     .map(p => p.settings)[0];
 
-  let mergeMethod = GitPullRequestMergeStrategy.NoFastForward;
+  let mergeMethod: GitPullRequestMergeStrategy;
 
   try {
-    mergeMethod = Object.keys(policyConfigurations)
-      .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p);
-    logger.info(`${mergeMethod}`);
+    mergeMethod =
+      Object.keys(policyConfigurations)
+        .map(p => GitPullRequestMergeStrategy[p.slice(5)])
+        .find(p => p) || GitPullRequestMergeStrategy.NoFastForward;
   } catch (err) {
     logger.info('Could not find allowed merge methods for repo');
   }
