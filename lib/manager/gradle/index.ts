@@ -1,4 +1,4 @@
-import { exists } from 'fs-extra';
+import { access, constants, exists } from 'fs-extra';
 import upath from 'upath';
 
 import { exec } from '../../util/exec';
@@ -139,7 +139,10 @@ async function getGradleCommandLine(
   cwd: string
 ): Promise<string> {
   let cmd: string;
-  const gradlewExists = await exists(upath.join(cwd, 'gradlew'));
+  const gradlewPath = upath.join(cwd, 'gradlew');
+  const gradlewExists = await exists(gradlewPath);
+  const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
+
   if (config.binarySource === 'docker') {
     cmd = `docker run --rm `;
     // istanbul ignore if
@@ -148,12 +151,23 @@ async function getGradleCommandLine(
     }
     cmd += `-v ${cwd}:${cwd} -w ${cwd} `;
     cmd += `renovate/gradle gradle`;
+  } else if (gradlewExecutable) {
+    cmd = './gradlew';
   } else if (gradlewExists) {
     cmd = 'sh gradlew';
   } else {
     cmd = 'gradle';
   }
   return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
+}
+
+async function canExecute(path) {
+  try {
+    await access(path, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export const language = 'java';
