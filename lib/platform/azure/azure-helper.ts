@@ -251,15 +251,9 @@ export async function getMergeMethod(
     )
     .map(p => p.settings)[0];
 
-  let mergeMethod: GitPullRequestMergeStrategy;
-
-  try {
-    mergeMethod =
-      Object.keys(policyConfigurations)
-        .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-        .find(p => p) || GitPullRequestMergeStrategy.NoFastForward;
-  } catch (err) {
-    logger.info('Could not find allowed merge methods for repo');
-  }
-  return mergeMethod;
+  return (
+    Object.keys(policyConfigurations)
+      .map(p => GitPullRequestMergeStrategy[p.slice(5)])
+      .find(p => p) || GitPullRequestMergeStrategy.NoFastForward
+  );
 }

@@ -14,6 +14,7 @@ describe('platform/azure/azure-got-wrapper', () => {
     it('should throw an error if no token is provided', () => {
       expect(azure.gitApi).toThrow('No token found for azure');
       expect(azure.coreApi).toThrow('No token found for azure');
+      expect(azure.policyApi()).toThrow('No token found for azure');
     });
     it('should set token and endpoint', async () => {
       hostRules.add({
