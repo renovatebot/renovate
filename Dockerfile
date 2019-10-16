@@ -113,7 +113,7 @@ RUN chmod +x /usr/local/bin/composer
 
 RUN apt-get update && apt-get install -y bzr && apt-get clean
 
-ENV GOLANG_VERSION 1.12
+ENV GOLANG_VERSION 1.13
 
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
   tar -C /usr/local -xzf go.tgz && \
