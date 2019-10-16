@@ -98,6 +98,7 @@ export async function getChanges(
   return changes;
 }
 
+// if no branchName, look globaly
 export async function getFile(
   repoId: string,
   filePath: string,
