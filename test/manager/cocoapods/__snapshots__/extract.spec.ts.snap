@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/cocoapods/extract extractPackageFile() extracts all dependencies 1`] = `
+Array [
+  Object {
+    "depName": "a",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "depName": "a/sub",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "cocoapods",
+    "depName": "b",
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "cocoapods",
+    "depName": "c",
+  },
+  Object {
+    "depName": "d",
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "depName": "e",
+    "skipReason": "git-dependency",
+  },
+  Object {
+    "depName": "f",
+    "skipReason": "git-dependency",
+  },
+  Object {
+    "currentValue": "3.2.1",
+    "datasource": "git-tags",
+    "depName": "g.git",
+  },
+]
+`;
