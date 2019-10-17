@@ -48,9 +48,18 @@ export async function extractPackageFile(
       currentValue: dep.version,
       registryUrls: [dep.repository],
     };
-    const url = new URL(dep.repository);
-    if (url.protocol === 'file:') {
-      res.skipReason = 'local-dependency';
+    if (dep.repository.startsWith('@')) {
+      res.skipReason = 'placeholder-url';
+    } else {
+      try {
+        const url = new URL(dep.repository);
+        if (url.protocol === 'file:') {
+          res.skipReason = 'local-dependency';
+        }
+      } catch (err) {
+        logger.debug({ err }, 'Error parsing url');
+        res.skipReason = 'invalid-url';
+      }
     }
     return res;
   });
