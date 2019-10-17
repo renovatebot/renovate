@@ -161,7 +161,7 @@ async function getGradleCommandLine(
   return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
 }
 
-async function canExecute(path) {
+async function canExecute(path: string): Promise<boolean> {
   try {
     await access(path, constants.X_OK);
     return true;
