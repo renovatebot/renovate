@@ -24,6 +24,8 @@ describe('lib/manager/helm/extract', () => {
         - name: postgresql
           version: 0.8.1
           repository: nope
+        - name: broken
+          version: 0.8.1
       `;
       const fileName = 'requirements.yaml';
       const result = await extractPackageFile(content, fileName);

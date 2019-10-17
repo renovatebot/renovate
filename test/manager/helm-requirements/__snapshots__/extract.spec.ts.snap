@@ -42,6 +42,11 @@ Object {
       ],
       "skipReason": "invalid-url",
     },
+    Object {
+      "currentValue": "0.8.1",
+      "depName": "broken",
+      "skipReason": "no-repository",
+    },
   ],
 }
 `;
