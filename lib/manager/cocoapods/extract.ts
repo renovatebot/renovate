@@ -34,10 +34,11 @@ export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
   const lines = content.split('\n');
 
-  for (let idx = 0; idx < lines.length; idx += 1) {
-    const line = lines[idx];
+  for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
+    const line = lines[lineNumber];
     const { depName, currentValue, git, tag, path } = parseLine(line);
     if (depName) {
+      const managerData = { lineNumber };
       let dep: PackageDependency = {
         depName,
         skipReason: 'unknown-version',
@@ -48,6 +49,7 @@ export function extractPackageFile(content: string): PackageFile {
           depName,
           datasource: 'cocoapods',
           currentValue,
+          managerData,
         };
       } else if (git) {
         if (tag) {
@@ -55,6 +57,7 @@ export function extractPackageFile(content: string): PackageFile {
             datasource: 'git-tags',
             depName: git,
             currentValue: tag,
+            managerData,
           };
         } else {
           dep = {

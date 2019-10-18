@@ -1904,6 +1904,20 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'cocoapods',
+    releaseStatus: 'beta',
+    description: 'Configuration object for Podfiles',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      enabled: true,
+      fileMatch: ['(^|/)Podfile$'],
+      versionScheme: 'ruby',
+    },
+    mergeable: true,
+  },
+
+  {
     name: 'hostRules',
     description: 'Host rules/configuration including credentials',
     type: 'array',

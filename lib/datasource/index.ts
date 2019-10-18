@@ -3,6 +3,7 @@ import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
 
 import * as cargo from './cargo';
+import * as cocoapods from './cocoapods';
 import * as dart from './dart';
 import * as docker from './docker';
 import * as hex from './hex';
@@ -34,6 +35,7 @@ export * from './common';
 
 const datasources: Record<string, Datasource> = {
   cargo,
+  cocoapods,
   dart,
   docker,
   helm,

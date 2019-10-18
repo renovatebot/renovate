@@ -16,6 +16,7 @@ const managerList = [
   'bundler',
   'cargo',
   'circleci',
+  'cocoapods',
   'composer',
   'deps-edn',
   'docker-compose',
