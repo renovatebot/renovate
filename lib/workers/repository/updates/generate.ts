@@ -5,6 +5,8 @@ import mdTable from 'markdown-table';
 import { logger } from '../../../logger';
 import { mergeChildConfig, ManagerConfig } from '../../../config';
 import { PackageDependency } from '../../../manager/common';
+import { getChangeLogJSON } from '../../pr/changelog/';
+import * as fs from 'fs';
 
 function ifTypesGroup(
   depNames: string[],
@@ -23,7 +25,45 @@ function ifTypesGroup(
   );
 }
 
-export function generateBranchConfig(branchUpgrades) {
+
+export async function generateBranchConfig(branchUpgrades) {
+  let CommitMessagesfromReleases: string = '';
+  for(let brUpgrade of branchUpgrades){
+    let strBuff: string = '';
+    let {sourceUrl, fromVersion, toVersion, datasource,depName,versionScheme,manager,homepage} = brUpgrade;
+    let resp = await getChangeLogJSON({
+      sourceUrl: sourceUrl,
+      fromVersion: fromVersion,
+      toVersion: toVersion,
+      versionScheme: versionScheme,
+      depName: depName,
+      manager: manager,
+      homepage: homepage,
+      datasource:datasource,
+      releases: null
+    });
+    if(resp!=null && resp != undefined && resp.versions.length!=0){
+      let strBuff: string;
+      strBuff += `# Package ${resp.project.depName}\n`
+    for(let vers of resp.versions){
+      strBuff += `## ${vers.version}\n`
+      for (let line of vers.releaseNotes.body.trim().split('\n')){
+        if(line!=''){
+          if(line.startsWith('#')){
+            strBuff += `##${line.replace(RegExp('^(#){5,6}','g'),'####')}\n`
+          }
+          else{
+            strBuff += `${line}\n`
+          }
+        }
+      }
+    }
+    CommitMessagesfromReleases += strBuff;
+  } else {
+    CommitMessagesfromReleases += `no release notes found for # ${depName}\n\n`;
+  }
+
+  }
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
   let config: any = {
@@ -123,7 +163,7 @@ export function generateBranchConfig(branchUpgrades) {
     delete upgrade.group;
     delete upgrade.lazyGrouping;
 
-    const isTypesGroup = ifTypesGroup(depNames, hasGroupName, branchUpgrades);
+    const isTypesGroup = await ifTypesGroup(depNames, hasGroupName, branchUpgrades);
 
     // istanbul ignore else
     if (toVersions.length > 1 && !isTypesGroup) {
@@ -286,8 +326,10 @@ export function generateBranchConfig(branchUpgrades) {
     let table = [];
     table.push(['datasource', 'package', 'from', 'to']);
     table = table.concat(tableRows);
-    config.commitMessage += '\n\n' + mdTable(table) + '\n';
+
+    config.commitMessage += '\n\n' + await mdTable(table) + '\n';
   }
+  config.commitMessage += '\n' + CommitMessagesfromReleases + '\n';
   return config;
 }
 

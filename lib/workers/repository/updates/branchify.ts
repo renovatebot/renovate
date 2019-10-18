@@ -22,12 +22,12 @@ function cleanBranchName(branchName: string): string {
     .replace(/\s/g, ''); // whitespace
 }
 
-export function branchifyUpgrades(
+export async function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
 ) {
   logger.debug('branchifyUpgrades');
-  const updates = flattenUpdates(config, packageFiles);
+  const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map(u => u.depName)
@@ -90,7 +90,7 @@ export function branchifyUpgrades(
       repository: config.repository,
       branch: branchName,
     });
-    const branch = generateBranchConfig(branchUpgrades[branchName]);
+    const branch = await generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branches.push(branch);
   }
