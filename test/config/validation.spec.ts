@@ -145,14 +145,14 @@ describe('config/validation', () => {
           fileMatch: ['abc ([a-z]+) ([a-z]+))'],
         },
         docker: {
-          fileMatch: ['(x+x+)+y'],
+          fileMatch: ['x?+'],
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
+      expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
 
