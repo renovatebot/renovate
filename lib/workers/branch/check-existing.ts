@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
-const { platform } = require('../../platform');
+import { logger } from '../../logger';
+import { RenovateConfig } from '../../config';
+import { platform } from '../../platform';
 
-module.exports = {
-  prAlreadyExisted,
-};
-
-async function prAlreadyExisted(config) {
+/** TODO: Proper return type */
+export async function prAlreadyExisted(
+  config: RenovateConfig
+): Promise<any | null> {
   logger.trace({ config }, 'prAlreadyExisted');
   if (config.recreateClosed) {
     logger.debug('recreateClosed is true');

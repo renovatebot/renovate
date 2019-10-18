@@ -7,6 +7,8 @@ const platform = require('../../../lib/platform');
 
 jest.mock('../../../lib/platform');
 
+const limits = require('../../../lib/workers/global/limits');
+
 describe('lib/workers/global', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -48,6 +50,27 @@ describe('lib/workers/global', () => {
     await globalWorker.start();
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
+  });
+
+  it('processes repositories break', async () => {
+    limits.getLimitRemaining = jest.fn(() => 0);
+    // limits.getLimitRemaining.mockReturnValueOnce(0);
+    configParser.parseConfigs.mockReturnValueOnce({
+      gitAuthor: 'a@b.com',
+      enabled: true,
+      repositories: ['a', 'b'],
+      hostRules: [
+        {
+          hostType: 'docker',
+          host: 'docker.io',
+          username: 'some-user',
+          password: 'some-password',
+        },
+      ],
+    });
+    await globalWorker.start();
+    expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+    expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
   });
 
   describe('processes platforms', () => {

@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 describe('platform/azure/helpers', () => {
   let azureHelper: typeof import('../../../lib/platform/azure/azure-helper');
@@ -339,6 +340,58 @@ describe('platform/azure/helpers', () => {
         Error(
           `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
         )
+      );
+    });
+  });
+
+  describe('getMergeMethod', () => {
+    it('should default to NoFastForward', async () => {
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: jest.fn(() => [
+              {
+                settings: {
+                  scope: [
+                    {
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          } as any)
+      );
+      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.NoFastForward
+      );
+    });
+    it('should return Squash', async () => {
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: jest.fn(() => [
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          } as any)
+      );
+      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.Squash
       );
     });
   });

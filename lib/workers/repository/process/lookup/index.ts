@@ -138,7 +138,12 @@ export async function lookupUpdates(
       res.updates.push(rollback);
     }
     const rangeStrategy = getRangeStrategy(config);
-    const fromVersion = getFromVersion(config, rangeStrategy, allVersions);
+    const nonDeprecatedVersions = releases
+      .filter(release => !release.isDeprecated)
+      .map(release => release.version);
+    const fromVersion =
+      getFromVersion(config, rangeStrategy, nonDeprecatedVersions) ||
+      getFromVersion(config, rangeStrategy, allVersions);
     if (
       fromVersion &&
       rangeStrategy === 'pin' &&
@@ -379,7 +384,7 @@ function getFromVersion(
   config: LookupUpdateConfig,
   rangeStrategy: string,
   allVersions: string[]
-): string {
+): string | null {
   const { currentValue, lockedVersion, versionScheme } = config;
   const version = versioning.get(versionScheme);
   if (version.isVersion(currentValue)) {

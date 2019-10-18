@@ -1,17 +1,25 @@
 import is from '@sindresorhus/is';
-import { platform } from '../../platform';
+import { FileData, platform } from '../../platform';
+import { logger } from '../../logger';
+import { get } from '../../manager';
+import { RenovateConfig } from '../../config';
+import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 
-const { logger } = require('../../logger');
-const { get } = require('../../manager');
+export interface PackageFilesResult {
+  artifactErrors: ArtifactError[];
+  parentBranch: string;
+  updatedPackageFiles: FileData[];
+  updatedArtifacts: FileData[];
+}
 
-export { getUpdatedPackageFiles };
-
-async function getUpdatedPackageFiles(config) {
+export async function getUpdatedPackageFiles(
+  config: RenovateConfig & UpdateArtifactsConfig
+): Promise<PackageFilesResult> {
   logger.debug('manager.getUpdatedPackageFiles()');
   logger.trace({ config });
-  const updatedFileContents = {};
-  const packageFileManagers = {};
-  const packageFileUpdatedDeps = {};
+  const updatedFileContents: Record<string, string> = {};
+  const packageFileManagers: Record<string, string> = {};
+  const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
     const { manager, packageFile, depName } = upgrade;
@@ -68,8 +76,8 @@ async function getUpdatedPackageFiles(config) {
     name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts = [];
-  const artifactErrors = [];
+  const updatedArtifacts: FileData[] = [];
+  const artifactErrors: ArtifactError[] = [];
   for (const packageFile of updatedPackageFiles) {
     const manager = packageFileManagers[packageFile.name];
     const updatedDeps = packageFileUpdatedDeps[packageFile.name];
@@ -82,7 +90,7 @@ async function getUpdatedPackageFiles(config) {
         config
       );
       if (is.nonEmptyArray(results)) {
-        for (/** @type any */ const res of results) {
+        for (const res of results) {
           const { file, artifactError } = res;
           if (file) {
             updatedArtifacts.push(file);
@@ -109,7 +117,7 @@ async function getUpdatedPackageFiles(config) {
           config
         );
         if (is.nonEmptyArray(results)) {
-          for (/** @type any */ const res of results) {
+          for (const res of results) {
             const { file, artifactError } = res;
             if (file) {
               updatedArtifacts.push(file);

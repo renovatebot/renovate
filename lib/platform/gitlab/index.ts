@@ -401,11 +401,13 @@ export async function setBranchStatus(
     await api.post(url, { body: options });
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.message &&
-      err.message.startsWith(
+      err.body &&
+      err.body.message &&
+      err.body.message.startsWith(
         'Cannot transition status via :enqueue from :pending'
       )
     ) {
+      // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
       logger.info('Ignoring status transition error');
     } else {
       logger.debug({ err });

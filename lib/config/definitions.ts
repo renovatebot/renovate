@@ -448,6 +448,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'prCommitsPerRunLimit',
+    description:
+      'Set a maximum number of commits per Renovate run. Default is no limit.',
+    stage: 'global',
+    type: 'integer',
+    default: 0,
+  },
+  {
     name: 'repositories',
     description: 'List of Repositories',
     stage: 'global',
@@ -1598,6 +1606,18 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'helm-requirements',
+    description: 'Configuration object for helm requirements.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)requirements.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
     name: 'circleci',
     description:
       'Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.',
@@ -1795,7 +1815,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
-      timeout: 300,
+      timeout: 600,
       versionScheme: 'maven',
     },
     mergeable: true,
