@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import safe from 'safe-regex';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import * as managerValidator from './validation-helpers/managers';
 import { RenovateConfig, ValidationMessage } from './common';
+import { regEx } from '../util/regex';
 
 const options = getOptions();
 
@@ -182,37 +182,27 @@ export async function validateConfig(
               (key === 'packagePatterns' || key === 'excludePackagePatterns') &&
               !(val && val.length === 1 && val[0] === '*')
             ) {
-              try {
-                RegExp(val as any);
-                if (!safe(val as any)) {
+              for (const pattern of val) {
+                try {
+                  regEx(pattern);
+                } catch (e) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Unsafe regExp for ${currentPath}: \`${val}\``,
+                    message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                   });
                 }
-              } catch (e) {
-                errors.push({
-                  depName: 'Configuration Error',
-                  message: `Invalid regExp for ${currentPath}: \`${val}\``,
-                });
               }
             }
             if (key === 'fileMatch') {
-              try {
-                for (const fileMatch of val) {
-                  RegExp(fileMatch);
-                  if (!safe(fileMatch)) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `Unsafe regExp for ${currentPath}: \`${fileMatch}\``,
-                    });
-                  }
+              for (const fileMatch of val) {
+                try {
+                  regEx(fileMatch);
+                } catch (e) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
+                  });
                 }
-              } catch (e) {
-                errors.push({
-                  depName: 'Configuration Error',
-                  message: `Invalid regExp for ${currentPath}: \`${val}\``,
-                });
               }
             }
             if (
