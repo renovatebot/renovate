@@ -80,14 +80,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin 1
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8.0.0",
-    },
-    Object {
-      "version": "8.1.0",
-    },
-  ],
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
@@ -131,7 +123,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin f
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [],
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
@@ -149,14 +140,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles digest updat
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8.0.0",
-    },
-    Object {
-      "version": "8.1.0",
-    },
-  ],
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
@@ -212,20 +195,6 @@ Object {
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
-      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
-      "version": "1.3.0",
-    },
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "05e20dc704421ca820553721c7178168a8461506",
-      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
-      "version": "1.4.0",
-    },
-  ],
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
@@ -271,26 +240,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() is deprecated 1`] = 
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
-      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
-      "version": "1.3.0",
-    },
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "05e20dc704421ca820553721c7178168a8461506",
-      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
-      "version": "1.4.0",
-    },
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "d373079d3620152e3d60e82f27265a09ee0e81bd",
-      "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-      "version": "1.4.1",
-    },
-  ],
   "sourceDirectory": "test",
   "sourceUrl": null,
   "updates": Array [
@@ -456,26 +405,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns complex obje
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
-      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
-      "version": "1.3.0",
-    },
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "05e20dc704421ca820553721c7178168a8461506",
-      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
-      "version": "1.4.0",
-    },
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": "d373079d3620152e3d60e82f27265a09ee0e81bd",
-      "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-      "version": "1.4.1",
-    },
-  ],
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
@@ -890,14 +819,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible v
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8",
-    },
-    Object {
-      "version": "9",
-    },
-  ],
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
@@ -919,17 +840,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible v
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8.1",
-    },
-    Object {
-      "version": "8.2",
-    },
-    Object {
-      "version": "9.0",
-    },
-  ],
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
@@ -961,20 +871,6 @@ exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible v
 Object {
   "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8.1.0",
-    },
-    Object {
-      "version": "8.1.5",
-    },
-    Object {
-      "version": "8.2.0",
-    },
-    Object {
-      "version": "8.2.5",
-    },
-  ],
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
@@ -1777,6 +1673,22 @@ Array [
     "newValue": "~1.4.0",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
+    "updateType": "minor",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup .lookupUpdates() uses minimum version for vulnerabilityAlerts 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "1.0.0",
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 0,
+    "newValue": "1.0.1",
+    "releaseTimestamp": "2014-03-11T18:47:17.560Z",
+    "toVersion": "1.0.1",
     "updateType": "minor",
   },
 ]

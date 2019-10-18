@@ -3,11 +3,12 @@ import _fs from 'fs-extra';
 import fsReal from 'fs';
 import { exec as _exec } from '../../../lib/util/exec';
 import * as manager from '../../../lib/manager/gradle';
+import { platform as _platform, Platform } from '../../../lib/platform';
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 
-const _platform: jest.Mocked<typeof global.platform> = global.platform as any;
+const platform: jest.Mocked<Platform> = _platform as any;
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 
@@ -29,8 +30,9 @@ describe('manager/gradle', () => {
     fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
     fs.mkdir.mockResolvedValue();
     fs.exists.mockResolvedValue(true);
+    fs.access.mockResolvedValue(undefined);
     exec.mockResolvedValue({ stdout: 'gradle output', stderr: '' } as never);
-    _platform.getFile.mockResolvedValue('some content');
+    platform.getFile.mockResolvedValue('some content');
   });
 
   describe('extractPackageFile', () => {
@@ -109,6 +111,19 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
+        './gradlew --init-script renovate-plugin.gradle renovate'
+      );
+      expect(exec.mock.calls[0][1]).toMatchObject({
+        cwd: 'localDir',
+        timeout: 20000,
+      });
+    });
+
+    it('should run gradlew through `sh` when available but not executable', async () => {
+      fs.access.mockRejectedValue(undefined);
+      await manager.extractAllPackageFiles(config, ['build.gradle']);
+
+      expect(exec.mock.calls[0][0]).toBe(
         'sh gradlew --init-script renovate-plugin.gradle renovate'
       );
       expect(exec.mock.calls[0][1]).toMatchObject({
@@ -117,13 +132,22 @@ describe('manager/gradle', () => {
       });
     });
 
-    it('should return null and gradle should not be executed if no build.gradle', async () => {
+    it('should return null and gradle should not be executed if no root build.gradle', async () => {
+      fs.exists.mockResolvedValue(false);
+
       const packageFiles = ['foo/build.gradle'];
       expect(
         await manager.extractAllPackageFiles(config, packageFiles)
       ).toBeNull();
 
       expect(exec).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'foo/build.gradle',
+      ]);
+      expect(dependencies).toMatchSnapshot();
     });
 
     it('should configure the renovate report plugin', async () => {

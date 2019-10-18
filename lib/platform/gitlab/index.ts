@@ -4,9 +4,16 @@ import is from '@sindresorhus/is';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import {
+  PlatformConfig,
+  RepoParams,
+  RepoConfig,
+  PlatformPrOptions,
+} from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
+import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -32,8 +39,8 @@ export async function initPlatform({
   endpoint,
   token,
 }: {
-  endpoint: string;
   token: string;
+  endpoint: string;
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -394,11 +401,13 @@ export async function setBranchStatus(
     await api.post(url, { body: options });
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.message &&
-      err.message.startsWith(
+      err.body &&
+      err.body.message &&
+      err.body.message.startsWith(
         'Cannot transition status via :enqueue from :pending'
       )
     ) {
+      // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
       logger.info('Ignoring status transition error');
     } else {
       logger.debug({ err });
@@ -453,7 +462,7 @@ export async function findIssue(title: string) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(body);
+  const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
@@ -572,8 +581,9 @@ async function deleteComment(issueNo: number, commentId: number) {
 export async function ensureComment(
   issueNo: number,
   topic: string | null | undefined,
-  content: string
+  rawContent: string
 ) {
+  const content = sanitize(rawContent);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
@@ -687,10 +697,12 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  description: string,
+  rawDescription: string,
   labels?: string[] | null,
-  useDefaultBranch?: boolean
+  useDefaultBranch?: boolean,
+  platformOptions?: PlatformPrOptions
 ) {
+  const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch
     : config.baseBranch;
@@ -709,11 +721,27 @@ export async function createPr(
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.canRebase = true;
+  pr.isModified = false;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
   }
+  if (platformOptions && platformOptions.gitLabAutomerge) {
+    try {
+      await api.put(
+        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
+        {
+          body: {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          },
+        }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Automerge on PR creation failed');
+    }
+  }
+
   return pr;
 }
 
@@ -729,6 +757,7 @@ export async function getPr(iid: number) {
   pr.body = pr.description;
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? 'open' : pr.state;
+  pr.isModified = true;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -750,13 +779,13 @@ export async function getPr(iid: number) {
       branch && branch.commit ? branch.commit.author_email : null;
     // istanbul ignore if
     if (branchCommitEmail === config.email) {
-      pr.canRebase = true;
+      pr.isModified = false;
     } else {
       logger.debug(
         { branchCommitEmail, configEmail: config.email, iid: pr.iid },
         'Last committer to branch does not match bot email, so PR cannot be rebased.'
       );
-      pr.canRebase = false;
+      pr.isModified = true;
     }
   } catch (err) {
     logger.debug({ err }, 'Error getting PR branch');
@@ -797,7 +826,7 @@ export async function updatePr(
   await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
     body: {
       title,
-      description,
+      description: sanitize(description),
     },
   });
 }
@@ -826,10 +855,13 @@ export async function mergePr(iid: number) {
 }
 
 export function getPrBody(input: string) {
-  return input
-    .replace(/Pull Request/g, 'Merge Request')
-    .replace(/PR/g, 'MR')
-    .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/');
+  return smartTruncate(
+    input
+      .replace(/Pull Request/g, 'Merge Request')
+      .replace(/PR/g, 'MR')
+      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
+    1000000
+  );
 }
 
 export function getCommitMessages() {

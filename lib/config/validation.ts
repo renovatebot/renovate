@@ -10,32 +10,6 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 
-// istanbul ignore next
-async function validateBaseBranches(
-  config: RenovateConfig
-): Promise<ValidationMessage[]> {
-  if (!is.nonEmptyArray(config.baseBranches)) {
-    return [];
-  }
-  const missingBranches: string[] = [];
-  for (const baseBranch of config.baseBranches) {
-    if (!(await platform.branchExists(baseBranch))) {
-      missingBranches.push(baseBranch);
-    }
-  }
-  if (missingBranches.length) {
-    return [
-      {
-        depName: 'Missing baseBranches',
-        message:
-          'One or more configured baseBranches are missing from this repo: ' +
-          missingBranches.join(', '),
-      },
-    ];
-  }
-  return [];
-}
-
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
@@ -54,8 +28,6 @@ export async function validateConfig(
   }
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
-
-  errors = errors.concat(await validateBaseBranches(config));
 
   function getDeprecationMessage(option: string): string {
     const deprecatedOptions = {
@@ -76,6 +48,7 @@ export async function validateConfig(
       'forkToken',
       'repository',
       'vulnerabilityAlertsOnly',
+      'vulnerabilityAlert',
       'copyLocalLibs', // deprecated - functionality is now enabled by default
       'prBody', // deprecated
     ];

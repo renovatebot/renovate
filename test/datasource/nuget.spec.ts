@@ -24,6 +24,10 @@ const pkgListV2 = fs.readFileSync(
   'test/datasource/nuget/_fixtures/nunitV2.xml',
   'utf8'
 );
+const pkgListV2NoRelease = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2_no_release.xml',
+  'utf8'
+);
 const pkgListV2WithoutProjectUrl = fs.readFileSync(
   'test/datasource/nuget/_fixtures/nunitV2_withoutProjectUrl.xml',
   'utf8'
@@ -321,6 +325,16 @@ describe('datasource/nuget', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
+    });
+    it('processes real data no relase (v2)', async () => {
+      got.mockReturnValueOnce({
+        body: pkgListV2NoRelease,
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV2,
+      });
+      expect(res).toBeNull();
     });
     it('processes real data without project url (v2)', async () => {
       got.mockReturnValueOnce({

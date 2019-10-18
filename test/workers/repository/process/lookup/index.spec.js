@@ -270,6 +270,18 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('uses minimum version for vulnerabilityAlerts', async () => {
+      config.currentValue = '1.0.0';
+      config.vulnerabilityAlert = true;
+      config.depName = 'q';
+      config.datasource = 'npm';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = (await lookup.lookupUpdates(config)).updates;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
     it('supports minor and major upgrades for ranged versions', async () => {
       config.currentValue = '~0.4.0';
       config.rangeStrategy = 'pin';
@@ -1018,7 +1030,6 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
       expect(res.sourceUrl).toBeDefined();
     });
     it('ignores deprecated', async () => {
@@ -1033,7 +1044,6 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
       expect(res.updates[0].toVersion).toEqual('1.4.0');
     });
     it('is deprecated', async () => {
@@ -1052,7 +1062,6 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
       expect(res.updates[0].toVersion).toEqual('1.4.1');
     });
     it('skips unsupported values', async () => {

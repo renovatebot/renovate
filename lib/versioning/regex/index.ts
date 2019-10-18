@@ -1,8 +1,7 @@
 import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
-import { logger } from '../../logger';
-import { RegEx } from '../../util/regex';
+import { regEx } from '../../util/regex';
 
 export interface RegExpVersion extends GenericVersion {
   /** prereleases are treated in the standard semver manner, if present */
@@ -48,16 +47,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
     // TODO: should we validate the user has not added extra unsupported
     // capture groups?
-
-    try {
-      this._config = new RegEx(new_config);
-    } catch (e) {
-      logger.debug({ err: e }, 'regex error');
-      const error = new Error('config-validation');
-      error.configFile = new_config;
-      error.validationError = 'Invalid regex versionSheme found';
-      throw error;
-    }
+    this._config = regEx(new_config);
   }
 
   protected _compare(version: string, other: string): number {

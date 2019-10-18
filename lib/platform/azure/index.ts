@@ -1,3 +1,5 @@
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
@@ -5,11 +7,13 @@ import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
 import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 interface Config {
   storage: GitStorage;
   repoForceRebase: boolean;
-  mergeMethod: string;
+  mergeMethod: GitPullRequestMergeStrategy;
   baseCommitSHA: string | undefined;
   baseBranch: string;
   defaultBranch: string;
@@ -84,7 +88,7 @@ export async function initRepo({
   config.baseBranch = config.defaultBranch;
   logger.debug(`${repository} default branch = ${config.defaultBranch}`);
   config.baseCommitSHA = await getBranchCommit(config.baseBranch);
-  config.mergeMethod = 'merge';
+  config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
 
   if (optimizeForDisabled) {
@@ -353,7 +357,7 @@ export async function createPr(
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
   );
-  const description = azureHelper.max4000Chars(body);
+  const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
@@ -377,7 +381,7 @@ export async function createPr(
           id: pr.createdBy!.id,
         },
         completionOptions: {
-          squashMerge: true,
+          mergeStrategy: config.mergeMethod,
           deleteSourceBranch: true,
         },
       },
@@ -405,7 +409,7 @@ export async function updatePr(prNo: number, title: string, body?: string) {
     title,
   };
   if (body) {
-    objToUpdate.description = azureHelper.max4000Chars(body);
+    objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
   }
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
@@ -416,7 +420,7 @@ export async function ensureComment(
   content: string
 ) {
   logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${content}`;
+  const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
     {
@@ -486,7 +490,7 @@ export async function mergePr(pr: number) {
 
 export function getPrBody(input: string) {
   // Remove any HTML we use
-  return input
+  return smartTruncate(input, 4000)
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
     .replace('<summary>', '**')
     .replace('</summary>', '**')
@@ -533,7 +537,7 @@ export async function addAssignees(issueNo: number, assignees: string[]) {
 export async function addReviewers(prNo: number, reviewers: string[]) {
   logger.trace(`addReviewers(${prNo}, ${reviewers})`);
   const azureApiGit = await azureApi.gitApi();
-  const azureApiCore = await azureApi.getCoreApi();
+  const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter(c => c.id === config.repoId)[0];
   const teams = await azureApiCore.getTeams(repo!.project!.id!);

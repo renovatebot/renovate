@@ -2,11 +2,10 @@ const prWorker = require('../../../lib/workers/pr');
 /** @type any */
 const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+/** @type any */
+const { platform } = require('../../../lib/platform');
 
 jest.mock('../../../lib/workers/pr/changelog');
-
-/** @type any */
-const platform = global.platform;
 
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
@@ -61,7 +60,7 @@ describe('workers/pr', () => {
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
-      pr.canRebase = true;
+      pr.isModified = false;
       platform.getBranchStatus.mockReturnValueOnce('success');
       platform.mergePr.mockReturnValueOnce(true);
       await prWorker.checkAutoMerge(pr, config);
@@ -71,14 +70,14 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
-      pr.canRebase = true;
+      pr.isModified = false;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
-      pr.canRebase = false;
+      pr.isModified = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
@@ -110,7 +109,7 @@ describe('workers/pr', () => {
       title: 'Update dependency dummy to v1.1.0',
       body:
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
-      canRebase: true,
+      isModified: false,
     };
     beforeEach(() => {
       config = {
@@ -301,6 +300,23 @@ describe('workers/pr', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
     });
+    it('should add random sample of assignees and reviewers to new PR', async () => {
+      config.assignees = ['foo', 'bar', 'baz'];
+      config.assigneesSampleSize = 2;
+      config.reviewers = ['baz', 'boo', 'bor'];
+      config.reviewersSampleSize = 2;
+      await prWorker.ensurePr(config);
+
+      expect(platform.addAssignees).toHaveBeenCalledTimes(1);
+      const assignees = platform.addAssignees.mock.calls[0][1];
+      expect(assignees.length).toEqual(2);
+      expect(config.assignees).toEqual(expect.arrayContaining(assignees));
+
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      const reviewers = platform.addReviewers.mock.calls[0][1];
+      expect(reviewers.length).toEqual(2);
+      expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
+    });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       config.semanticCommitScope = null;
@@ -398,6 +414,16 @@ describe('workers/pr', () => {
       config.platform = 'gitlab';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
+
+    it('should trigger GitLab automerge when configured', async () => {
+      config.gitLabAutomerge = true;
+      config.automerge = true;
+      await prWorker.ensurePr(config);
+      const args = platform.createPr.mock.calls[0];
+      expect(args[5]).toMatchObject({
+        gitLabAutomerge: true,
+      });
     });
   });
 });

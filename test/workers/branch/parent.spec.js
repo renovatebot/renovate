@@ -1,7 +1,6 @@
 const { getParentBranch } = require('../../../lib/workers/branch/parent');
-
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
@@ -39,7 +38,7 @@ describe('workers/branch/parent', () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
         isConflicted: true,
-        canRebase: false,
+        isModified: true,
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
@@ -49,7 +48,7 @@ describe('workers/branch/parent', () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
         isConflicted: true,
-        canRebase: true,
+        isModified: false,
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
@@ -74,7 +73,7 @@ describe('workers/branch/parent', () => {
     it('returns undefined if manual rebase by label', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        canRebase: false,
+        isModified: true,
         labels: ['rebase'],
       });
       const res = await getParentBranch(config);
@@ -84,7 +83,7 @@ describe('workers/branch/parent', () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
         isConflicted: true,
-        canRebase: true,
+        isModified: false,
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBeUndefined();
@@ -110,7 +109,7 @@ describe('workers/branch/parent', () => {
       platform.isBranchStale.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValue({
         isConflicted: true,
-        canRebase: false,
+        isModified: true,
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).not.toBeUndefined();

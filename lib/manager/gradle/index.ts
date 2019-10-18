@@ -1,4 +1,6 @@
-import { exists } from 'fs-extra';
+import { access, constants, exists } from 'fs-extra';
+import upath from 'upath';
+
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 
@@ -13,6 +15,7 @@ import {
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
+import { platform } from '../../platform';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -22,24 +25,38 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  if (
-    !packageFiles.some(packageFile =>
-      ['build.gradle', 'build.gradle.kts'].includes(packageFile)
-    )
-  ) {
+  let rootBuildGradle: string | undefined;
+  for (const packageFile of packageFiles) {
+    if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
+      rootBuildGradle = packageFile;
+      break;
+    }
+
+    // If there is gradlew in the same directory, the directory should be a Gradle project root
+    const dirname = upath.dirname(packageFile);
+    const gradlewPath = upath.join(dirname, 'gradlew');
+    const gradlewExists = await exists(
+      upath.join(config.localDir, gradlewPath)
+    );
+    if (gradlewExists) {
+      rootBuildGradle = packageFile;
+      break;
+    }
+  }
+  if (!rootBuildGradle) {
     logger.warn('No root build.gradle nor build.gradle.kts found - skipping');
     return null;
   }
   logger.info('Extracting dependencies from all gradle files');
 
-  await createRenovateGradlePlugin(config.localDir);
-  await executeGradle(config);
+  const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
+
+  await createRenovateGradlePlugin(cwd);
+  await executeGradle(config, cwd);
 
   init();
 
-  const dependencies = await extractDependenciesFromUpdatesReport(
-    config.localDir
-  );
+  const dependencies = await extractDependenciesFromUpdatesReport(cwd);
   if (dependencies.length === 0) {
     return [];
   }
@@ -83,18 +100,18 @@ function buildGradleDependency(config: Upgrade): GradleDependency {
   return { group: config.depGroup, name: config.name, version: config.version };
 }
 
-async function executeGradle(config: ExtractConfig) {
+async function executeGradle(config: ExtractConfig, cwd: string) {
   let stdout: string;
   let stderr: string;
   const gradleTimeout =
     config.gradle && config.gradle.timeout
       ? config.gradle.timeout * 1000
       : undefined;
-  const cmd = await getGradleCommandLine(config);
+  const cmd = await getGradleCommandLine(config, cwd);
   try {
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, {
-      cwd: config.localDir,
+      cwd,
       timeout: gradleTimeout,
     }));
   } catch (err) {
@@ -117,17 +134,40 @@ async function executeGradle(config: ExtractConfig) {
   logger.info('Gradle report complete');
 }
 
-async function getGradleCommandLine(config: ExtractConfig): Promise<string> {
+async function getGradleCommandLine(
+  config: ExtractConfig,
+  cwd: string
+): Promise<string> {
   let cmd: string;
-  const gradlewExists = await exists(config.localDir + '/gradlew');
+  const gradlewPath = upath.join(cwd, 'gradlew');
+  const gradlewExists = await exists(gradlewPath);
+  const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
+
   if (config.binarySource === 'docker') {
-    cmd = `docker run --rm -v ${config.localDir}:${config.localDir} -w ${config.localDir} renovate/gradle gradle`;
+    cmd = `docker run --rm `;
+    // istanbul ignore if
+    if (config.dockerUser) {
+      cmd += `--user=${config.dockerUser} `;
+    }
+    cmd += `-v ${cwd}:${cwd} -w ${cwd} `;
+    cmd += `renovate/gradle gradle`;
+  } else if (gradlewExecutable) {
+    cmd = './gradlew';
   } else if (gradlewExists) {
     cmd = 'sh gradlew';
   } else {
     cmd = 'gradle';
   }
   return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
+}
+
+async function canExecute(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export const language = 'java';

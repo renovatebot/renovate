@@ -5,6 +5,7 @@ import { find } from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   goModFileName: string,
@@ -44,6 +45,10 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [config.localDir, process.env.GOPATH];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = customEnv;
@@ -69,7 +74,7 @@ export async function updateArtifacts(
       logger.info('Running go via global command');
       cmd = 'go';
     }
-    let args = 'get';
+    let args = 'get -d ./...';
     if (cmd.includes('.insteadOf')) {
       args += '"';
     }

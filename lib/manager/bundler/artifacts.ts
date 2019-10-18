@@ -11,6 +11,7 @@ import {
   sortVersions,
 } from '../../versioning/ruby';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { platform } from '../../platform';
 
 // istanbul ignore next
 export async function updateArtifacts(
@@ -92,6 +93,10 @@ export async function updateArtifacts(
         bundlerVersion = ' -v ' + bundlerConstraint;
       }
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [config.localDir];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = [];

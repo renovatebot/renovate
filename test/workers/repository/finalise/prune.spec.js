@@ -1,7 +1,7 @@
 const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../lib/platform');
 
 /** @type any */
 let config;
@@ -74,7 +74,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.getAllRenovateBranches.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockReturnValueOnce({ canRebase: false });
+      platform.getBranchPr.mockReturnValueOnce({ isModified: true });
       platform.findPr.mockReturnValueOnce({ title: 'foo' });
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
@@ -88,7 +88,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.getAllRenovateBranches.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockReturnValueOnce({ canRebase: false });
+      platform.getBranchPr.mockReturnValueOnce({ isModified: true });
       platform.findPr.mockReturnValueOnce({ title: 'foo' });
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);

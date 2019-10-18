@@ -1,4 +1,11 @@
 import got from 'got';
+import Git from 'simple-git/promise';
+import { RenovateConfig } from '../config/common';
+
+export interface FileData {
+  name: string;
+  contents: string;
+}
 
 export interface GotApiOptions {
   useCache?: boolean;
@@ -65,4 +72,109 @@ export interface RepoParams {
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+}
+
+/**
+ * TODO: Proper typing
+ */
+export type Pr = any;
+
+/**
+ * TODO: Proper typing
+ */
+export interface Issue {
+  body?: string;
+  number?: number;
+  state?: string;
+  title?: string;
+}
+
+export type BranchStatus = 'pending' | 'success' | 'failed';
+
+export type PlatformPrOptions = {
+  azureAutoComplete: boolean;
+  statusCheckVerify: boolean;
+  gitLabAutomerge: boolean;
+};
+
+/**
+ * TODO: Proper typing
+ */
+export type VulnerabilityAlert = any;
+
+export interface Platform {
+  findIssue(title: string): Promise<Issue>;
+  getIssueList(): Promise<Issue[]>;
+  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getCommitMessages(): Promise<string[]>;
+  setBranchPrefix(branchPrefix: string): Promise<void>;
+  initRepo(config: RepoParams): Promise<RepoConfig>;
+  cleanRepo(): Promise<void>;
+  getPrFiles(prNo: number): Promise<string[]>;
+  getPrList(): Promise<Pr[]>;
+  getAllRenovateBranches(branchPrefix: string): Promise<string[]>;
+  ensureIssueClosing(title: string): Promise<void>;
+  getFileList(): Promise<string[]>;
+  ensureIssue(
+    title: string,
+    body: string,
+    once?: boolean,
+    shouldReopen?: boolean
+  ): Promise<'updated' | 'created' | null>;
+  getPrBody(prBody: string): string;
+  updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
+  mergePr(number: number, branchName: string): Promise<boolean>;
+  addReviewers(number: number, reviewers: string[]): Promise<void>;
+  addAssignees(number: number, assignees: string[]): Promise<void>;
+  createPr(
+    branchName: string,
+    prTitle: string,
+    prBody: string,
+    labels?: string[] | null,
+    useDefaultBranch?: boolean,
+    platformOptions?: PlatformPrOptions
+  ): Promise<Pr>;
+  getBranchLastCommitTime(branchName: string): Promise<Date>;
+  getRepos(): Promise<string[]>;
+  isBranchStale(branchName: string): Promise<boolean>;
+  getRepoForceRebase(): Promise<boolean>;
+  deleteLabel(number: number, label: string): Promise<void>;
+  setBranchStatus(
+    branchName: string,
+    context: string,
+    description: string,
+    state: string | null,
+    url?: string
+  ): Promise<void>;
+  getBranchStatusCheck(branchName: string, context: string): Promise<string>;
+  ensureCommentRemoval(number: number, subject: string): Promise<void>;
+  deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
+  ensureComment(
+    number: number,
+    subject: string,
+    content: string
+  ): Promise<boolean>;
+  branchExists(branchName: string): Promise<boolean>;
+  setBaseBranch(baseBranch: string): Promise<void>;
+  commitFilesToBranch(
+    branchName: string,
+    updatedFiles: any[],
+    commitMessage: string,
+    parentBranch?: string
+  ): Promise<void>;
+  getPr(number: number): Promise<Pr>;
+  findPr(
+    branchName: string,
+    prTitle: string | null,
+    state?: string
+  ): Promise<Pr>;
+  mergeBranch(branchName: string): Promise<void>;
+  getBranchStatus(
+    branchName: string,
+    requiredStatusChecks?: string[] | null
+  ): Promise<BranchStatus>;
+  getBranchPr(branchName: string): Promise<Pr>;
+  getRepoStatus(): Promise<Git.StatusResult>;
+  getFile(lockFileName: string, branchName?: string): Promise<string>;
+  initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
 }

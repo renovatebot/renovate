@@ -5,6 +5,8 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 import { logger } from '../../logger';
 
+const limits = require('../../workers/global/limits');
+
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
@@ -120,6 +122,14 @@ export class Storage {
         10;
       logger.info({ cloneSeconds }, 'git clone completed');
     }
+    const submodules = await this.getSubmodules();
+    for (const submodule of submodules) {
+      try {
+        await this._git.submoduleUpdate(['--init', '--', submodule]);
+      } catch (err) {
+        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+      }
+    }
     try {
       const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
       logger.debug({ latestCommitDate }, 'latest commit');
@@ -190,10 +200,7 @@ export class Storage {
   async setBaseBranch(branchName: string) {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
-        throw new Error(
-          'Cannot set baseBranch to something that does not exist: ' +
-            branchName
-        );
+        throwBaseBranchValidationError(branchName);
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
@@ -215,12 +222,7 @@ export class Storage {
             'unknown revision or path not in the working tree'
           )
         ) {
-          const error = new Error('config-validation');
-          error.validationError = 'baseBranch not found';
-          error.validationMessage =
-            'The following configured baseBranch could not be found: ' +
-            branchName;
-          throw error;
+          throwBaseBranchValidationError(branchName);
         }
         throw err;
       }
@@ -249,7 +251,8 @@ export class Storage {
     if (!exists) {
       return [];
     }
-    const files = await this._git!.raw([
+    const submodules = await this.getSubmodules();
+    const files: string = await this._git!.raw([
       'ls-tree',
       '-r',
       '--name-only',
@@ -259,7 +262,27 @@ export class Storage {
     if (!files) {
       return [];
     }
-    return files.split('\n').filter(Boolean);
+    return files
+      .split('\n')
+      .filter(Boolean)
+      .filter((file: string) =>
+        submodules.every((submodule: string) => !file.startsWith(submodule))
+      );
+  }
+
+  async getSubmodules() {
+    return (
+      (await this._git!.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
   }
 
   async branchExists(branchName: string) {
@@ -345,6 +368,7 @@ export class Storage {
     await this._git!.checkout(this._config.baseBranch);
     await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
+    limits.incrementLimit('prCommitsPerRunLimit');
   }
 
   async getBranchLastCommitTime(branchName: string) {
@@ -429,6 +453,7 @@ export class Storage {
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
       await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
       this._config.branchExists[branchName] = true;
+      limits.incrementLimit('prCommitsPerRunLimit');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');
@@ -471,7 +496,7 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
-  if (process.env.CI) {
+  if (process.env.NODE_ENV === 'test') {
     return;
   }
   const platformFailureStrings = [
@@ -489,6 +514,14 @@ function checkForPlatformFailure(err: Error) {
       throw new Error('platform-failure');
     }
   }
+}
+
+function throwBaseBranchValidationError(branchName) {
+  const error = new Error('config-validation');
+  error.validationError = 'baseBranch not found';
+  error.validationMessage =
+    'The following configured baseBranch could not be found: ' + branchName;
+  throw error;
 }
 
 export default Storage;

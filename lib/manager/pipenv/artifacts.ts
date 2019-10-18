@@ -4,6 +4,7 @@ import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsResult, UpdateArtifactsConfig } from '../common';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   pipfileName: string,
@@ -35,6 +36,10 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running pipenv via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [config.localDir, process.env.PIPENV_CACHE_DIR];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = ['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR'];

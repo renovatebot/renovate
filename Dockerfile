@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.3@sha256:47577703778ff7d741425c5f5c81df719b1b3bb647c4beae02a1d1d327afbe8c AS tsbuild
+FROM amd64/node:10.16.3@sha256:925162bdc4b23422763cb2d08ecf1661bbbd856ab54b959517924054e17813fc AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:ca013ac5c09f9a9f6db8370c1b759a29fe997d64d6591e9a75b71748858f7da0
+FROM amd64/ubuntu:18.04@sha256:1bbdea4846231d91cce6c7ff3907d26fca444fd6b7e3c282b90c7fe4251f9f86
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -74,6 +74,31 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
 
 ## END copy Node.js
 
+# Erlang
+
+RUN cd /tmp && \
+    curl https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb -o erlang-solutions_1.0_all.deb && \
+    dpkg -i erlang-solutions_1.0_all.deb && \
+    rm -f erlang-solutions_1.0_all.deb
+
+ENV ERLANG_VERSION=22.0.2-1
+
+RUN apt-get update && \
+    apt-cache policy esl-erlang && \
+    apt-get install -y esl-erlang=1:$ERLANG_VERSION && \
+    apt-get clean
+
+# Elixir
+
+ENV ELIXIR_VERSION 1.8.2
+
+RUN curl -L https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip -o Precompiled.zip && \
+    mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
+    unzip Precompiled.zip -d /opt/elixir-${ELIXIR_VERSION}/ && \
+    rm Precompiled.zip
+
+ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
+
 # PHP Composer
 
 RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
@@ -88,7 +113,11 @@ RUN chmod +x /usr/local/bin/composer
 
 RUN apt-get update && apt-get install -y bzr && apt-get clean
 
-ENV GOLANG_VERSION 1.12
+ENV GOLANG_VERSION 1.13
+
+# Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
+# private repositories.
+ENV GOPROXY=direct GOSUMDB=off
 
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
   tar -C /usr/local -xzf go.tgz && \
@@ -143,6 +172,11 @@ RUN set -ex ;\
   curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
   rustup toolchain install 1.36.0
 
+# Mix and Rebar
+
+RUN mix local.hex --force
+RUN mix local.rebar --force
+
 # Pipenv
 
 ENV PATH="/home/ubuntu/.local/bin:$PATH"
@@ -173,9 +207,14 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production --frozen-lockfile && yarn cache clean
+RUN rm -f yarn.lock
 COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data
+
+USER root
+RUN chown -R ubuntu:ubuntu /usr/src/app
+USER ubuntu
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []

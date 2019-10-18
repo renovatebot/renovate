@@ -17,8 +17,12 @@ export function gitApi() {
   return azureObj().getGitApi();
 }
 
-export function getCoreApi() {
+export function coreApi() {
   return azureObj().getCoreApi();
+}
+
+export function policyApi() {
+  return azureObj().getPolicyApi();
 }
 
 export function setEndpoint(e: string) {

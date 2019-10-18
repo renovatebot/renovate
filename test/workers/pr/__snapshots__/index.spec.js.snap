@@ -68,6 +68,7 @@ Array [
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -115,6 +116,7 @@ Array [
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -179,6 +181,7 @@ note 2
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -226,6 +229,7 @@ Array [
   false,
   Object {
     "azureAutoComplete": false,
+    "gitLabAutomerge": false,
     "statusCheckVerify": false,
   },
 ]
@@ -267,8 +271,8 @@ Object {
 ---
 
  - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
-  "canRebase": true,
   "displayNumber": "Existing PR",
+  "isModified": false,
   "title": "Update dependency dummy to v1.1.0",
 }
 `;
@@ -309,8 +313,8 @@ Object {
 ---
 
  - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
-  "canRebase": true,
   "displayNumber": "Existing PR",
+  "isModified": false,
   "title": "wrong",
 }
 `;

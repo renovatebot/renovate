@@ -201,6 +201,29 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });
+
+  it('should parse repo url (string)', async () => {
+    const pkg = {
+      name: 'foobar',
+      versions: {
+        '0.0.1': {
+          repository: 'git:github.com/renovateapp/dummy',
+        },
+      },
+      'dist-tags': {
+        latest: '0.0.1',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+      },
+    };
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, pkg);
+    const res = await npm.getPkgReleases({ lookupName: 'foobar' });
+    expect(res).toMatchSnapshot();
+    expect(res.sourceUrl).toBeDefined();
+  });
   it('should return deprecated', async () => {
     const deprecatedPackage = {
       name: 'foobar',
@@ -367,19 +390,6 @@ describe('api/npm', () => {
     const res2 = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res1).not.toBeNull();
     expect(res1).toEqual(res2);
-  });
-  it('should use global cache', async () => {
-    const dep = {
-      name: 'abc123',
-    };
-    await global.renovateCache.set(
-      'datasource-npm',
-      'https://registry.npmjs.org/abc123',
-      dep,
-      10
-    );
-    const res = await npm.getPkgReleases({ lookupName: 'abc123' });
-    expect(res).toEqual(dep);
   });
   it('should fetch package info from custom registry', async () => {
     nock('https://npm.mycustomregistry.com')

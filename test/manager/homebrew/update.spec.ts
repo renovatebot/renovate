@@ -1,10 +1,11 @@
 import fs from 'fs';
+import { fromStream as _fromStream } from 'hasha';
 import { updateDependency } from '../../../lib/manager/homebrew/update';
-import _got from '../../../lib/util/got';
 
+jest.mock('hasha');
 jest.mock('../../../lib/util/got');
 
-const got: any = _got;
+const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
 
 const aide = fs.readFileSync('test/manager/homebrew/_fixtures/aide.rb', 'utf8');
 const ibazel = fs.readFileSync(
@@ -30,7 +31,7 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.17.7',
     };
-    got.mockReturnValueOnce({ body: 'some_content_1' });
+    fromStream.mockResolvedValueOnce('new_hash_value');
     const newContent = await updateDependency(aide, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(aide);
@@ -50,13 +51,13 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockReturnValueOnce({ body: 'some_content_2' });
+    fromStream.mockResolvedValueOnce('new_hash_value');
     const newContent = await updateDependency(ibazel, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
   });
-  it('returns unchanged content if got function throws errors', async () => {
+  it('returns unchanged content if fromStream promise rejects', async () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -70,9 +71,7 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockImplementationOnce(() => {
-      throw new Error('Request failed');
-    });
+    fromStream.mockRejectedValueOnce('Request failed');
     const newContent = await updateDependency(ibazel, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(ibazel);
@@ -91,9 +90,7 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockImplementationOnce(() => {
-      return { body: 'some_content' };
-    });
+    fromStream.mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
@@ -113,13 +110,9 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got
-      .mockImplementationOnce(() => {
-        throw Error('Request failed');
-      })
-      .mockImplementationOnce(() => {
-        return { body: 'some_content' };
-      });
+    fromStream
+      .mockRejectedValueOnce('Request failed')
+      .mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
@@ -139,13 +132,9 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got
-      .mockImplementationOnce(() => {
-        throw Error('Request failed');
-      })
-      .mockImplementationOnce(() => {
-        return { body: 'some_content' };
-      });
+    fromStream
+      .mockRejectedValueOnce('Request failed')
+      .mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
@@ -172,9 +161,7 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockImplementationOnce(() => {
-      return { body: 'some_content' };
-    });
+    fromStream.mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
@@ -200,9 +187,7 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockImplementationOnce(() => {
-      return { body: 'some_content' };
-    });
+    fromStream.mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
@@ -229,9 +214,7 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockImplementationOnce(() => {
-      return { body: 'some_content' };
-    });
+    fromStream.mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
@@ -257,11 +240,31 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    got.mockImplementationOnce(() => {
-      return { body: 'some_content' };
-    });
+    fromStream.mockResolvedValueOnce('some_content');
     const newContent = await updateDependency(content, upgrade);
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if both got requests fail', async () => {
+    const upgrade = {
+      currentValue: 'v0.16.1',
+      depName: 'Aide',
+      managerData: {
+        ownerName: 'aide',
+        repoName: 'aide',
+        sha256:
+          '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
+        url:
+          'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+      },
+      newValue: 'v0.17.7',
+    };
+    fromStream
+      .mockRejectedValueOnce('Request failed.')
+      .mockRejectedValueOnce('Request failed.');
+    const newContent = await updateDependency(aide, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(aide);
+    expect(newContent).toMatchSnapshot();
   });
 });

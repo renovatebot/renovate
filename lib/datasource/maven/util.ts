@@ -12,7 +12,7 @@ function isTemporalError(err: { code: string; statusCode: number }) {
   return (
     err.code === 'ECONNRESET' ||
     err.statusCode === 429 ||
-    (err.statusCode > 500 && err.statusCode < 600)
+    (err.statusCode >= 500 && err.statusCode < 600)
   );
 }
 
@@ -38,7 +38,23 @@ export async function downloadHttpProtocol(
 ): Promise<string | null> {
   let raw: { body: string };
   try {
-    raw = await got(pkgUrl, { hostType });
+    raw = await got(pkgUrl, {
+      hostType,
+      hooks: {
+        beforeRedirect: [
+          (options: any) => {
+            if (
+              options.search &&
+              options.search.indexOf('X-Amz-Algorithm') !== -1
+            ) {
+              // maven repository is hosted on amazon, redirect url includes authentication.
+              // eslint-disable-next-line no-param-reassign
+              delete options.auth;
+            }
+          },
+        ],
+      },
+    });
   } catch (err) {
     if (isNotFoundError(err)) {
       logger.debug(`Url not found ${pkgUrl}`);

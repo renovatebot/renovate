@@ -5,6 +5,7 @@ import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { platform } from '../../platform';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -47,6 +48,10 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running poetry via docker');
       cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
+      }
       const volumes = [cwd];
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
       const envVars = [];

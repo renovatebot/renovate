@@ -53,6 +53,9 @@ Object {
   "gradle-wrapper": Array [
     Object {},
   ],
+  "helm-requirements": Array [
+    Object {},
+  ],
   "homebrew": Array [
     Object {},
   ],
@@ -66,6 +69,9 @@ Object {
     Object {},
   ],
   "meteor": Array [
+    Object {},
+  ],
+  "mix": Array [
     Object {},
   ],
   "npm": Array [

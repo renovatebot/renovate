@@ -54,7 +54,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
       const requireMatch = line.match(/^require\s+([^\s]+)\s+([^\s]+)/);
-      if (requireMatch) {
+      if (requireMatch && !line.endsWith('// indirect')) {
         logger.trace({ lineNumber }, `require line: "${line}"`);
         const dep = getDep(lineNumber, requireMatch, 'require');
         deps.push(dep);
@@ -66,7 +66,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           line = lines[lineNumber];
           const multiMatch = line.match(/^\s+([^\s]+)\s+([^\s]+)/);
           logger.trace(`reqLine: "${line}"`);
-          if (multiMatch) {
+          if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);
             const dep = getDep(lineNumber, multiMatch, 'require');
             dep.managerData.multiLine = true;

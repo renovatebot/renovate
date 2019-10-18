@@ -2,9 +2,8 @@ const {
   prAlreadyExisted,
 } = require('../../../lib/workers/branch/check-existing');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {

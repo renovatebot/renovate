@@ -4,7 +4,7 @@ const {
 } = require('../../../../../lib/workers/repository/onboarding/branch/rebase');
 
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../../../lib/platform');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {
@@ -17,7 +17,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
     it('does not rebase modified branch', async () => {
       platform.getBranchPr.mockReturnValueOnce({
-        canRebase: false,
+        isModified: true,
       });
       await rebaseOnboardingBranch(config);
       expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
@@ -28,7 +28,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       platform.getFile.mockReturnValueOnce(contents); // package.json
       platform.getFile.mockReturnValueOnce(contents); // renovate.json
       platform.getBranchPr.mockReturnValueOnce({
-        canRebase: true,
+        isModified: false,
         isStale: false,
       });
       await rebaseOnboardingBranch(config);
@@ -37,7 +37,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('rebases onboarding branch', async () => {
       platform.getBranchPr.mockReturnValueOnce({
         isStale: true,
-        canRebase: true,
+        isModified: false,
       });
       await rebaseOnboardingBranch(config);
       expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(1);

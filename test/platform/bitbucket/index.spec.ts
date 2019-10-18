@@ -198,6 +198,10 @@ describe('platform/bitbucket', () => {
       expect(await getBranchStatus('master', ['foo'])).toBe('failed');
       expect(await getBranchStatus('master', true)).toBe('failed');
       expect(await getBranchStatus('branch', true)).toBe('success');
+      expect(await getBranchStatus('pending/branch', true)).toBe('pending');
+      expect(await getBranchStatus('branch-with-empty-status', true)).toBe(
+        'pending'
+      );
     });
   });
 
@@ -388,6 +392,11 @@ describe('platform/bitbucket', () => {
   describe('createPr()', () => {
     it('posts PR', async () => {
       await initRepo();
+      api.get.mockReturnValueOnce({
+        body: {
+          values: [{ uuid: '{1234-5678}' }],
+        },
+      } as any);
       api.post.mockReturnValueOnce({
         body: { id: 5 },
       } as any);

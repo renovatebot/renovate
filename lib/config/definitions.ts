@@ -178,6 +178,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'dockerUser',
+    description:
+      'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
+    admin: true,
+    type: 'string',
+  },
   // Log options
   {
     name: 'logLevel',
@@ -349,6 +356,13 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
+    allowedValues: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'github',
+      'gitlab',
+    ],
     default: 'github',
     admin: true,
   },
@@ -432,6 +446,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'prCommitsPerRunLimit',
+    description:
+      'Set a maximum number of commits per Renovate run. Default is no limit.',
+    stage: 'global',
+    type: 'integer',
+    default: 0,
   },
   {
     name: 'repositories',
@@ -1007,8 +1029,17 @@ const options: RenovateOptions[] = [
     default: 0, // no limit
   },
   {
+    name: 'prPriority',
+    description:
+      'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
+    type: 'integer',
+    default: 0,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'bbUseDefaultReviewers',
-    description: 'Use the default reviewers (Bitbucket server only).',
+    description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
   },
@@ -1226,6 +1257,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
   },
   {
+    name: 'assigneesSampleSize',
+    description: 'Take a random sample of given size from assignees.',
+    type: 'integer',
+    default: null,
+  },
+  {
     name: 'assignAutomerge',
     description:
       'Assign reviewers and assignees even if the PR is to be automerged',
@@ -1238,6 +1275,12 @@ const options: RenovateOptions[] = [
       'Requested reviewers for Pull Requests (either username or email address depending on the platform)',
     type: 'array',
     subType: 'string',
+  },
+  {
+    name: 'reviewersSampleSize',
+    description: 'Take a random sample of given size from reviewers.',
+    type: 'integer',
+    default: null,
   },
   {
     name: 'fileMatch',
@@ -1394,6 +1437,19 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'mix',
+    releaseStatus: 'beta',
+    description: 'Configuration object for Mix module renovation',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      enabled: false,
+      fileMatch: ['(^|/)mix\\.exs$'],
+      versionScheme: 'hex',
+    },
+    mergeable: true,
+  },
+  {
     name: 'rust',
     releaseStatus: 'unpublished',
     description: 'Configuration option for Rust package management.',
@@ -1412,6 +1468,7 @@ const options: RenovateOptions[] = [
       commitMessageTopic: 'Rust crate {{depName}}',
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
+      versionScheme: 'cargo',
     },
     mergeable: true,
   },
@@ -1549,6 +1606,18 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'helm-requirements',
+    description: 'Configuration object for helm requirements.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)requirements.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
     name: 'circleci',
     description:
       'Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.',
@@ -1591,7 +1660,10 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['^\\.github/main.workflow$'],
+      fileMatch: [
+        '^\\.github/main.workflow$',
+        '^\\.github/workflows/[^/]+\\.ya?ml$',
+      ],
       pinDigests: true,
     },
     mergeable: true,
@@ -1743,7 +1815,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
-      timeout: 300,
+      timeout: 600,
       versionScheme: 'maven',
     },
     mergeable: true,
@@ -1891,6 +1963,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'insecureRegistry',
+    description: 'explicity turn on insecure docker registry access (http)',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',
@@ -1961,6 +2042,18 @@ const options: RenovateOptions[] = [
     description: `Enable or disable pruning of stale branches`,
     type: 'boolean',
     default: true,
+  },
+  {
+    name: 'unicodeEmoji',
+    description: 'Enable or disable Unicode emoji',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'gitLabAutomerge',
+    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs`,
+    type: 'boolean',
+    default: false,
   },
 ];
 

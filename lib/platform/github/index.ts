@@ -15,6 +15,8 @@ import {
   configFileNames,
   urls,
 } from '../../config/app-strings';
+import { sanitize } from '../../util/sanitize';
+import { smartTruncate } from '../utils/pr-body';
 
 const Graphql = require('./gh-graphql-wrapper').default;
 
@@ -38,7 +40,7 @@ interface Pr {
   sha: string;
 
   sourceRepo: string;
-  canRebase: boolean;
+  isModified: boolean;
 }
 
 interface LocalRepoConfig {
@@ -653,13 +655,21 @@ export async function getBranchStatusCheck(
 ) {
   const branchCommit = await config.storage.getBranchCommit(branchName);
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
-  const res = await api.get(url);
-  for (const check of res.body) {
-    if (check.context === context) {
-      return check.state;
+  try {
+    const res = await api.get(url);
+    for (const check of res.body) {
+      if (check.context === context) {
+        return check.state;
+      }
     }
+    return null;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.info('Commit not found when checking statuses');
+      throw new Error('repository-changed');
+    }
+    throw err;
   }
-  return null;
 }
 
 export async function setBranchStatus(
@@ -767,11 +777,12 @@ export async function findIssue(title: string) {
 
 export async function ensureIssue(
   title: string,
-  body: string,
+  rawbody: string,
   once = false,
   reopen = true
 ) {
-  logger.debug(`ensureIssue()`);
+  logger.debug(`ensureIssue(${title})`);
+  const body = sanitize(rawbody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -969,8 +980,9 @@ async function deleteComment(commentId: number) {
 export async function ensureComment(
   issueNo: number,
   topic: string | null,
-  content: string
+  rawContent: string
 ) {
+  const content = sanitize(rawContent);
   try {
     const comments = await getComments(issueNo);
     let body: string;
@@ -1117,11 +1129,12 @@ export async function findPr(
 export async function createPr(
   branchName: string,
   title: string,
-  body: string,
+  rawBody: string,
   labels: string[] | null,
   useDefaultBranch: boolean,
   platformOptions: { statusCheckVerify?: boolean } = {}
 ) {
+  const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
   const head = `${config.repository!.split('/')[0]}:${branchName}`;
@@ -1161,7 +1174,7 @@ export async function createPr(
       urls.homepage
     );
   }
-  pr.canRebase = true;
+  pr.isModified = false;
   return pr;
 }
 
@@ -1269,7 +1282,7 @@ async function getOpenPrs() {
             // Check against gitAuthor
             const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
             if (commitAuthorEmail === global.gitAuthor.email) {
-              pr.canRebase = true;
+              pr.isModified = false;
             } else {
               logger.trace(
                 {
@@ -1278,14 +1291,14 @@ async function getOpenPrs() {
                   commitAuthorEmail,
                   gitAuthorEmail: global.gitAuthor.email,
                 },
-                'PR canRebase=false: last committer has different email to the bot'
+                'PR isModified=true: last committer has different email to the bot'
               );
-              pr.canRebase = false;
+              pr.isModified = true;
             }
           } else {
             // assume the author is us
             // istanbul ignore next
-            pr.canRebase = true;
+            pr.isModified = false;
           }
         } else {
           // assume we can't rebase if more than 1
@@ -1294,9 +1307,9 @@ async function getOpenPrs() {
               branchName,
               prNo,
             },
-            'PR canRebase=false: PR has more than one commit'
+            'PR isModified=true: PR has more than one commit'
           );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
         pr.isStale = false;
         if (pr.mergeStateStatus === 'BEHIND') {
@@ -1425,6 +1438,7 @@ export async function getPr(prNo: number) {
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
   if (pr.state === 'open') {
+    pr.isModified = true;
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
@@ -1446,7 +1460,7 @@ export async function getPr(prNo: number) {
             { prNo },
             '1 commit matches configured gitAuthor so can rebase'
           );
-          pr.canRebase = true;
+          pr.isModified = false;
         } else {
           logger.trace(
             {
@@ -1454,16 +1468,16 @@ export async function getPr(prNo: number) {
               commitAuthorEmail,
               gitAuthorEmail: global.gitAuthor.email,
             },
-            'PR canRebase=false: 1 commit and not by configured gitAuthor so cannot rebase'
+            'PR isModified=true: 1 commit and not by configured gitAuthor so cannot rebase'
           );
-          pr.canRebase = false;
+          pr.isModified = true;
         }
       } else {
         logger.debug(
           { prNo },
           '1 commit and no configured gitAuthor so can rebase'
         );
-        pr.canRebase = true;
+        pr.isModified = false;
       }
     } else {
       // Check if only one author of all commits
@@ -1496,7 +1510,7 @@ export async function getPr(prNo: number) {
         }
       );
       if (remainingCommits.length <= 1) {
-        pr.canRebase = true;
+        pr.isModified = false;
       }
     }
     const baseCommitSHA = await getBaseCommitSHA();
@@ -1519,8 +1533,9 @@ export async function getPrFiles(prNo: number) {
   return files.map((f: { filename: string }) => f.filename);
 }
 
-export async function updatePr(prNo: number, title: string, body?: string) {
+export async function updatePr(prNo: number, title: string, rawBody?: string) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
@@ -1549,7 +1564,7 @@ export async function updatePr(prNo: number, title: string, body?: string) {
 export async function mergePr(prNo: number, branchName: string) {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
-  if (config.pushProtection) {
+  if (config.isGhe && config.pushProtection) {
     logger.info(
       { branch: branchName, prNo },
       'Branch protection: Cannot automerge PR when push protection is enabled'
@@ -1590,14 +1605,14 @@ export async function mergePr(prNo: number, branchName: string) {
       await api.put(url, options);
       automerged = true;
     } catch (err) {
-      if (err.statusCode === 405) {
+      if (err.statusCode === 404 || err.statusCode === 405) {
         // istanbul ignore next
         logger.info(
           { response: err.response ? err.response.body : undefined },
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${options.body.merge_method} PR`);
+        logger.warn({ err }, `Failed to ${options.body.merge_method} merge PR`);
         return false;
       }
     }
@@ -1609,7 +1624,10 @@ export async function mergePr(prNo: number, branchName: string) {
       logger.debug({ options, url }, `mergePr`);
       await api.put(url, options);
     } catch (err1) {
-      logger.debug({ err: err1 }, `Failed to ${options.body.merge_method} PR`);
+      logger.debug(
+        { err: err1 },
+        `Failed to ${options.body.merge_method} merge PR`
+      );
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
@@ -1617,7 +1635,7 @@ export async function mergePr(prNo: number, branchName: string) {
       } catch (err2) {
         logger.debug(
           { err: err2 },
-          `Failed to ${options.body.merge_method} PR`
+          `Failed to ${options.body.merge_method} merge PR`
         );
         try {
           options.body.merge_method = 'merge';
@@ -1626,7 +1644,7 @@ export async function mergePr(prNo: number, branchName: string) {
         } catch (err3) {
           logger.debug(
             { err: err3 },
-            `Failed to ${options.body.merge_method} PR`
+            `Failed to ${options.body.merge_method} merge PR`
           );
           logger.debug({ pr: prNo }, 'All merge attempts failed');
           return false;
@@ -1642,39 +1660,16 @@ export async function mergePr(prNo: number, branchName: string) {
   return true;
 }
 
-// istanbul ignore next
-function smartTruncate(input: string) {
-  if (input.length < 60000) {
-    return input;
-  }
-  const releaseNotesMatch = input.match(
-    new RegExp(`### Release Notes.*### ${appName} configuration`, 'ms')
-  );
-  // istanbul ignore if
-  if (releaseNotesMatch) {
-    const divider = `</details>\n\n---\n\n### ${appName} configuration`;
-    const [releaseNotes] = releaseNotesMatch;
-    const nonReleaseNotesLength =
-      input.length - releaseNotes.length - divider.length;
-    const availableLength = 60000 - nonReleaseNotesLength;
-    return input.replace(
-      releaseNotes,
-      releaseNotes.slice(0, availableLength) + divider
-    );
-  }
-  return input.substring(0, 60000);
-}
-
 export function getPrBody(input: string) {
   if (config.isGhe) {
-    return smartTruncate(input);
+    return smartTruncate(input, 60000);
   }
   const massagedInput = input
     // to be safe, replace all github.com links with renovatebot redirector
     .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
     .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
     .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
-  return smartTruncate(massagedInput);
+  return smartTruncate(massagedInput, 60000);
 }
 
 export async function getVulnerabilityAlerts() {

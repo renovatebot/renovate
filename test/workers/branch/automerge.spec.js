@@ -1,8 +1,7 @@
 const { tryBranchAutomerge } = require('../../../lib/workers/branch/automerge');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-
 /** @type any */
-const platform = global.platform;
+const { platform } = require('../../../lib/platform');
 
 describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {

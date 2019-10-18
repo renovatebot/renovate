@@ -93,7 +93,13 @@ const isStable = (version: string): boolean | null => {
       const val = qualToken.val;
       // TODO: Can this if be removed, we never get here
       // istanbul ignore if
-      if (val === 'final' || val === 'ga') return true;
+      if (
+        val === 'final' ||
+        val === 'ga' ||
+        val === 'release' ||
+        val === 'latest'
+      )
+        return true;
 
       if (val === 'release' || val === 'sp') return true;
       return false;

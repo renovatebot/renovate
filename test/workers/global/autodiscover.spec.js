@@ -6,6 +6,7 @@ const hostRules = require('../../../lib/util/host-rules');
 const ghApi = require('../../../lib/platform/github');
 
 jest.mock('../../../lib/platform/github');
+jest.unmock('../../../lib/platform');
 
 describe('lib/workers/global/autodiscover', () => {
   let config;
