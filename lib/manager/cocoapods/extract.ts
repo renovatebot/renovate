@@ -7,6 +7,7 @@ const regexMapping = {
   git: /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/,
   tag: /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/,
   path: /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/,
+  source: /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
 };
 
 interface ParsedLine {
@@ -15,6 +16,7 @@ interface ParsedLine {
   git?: string;
   tag?: string;
   path?: string;
+  source?: string;
 }
 
 function parseLine(line): ParsedLine {
@@ -29,14 +31,24 @@ function parseLine(line): ParsedLine {
   return result;
 }
 
+const defaultRegistryUrl = 'https://github.com/CocoaPods/Specs';
+
 export function extractPackageFile(content: string): PackageFile {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
   const lines = content.split('\n');
 
+  const registryUrls = [];
+  const registryUrlsSet = new Set<string>();
+
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
-    const { depName, currentValue, git, tag, path } = parseLine(line);
+    const { depName, currentValue, git, tag, path, source } = parseLine(line);
+
+    if (source) {
+      registryUrlsSet.add(source);
+    }
+
     if (depName) {
       const managerData = { lineNumber };
       let dep: PackageDependency = {
@@ -50,6 +62,7 @@ export function extractPackageFile(content: string): PackageFile {
           datasource: 'cocoapods',
           currentValue,
           managerData,
+          registryUrls,
         };
       } else if (git) {
         if (tag) {
@@ -73,6 +86,13 @@ export function extractPackageFile(content: string): PackageFile {
       }
 
       deps.push(dep);
+    }
+  }
+
+  registryUrls.push(defaultRegistryUrl);
+  if (registryUrlsSet.size > 0) {
+    for (const url of registryUrlsSet.values()) {
+      registryUrls.push(url);
     }
   }
 
