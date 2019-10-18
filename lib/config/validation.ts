@@ -179,8 +179,7 @@ export async function validateConfig(
               }
             }
             if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
-              const patterns = is.string(val) ? [val] : val;
-              for (const pattern of patterns) {
+              for (const pattern of val) {
                 if (pattern !== '*') {
                   try {
                     regEx(pattern);
