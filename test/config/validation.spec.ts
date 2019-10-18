@@ -20,7 +20,7 @@ describe('config/validation', () => {
         packageRules: [
           {
             packagePatterns: ['*'],
-            excludePackagePatterns: ['(x+x+)+y'],
+            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
           },
         ],
         lockFileMaintenance: {

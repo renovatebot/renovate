@@ -109,7 +109,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+    "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
   },
 ]
 `;
