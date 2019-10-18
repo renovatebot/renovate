@@ -115,6 +115,10 @@ RUN apt-get update && apt-get install -y bzr && apt-get clean
 
 ENV GOLANG_VERSION 1.13
 
+# Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
+# private repositories.
+ENV GOPROXY=direct GOSUMDB=off
+
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
   tar -C /usr/local -xzf go.tgz && \
   rm go.tgz && \
