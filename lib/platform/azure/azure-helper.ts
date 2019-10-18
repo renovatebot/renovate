@@ -3,6 +3,8 @@ import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/Gi
 import * as azureApi from './azure-got-wrapper';
 import { logger } from '../../logger';
 
+const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
+
 export function getNewBranchName(branchName?: string) {
   if (branchName && !branchName.startsWith('refs/heads/')) {
     return `refs/heads/${branchName}`;
@@ -248,7 +250,7 @@ export async function getMergeMethod(
     .filter(
       p =>
         p.settings.scope.some(s => s.repositoryId === repoId) &&
-        p.type.id === 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' // Magic GUID for merge strategy policy configurations
+        p.type.id === mergePolicyGuid
     )
     .map(p => p.settings)[0];
 
