@@ -2,6 +2,7 @@ import { fromStream } from 'hasha';
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
+import { regEx } from '../../util/regex';
 
 function updateWithNewVersion(
   content: string,
@@ -137,7 +138,7 @@ export async function updateDependency(
       const hash = await getHashFromUrl(url);
       newDef = setNewHash(upgrade.managerData.def, hash);
       newDef = newDef.replace(
-        new RegExp(`(strip_prefix\\s*=\\s*)"[^"]*"`),
+        regEx(`(strip_prefix\\s*=\\s*)"[^"]*"`),
         `$1"${shortRepo}-${upgrade.newDigest}"`
       );
       const match =
@@ -151,7 +152,7 @@ export async function updateDependency(
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }
-    const existingDef = new RegExp(existingRegExStr);
+    const existingDef = regEx(existingRegExStr);
     // istanbul ignore if
     if (!fileContent.match(existingDef)) {
       logger.info('Cannot match existing string');

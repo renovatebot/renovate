@@ -59,10 +59,6 @@ Array [
     "depName": "Configuration Error",
     "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
   },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Unsafe regExp for docker.fileMatch: \`(x+x+)+y\`",
-  },
 ]
 `;
 
@@ -113,7 +109,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+    "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
   },
 ]
 `;
