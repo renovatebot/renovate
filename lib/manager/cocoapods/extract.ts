@@ -67,8 +67,9 @@ export function extractPackageFile(content: string): PackageFile {
       } else if (git) {
         if (tag) {
           dep = {
-            datasource: 'git-tags',
-            depName: git,
+            datasource: 'gitTags',
+            depName,
+            lookupName: git,
             currentValue: tag,
             managerData,
           };

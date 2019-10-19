@@ -35,7 +35,6 @@ async function getReleases(lookupName, registryUrl, useShard = false) {
   const groups = match ? match.groups : {};
   const opts = { ...groups, useShard };
   const url = releasesUrl(lookupName, opts);
-  logger.info(url);
   try {
     const resp = await api.get(url);
     if (resp && resp.body) {
