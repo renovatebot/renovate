@@ -1265,6 +1265,16 @@
       },
       "$ref": "#"
     },
+    "cocoapods": {
+      "description": "Configuration object for Podfiles",
+      "type": "object",
+      "default": {
+        "enabled": true,
+        "fileMatch": ["(^|/)Podfile$"],
+        "versionScheme": "ruby"
+      },
+      "$ref": "#"
+    },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array",

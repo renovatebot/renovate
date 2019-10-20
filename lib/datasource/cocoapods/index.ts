@@ -13,7 +13,7 @@ function shardPart(lookupName) {
     .join('/');
 }
 
-function releasesUrl(lookupName, opts = {}) {
+function releasesUrl(lookupName, opts) {
   const defaults = {
     useShard: true,
     account: 'CocoaPods',
@@ -28,11 +28,12 @@ function releasesUrl(lookupName, opts = {}) {
   return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
 }
 
-async function getReleases(lookupName, registryUrl, useShard = false) {
-  const match = registryUrl.match(
-    /https:\/\/github\.com\/(?<account>[^/])\/(?<repo>[^/])/
-  );
-  const groups = match ? match.groups : {};
+async function getReleases(lookupName, registryUrl, useShard) {
+  const match = registryUrl
+    .replace(/\.git$/, '')
+    .replace(/\/+$/, '')
+    .match(/https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)$/);
+  const groups = (match && match.groups) || {};
   const opts = { ...groups, useShard };
   const url = releasesUrl(lookupName, opts);
   try {
@@ -72,12 +73,14 @@ export async function getPkgReleases({
   registryUrls,
   lookupName,
 }: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
+  const urls = registryUrls || [];
+
   logger.debug(
-    `CocoaPods: Found ${registryUrls.length} repositories for ${lookupName}`
+    `CocoaPods: Found ${urls.length} repositories for ${lookupName}`
   );
 
-  for (let idx = 0; idx < registryUrls.length; idx += 1) {
-    const registryUrl = registryUrls[idx];
+  for (let idx = 0; idx < urls.length; idx += 1) {
+    const registryUrl = urls[idx];
     const useShard = idx === 0;
     const releases = await getReleases(lookupName, registryUrl, useShard);
     if (releases) return releases;

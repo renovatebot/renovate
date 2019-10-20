@@ -146,6 +146,8 @@ Bundler is now in alpha stage and ready for testing! [Details](https://renovateb
 
 ## circleci
 
+## cocoapods
+
 ## commitBody
 
 This is used whenever a commit `"body"` is needed, e.g. for adding `[skip ci]` or DCO signoff.

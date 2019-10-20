@@ -19,7 +19,7 @@ interface ParsedLine {
   source?: string;
 }
 
-function parseLine(line): ParsedLine {
+export function parseLine(line: string): ParsedLine {
   const result = {};
   for (const [key, regex] of Object.entries(regexMapping)) {
     const match = line.replace(/#.*$/, '').match(regex);

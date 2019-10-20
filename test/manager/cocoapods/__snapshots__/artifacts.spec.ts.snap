@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`.updateArtifacts() catches read error 1`] = `
+Array [
+  Object {
+    "lockFileError": Object {
+      "lockFile": "Podfile.lock",
+      "stderr": "read error",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() catches write error 1`] = `
+Array [
+  Object {
+    "lockFileError": Object {
+      "lockFile": "Podfile.lock",
+      "stderr": "not found",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() does not return stderr if lockfile has changed 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New Podfile.lock",
+      "name": "Podfile.lock",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns pod exec error 1`] = `
+Array [
+  Object {
+    "lockFileError": Object {
+      "lockFile": "Podfile.lock",
+      "stderr": "exec exception",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns pod exec stderr 1`] = `
+Array [
+  Object {
+    "lockFileError": Object {
+      "lockFile": "Podfile.lock",
+      "stderr": "Something happened",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated Podfile 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New Podfile",
+      "name": "Podfile.lock",
+    },
+  },
+]
+`;

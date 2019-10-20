@@ -1,5 +1,11 @@
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
+import { parseLine } from './extract';
+
+function lineContainsDep(line, dep) {
+  const { depName } = parseLine(line);
+  return dep === depName;
+}
 
 export function updateDependency(
   fileContent: string,
@@ -11,7 +17,7 @@ export function updateDependency(
   const lines = fileContent.split('\n');
   const lineToChange = lines[upgrade.managerData.lineNumber];
 
-  if (!lineToChange.includes(upgrade.depName)) return null;
+  if (!lineContainsDep(lineToChange, upgrade.depName)) return null;
 
   const regex = new RegExp(`(['"])${currentValue.replace('.', '\\.')}\\1`);
   const newLine = lineToChange.replace(regex, `$1${newValue}$1`);

@@ -14,11 +14,25 @@ Array [
     "currentValue": "1.2.3",
     "datasource": "cocoapods",
     "depName": "b",
+    "managerData": Object {
+      "lineNumber": 4,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs",
+      "https://github.com/Artsy/Specs.git",
+    ],
   },
   Object {
     "currentValue": "1.2.3",
     "datasource": "cocoapods",
     "depName": "c",
+    "managerData": Object {
+      "lineNumber": 5,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs",
+      "https://github.com/Artsy/Specs.git",
+    ],
   },
   Object {
     "depName": "d",
@@ -34,8 +48,12 @@ Array [
   },
   Object {
     "currentValue": "3.2.1",
-    "datasource": "git-tags",
-    "depName": "g.git",
+    "datasource": "gitTags",
+    "depName": "g",
+    "lookupName": "g.git",
+    "managerData": Object {
+      "lineNumber": 9,
+    },
   },
 ]
 `;
