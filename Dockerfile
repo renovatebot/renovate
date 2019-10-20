@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.3@sha256:e0f7dabe991810057aee6ba7a7d4136fe7fc70e99235d79e6c7ae0177656a5c8 AS tsbuild
+FROM amd64/node:10.16.3@sha256:925162bdc4b23422763cb2d08ecf1661bbbd856ab54b959517924054e17813fc AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:1bbdea4846231d91cce6c7ff3907d26fca444fd6b7e3c282b90c7fe4251f9f86
+FROM amd64/ubuntu:18.04@sha256:3e83eca7870ee14a03b8026660e71ba761e6919b6982fb920d10254688a363d4
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -113,7 +113,11 @@ RUN chmod +x /usr/local/bin/composer
 
 RUN apt-get update && apt-get install -y bzr && apt-get clean
 
-ENV GOLANG_VERSION 1.12
+ENV GOLANG_VERSION 1.13
+
+# Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
+# private repositories.
+ENV GOPROXY=direct GOSUMDB=off
 
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
   tar -C /usr/local -xzf go.tgz && \

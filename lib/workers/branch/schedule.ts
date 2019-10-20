@@ -1,35 +1,30 @@
 import is from '@sindresorhus/is';
-
-const later = require('later');
-const moment = require('moment-timezone');
-const { logger } = require('../../logger');
-
-export { hasValidTimezone, hasValidSchedule, isScheduledNow };
+import later from 'later';
+import moment from 'moment-timezone';
+import { logger } from '../../logger';
 
 const scheduleMappings = {
   'every month': 'before 3am on the first day of the month',
   monthly: 'before 3am on the first day of the month',
 };
 
-function fixShortHours(input) {
+function fixShortHours(input: string): string {
   return input.replace(/( \d?\d)((a|p)m)/g, '$1:00$2');
 }
 
-/**
- * @returns {[boolean] | [boolean, string]}
- */
-function hasValidTimezone(timezone) {
+export function hasValidTimezone(
+  timezone: string
+): [boolean] | [boolean, string] {
   if (!moment.tz.zone(timezone)) {
     return [false, `Invalid timezone: ${timezone}`];
   }
   return [true];
 }
 
-/**
- * @returns {[boolean] | [boolean, string]}
- */
-function hasValidSchedule(schedule) {
-  let message;
+export function hasValidSchedule(
+  schedule: string[] | null | 'at any time'
+): [boolean] | [boolean, string] {
+  let message: string;
   if (
     !schedule ||
     schedule === 'at any time' ||
@@ -70,7 +65,7 @@ function hasValidSchedule(schedule) {
   return [true, ''];
 }
 
-function isScheduledNow(config) {
+export function isScheduledNow(config) {
   let configSchedule = config.schedule;
   logger.debug(`Checking schedule(${configSchedule}, ${config.timezone})`);
   if (

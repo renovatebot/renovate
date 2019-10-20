@@ -205,12 +205,6 @@ Note: the GitHub.com token in env is necessary in order to retrieve Release Note
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
-## Deployment
-
-See
-[deployment docs](https://github.com/renovatebot/renovate/blob/master/docs/deployment.md)
-for details.
-
 ## Kubernetes for Gitlab, using Git over SSH
 
 This section describes how to use git binary with ssh for Gitlab, to avoid API shortcomings.

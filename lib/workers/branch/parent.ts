@@ -1,12 +1,13 @@
-const { logger } = require('../../logger');
-const { appSlug } = require('../../config/app-strings');
-const { platform } = require('../../platform');
+import { logger } from '../../logger';
+import { appSlug } from '../../config/app-strings';
+import { RenovateConfig } from '../../config';
+import { platform } from '../../platform';
 
-module.exports = {
-  getParentBranch,
-};
+type ParentBranch = { parentBranch: string | undefined; isModified?: boolean };
 
-async function getParentBranch(config) {
+export async function getParentBranch(
+  config: RenovateConfig
+): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
   const branchExists = await platform.branchExists(branchName);
