@@ -173,7 +173,7 @@
     "@types/bunyan": "1.8.6",
     "@types/chai": "4.2.3",
     "@types/convert-hrtime": "2.0.0",
-    "@types/fs-extra": "8.0.0",
+    "@types/fs-extra": "8.0.1",
     "@types/github-url-from-git": "1.5.0",
     "@types/got": "9.6.7",
     "@types/ini": "1.3.30",
