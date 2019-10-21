@@ -1,4 +1,5 @@
 import Git from 'simple-git/promise';
+import upath from 'upath';
 
 import { ManagerConfig, PackageFile } from '../common';
 
@@ -8,7 +9,7 @@ export default async function extractPackageFile(
   config: ManagerConfig
 ): Promise<PackageFile | null> {
   const git = Git(config.localDir);
-  const gitModulesPath = `${config.localDir}/${fileName}`;
+  const gitModulesPath = upath.join(config.localDir, fileName);
 
   const depNames = (await git.raw([
     'config',
