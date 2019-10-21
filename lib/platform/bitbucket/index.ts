@@ -716,7 +716,9 @@ export function getPrBody(input: string) {
 async function getBranchCommit(branchName: string) {
   try {
     const branch = (await api.get(
-      `/2.0/repositories/${config.repository}/refs/branches/${branchName}`
+      `/2.0/repositories/${
+        config.repository
+      }/refs/branches/${encodeURIComponent(branchName)}`
     )).body;
     return branch.target.hash;
   } catch (err) /* istanbul ignore next */ {

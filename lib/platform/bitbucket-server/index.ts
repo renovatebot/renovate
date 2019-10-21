@@ -743,7 +743,11 @@ export async function createPr(
     )).body;
 
     const defReviewers = (await api.get(
-      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/reviewers?sourceRefId=refs/heads/${branchName}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
+      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/reviewers?sourceRefId=refs/heads/${encodeURIComponent(
+        branchName
+      )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
     )).body;
 
     reviewers = defReviewers.map((u: { name: string }) => ({
