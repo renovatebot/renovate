@@ -13,7 +13,7 @@ about: You've found a bug with Renovate
 
 **Did you see anything helpful in debug logs?**
 
-<!-- If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created). The Job ID will help us located it. -->
+<!-- If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug and search for whatever dependency/branch/PR that is causing the problem. If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created). The Job ID will help us locate it. -->
 
 **To Reproduce**
 
