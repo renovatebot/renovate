@@ -174,7 +174,7 @@ export async function getDependency(
         extraBaseUrls,
       });
     }
-    if(sourceUrl==undefined){
+    if (sourceUrl === undefined) {
       sourceUrl = res.repository.url;
     }
     if (res.homepage && res.homepage.includes('://github.com')) {

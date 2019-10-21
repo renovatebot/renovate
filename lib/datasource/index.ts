@@ -1,7 +1,8 @@
+import * as hostedGitInfo from 'hosted-git-info';
+import * as url from 'url';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
-import * as url from 'url';
 import * as cargo from './cargo';
 import * as dart from './dart';
 import * as docker from './docker';
@@ -21,7 +22,6 @@ import * as rubygems from './rubygems';
 import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as terraform from './terraform';
-import * as hostRules from '../util/host-rules';
 import {
   Datasource,
   PkgReleaseConfig,
@@ -126,45 +126,51 @@ export function getDigest(
     value
   );
 }
-export function sanitizeSourceUrl(rawSourceUrl){
+export function sanitizeSourceUrl(rawSourceUrl) {
   let repoUrlTmp: string;
-if(rawSourceUrl==undefined || rawSourceUrl==null){
-console.log('Parameter can not be null, eixiting');
-return null;
+  if (!rawSourceUrl.endsWith('.git')) {
+    logger.debug(`${rawSourceUrl} is not a valid git url.`);
+    return null;
+  }
+  const git_info = hostedGitInfo.fromUrl(rawSourceUrl, { noGitPlus: true });
+  if (git_info === undefined) {
+    repoUrlTmp = sanitizeSourceUrlFallback(rawSourceUrl);
+  } else {
+    repoUrlTmp = git_info.https();
+  }
+  return repoUrlTmp;
 }
-if(RegExp('^(http(s)?\:\/\/|git\:|ssh\:)').test(rawSourceUrl) || rawSourceUrl.startsWith('git+ssh:')){
-repoUrlTmp = rawSourceUrl;
-console.log(rawSourceUrl);
-
-}
-else {
-  repoUrlTmp = `ssh://${rawSourceUrl}`;
-// convert scp shorthand, which is the most common case, to a full ssh: url.
-}
-let { protocol, host, port, path }: any = url.parse(repoUrlTmp);
-if(host=='gitlab.com' || host == 'github.com' || host == 'bitbucket.org')
-{ //probably redundant, but could be used as a start for a more general git url extraction librabry later on as per the discussion in https://github.com/renovatebot/renovate/issues/3323 TODO add search for hostRules as well?
-  repoUrlTmp = `https://${host}${path}`
-} else if(protocol =='http:'){
-  // maybe this is useless, but someone might be using http.
-  repoUrlTmp = `${protocol}//${host}${path}`
-} else{
-  let nonstandard_port = host.split(':');
-  if(protocol!='https:' || protocol!='http:') {
-      // Assuming everyone is using https over standard ports unless explicitly specified otherwise.A port knock/http(s) connection attempt might be useful here.
-      if(!isNaN(port)){
+export function sanitizeSourceUrlFallback(rawSourceUrl) {
+  let repoUrlTmp: string;
+  if (rawSourceUrl === undefined || rawSourceUrl === null) {
+    return null;
+  }
+  if (
+    RegExp('^(http(s)?://|git:|ssh:)').test(rawSourceUrl) ||
+    rawSourceUrl.startsWith('git+ssh:')
+  ) {
+    repoUrlTmp = rawSourceUrl;
+  } else {
+    repoUrlTmp = `ssh://${rawSourceUrl}`;
+  }
+  const { protocol, host, port, path }: any = url.parse(repoUrlTmp);
+  if (
+    host === 'gitlab.com' ||
+    host === 'github.com' ||
+    host === 'bitbucket.org'
+  ) {
+    repoUrlTmp = `https://${host}${path}`;
+  } else if (protocol === 'http:') {
+    repoUrlTmp = `${protocol}//${host}${path}`;
+  } else if (protocol !== 'https:' || protocol !== 'http:') {
+    if (!Number.isNaN(port)) {
       repoUrlTmp = `https://${host.split(':')[0]}${path}`;
     } else {
       repoUrlTmp = `https://${host}${path}`;
-      //exceedingly rare case where something like :~ is utilized as part of an SCP url.Probably not something we should worry about, but let us stay on the safe side.
     }
-} else {
-  repoUrlTmp = `${protocol}//${host}${path}`;
-  // http and https on non-standard ports.
-}
-}
-
-repoUrlTmp = repoUrlTmp.replace(RegExp('\.git$'),'')
-console.log(`Formatted source url for ${rawSourceUrl} : ${repoUrlTmp}`);
-return repoUrlTmp;
+  } else {
+    repoUrlTmp = `${protocol}//${host}${path}`;
+  }
+  repoUrlTmp = repoUrlTmp.replace(RegExp('.git$'), '');
+  return repoUrlTmp;
 }
