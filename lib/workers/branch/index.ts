@@ -1,26 +1,52 @@
-const { DateTime } = require('luxon');
+import { DateTime } from 'luxon';
 
-const { logger, setMeta } = require('../../logger');
-const schedule = require('./schedule');
-const { getUpdatedPackageFiles } = require('./get-updated');
-const { getAdditionalFiles } = require('../../manager/npm/post-update');
-const { commitFilesToBranch } = require('./commit');
-const { getParentBranch } = require('./parent');
-const { tryBranchAutomerge } = require('./automerge');
-const { setStability, setUnpublishable } = require('./status-checks');
-const { prAlreadyExisted } = require('./check-existing');
-const prWorker = require('../pr');
-const { appName, appSlug } = require('../../config/app-strings');
-const { platform } = require('../../platform');
-const { emojify } = require('../../util/emoji');
+import { logger, setMeta } from '../../logger';
+import { isScheduledNow } from './schedule';
+import { getUpdatedPackageFiles } from './get-updated';
+import {
+  getAdditionalFiles,
+  AdditionalPackageFiles,
+} from '../../manager/npm/post-update';
+import { commitFilesToBranch, CommitConfig } from './commit';
+import { getParentBranch } from './parent';
+import { tryBranchAutomerge } from './automerge';
+import {
+  setStability,
+  setUnpublishable,
+  StabilityConfig,
+  UnpublishableConfig,
+} from './status-checks';
+import { prAlreadyExisted } from './check-existing';
+import { ensurePr, checkAutoMerge } from '../pr';
+import { appName, appSlug } from '../../config/app-strings';
+import { RenovateConfig } from '../../config';
+import { platform } from '../../platform';
+import { emojify } from '../../util/emoji';
 
-const { isScheduledNow } = schedule;
+export type BranchConfig = RenovateConfig &
+  StabilityConfig &
+  UnpublishableConfig &
+  CommitConfig;
 
-module.exports = {
-  processBranch,
-};
+export type ProcessBranchResult =
+  | 'already-existed'
+  | 'automerged'
+  | 'done'
+  | 'error'
+  | 'needs-approval'
+  | 'needs-pr-approval'
+  | 'not-scheduled'
+  | 'no-work'
+  | 'pending'
+  | 'pr-created'
+  | 'pr-edited'
+  | 'pr-hourly-limit-reached';
 
-async function processBranch(branchConfig, prHourlyLimitReached, packageFiles) {
+export async function processBranch(
+  branchConfig: BranchConfig,
+  prHourlyLimitReached?: boolean,
+  packageFiles?: AdditionalPackageFiles
+): Promise<ProcessBranchResult> {
   const config = { ...branchConfig };
   const dependencies = config.upgrades
     .map(upgrade => upgrade.depName)
@@ -111,7 +137,9 @@ async function processBranch(branchConfig, prHourlyLimitReached, packageFiles) {
       !masterIssueCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.info('Reached PR creation limit - skipping branch creation');
+      logger.info(
+        'Reached PR creation limit or per run commits limit - skipping branch creation'
+      );
       return 'pr-hourly-limit-reached';
     }
     if (branchExists) {
@@ -416,7 +444,7 @@ async function processBranch(branchConfig, prHourlyLimitReached, packageFiles) {
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const pr = await prWorker.ensurePr(config);
+    const pr = await ensurePr(config);
     // TODO: ensurePr should check for automerge itself
     if (pr === 'needs-pr-approval') {
       return 'needs-pr-approval';
@@ -502,7 +530,7 @@ async function processBranch(branchConfig, prHourlyLimitReached, packageFiles) {
             await platform.ensureCommentRemoval(pr.number, topic);
           }
         }
-        const prAutomerged = await prWorker.checkAutoMerge(pr, config);
+        const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged) {
           return 'automerged';
         }
@@ -528,7 +556,8 @@ async function processBranch(branchConfig, prHourlyLimitReached, packageFiles) {
   return 'done';
 }
 
-function rebaseCheck(config, branchPr) {
+// TODO: proper typings
+function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
   const titleRebase = branchPr.title && branchPr.title.startsWith('rebase!');
   const labelRebase =
     branchPr.labels && branchPr.labels.includes(config.rebaseLabel);

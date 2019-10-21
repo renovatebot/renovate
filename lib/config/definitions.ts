@@ -448,6 +448,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'prCommitsPerRunLimit',
+    description:
+      'Set a maximum number of commits per Renovate run. Default is no limit.',
+    stage: 'global',
+    type: 'integer',
+    default: 0,
+  },
+  {
     name: 'repositories',
     description: 'List of Repositories',
     stage: 'global',
@@ -1593,6 +1601,18 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: [],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'helm-requirements',
+    description: 'Configuration object for helm requirements.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)requirements.yaml$'],
     },
     mergeable: true,
     cli: false,

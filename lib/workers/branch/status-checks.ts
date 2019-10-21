@@ -1,13 +1,14 @@
-const { logger } = require('../../logger');
-const { appSlug, urls } = require('../../config/app-strings');
-const { platform } = require('../../platform');
+import { logger } from '../../logger';
+import { appSlug, urls } from '../../config/app-strings';
+import { RenovateConfig } from '../../config';
+import { platform } from '../../platform';
 
-module.exports = {
-  setStability,
-  setUnpublishable,
-};
-
-async function setStatusCheck(branchName, context, description, state) {
+async function setStatusCheck(
+  branchName: string,
+  context: string,
+  description: string,
+  state: string
+) {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
     context
@@ -27,7 +28,12 @@ async function setStatusCheck(branchName, context, description, state) {
   }
 }
 
-async function setStability(config) {
+export type StabilityConfig = RenovateConfig & {
+  stabilityStatus: string;
+  branchName: string;
+};
+
+export async function setStability(config: StabilityConfig) {
   if (!config.stabilityStatus) {
     return;
   }
@@ -44,7 +50,15 @@ async function setStability(config) {
   );
 }
 
-async function setUnpublishable(config) {
+export type UnpublishableConfig = RenovateConfig & {
+  unpublishSafe?: boolean;
+  canBeUnpublished?: boolean;
+  branchName: string;
+};
+
+export async function setUnpublishable(
+  config: UnpublishableConfig
+): Promise<void> {
   if (!config.unpublishSafe) {
     return;
   }
