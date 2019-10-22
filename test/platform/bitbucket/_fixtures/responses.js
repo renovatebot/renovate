@@ -89,7 +89,7 @@ module.exports = {
       { name: 'branch' },
       { name: 'renovate/branch' },
       { name: 'renovate/upgrade' },
-      { name: 'pending_branch' },
+      { name: 'pending/branch' },
     ],
   },
   '/2.0/repositories/some/repo/refs/branches/master': {
@@ -103,10 +103,10 @@ module.exports = {
       parents: [{ hash: 'master_hash' }],
     },
   },
-  '/2.0/repositories/some/repo/refs/branches/pending_branch': {
-    name: 'pending_branch',
+  '/2.0/repositories/some/repo/refs/branches/pending/branch': {
+    name: 'pending/branch',
     target: {
-      hash: 'pending_branch_hash',
+      hash: 'pending/branch_hash',
       parents: [{ hash: 'master_hash' }],
     },
   },
@@ -166,7 +166,7 @@ module.exports = {
       },
     ],
   },
-  '/2.0/repositories/some/repo/commit/pending_branch_hash/statuses': {
+  '/2.0/repositories/some/repo/commit/pending/branch_hash/statuses': {
     values: [
       {
         key: 'foo',
