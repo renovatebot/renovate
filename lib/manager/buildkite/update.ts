@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
+import { regEx } from '../../util/regex';
 
 export function updateDependency(
   currentFileContent: string,
@@ -10,7 +11,7 @@ export function updateDependency(
     logger.debug(`buildkite.updateDependency: ${upgrade.newValue}`);
     const lines = currentFileContent.split('\n');
     const lineToChange = lines[lineIdx];
-    const depLine = new RegExp(/^(\s+[^#]+#)[^:]+(:.*)$/);
+    const depLine = regEx(`^(\\s+[^#]+#)[^:]+(:.*)$`);
     if (!lineToChange.match(depLine)) {
       logger.debug('No image line found');
       return null;
