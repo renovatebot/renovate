@@ -73,6 +73,8 @@ const defaults = {
   endpoint: 'https://api.github.com/',
 };
 
+const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
+
 export async function initPlatform({
   endpoint,
   token,
@@ -431,7 +433,7 @@ export async function getRepoForceRebase() {
 async function getBranchCommit(branchName: string) {
   try {
     const res = await api.get(
-      `repos/${config.repository}/git/refs/heads/${branchName}`
+      `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
     );
     return res.body.object.sha;
   } catch (err) /* istanbul ignore next */ {
@@ -459,7 +461,7 @@ async function getBranchProtection(branchName: string) {
     return {};
   }
   const res = await api.get(
-    `repos/${config.repository}/branches/${branchName}/protection`
+    `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`
   );
   return res.body;
 }
@@ -574,7 +576,9 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return 'failed';
   }
-  const commitStatusUrl = `repos/${config.repository}/commits/${branchName}/status`;
+  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
+    branchName
+  )}/status`;
   let commitStatus;
   try {
     commitStatus = (await api.get(commitStatusUrl)).body;
@@ -595,7 +599,9 @@ export async function getBranchStatus(
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
   if (!config.isGhe) {
     try {
-      const checkRunsUrl = `repos/${config.repository}/commits/${branchName}/check-runs`;
+      const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
+        branchName
+      )}/check-runs`;
       const opts = {
         headers: {
           Accept: 'application/vnd.github.antiope-preview+json',
