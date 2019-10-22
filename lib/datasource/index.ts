@@ -22,6 +22,7 @@ import * as rubygems from './rubygems';
 import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as terraform from './terraform';
+import * as hostRules from '../util/host-rules';
 import {
   Datasource,
   PkgReleaseConfig,
@@ -128,17 +129,23 @@ export function getDigest(
 }
 export function sanitizeSourceUrl(rawSourceUrl) {
   let repoUrlTmp: string;
-  if (!rawSourceUrl.endsWith('.git')) {
-    logger.debug(`${rawSourceUrl} is not a valid git url.`);
+  if(rawSourceUrl==null || rawSourceUrl==undefined){
+    logger.info(`no source url provided by datasource, exiting.`)
     return null;
   }
-  const git_info = hostedGitInfo.fromUrl(rawSourceUrl, { noGitPlus: true });
-  if (git_info === undefined) {
-    repoUrlTmp = sanitizeSourceUrlFallback(rawSourceUrl);
+  const gitInfo = hostedGitInfo.fromUrl(rawSourceUrl, { noGitPlus: true });
+  if (gitInfo) {
+    repoUrlTmp = gitInfo.https();
   } else {
-    repoUrlTmp = git_info.https();
+    repoUrlTmp = sanitizeSourceUrlFallback(rawSourceUrl);
   }
+  if(hostRules.getPlatformByHostOrUrl(repoUrlTmp)){
+  logger.debug(`${repoUrlTmp} present in HostRules`);
+  repoUrlTmp = repoUrlTmp.replace(RegExp('.git$'), '');
   return repoUrlTmp;
+} else{
+  return null;
+}
 }
 export function sanitizeSourceUrlFallback(rawSourceUrl) {
   let repoUrlTmp: string;
@@ -171,6 +178,5 @@ export function sanitizeSourceUrlFallback(rawSourceUrl) {
   } else {
     repoUrlTmp = `${protocol}//${host}${path}`;
   }
-  repoUrlTmp = repoUrlTmp.replace(RegExp('.git$'), '');
   return repoUrlTmp;
 }

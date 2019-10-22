@@ -156,27 +156,9 @@ export async function getDependency(
       hostRules.hosts({ hostType: 'github' }).forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
-      // Massage www out of github URL
-      res.repository.url = res.repository.url.replace(
-        'www.github.com',
-        'github.com'
-      );
-      if (res.repository.url.startsWith('https://github.com/')) {
-        res.repository.url = res.repository.url
-          .split('/')
-          .slice(0, 5)
-          .join('/');
-      }
-      if (res.repository.url.startsWith('git:github.com/')) {
-        res.repository.url = 'https://' + res.repository.url.substr(4);
-      }
-      sourceUrl = parse(res.repository.url, {
-        extraBaseUrls,
-      });
+
     }
-    if (sourceUrl === undefined) {
-      sourceUrl = res.repository.url;
-    }
+    sourceUrl = res.repository.url;
     if (res.homepage && res.homepage.includes('://github.com')) {
       delete res.homepage;
     }
