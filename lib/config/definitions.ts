@@ -1910,13 +1910,12 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'object',
     default: {
-      enabled: true,
+      enabled: false,
       fileMatch: ['(^|/)Podfile$'],
       versionScheme: 'ruby',
     },
     mergeable: true,
   },
-
   {
     name: 'hostRules',
     description: 'Host rules/configuration including credentials',
