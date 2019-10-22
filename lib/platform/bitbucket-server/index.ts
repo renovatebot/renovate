@@ -723,6 +723,10 @@ export async function findPr(
 
 // Pull Request
 
+function escapeHash(input) {
+  return input.replace(/#/g, '%23');
+}
+
 export async function createPr(
   branchName: string,
   title: string,
@@ -745,7 +749,7 @@ export async function createPr(
     const defReviewers = (await api.get(
       `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
         config.repositorySlug
-      }/reviewers?sourceRefId=refs/heads/${encodeURIComponent(
+      }/reviewers?sourceRefId=refs/heads/${escapeHash(
         branchName
       )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
     )).body;
