@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { extractPackageFile } from '../../../lib/manager/cocoapods/extract';
+import { extractPackageFile } from '../../../lib/manager/cocoapods';
 
 const sample = fs.readFileSync(
   path.resolve(__dirname, './_fixtures/Podfile'),

@@ -55,5 +55,15 @@ Array [
       "lineNumber": 9,
     },
   },
+  Object {
+    "currentValue": "0.0.1",
+    "datasource": "github",
+    "depName": "h",
+    "lookupName": "foo/bar",
+    "lookupType": "tags",
+    "managerData": Object {
+      "lineNumber": 10,
+    },
+  },
 ]
 `;

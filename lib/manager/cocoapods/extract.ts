@@ -33,6 +33,32 @@ export function parseLine(line: string): ParsedLine {
 
 const defaultRegistryUrl = 'https://github.com/CocoaPods/Specs';
 
+export function gitDep(parsedLine: ParsedLine): PackageDependency {
+  const { depName, git, tag } = parsedLine;
+  if (git.startsWith('https://github.com/')) {
+    const githubMatch = git.match(
+      /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/
+    );
+    const { account, repo } = (githubMatch && githubMatch.groups) || {};
+    if (account && repo) {
+      return {
+        datasource: 'github',
+        depName,
+        lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
+        lookupType: 'tags',
+        currentValue: tag,
+      };
+    }
+  }
+
+  return {
+    datasource: 'gitTags',
+    depName,
+    lookupName: git,
+    currentValue: tag,
+  };
+}
+
 export function extractPackageFile(content: string): PackageFile {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
@@ -43,7 +69,8 @@ export function extractPackageFile(content: string): PackageFile {
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
-    const { depName, currentValue, git, tag, path, source } = parseLine(line);
+    const parsedLine = parseLine(line);
+    const { depName, currentValue, git, tag, path, source } = parsedLine;
 
     if (source) {
       registryUrlsSet.add(source);
@@ -66,13 +93,7 @@ export function extractPackageFile(content: string): PackageFile {
         };
       } else if (git) {
         if (tag) {
-          dep = {
-            datasource: 'gitTags',
-            depName,
-            lookupName: git,
-            currentValue: tag,
-            managerData,
-          };
+          dep = { ...gitDep(parsedLine), managerData };
         } else {
           dep = {
             depName,

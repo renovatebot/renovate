@@ -82,7 +82,11 @@ export async function getPkgReleases({
   for (let idx = 0; idx < urls.length; idx += 1) {
     const registryUrl = urls[idx];
     const useShard = idx === 0;
-    const releases = await getReleases(lookupName, registryUrl, useShard);
+    const releases = await getReleases(
+      lookupName.replace(/\/.*$/, ''),
+      registryUrl,
+      useShard
+    );
     if (releases) return releases;
   }
   return null;
