@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import * as github from '../github';
 import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
+import { regEx } from '../../util/regex';
 
 interface DataSource {
   datasource: string;
@@ -30,7 +31,7 @@ async function getDatasource(name: string): Promise<DataSource | null> {
       hostType: 'go',
     })).body;
     const sourceMatch = res.match(
-      new RegExp(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
+      regEx(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
     );
     if (sourceMatch) {
       const [, goSourceUrl] = sourceMatch;
