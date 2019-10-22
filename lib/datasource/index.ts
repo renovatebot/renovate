@@ -108,7 +108,13 @@ async function fetchReleases(
   }
   const dep = await datasources[datasource].getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
-  dep.sourceUrl = sanitizeSourceUrl(dep.sourceUrl);
+  const sanitizedSourceUrl = sanitizeSourceUrl(dep.sourceUrl);
+  if(sanitizedSourceUrl !== null){
+  dep.sourceUrl = sanitizedSourceUrl;
+}
+else {
+  logger.debug(`Can't parse dep.sourceUrl ${config.lookupName} : ${dep.sourceUrl}`);
+}
   return dep;
 }
 
