@@ -74,6 +74,8 @@ Or perhaps at least weekly:
   ]
 ```
 
+If you're wondering what is supported and not, under the hood, the schedule is parsed using [later.js](https://bunkat.github.io/later/) using the `later.parse.text(scheduleString)` API. [This page](https://bunkat.github.io/later/parsers.html#text) explains the supported syntax or you can experiment on the [RunKit playground](https://npm.runkit.com/later).
+
 ## Automerging
 
 Automerging is a Renovate feature that can save you a lot of time/noise directly, while also benefiting grouping and scheduling. In short: it means that Renovate can merge PRs or even branches itself if they pass your tests.
