@@ -26,7 +26,7 @@ describe('lib/manager/travis/package', () => {
       expect(await getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentValue = ['10'];
+      config.currentValue = ['10', '12'];
       config.supportPolicy = ['lts_active'];
       expect(await getPackageUpdates(config)).toEqual([]);
     });
@@ -36,7 +36,7 @@ describe('lib/manager/travis/package', () => {
       expect(await getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
-      config.currentValue = ['6.1.0', '8.4.0', '10.0.0'];
+      config.currentValue = ['8.4.0', '10.0.0', '12.0.0'];
       config.supportPolicy = ['lts'];
       getPkgReleases.mockReturnValueOnce({
         releases: [
@@ -60,6 +60,9 @@ describe('lib/manager/travis/package', () => {
           },
           {
             version: '10.0.1',
+          },
+          {
+            version: '12.3.0',
           },
         ],
       });
