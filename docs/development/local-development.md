@@ -18,7 +18,7 @@ and `exports`. We will transpile them to `commonjs` on build.
 For local development some dependencies are required.
 
 - git
-- nodejs `^10.13.0 || ^12.0.0`
+- nodejs `^12.0.0 || ^13.0.0`
 - yarn `^1.17.0`
 - c++ compiler
 - python `^2.7` with `mock` library
