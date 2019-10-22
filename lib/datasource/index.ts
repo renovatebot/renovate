@@ -129,8 +129,8 @@ export function getDigest(
 }
 export function sanitizeSourceUrl(rawSourceUrl) {
   let repoUrlTmp: string;
-  if(rawSourceUrl==null || rawSourceUrl==undefined){
-    logger.info(`no source url provided by datasource, exiting.`)
+  if (rawSourceUrl === null || rawSourceUrl === undefined) {
+    logger.info(`no source url provided by datasource, exiting.`);
     return null;
   }
   const gitInfo = hostedGitInfo.fromUrl(rawSourceUrl, { noGitPlus: true });
@@ -139,13 +139,12 @@ export function sanitizeSourceUrl(rawSourceUrl) {
   } else {
     repoUrlTmp = sanitizeSourceUrlFallback(rawSourceUrl);
   }
-  if(hostRules.getPlatformByHostOrUrl(repoUrlTmp)){
-  logger.debug(`${repoUrlTmp} present in HostRules`);
-  repoUrlTmp = repoUrlTmp.replace(RegExp('.git$'), '');
-  return repoUrlTmp;
-} else{
+  if (hostRules.getPlatformByHostOrUrl(repoUrlTmp)) {
+    logger.debug(`${repoUrlTmp} present in HostRules`);
+    repoUrlTmp = repoUrlTmp.replace(RegExp('.git$'), '');
+    return repoUrlTmp;
+  }
   return null;
-}
 }
 export function sanitizeSourceUrlFallback(rawSourceUrl) {
   let repoUrlTmp: string;

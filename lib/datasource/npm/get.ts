@@ -2,7 +2,6 @@ import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import parse from 'github-url-from-git';
 import { isBase64 } from 'validator';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
@@ -143,9 +142,6 @@ export async function getDependency(
     res.repository = res.repository || latestVersion.repository;
     res.homepage = res.homepage || latestVersion.homepage;
 
-    // Determine repository URL
-    let sourceUrl: string;
-
     if (is.string(res.repository)) {
       res.repository = { url: res.repository };
     }
@@ -156,9 +152,8 @@ export async function getDependency(
       hostRules.hosts({ hostType: 'github' }).forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
-
     }
-    sourceUrl = res.repository.url;
+    const sourceUrl = res.repository.url;
     if (res.homepage && res.homepage.includes('://github.com')) {
       delete res.homepage;
     }
