@@ -785,7 +785,7 @@ The above will enable set `rangeStrategy` to `pin` only for the package `angular
 
 ### packagePatterns
 
-Use this field if you want to have one or more package names patterns in your package rule. See also `excludedPackagePatterns`.
+Use this field if you want to have one or more package names patterns in your package rule. See also `excludePackagePatterns`.
 
 ```
   "packageRules": [{
