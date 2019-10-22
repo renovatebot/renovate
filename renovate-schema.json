@@ -1269,7 +1269,7 @@
       "description": "Configuration object for Podfiles",
       "type": "object",
       "default": {
-        "enabled": true,
+        "enabled": false,
         "fileMatch": ["(^|/)Podfile$"],
         "versionScheme": "ruby"
       },
