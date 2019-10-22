@@ -723,9 +723,7 @@ export async function findPr(
 
 // Pull Request
 
-function escapeHash(input) {
-  return input.replace(/#/g, '%23');
-}
+const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
 
 export async function createPr(
   branchName: string,
