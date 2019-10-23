@@ -23,11 +23,13 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && apt-get clean -y
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Node.js
 
@@ -86,7 +88,7 @@ ENV ERLANG_VERSION=22.0.2-1
 RUN apt-get update && \
     apt-cache policy esl-erlang && \
     apt-get install -y esl-erlang=1:$ERLANG_VERSION && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 # Elixir
 
@@ -101,7 +103,8 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
-RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
+RUN apt-get update && apt-get install -y php-cli php-mbstring && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV COMPOSER_VERSION=1.8.6
 
@@ -111,7 +114,8 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-RUN apt-get update && apt-get install -y bzr && apt-get clean
+RUN apt-get update && apt-get install -y bzr && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV GOLANG_VERSION 1.13
 
@@ -133,7 +137,8 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
+RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
 RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
