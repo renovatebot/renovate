@@ -22,6 +22,7 @@ export function extractPackageFile(
     }
     return { deps };
   } catch (err) {
+    logger.info("Couldn't extract dependencies from esy.json file");
     return null;
   }
 }
@@ -38,16 +39,14 @@ function extractFromSection(
   Object.keys(sectionContent).forEach(depName => {
     const parsedDepName = parseDepName(depName);
     const currentValue = sectionContent[depName];
-    if (currentValue) {
-      const npmScope = parsedDepName.npmScope;
-      const dep: PackageDependency = {
-        depName,
-        currentValue,
-        depType: section,
-        datasource: npmScope === 'opam' ? 'opam' : 'npm',
-      };
-      deps.push(dep);
-    }
+    const npmScope = parsedDepName.npmScope;
+    const dep: PackageDependency = {
+      depName,
+      currentValue,
+      depType: section,
+      datasource: npmScope === 'opam' ? 'opam' : 'npm',
+    };
+    deps.push(dep);
   });
   return deps;
 }
@@ -58,8 +57,7 @@ export function parseDepName(depName) {
     return {
       depName: strs[0],
     };
-  }
-  if (strs.length === 2) {
+  } else if (strs.length === 2) {
     if (strs[0][0] === '@') {
       strs[0] = strs[0].substring(1);
     } else {
