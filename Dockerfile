@@ -136,13 +136,6 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
-# Set up ubuntu user
-
-RUN groupadd --gid 1000 ubuntu \
-  && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
-
-RUN chmod -R a+rw /usr
-
 # Docker client and group
 
 RUN groupadd -g 999 docker
@@ -193,9 +186,6 @@ COPY --from=tsbuild /usr/src/app/node_modules node_modules
 COPY bin bin
 COPY data data
 
-USER root
-RUN chown -R ubuntu:ubuntu /usr/src/app
-USER ubuntu
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []
