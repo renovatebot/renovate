@@ -28,6 +28,7 @@ jobs:
       vmImage: vs2017-win2016
     steps:
       - bash: |
+          set -e
           git config --global core.autocrlf false
           git config --global core.symlinks true
         displayName: 'Preserve LF endings and symbolic links on check out'

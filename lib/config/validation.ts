@@ -178,17 +178,18 @@ export async function validateConfig(
                 }
               }
             }
-            if (
-              (key === 'packagePatterns' || key === 'excludePackagePatterns') &&
-              !(val && val.length === 1 && val[0] === '*')
-            ) {
-              try {
-                regEx(val as any);
-              } catch (e) {
-                errors.push({
-                  depName: 'Configuration Error',
-                  message: `Invalid regExp for ${currentPath}: \`${val}\``,
-                });
+            if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
+              for (const pattern of val) {
+                if (pattern !== '*') {
+                  try {
+                    regEx(pattern);
+                  } catch (e) {
+                    errors.push({
+                      depName: 'Configuration Error',
+                      message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
+                    });
+                  }
+                }
               }
             }
             if (key === 'fileMatch') {

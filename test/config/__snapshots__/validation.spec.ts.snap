@@ -57,6 +57,10 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
 Array [
   Object {
     "depName": "Configuration Error",
+    "message": "Invalid regExp for docker.fileMatch: \`x?+\`",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
   },
 ]
@@ -109,7 +113,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+    "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
   },
 ]
 `;
