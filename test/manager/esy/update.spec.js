@@ -1,14 +1,8 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from '../../../lib/manager/esy/update';
 
-const package1json = readFileSync(
-  'test/manager/esy/_fixtures/package.1.json',
-  'utf8'
-);
-const package2json = readFileSync(
-  'test/manager/esy/_fixtures/package.2.json',
-  'utf8'
-);
+const esy1json = readFileSync('test/manager/esy/_fixtures/esy.1.json', 'utf8');
+const esy2json = readFileSync('test/manager/esy/_fixtures/esy.2.json', 'utf8');
 
 describe('lib/manager/esy/update', () => {
   describe('updateDependency()', () => {
@@ -18,7 +12,7 @@ describe('lib/manager/esy/update', () => {
       expect(await updateDependency(content, upgrade)).toBeNull();
     });
     it('updates a dependency correctly', async () => {
-      const content = package1json;
+      const content = esy1json;
       const upgrade = {
         depType: 'dependencies',
         depName: 'ocaml',
@@ -31,7 +25,7 @@ describe('lib/manager/esy/update', () => {
       expect(res).toMatchSnapshot();
     });
     it('updates a dependency correctly', async () => {
-      const content = package2json;
+      const content = esy2json;
       const upgrade = {
         depType: 'dependencies',
         depName: 'ocaml',
@@ -44,7 +38,7 @@ describe('lib/manager/esy/update', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns unchanged content if newValue === currentValue ', async () => {
-      const content = package2json;
+      const content = esy2json;
       const upgrade = {
         depType: 'dependencies',
         depName: 'ocaml',
