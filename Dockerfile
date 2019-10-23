@@ -6,10 +6,6 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-
 WORKDIR /usr/src/app/
 
 # required for install
