@@ -6,7 +6,7 @@ const package1json = readFileSync(
   'utf8'
 );
 const package2json = readFileSync(
-  'test/manager/esy/_fixtures/package.1.json',
+  'test/manager/esy/_fixtures/package.2.json',
   'utf8'
 );
 
@@ -27,6 +27,7 @@ describe('lib/manager/esy/update', () => {
       };
       const res = await updateDependency(content, upgrade);
       expect(res).not.toBeNull();
+      expect(res).not.toMatch(content);
       expect(res).toMatchSnapshot();
     });
     it('updates a dependency correctly', async () => {
@@ -39,6 +40,84 @@ describe('lib/manager/esy/update', () => {
       };
       const res = await updateDependency(content, upgrade);
       expect(res).not.toBeNull();
+      expect(res).not.toMatch(content);
+      expect(res).toMatchSnapshot();
+    });
+    it('returns unchanged content if newValue === currentValue ', async () => {
+      const content = package2json;
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'ocaml',
+        currentValue: '~4.6.0',
+        newValue: '~4.6.0',
+      };
+      const res = await updateDependency(content, upgrade);
+      expect(res).toMatch(content);
+    });
+    it('returns unchanged content if depName is not found', async () => {
+      const content = `{
+  "name": "hello-reason",
+  "version": "0.1.0",
+  "description": "Example Reason Esy Project",
+  "license": "MIT",
+  "dependencies": {
+    "foo": "1.2.3"
+  }
+}`;
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'will_not_be_found',
+        currentValue: '1.2.4',
+        newValue: '2.0.0',
+      };
+      const res = await updateDependency(content, upgrade);
+      expect(res).not.toBeNull();
+      expect(res).toMatch(content);
+    });
+    it('updates correctly if there are two dependencies with the same depName in different sections', async () => {
+      const content = `{
+  "name": "hello-reason",
+  "version": "0.1.0",
+  "description": "Example Reason Esy Project",
+  "license": "MIT",
+  "dependencies": {
+    "foo": "1.2.3"
+  },
+  "devDependencies": {
+    "foo": "1.2.4"
+  }
+}`;
+      const upgrade = {
+        depType: 'devDependencies',
+        depName: 'foo',
+        currentValue: '1.2.4',
+        newValue: '2.0.0',
+      };
+      const res = await updateDependency(content, upgrade);
+      expect(res).not.toBeNull();
+      expect(res).not.toMatch(content);
+      expect(res).toMatchSnapshot();
+    });
+    it('updates correctly if there are two dependencies with the same version in the same section', async () => {
+      const content = `{
+  "name": "hello-reason",
+  "version": "0.1.0",
+  "description": "Example Reason Esy Project",
+  "license": "MIT",
+  "dependencies": {
+    "foo": "1.2.3",
+    "bar": "1.2.3"
+  }
+}`;
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'bar',
+        currentValue: '1.2.3',
+        newValue: '2.0.0',
+      };
+      const res = await updateDependency(content, upgrade);
+      expect(res).not.toBeNull();
+      expect(res).not.toMatch(content);
       expect(res).toMatchSnapshot();
     });
   });

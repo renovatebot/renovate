@@ -4,12 +4,18 @@ import { Upgrade } from '../common';
 
 export function updateDependency(fileContent: string, upgrade: Upgrade) {
   logger.trace(`updateDependency(${upgrade.depName})`);
-  const { depType, depName, newValue } = upgrade;
+  const { depType, depName, newValue, currentValue } = upgrade;
   try {
     const parsedContents = JSON.parse(fileContent);
     const oldVersion = parsedContents[depType][depName];
+    if (oldVersion !== currentValue) {
+      logger.warn(
+        `Actual value in ${depType}.${depName} = ${oldVersion} is not equal to currentValue = ${currentValue}`
+      );
+    }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
+      return fileContent;
     }
     parsedContents[depType][depName] = newValue;
     const searchString = `"${oldVersion}"`;

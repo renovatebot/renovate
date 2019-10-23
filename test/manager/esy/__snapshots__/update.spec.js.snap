@@ -35,33 +35,68 @@ exports[`lib/manager/esy/update updateDependency() updates a dependency correctl
 
 exports[`lib/manager/esy/update updateDependency() updates a dependency correctly 2`] = `
 "{
-  \\"name\\": \\"hello-ocaml\\",
+  \\"name\\": \\"hello-reason\\",
   \\"version\\": \\"0.1.0\\",
-  \\"description\\": \\"OCaml workflow with Esy\\",
+  \\"description\\": \\"Example Reason Esy Project\\",
   \\"license\\": \\"MIT\\",
   \\"esy\\": {
-    \\"build\\": \\"dune build -p #{self.name}\\",
+    \\"build\\": \\"refmterr dune build -p #{self.name}\\",
+    \\"NOTE\\": \\"Optional release Section. Customizes result of \`esy release\`\\",
     \\"release\\": {
-      \\"bin\\": \\"hello\\",
-      \\"includePackages\\": [
-        \\"root\\",
-        \\"@opam/camomile\\"
+      \\"bin\\": [
+        \\"Hello\\"
       ]
+    },
+    \\"buildEnv\\": {
+      \\"ODOC_SYNTAX\\": \\"re\\"
     }
   },
   \\"scripts\\": {
-    \\"test\\": \\"esy x hello\\"
+    \\"test\\": \\"esy x Hello\\",
+    \\"doc\\": \\"esy dune build @doc\\"
   },
   \\"dependencies\\": {
     \\"@opam/dune\\": \\"*\\",
-    \\"@opam/lambda-term\\": \\"*\\",
-    \\"@opam/lwt\\": \\"^4.0.0\\",
+    \\"@reason-native/console\\": \\"*\\",
+    \\"@reason-native/pastel\\": \\"*\\",
+    \\"@reason-native/rely\\": \\"*\\",
+    \\"@esy-ocaml/reason\\": \\">= 3.4.0 < 3.6.0\\",
+    \\"refmterr\\": \\"*\\",
     \\"ocaml\\": \\"5.0.0\\"
   },
   \\"devDependencies\\": {
-    \\"@opam/merlin\\": \\"^3.0.3\\",
-    \\"ocaml\\": \\"~4.6.0\\"
+    \\"@opam/merlin\\": \\"*\\",
+    \\"ocaml\\": \\"~4.6.0\\",
+    \\"@opam/odoc\\": \\"*\\"
   }
 }
 "
+`;
+
+exports[`lib/manager/esy/update updateDependency() updates correctly if there are two dependencies with the same depName in different sections 1`] = `
+"{
+  \\"name\\": \\"hello-reason\\",
+  \\"version\\": \\"0.1.0\\",
+  \\"description\\": \\"Example Reason Esy Project\\",
+  \\"license\\": \\"MIT\\",
+  \\"dependencies\\": {
+    \\"foo\\": \\"1.2.3\\"
+  },
+  \\"devDependencies\\": {
+    \\"foo\\": \\"2.0.0\\"
+  }
+}"
+`;
+
+exports[`lib/manager/esy/update updateDependency() updates correctly if there are two dependencies with the same version in the same section 1`] = `
+"{
+  \\"name\\": \\"hello-reason\\",
+  \\"version\\": \\"0.1.0\\",
+  \\"description\\": \\"Example Reason Esy Project\\",
+  \\"license\\": \\"MIT\\",
+  \\"dependencies\\": {
+    \\"foo\\": \\"1.2.3\\",
+    \\"bar\\": \\"2.0.0\\"
+  }
+}"
 `;
