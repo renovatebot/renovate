@@ -57,7 +57,8 @@ export function parseDepName(depName) {
     return {
       depName: strs[0],
     };
-  } else if (strs.length === 2) {
+  }
+  if (strs.length === 2) {
     if (strs[0][0] === '@') {
       strs[0] = strs[0].substring(1);
     } else {
