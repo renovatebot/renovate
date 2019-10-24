@@ -19,16 +19,22 @@ export async function updateArtifacts(
     return null;
   }
 
-  const cwd = config.localDir;
-  if (!cwd) {
-    logger.debug('No local dir specified');
+  if (!config.localDir) {
+    logger.debug('CocoaPods: no local dir specified');
     return null;
   }
 
-  const lockFileName = 'Podfile.lock';
+  const packageFileAbsolutePath = upath.join(config.localDir, packageFileName);
+  const cwd = upath.dirname(packageFileAbsolutePath);
+
+  const lockFileName = upath.join(
+    upath.dirname(packageFileName),
+    'Podfile.lock'
+  );
+  const lockFileAbsolutePath = upath.join(cwd, 'Podfile.lock');
+
   try {
-    const localPackageFileName = upath.join(cwd, packageFileName);
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
+    await fs.outputFile(packageFileAbsolutePath, newPackageFileContent);
   } catch (err) {
     logger.warn({ err }, 'Podfile could not be written');
     return [
@@ -43,7 +49,7 @@ export async function updateArtifacts(
 
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
-    logger.debug('No Podfile.lock found');
+    logger.debug(`Lockfile not found: ${lockFileName}`);
     return null;
   }
 
@@ -74,15 +80,17 @@ export async function updateArtifacts(
   const duration = hrtime(startTime);
   const seconds = Math.round(duration[0] + duration[1] / 1e9);
   logger.info({ seconds, type: 'Podfile.lock' }, 'Updated lockfile');
-  logger.debug('Returning updated Podfile.lock');
+  logger.debug(`Returning updated lockfile: ${lockFileName}`);
 
   let newPodfileLockContent = null;
-  const localLockFileName = upath.join(cwd, lockFileName);
   try {
-    newPodfileLockContent = await fs.readFile(localLockFileName, 'utf8');
+    newPodfileLockContent = await fs.readFile(lockFileAbsolutePath, 'utf8');
   } catch (readError) {
     const err = execError || readError;
-    logger.warn({ err, message: err.message }, 'Failed to update Podfile.lock');
+    logger.warn(
+      { err, message: err.message },
+      `Failed to update lockfile: ${lockFileName}`
+    );
 
     return [
       {
@@ -99,7 +107,7 @@ export async function updateArtifacts(
       const err = execError;
       logger.warn(
         { err, message: err.message },
-        'Failed to update Podfile.lock'
+        `Failed to update lockfile: ${lockFileName}`
       );
 
       return [
@@ -123,7 +131,7 @@ export async function updateArtifacts(
       ];
     }
 
-    logger.debug('Podfile.lock is unchanged');
+    logger.debug(`${lockFileName} is unchanged`);
     return null;
   }
 
