@@ -35,7 +35,8 @@ RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src 
     rm -rf /var/lib/apt/lists/*
 
 ## Gradle
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-headless gradle && \
+
+RUN apt-get update && apt-get install -y --no-install-recommends gradle && \
     rm -rf /var/lib/apt/lists/*
 
 ## Node.js
