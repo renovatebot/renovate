@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openss
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && \
+RUN apt-get update && apt-get install -y --no-install-recommends gradle && \
     rm -rf /var/lib/apt/lists/*
 
 ## Node.js
