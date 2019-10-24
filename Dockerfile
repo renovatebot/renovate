@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.3@sha256:925162bdc4b23422763cb2d08ecf1661bbbd856ab54b959517924054e17813fc AS tsbuild
+FROM amd64/node:12.13.0@sha256:834225bc3af578aee9486fe3c5ad850a957c3c72c9f45688a9e0ce2eeee16794 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -33,9 +33,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends gradle && \
 
 ## Node.js
 
-# START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
+# START copy Node.js from https://github.com/nodejs/docker-node/blob/master/12/stretch/Dockerfile
 
-ENV NODE_VERSION 10.16.0
+ENV NODE_VERSION 12.13.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -70,7 +70,7 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
   && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
   && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-  && bsdtar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+  && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
   && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
