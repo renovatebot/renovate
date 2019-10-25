@@ -109,7 +109,7 @@
     "commander": "3.0.2",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "3.0.0",
-    "deepmerge": "4.1.1",
+    "deepmerge": "4.2.1",
     "delay": "4.3.0",
     "detect-indent": "6.0.0",
     "email-addresses": "3.0.3",
