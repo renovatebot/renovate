@@ -76,17 +76,27 @@ async function getReleases(
   return null;
 }
 
-export async function getPkgReleases({
-  registryUrls,
-  lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
-  const urls = registryUrls || [];
+export async function getPkgReleases(
+  config: Partial<PkgReleaseConfig>
+): Promise<ReleaseResult | null> {
+  const { registryUrls, lookupName } = config;
+
+  if (!lookupName) {
+    logger.debug(config, `CocoaPods: invalid lookup name`);
+    return null;
+  }
+
+  if (!registryUrls.length) {
+    logger.debug(config, `CocoaPods: invalid registryUrls`);
+    return null;
+  }
 
   logger.debug(
-    `CocoaPods: Found ${urls.length} repositories for ${lookupName}`
+    `CocoaPods: Found ${registryUrls.length} repositories for ${lookupName}`
   );
 
   const podName = lookupName.replace(/\/.*$/, '');
+
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     podName
@@ -97,8 +107,8 @@ export async function getPkgReleases({
     return cachedResult;
   }
 
-  for (let idx = 0; idx < urls.length; idx += 1) {
-    const registryUrl = urls[idx];
+  for (let idx = 0; idx < registryUrls.length; idx += 1) {
+    const registryUrl = registryUrls[idx];
     const useShard = idx === 0; // First element is default CocoaPods repo (with sharding)
     const result = await getReleases(podName, registryUrl, useShard);
     if (result) {

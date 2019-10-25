@@ -16,9 +16,20 @@ describe('datasource/cocoapods', () => {
     beforeEach(() => {
       global.repoCache = {};
     });
-    it('returns null for empty registryUrls', async () => {
-      api.get.mockReturnValueOnce(null);
+    it('returns null for invalid inputs', async () => {
+      api.get.mockReturnValue(null);
       expect(await getPkgReleases({})).toBeNull();
+      expect(
+        await getPkgReleases({
+          lookupName: null,
+        })
+      ).toBeNull();
+      expect(
+        await getPkgReleases({
+          lookupName: 'foobar',
+          registryUrls: [],
+        })
+      ).toBeNull();
     });
     it('returns null for empty result', async () => {
       api.get.mockReturnValueOnce(null);
