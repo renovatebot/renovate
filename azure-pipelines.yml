@@ -21,6 +21,9 @@ jobs:
         Node12 Py3.7:
           nodeVersion: '12.x'
           pythonVersion: '3.7'
+        Node13 Py3.7:
+          nodeVersion: '13.x'
+          pythonVersion: '3.7'
     pool:
       vmImage: vs2017-win2016
     steps:
@@ -38,6 +41,9 @@ jobs:
         Node12 Py3.7:
           nodeVersion: '12.x'
           pythonVersion: '3.7'
+        Node13 Py3.7:
+          nodeVersion: '13.x'
+          pythonVersion: '3.7'
     pool:
       vmImage: ubuntu-16.04
     steps:
@@ -48,6 +54,9 @@ jobs:
       matrix:
         Node12 Py3.7:
           nodeVersion: '12.x'
+          pythonVersion: '3.7'
+        Node13 Py3.7:
+          nodeVersion: '13.x'
           pythonVersion: '3.7'
     pool:
       vmImage: macOS-10.14
