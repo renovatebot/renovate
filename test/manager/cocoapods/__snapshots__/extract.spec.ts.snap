@@ -4,16 +4,19 @@ exports[`lib/manager/cocoapods/extract extractPackageFile() extracts all depende
 Array [
   Object {
     "depName": "a",
+    "groupName": "a",
     "skipReason": "unknown-version",
   },
   Object {
     "depName": "a/sub",
+    "groupName": "a",
     "skipReason": "unknown-version",
   },
   Object {
     "currentValue": "1.2.3",
     "datasource": "cocoapods",
     "depName": "b",
+    "groupName": "b",
     "managerData": Object {
       "lineNumber": 4,
     },
@@ -26,6 +29,7 @@ Array [
     "currentValue": "1.2.3",
     "datasource": "cocoapods",
     "depName": "c",
+    "groupName": "c",
     "managerData": Object {
       "lineNumber": 5,
     },
@@ -36,14 +40,17 @@ Array [
   },
   Object {
     "depName": "d",
+    "groupName": "d",
     "skipReason": "path-dependency",
   },
   Object {
     "depName": "e",
+    "groupName": "e",
     "skipReason": "git-dependency",
   },
   Object {
     "depName": "f",
+    "groupName": "f",
     "skipReason": "git-dependency",
   },
   Object {
@@ -74,6 +81,7 @@ Array [
     "currentValue": "~> 6.5.0",
     "datasource": "cocoapods",
     "depName": "IQKeyboardManager",
+    "groupName": "IQKeyboardManager",
     "managerData": Object {
       "lineNumber": 8,
     },
@@ -85,6 +93,7 @@ Array [
     "currentValue": "~> 1.28.3",
     "datasource": "cocoapods",
     "depName": "CYLTabBarController",
+    "groupName": "CYLTabBarController",
     "managerData": Object {
       "lineNumber": 9,
     },
@@ -96,6 +105,7 @@ Array [
     "currentValue": "~> 3.1.4",
     "datasource": "cocoapods",
     "depName": "PureLayout",
+    "groupName": "PureLayout",
     "managerData": Object {
       "lineNumber": 11,
     },
@@ -107,6 +117,7 @@ Array [
     "currentValue": "~> 3.2.1",
     "datasource": "cocoapods",
     "depName": "AFNetworking/Serialization",
+    "groupName": "AFNetworking",
     "managerData": Object {
       "lineNumber": 12,
     },
@@ -118,6 +129,7 @@ Array [
     "currentValue": "~> 3.2.1",
     "datasource": "cocoapods",
     "depName": "AFNetworking/Security",
+    "groupName": "AFNetworking",
     "managerData": Object {
       "lineNumber": 13,
     },
@@ -129,6 +141,7 @@ Array [
     "currentValue": "~> 3.2.1",
     "datasource": "cocoapods",
     "depName": "AFNetworking/Reachability",
+    "groupName": "AFNetworking",
     "managerData": Object {
       "lineNumber": 14,
     },
@@ -140,6 +153,7 @@ Array [
     "currentValue": "~> 3.2.1",
     "datasource": "cocoapods",
     "depName": "AFNetworking/NSURLSession",
+    "groupName": "AFNetworking",
     "managerData": Object {
       "lineNumber": 15,
     },
@@ -151,6 +165,7 @@ Array [
     "currentValue": "~> 1.1.0",
     "datasource": "cocoapods",
     "depName": "MBProgressHUD",
+    "groupName": "MBProgressHUD",
     "managerData": Object {
       "lineNumber": 17,
     },
@@ -162,6 +177,7 @@ Array [
     "currentValue": "~> 3.1.16",
     "datasource": "cocoapods",
     "depName": "MJRefresh",
+    "groupName": "MJRefresh",
     "managerData": Object {
       "lineNumber": 18,
     },
@@ -173,6 +189,7 @@ Array [
     "currentValue": "~> 3.1.0",
     "datasource": "cocoapods",
     "depName": "MJExtension",
+    "groupName": "MJExtension",
     "managerData": Object {
       "lineNumber": 19,
     },
@@ -184,6 +201,7 @@ Array [
     "currentValue": "~> 2.1.2",
     "datasource": "cocoapods",
     "depName": "TYPagerController",
+    "groupName": "TYPagerController",
     "managerData": Object {
       "lineNumber": 20,
     },
@@ -195,6 +213,7 @@ Array [
     "currentValue": "~> 1.0.4",
     "datasource": "cocoapods",
     "depName": "YYImage",
+    "groupName": "YYImage",
     "managerData": Object {
       "lineNumber": 21,
     },
@@ -206,6 +225,7 @@ Array [
     "currentValue": "~> 5.0",
     "datasource": "cocoapods",
     "depName": "SDWebImage",
+    "groupName": "SDWebImage",
     "managerData": Object {
       "lineNumber": 22,
     },
@@ -217,6 +237,7 @@ Array [
     "currentValue": "~> 1.80",
     "datasource": "cocoapods",
     "depName": "SDCycleScrollView",
+    "groupName": "SDCycleScrollView",
     "managerData": Object {
       "lineNumber": 23,
     },
@@ -228,6 +249,7 @@ Array [
     "currentValue": "~> 2.0",
     "datasource": "cocoapods",
     "depName": "NullSafe",
+    "groupName": "NullSafe",
     "managerData": Object {
       "lineNumber": 24,
     },
@@ -239,6 +261,7 @@ Array [
     "currentValue": "~> 3.2.1",
     "datasource": "cocoapods",
     "depName": "TZImagePickerController",
+    "groupName": "TZImagePickerController",
     "managerData": Object {
       "lineNumber": 26,
     },
@@ -250,6 +273,7 @@ Array [
     "currentValue": "~> 2.5.1",
     "datasource": "cocoapods",
     "depName": "TOCropViewController",
+    "groupName": "TOCropViewController",
     "managerData": Object {
       "lineNumber": 27,
     },
@@ -261,6 +285,7 @@ Array [
     "currentValue": "~> 2.7.5",
     "datasource": "cocoapods",
     "depName": "FMDB",
+    "groupName": "FMDB",
     "managerData": Object {
       "lineNumber": 31,
     },
@@ -272,6 +297,7 @@ Array [
     "currentValue": "~> 1.0.1",
     "datasource": "cocoapods",
     "depName": "FDStackView",
+    "groupName": "FDStackView",
     "managerData": Object {
       "lineNumber": 32,
     },
@@ -281,12 +307,14 @@ Array [
   },
   Object {
     "depName": "LYEmptyView",
+    "groupName": "LYEmptyView",
     "skipReason": "unknown-version",
   },
   Object {
     "currentValue": "~> 1.0.22",
     "datasource": "cocoapods",
     "depName": "MMKV",
+    "groupName": "MMKV",
     "managerData": Object {
       "lineNumber": 35,
     },
@@ -296,12 +324,14 @@ Array [
   },
   Object {
     "depName": "fishhook",
+    "groupName": "fishhook",
     "skipReason": "unknown-version",
   },
   Object {
     "currentValue": "~> 3.5.3",
     "datasource": "cocoapods",
     "depName": "CocoaLumberjack",
+    "groupName": "CocoaLumberjack",
     "managerData": Object {
       "lineNumber": 39,
     },
@@ -313,6 +343,7 @@ Array [
     "currentValue": "~> 1.2",
     "datasource": "cocoapods",
     "depName": "GZIP",
+    "groupName": "GZIP",
     "managerData": Object {
       "lineNumber": 41,
     },
@@ -324,6 +355,7 @@ Array [
     "currentValue": "~> 2.3",
     "datasource": "cocoapods",
     "depName": "LBXScan/LBXNative",
+    "groupName": "LBXScan",
     "managerData": Object {
       "lineNumber": 43,
     },
@@ -335,6 +367,7 @@ Array [
     "currentValue": "~> 2.3",
     "datasource": "cocoapods",
     "depName": "LBXScan/LBXZXing",
+    "groupName": "LBXScan",
     "managerData": Object {
       "lineNumber": 44,
     },
@@ -346,6 +379,7 @@ Array [
     "currentValue": "~> 2.3",
     "datasource": "cocoapods",
     "depName": "LBXScan/UI",
+    "groupName": "LBXScan",
     "managerData": Object {
       "lineNumber": 46,
     },
@@ -355,10 +389,12 @@ Array [
   },
   Object {
     "depName": "MLeaksFinder",
+    "groupName": "MLeaksFinder",
     "skipReason": "unknown-version",
   },
   Object {
     "depName": "FBMemoryProfiler",
+    "groupName": "FBMemoryProfiler",
     "skipReason": "unknown-version",
   },
 ]

@@ -1,17 +1,20 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 
-const regexMapping = {
-  depName: /^\s*pod\s+(['"])(?<depName>[^'"]+)\1/,
-  currentValue: /^\s*pod\s+(['"])(?<depName>[^'"]+)\1\s*,\s*(['"])(?<currentValue>[^'"]+)\3\s*$/,
-  git: /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/,
-  tag: /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/,
-  path: /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/,
-  source: /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
-};
+const regexMappings = [
+  /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
+  /^\s*pod\s+(['"])[^'"]+\1\s*,\s*(['"])(?<currentValue>[^'"]+)\2\s*$/,
+  /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/,
+  /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/,
+  /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/,
+  /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
+];
 
 interface ParsedLine {
   depName?: string;
+  groupName?: string;
+  spec?: string;
+  subspec?: string;
   currentValue?: string;
   git?: string;
   tag?: string;
@@ -20,14 +23,25 @@ interface ParsedLine {
 }
 
 export function parseLine(line: string): ParsedLine {
-  const result = {};
-  for (const [key, regex] of Object.entries(regexMapping)) {
+  const result: ParsedLine = {};
+  for (const regex of Object.values(regexMappings)) {
     const match = line.replace(/#.*$/, '').match(regex);
-    const value = match && match.groups && match.groups[key];
-    if (value) {
-      result[key] = value;
+    if (match && match.groups) {
+      Object.assign(result, match.groups);
     }
   }
+
+  if (result.spec) {
+    const depName = result.subspec
+      ? `${result.spec}/${result.subspec}`
+      : result.spec;
+    const groupName = result.spec;
+    if (depName) result.depName = depName;
+    if (groupName) result.groupName = groupName;
+    delete result.spec;
+    delete result.subspec;
+  }
+
   return result;
 }
 
@@ -70,7 +84,15 @@ export function extractPackageFile(content: string): PackageFile {
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
     const parsedLine = parseLine(line);
-    const { depName, currentValue, git, tag, path, source } = parsedLine;
+    const {
+      depName,
+      groupName,
+      currentValue,
+      git,
+      tag,
+      path,
+      source,
+    } = parsedLine;
 
     if (source) {
       registryUrlsSet.add(source);
@@ -80,12 +102,14 @@ export function extractPackageFile(content: string): PackageFile {
       const managerData = { lineNumber };
       let dep: PackageDependency = {
         depName,
+        groupName,
         skipReason: 'unknown-version',
       };
 
       if (currentValue) {
         dep = {
           depName,
+          groupName,
           datasource: 'cocoapods',
           currentValue,
           managerData,
@@ -97,12 +121,14 @@ export function extractPackageFile(content: string): PackageFile {
         } else {
           dep = {
             depName,
+            groupName,
             skipReason: 'git-dependency',
           };
         }
       } else if (path) {
         dep = {
           depName,
+          groupName,
           skipReason: 'path-dependency',
         };
       }
