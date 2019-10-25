@@ -6,8 +6,10 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
+USER root
 WORKDIR /usr/src/app/
 RUN chown -R ubuntu:ubuntu /usr/src/app
+USER ubuntu
 
 # Build image
 #============
