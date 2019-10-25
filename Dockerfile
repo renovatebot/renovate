@@ -7,7 +7,7 @@ LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
 WORKDIR /usr/src/app/
-
+RUN chown -R ubuntu:ubuntu /usr/src/app
 
 # Build image
 #============
