@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.3@sha256:925162bdc4b23422763cb2d08ecf1661bbbd856ab54b959517924054e17813fc AS tsbuild
+FROM amd64/node:10.17.0@sha256:872a4cb1f054fd2f85bbdc9cdf5973ed46e92370e322dbbd4a20afe17530b656 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -23,11 +23,13 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && apt-get clean -y
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Node.js
 
@@ -86,7 +88,7 @@ ENV ERLANG_VERSION=22.0.2-1
 RUN apt-get update && \
     apt-cache policy esl-erlang && \
     apt-get install -y esl-erlang=1:$ERLANG_VERSION && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 # Elixir
 
@@ -101,7 +103,8 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
-RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
+RUN apt-get update && apt-get install -y php-cli php-mbstring && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV COMPOSER_VERSION=1.8.6
 
@@ -111,7 +114,8 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-RUN apt-get update && apt-get install -y bzr && apt-get clean
+RUN apt-get update && apt-get install -y bzr mercurial && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV GOLANG_VERSION 1.13
 
@@ -133,7 +137,8 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
+RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
 RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
@@ -203,7 +208,7 @@ RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.17.3
+ENV YARN_VERSION=1.19.1
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
