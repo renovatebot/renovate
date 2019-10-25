@@ -54,10 +54,6 @@ Array [
     "skipReason": "git-dependency",
   },
   Object {
-    "currentValue": "3.2.1",
-    "datasource": "gitTags",
-    "depName": "g",
-    "lookupName": "g.git",
     "managerData": Object {
       "lineNumber": 9,
     },
