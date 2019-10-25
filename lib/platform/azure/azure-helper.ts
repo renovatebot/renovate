@@ -254,9 +254,11 @@ export async function getMergeMethod(
     )
     .map(p => p.settings)[0];
 
-  return (
-    Object.keys(policyConfigurations)
+  try {
+    return Object.keys(policyConfigurations)
       .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p) || GitPullRequestMergeStrategy.NoFastForward
-  );
+      .find(p => p);
+  } catch (err) {
+    return GitPullRequestMergeStrategy.NoFastForward;
+  }
 }
