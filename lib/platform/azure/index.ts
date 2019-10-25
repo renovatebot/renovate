@@ -729,12 +729,32 @@ export /* istanbul ignore next */ async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-// to become async?
-export function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug(
-    `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
+export async function getPrFiles(prId: number): Promise<string[]> {
+  const azureApiGit = await azureApi.gitApi();
+  const prIterations = await azureApiGit.getPullRequestIterations(
+    config.repoId,
+    prId
   );
-  return Promise.resolve([]);
+  return [
+    ...new Set(
+      (
+        await Promise.all(
+          prIterations.map(
+            async iteration =>
+              (
+                await azureApiGit.getPullRequestIterationChanges(
+                  config.repoId,
+                  prId,
+                  iteration.id
+                )
+              ).changeEntries
+          )
+        )
+      )
+        .flat()
+        .map(change => change.item.path.slice(1))
+    ),
+  ];
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
