@@ -3,6 +3,9 @@ import { api } from '../../platform/github/gh-got-wrapper';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
 import { logger } from '../../logger';
 
+const cacheNamespace = 'cocoapods';
+const cacheMinutes = 30;
+
 function shardPart(lookupName) {
   return crypto
     .createHash('md5')
@@ -79,15 +82,26 @@ export async function getPkgReleases({
     `CocoaPods: Found ${urls.length} repositories for ${lookupName}`
   );
 
+  const podName = lookupName.replace(/\/.*$/, '');
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    podName
+  );
+  /* istanbul ignore next line */
+  if (cachedResult) {
+    logger.debug(`CocoaPods: Return cached result for ${podName}`);
+    return cachedResult;
+  }
+
   for (let idx = 0; idx < urls.length; idx += 1) {
     const registryUrl = urls[idx];
     const useShard = idx === 0; // First element is default CocoaPods repo (with sharding)
-    const releases = await getReleases(
-      lookupName.replace(/\/.*$/, ''),
-      registryUrl,
-      useShard
-    );
-    if (releases) return releases;
+
+    const releases = await getReleases(podName, registryUrl, useShard);
+    if (releases) {
+      await renovateCache.set(cacheNamespace, podName, releases, cacheMinutes);
+      return releases;
+    }
   }
   return null;
 }
