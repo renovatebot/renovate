@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { api } from '../../platform/github/gh-got-wrapper';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
 
 const cacheNamespace = 'cocoapods';
@@ -31,7 +31,11 @@ function releasesUrl(lookupName, opts) {
   return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
 }
 
-async function getReleases(lookupName, registryUrl, useShard) {
+async function getReleases(
+  lookupName,
+  registryUrl,
+  useShard
+): Promise<ReleaseResult | null> {
   const match = registryUrl
     .replace(/\.git$/, '')
     .replace(/\/+$/, '')
@@ -96,11 +100,10 @@ export async function getPkgReleases({
   for (let idx = 0; idx < urls.length; idx += 1) {
     const registryUrl = urls[idx];
     const useShard = idx === 0; // First element is default CocoaPods repo (with sharding)
-
-    const releases = await getReleases(podName, registryUrl, useShard);
-    if (releases) {
-      await renovateCache.set(cacheNamespace, podName, releases, cacheMinutes);
-      return releases;
+    const result = await getReleases(podName, registryUrl, useShard);
+    if (result) {
+      await renovateCache.set(cacheNamespace, podName, result, cacheMinutes);
+      return result;
     }
   }
   return null;
