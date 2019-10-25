@@ -8,14 +8,6 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
 WORKDIR /usr/src/app/
 
-# required for install
-USER root
-
-RUN chown -R ubuntu:ubuntu /usr/src/app/
-
-# and back to normal
-USER ubuntu
-
 # Build image
 #============
 FROM base as tsbuild
