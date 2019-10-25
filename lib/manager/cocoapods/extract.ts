@@ -31,7 +31,7 @@ export function parseLine(line: string): ParsedLine {
   return result;
 }
 
-const defaultRegistryUrl = 'https://github.com/CocoaPods/Specs';
+const defaultRegistryUrl = 'https://github.com/CocoaPods/Specs.git';
 
 export function gitDep(parsedLine: ParsedLine): PackageDependency {
   const { depName, git, tag } = parsedLine;
@@ -111,6 +111,7 @@ export function extractPackageFile(content: string): PackageFile {
     }
   }
 
+  registryUrlsSet.delete(defaultRegistryUrl);
   registryUrls.push(defaultRegistryUrl);
   if (registryUrlsSet.size > 0) {
     for (const url of registryUrlsSet.values()) {

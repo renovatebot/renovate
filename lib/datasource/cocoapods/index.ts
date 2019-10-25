@@ -81,7 +81,7 @@ export async function getPkgReleases({
 
   for (let idx = 0; idx < urls.length; idx += 1) {
     const registryUrl = urls[idx];
-    const useShard = idx === 0;
+    const useShard = idx === 0; // First element is default CocoaPods repo (with sharding)
     const releases = await getReleases(
       lookupName.replace(/\/.*$/, ''),
       registryUrl,

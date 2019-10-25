@@ -18,7 +18,7 @@ Array [
       "lineNumber": 4,
     },
     "registryUrls": Array [
-      "https://github.com/CocoaPods/Specs",
+      "https://github.com/CocoaPods/Specs.git",
       "https://github.com/Artsy/Specs.git",
     ],
   },
@@ -30,7 +30,7 @@ Array [
       "lineNumber": 5,
     },
     "registryUrls": Array [
-      "https://github.com/CocoaPods/Specs",
+      "https://github.com/CocoaPods/Specs.git",
       "https://github.com/Artsy/Specs.git",
     ],
   },
@@ -64,6 +64,302 @@ Array [
     "managerData": Object {
       "lineNumber": 10,
     },
+  },
+]
+`;
+
+exports[`lib/manager/cocoapods/extract extractPackageFile() extracts all dependencies 2`] = `
+Array [
+  Object {
+    "currentValue": "~> 6.5.0",
+    "datasource": "cocoapods",
+    "depName": "IQKeyboardManager",
+    "managerData": Object {
+      "lineNumber": 8,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 1.28.3",
+    "datasource": "cocoapods",
+    "depName": "CYLTabBarController",
+    "managerData": Object {
+      "lineNumber": 9,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.1.4",
+    "datasource": "cocoapods",
+    "depName": "PureLayout",
+    "managerData": Object {
+      "lineNumber": 11,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.2.1",
+    "datasource": "cocoapods",
+    "depName": "AFNetworking/Serialization",
+    "managerData": Object {
+      "lineNumber": 12,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.2.1",
+    "datasource": "cocoapods",
+    "depName": "AFNetworking/Security",
+    "managerData": Object {
+      "lineNumber": 13,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.2.1",
+    "datasource": "cocoapods",
+    "depName": "AFNetworking/Reachability",
+    "managerData": Object {
+      "lineNumber": 14,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.2.1",
+    "datasource": "cocoapods",
+    "depName": "AFNetworking/NSURLSession",
+    "managerData": Object {
+      "lineNumber": 15,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 1.1.0",
+    "datasource": "cocoapods",
+    "depName": "MBProgressHUD",
+    "managerData": Object {
+      "lineNumber": 17,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.1.16",
+    "datasource": "cocoapods",
+    "depName": "MJRefresh",
+    "managerData": Object {
+      "lineNumber": 18,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.1.0",
+    "datasource": "cocoapods",
+    "depName": "MJExtension",
+    "managerData": Object {
+      "lineNumber": 19,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.1.2",
+    "datasource": "cocoapods",
+    "depName": "TYPagerController",
+    "managerData": Object {
+      "lineNumber": 20,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 1.0.4",
+    "datasource": "cocoapods",
+    "depName": "YYImage",
+    "managerData": Object {
+      "lineNumber": 21,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 5.0",
+    "datasource": "cocoapods",
+    "depName": "SDWebImage",
+    "managerData": Object {
+      "lineNumber": 22,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 1.80",
+    "datasource": "cocoapods",
+    "depName": "SDCycleScrollView",
+    "managerData": Object {
+      "lineNumber": 23,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.0",
+    "datasource": "cocoapods",
+    "depName": "NullSafe",
+    "managerData": Object {
+      "lineNumber": 24,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 3.2.1",
+    "datasource": "cocoapods",
+    "depName": "TZImagePickerController",
+    "managerData": Object {
+      "lineNumber": 26,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.5.1",
+    "datasource": "cocoapods",
+    "depName": "TOCropViewController",
+    "managerData": Object {
+      "lineNumber": 27,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.7.5",
+    "datasource": "cocoapods",
+    "depName": "FMDB",
+    "managerData": Object {
+      "lineNumber": 31,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 1.0.1",
+    "datasource": "cocoapods",
+    "depName": "FDStackView",
+    "managerData": Object {
+      "lineNumber": 32,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "depName": "LYEmptyView",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "currentValue": "~> 1.0.22",
+    "datasource": "cocoapods",
+    "depName": "MMKV",
+    "managerData": Object {
+      "lineNumber": 35,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "depName": "fishhook",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "currentValue": "~> 3.5.3",
+    "datasource": "cocoapods",
+    "depName": "CocoaLumberjack",
+    "managerData": Object {
+      "lineNumber": 39,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 1.2",
+    "datasource": "cocoapods",
+    "depName": "GZIP",
+    "managerData": Object {
+      "lineNumber": 41,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.3",
+    "datasource": "cocoapods",
+    "depName": "LBXScan/LBXNative",
+    "managerData": Object {
+      "lineNumber": 43,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.3",
+    "datasource": "cocoapods",
+    "depName": "LBXScan/LBXZXing",
+    "managerData": Object {
+      "lineNumber": 44,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "~> 2.3",
+    "datasource": "cocoapods",
+    "depName": "LBXScan/UI",
+    "managerData": Object {
+      "lineNumber": 46,
+    },
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
+  },
+  Object {
+    "depName": "MLeaksFinder",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "depName": "FBMemoryProfiler",
+    "skipReason": "unknown-version",
   },
 ]
 `;

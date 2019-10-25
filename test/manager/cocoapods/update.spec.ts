@@ -2,8 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import { updateDependency } from '../../../lib/manager/cocoapods';
 
-const sample = fs.readFileSync(
-  path.resolve(__dirname, './_fixtures/Podfile'),
+const simplePodfile = fs.readFileSync(
+  path.resolve(__dirname, './_fixtures/Podfile.simple'),
   'utf-8'
 );
 
@@ -16,8 +16,8 @@ describe('lib/manager/cocoapods/update', () => {
         currentValue: '1.2.3',
         newValue: '2.0.0',
       };
-      const res = updateDependency(sample, upgrade);
-      expect(res).not.toEqual(sample);
+      const res = updateDependency(simplePodfile, upgrade);
+      expect(res).not.toEqual(simplePodfile);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns same content', () => {
@@ -27,9 +27,9 @@ describe('lib/manager/cocoapods/update', () => {
         currentValue: '1.2.3',
         newValue: '1.2.3',
       };
-      const res = updateDependency(sample, upgrade);
-      expect(res).toEqual(sample);
-      expect(res).toBe(sample);
+      const res = updateDependency(simplePodfile, upgrade);
+      expect(res).toEqual(simplePodfile);
+      expect(res).toBe(simplePodfile);
     });
     it('returns null', () => {
       const upgrade = {
@@ -38,7 +38,7 @@ describe('lib/manager/cocoapods/update', () => {
         currentValue: '1.2.3',
         newValue: '2.0.0',
       };
-      const res = updateDependency(sample, upgrade);
+      const res = updateDependency(simplePodfile, upgrade);
       expect(res).toBeNull();
     });
   });
