@@ -25,11 +25,17 @@ describe('workers/repository/extract/file-match', () => {
       const res = fileMatch.filterIgnoredFiles(fileList, []);
       expect(res).toEqual(fileList);
     });
-    it('ignores partial matches', () => {
-      const ignoredPaths = ['frontend'];
+    it('only ignores exact string matches', () => {
+      const ignoredPaths = ['package.json'];
       const res = fileMatch.filterIgnoredFiles(fileList, ignoredPaths);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
+    });
+    it('does not ignore partial string / substring matches', () => {
+      const ignoredPaths = ['frontend'];
+      const res = fileMatch.filterIgnoredFiles(fileList, ignoredPaths);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
     it('returns minimatch matches', () => {
       const ignoredPaths = ['frontend/**'];

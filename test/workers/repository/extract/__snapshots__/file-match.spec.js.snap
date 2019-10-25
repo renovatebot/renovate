@@ -1,8 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/extract/file-match filterIgnoredFiles() ignores partial matches 1`] = `
+exports[`workers/repository/extract/file-match filterIgnoredFiles() does not ignore partial string / substring matches 1`] = `
 Array [
   "package.json",
+  "frontend/package.json",
+]
+`;
+
+exports[`workers/repository/extract/file-match filterIgnoredFiles() only ignores exact string matches 1`] = `
+Array [
+  "frontend/package.json",
 ]
 `;
 
