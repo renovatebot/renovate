@@ -65,12 +65,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency {
     }
   }
 
-  return {
-    datasource: 'gitTags',
-    depName,
-    lookupName: git,
-    currentValue: tag,
-  };
+  return null; // TODO: gitlab or gitTags datasources?
 }
 
 export function extractPackageFile(content: string): PackageFile {
