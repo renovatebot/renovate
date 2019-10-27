@@ -112,7 +112,7 @@
     "deepmerge": "4.2.1",
     "delay": "4.3.0",
     "detect-indent": "6.0.0",
-    "email-addresses": "3.0.3",
+    "email-addresses": "3.1.0",
     "fs-extra": "8.1.0",
     "get-installed-path": "4.0.8",
     "github-url-from-git": "1.5.0",
