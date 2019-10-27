@@ -62,7 +62,7 @@ The timezone must be one of the valid
 
 Now that your timezone is set, you can define days of week or hours of the day
 in which renovate will make changes. For this we rely on text parsing of the
-library [later](http://bunkat.github.io/later/parsers.html#text) and its
+library [later](https://bunkat.github.io/later/parsers.html#text) and its
 concepts of "days", "time_before", and "time_after".
 
 Example scheduling:
