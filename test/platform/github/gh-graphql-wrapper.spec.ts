@@ -8,7 +8,7 @@ jest.mock('../../../lib/platform/github/gh-got-wrapper');
 const query = `
       query {
         repository(owner: "testOwner", name: "testName") {
-          testItem(orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "someone"}) {
+          testItem (orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "someone"}) {
             pageInfo {
               startCursor
               hasNextPage

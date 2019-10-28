@@ -33,14 +33,14 @@ export async function getGraphqlNodes(
 ): Promise<any[]> {
   const result = [];
 
-  const regex = new RegExp(`(\\W)${fieldName}\\s\\(`);
+  const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
 
   let cursor = '';
   let count = 100;
   let canIterate = true;
 
   while (canIterate) {
-    const replacement = `$1${fieldName}$2(first: ${count}, after: ${cursor}`;
+    const replacement = `$1${fieldName}$2(first: ${count}, after: '${cursor}', `;
     const query = queryOrig.replace(regex, replacement);
     const res = await gqlGet(query);
     if (!res.data && !res.errors) {
