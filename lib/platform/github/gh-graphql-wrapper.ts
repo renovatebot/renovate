@@ -8,7 +8,14 @@ const gqlOpts = {
   json: false,
 };
 
-async function gqlGet(query) {
+interface GithubGraphqlResponse {
+  data?: {
+    repository?: any;
+  };
+  errors?: any;
+}
+
+async function gqlGet(query: string): Promise<GithubGraphqlResponse> {
   try {
     const body = JSON.stringify({ query });
     const options = { ...gqlOpts, body };
@@ -20,7 +27,10 @@ async function gqlGet(query) {
   }
 }
 
-export async function getGraphqlNodes(queryOrig: string, fieldName: string) {
+export async function getGraphqlNodes(
+  queryOrig: string,
+  fieldName: string
+): Promise<any[]> {
   const result = [];
 
   const regex = new RegExp(`(\\W)${fieldName}\\s\\(`);
@@ -39,23 +49,20 @@ export async function getGraphqlNodes(queryOrig: string, fieldName: string) {
         logger.info({ query, res }, 'No graphql res.data');
         canIterate = false;
       }
-    } else {
-      const fieldData = res.data.repository[fieldName];
-      if (fieldData) {
-        const { nodes, pageInfo } = fieldData;
-        result.push(...nodes);
-        if (pageInfo.hasNextPage) {
-          cursor = pageInfo.startCursor;
-        } else {
-          canIterate = false;
-        }
+    } else if (res.data.repository && res.data.repository[fieldName]) {
+      const { nodes, pageInfo } = res.data.repository[fieldName];
+      result.push(...nodes);
+      if (pageInfo.hasNextPage) {
+        cursor = pageInfo.startCursor;
       } else {
-        logger.info(
-          { query, res },
-          `No graphql data found for field ${fieldName}`
-        );
         canIterate = false;
       }
+    } else {
+      logger.info(
+        { query, res },
+        `No graphql data found for field ${fieldName}`
+      );
+      canIterate = false;
     }
   }
 

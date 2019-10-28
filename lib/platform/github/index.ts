@@ -733,8 +733,11 @@ async function getGraphqlIssues() {
 
   const result = await getGraphqlNodes(query, 'issues');
 
-  logger.debug('Retrieved ' + result.length + ' issues');
-  return result.map(issue => ({ ...issue, state: issue.state.toLowerCase() }));
+  logger.debug(`Retrieved ${result.length} issues`);
+  return result.map(issue => ({
+    ...issue,
+    state: issue.state.toLowerCase(),
+  }));
 }
 
 // istanbul ignore next
@@ -769,6 +772,7 @@ export async function getIssueList() {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     const filterBySupportMinimumGheVersion = '2.17.0';
+    // istanbul ignore next
     config.issueList =
       config.enterpriseVersion &&
       semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
