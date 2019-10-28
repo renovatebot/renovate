@@ -35,12 +35,12 @@ export async function getGraphqlNodes(
 
   const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
 
-  let cursor = '';
+  let cursor = null;
   let count = 100;
   let canIterate = true;
 
   while (canIterate) {
-    const replacement = `$1${fieldName}$2(first: ${count}, after: '${cursor}', `;
+    const replacement = `$1${fieldName}$2(first: ${count}, after: ${cursor}, `;
     const query = queryOrig.replace(regex, replacement);
     const res = await gqlGet(query);
     if (!res.data && !res.errors) {
@@ -49,7 +49,11 @@ export async function getGraphqlNodes(
         logger.info({ query, res }, 'No graphql res.data');
         canIterate = false;
       }
-    } else if (res.data.repository && res.data.repository[fieldName]) {
+    } else if (
+      res.data &&
+      res.data.repository &&
+      res.data.repository[fieldName]
+    ) {
       const { nodes, pageInfo } = res.data.repository[fieldName];
       result.push(...nodes);
       if (pageInfo.hasNextPage) {
@@ -58,10 +62,7 @@ export async function getGraphqlNodes(
         canIterate = false;
       }
     } else {
-      logger.info(
-        { query, res },
-        `No graphql data found for field ${fieldName}`
-      );
+      logger.info({ query, res }, `Error fetching graphql items`);
       canIterate = false;
     }
   }
