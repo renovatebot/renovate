@@ -769,12 +769,11 @@ export async function getIssueList() {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     const filterBySupportMinimumGheVersion = '2.17.0';
-    const useRest =
+    config.issueList =
       config.enterpriseVersion &&
-      semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion);
-    config.issueList = useRest
-      ? await getRestIssues()
-      : await getGraphqlIssues();
+      semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
+        ? await getRestIssues()
+        : await getGraphqlIssues();
   }
   return config.issueList;
 }
