@@ -30,6 +30,7 @@ describe('manager/gradle', () => {
     fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
     fs.mkdir.mockResolvedValue();
     fs.exists.mockResolvedValue(true);
+    fs.access.mockResolvedValue(undefined);
     exec.mockResolvedValue({ stdout: 'gradle output', stderr: '' } as never);
     platform.getFile.mockResolvedValue('some content');
   });
@@ -107,6 +108,19 @@ describe('manager/gradle', () => {
     });
 
     it('should execute gradlew when available', async () => {
+      await manager.extractAllPackageFiles(config, ['build.gradle']);
+
+      expect(exec.mock.calls[0][0]).toBe(
+        './gradlew --init-script renovate-plugin.gradle renovate'
+      );
+      expect(exec.mock.calls[0][1]).toMatchObject({
+        cwd: 'localDir',
+        timeout: 20000,
+      });
+    });
+
+    it('should run gradlew through `sh` when available but not executable', async () => {
+      fs.access.mockRejectedValue(undefined);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(

@@ -2,6 +2,11 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 
+export interface FileData {
+  name: string;
+  contents: string;
+}
+
 export interface GotApiOptions {
   useCache?: boolean;
   hostType?: string;
