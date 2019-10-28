@@ -17,6 +17,7 @@ import {
 } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import { getGraphqlNodes } from './gh-graphql-wrapper';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -709,54 +710,31 @@ export async function setBranchStatus(
 // Issue
 
 /* istanbul ignore next */
-async function getGraphqlIssues(afterCursor: string | null = null) {
-  const url = 'graphql';
-  const headers = {
-    accept: 'application/vnd.github.merge-info-preview+json',
-  };
-  // prettier-ignore
+async function getGraphqlIssues() {
+  // istanbul ignore next
   const query = `
-  query {
-    repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-      issues(first: 100, after:${afterCursor}, orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
-        pageInfo {
-          startCursor
-          hasNextPage
-        }
-        nodes {
-          number
-          state
-          title
-          body
+    query {
+      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
+        issues(orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
+          pageInfo {
+            startCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
         }
       }
     }
-  }
   `;
 
-  const options = {
-    headers,
-    body: JSON.stringify({ query }),
-    json: false,
-  };
+  const result = await getGraphqlNodes(query, 'issues');
 
-  try {
-    const res = JSON.parse((await api.post(url, options)).body);
-
-    if (!res.data) {
-      logger.info({ query, res }, 'No graphql res.data');
-      return [false, [], null];
-    }
-
-    const cursor = res.data.repository.issues.pageInfo.hasNextPage
-      ? res.data.repository.issues.pageInfo.startCursor
-      : null;
-
-    return [true, res.data.repository.issues.nodes, cursor];
-  } catch (err) {
-    logger.warn({ query, err }, 'getGraphqlIssues error');
-    throw new Error('platform-failure');
-  }
+  logger.debug('Retrieved ' + result.length + ' issues');
+  return result.map(issue => ({ ...issue, state: issue.state.toLowerCase() }));
 }
 
 // istanbul ignore next
@@ -791,29 +769,12 @@ export async function getIssueList() {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     const filterBySupportMinimumGheVersion = '2.17.0';
-    // istanbul ignore next
-    if (
+    const useRest =
       config.enterpriseVersion &&
-      semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
-    ) {
-      config.issueList = await getRestIssues();
-      return config.issueList;
-    }
-    let [success, issues, cursor] = await getGraphqlIssues();
-    config.issueList = [];
-    while (success) {
-      for (const issue of issues) {
-        issue.state = issue.state.toLowerCase();
-        config.issueList.push(issue);
-      }
-
-      if (!cursor) {
-        break;
-      }
-      // istanbul ignore next
-      [success, issues, cursor] = await getGraphqlIssues(cursor);
-    }
-    logger.debug('Retrieved ' + config.issueList.length + ' issues');
+      semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion);
+    config.issueList = useRest
+      ? await getRestIssues()
+      : await getGraphqlIssues();
   }
   return config.issueList;
 }
