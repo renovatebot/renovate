@@ -235,6 +235,11 @@
       "type": "string",
       "default": null
     },
+    "prCommitsPerRunLimit": {
+      "description": "Set a maximum number of commits per Renovate run. Default is no limit.",
+      "type": "integer",
+      "default": 0
+    },
     "repositories": {
       "description": "List of Repositories",
       "type": "array"
@@ -1051,6 +1056,15 @@
       },
       "$ref": "#"
     },
+    "helm-requirements": {
+      "description": "Configuration object for helm requirements.yaml files.",
+      "type": "object",
+      "default": {
+        "commitMessageTopic": "helm chart {{depName}}",
+        "fileMatch": ["(^|/)requirements.yaml$"]
+      },
+      "$ref": "#"
+    },
     "circleci": {
       "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
@@ -1188,7 +1202,7 @@
       "type": "object",
       "default": {
         "fileMatch": ["\\.gradle(\\.kts)?$", "(^|/)gradle.properties$"],
-        "timeout": 300,
+        "timeout": 600,
         "versionScheme": "maven"
       },
       "$ref": "#"

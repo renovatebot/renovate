@@ -2,6 +2,7 @@ import { fromStream } from 'hasha';
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
+import { regEx } from '../../util/regex';
 
 function updateWithNewVersion(
   content: string,
@@ -66,7 +67,7 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
   )).filter(Boolean);
   const distinctHashes = [...new Set(hashes)];
   if (!distinctHashes.length) {
-    logger.debug({ hashes }, 'Could not calculate hash for URLs');
+    logger.debug({ hashes, urls }, 'Could not calculate hash for URLs');
     return null;
   }
   // istanbul ignore if
@@ -115,6 +116,7 @@ export async function updateDependency(
       );
       const massages = {
         'bazel-skylib.0.9.0': 'bazel_skylib-0.9.0',
+        '0.19.5/rules_go-0.19.5.tar.gz': 'v0.19.5/rules_go-v0.19.5.tar.gz',
       };
       for (const [from, to] of Object.entries(massages)) {
         newDef = newDef.replace(from, to);
@@ -136,7 +138,7 @@ export async function updateDependency(
       const hash = await getHashFromUrl(url);
       newDef = setNewHash(upgrade.managerData.def, hash);
       newDef = newDef.replace(
-        new RegExp(`(strip_prefix\\s*=\\s*)"[^"]*"`),
+        regEx(`(strip_prefix\\s*=\\s*)"[^"]*"`),
         `$1"${shortRepo}-${upgrade.newDigest}"`
       );
       const match =
@@ -150,7 +152,7 @@ export async function updateDependency(
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }
-    const existingDef = new RegExp(existingRegExStr);
+    const existingDef = regEx(existingRegExStr);
     // istanbul ignore if
     if (!fileContent.match(existingDef)) {
       logger.info('Cannot match existing string');

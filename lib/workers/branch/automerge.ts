@@ -1,11 +1,18 @@
-const { logger } = require('../../logger');
-const { platform } = require('../../platform');
+import { logger } from '../../logger';
+import { RenovateConfig } from '../../config';
+import { platform } from '../../platform';
 
-module.exports = {
-  tryBranchAutomerge,
-};
+export type AutomergeResult =
+  | 'automerged'
+  | 'automerge aborted - PR exists'
+  | 'branch status error'
+  | 'failed'
+  | 'no automerge'
+  | 'not ready';
 
-async function tryBranchAutomerge(config) {
+export async function tryBranchAutomerge(
+  config: RenovateConfig
+): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
     return 'no automerge';

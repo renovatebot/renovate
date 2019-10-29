@@ -157,7 +157,7 @@ export interface Upgrade<T = Record<string, any>>
   version?: string;
 }
 
-interface ArtifactError {
+export interface ArtifactError {
   lockFile?: string;
   stderr?: string;
 }
