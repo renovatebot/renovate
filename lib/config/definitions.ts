@@ -339,7 +339,7 @@ const options: RenovateOptions[] = [
   {
     name: 'persistRepoData',
     description:
-      'If set to false, repository data will preserved between runs instead of deleted.',
+      'If set to true, repository data will preserved between runs instead of deleted.',
     type: 'boolean',
     admin: true,
     default: false,
