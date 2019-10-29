@@ -85,13 +85,13 @@ function applyProps(
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = null;
-  let groupName = null;
+  let placeholderKey = null;
   const currentValue = dep.currentValue.replace(/^\${.*?}$/, substr => {
     const propKey = substr.slice(2, -1).trim();
     const propValue = props[propKey];
     if (propValue) {
-      if (!groupName) {
-        groupName = propKey;
+      if (!placeholderKey) {
+        placeholderKey = propKey;
       }
       fileReplacePosition = propValue.fileReplacePosition;
       propSource = propValue.packageFile;
@@ -109,13 +109,11 @@ function applyProps(
     currentValue,
   };
 
-  if (groupName) {
-    result.groupName = groupName;
-  } else {
-    groupName = depName.replace(/(?<=^.*:[a-z]+-).*$/, '*');
-    if (groupName.endsWith('-*')) {
-      result.groupName = groupName;
-    }
+  if (placeholderKey) {
+    result.managerData = {
+      ...dep.managerData,
+      placeholderKey,
+    };
   }
 
   if (containsPlaceholder(depName)) {
@@ -197,7 +195,9 @@ export function extractPackage(
   return result;
 }
 
-export function resolveParents(packages: PackageFile[]): PackageFile[] {
+export function postprocessExtractedPackages(
+  packages: PackageFile[]
+): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, PackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
@@ -261,10 +261,12 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     });
   });
 
-  return packageFileNames.map(name => ({
+  const processedPackages = packageFileNames.map(name => ({
     ...extractedPackages[name],
     deps: extractedDeps[name],
   }));
+
+  return cleanResult(processedPackages);
 }
 
 function cleanResult(
@@ -279,8 +281,36 @@ function cleanResult(
   return packageFiles;
 }
 
+function applyGrouping(
+  config: ExtractConfig,
+  packageFiles: PackageFile<Record<string, any>>[]
+): PackageFile<Record<string, any>>[] {
+  packageFiles.forEach(packageFile => {
+    const deps = packageFile.deps;
+    // eslint-disable-next-line no-param-reassign
+    packageFile.deps = deps.map(dep => {
+      const result = { ...dep };
+      const { depName } = dep;
+      const { placeholderKey } = dep.managerData || {};
+      const prefixKey = depName.replace(/(?<=^.*:[a-z]+-).*$/, '*');
+
+      let groupName = null;
+      if (placeholderKey) {
+        groupName = placeholderKey;
+      } else if (prefixKey.endsWith('-*')) {
+        groupName = prefixKey;
+      }
+
+      if (groupName) result.groupName = groupName;
+
+      return result;
+    });
+  });
+  return packageFiles;
+}
+
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
@@ -297,5 +327,6 @@ export async function extractAllPackageFiles(
       logger.info({ packageFile }, 'packageFile has no content');
     }
   }
-  return cleanResult(resolveParents(packages));
+
+  return applyGrouping(config, postprocessExtractedPackages(packages));
 }

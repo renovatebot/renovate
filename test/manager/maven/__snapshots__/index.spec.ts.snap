@@ -74,6 +74,9 @@ Array [
         "depName": "org.example:quux",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
+        "managerData": Object {
+          "placeholderKey": "quuxVersion",
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -85,6 +88,9 @@ Array [
         "depName": "org.example:quux-test",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
+        "managerData": Object {
+          "placeholderKey": "quuxVersion",
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
