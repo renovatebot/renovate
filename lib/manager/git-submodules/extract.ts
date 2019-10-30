@@ -11,13 +11,15 @@ export default async function extractPackageFile(
   const git = Git(config.localDir);
   const gitModulesPath = upath.join(config.localDir, fileName);
 
-  const depNames = (await git.raw([
-    'config',
-    '--file',
-    gitModulesPath,
-    '--get-regexp',
-    'path',
-  ]))
+  const depNames = (
+    (await git.raw([
+      'config',
+      '--file',
+      gitModulesPath,
+      '--get-regexp',
+      'path',
+    ])) || ''
+  )
     .trim()
     .split(/[\n\s]/)
     .filter((_e: string, i: number) => i % 2);
@@ -30,7 +32,7 @@ export default async function extractPackageFile(
     depNames.map(async depName => {
       const currentValue = (await git.subModule(['status', depName])).split(
         /[+\s]/
-      )[1];
+      )[0];
       const submoduleBranch = await getBranch(gitModulesPath, depName);
       const subModuleUrl = await getUrl(gitModulesPath, depName);
       return {

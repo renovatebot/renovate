@@ -1,14 +1,38 @@
-import { resolve } from 'path';
-
+import _simpleGit from 'simple-git/promise';
 import extractPackageFile from '../../../lib/manager/git-submodules/extract';
 
-const g1 = resolve(__dirname, './_fixtures/.gitmodules1');
+jest.mock('simple-git/promise.js');
+const simpleGit: any = _simpleGit;
+const Git = jest.requireActual('simple-git/promise');
 
-describe('manager/git-submodules/update', () => {
-  describe('extractPackageFile', () => {
-    it('returns master as default', async () => {
-      const packageFile = await extractPackageFile('', g1, { localDir: '' });
-      expect(packageFile).not.toBeNull();
+const localDir = `${__dirname}/_fixtures`;
+
+describe('lib/manager/gitsubmodules/extract', () => {
+  beforeAll(() => {
+    simpleGit.mockReturnValue({
+      subModule() {
+        return Promise.resolve('4b825dc642cb6eb9a060e54bf8d69288fbee4904');
+      },
+      raw(options: string[]) {
+        return Git().raw(options);
+      },
+    });
+  });
+  describe('extractPackageFile()', () => {
+    it('handles empty gitmodules file', async () => {
+      expect(
+        await extractPackageFile('', '.gitmodules.3', { localDir })
+      ).toBeNull();
+    });
+    it('default to master branch', async () => {
+      const res = await extractPackageFile('', '.gitmodules.1', { localDir });
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(1);
+    });
+    it('extract branch', async () => {
+      const res = await extractPackageFile('', '.gitmodules.2', { localDir });
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(1);
     });
   });
 });
