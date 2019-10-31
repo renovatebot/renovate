@@ -1469,6 +1469,7 @@ const options: RenovateOptions[] = [
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
       versionScheme: 'cargo',
+      rangeStrategy: 'bump',
     },
     mergeable: true,
   },
