@@ -290,19 +290,10 @@ function applyGrouping(
     // eslint-disable-next-line no-param-reassign
     packageFile.deps = deps.map(dep => {
       const result = { ...dep };
-      const { depName } = dep;
       const { placeholderKey } = dep.managerData || {};
-      const prefixKey = depName.replace(/(?<=^.*:[a-z]+-).*$/, '*');
-
-      let groupName = null;
-      if (placeholderKey) {
-        groupName = placeholderKey;
-      } else if (prefixKey.endsWith('-*')) {
-        groupName = prefixKey;
-      }
-
-      if (groupName) result.groupName = groupName;
-
+      const { depName } = dep;
+      const [groupId] = depName.split(':');
+      result.groupName = placeholderKey || groupId;
       return result;
     });
   });
