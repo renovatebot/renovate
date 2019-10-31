@@ -167,7 +167,7 @@
       "type": "boolean"
     },
     "persistRepoData": {
-      "description": "If set to false, repository data will preserved between runs instead of deleted.",
+      "description": "If set to true, repository data will preserved between runs instead of deleted.",
       "type": "boolean",
       "default": false
     },
@@ -949,7 +949,8 @@
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
         "fileMatch": ["(^|/)Cargo.toml$"],
-        "versionScheme": "cargo"
+        "versionScheme": "cargo",
+        "rangeStrategy": "bump"
       },
       "$ref": "#"
     },

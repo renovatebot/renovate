@@ -114,7 +114,7 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-RUN apt-get update && apt-get install -y bzr && \
+RUN apt-get update && apt-get install -y bzr mercurial && \
     rm -rf /var/lib/apt/lists/*
 
 ENV GOLANG_VERSION 1.13
