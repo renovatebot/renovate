@@ -109,12 +109,10 @@ function applyProps(
     currentValue,
   };
 
-  if (placeholderKey) {
-    result.managerData = {
-      ...dep.managerData,
-      placeholderKey,
-    };
-  }
+  result.managerData = {
+    ...dep.managerData,
+    placeholderKey,
+  };
 
   if (containsPlaceholder(depName)) {
     result.skipReason = 'name-placeholder';
@@ -290,10 +288,22 @@ function applyGrouping(
     // eslint-disable-next-line no-param-reassign
     packageFile.deps = deps.map(dep => {
       const result = { ...dep };
-      const { placeholderKey } = dep.managerData || {};
+      const { placeholderKey } = dep.managerData;
       const { depName } = dep;
+      if (placeholderKey) {
+        result.groupName = placeholderKey;
+      }
       const [groupId] = depName.split(':');
-      result.groupName = placeholderKey || groupId;
+      const artifactPrefix = depName.replace(
+        /(?<=^.*:[a-zA-Z][a-zA-Z0-9]*)-.*$/,
+        ''
+      );
+      result.managerData = {
+        ...result.managerData,
+        placeholderKey,
+        groupId,
+        artifactPrefix,
+      };
       return result;
     });
   });

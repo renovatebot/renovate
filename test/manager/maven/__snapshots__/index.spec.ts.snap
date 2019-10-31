@@ -10,6 +10,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:parent",
         "fileReplacePosition": 186,
+        "managerData": Object {
+          "artifactPrefix": "org.example:parent",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -20,6 +25,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:foo",
         "fileReplacePosition": 905,
+        "managerData": Object {
+          "artifactPrefix": "org.example:foo",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -30,6 +40,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:bar",
         "fileReplacePosition": 1053,
+        "managerData": Object {
+          "artifactPrefix": "org.example:bar",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -40,7 +55,11 @@ Array [
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
         "fileReplacePosition": 1485,
-        "groupName": "org.apache.maven.scm:maven-*",
+        "managerData": Object {
+          "artifactPrefix": "org.apache.maven.scm:maven",
+          "groupId": "org.apache.maven.scm",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -51,6 +70,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:\${artifact-id-placeholder}",
         "fileReplacePosition": 2230,
+        "managerData": Object {
+          "artifactPrefix": "org.example:\${artifact-id-placeholder}",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -62,6 +86,11 @@ Array [
         "datasource": "maven",
         "depName": "\${group-id-placeholder}:baz",
         "fileReplacePosition": 2380,
+        "managerData": Object {
+          "artifactPrefix": "\${group-id-placeholder}:baz",
+          "groupId": "\${group-id-placeholder}",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -75,6 +104,8 @@ Array [
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "managerData": Object {
+          "artifactPrefix": "org.example:quux",
+          "groupId": "org.example",
           "placeholderKey": "quuxVersion",
         },
         "registryUrls": Array [
@@ -89,6 +120,8 @@ Array [
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "managerData": Object {
+          "artifactPrefix": "org.example:quux",
+          "groupId": "org.example",
           "placeholderKey": "quuxVersion",
         },
         "registryUrls": Array [
@@ -101,6 +134,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:quuz",
         "fileReplacePosition": 2832,
+        "managerData": Object {
+          "artifactPrefix": "org.example:quuz",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -111,6 +149,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:quuuz",
         "fileReplacePosition": 2972,
+        "managerData": Object {
+          "artifactPrefix": "org.example:quuuz",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -122,7 +165,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:hard-range",
         "fileReplacePosition": 3130,
-        "groupName": "org.example:hard-*",
+        "managerData": Object {
+          "artifactPrefix": "org.example:hard",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -133,7 +180,11 @@ Array [
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
         "fileReplacePosition": 3392,
-        "groupName": "org.example:profile-*",
+        "managerData": Object {
+          "artifactPrefix": "org.example:profile",
+          "groupId": "org.example",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -145,7 +196,11 @@ Array [
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
         "fileReplacePosition": 3668,
-        "groupName": "org.apache.maven.plugins:maven-*",
+        "managerData": Object {
+          "artifactPrefix": "org.apache.maven.plugins:maven",
+          "groupId": "org.apache.maven.plugins",
+          "placeholderKey": null,
+        },
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
