@@ -551,6 +551,7 @@ const options: RenovateOptions[] = [
       'maven',
       'node',
       'npm',
+      'nuget',
       'pep440',
       'poetry',
       'regex',
