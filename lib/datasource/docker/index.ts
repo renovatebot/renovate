@@ -434,23 +434,7 @@ async function getLabels(
       return {};
     }
     const url = `${registry}/v2/${repository}/blobs/${configDigest}`;
-    const configResponse = await got(url, {
-      headers,
-      hooks: {
-        beforeRedirect: [
-          (options: any) => {
-            if (
-              options.search &&
-              options.search.indexOf('X-Amz-Algorithm') !== -1
-            ) {
-              // docker registry is hosted on amazon, redirect url includes authentication.
-              // eslint-disable-next-line no-param-reassign
-              delete options.headers.authorization;
-            }
-          },
-        ],
-      },
-    });
+    const configResponse = await getConfigResponse(url, headers);
     labels = JSON.parse(configResponse.body).config.Labels;
 
     if (labels) {
@@ -507,6 +491,34 @@ async function getLabels(
     }
     return {};
   }
+}
+
+export function getConfigResponse(url: string, headers: OutgoingHttpHeaders) {
+  return got(url, {
+    headers,
+    hooks: {
+      beforeRedirect: [
+        (options: any) => {
+          if (
+            options.search &&
+            options.search.indexOf('X-Amz-Algorithm') !== -1
+          ) {
+            // if there is no port in the redirect URL string, then delete it from the redirect options.
+            // This can be evaluated for removal after upgrading to Got v10
+            const portInUrl = options.href.split('/')[2].split(':')[1];
+            if (!portInUrl) {
+              // eslint-disable-next-line no-param-reassign
+              delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
+            }
+
+            // docker registry is hosted on amazon, redirect url includes authentication.
+            // eslint-disable-next-line no-param-reassign
+            delete options.headers.authorization;
+          }
+        },
+      ],
+    },
+  });
 }
 
 /**
