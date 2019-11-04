@@ -6,6 +6,7 @@ jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 
+const path = require('path');
 /** @type any */
 const fs = require('fs-extra');
 /** @type any */
@@ -59,6 +60,74 @@ describe('generateLockFile', () => {
       updates
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
+  it('performs npm-shrinkwrap.json updates', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/npm');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.pathExistsSync.mockReturnValueOnce(true);
+    fs.move = jest.fn();
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const skipInstalls = true;
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'npm-shrinkwrap.json',
+      { skipInstalls }
+    );
+    expect(fs.pathExistsSync).toHaveBeenCalledWith(
+      path.join('some-dir', 'package-lock.json')
+    );
+    expect(fs.move).toHaveBeenCalledTimes(1);
+    expect(fs.move).toHaveBeenCalledWith(
+      path.join('some-dir', 'package-lock.json'),
+      path.join('some-dir', 'npm-shrinkwrap.json')
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledWith(
+      path.join('some-dir', 'npm-shrinkwrap.json'),
+      'utf8'
+    );
+    expect(res.error).toBeUndefined();
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
+  it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/npm');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.pathExistsSync.mockReturnValueOnce(false);
+    fs.move = jest.fn();
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const skipInstalls = true;
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'npm-shrinkwrap.json',
+      { skipInstalls }
+    );
+    expect(fs.pathExistsSync).toHaveBeenCalledWith(
+      path.join('some-dir', 'package-lock.json')
+    );
+    expect(fs.move).toHaveBeenCalledTimes(0);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledWith(
+      path.join('some-dir', 'npm-shrinkwrap.json'),
+      'utf8'
+    );
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
   });
