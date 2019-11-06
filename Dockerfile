@@ -17,7 +17,8 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
-WORKDIR /usr/src/app/
+ENV APP_ROOT=/usr/src/app
+WORKDIR ${APP_ROOT}
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
@@ -149,15 +150,20 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
 # Set up ubuntu user
 
-RUN groupadd --gid 1000 ubuntu \
-  && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
+#RUN groupadd --gid 1000 ubuntu \
+#  && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
+
+ENV HOME=/opt/app-home
+RUN mkdir -p ${HOME} \
+  && chgrp -R 0 ${HOME} \
+  && chmod -R g=u ${HOME} /etc/passwd
 
 RUN chmod -R a+rw /usr
 
 # Docker client and group
 
 RUN groupadd -g 999 docker
-RUN usermod -aG docker ubuntu
+#RUN usermod -aG docker ubuntu
 
 ENV DOCKER_VERSION=19.03.1
 
@@ -166,12 +172,13 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   -C /usr/local/bin docker/docker \
   && rm docker-${DOCKER_VERSION}.tgz
 
-USER ubuntu
+### Containers should NOT run as root as a good practice
+USER 10001
 
 # Cargo
 
 ENV RUST_BACKTRACE=1 \
-  PATH=/home/ubuntu/.cargo/bin:$PATH
+  PATH=${HOME}/.cargo/bin:$PATH
 
 RUN set -ex ;\
   curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
@@ -184,7 +191,7 @@ RUN mix local.rebar --force
 
 # Pipenv
 
-ENV PATH="/home/ubuntu/.local/bin:$PATH"
+ENV PATH="${HOME}/.local/bin:$PATH"
 
 RUN pip install --user pipenv
 
@@ -192,7 +199,7 @@ RUN pip install --user pipenv
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
-ENV PATH="/home/ubuntu/.poetry/bin:$PATH"
+ENV PATH="${HOME}/.poetry/bin:$PATH"
 RUN poetry config settings.virtualenvs.create false
 
 # npm
@@ -207,7 +214,7 @@ ENV YARN_VERSION=1.19.1
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
-ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.bin:$PATH"
+ENV PATH="${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin:$PATH"
 
 COPY package.json .
 COPY yarn.lock .
@@ -218,8 +225,9 @@ COPY bin bin
 COPY data data
 
 USER root
-RUN chown -R ubuntu:ubuntu /usr/src/app
-USER ubuntu
+RUN chgrp -R 0 ${APP_ROOT} && \
+  chmod -R g=u ${APP_ROOT}
+USER 10001
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []
