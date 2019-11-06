@@ -148,22 +148,18 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
-# Set up ubuntu user
-
-#RUN groupadd --gid 1000 ubuntu \
-#  && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
+# Set up user home directory with access to users in the root group (0)
 
 ENV HOME=/opt/app-home
 RUN mkdir -p ${HOME} \
   && chgrp -R 0 ${HOME} \
-  && chmod -R g=u ${HOME} /etc/passwd
+  && chmod -R g=u ${HOME}
 
 RUN chmod -R a+rw /usr
 
 # Docker client and group
 
 RUN groupadd -g 999 docker
-#RUN usermod -aG docker ubuntu
 
 ENV DOCKER_VERSION=19.03.1
 
@@ -172,7 +168,7 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   -C /usr/local/bin docker/docker \
   && rm docker-${DOCKER_VERSION}.tgz
 
-### Containers should NOT run as root as a good practice
+# Run as non-root user
 USER 10001
 
 # Cargo
@@ -225,8 +221,10 @@ COPY bin bin
 COPY data data
 
 USER root
-RUN chgrp -R 0 ${APP_ROOT} && \
-  chmod -R g=u ${APP_ROOT}
+RUN chgrp -R 0 ${APP_ROOT} ${HOME} \
+  && chmod -R g=u ${APP_ROOT} ${HOME} /etc/passwd
+
+# Numeric user ID to indicate a non-root user to OpenShift
 USER 10001
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
