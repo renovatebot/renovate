@@ -1,3 +1,4 @@
+import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
@@ -14,7 +15,7 @@ function convertToCaret(item: string) {
 
 function cargo2npm(input: string) {
   let versions = input.split(',');
-  versions = versions.map(convertToCaret);
+  versions = versions.map(s => convertToCaret(s.trim()));
   return versions.join(' ');
 }
 
@@ -83,6 +84,14 @@ function getNewValue(
     fromVersion,
     toVersion
   );
+  if (newSemver == null) {
+    logger.debug(
+      `npm.getNewValue failed for converted cargo version: currentValue=${currentValue} cargo2npm(currentValue)=${cargo2npm(
+        currentValue
+      )}`
+    );
+    return null;
+  }
   let newCargo = npm2cargo(newSemver);
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {

@@ -207,4 +207,18 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue('<=   1.3.4', 'replace', '1.2.3', '1.5.0')
     ).toEqual('<= 1.5.0');
   });
+  it('returns null when attempting to bump complex ranges', () => {
+    expect(
+      semver.getNewValue('>=0.1.21,<0.2', 'bump', '0.1.21', '0.1.24')
+    ).toBeNull();
+    expect(
+      semver.getNewValue('>=0.1.21,<=0.2.0', 'bump', '0.1.21', '0.1.24')
+    ).toBeNull();
+    expect(
+      semver.getNewValue('>=1.2.3,<=1', 'bump', '1.2.3', '1.2.4')
+    ).toBeNull();
+    expect(
+      semver.getNewValue('>=0.0.1,<=0.1', 'bump', '0.0.1', '0.0.2')
+    ).toBeNull();
+  });
 });
