@@ -8,7 +8,8 @@ Array [
     "newValue": Array [
       "8.9.4",
       "10.0.1",
-      "null",
+      "12.3.0",
+
     ],
     "sourceUrl": "https://github.com/nodejs/node",
   },

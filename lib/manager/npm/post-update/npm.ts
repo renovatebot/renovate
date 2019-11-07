@@ -1,4 +1,4 @@
-import { readFile } from 'fs-extra';
+import { readFile, move, pathExists } from 'fs-extra';
 import { join } from 'upath';
 import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
@@ -139,6 +139,15 @@ export async function generateLockFile(
     }
     const duration = process.hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
+    if (
+      filename === 'npm-shrinkwrap.json' &&
+      (await pathExists(join(cwd, 'package-lock.json')))
+    ) {
+      await move(
+        join(cwd, 'package-lock.json'),
+        join(cwd, 'npm-shrinkwrap.json')
+      );
+    }
     lockFile = await readFile(join(cwd, filename), 'utf8');
     logger.info(
       { seconds, type: filename, stdout, stderr },

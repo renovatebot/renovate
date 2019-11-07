@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.3@sha256:e0f7dabe991810057aee6ba7a7d4136fe7fc70e99235d79e6c7ae0177656a5c8 AS tsbuild
+FROM amd64/node:10.17.0@sha256:872a4cb1f054fd2f85bbdc9cdf5973ed46e92370e322dbbd4a20afe17530b656 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:1bbdea4846231d91cce6c7ff3907d26fca444fd6b7e3c282b90c7fe4251f9f86
+FROM amd64/ubuntu:18.10@sha256:c95b7b93ccd48c3bfd97f8cac6d5ca8053ced584c9e8e6431861ca30b0d73114
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -23,11 +23,13 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && apt-get clean -y
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Node.js
 
@@ -86,7 +88,7 @@ ENV ERLANG_VERSION=22.0.2-1
 RUN apt-get update && \
     apt-cache policy esl-erlang && \
     apt-get install -y esl-erlang=1:$ERLANG_VERSION && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 # Elixir
 
@@ -101,7 +103,8 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
-RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
+RUN apt-get update && apt-get install -y php-cli php-mbstring && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV COMPOSER_VERSION=1.8.6
 
@@ -111,9 +114,14 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-RUN apt-get update && apt-get install -y bzr && apt-get clean
+RUN apt-get update && apt-get install -y bzr mercurial && \
+    rm -rf /var/lib/apt/lists/*
 
-ENV GOLANG_VERSION 1.12
+ENV GOLANG_VERSION 1.13
+
+# Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
+# private repositories.
+ENV GOPROXY=direct GOSUMDB=off
 
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
   tar -C /usr/local -xzf go.tgz && \
@@ -129,7 +137,8 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
+RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
 RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
@@ -194,7 +203,7 @@ RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.17.3
+ENV YARN_VERSION=1.19.1
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 

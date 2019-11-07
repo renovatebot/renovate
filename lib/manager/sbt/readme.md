@@ -78,7 +78,7 @@ Another option might be to use ScalaJS. I don't know it but it has same syntax a
 
 If we can use Scala or ScalaJS, the idea would be to execute the `build.sbt` or `plugins.sbt` file and work on the `libraryDependencies` or `dependencyOverrides` variables.
 
-_Update (thanks to @ChristianMurphy)_: https://github.com/scalameta/scalameta running on http://www.scala-js.org could be a way to parse Scala without depending on a JDK.
+_Update (thanks to @ChristianMurphy)_: https://github.com/scalameta/scalameta running on https://www.scala-js.org could be a way to parse Scala without depending on a JDK.
 E.G. https://astexplorer.net/#/gist/027dce11e6927b4ad39ea097ce6289b9/ea4d1048f32063a71d727d01178ae6d01087a62f
 
 ---

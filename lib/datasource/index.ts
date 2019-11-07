@@ -12,6 +12,7 @@ import * as gitlab from './gitlab';
 import * as gitTags from './git-tags';
 import * as go from './go';
 import * as gradleVersion from './gradle-version';
+import * as helm from './helm';
 import * as maven from './maven';
 import * as npm from './npm';
 import * as nuget from './nuget';
@@ -37,6 +38,7 @@ const datasources: Record<string, Datasource> = {
   cargo,
   dart,
   docker,
+  helm,
   hex,
   github,
   gitlab,

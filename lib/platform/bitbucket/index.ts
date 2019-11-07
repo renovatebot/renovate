@@ -712,11 +712,15 @@ export function getPrBody(input: string) {
     .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
 }
 
+const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
+
 // Return the commit SHA for a branch
 async function getBranchCommit(branchName: string) {
   try {
     const branch = (await api.get(
-      `/2.0/repositories/${config.repository}/refs/branches/${branchName}`
+      `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
+        branchName
+      )}`
     )).body;
     return branch.target.hash;
   } catch (err) /* istanbul ignore next */ {

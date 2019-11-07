@@ -622,7 +622,7 @@ describe('platform/azure', () => {
             createPullRequestReviewer: jest.fn(),
           } as any)
       );
-      azureApi.getCoreApi.mockImplementation(
+      azureApi.coreApi.mockImplementation(
         () =>
           ({
             getTeams: jest.fn(() => [

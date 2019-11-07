@@ -339,7 +339,7 @@ const options: RenovateOptions[] = [
   {
     name: 'persistRepoData',
     description:
-      'If set to false, repository data will preserved between runs instead of deleted.',
+      'If set to true, repository data will preserved between runs instead of deleted.',
     type: 'boolean',
     admin: true,
     default: false,
@@ -448,6 +448,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'prCommitsPerRunLimit',
+    description:
+      'Set a maximum number of commits per Renovate run. Default is no limit.',
+    stage: 'global',
+    type: 'integer',
+    default: 0,
+  },
+  {
     name: 'repositories',
     description: 'List of Repositories',
     stage: 'global',
@@ -543,6 +551,7 @@ const options: RenovateOptions[] = [
       'maven',
       'node',
       'npm',
+      'nuget',
       'pep440',
       'poetry',
       'regex',
@@ -1461,6 +1470,7 @@ const options: RenovateOptions[] = [
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
       versionScheme: 'cargo',
+      rangeStrategy: 'bump',
     },
     mergeable: true,
   },
@@ -1593,6 +1603,18 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: [],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'helm-requirements',
+    description: 'Configuration object for helm requirements.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)requirements.yaml$'],
     },
     mergeable: true,
     cli: false,
