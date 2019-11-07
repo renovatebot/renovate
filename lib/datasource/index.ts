@@ -110,11 +110,8 @@ async function fetchReleases(
   }
   const dep = await datasources[datasource].getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
-  if (dep && Object.entries(dep).length !== 0) {
-    let rawSourceUrl: string;
-    if (dep && dep.sourceUrl !== null && dep.sourceUrl !== undefined) {
-      rawSourceUrl = dep.sourceUrl;
-    }
+  if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
+    const rawSourceUrl: string = dep.sourceUrl;
     const sanitizedSourceUrl = sanitizeSourceUrl(rawSourceUrl);
     if (sanitizedSourceUrl !== null) {
       dep.sourceUrl = sanitizedSourceUrl;
