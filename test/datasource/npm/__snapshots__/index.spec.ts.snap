@@ -20,7 +20,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -48,7 +48,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -76,7 +76,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -102,7 +102,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -123,7 +123,7 @@ Object {
       "version": "0.0.1",
     },
   ],
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git:github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -144,7 +144,7 @@ Object {
       "version": "0.0.1",
     },
   ],
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git:github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -172,7 +172,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -206,7 +206,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "version": "0.0.2",
     },
   ],
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.2",
   },
@@ -248,7 +248,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -276,7 +276,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -304,7 +304,7 @@ Object {
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
   "tags": Object {
     "latest": "0.0.1",
   },

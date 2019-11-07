@@ -108,13 +108,20 @@ async function fetchReleases(
   }
   const dep = await datasources[datasource].getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
-  const sanitizedSourceUrl = sanitizeSourceUrl(dep.sourceUrl);
-  if(sanitizedSourceUrl !== null){
-  dep.sourceUrl = sanitizedSourceUrl;
-}
-else {
-  logger.debug(`Can't parse dep.sourceUrl ${config.lookupName} : ${dep.sourceUrl}`);
-}
+  if (dep && Object.entries(dep).length !== 0) {
+    let rawSourceUrl: string;
+    if (dep && dep.sourceUrl !== null && dep.sourceUrl !== undefined) {
+      rawSourceUrl = dep.sourceUrl;
+    }
+    const sanitizedSourceUrl = sanitizeSourceUrl(rawSourceUrl);
+    if (sanitizedSourceUrl !== null) {
+      dep.sourceUrl = sanitizedSourceUrl;
+    } else {
+      logger.debug(
+        `Can't parse dep.sourceUrl ${config.lookupName} : ${dep.sourceUrl}`
+      );
+    }
+  }
   return dep;
 }
 

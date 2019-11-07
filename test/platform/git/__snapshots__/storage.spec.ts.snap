@@ -20,14 +20,7 @@ Array [
 ]
 `;
 
-exports[`platform/git/storage getFileList() should return the correct files 1`] = `
-Array [
-  "file_to_delete",
-  "future_file",
-  "master_file",
-  "past_file",
-]
-`;
+exports[`platform/git/storage getFileList() should return the correct files 1`] = `Array []`;
 
 exports[`platform/git/storage getFileList() should return the correct files 2`] = `
 Array [
