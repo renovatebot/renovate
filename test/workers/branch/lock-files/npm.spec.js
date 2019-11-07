@@ -73,7 +73,7 @@ describe('generateLockFile', () => {
       stdout: '',
       stderror: '',
     });
-    fs.pathExistsSync.mockReturnValueOnce(true);
+    fs.pathExists.mockResolvedValueOnce(true);
     fs.move = jest.fn();
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const skipInstalls = true;
@@ -83,7 +83,7 @@ describe('generateLockFile', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(fs.pathExistsSync).toHaveBeenCalledWith(
+    expect(fs.pathExists).toHaveBeenCalledWith(
       path.join('some-dir', 'package-lock.json')
     );
     expect(fs.move).toHaveBeenCalledTimes(1);
@@ -109,7 +109,7 @@ describe('generateLockFile', () => {
       stdout: '',
       stderror: '',
     });
-    fs.pathExistsSync.mockReturnValueOnce(false);
+    fs.pathExists.mockResolvedValueOnce(false);
     fs.move = jest.fn();
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const skipInstalls = true;
@@ -119,7 +119,7 @@ describe('generateLockFile', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(fs.pathExistsSync).toHaveBeenCalledWith(
+    expect(fs.pathExists).toHaveBeenCalledWith(
       path.join('some-dir', 'package-lock.json')
     );
     expect(fs.move).toHaveBeenCalledTimes(0);
