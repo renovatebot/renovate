@@ -46,6 +46,7 @@ export async function extractSetupFile(
   // istanbul ignore if
   if (config.binarySource === 'docker') {
     logger.info('Running python via docker');
+    await exec(`docker pull renovate/pip`);
     cmd = 'docker';
     args.unshift(
       'run',

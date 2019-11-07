@@ -785,7 +785,7 @@ The above will enable set `rangeStrategy` to `pin` only for the package `angular
 
 ### packagePatterns
 
-Use this field if you want to have one or more package names patterns in your package rule. See also `excludedPackagePatterns`.
+Use this field if you want to have one or more package names patterns in your package rule. See also `excludePackagePatterns`.
 
 ```
   "packageRules": [{
@@ -1133,7 +1133,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
   ]
 ```
 
-Technical details: We mostly rely on the text parsing of the library [later](http://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
+Technical details: We mostly rely on the text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
 
 ## semanticCommitScope
 
