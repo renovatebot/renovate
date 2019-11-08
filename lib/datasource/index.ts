@@ -1,7 +1,8 @@
+import parse from 'github-url-from-git';
 import { logger } from '../logger';
+import * as hostRules from '../util/host-rules';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
-
 import * as cargo from './cargo';
 import * as dart from './dart';
 import * as docker from './docker';
@@ -108,6 +109,9 @@ async function fetchReleases(
   }
   const dep = await datasources[datasource].getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
+  if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
+    dep.sourceUrl = baseUrlLegacyMassager(dep.sourceUrl);
+  }
   return dep;
 }
 
@@ -125,4 +129,31 @@ export function getDigest(
     { lookupName, registryUrls },
     value
   );
+}
+function baseUrlLegacyMassager(sourceUrl) {
+  let url: string = sourceUrl;
+  // Massage www out of github URL
+  url = url.replace('www.github.com', 'github.com');
+  if (url.startsWith('https://github.com/')) {
+    url = url
+      .split('/')
+      .slice(0, 5)
+      .join('/');
+  } // a lot of this is probably redundant and can be better achieved with URL.
+  if (url.includes('github.com')) {
+    const extraBaseUrls = [];
+    const getHostRules = hostRules.hosts({ hostType: 'github' });
+    if (getHostRules && Object.entries(getHostRules).length !== 0) {
+      getHostRules.forEach(host => {
+        extraBaseUrls.push(host, `gist.${host}`);
+      });
+      url = parse(url, {
+        extraBaseUrls,
+      });
+    }
+    if (url.startsWith('git:github.com/')) {
+      url = 'https://' + url.substr(4);
+    }
+  }
+  return url;
 }
