@@ -136,7 +136,7 @@ function baseUrlLegacyMassager(sourceUrl) {
   let url: string = sourceUrl;
   // Massage www out of github URL
   url = url.replace('www.github.com', 'github.com');
-  //istanbul ignore if
+  //  istanbul ignore if
   if (url.startsWith('https://github.com/')) {
     url = url
       .split('/')
