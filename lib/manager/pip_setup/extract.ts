@@ -5,7 +5,7 @@ import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 
-export const pythonVersions = ['python', 'python3', 'python3.7'];
+export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
 
 export function parsePythonVersion(str: string): number[] {
