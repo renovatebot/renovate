@@ -1,4 +1,5 @@
 import parse from 'github-url-from-git';
+import * as URL from 'url';
 import { logger } from '../logger';
 import * as hostRules from '../util/host-rules';
 import { addMetaData } from './metadata';
@@ -100,6 +101,7 @@ async function fetchReleases(
   config: PkgReleaseConfig
 ): Promise<ReleaseResult | null> {
   const { datasource } = config;
+  // istanbul ignore if
   if (!datasource) {
     logger.warn('No datasource found');
   }
@@ -134,26 +136,29 @@ function baseUrlLegacyMassager(sourceUrl) {
   let url: string = sourceUrl;
   // Massage www out of github URL
   url = url.replace('www.github.com', 'github.com');
+  //istanbul ignore if
   if (url.startsWith('https://github.com/')) {
     url = url
       .split('/')
       .slice(0, 5)
       .join('/');
   } // a lot of this is probably redundant and can be better achieved with URL.
-  if (url.includes('github.com')) {
-    const extraBaseUrls = [];
-    const getHostRules = hostRules.hosts({ hostType: 'github' });
-    if (getHostRules && Object.entries(getHostRules).length !== 0) {
-      getHostRules.forEach(host => {
+  const extraBaseUrls = [];
+  const getHostsFromRulesGithub = hostRules.hosts({ hostType: 'github' });
+  // istanbul ignore if
+  if (getHostsFromRulesGithub && getHostsFromRulesGithub.length !== 0) {
+    // istanbul ignore next
+    if (getHostsFromRulesGithub.includes(URL.parse(url).hostname)) {
+      getHostsFromRulesGithub.forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
       url = parse(url, {
         extraBaseUrls,
       });
     }
-    if (url.startsWith('git:github.com/')) {
-      url = 'https://' + url.substr(4);
-    }
+  } // istanbul ignore if
+  if (url.startsWith('git:github.com/')) {
+    url = 'https://' + url.substr(4);
   }
   return url;
 }
