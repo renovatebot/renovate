@@ -2,13 +2,11 @@ import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import parse from 'github-url-from-git';
 import { isBase64 } from 'validator';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
-import * as hostRules from '../../util/host-rules';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
@@ -52,6 +50,7 @@ export async function getDependency(
     return JSON.parse(memcache[name]);
   }
 
+  let sourceUrl: string;
   const scope = name.split('/')[0];
   let regUrl: string;
   const npmrc = getNpmrc();
@@ -143,37 +142,13 @@ export async function getDependency(
     res.repository = res.repository || latestVersion.repository;
     res.homepage = res.homepage || latestVersion.homepage;
 
-    // Determine repository URL
-    let sourceUrl: string;
-
     if (is.string(res.repository)) {
       res.repository = { url: res.repository };
     }
-
     if (res.repository && res.repository.url) {
-      const extraBaseUrls = [];
-      // istanbul ignore next
-      hostRules.hosts({ hostType: 'github' }).forEach(host => {
-        extraBaseUrls.push(host, `gist.${host}`);
-      });
-      // Massage www out of github URL
-      res.repository.url = res.repository.url.replace(
-        'www.github.com',
-        'github.com'
-      );
-      if (res.repository.url.startsWith('https://github.com/')) {
-        res.repository.url = res.repository.url
-          .split('/')
-          .slice(0, 5)
-          .join('/');
-      }
-      if (res.repository.url.startsWith('git:github.com/')) {
-        res.repository.url = 'https://' + res.repository.url.substr(4);
-      }
-      sourceUrl = parse(res.repository.url, {
-        extraBaseUrls,
-      });
+      sourceUrl = res.repository.url;
     }
+
     if (res.homepage && res.homepage.includes('://github.com')) {
       delete res.homepage;
     }
