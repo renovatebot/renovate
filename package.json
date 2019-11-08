@@ -219,7 +219,7 @@
     "semantic-release": "15.13.30",
     "shelljs": "0.8.3",
     "tmp-promise": "2.0.2",
-    "typescript": "3.6.4"
+    "typescript": "3.7.2"
   },
   "resolutions": {
     "lodash": "4.17.15",
