@@ -92,7 +92,7 @@ export async function lookupUpdates(
       res.dockerRegistry = dependency.dockerRegistry;
       res.dockerRepository = dependency.dockerRepository;
     }
-    const { releases } = dependency;
+    const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning scheme
     let allVersions = releases
       .map(release => release.version)
@@ -142,8 +142,12 @@ export async function lookupUpdates(
       .filter(release => !release.isDeprecated)
       .map(release => release.version);
     const fromVersion =
-      getFromVersion(config, rangeStrategy, nonDeprecatedVersions) ||
-      getFromVersion(config, rangeStrategy, allVersions);
+      getFromVersion(
+        config,
+        rangeStrategy,
+        latestVersion,
+        nonDeprecatedVersions
+      ) || getFromVersion(config, rangeStrategy, latestVersion, allVersions);
     if (
       fromVersion &&
       rangeStrategy === 'pin' &&
@@ -383,6 +387,7 @@ function getBucket(config: LookupUpdateConfig, update: LookupUpdate) {
 function getFromVersion(
   config: LookupUpdateConfig,
   rangeStrategy: string,
+  latestVersion: string,
   allVersions: string[]
 ): string | null {
   const { currentValue, lockedVersion, versionScheme } = config;
@@ -394,15 +399,21 @@ function getFromVersion(
     return currentValue.replace(/=/g, '').trim();
   }
   logger.trace(`currentValue ${currentValue} is range`);
+  let useVersions = allVersions.filter(v => version.matches(v, currentValue));
+  if (latestVersion && version.matches(latestVersion, currentValue)) {
+    useVersions = useVersions.filter(
+      v => !version.isGreaterThan(v, latestVersion)
+    );
+  }
   if (rangeStrategy === 'pin') {
     return (
-      lockedVersion || version.maxSatisfyingVersion(allVersions, currentValue)
+      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
     // Use the lowest version in the current range
-    return version.minSatisfyingVersion(allVersions, currentValue);
+    return version.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return version.maxSatisfyingVersion(allVersions, currentValue);
+  return version.maxSatisfyingVersion(useVersions, currentValue);
 }
