@@ -205,7 +205,7 @@
     "eslint-config-prettier": "6.5.0",
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-promise": "4.2.1",
-    "glob": "7.1.5",
+    "glob": "7.1.6",
     "husky": "3.0.9",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
