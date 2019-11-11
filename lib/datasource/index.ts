@@ -112,7 +112,13 @@ async function fetchReleases(
   const dep = await datasources[datasource].getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
   if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
-    dep.sourceUrl = baseUrlLegacyMassager(dep.sourceUrl);
+    const tmpSourceUrl: string | null = baseUrlLegacyMassager(dep.sourceUrl);
+    if (tmpSourceUrl !== null) {
+      // istanbul ignore else
+      dep.sourceUrl = tmpSourceUrl;
+    } else {
+      delete dep.sourceUrl;
+    }
   }
   return dep;
 }
@@ -132,7 +138,7 @@ export function getDigest(
     value
   );
 }
-function baseUrlLegacyMassager(sourceUrl) {
+export function baseUrlLegacyMassager(sourceUrl) {
   let url: string = sourceUrl;
   // Massage www out of github URL
   url = url.replace('www.github.com', 'github.com');
@@ -152,13 +158,29 @@ function baseUrlLegacyMassager(sourceUrl) {
       getHostsFromRulesGithub.forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
+      // istanbul ignore if
+      if (url.startsWith('http://github.com/')) {
+        url = 'https://' + url.substr(7);
+      }
+      // istanbul ignore if
+      if (url.startsWith('git:github.com/')) {
+        // github-url-from-git does not process git: without the forward slashes.Neither the help pages for git pull/push nor the git extended documentation on protocols specify that as a valid url. Was this related to some package-specific logic, e.g. npm returns the git url without the initial slashes after the protocol?
+        url = 'https://' + url.substr(4);
+      }
       url = parse(url, {
         extraBaseUrls,
       });
     }
-  } // istanbul ignore if
-  if (url.startsWith('git:github.com/')) {
-    url = 'https://' + url.substr(4);
   }
-  return url;
+  const parsedUrl = URL.parse(url);
+  const validProtocols = ['git:', 'ssh:', 'http:', 'https:', 'git+ssh:'];
+  if (
+    parsedUrl.protocol &&
+    parsedUrl.host &&
+    parsedUrl.path &&
+    validProtocols.includes(parsedUrl.protocol) // this to be swapped out with hosted-git-info.
+  ) {
+    return url.replace(RegExp('.git$'), '').trim();
+  }
+  return null;
 }

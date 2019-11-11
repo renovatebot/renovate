@@ -1,10 +1,13 @@
 import * as datasource from '../../lib/datasource';
 import * as _npm from '../../lib/datasource/npm';
+import * as _hostRules from '../../lib/util/host-rules';
 
 jest.mock('../../lib/datasource/docker');
 jest.mock('../../lib/datasource/npm');
+jest.mock('../../lib/util/host-rules');
 
 const npmDatasource: any = _npm;
+const hostRules: any = _hostRules;
 
 describe('datasource/index', () => {
   it('returns if digests are supported', async () => {
@@ -75,8 +78,50 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
   });
   it('test sourceUrl -> remove www. from fqdn', async () => {
-    const url ='https://www.github.com/abc/'
-    const res = datasource.baseUrlLegacyMassager(url);
+    const url = 'https://www.github.com/abc/';
+    const res = await datasource.baseUrlLegacyMassager(url);
     expect(res).toEqual('https://github.com/abc/');
+  });
+  it('test sourceUrl -> convert http:// to https for github.com', async () => {
+    const url = 'http://github.com/abc/edf.git';
+    hostRules.hosts.mockImplementationOnce(() => {
+      return ['github.com'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/abc/edf');
+  });
+  it('test sourceUrl -> convert http://www.github.com/abc/ -> https://github.com/abc/edf.git', async () => {
+    const url = 'http://github.com/abc/edf.git';
+    hostRules.hosts.mockImplementationOnce(() => {
+      return ['github.com'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/abc/edf');
+  });
+  it('test sourceUrl -> bogus url', async () => {
+    const url = 'a';
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual(null);
+  });
+  it('test sourceUrl -> non-github url', async () => {
+    const url = 'http://gitlab.com/abc/edf.git';
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('http://gitlab.com/abc/edf');
+  });
+  it('mock hosts array from host-rules -> https://', async () => {
+    const url = 'http://github.com/abc/some.git';
+    hostRules.hosts.mockImplementationOnce(() => {
+      return ['github.com'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/abc/some');
+  });
+  it('mock hosts array from host-rules -> git:', async () => {
+    const url = 'git:github.com/abc/some.git';
+    hostRules.hosts.mockImplementation(() => {
+      return ['github.com'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/abc/some');
   });
 });
