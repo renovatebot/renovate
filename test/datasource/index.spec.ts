@@ -74,4 +74,9 @@ describe('datasource/index', () => {
     });
     expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
   });
+  it('test sourceUrl -> remove www. from fqdn', async () => {
+    const url ='https://www.github.com/abc/'
+    const res = datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/abc/');
+  });
 });
