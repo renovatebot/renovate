@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import parse from 'github-url-from-git';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
@@ -76,7 +75,7 @@ export async function getPkgReleases({
       releases: null,
     };
     if (res.source) {
-      dep.sourceUrl = parse(res.source);
+      dep.sourceUrl = res.source;
     }
     dep.releases = res.versions.map(version => ({
       version,

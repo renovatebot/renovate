@@ -1,5 +1,4 @@
 /* eslint no-plusplus: 0  */
-import parse from 'github-url-from-git';
 import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
@@ -173,7 +172,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (commit) {
         dep.currentDigest = commit;
       }
-      const githubURL = parse(remote);
+      const githubURL = remote;
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
         dep.datasource = 'github';

@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 
 import URL from 'url';
 import delay from 'delay';
-import parse from 'github-url-from-git';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 
@@ -135,7 +134,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
     const release = versions[version];
     dep.homepage = release.homepage || dep.homepage;
     if (release.source && release.source.url) {
-      dep.sourceUrl = parse(release.source.url) || release.source.url;
+      dep.sourceUrl = release.source.url;
     }
     return {
       version: version.replace(/^v/, ''),

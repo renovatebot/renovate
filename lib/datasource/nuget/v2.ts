@@ -1,4 +1,3 @@
-import parse from 'github-url-from-git';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import got from '../../util/got';
@@ -36,7 +35,7 @@ export async function getPkgReleases(
         try {
           const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
           if (pkgIsLatestVersion === 'true') {
-            dep.sourceUrl = parse(getPkgProp(pkgInfo, 'ProjectUrl'));
+            dep.sourceUrl = getPkgProp(pkgInfo, 'ProjectUrl');
           }
         } catch (err) /* istanbul ignore next */ {
           logger.debug(

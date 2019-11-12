@@ -206,7 +206,7 @@ Array [
     "datasource": "github",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_nodejs",
+    "lookupName": "bazelbuild/rules_nodejs.git",
     "managerData": Object {
       "def": "git_repository(
     name = \\"build_bazel_rules_nodejs\\",
@@ -220,7 +220,7 @@ Array [
     "datasource": "github",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_typescript",
+    "lookupName": "bazelbuild/rules_typescript.git",
     "managerData": Object {
       "def": "git_repository(
     name = \\"build_bazel_rules_typescript\\",
@@ -234,7 +234,7 @@ Array [
     "datasource": "github",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_sass",
+    "lookupName": "bazelbuild/rules_sass.git",
     "managerData": Object {
       "def": "git_repository(
     name = \\"io_bazel_rules_sass\\",
@@ -248,7 +248,7 @@ Array [
     "datasource": "github",
     "depName": "com_github_bazelbuild_buildtools",
     "depType": "git_repository",
-    "lookupName": "bazelbuild/buildtools",
+    "lookupName": "bazelbuild/buildtools.git",
     "managerData": Object {
       "def": "git_repository(
     name = \\"com_github_bazelbuild_buildtools\\",
