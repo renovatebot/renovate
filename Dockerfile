@@ -224,7 +224,7 @@ COPY data data
 
 USER root
 RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
-  chmod -R g=u ${APP_ROOT} ${HOME} /etc/passwd
+  chmod -R g=u ${APP_ROOT} ${HOME}
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
 USER 1000
