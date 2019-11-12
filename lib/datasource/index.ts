@@ -113,8 +113,8 @@ async function fetchReleases(
   addMetaData(dep, datasource, config.lookupName);
   if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
     const tmpSourceUrl: string | null = baseUrlLegacyMassager(dep.sourceUrl);
+    // istanbul ignore next
     if (tmpSourceUrl !== null) {
-      // istanbul ignore else
       dep.sourceUrl = tmpSourceUrl;
     } else {
       delete dep.sourceUrl;
