@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import parse from 'github-url-from-git';
 import { ReleaseResult } from './common';
 
 // Use this object to define changelog URLs for packages
@@ -86,23 +85,9 @@ export function addMetaData(
   /**
    * @param {string} url
    */
-  const massageGithubUrl = url => {
-    return url
-      .replace('http:', 'https:')
-      .replace('www.github.com', 'github.com')
-      .split('/')
-      .slice(0, 5)
-      .join('/');
-  };
-  if (dep.sourceUrl && dep.sourceUrl.includes('github.com')) {
-    dep.sourceUrl = parse(massageGithubUrl(dep.sourceUrl));
-  }
-  if (
-    !dep.sourceUrl &&
-    dep.changelogUrl &&
-    dep.changelogUrl.match(/^https?:\/\/(www\.)?github\.com/)
-  ) {
-    dep.sourceUrl = massageGithubUrl(dep.changelogUrl);
+
+  if (!dep.sourceUrl && dep.changelogUrl) {
+    dep.sourceUrl = dep.changelogUrl;
   }
 
   // Clean up any empty urls

@@ -78,9 +78,9 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
   });
   it('test sourceUrl -> remove www. from fqdn', async () => {
-    const url = 'https://www.github.com/abc/';
+    const url = 'https://www.github.com/abc/edf.git';
     const res = await datasource.baseUrlLegacyMassager(url);
-    expect(res).toEqual('https://github.com/abc/');
+    expect(res).toEqual('https://github.com/abc/edf');
   });
   it('test sourceUrl -> convert http:// to https for github.com', async () => {
     const url = 'http://github.com/abc/edf.git';
@@ -123,5 +123,21 @@ describe('datasource/index', () => {
     });
     const res = await datasource.baseUrlLegacyMassager(url);
     expect(res).toEqual('https://github.com/abc/some');
+  });
+  it('handle trailing slashes.', async () => {
+    const url = ' http://www.github.com/some/repo/ ';
+    hostRules.hosts.mockImplementation(() => {
+      return ['github.com'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/some/repo');
+  });
+  it('test scp shorthand syntax.', async () => {
+    const url = 'git@github.com:some/repo.git';
+    hostRules.hosts.mockImplementation(() => {
+      return ['github.com'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://github.com/some/repo');
   });
 });

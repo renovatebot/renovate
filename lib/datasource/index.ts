@@ -139,40 +139,59 @@ export function getDigest(
   );
 }
 export function baseUrlLegacyMassager(sourceUrl) {
-  let url: string = sourceUrl;
-  // Massage www out of github URL
-  url = url.replace('www.github.com', 'github.com');
-  //  istanbul ignore if
-  if (url.startsWith('https://github.com/')) {
-    url = url
-      .split('/')
-      .slice(0, 5)
-      .join('/');
-  } // a lot of this is probably redundant and can be better achieved with URL.
-  const extraBaseUrls = [];
-  const getHostsFromRulesGithub = hostRules.hosts({ hostType: 'github' });
+  let url: string = sourceUrl.trim();
+  const parsedUrl = URL.parse(url);
   // istanbul ignore if
-  if (getHostsFromRulesGithub && getHostsFromRulesGithub.length !== 0) {
-    // istanbul ignore next
-    if (getHostsFromRulesGithub.includes(URL.parse(url).hostname)) {
+  if (url.startsWith('scm:')) {
+    // scm format appears to be pretty much gradel-specific.
+    url = `https://${parsedUrl.host}${parsedUrl.path.split(':').join('')}`;
+  }
+  const extraBaseUrls = [];
+  const getHostsFromRulesGithub = hostRules.hosts({ hostType: 'github' }) || [];
+  // istanbul ignore if
+  if (
+    getHostsFromRulesGithub.includes(parsedUrl.hostname) ||
+    (parsedUrl.hostname &&
+      (parsedUrl.hostname === 'github.com' ||
+        parsedUrl.hostname === 'www.github.com')) ||
+    url.indexOf('git@github.com') >= 0
+  ) {
+    // istanbul ignore if
+    if (url.startsWith('git:github.com/')) {
+      // github-url-from-git does not process git: without the forward slashes.Neither the help pages for git pull/push nor the git extended documentation on protocols specify that as a valid url. Was this related to some package-specific logic, e.g. npm returns the git url without the initial slashes after the protocol?
+      url = 'https://' + url.substr(4);
+    }
+    // Massage www out of github URL
+    url = url.replace('www.github.com', 'github.com');
+    // istanbul ignore if
+    if (url.startsWith('http://github.com/')) {
+      url = 'https://' + url.substr(7);
+    }
+    //  istanbul ignore if
+    if (url.startsWith('https://github.com/')) {
+      url = url
+        .split('/')
+        .slice(0, 5)
+        .join('/');
+    } // a lot of this is probably redundant and can be better achieved with URL
+    if (
+      getHostsFromRulesGithub === undefined ||
+      !getHostsFromRulesGithub.includes(URL.parse(url).hostname)
+    ) {
+      extraBaseUrls.push('github.com', 'gist.github.com');
+    } else {
       getHostsFromRulesGithub.forEach(host => {
         extraBaseUrls.push(host, `gist.${host}`);
       });
-      // istanbul ignore if
-      if (url.startsWith('http://github.com/')) {
-        url = 'https://' + url.substr(7);
-      }
-      // istanbul ignore if
-      if (url.startsWith('git:github.com/')) {
-        // github-url-from-git does not process git: without the forward slashes.Neither the help pages for git pull/push nor the git extended documentation on protocols specify that as a valid url. Was this related to some package-specific logic, e.g. npm returns the git url without the initial slashes after the protocol?
-        url = 'https://' + url.substr(4);
-      }
-      url = parse(url, {
-        extraBaseUrls,
-      });
+    }
+    url = parse(url, {
+      extraBaseUrls,
+    });
+    console.log(url);
+    if (url !== null || url !== undefined) {
+      return url;
     }
   }
-  const parsedUrl = URL.parse(url);
   const validProtocols = ['git:', 'ssh:', 'http:', 'https:', 'git+ssh:'];
   if (
     parsedUrl.protocol &&
