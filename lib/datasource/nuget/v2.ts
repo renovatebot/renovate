@@ -35,7 +35,15 @@ export async function getPkgReleases(
         try {
           const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
           if (pkgIsLatestVersion === 'true') {
-            dep.sourceUrl = getPkgProp(pkgInfo, 'ProjectUrl');
+            const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
+            if (projectUrl) {
+              dep.sourceUrl = parse(projectUrl);
+              if (!dep.sourceUrl) {
+                // The project URL does not represent a known
+                // source URL, pass it on as homepage instead.
+                dep.homepage = projectUrl;
+              }
+            }
           }
         } catch (err) /* istanbul ignore next */ {
           logger.debug(
