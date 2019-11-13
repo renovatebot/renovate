@@ -1,4 +1,4 @@
-![Renovate banner](https://renovatebot.com/images/design/header_small.jpg)
+![Renovate banner](https://app.renovatebot.com/images/renovate_660_220.jpg)
 
 # Renovate
 
