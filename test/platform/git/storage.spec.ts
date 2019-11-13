@@ -250,6 +250,19 @@ describe('platform/git/storage', () => {
         'Update something'
       );
     });
+    it('updates git submodules', async () => {
+      const files = [
+        {
+          name: '.',
+          contents: 'some content',
+        },
+      ];
+      await git.commitFilesToBranch(
+        'renovate/something',
+        files,
+        'Update something'
+      );
+    });
   });
 
   describe('getCommitMessages()', () => {

@@ -72,7 +72,7 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === existingContent &&
-        config.datasource === 'gitSubmodules'
+        upgrade.datasource === 'gitSubmodules'
       ) {
         updatedFileContents[packageFile] = newContent;
       }
