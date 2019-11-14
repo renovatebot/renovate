@@ -13,9 +13,7 @@ const config = {
 
 describe('datasource/cocoapods', () => {
   describe('getPkgReleases', () => {
-    beforeEach(() => {
-      global.repoCache = {};
-    });
+    beforeEach(() => global.renovateCache.rmAll());
     it('returns null for invalid inputs', async () => {
       api.get.mockReturnValue(null);
       expect(await getPkgReleases({})).toBeNull();
@@ -93,12 +91,24 @@ describe('datasource/cocoapods', () => {
       });
       expect(await getPkgReleases(config)).toBeNull();
     });
-    it('processes real data', async () => {
+    it('processes real data from CDN', async () => {
+      api.get.mockReturnValueOnce({
+        body: 'foo/1.2.3',
+      });
+      expect(await getPkgReleases(config)).toEqual({
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github', async () => {
+      api.get.mockReturnValueOnce(null);
       api.get.mockReturnValueOnce({
         body: [{ name: '1.2.3' }],
       });
-      const result = await getPkgReleases(config);
-      expect(result).toEqual({
+      expect(await getPkgReleases(config)).toEqual({
         releases: [
           {
             version: '1.2.3',

@@ -45,8 +45,6 @@ export function parseLine(line: string): ParsedLine {
   return result;
 }
 
-const defaultRegistryUrl = 'https://github.com/CocoaPods/Specs.git';
-
 export function gitDep(parsedLine: ParsedLine): PackageDependency {
   const { depName, git, tag } = parsedLine;
   if (git.startsWith('https://github.com/')) {
@@ -90,7 +88,7 @@ export function extractPackageFile(content: string): PackageFile {
     } = parsedLine;
 
     if (source) {
-      registryUrlsSet.add(source);
+      registryUrlsSet.add(source.replace(/\/*$/, ''));
     }
 
     if (depName) {
@@ -132,8 +130,8 @@ export function extractPackageFile(content: string): PackageFile {
     }
   }
 
-  registryUrlsSet.delete(defaultRegistryUrl);
-  registryUrls.push(defaultRegistryUrl);
+  registryUrlsSet.delete('https://github.com/CocoaPods/Specs.git');
+  registryUrlsSet.delete('https://cdn.cocoapods.org');
   if (registryUrlsSet.size > 0) {
     for (const url of registryUrlsSet.values()) {
       registryUrls.push(url);
