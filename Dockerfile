@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:3e83eca7870ee14a03b8026660e71ba761e6919b6982fb920d10254688a363d4
+FROM amd64/ubuntu:18.04@sha256:134c7fe821b9d359490cd009ce7ca322453f4f2d018623f849e580a89a685e5d
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
