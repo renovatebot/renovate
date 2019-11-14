@@ -59,13 +59,13 @@ describe('datasource/index', () => {
   });
   it('trims sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({
-      sourceUrl: ' https://abc.com',
+      sourceUrl: ' https://abc.com/some/repo/',
     });
     const res = await datasource.getPkgReleases({
       datasource: 'npm',
       depName: 'abc',
     });
-    expect(res.sourceUrl).toEqual('https://abc.com');
+    expect(res.sourceUrl).toEqual('https://abc.com/some/repo');
   });
   it('massages sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({
@@ -106,7 +106,7 @@ describe('datasource/index', () => {
   it('test sourceUrl -> non-github url', async () => {
     const url = 'http://gitlab.com/abc/edf.git';
     const res = await datasource.baseUrlLegacyMassager(url);
-    expect(res).toEqual('http://gitlab.com/abc/edf');
+    expect(res).toEqual('https://gitlab.com/abc/edf');
   });
   it('mock hosts array from host-rules -> https://', async () => {
     const url = 'http://github.com/abc/some.git';

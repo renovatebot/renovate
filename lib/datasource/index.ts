@@ -1,7 +1,6 @@
 import parse from 'github-url-from-git';
 import * as URL from 'url';
 import { logger } from '../logger';
-import * as hostRules from '../util/host-rules';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
 import * as cargo from './cargo';
@@ -24,6 +23,7 @@ import * as rubygems from './rubygems';
 import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as terraform from './terraform';
+import * as hostRules from '../util/host-rules';
 import {
   Datasource,
   PkgReleaseConfig,
@@ -138,6 +138,7 @@ export function getDigest(
     value
   );
 }
+
 export function baseUrlLegacyMassager(sourceUrl) {
   let url: string = sourceUrl.trim();
   const parsedUrl = URL.parse(url);
@@ -187,7 +188,6 @@ export function baseUrlLegacyMassager(sourceUrl) {
     url = parse(url, {
       extraBaseUrls,
     });
-    console.log(url);
     if (url !== null || url !== undefined) {
       return url;
     }
@@ -199,7 +199,16 @@ export function baseUrlLegacyMassager(sourceUrl) {
     parsedUrl.path &&
     validProtocols.includes(parsedUrl.protocol) // this to be swapped out with hosted-git-info.
   ) {
-    return url.replace(RegExp('.git$'), '').trim();
+    return `https://${parsedUrl.host}/${parsedUrl.path
+      .replace(RegExp('^/'), '')
+      .replace(RegExp('api/v[3|4]/'), '')
+      .split('/')
+      .slice(0, 2)
+      .join('/')
+      .replace(':', '')
+      .replace(RegExp('.git$'), '')
+      .replace(RegExp('/$'), '')}`;
   }
+
   return null;
 }

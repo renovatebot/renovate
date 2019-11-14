@@ -28,6 +28,6 @@ Object {
       "version": "v1.1.0",
     },
   ],
-  "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+  "sourceUrl": "https://gitlab.company.com/some/dep2",
 }
 `;
