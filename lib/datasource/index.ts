@@ -1,3 +1,4 @@
+import * as hostedGitInfo from 'hosted-git-info';
 import parse from 'github-url-from-git';
 import * as URL from 'url';
 import { logger } from '../logger';
@@ -141,12 +142,11 @@ export function getDigest(
 
 export function baseUrlLegacyMassager(sourceUrl) {
   let url: string = sourceUrl.trim();
-  const parsedUrl = URL.parse(url);
-  // istanbul ignore if
-  if (url.startsWith('scm:')) {
-    // scm format appears to be pretty much gradel-specific.
-    url = `https://${parsedUrl.host}${parsedUrl.path.split(':').join('')}`;
+
+  if (url.startsWith('git@')) {
+    url = 'ssh://' + url; // workaround for https://github.com/npm/hosted-git-info/issues/56
   }
+  const parsedUrl = URL.parse(url);
   const extraBaseUrls = [];
   const getHostsFromRulesGithub = hostRules.hosts({ hostType: 'github' }) || [];
   // istanbul ignore if
@@ -154,8 +154,7 @@ export function baseUrlLegacyMassager(sourceUrl) {
     getHostsFromRulesGithub.includes(parsedUrl.hostname) ||
     (parsedUrl.hostname &&
       (parsedUrl.hostname === 'github.com' ||
-        parsedUrl.hostname === 'www.github.com')) ||
-    url.indexOf('git@github.com') >= 0
+        parsedUrl.hostname === 'www.github.com'))
   ) {
     // istanbul ignore if
     if (url.startsWith('git:github.com/')) {
@@ -192,23 +191,62 @@ export function baseUrlLegacyMassager(sourceUrl) {
       return url;
     }
   }
-  const validProtocols = ['git:', 'ssh:', 'http:', 'https:', 'git+ssh:'];
+  /* const validProtocols = [
+    'git:',
+    'ssh:',
+    'http:',
+    'https:',
+    'git+ssh:',
+    'scm:',
+  ]; */
   if (
     parsedUrl.protocol &&
     parsedUrl.host &&
-    parsedUrl.path &&
-    validProtocols.includes(parsedUrl.protocol) // this to be swapped out with hosted-git-info.
+    parsedUrl.path // this to be swapped out with hosted-git-info.
   ) {
-    return `https://${parsedUrl.host}/${parsedUrl.path
-      .replace(RegExp('^/'), '')
-      .replace(RegExp('api/v[3|4]/'), '')
-      .split('/')
-      .slice(0, 2)
-      .join('/')
-      .replace(':', '')
-      .replace(RegExp('.git$'), '')
-      .replace(RegExp('/$'), '')}`;
-  }
-
+    const getHostsFromRulesGitlab =
+      hostRules.hosts({ hostType: 'gitlab' }) || [];
+    const getHostsFromRulesBitbucket =
+      hostRules.hosts({ hostType: 'bitbucket' }) || [];
+    const getHostsFromRulesBitbucketServer =
+      hostRules.hosts({ hostType: 'bitbucket-server' }) || [];
+    const gitInfo = hostedGitInfo.fromUrl(url) || null;
+    let tmpurl: string;
+    if (gitInfo) {
+      tmpurl = gitInfo.browse({ noGitPlus: true, noCommittish: true });
+    }
+    if (
+      getHostsFromRulesGitlab.includes(parsedUrl.host) ||
+      parsedUrl.host === 'gitlab.com'
+    ) {
+      if (gitInfo && gitInfo.type === 'gitlab') {
+        url = tmpurl;
+      } else if (!tmpurl) {
+        url = `https://${parsedUrl.host}/${parsedUrl.path
+          .replace(RegExp('^/'), '')
+          .replace(RegExp('api/v[3|4]/'), '')
+          .replace(':', '')
+          .replace(RegExp('.git$'), '')
+          .replace(RegExp('/$'), '')}`;
+      }
+    } else if (
+      getHostsFromRulesBitbucket.includes(parsedUrl.host) ||
+      parsedUrl.host === 'bitbucket.org' ||
+      getHostsFromRulesBitbucketServer.includes(parsedUrl.host)
+    ) {
+      if (gitInfo && gitInfo.type === 'bitbucket') {
+        url = tmpurl;
+      } else {
+        url = `https://${parsedUrl.host}/${parsedUrl.path
+          .replace(':', '')
+          .split('/')
+          .slice(0, 3)
+          .join('/')
+          .replace(RegExp('.git$'), '')
+          .replace(RegExp('/$'), '')}`;
+      }
+      return url;
+    }
+  } //TODO add azure support.
   return null;
 }
