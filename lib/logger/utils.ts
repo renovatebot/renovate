@@ -53,6 +53,10 @@ function sanitizeValue(value: any, seen = new WeakMap()) {
   const valueType = typeof value;
 
   if (value != null && valueType !== 'function' && valueType === 'object') {
+    if (value instanceof Date) {
+      return value;
+    }
+
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
