@@ -1,4 +1,5 @@
 import Git from 'simple-git/promise';
+import { URL } from 'url';
 
 import { ReleaseResult, PkgReleaseConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
@@ -16,7 +17,12 @@ export async function getPkgReleases({
     ]))
       .trim()
       .split(/\t/)[0];
+
+    const sourceUrl = new URL(registryUrls[0]);
+    sourceUrl.username = '';
+
     return {
+      sourceUrl: sourceUrl.href,
       releases: [
         {
           version: newHash,
