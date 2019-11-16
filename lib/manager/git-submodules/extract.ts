@@ -60,7 +60,7 @@ const getUrl = async (
     '--get',
     `submodule.${submoduleName}.url`,
   ])).trim();
-  if (upath.isAbsolute(path)) {
+  if (!path.startsWith('../')) {
     return path;
   }
   const remoteUrl = (await git.raw([
