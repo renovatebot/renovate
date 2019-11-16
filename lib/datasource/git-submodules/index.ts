@@ -8,6 +8,17 @@ export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
+  const cacheNamespace = 'datasource-git-submodules';
+  const cacheKey = `${registryUrls[0]}-${registryUrls[1]}`;
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    cacheKey
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   const git = Git();
   try {
     const newHash = (await git.listRemote([
@@ -21,7 +32,7 @@ export async function getPkgReleases({
     const sourceUrl = new URL(registryUrls[0]);
     sourceUrl.username = '';
 
-    return {
+    const result = {
       sourceUrl: sourceUrl.href,
       releases: [
         {
@@ -29,6 +40,9 @@ export async function getPkgReleases({
         },
       ],
     };
+    const cacheMinutes = 60;
+    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    return result;
   } catch (err) {
     logger.debug(`Error looking up tags in ${lookupName}`);
   }
