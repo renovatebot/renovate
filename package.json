@@ -170,7 +170,7 @@
     "@babel/preset-env": "7.7.1",
     "@babel/preset-typescript": "7.7.2",
     "@types/bunyan": "1.8.6",
-    "@types/chai": "4.2.4",
+    "@types/chai": "4.2.5",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "8.0.1",
     "@types/github-url-from-git": "1.5.0",
