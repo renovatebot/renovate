@@ -191,14 +191,6 @@ export function baseUrlLegacyMassager(sourceUrl) {
       return url;
     }
   }
-  /* const validProtocols = [
-    'git:',
-    'ssh:',
-    'http:',
-    'https:',
-    'git+ssh:',
-    'scm:',
-  ]; */
   if (
     parsedUrl.protocol &&
     parsedUrl.host &&
@@ -221,12 +213,13 @@ export function baseUrlLegacyMassager(sourceUrl) {
     ) {
       if (gitInfo && gitInfo.type === 'gitlab') {
         url = tmpurl;
-      } else if (!tmpurl) {
+      } else {
         url = `https://${parsedUrl.host}/${parsedUrl.path
-          .replace(RegExp('^/'), '')
           .replace(RegExp('api/v[3|4]/'), '')
           .replace(':', '')
           .replace(RegExp('.git$'), '')
+          .split('/')
+          .join('/')
           .replace(RegExp('/$'), '')}`;
       }
     } else if (
@@ -245,8 +238,9 @@ export function baseUrlLegacyMassager(sourceUrl) {
           .replace(RegExp('.git$'), '')
           .replace(RegExp('/$'), '')}`;
       }
-      return url;
     }
-  } //TODO add azure support.
+    return url;
+  }
+  //  TODO add azure support.
   return null;
 }
