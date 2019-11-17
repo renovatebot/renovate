@@ -177,7 +177,7 @@ export function getRenovatePRFormat(azurePr: {
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
-  pr.targetBranch = azurePr.targetRefName.replace('refs/heads/', '');
+  pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
 
   // status
   // export declare enum PullRequestStatus {
