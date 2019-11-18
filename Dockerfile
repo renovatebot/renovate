@@ -152,9 +152,7 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
 ENV HOME=/home/ubuntu
 RUN groupadd --gid 1000 ubuntu && \
-  useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu && \
-  chown -R ubuntu:0 ${HOME} && \
-  chmod -R g=u ${HOME}
+  useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu
 
 RUN chmod -R a+rw /usr
 
