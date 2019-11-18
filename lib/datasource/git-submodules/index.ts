@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 
 export async function getPkgReleases({
   lookupName: string,
-  registryUrls,
+  registryUrls: string[],
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-git-submodules';
   const cacheKey = `${registryUrls[0]}-${registryUrls[1]}`;
