@@ -5,7 +5,7 @@ import { ReleaseResult, PkgReleaseConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
 
 export async function getPkgReleases({
-  lookupName,
+  lookupName: string,
   registryUrls,
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-git-submodules';
