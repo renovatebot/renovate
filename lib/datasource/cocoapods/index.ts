@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 const cacheNamespace = 'cocoapods';
 const cacheMinutes = 30;
 
-function shardParts(lookupName) {
+function shardParts(lookupName: string): string[] {
   return crypto
     .createHash('md5')
     .update(lookupName)
@@ -15,7 +15,10 @@ function shardParts(lookupName) {
     .split('');
 }
 
-function releasesGithubUrl(lookupName, opts) {
+function releasesGithubUrl(
+  lookupName: string,
+  opts: { account: string; repo: string; useShard: boolean }
+): string {
   const { useShard, account, repo } = opts;
   const prefix = 'https://api.github.com/repos';
   const shard = shardParts(lookupName).join('/');
@@ -23,15 +26,15 @@ function releasesGithubUrl(lookupName, opts) {
   return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
 }
 
-async function makeRequest(
+async function makeRequest<T = any>(
   url: string,
   lookupName: string,
   json = true
-): Promise<any> {
+): Promise<T> {
   try {
     const resp = await api.get(url, { json });
     if (resp && resp.body) {
-      return resp.body;
+      return resp.body as any;
     }
   } catch (err) {
     const errorData = { lookupName, err };
@@ -68,7 +71,7 @@ async function getReleasesFromGithub(
   const groups = (match && match.groups) || {};
   const opts = { ...groups, useShard };
   const url = releasesGithubUrl(lookupName, opts);
-  const resp = await makeRequest(url, lookupName);
+  const resp = await makeRequest<{ name: string }[]>(url, lookupName);
   if (resp) {
     const releases = resp.map(({ name }) => ({ version: name }));
     return { releases };
@@ -81,7 +84,7 @@ async function getReleasesFromGithub(
   return null;
 }
 
-function releasesCDNUrl(lookupName: string) {
+function releasesCDNUrl(lookupName: string): string {
   const shard = shardParts(lookupName).join('_');
   return `https://cdn.cocoapods.org/all_pods_versions_${shard}.txt`;
 }
@@ -90,8 +93,8 @@ async function getReleasesFromCDN(
   lookupName: string
 ): Promise<ReleaseResult | null> {
   const url = releasesCDNUrl(lookupName);
-  const resp = await makeRequest(url, lookupName, false);
-  if (resp && typeof resp === 'string') {
+  const resp = await makeRequest<string>(url, lookupName, false);
+  if (resp) {
     const lines = resp.split('\n');
     for (let idx = 0; idx < lines.length; idx += 1) {
       const line = lines[idx];

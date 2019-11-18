@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { Upgrade } from '../common';
 import { parseLine } from './extract';
 
-function lineContainsDep(line, dep) {
+function lineContainsDep(line: string, dep: string): boolean {
   const { depName } = parseLine(line);
   return dep === depName;
 }
