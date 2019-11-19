@@ -193,7 +193,8 @@ RUN pip install --user pipenv
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
 ENV PATH="/home/ubuntu/.poetry/bin:$PATH"
-RUN poetry config settings.virtualenvs.create false
+RUN cp -r $HOME/.poetry/lib/poetry/_vendor/py3.7 $HOME/.poetry/lib/poetry/_vendor/py3.8
+RUN poetry config settings.virtualenvs.in-project false
 
 # npm
 
