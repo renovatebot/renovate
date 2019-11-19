@@ -4,6 +4,6 @@ declare namespace jest {
      * only available in `test/website-docs.spec.js`
      * @param arg
      */
-    toContainOption(arg: R): void;
+    toContainOption(arg: T): void;
   }
 }
