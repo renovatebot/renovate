@@ -339,7 +339,7 @@ const options: RenovateOptions[] = [
   {
     name: 'persistRepoData',
     description:
-      'If set to false, repository data will preserved between runs instead of deleted.',
+      'If set to true, repository data will preserved between runs instead of deleted.',
     type: 'boolean',
     admin: true,
     default: false,
@@ -551,6 +551,7 @@ const options: RenovateOptions[] = [
       'maven',
       'node',
       'npm',
+      'nuget',
       'pep440',
       'poetry',
       'regex',
@@ -1469,6 +1470,7 @@ const options: RenovateOptions[] = [
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
       versionScheme: 'cargo',
+      rangeStrategy: 'bump',
     },
     mergeable: true,
   },
