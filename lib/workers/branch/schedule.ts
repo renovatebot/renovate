@@ -49,10 +49,10 @@ export function hasValidSchedule(
     }
     if (
       !parsedSchedule.schedules.some(
-        s => s.d !== undefined || s.D || s.t_a !== undefined || s.t_b
+        s => s.M || s.d !== undefined || s.D || s.t_a !== undefined || s.t_b
       )
     ) {
-      message = `Schedule "${scheduleText}" has no days of week or time of day`;
+      message = `Schedule "${scheduleText}" has no months, days of week or time of day`;
       return true;
     }
     // It must be OK
@@ -119,6 +119,16 @@ export function isScheduledNow(config) {
     logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
     // Later library returns array of schedules
     return parsedSchedule.schedules.some(schedule => {
+      // Check if months are defined
+      if (schedule.M) {
+        const currentMonth = parseInt(now.format('M'), 10);
+        if (!schedule.M.includes(currentMonth)) {
+          logger.debug(
+            `Does not match schedule because ${currentMonth} is not in ${schedule.M}`
+          );
+          return false;
+        }
+      }
       // Check if days are defined
       if (schedule.d) {
         // We need to compare text instead of numbers because
