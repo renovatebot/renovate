@@ -12,6 +12,7 @@ pr:
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   CI: true
+  Agent.Source.Git.ShallowFetchDepth: 1
 
 jobs:
   - job: 'Windows'
