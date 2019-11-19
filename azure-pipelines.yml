@@ -52,7 +52,7 @@ jobs:
           nodeVersion: '10.x'
           pythonVersion: '3.7'
     pool:
-      vmImage: macOS-10.14
+      vmImage: macOS-10.13
 
     steps:
       - template: .azure/steps.yml
