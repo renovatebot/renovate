@@ -1089,6 +1089,8 @@ Set this to false either globally, per-language, or per-package if you want to d
 
 ## ruby-version
 
+## rust
+
 ## sbt
 
 It isn't supporting Scala version inference well (`%%` operator), just searching for package like `<artifactId>_<scalaVersion>` without any additional resolving.
