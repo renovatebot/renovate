@@ -37,7 +37,7 @@ describe('datasource/cocoapods', () => {
       api.get.mockReturnValueOnce({});
       expect(await getPkgReleases(config)).toBeNull();
 
-      api.get.mockReturnValueOnce({ body: {} });
+      api.get.mockReturnValueOnce({ body: '' });
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('returns null for 404', async () => {
