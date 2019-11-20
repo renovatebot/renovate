@@ -2,6 +2,9 @@ import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
 
 jest.mock('../../lib/util/got');
+jest.mock('simple-git', () => {
+  throw new Error('Test');
+});
 
 const got: any = _got;
 

@@ -124,7 +124,7 @@ You can run just the Jest unit tests by running `yarn jest`. You can also run ju
 
 #### Prerequisites
 
-You need to have Python with `mock` installed for all tests to pass. Version 3.7 of Python includes `mock` so that approach is recommended.
+You need to have Python with `mock` installed for all tests to pass. Python 3 includes `mock` so that approach is recommended.
 
 You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry.
 
