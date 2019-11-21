@@ -179,7 +179,7 @@
     "@types/jest": "24.0.23",
     "@types/js-yaml": "3.12.1",
     "@types/later": "1.2.5",
-    "@types/lodash": "4.14.148",
+    "@types/lodash": "4.14.149",
     "@types/luxon": "1.21.0",
     "@types/moment-timezone": "0.5.12",
     "@types/nock": "10.0.3",
