@@ -177,7 +177,7 @@ export function getRenovatePRFormat(azurePr: {
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
-  pr.targetBranch = azurePr.targetRefName;
+  pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
 
   // status
   // export declare enum PullRequestStatus {
@@ -254,9 +254,11 @@ export async function getMergeMethod(
     )
     .map(p => p.settings)[0];
 
-  return (
-    Object.keys(policyConfigurations)
+  try {
+    return Object.keys(policyConfigurations)
       .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p) || GitPullRequestMergeStrategy.NoFastForward
-  );
+      .find(p => p);
+  } catch (err) {
+    return GitPullRequestMergeStrategy.NoFastForward;
+  }
 }

@@ -137,11 +137,11 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && \
+RUN apt-get update && apt-get install -y python3.8-dev python3-distutils && \
     rm -rf /var/lib/apt/lists/*
 
-RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
-RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
+RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.8 /usr/bin/python3
+RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 # Pip
 
@@ -198,7 +198,8 @@ RUN pip install --user pipenv
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
 ENV PATH="/home/ubuntu/.poetry/bin:$PATH"
-RUN poetry config settings.virtualenvs.create false
+RUN cp -r $HOME/.poetry/lib/poetry/_vendor/py3.7 $HOME/.poetry/lib/poetry/_vendor/py3.8
+RUN poetry config settings.virtualenvs.in-project false
 
 # npm
 
