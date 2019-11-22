@@ -91,8 +91,10 @@ export async function generateLockFile(
     logger.debug(`Using pnpm: ${cmd}`);
     cmd += ' install';
     cmd += ' --lockfile-only';
-    cmd += ' --ignore-scripts';
-    cmd += ' --ignore-pnpmfile';
+    if (global.trustLevel !== 'high') {
+      cmd += ' --ignore-scripts';
+      cmd += ' --ignore-pnpmfile';
+    }
     // TODO: Switch to native util.promisify once using only node 8
     ({ stdout, stderr } = await exec(cmd, {
       cwd,
