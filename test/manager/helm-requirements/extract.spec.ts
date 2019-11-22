@@ -28,7 +28,11 @@ describe('lib/manager/helm/extract', () => {
           version: 0.8.1
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
       expect(result.deps.every(dep => dep.skipReason));
@@ -51,7 +55,11 @@ describe('lib/manager/helm/extract', () => {
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
@@ -63,7 +71,11 @@ describe('lib/manager/helm/extract', () => {
       name: example
       `);
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile('', fileName, {});
+      const result = await extractPackageFile('', fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).toBeNull();
     });
     it('resolves aliased registry urls', async () => {
@@ -82,10 +94,8 @@ describe('lib/manager/helm/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = await extractPackageFile(content, fileName, {
-        helm: {
-          aliases: {
-            placeholder: 'https://my-registry.gcr.io/',
-          },
+        aliases: {
+          placeholder: 'https://my-registry.gcr.io/',
         },
       });
       expect(result).not.toBeNull();
@@ -108,7 +118,11 @@ describe('lib/manager/helm/extract', () => {
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).toBeNull();
     });
     it('skips local dependencies', async () => {
@@ -129,7 +143,11 @@ describe('lib/manager/helm/extract', () => {
           repository: file:///some/local/path/
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
     });
@@ -145,7 +163,11 @@ describe('lib/manager/helm/extract', () => {
       hello: world
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).toBeNull();
     });
     it('returns null if requirements.yaml is invalid', async () => {
@@ -162,13 +184,21 @@ describe('lib/manager/helm/extract', () => {
       [
       `;
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).toBeNull();
     });
     it('returns null if Chart.yaml is empty', async () => {
       const content = '';
       const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
       expect(result).toBeNull();
     });
   });

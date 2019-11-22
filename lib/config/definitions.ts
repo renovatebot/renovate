@@ -62,6 +62,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
+  additionalProperties?: {} | boolean;
   mergeable?: boolean;
   type: 'object';
 }
@@ -524,6 +525,18 @@ const options: RenovateOptions[] = [
     default: {},
     mergeable: true,
     cli: false,
+  },
+  {
+    name: 'aliases',
+    description: 'Aliases for registries, package manager specific',
+    type: 'object',
+    default: {
+      stable: 'https://kubernetes-charts.storage.googleapis.com/',
+    },
+    additionalProperties: {
+      type: 'string',
+      format: 'uri',
+    },
   },
   {
     name: 'registryUrls',

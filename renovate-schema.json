@@ -298,6 +298,17 @@
       },
       "default": null
     },
+    "aliases": {
+      "description": "Aliases for registries, package manager specific",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "default": {
+        "stable": "https://kubernetes-charts.storage.googleapis.com/"
+      }
+    },
     "versionScheme": {
       "description": "Version scheme to use for filtering and comparisons",
       "type": "string",

@@ -51,15 +51,12 @@ export async function extractPackageFile(
     if (dep.repository) {
       res.registryUrls = [dep.repository];
       if (dep.repository.startsWith('@')) {
-        const aliases =
-          config.helm && config.helm.aliases ? config.helm.aliases : null;
-        if (aliases) {
-          const alias = aliases[dep.repository.slice(1)];
-          if (alias) {
-            res.registryUrls = [alias];
-            return res;
-          }
+        const alias = config.aliases[dep.repository.slice(1)];
+        if (alias) {
+          res.registryUrls = [alias];
+          return res;
         }
+
         res.skipReason = 'placeholder-url';
       } else {
         try {

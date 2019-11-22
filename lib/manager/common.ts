@@ -18,7 +18,7 @@ export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
   global?: any;
   gradle?: { timeout?: number };
-  helm?: { aliases?: Record<string, string> };
+  aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
 
   skipInstalls?: boolean;
