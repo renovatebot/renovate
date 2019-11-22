@@ -124,7 +124,7 @@ export class Storage {
     const submodules = await this.getSubmodules();
     for (const submodule of submodules) {
       try {
-        logger.info(`Cloning git submodule at ${submodule}`);
+        logger.debug(`Cloning git submodule at ${submodule}`);
         await this._git.submoduleUpdate(['--init', '--', submodule]);
       } catch (err) {
         logger.warn(`Unable to initialise git submodule at ${submodule}`);

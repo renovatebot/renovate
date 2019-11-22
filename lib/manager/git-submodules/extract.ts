@@ -48,11 +48,11 @@ export default async function extractPackageFile(
   return { deps, datasource: 'gitSubmodules' };
 }
 
-const getUrl = async (
+async function getUrl(
   git: Git.SimpleGit,
   gitModulesPath: string,
   submoduleName: string
-) => {
+): Promise<string> {
   const path = (await Git().raw([
     'config',
     '--file',
@@ -69,10 +69,13 @@ const getUrl = async (
     'remote.origin.url',
   ])).trim();
   return URL.resolve(`${remoteUrl}/`, path);
-};
+}
 
-const getBranch = async (gitModulesPath: string, submoduleName: string) =>
-  (
+async function getBranch(
+  gitModulesPath: string,
+  submoduleName: string
+): Promise<string> {
+  return (
     (await Git().raw([
       'config',
       '--file',
@@ -81,3 +84,4 @@ const getBranch = async (gitModulesPath: string, submoduleName: string) =>
       `submodule.${submoduleName}.branch`,
     ])) || 'master'
   ).trim();
+}
