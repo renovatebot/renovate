@@ -514,11 +514,23 @@ export async function ensureIssueClosing(title: string) {
 export async function addAssignees(iid: number, assignees: string[]) {
   logger.debug(`Adding assignees ${assignees} to #${iid}`);
   try {
-    const assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
+    let assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
       .id;
-    let url = `projects/${config.repository}/merge_requests/${iid}`;
-    url += `?assignee_id=${assigneeId}`;
+    let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
     await api.put(url);
+    try {
+      if (assignees.length > 1) {
+        url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
+        for (let i = 1; i < assignees.length; i += 1) {
+          assigneeId = (await api.get(`users?username=${assignees[i]}`)).body[0]
+            .id;
+          url += `&assignee_ids[]=${assigneeId}`;
+        }
+        await api.put(url);
+      }
+    } catch (error) {
+      logger.error({ iid, assignees }, 'Failed to add multiple assignees');
+    }
   } catch (err) {
     logger.error({ iid, assignees }, 'Failed to add assignees');
   }
