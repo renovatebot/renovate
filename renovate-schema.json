@@ -290,6 +290,18 @@
       "default": {},
       "$ref": "#"
     },
+    "aliases": {
+      "description": "Aliases for registries, package manager specific",
+      "type": "object",
+      "default": {
+        "stable": "https://kubernetes-charts.storage.googleapis.com/"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "$ref": "#"
+    },
     "registryUrls": {
       "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "type": "array",
@@ -297,17 +309,6 @@
         "type": "string"
       },
       "default": null
-    },
-    "aliases": {
-      "description": "Aliases for registries, package manager specific",
-      "type": "object",
-      "additionalProperties": {
-        "type": "string",
-        "format": "uri"
-      },
-      "default": {
-        "stable": "https://kubernetes-charts.storage.googleapis.com/"
-      }
     },
     "versionScheme": {
       "description": "Version scheme to use for filtering and comparisons",
