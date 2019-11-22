@@ -106,7 +106,7 @@
     "chalk": "2.4.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "3.0.2",
+    "commander": "4.0.1",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "3.0.0",
     "deepmerge": "4.2.2",
