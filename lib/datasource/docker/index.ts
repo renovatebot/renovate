@@ -15,10 +15,13 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
-function getRegistryRepository(lookupName: string, registryUrls: string[]) {
+export function getRegistryRepository(
+  lookupName: string,
+  registryUrls: string[]
+) {
   let registry: string;
   const split = lookupName.split('/');
-  if (split.length > 1 && split[0].includes('.')) {
+  if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registry] = split;
     split.shift();
   }
@@ -33,7 +36,7 @@ function getRegistryRepository(lookupName: string, registryUrls: string[]) {
     registry = `https://${registry}`;
   }
   const opts = hostRules.find({ url: registry });
-  if (opts.insecureRegistry) {
+  if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
   if (registry.endsWith('.docker.io') && !repository.includes('/')) {
