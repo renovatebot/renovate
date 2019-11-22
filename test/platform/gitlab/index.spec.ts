@@ -627,6 +627,16 @@ describe('platform/gitlab', () => {
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(api.put).toHaveBeenCalledTimes(0);
     });
+    it('should add the given assignees to the issue if supported', async () => {
+      api.get.mockReturnValueOnce({
+        body: [{ id: 123 }],
+      } as any);
+      api.get.mockReturnValueOnce({
+        body: [{ id: 124 }],
+      } as any);
+      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
+      expect(api.put.mock.calls).toMatchSnapshot();
+    });
   });
   describe('addReviewers(issueNo, reviewers)', () => {
     it('should add the given reviewers to the PR', async () => {
