@@ -1,6 +1,6 @@
-import { satisfies } from '@snyk/ruby-semver';
-import { logger } from '../../../logger';
+import { satisfies } from '@renovatebot/ruby-semver';
 import bump from './bump';
+import { logger } from '../../../logger';
 
 function countInstancesOf(str: string, char: string): number {
   return str.split(char).length - 1;

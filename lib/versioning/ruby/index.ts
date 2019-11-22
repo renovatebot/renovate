@@ -3,9 +3,7 @@ import {
   gt,
   maxSatisfying,
   minSatisfying,
-  satisfies,
-  valid,
-} from '@snyk/ruby-semver';
+} from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
 import { NewValueConfig, VersioningApi } from '../common';
 import { isSingleOperator, isValidOperator } from './operator';
