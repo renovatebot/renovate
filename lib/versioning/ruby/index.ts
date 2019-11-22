@@ -5,7 +5,7 @@ import {
   satisfies,
   maxSatisfying,
   minSatisfying,
-} from '@snyk/ruby-semver';
+} from '@renovatebot/ruby-semver';
 import { VersioningApi, RangeStrategy } from '../common';
 import { logger } from '../../logger';
 import { parse as parseVersion } from './version';

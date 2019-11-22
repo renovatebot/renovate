@@ -270,6 +270,15 @@ describe('semverRuby', () => {
         false
       );
     });
+
+    it('returns null for garbage version input', () => {
+      expect(semverRuby.isLessThanRange('asdf', '> 1.2.2, ~> 2.0.0')).toBe(
+        null
+      );
+      expect(
+        semverRuby.isLessThanRange(null as string, '> 1.2.2, ~> 2.0.0')
+      ).toBe(null);
+    });
   });
 
   describe('.isValid', () => {

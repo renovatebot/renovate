@@ -1,12 +1,30 @@
 import last from 'lodash/last';
-import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
-import { diff, major, minor, patch, prerelease } from '@snyk/ruby-semver';
+import {
+  create,
+  SegmentElement,
+} from '@renovatebot/ruby-semver/dist/ruby/version';
+import {
+  diff,
+  major,
+  minor,
+  patch,
+  prerelease,
+} from '@renovatebot/ruby-semver';
 
 interface RubyVersion {
   major: number;
   minor: number;
   patch: number;
-  prerelease: string[];
+  prerelease: string[] | null;
+}
+
+function releaseSegments(version: string): SegmentElement[] {
+  const v = create(version);
+  if (v) {
+    return v.release().getSegments();
+  }
+  /* istanbul ignore next */
+  return [];
 }
 
 const parse = (version: string): RubyVersion => ({
@@ -22,21 +40,14 @@ const adapt = (left: string, right: string) =>
     .slice(0, right.split('.').length)
     .join('.');
 
-const floor = (version: string) =>
-  [
-    ...create(version)
-      .release()
-      .getSegments()
-      .slice(0, -1),
-    0,
-  ].join('.');
+const floor = (version: string) => {
+  return [...releaseSegments(version).slice(0, -1), 0].join('.');
+};
 
 // istanbul ignore next
 const incrementLastSegment = (version: string) => {
-  const segments = create(version)
-    .release()
-    .getSegments();
-  const nextLast = parseInt(last(segments), 10) + 1;
+  const segments = releaseSegments(version);
+  const nextLast = parseInt(last(segments) as string, 10) + 1;
 
   return [...segments.slice(0, -1), nextLast].join('.');
 };
@@ -59,7 +70,11 @@ const incrementPatch = (ptch: number, pre: string[]) =>
 
 // istanbul ignore next
 const increment = (from: string, to: string): string => {
-  const { major: maj, minor: min, patch: ptch, prerelease: pre } = parse(from);
+  const parsed = parse(from);
+  const { major: maj, prerelease: pre } = parsed;
+  let { minor: min, patch: ptch } = parsed;
+  min = min || 0;
+  ptch = ptch || 0;
 
   let nextVersion: string;
   switch (diff(from, adapt(to, from))) {
@@ -84,22 +99,31 @@ const increment = (from: string, to: string): string => {
 
 // istanbul ignore next
 const decrement = (version: string): string => {
-  const segments = create(version)
-    .release()
-    .getSegments();
+  const segments = releaseSegments(version);
   const nextSegments = segments
     .reverse()
-    .reduce((accumulator: number[], segment: number, index: number) => {
-      if (index === 0) {
-        return [segment - 1];
-      }
+    .reduce(
+      (
+        accumulator: number[],
+        segment: SegmentElement,
+        index: number
+      ): number[] => {
+        if (index === 0) {
+          return [(segment as number) - 1];
+        }
 
-      if (accumulator[index - 1] === -1) {
-        return [...accumulator.slice(0, index - 1), 0, segment - 1];
-      }
+        if (accumulator[index - 1] === -1) {
+          return [
+            ...accumulator.slice(0, index - 1),
+            0,
+            (segment as number) - 1,
+          ];
+        }
 
-      return [...accumulator, segment];
-    }, []);
+        return [...accumulator, segment as number];
+      },
+      []
+    );
 
   return nextSegments.reverse().join('.');
 };
