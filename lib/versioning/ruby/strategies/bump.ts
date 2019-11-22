@@ -1,4 +1,4 @@
-import { gte, lte } from '@snyk/ruby-semver';
+import { gte, lte } from '@renovatebot/ruby-semver';
 import { logger } from '../../../logger';
 import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from '../operator';
 import { floor, increment, decrement } from '../version';
