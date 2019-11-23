@@ -10,7 +10,7 @@ export function updateDependency(fileContent, upgrade) {
     logger.debug('Failed to update dependency, invalid upgrade');
     return fileContent;
   }
-  const doc = yaml.safeLoad(fileContent);
+  const doc = yaml.safeLoad(fileContent, { json: true });
   if (!doc || !is.array(doc.dependencies)) {
     logger.debug('Failed to update dependency, invalid requirements.yaml file');
     return fileContent;
@@ -48,7 +48,7 @@ export function updateDependency(fileContent, upgrade) {
         newString
       );
       // Compare the parsed yaml structure of old and new
-      if (_.isEqual(doc, yaml.safeLoad(testContent))) {
+      if (_.isEqual(doc, yaml.safeLoad(testContent, { json: true }))) {
         newFileContent = testContent;
         break;
       } else {
