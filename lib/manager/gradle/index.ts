@@ -21,6 +21,78 @@ const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
+async function canExecute(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getGradleCommandLine(
+  config: ExtractConfig,
+  cwd: string
+): Promise<string> {
+  let cmd: string;
+  const gradlewPath = upath.join(cwd, 'gradlew');
+  const gradlewExists = await exists(gradlewPath);
+  const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
+
+  if (config.binarySource === 'docker') {
+    cmd = `docker run --rm `;
+    // istanbul ignore if
+    if (config.dockerUser) {
+      cmd += `--user=${config.dockerUser} `;
+    }
+    cmd += `-v "${cwd}":"${cwd}" -w "${cwd}" `;
+    cmd += `renovate/gradle gradle`;
+  } else if (gradlewExecutable) {
+    cmd = './gradlew';
+  } else if (gradlewExists) {
+    cmd = 'sh gradlew';
+  } else {
+    cmd = 'gradle';
+  }
+  return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
+}
+
+async function executeGradle(
+  config: ExtractConfig,
+  cwd: string
+): Promise<void> {
+  let stdout: string;
+  let stderr: string;
+  const gradleTimeout =
+    config.gradle && config.gradle.timeout
+      ? config.gradle.timeout * 1000
+      : undefined;
+  const cmd = await getGradleCommandLine(config, cwd);
+  try {
+    logger.debug({ cmd }, 'Start gradle command');
+    ({ stdout, stderr } = await exec(cmd, {
+      cwd,
+      timeout: gradleTimeout,
+    }));
+  } catch (err) {
+    // istanbul ignore if
+    if (err.code === TIMEOUT_CODE) {
+      logger.error(' Process killed. Possibly gradle timed out.');
+    }
+    // istanbul ignore if
+    if (err.message.includes('Could not resolve all files for configuration')) {
+      logger.debug({ err }, 'Gradle error');
+      logger.warn('Gradle resolution error');
+      return;
+    }
+    logger.warn({ err, cmd }, 'Gradle run failed');
+    logger.info('Aborting Renovate due to Gradle lookup errors');
+    throw new Error('registry-failure');
+  }
+  logger.debug(stdout + stderr);
+  logger.info('Gradle report complete');
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
@@ -82,6 +154,10 @@ export async function extractAllPackageFiles(
   return gradleFiles;
 }
 
+function buildGradleDependency(config: Upgrade): GradleDependency {
+  return { group: config.depGroup, name: config.name, version: config.version };
+}
+
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
@@ -94,79 +170,6 @@ export function updateDependency(
     buildGradleDependency(upgrade),
     upgrade.newValue
   );
-}
-
-function buildGradleDependency(config: Upgrade): GradleDependency {
-  return { group: config.depGroup, name: config.name, version: config.version };
-}
-
-async function executeGradle(config: ExtractConfig, cwd: string) {
-  let stdout: string;
-  let stderr: string;
-  const gradleTimeout =
-    config.gradle && config.gradle.timeout
-      ? config.gradle.timeout * 1000
-      : undefined;
-  const cmd = await getGradleCommandLine(config, cwd);
-  try {
-    logger.debug({ cmd }, 'Start gradle command');
-    ({ stdout, stderr } = await exec(cmd, {
-      cwd,
-      timeout: gradleTimeout,
-    }));
-  } catch (err) {
-    // istanbul ignore if
-    if (err.code === TIMEOUT_CODE) {
-      logger.error(' Process killed. Possibly gradle timed out.');
-    }
-    // istanbul ignore if
-    if (err.message.includes('Could not resolve all files for configuration')) {
-      logger.debug({ err }, 'Gradle error');
-      logger.warn('Gradle resolution error');
-      return;
-    }
-    logger.warn({ err, cmd }, 'Gradle run failed');
-    logger.info('Aborting Renovate due to Gradle lookup errors');
-    throw new Error('registry-failure');
-  }
-  logger.debug(stdout + stderr);
-  logger.info('Gradle report complete');
-}
-
-async function getGradleCommandLine(
-  config: ExtractConfig,
-  cwd: string
-): Promise<string> {
-  let cmd: string;
-  const gradlewPath = upath.join(cwd, 'gradlew');
-  const gradlewExists = await exists(gradlewPath);
-  const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
-
-  if (config.binarySource === 'docker') {
-    cmd = `docker run --rm `;
-    // istanbul ignore if
-    if (config.dockerUser) {
-      cmd += `--user=${config.dockerUser} `;
-    }
-    cmd += `-v "${cwd}":"${cwd}" -w "${cwd}" `;
-    cmd += `renovate/gradle gradle`;
-  } else if (gradlewExecutable) {
-    cmd = './gradlew';
-  } else if (gradlewExists) {
-    cmd = 'sh gradlew';
-  } else {
-    cmd = 'gradle';
-  }
-  return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
-}
-
-async function canExecute(path: string): Promise<boolean> {
-  try {
-    await access(path, constants.X_OK);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export const language = 'java';
