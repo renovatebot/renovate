@@ -13,7 +13,7 @@ export async function updateArtifacts(
   newPackageFileContent: string,
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
-  await logger.debug(`cargo.updateArtifacts(${packageFileName})`);
+  logger.debug(`cargo.updateArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
     logger.debug('No updated cargo deps - returning null');
     return null;

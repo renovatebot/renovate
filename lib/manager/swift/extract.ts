@@ -153,7 +153,7 @@ export function extractPackageFile(
   let currentValue: string = null;
   let fileReplacePosition: number = null;
 
-  function yieldDep() {
+  function yieldDep(): void {
     const depName = getDepName(lookupName);
     if (depName && currentValue && fileReplacePosition) {
       const dep: PackageDependency = {

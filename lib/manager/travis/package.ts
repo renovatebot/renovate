@@ -25,7 +25,7 @@ type NodeJsData = Record<string, NodeJsSchedule>;
 let policies: NodeJsPolicies;
 let refreshDate: Date;
 
-function generatePolicies() {
+function generatePolicies(): void {
   policies = {
     all: [],
     lts: [],
@@ -56,7 +56,7 @@ function generatePolicies() {
   policies.lts_latest.push(policies.lts[policies.lts.length - 1]);
 }
 
-function checkPolicies() {
+function checkPolicies(): void {
   if (policies && refreshDate > new Date()) {
     return;
   }

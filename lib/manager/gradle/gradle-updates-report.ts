@@ -27,7 +27,7 @@ export interface BuildDependency {
   registryUrls?: string[];
 }
 
-async function createRenovateGradlePlugin(localDir: string) {
+async function createRenovateGradlePlugin(localDir: string): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
@@ -65,19 +65,6 @@ gradle.buildFinished {
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
   await writeFile(gradleInitFile, content);
-}
-
-async function extractDependenciesFromUpdatesReport(
-  localDir: string
-): Promise<BuildDependency[]> {
-  const gradleProjectConfigurations = await readGradleReport(localDir);
-
-  const dependencies = gradleProjectConfigurations
-    .map(mergeDependenciesWithRepositories, [])
-    .reduce(flatternDependencies, [])
-    .reduce(combineReposOnDuplicatedDependencies, []);
-
-  return dependencies.map(gradleModule => buildDependency(gradleModule));
 }
 
 async function readGradleReport(localDir: string): Promise<GradleProject[]> {
@@ -146,6 +133,19 @@ function buildDependency(
     currentValue: gradleModule.version,
     registryUrls: gradleModule.repos,
   };
+}
+
+async function extractDependenciesFromUpdatesReport(
+  localDir: string
+): Promise<BuildDependency[]> {
+  const gradleProjectConfigurations = await readGradleReport(localDir);
+
+  const dependencies = gradleProjectConfigurations
+    .map(mergeDependenciesWithRepositories, [])
+    .reduce(flatternDependencies, [])
+    .reduce(combineReposOnDuplicatedDependencies, []);
+
+  return dependencies.map(gradleModule => buildDependency(gradleModule));
 }
 
 export {
