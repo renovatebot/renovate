@@ -53,10 +53,10 @@ export async function updateArtifacts(
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [cwd];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = [];
       cmd += envVars.map(e => `-e ${e} `);
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/poetry poetry`;
     } else {
       logger.info('Running poetry via global poetry');

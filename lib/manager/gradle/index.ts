@@ -148,7 +148,7 @@ async function getGradleCommandLine(
     if (config.dockerUser) {
       cmd += `--user=${config.dockerUser} `;
     }
-    cmd += `-v ${cwd}:${cwd} -w ${cwd} `;
+    cmd += `-v "${cwd}":"${cwd}" -w "${cwd}" `;
     cmd += `renovate/gradle gradle`;
   } else if (gradlewExecutable) {
     cmd = './gradlew';

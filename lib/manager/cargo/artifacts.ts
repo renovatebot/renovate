@@ -47,10 +47,10 @@ export async function updateArtifacts(
           cmd += `--user=${config.dockerUser} `;
         }
         const volumes = [cwd];
-        cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+        cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
         const envVars = [];
         cmd += envVars.map(e => `-e ${e} `).join('');
-        cmd += `-w ${cwd} `;
+        cmd += `-w "${cwd}" `;
         cmd += `renovate/rust cargo`;
       } else {
         logger.info('Running cargo via global cargo');
