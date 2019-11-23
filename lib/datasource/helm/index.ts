@@ -1,9 +1,13 @@
 import yaml from 'js-yaml';
 
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
 
-export async function getPkgReleases({ lookupName, registryUrls }) {
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   if (!lookupName) {
     logger.warn(`lookupName was not provided to getPkgReleases`);
     return null;
@@ -18,7 +22,7 @@ export async function getPkgReleases({ lookupName, registryUrls }) {
     logger.warn(`Couldn't get index.yaml file from ${helmRepository}`);
     return null;
   }
-  const releases = repositoryData[lookupName];
+  const releases = repositoryData.find(chart => chart.name === lookupName);
   if (!releases) {
     logger.warn(
       { dependency: lookupName },
@@ -26,19 +30,19 @@ export async function getPkgReleases({ lookupName, registryUrls }) {
     );
     return null;
   }
-  return {
-    releases,
-  };
+  return releases;
 }
 
-export async function getRepositoryData(repository) {
+export async function getRepositoryData(
+  repository: string
+): Promise<ReleaseResult[]> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
   const cachedIndex = await renovateCache.get(cacheNamespace, cacheKey);
   if (cachedIndex) {
     return cachedIndex;
   }
-  let res;
+  let res: any;
   try {
     res = await got('index.yaml', { baseUrl: repository });
     if (!res || !res.body) {
@@ -60,29 +64,28 @@ export async function getRepositoryData(repository) {
     logger.warn({ err }, `${repository} lookup failure: Unknown error`);
     return null;
   }
-  let result;
   try {
     const doc = yaml.safeLoad(res.body, { json: true });
     if (!doc) {
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }
-    result = {};
-    Object.keys(doc.entries).forEach(depName => {
-      const versions = doc.entries[depName].map(release => ({
-        version: release.version,
-        homepage: release.home,
-        sources: release.sources,
-        urls: release.urls,
-      }));
-      result[depName] = versions;
-    });
+    const result: ReleaseResult[] = Object.entries(doc.entries).map(
+      ([k, v]: [string, any]): ReleaseResult => ({
+        name: k,
+        homepage: v[0].home,
+        sourceUrl: v[0].sources ? v[0].sources[0] : undefined,
+        releases: v.map((x: any) => ({
+          version: x.version,
+        })),
+      })
+    );
     const cacheMinutes = 20;
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    return result;
   } catch (err) {
     logger.warn(`Failed to parse index.yaml from ${repository}`);
     logger.debug(err);
     return null;
   }
-  return result;
 }
