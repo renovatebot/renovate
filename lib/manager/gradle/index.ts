@@ -115,7 +115,6 @@ async function executeGradle(config: ExtractConfig, cwd: string) {
       timeout: gradleTimeout,
     }));
   } catch (err) {
-    const errorStr = `Gradle command ${cmd} failed. Exit code: ${err.code}.`;
     // istanbul ignore if
     if (err.code === TIMEOUT_CODE) {
       logger.error(' Process killed. Possibly gradle timed out.');
@@ -126,7 +125,7 @@ async function executeGradle(config: ExtractConfig, cwd: string) {
       logger.warn('Gradle resolution error');
       return;
     }
-    logger.warn({ err }, errorStr);
+    logger.warn({ err, cmd }, 'Gradle run failed');
     logger.info('Aborting Renovate due to Gradle lookup errors');
     throw new Error('registry-failure');
   }
