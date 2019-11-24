@@ -494,6 +494,10 @@ describe('platform/gitlab', () => {
       } as any);
       await gitlab.deleteBranch('branch', true);
     });
+    it('defaults to not closing associated PR', async () => {
+      await initRepo();
+      await gitlab.deleteBranch('branch2');
+    });
   });
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
