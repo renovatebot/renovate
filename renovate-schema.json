@@ -290,6 +290,16 @@
       "default": {},
       "$ref": "#"
     },
+    "aliases": {
+      "description": "Aliases for registries, package manager specific",
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "$ref": "#"
+    },
     "registryUrls": {
       "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "type": "array",
@@ -1058,6 +1068,9 @@
       "description": "Configuration object for helm requirements.yaml files.",
       "type": "object",
       "default": {
+        "aliases": {
+          "stable": "https://kubernetes-charts.storage.googleapis.com/"
+        },
         "commitMessageTopic": "helm chart {{depName}}",
         "fileMatch": ["(^|/)requirements.yaml$"]
       },
