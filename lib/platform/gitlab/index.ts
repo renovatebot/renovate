@@ -227,12 +227,231 @@ export function getFileList(branchName = config.baseBranch) {
   return config.storage.getFileList(branchName);
 }
 
-// Branch
-
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string) {
   return config.storage.branchExists(branchName);
 }
+
+// Returns the combined status for a branch.
+export async function getBranchStatus(
+  branchName: string,
+  requiredStatusChecks?: string[] | null
+) {
+  logger.debug(`getBranchStatus(${branchName})`);
+  if (!requiredStatusChecks) {
+    // null means disable status checks, so it always succeeds
+    return 'success';
+  }
+  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
+    // This is Unsupported
+    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
+    return 'failed';
+  }
+
+  if (!(await branchExists(branchName))) {
+    throw new Error('repository-changed');
+  }
+
+  // First, get the branch commit SHA
+  const branchSha = await config.storage.getBranchCommit(branchName);
+  // Now, check the statuses for that commit
+  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
+  const res = await api.get(url, { paginate: true });
+  logger.debug(`Got res with ${res.body.length} results`);
+  if (res.body.length === 0) {
+    // Return 'pending' if we have no status checks
+    return 'pending';
+  }
+  let status = 'success';
+  // Return 'success' if all are success
+  res.body.forEach((check: { status: string; allow_failure?: boolean }) => {
+    // If one is failed then don't overwrite that
+    if (status !== 'failure') {
+      if (!check.allow_failure) {
+        if (check.status === 'failed') {
+          status = 'failure';
+        } else if (check.status !== 'success') {
+          ({ status } = check);
+        }
+      }
+    }
+  });
+  return status;
+}
+
+// Pull Request
+
+export async function createPr(
+  branchName: string,
+  title: string,
+  rawDescription: string,
+  labels?: string[] | null,
+  useDefaultBranch?: boolean,
+  platformOptions?: PlatformPrOptions
+) {
+  const description = sanitize(rawDescription);
+  const targetBranch = useDefaultBranch
+    ? config.defaultBranch
+    : config.baseBranch;
+  logger.debug(`Creating Merge Request: ${title}`);
+  const res = await api.post(`projects/${config.repository}/merge_requests`, {
+    body: {
+      source_branch: branchName,
+      target_branch: targetBranch,
+      remove_source_branch: true,
+      title,
+      description,
+      labels: is.array(labels) ? labels.join(',') : null,
+    },
+  });
+  const pr = res.body;
+  pr.number = pr.iid;
+  pr.branchName = branchName;
+  pr.displayNumber = `Merge Request #${pr.iid}`;
+  pr.isModified = false;
+  // istanbul ignore if
+  if (config.prList) {
+    config.prList.push(pr);
+  }
+  if (platformOptions && platformOptions.gitLabAutomerge) {
+    try {
+      await api.put(
+        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
+        {
+          body: {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          },
+        }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Automerge on PR creation failed');
+    }
+  }
+
+  return pr;
+}
+
+export async function getPr(iid: number) {
+  logger.debug(`getPr(${iid})`);
+  const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
+  const pr = (await api.get(url)).body;
+  // Harmonize fields with GitHub
+  pr.branchName = pr.source_branch;
+  pr.targetBranch = pr.target_branch;
+  pr.number = pr.iid;
+  pr.displayNumber = `Merge Request #${pr.iid}`;
+  pr.body = pr.description;
+  pr.isStale = pr.diverged_commits_count > 0;
+  pr.state = pr.state === 'opened' ? 'open' : pr.state;
+  pr.isModified = true;
+  if (pr.merge_status === 'cannot_be_merged') {
+    logger.debug('pr cannot be merged');
+    pr.canMerge = false;
+    pr.isConflicted = true;
+  } else if (pr.state === 'open') {
+    const branchStatus = await getBranchStatus(pr.branchName, []);
+    if (branchStatus === 'success') {
+      pr.canMerge = true;
+    }
+  }
+  // Check if the most recent branch commit is by us
+  // If not then we don't allow it to be rebased, in case someone's changes would be lost
+  const branchUrl = `projects/${
+    config.repository
+  }/repository/branches/${urlEscape(pr.source_branch)}`;
+  try {
+    const branch = (await api.get(branchUrl)).body;
+    const branchCommitEmail =
+      branch && branch.commit ? branch.commit.author_email : null;
+    // istanbul ignore if
+    if (branchCommitEmail === config.email) {
+      pr.isModified = false;
+    } else {
+      logger.debug(
+        { branchCommitEmail, configEmail: config.email, iid: pr.iid },
+        'Last committer to branch does not match bot email, so PR cannot be rebased.'
+      );
+      pr.isModified = true;
+    }
+  } catch (err) {
+    logger.debug({ err }, 'Error getting PR branch');
+    if (pr.state === 'open' || err.statusCode !== 404) {
+      logger.warn({ err }, 'Error getting PR branch');
+      pr.isConflicted = true;
+    }
+  }
+  return pr;
+}
+
+// Return a list of all modified files in a PR
+export async function getPrFiles(mrNo: number) {
+  logger.debug({ mrNo }, 'getPrFiles');
+  if (!mrNo) {
+    return [];
+  }
+  const files = (await api.get(
+    `projects/${config.repository}/merge_requests/${mrNo}/changes`
+  )).body.changes;
+  return files.map((f: { new_path: string }) => f.new_path);
+}
+
+// istanbul ignore next
+async function closePr(iid: number) {
+  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
+    body: {
+      state_event: 'close',
+    },
+  });
+}
+
+export async function updatePr(
+  iid: number,
+  title: string,
+  description: string
+) {
+  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
+    body: {
+      title,
+      description: sanitize(description),
+    },
+  });
+}
+
+export async function mergePr(iid: number) {
+  try {
+    await api.put(`projects/${config.repository}/merge_requests/${iid}/merge`, {
+      body: {
+        should_remove_source_branch: true,
+      },
+    });
+    return true;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 401) {
+      logger.info('No permissions to merge PR');
+      return false;
+    }
+    if (err.statusCode === 406) {
+      logger.info('PR not acceptable for merging');
+      return false;
+    }
+    logger.debug({ err }, 'merge PR error');
+    logger.info('PR merge failed');
+    return false;
+  }
+}
+
+export function getPrBody(input: string) {
+  return smartTruncate(
+    input
+      .replace(/Pull Request/g, 'Merge Request')
+      .replace(/PR/g, 'MR')
+      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
+    1000000
+  );
+}
+
+// Branch
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string) {
@@ -310,53 +529,6 @@ export function getBranchLastCommitTime(branchName: string) {
 // istanbul ignore next
 export function getRepoStatus() {
   return config.storage.getRepoStatus();
-}
-
-// Returns the combined status for a branch.
-export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
-) {
-  logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return 'success';
-  }
-  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
-  }
-
-  if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
-  }
-
-  // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
-  // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
-  const res = await api.get(url, { paginate: true });
-  logger.debug(`Got res with ${res.body.length} results`);
-  if (res.body.length === 0) {
-    // Return 'pending' if we have no status checks
-    return 'pending';
-  }
-  let status = 'success';
-  // Return 'success' if all are success
-  res.body.forEach((check: { status: string; allow_failure?: boolean }) => {
-    // If one is failed then don't overwrite that
-    if (status !== 'failure') {
-      if (!check.allow_failure) {
-        if (check.status === 'failed') {
-          status = 'failure';
-        } else if (check.status !== 'success') {
-          ({ status } = check);
-        }
-      }
-    }
-  });
-  return status;
 }
 
 export async function getBranchStatusCheck(
@@ -689,178 +861,6 @@ export async function findPr(
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
-  );
-}
-
-// Pull Request
-
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  labels?: string[] | null,
-  useDefaultBranch?: boolean,
-  platformOptions?: PlatformPrOptions
-) {
-  const description = sanitize(rawDescription);
-  const targetBranch = useDefaultBranch
-    ? config.defaultBranch
-    : config.baseBranch;
-  logger.debug(`Creating Merge Request: ${title}`);
-  const res = await api.post(`projects/${config.repository}/merge_requests`, {
-    body: {
-      source_branch: branchName,
-      target_branch: targetBranch,
-      remove_source_branch: true,
-      title,
-      description,
-      labels: is.array(labels) ? labels.join(',') : null,
-    },
-  });
-  const pr = res.body;
-  pr.number = pr.iid;
-  pr.branchName = branchName;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.isModified = false;
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
-  }
-  if (platformOptions && platformOptions.gitLabAutomerge) {
-    try {
-      await api.put(
-        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
-        {
-          body: {
-            should_remove_source_branch: true,
-            merge_when_pipeline_succeeds: true,
-          },
-        }
-      );
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'Automerge on PR creation failed');
-    }
-  }
-
-  return pr;
-}
-
-export async function getPr(iid: number) {
-  logger.debug(`getPr(${iid})`);
-  const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
-  const pr = (await api.get(url)).body;
-  // Harmonize fields with GitHub
-  pr.branchName = pr.source_branch;
-  pr.targetBranch = pr.target_branch;
-  pr.number = pr.iid;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.body = pr.description;
-  pr.isStale = pr.diverged_commits_count > 0;
-  pr.state = pr.state === 'opened' ? 'open' : pr.state;
-  pr.isModified = true;
-  if (pr.merge_status === 'cannot_be_merged') {
-    logger.debug('pr cannot be merged');
-    pr.canMerge = false;
-    pr.isConflicted = true;
-  } else if (pr.state === 'open') {
-    const branchStatus = await getBranchStatus(pr.branchName, []);
-    if (branchStatus === 'success') {
-      pr.canMerge = true;
-    }
-  }
-  // Check if the most recent branch commit is by us
-  // If not then we don't allow it to be rebased, in case someone's changes would be lost
-  const branchUrl = `projects/${
-    config.repository
-  }/repository/branches/${urlEscape(pr.source_branch)}`;
-  try {
-    const branch = (await api.get(branchUrl)).body;
-    const branchCommitEmail =
-      branch && branch.commit ? branch.commit.author_email : null;
-    // istanbul ignore if
-    if (branchCommitEmail === config.email) {
-      pr.isModified = false;
-    } else {
-      logger.debug(
-        { branchCommitEmail, configEmail: config.email, iid: pr.iid },
-        'Last committer to branch does not match bot email, so PR cannot be rebased.'
-      );
-      pr.isModified = true;
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error getting PR branch');
-    if (pr.state === 'open' || err.statusCode !== 404) {
-      logger.warn({ err }, 'Error getting PR branch');
-      pr.isConflicted = true;
-    }
-  }
-  return pr;
-}
-
-// Return a list of all modified files in a PR
-export async function getPrFiles(mrNo: number) {
-  logger.debug({ mrNo }, 'getPrFiles');
-  if (!mrNo) {
-    return [];
-  }
-  const files = (await api.get(
-    `projects/${config.repository}/merge_requests/${mrNo}/changes`
-  )).body.changes;
-  return files.map((f: { new_path: string }) => f.new_path);
-}
-
-// istanbul ignore next
-async function closePr(iid: number) {
-  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      state_event: 'close',
-    },
-  });
-}
-
-export async function updatePr(
-  iid: number,
-  title: string,
-  description: string
-) {
-  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      title,
-      description: sanitize(description),
-    },
-  });
-}
-
-export async function mergePr(iid: number) {
-  try {
-    await api.put(`projects/${config.repository}/merge_requests/${iid}/merge`, {
-      body: {
-        should_remove_source_branch: true,
-      },
-    });
-    return true;
-  } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 401) {
-      logger.info('No permissions to merge PR');
-      return false;
-    }
-    if (err.statusCode === 406) {
-      logger.info('PR not acceptable for merging');
-      return false;
-    }
-    logger.debug({ err }, 'merge PR error');
-    logger.info('PR merge failed');
-    return false;
-  }
-}
-
-export function getPrBody(input: string) {
-  return smartTruncate(
-    input
-      .replace(/Pull Request/g, 'Merge Request')
-      .replace(/PR/g, 'MR')
-      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
-    1000000
   );
 }
 

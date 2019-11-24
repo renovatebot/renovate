@@ -2054,6 +2054,6 @@ const options: RenovateOptions[] = [
   },
 ];
 
-export function getOptions() {
+export function getOptions(): any {
   return options;
 }

@@ -50,6 +50,84 @@ export interface LookupUpdateConfig
   separateMultipleMajor?: boolean;
 }
 
+function getType(
+  config: LookupUpdateConfig,
+  fromVersion: string,
+  toVersion: string
+): string {
+  const { versionScheme, rangeStrategy, currentValue } = config;
+  const version = versioning.get(versionScheme);
+  if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
+    return 'bump';
+  }
+  if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
+    return 'major';
+  }
+  if (version.getMinor(toVersion) > version.getMinor(fromVersion)) {
+    return 'minor';
+  }
+  if (config.separateMinorPatch) {
+    return 'patch';
+  }
+  if (config.patch.automerge && !config.minor.automerge) {
+    return 'patch';
+  }
+  return 'minor';
+}
+
+function getFromVersion(
+  config: LookupUpdateConfig,
+  rangeStrategy: string,
+  latestVersion: string,
+  allVersions: string[]
+): string | null {
+  const { currentValue, lockedVersion, versionScheme } = config;
+  const version = versioning.get(versionScheme);
+  if (version.isVersion(currentValue)) {
+    return currentValue;
+  }
+  if (version.isSingleVersion(currentValue)) {
+    return currentValue.replace(/=/g, '').trim();
+  }
+  logger.trace(`currentValue ${currentValue} is range`);
+  let useVersions = allVersions.filter(v => version.matches(v, currentValue));
+  if (latestVersion && version.matches(latestVersion, currentValue)) {
+    useVersions = useVersions.filter(
+      v => !version.isGreaterThan(v, latestVersion)
+    );
+  }
+  if (rangeStrategy === 'pin') {
+    return (
+      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
+    );
+  }
+  if (rangeStrategy === 'bump') {
+    // Use the lowest version in the current range
+    return version.minSatisfyingVersion(useVersions, currentValue);
+  }
+  // Use the highest version in the current range
+  return version.maxSatisfyingVersion(useVersions, currentValue);
+}
+
+function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
+  const { separateMajorMinor, separateMultipleMajor } = config;
+  const { updateType, newMajor } = update;
+  if (updateType === 'lockfileUpdate') {
+    return updateType;
+  }
+  if (
+    !separateMajorMinor ||
+    config.major.automerge === true ||
+    (config.automerge && config.major.automerge !== false)
+  ) {
+    return 'latest';
+  }
+  if (separateMultipleMajor && updateType === 'major') {
+    return `major-${newMajor}`;
+  }
+  return updateType;
+}
+
 export async function lookupUpdates(
   config: LookupUpdateConfig
 ): Promise<UpdateResult> {
@@ -338,82 +416,4 @@ export async function lookupUpdates(
     }
   }
   return res;
-}
-
-function getType(
-  config: LookupUpdateConfig,
-  fromVersion: string,
-  toVersion: string
-): string {
-  const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = versioning.get(versionScheme);
-  if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
-    return 'bump';
-  }
-  if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
-    return 'major';
-  }
-  if (version.getMinor(toVersion) > version.getMinor(fromVersion)) {
-    return 'minor';
-  }
-  if (config.separateMinorPatch) {
-    return 'patch';
-  }
-  if (config.patch.automerge && !config.minor.automerge) {
-    return 'patch';
-  }
-  return 'minor';
-}
-
-function getBucket(config: LookupUpdateConfig, update: LookupUpdate) {
-  const { separateMajorMinor, separateMultipleMajor } = config;
-  const { updateType, newMajor } = update;
-  if (updateType === 'lockfileUpdate') {
-    return updateType;
-  }
-  if (
-    !separateMajorMinor ||
-    config.major.automerge === true ||
-    (config.automerge && config.major.automerge !== false)
-  ) {
-    return 'latest';
-  }
-  if (separateMultipleMajor && updateType === 'major') {
-    return `major-${newMajor}`;
-  }
-  return updateType;
-}
-
-function getFromVersion(
-  config: LookupUpdateConfig,
-  rangeStrategy: string,
-  latestVersion: string,
-  allVersions: string[]
-): string | null {
-  const { currentValue, lockedVersion, versionScheme } = config;
-  const version = versioning.get(versionScheme);
-  if (version.isVersion(currentValue)) {
-    return currentValue;
-  }
-  if (version.isSingleVersion(currentValue)) {
-    return currentValue.replace(/=/g, '').trim();
-  }
-  logger.trace(`currentValue ${currentValue} is range`);
-  let useVersions = allVersions.filter(v => version.matches(v, currentValue));
-  if (latestVersion && version.matches(latestVersion, currentValue)) {
-    useVersions = useVersions.filter(
-      v => !version.isGreaterThan(v, latestVersion)
-    );
-  }
-  if (rangeStrategy === 'pin') {
-    return (
-      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
-    );
-  }
-  if (rangeStrategy === 'bump') {
-    // Use the lowest version in the current range
-    return version.minSatisfyingVersion(useVersions, currentValue);
-  }
-  // Use the highest version in the current range
-  return version.maxSatisfyingVersion(useVersions, currentValue);
 }

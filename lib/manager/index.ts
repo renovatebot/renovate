@@ -69,8 +69,10 @@ const languageList = [
   'rust',
 ];
 
-export const get = <T extends keyof ManagerApi>(manager: string, name: T) =>
-  managers[manager][name];
+export const get = <T extends keyof ManagerApi>(
+  manager: string,
+  name: T
+): ManagerApi[T] => managers[manager][name];
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
 

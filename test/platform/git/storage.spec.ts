@@ -15,6 +15,8 @@ describe('platform/git/storage', () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(base.path).silent(true);
     await repo.init();
+    await repo.addConfig('user.email', 'Jest@example.com');
+    await repo.addConfig('user.name', 'Jest');
     await fs.writeFile(base.path + '/past_file', 'past');
     await repo.add(['past_file']);
     await repo.commit('past message');

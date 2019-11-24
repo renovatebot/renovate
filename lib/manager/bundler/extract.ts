@@ -4,9 +4,7 @@ import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 
-export { extractPackageFile };
-
-async function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   fileName?: string
 ): Promise<PackageFile | null> {

@@ -118,3 +118,11 @@ Object {
   ],
 }
 `;
+
+exports[`workers/repository/extract/index extractAllDependencies() skips non-enabled maangers 1`] = `
+Object {
+  "npm": Array [
+    Object {},
+  ],
+}
+`;
