@@ -1,6 +1,8 @@
 import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
+const isVersion = (input: string) => npm.isVersion(input);
+
 function convertToCaret(item: string) {
   // In Cargo, "1.2.3" doesn't mean exactly 1.2.3, it means >= 1.2.3 < 2.0.0
   if (isVersion(item)) {
@@ -42,8 +44,6 @@ const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(version, cargo2npm(range));
 
 export const isValid = (input: string) => npm.isValid(cargo2npm(input));
-
-const isVersion = (input: string) => npm.isVersion(input);
 
 const matches = (version: string, range: string) =>
   npm.matches(version, cargo2npm(range));

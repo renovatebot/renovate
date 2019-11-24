@@ -18,5 +18,11 @@ describe('workers/repository/extract/index', () => {
       const res = await extractAllDependencies(config);
       expect(res).toMatchSnapshot();
     });
+    it('skips non-enabled maangers', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockReturnValue([{}]);
+      const res = await extractAllDependencies(config);
+      expect(res).toMatchSnapshot();
+    });
   });
 });

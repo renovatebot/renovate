@@ -113,18 +113,6 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
-  describe('cleanRepo()', () => {
-    it('exists', () => {
-      azure.cleanRepo();
-    });
-  });
   function initRepo(args?: Partial<RepoParams> | string) {
     azureApi.gitApi.mockImplementationOnce(
       () =>
@@ -171,6 +159,19 @@ describe('platform/azure', () => {
       ...args,
     } as any);
   }
+
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      await initRepo();
+      expect(await azure.getRepoStatus()).toBeUndefined();
+    });
+  });
+
+  describe('cleanRepo()', () => {
+    it('exists', () => {
+      azure.cleanRepo();
+    });
+  });
 
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {

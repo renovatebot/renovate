@@ -25,6 +25,40 @@ interface LocalConfig extends StorageConfig {
   branchPrefix: string;
 }
 
+// istanbul ignore next
+function checkForPlatformFailure(err: Error) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+  const platformFailureStrings = [
+    'remote: Invalid username or password',
+    'gnutls_handshake() failed',
+    'The requested URL returned error: 5',
+    'The remote end hung up unexpectedly',
+    'access denied or repository not exported',
+    'Could not write new index file',
+    'Failed to connect to',
+    'Connection timed out',
+  ];
+  for (const errorStr of platformFailureStrings) {
+    if (err.message.includes(errorStr)) {
+      throw new Error('platform-failure');
+    }
+  }
+}
+
+function localName(branchName: string) {
+  return branchName.replace(/^origin\//, '');
+}
+
+function throwBaseBranchValidationError(branchName) {
+  const error = new Error('config-validation');
+  error.validationError = 'baseBranch not found';
+  error.validationMessage =
+    'The following configured baseBranch could not be found: ' + branchName;
+  throw error;
+}
+
 export class Storage {
   private _config: LocalConfig = {} as any;
 

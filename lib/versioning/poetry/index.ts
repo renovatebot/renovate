@@ -62,6 +62,25 @@ const isSingleVersion = (constraint: string) =>
     )) ||
   isVersion(constraint.trim());
 
+function handleShort(
+  operator: string,
+  currentValue: string,
+  toVersion: string
+) {
+  const toVersionMajor = major(toVersion);
+  const toVersionMinor = minor(toVersion);
+  const split = currentValue.split('.');
+  if (split.length === 1) {
+    // [^,~]4
+    return operator + toVersionMajor;
+  }
+  if (split.length === 2) {
+    // [^,~]4.1
+    return operator + toVersionMajor + '.' + toVersionMinor;
+  }
+  return null;
+}
+
 function getNewValue(
   currentValue: string,
   rangeStrategy: RangeStrategy,
@@ -95,25 +114,6 @@ function getNewValue(
   );
   const newPoetry = npm2poetry(newSemver);
   return newPoetry;
-}
-
-function handleShort(
-  operator: string,
-  currentValue: string,
-  toVersion: string
-) {
-  const toVersionMajor = major(toVersion);
-  const toVersionMinor = minor(toVersion);
-  const split = currentValue.split('.');
-  if (split.length === 1) {
-    // [^,~]4
-    return operator + toVersionMajor;
-  }
-  if (split.length === 2) {
-    // [^,~]4.1
-    return operator + toVersionMajor + '.' + toVersionMinor;
-  }
-  return null;
 }
 
 export const api: VersioningApi = {
