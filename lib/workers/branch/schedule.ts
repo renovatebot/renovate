@@ -65,7 +65,7 @@ export function hasValidSchedule(
   return [true, ''];
 }
 
-export function isScheduledNow(config) {
+export function isScheduledNow(config): boolean {
   let configSchedule = config.schedule;
   logger.debug(`Checking schedule(${configSchedule}, ${config.timezone})`);
   if (

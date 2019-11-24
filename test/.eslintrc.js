@@ -12,5 +12,6 @@ module.exports = {
 
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/no-object-literal-type-assertion': 0,
+    '@typescript-eslint/explicit-function-return-type': 0,
   },
 };
