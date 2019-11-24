@@ -114,10 +114,11 @@ async function fetchReleases(
   addMetaData(dep, datasource, config.lookupName);
   if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
     const tmpSourceUrl: string | null = baseUrlLegacyMassager(dep.sourceUrl);
-    // istanbul ignore next
+    /* istanbul ignore if */
     if (tmpSourceUrl !== null) {
       dep.sourceUrl = tmpSourceUrl;
     } else {
+      /* istanbul ignore next */
       delete dep.sourceUrl;
     }
   }
@@ -207,10 +208,12 @@ export function baseUrlLegacyMassager(sourceUrl) {
     if (gitInfo) {
       tmpurl = gitInfo.browse({ noGitPlus: true, noCommittish: true });
     }
+    /* istanbul ignore else */
     if (
       getHostsFromRulesGitlab.includes(parsedUrl.host) ||
       parsedUrl.host === 'gitlab.com'
     ) {
+      // istanbul ignore next
       if (gitInfo && gitInfo.type === 'gitlab') {
         url = tmpurl;
       } else {
@@ -222,11 +225,13 @@ export function baseUrlLegacyMassager(sourceUrl) {
           .join('/')
           .replace(RegExp('/$'), '')}`;
       }
+      // istanbul ignore else
     } else if (
       getHostsFromRulesBitbucket.includes(parsedUrl.host) ||
       parsedUrl.host === 'bitbucket.org' ||
       getHostsFromRulesBitbucketServer.includes(parsedUrl.host)
     ) {
+      // istanbul ignore next
       if (gitInfo && gitInfo.type === 'bitbucket') {
         url = tmpurl;
       } else {
@@ -239,8 +244,8 @@ export function baseUrlLegacyMassager(sourceUrl) {
           .replace(RegExp('/$'), '')}`;
       }
     }
-    return url;
+    return url.replace(RegExp('.git$'), '').replace(RegExp('/$'), '');
   }
-  //  TODO add azure support.
+  /* todo add azure support. */
   return null;
 }
