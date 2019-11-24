@@ -22,40 +22,95 @@ interface UpdateFunction {
   ): string;
 }
 
-export function updateGradleVersion(
-  buildGradleContent: string,
-  dependency: GradleDependency,
-  newVersion: string
-): string {
-  if (dependency) {
-    const updateFunctions: UpdateFunction[] = [
-      updateVersionLiterals,
-      updateLocalVariables,
-      updateGlobalVariables,
-      updatePropertyFileGlobalVariables,
-      updateKotlinVariablesByExtra,
-    ];
+// https://github.com/patrikerdes/gradle-use-latest-versions-plugin/blob/8cf9c3917b8b04ba41038923cab270d2adda3aa6/src/main/groovy/se/patrikerdes/DependencyUpdate.groovy#L27-L29
+function moduleStringVersionFormatMatch(dependency: GradleDependency): RegExp {
+  return new RegExp(
+    `(["']${dependency.group}:${dependency.name}:)[^$].*?(([:@].*?)?["'])`
+  );
+}
 
-    // eslint-disable-next-line guard-for-in
-    for (const updateFunctionIndex in updateFunctions) {
-      const updateFunction = updateFunctions[updateFunctionIndex];
-      const gradleContentUpdated = updateFunction(
-        dependency,
-        buildGradleContent,
-        newVersion
-      );
-      if (gradleContentUpdated) {
-        return gradleContentUpdated;
-      }
-    }
-  }
-  return buildGradleContent;
+function groovyPluginStringVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return new RegExp(
+    `(id\\s+["']${dependency.group}["']\\s+version\\s+["'])[^$].*?(["'])`
+  );
+}
+
+function kotlinPluginStringVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return new RegExp(
+    `(id\\("${dependency.group}"\\)\\s+version\\s+")[^$].*?(")`
+  );
+}
+
+function moduleMapVersionFormatMatch(dependency: GradleDependency): RegExp {
+  // prettier-ignore
+  return new RegExp(
+    `(group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
+    `name\\s*:\\s*["']${dependency.name}["']\\s*,\\s*` +
+    `version\\s*:\\s*["']).*?(["'])`
+  );
+}
+
+function moduleKotlinNamedArgumentVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // prettier-ignore
+  return new RegExp(
+    `(group\\s*=\\s*"${dependency.group}"\\s*,\\s*` +
+    `name\\s*=\\s*"${dependency.name}"\\s*,\\s*` +
+    `version\\s*=\\s*").*?(")`
+  );
+}
+
+function moduleMapVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // prettier-ignore
+  return new RegExp(
+    `group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
+    `name\\s*:\\s*["']${dependency.name}["']\\s*,\\s*` +
+    `version\\s*:\\s*([^\\s"')]+)\\s*`
+  );
+}
+
+function moduleKotlinNamedArgumentVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // prettier-ignore
+  return new RegExp(
+    `group\\s*=\\s*"${dependency.group}"\\s*,\\s*` +
+    `name\\s*=\\s*"${dependency.name}"\\s*,\\s*` +
+    `version\\s*=\\s*([^\\s"]+?)[\\s\\),]`
+  );
+}
+
+function moduleStringVariableInterpolationVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return new RegExp(
+    `["']${dependency.group}:${dependency.name}:\\$([^{].*?)["']`
+  );
+}
+
+function moduleStringVariableExpressionVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return new RegExp(
+    `["']${dependency.group}:${dependency.name}:\\$\{([^{].*?)}["']`
+  );
+}
+
+function variableDefinitionFormatMatch(variable: string): RegExp {
+  return new RegExp(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
 }
 
 export function collectVersionVariables(
   dependencies: BuildDependency[],
   buildGradleContent: string
-) {
+): void {
   for (const dep of dependencies) {
     const dependency: GradleDependency = {
       ...dep,
@@ -77,7 +132,7 @@ export function collectVersionVariables(
   }
 }
 
-export function init() {
+export function init(): void {
   variables = {};
 }
 
@@ -177,87 +232,32 @@ function updatePropertyFileGlobalVariables(
   return null;
 }
 
-// https://github.com/patrikerdes/gradle-use-latest-versions-plugin/blob/8cf9c3917b8b04ba41038923cab270d2adda3aa6/src/main/groovy/se/patrikerdes/DependencyUpdate.groovy#L27-L29
-function moduleStringVersionFormatMatch(dependency: GradleDependency): RegExp {
-  return new RegExp(
-    `(["']${dependency.group}:${dependency.name}:)[^$].*?(([:@].*?)?["'])`
-  );
-}
+export function updateGradleVersion(
+  buildGradleContent: string,
+  dependency: GradleDependency,
+  newVersion: string
+): string {
+  if (dependency) {
+    const updateFunctions: UpdateFunction[] = [
+      updateVersionLiterals,
+      updateLocalVariables,
+      updateGlobalVariables,
+      updatePropertyFileGlobalVariables,
+      updateKotlinVariablesByExtra,
+    ];
 
-function groovyPluginStringVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  return new RegExp(
-    `(id\\s+["']${dependency.group}["']\\s+version\\s+["'])[^$].*?(["'])`
-  );
-}
-
-function kotlinPluginStringVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  return new RegExp(
-    `(id\\("${dependency.group}"\\)\\s+version\\s+")[^$].*?(")`
-  );
-}
-
-function moduleMapVersionFormatMatch(dependency: GradleDependency): RegExp {
-  // prettier-ignore
-  return new RegExp(
-    `(group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
-    `name\\s*:\\s*["']${dependency.name}["']\\s*,\\s*` +
-    `version\\s*:\\s*["']).*?(["'])`
-  );
-}
-
-function moduleKotlinNamedArgumentVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  // prettier-ignore
-  return new RegExp(
-    `(group\\s*=\\s*"${dependency.group}"\\s*,\\s*` +
-    `name\\s*=\\s*"${dependency.name}"\\s*,\\s*` +
-    `version\\s*=\\s*").*?(")`
-  );
-}
-
-function moduleMapVariableVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  // prettier-ignore
-  return new RegExp(
-    `group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
-    `name\\s*:\\s*["']${dependency.name}["']\\s*,\\s*` +
-    `version\\s*:\\s*([^\\s"')]+)\\s*`
-  );
-}
-
-function moduleKotlinNamedArgumentVariableVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  // prettier-ignore
-  return new RegExp(
-    `group\\s*=\\s*"${dependency.group}"\\s*,\\s*` +
-    `name\\s*=\\s*"${dependency.name}"\\s*,\\s*` +
-    `version\\s*=\\s*([^\\s"]+?)[\\s\\),]`
-  );
-}
-
-function moduleStringVariableInterpolationVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  return new RegExp(
-    `["']${dependency.group}:${dependency.name}:\\$([^{].*?)["']`
-  );
-}
-
-function moduleStringVariableExpressionVersionFormatMatch(
-  dependency: GradleDependency
-): RegExp {
-  return new RegExp(
-    `["']${dependency.group}:${dependency.name}:\\$\{([^{].*?)}["']`
-  );
-}
-
-function variableDefinitionFormatMatch(variable: string): RegExp {
-  return new RegExp(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
+    // eslint-disable-next-line guard-for-in
+    for (const updateFunctionIndex in updateFunctions) {
+      const updateFunction = updateFunctions[updateFunctionIndex];
+      const gradleContentUpdated = updateFunction(
+        dependency,
+        buildGradleContent,
+        newVersion
+      );
+      if (gradleContentUpdated) {
+        return gradleContentUpdated;
+      }
+    }
+  }
+  return buildGradleContent;
 }

@@ -5,6 +5,6 @@ import * as globalWorker from './workers/global';
 
 proxy.bootstrap();
 
-(async () => {
+(async (): Promise<void> => {
   process.exitCode = await globalWorker.start();
 })();

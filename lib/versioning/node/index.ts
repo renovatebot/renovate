@@ -6,7 +6,7 @@ function getNewValue(
   rangeStrategy: RangeStrategy,
   fromVersion: string,
   toVersion: string
-) {
+): string {
   const res = npm.getNewValue(
     currentValue,
     rangeStrategy,

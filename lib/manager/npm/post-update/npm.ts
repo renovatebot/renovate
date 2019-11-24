@@ -78,7 +78,7 @@ export async function generateLockFile(
       if (config.cacheDir) {
         volumes.push(config.cacheDir);
       }
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       if (config.dockerMapDotfiles) {
         const homeDir =
           process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -87,7 +87,7 @@ export async function generateLockFile(
       }
       const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
       cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/npm npm`;
     }
     args = `install`;

@@ -28,33 +28,6 @@ function compatibleVersions(
   );
 }
 
-export async function getPkgReleases({
-  compatibility,
-  lookupName,
-  registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  let hostUrls = ['https://pypi.org/pypi/'];
-  if (is.nonEmptyArray(registryUrls)) {
-    hostUrls = registryUrls;
-  }
-  if (process.env.PIP_INDEX_URL) {
-    hostUrls = [process.env.PIP_INDEX_URL];
-  }
-  for (let hostUrl of hostUrls) {
-    hostUrl += hostUrl.endsWith('/') ? '' : '/';
-    let dep: ReleaseResult;
-    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
-      dep = await getSimpleDependency(lookupName, hostUrl);
-    } else {
-      dep = await getDependency(lookupName, hostUrl, compatibility);
-    }
-    if (dep !== null) {
-      return dep;
-    }
-  }
-  return null;
-}
-
 async function getDependency(
   depName: string,
   hostUrl: string,
@@ -108,6 +81,18 @@ async function getDependency(
   }
 }
 
+function extractVersionFromLinkText(
+  text: string,
+  depName: string
+): string | null {
+  const prefix = `${depName}-`;
+  const suffix = '.tar.gz';
+  if (!(text.startsWith(prefix) && text.endsWith(suffix))) {
+    return null;
+  }
+  return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+}
+
 async function getSimpleDependency(
   depName: string,
   hostUrl: string
@@ -147,14 +132,29 @@ async function getSimpleDependency(
   }
 }
 
-function extractVersionFromLinkText(
-  text: string,
-  depName: string
-): string | null {
-  const prefix = `${depName}-`;
-  const suffix = '.tar.gz';
-  if (!(text.startsWith(prefix) && text.endsWith(suffix))) {
-    return null;
+export async function getPkgReleases({
+  compatibility,
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+  let hostUrls = ['https://pypi.org/pypi/'];
+  if (is.nonEmptyArray(registryUrls)) {
+    hostUrls = registryUrls;
   }
-  return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+  if (process.env.PIP_INDEX_URL) {
+    hostUrls = [process.env.PIP_INDEX_URL];
+  }
+  for (let hostUrl of hostUrls) {
+    hostUrl += hostUrl.endsWith('/') ? '' : '/';
+    let dep: ReleaseResult;
+    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+      dep = await getSimpleDependency(lookupName, hostUrl);
+    } else {
+      dep = await getDependency(lookupName, hostUrl, compatibility);
+    }
+    if (dep !== null) {
+      return dep;
+    }
+  }
+  return null;
 }

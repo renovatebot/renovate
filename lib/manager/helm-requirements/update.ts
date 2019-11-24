@@ -3,14 +3,38 @@ import yaml from 'js-yaml';
 import is from '@sindresorhus/is';
 
 import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-export function updateDependency(fileContent, upgrade) {
+// Return true if the match string is found at index in content
+function matchAt(content: string, index: number, match: string): boolean {
+  return content.substring(index, index + match.length) === match;
+}
+
+// Replace oldString with newString at location index of content
+function replaceAt(
+  content: string,
+  index: number,
+  oldString: string,
+  newString: string
+): string {
+  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
+  return (
+    content.substr(0, index) +
+    newString +
+    content.substr(index + oldString.length)
+  );
+}
+
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string | null {
   logger.trace({ config: upgrade }, 'updateDependency()');
   if (!upgrade || !upgrade.depName || !upgrade.newValue) {
     logger.debug('Failed to update dependency, invalid upgrade');
     return fileContent;
   }
-  const doc = yaml.safeLoad(fileContent);
+  const doc = yaml.safeLoad(fileContent, { json: true });
   if (!doc || !is.array(doc.dependencies)) {
     logger.debug('Failed to update dependency, invalid requirements.yaml file');
     return fileContent;
@@ -48,7 +72,7 @@ export function updateDependency(fileContent, upgrade) {
         newString
       );
       // Compare the parsed yaml structure of old and new
-      if (_.isEqual(doc, yaml.safeLoad(testContent))) {
+      if (_.isEqual(doc, yaml.safeLoad(testContent, { json: true }))) {
         newFileContent = testContent;
         break;
       } else {
@@ -57,19 +81,4 @@ export function updateDependency(fileContent, upgrade) {
     }
   }
   return newFileContent;
-}
-
-// Return true if the match string is found at index in content
-function matchAt(content, index, match) {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(content, index, oldString, newString) {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
 }

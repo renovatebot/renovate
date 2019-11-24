@@ -666,7 +666,6 @@
       "description": "Config to apply when a PR is necessary due to vulnerability of existing package version.",
       "type": "object",
       "default": {
-        "enabled": true,
         "groupName": null,
         "schedule": [],
         "masterIssueApproval": false,
@@ -901,7 +900,6 @@
       "description": "Configuration object for bundler Gemfiles",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["(^|/)Gemfile$"],
         "versionScheme": "ruby"
       },
@@ -930,7 +928,6 @@
       "description": "Configuration object for Mix module renovation",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["(^|/)mix\\.exs$"],
         "versionScheme": "hex"
       },
@@ -976,7 +973,6 @@
       "description": "Configuration object for .travis.yml node version renovation",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["^.travis.yml$"],
         "versionScheme": "node"
       },
@@ -1260,7 +1256,6 @@
       "description": "Configuration object for homebrew",
       "type": "object",
       "default": {
-        "enabled": true,
         "commitMessageTopic": "Homebrew Formula {{depName}}",
         "managerBranchPrefix": "homebrew-",
         "fileMatch": ["^Formula/[^/]+[.]rb$"]
