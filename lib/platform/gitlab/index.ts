@@ -828,8 +828,16 @@ async function fetchPrList() {
     author_id: `${authorId}`,
   }).toString();
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  const res = await api.get(urlString, { paginate: true });
-  return res.body.map(mapPullRequests);
+  try {
+    const res = await api.get(urlString, { paginate: true });
+    return res.body.map(mapPullRequests);
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error fetching PR list');
+    if (err.statusCode === 403) {
+      throw new Error('authentication-error');
+    }
+    throw err;
+  }
 }
 
 export async function getPrList() {
