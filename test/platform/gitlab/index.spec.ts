@@ -263,6 +263,10 @@ describe('platform/gitlab', () => {
       await gitlab.setBaseBranch('some-branch');
       expect(api.get.mock.calls).toMatchSnapshot();
     });
+    it('uses default base branch', async () => {
+      await initRepo();
+      await gitlab.setBaseBranch();
+    });
   });
   describe('getFileList()', () => {
     it('sends to gitFs', async () => {
