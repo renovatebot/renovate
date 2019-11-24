@@ -4,34 +4,6 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { PoetryFile, PoetrySection } from './types';
 
-export function extractPackageFile(
-  content: string,
-  fileName: string
-): PackageFile | null {
-  logger.trace(`poetry.extractPackageFile(${fileName})`);
-  let pyprojectfile: PoetryFile;
-  try {
-    pyprojectfile = parse(content);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing pyproject.toml file');
-    return null;
-  }
-  if (!(pyprojectfile.tool && pyprojectfile.tool.poetry)) {
-    logger.debug(`${fileName} contains no poetry section`);
-    return null;
-  }
-  const deps = [
-    ...extractFromSection(pyprojectfile, 'dependencies'),
-    ...extractFromSection(pyprojectfile, 'dev-dependencies'),
-    ...extractFromSection(pyprojectfile, 'extras'),
-  ];
-  if (!deps.length) {
-    return null;
-  }
-
-  return { deps, registryUrls: extractRegistries(pyprojectfile) };
-}
-
 function extractFromSection(
   parsedFile: PoetryFile,
   section: keyof PoetrySection
@@ -105,4 +77,32 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
   registryUrls.add('https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
+}
+
+export function extractPackageFile(
+  content: string,
+  fileName: string
+): PackageFile | null {
+  logger.trace(`poetry.extractPackageFile(${fileName})`);
+  let pyprojectfile: PoetryFile;
+  try {
+    pyprojectfile = parse(content);
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing pyproject.toml file');
+    return null;
+  }
+  if (!(pyprojectfile.tool && pyprojectfile.tool.poetry)) {
+    logger.debug(`${fileName} contains no poetry section`);
+    return null;
+  }
+  const deps = [
+    ...extractFromSection(pyprojectfile, 'dependencies'),
+    ...extractFromSection(pyprojectfile, 'dev-dependencies'),
+    ...extractFromSection(pyprojectfile, 'extras'),
+  ];
+  if (!deps.length) {
+    return null;
+  }
+
+  return { deps, registryUrls: extractRegistries(pyprojectfile) };
 }

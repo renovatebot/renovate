@@ -48,6 +48,38 @@ export function getRegistryRepository(
   };
 }
 
+function getECRAuthToken(region: string, opts: hostRules.HostRule) {
+  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
+  if (opts.username && opts.password) {
+    config.accessKeyId = opts.username;
+    config.secretAccessKey = opts.password;
+  }
+  const ecr = new AWS.ECR(config);
+  return new Promise<string>(resolve => {
+    ecr.getAuthorizationToken({}, (err, data) => {
+      if (err) {
+        logger.trace({ err }, 'err');
+        logger.info('ECR getAuthorizationToken error');
+        resolve(null);
+      } else {
+        const authorizationToken =
+          data &&
+          data.authorizationData &&
+          data.authorizationData[0] &&
+          data.authorizationData[0].authorizationToken;
+        if (authorizationToken) {
+          resolve(authorizationToken);
+        } else {
+          logger.warn(
+            'Could not extract authorizationToken from ECR getAuthorizationToken response'
+          );
+          resolve(null);
+        }
+      }
+    });
+  });
+}
+
 async function getAuthHeaders(
   registry: string,
   repository: string
@@ -376,6 +408,34 @@ async function getTags(
   }
 }
 
+export function getConfigResponse(url: string, headers: OutgoingHttpHeaders) {
+  return got(url, {
+    headers,
+    hooks: {
+      beforeRedirect: [
+        (options: any) => {
+          if (
+            options.search &&
+            options.search.indexOf('X-Amz-Algorithm') !== -1
+          ) {
+            // if there is no port in the redirect URL string, then delete it from the redirect options.
+            // This can be evaluated for removal after upgrading to Got v10
+            const portInUrl = options.href.split('/')[2].split(':')[1];
+            if (!portInUrl) {
+              // eslint-disable-next-line no-param-reassign
+              delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
+            }
+
+            // docker registry is hosted on amazon, redirect url includes authentication.
+            // eslint-disable-next-line no-param-reassign
+            delete options.headers.authorization;
+          }
+        },
+      ],
+    },
+  });
+}
+
 /*
  * docker.getLabels
  *
@@ -496,34 +556,6 @@ async function getLabels(
   }
 }
 
-export function getConfigResponse(url: string, headers: OutgoingHttpHeaders) {
-  return got(url, {
-    headers,
-    hooks: {
-      beforeRedirect: [
-        (options: any) => {
-          if (
-            options.search &&
-            options.search.indexOf('X-Amz-Algorithm') !== -1
-          ) {
-            // if there is no port in the redirect URL string, then delete it from the redirect options.
-            // This can be evaluated for removal after upgrading to Got v10
-            const portInUrl = options.href.split('/')[2].split(':')[1];
-            if (!portInUrl) {
-              // eslint-disable-next-line no-param-reassign
-              delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-            }
-
-            // docker registry is hosted on amazon, redirect url includes authentication.
-            // eslint-disable-next-line no-param-reassign
-            delete options.headers.authorization;
-          }
-        },
-      ],
-    },
-  });
-}
-
 /**
  * docker.getPkgReleases
  *
@@ -561,36 +593,4 @@ export async function getPkgReleases({
     ret.sourceUrl = labels['org.opencontainers.image.source'];
   }
   return ret;
-}
-
-function getECRAuthToken(region: string, opts: hostRules.HostRule) {
-  const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
-  if (opts.username && opts.password) {
-    config.accessKeyId = opts.username;
-    config.secretAccessKey = opts.password;
-  }
-  const ecr = new AWS.ECR(config);
-  return new Promise<string>(resolve => {
-    ecr.getAuthorizationToken({}, (err, data) => {
-      if (err) {
-        logger.trace({ err }, 'err');
-        logger.info('ECR getAuthorizationToken error');
-        resolve(null);
-      } else {
-        const authorizationToken =
-          data &&
-          data.authorizationData &&
-          data.authorizationData[0] &&
-          data.authorizationData[0].authorizationToken;
-        if (authorizationToken) {
-          resolve(authorizationToken);
-        } else {
-          logger.warn(
-            'Could not extract authorizationToken from ECR getAuthorizationToken response'
-          );
-          resolve(null);
-        }
-      }
-    });
-  });
 }

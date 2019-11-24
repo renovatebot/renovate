@@ -13,17 +13,18 @@ import { parse as parseRange, ltr } from './range';
 import { isSingleOperator, isValidOperator } from './operator';
 import { pin, bump, replace } from './strategies';
 
-const equals = (left: string, right: string) => eq(left, right);
+const equals = (left: string, right: string): boolean => eq(left, right);
 
-const getMajor = (version: string) => parseVersion(version).major;
-const getMinor = (version: string) => parseVersion(version).minor;
-const getPatch = (version: string) => parseVersion(version).patch;
+const getMajor = (version: string): number => parseVersion(version).major;
+const getMinor = (version: string): number => parseVersion(version).minor;
+const getPatch = (version: string): number => parseVersion(version).patch;
 
-export const isVersion = (version: string) => !!valid(version);
-const isGreaterThan = (left: string, right: string) => gt(left, right);
-const isLessThanRange = (version: string, range: string) => ltr(version, range);
+export const isVersion = (version: string): boolean => !!valid(version);
+const isGreaterThan = (left: string, right: string): boolean => gt(left, right);
+const isLessThanRange = (version: string, range: string): boolean =>
+  ltr(version, range);
 
-const isSingleVersion = (range: string) => {
+const isSingleVersion = (range: string): boolean => {
   const { version, operator } = parseRange(range);
 
   return operator
@@ -31,10 +32,10 @@ const isSingleVersion = (range: string) => {
     : isVersion(version);
 };
 
-const isStable = (version: string) =>
+const isStable = (version: string): boolean =>
   parseVersion(version).prerelease ? false : isVersion(version);
 
-export const isValid = (input: string) =>
+export const isValid = (input: string): boolean =>
   input
     .split(',')
     .map(piece => piece.trim())
@@ -46,11 +47,11 @@ export const isValid = (input: string) =>
         : isVersion(version);
     });
 
-export const matches = (version: string, range: string) =>
+export const matches = (version: string, range: string): boolean =>
   satisfies(version, range);
-const maxSatisfyingVersion = (versions: string[], range: string) =>
+const maxSatisfyingVersion = (versions: string[], range: string): string =>
   maxSatisfying(versions, range);
-const minSatisfyingVersion = (versions: string[], range: string) =>
+const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(versions, range);
 
 const getNewValue = (
@@ -58,7 +59,7 @@ const getNewValue = (
   rangeStrategy: RangeStrategy,
   _fromVersion: string,
   toVersion: string
-) => {
+): string => {
   switch (rangeStrategy) {
     case 'pin':
       return pin({ to: toVersion });
@@ -73,7 +74,7 @@ const getNewValue = (
   }
 };
 
-export const sortVersions = (left: string, right: string) =>
+export const sortVersions = (left: string, right: string): number =>
   gt(left, right) ? 1 : -1;
 
 export const api: VersioningApi = {
