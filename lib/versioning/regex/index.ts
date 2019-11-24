@@ -13,6 +13,15 @@ export interface RegExpVersion extends GenericVersion {
   compatibility: string;
 }
 
+// convenience method for passing a Version object into any semver.* method.
+function asSemver(version: RegExpVersion): string {
+  let vstring = `${version.release[0]}.${version.release[1]}.${version.release[2]}`;
+  if (typeof version.prerelease !== 'undefined') {
+    vstring += `-${version.prerelease}`;
+  }
+  return vstring;
+}
+
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   // config is expected to be overridden by a user-specified RegExp value
   // sample values:
@@ -110,15 +119,6 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       asSemver(this._parse(range))
     );
   }
-}
-
-// convenience method for passing a Version object into any semver.* method.
-function asSemver(version: RegExpVersion): string {
-  let vstring = `${version.release[0]}.${version.release[1]}.${version.release[2]}`;
-  if (typeof version.prerelease !== 'undefined') {
-    vstring += `-${version.prerelease}`;
-  }
-  return vstring;
 }
 
 export const api: VersioningApiConstructor = RegExpVersioningApi;

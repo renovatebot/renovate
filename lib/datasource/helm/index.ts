@@ -4,35 +4,6 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
 
-export async function getPkgReleases({
-  lookupName,
-  registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    logger.warn(`lookupName was not provided to getPkgReleases`);
-    return null;
-  }
-  const [helmRepository] = registryUrls;
-  if (!helmRepository) {
-    logger.warn(`helmRepository was not provided to getPkgReleases`);
-    return null;
-  }
-  const repositoryData = await getRepositoryData(helmRepository);
-  if (!repositoryData) {
-    logger.warn(`Couldn't get index.yaml file from ${helmRepository}`);
-    return null;
-  }
-  const releases = repositoryData.find(chart => chart.name === lookupName);
-  if (!releases) {
-    logger.warn(
-      { dependency: lookupName },
-      `Entry ${lookupName} doesn't exist in index.yaml from ${helmRepository}`
-    );
-    return null;
-  }
-  return releases;
-}
-
 export async function getRepositoryData(
   repository: string
 ): Promise<ReleaseResult[]> {
@@ -88,4 +59,33 @@ export async function getRepositoryData(
     logger.debug(err);
     return null;
   }
+}
+
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+  if (!lookupName) {
+    logger.warn(`lookupName was not provided to getPkgReleases`);
+    return null;
+  }
+  const [helmRepository] = registryUrls;
+  if (!helmRepository) {
+    logger.warn(`helmRepository was not provided to getPkgReleases`);
+    return null;
+  }
+  const repositoryData = await getRepositoryData(helmRepository);
+  if (!repositoryData) {
+    logger.warn(`Couldn't get index.yaml file from ${helmRepository}`);
+    return null;
+  }
+  const releases = repositoryData.find(chart => chart.name === lookupName);
+  if (!releases) {
+    logger.warn(
+      { dependency: lookupName },
+      `Entry ${lookupName} doesn't exist in index.yaml from ${helmRepository}`
+    );
+    return null;
+  }
+  return releases;
 }

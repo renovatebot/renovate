@@ -12,25 +12,6 @@ export interface VersionComparator {
   (version: string, other: string): number;
 }
 
-// helper functions to ease create other versioning schemas with little code
-// especially if those schemas do not support ranges
-export const create = ({
-  parse,
-  compare,
-}: {
-  parse: VersionParser;
-  compare: VersionComparator;
-}) => {
-  let schema: VersioningApi = {} as any;
-  if (parse) {
-    schema = { ...schema, ...parser(parse) };
-  }
-  if (compare) {
-    schema = { ...schema, ...comparer(compare) };
-  }
-  return schema;
-};
-
 // since this file was meant for no range support, a range = version
 // parse should return null if version not valid
 // parse should return an object with property release, an array of version sections major.minor.patch
@@ -117,6 +98,25 @@ export const comparer = (
     getNewValue,
     sortVersions,
   };
+};
+
+// helper functions to ease create other versioning schemas with little code
+// especially if those schemas do not support ranges
+export const create = ({
+  parse,
+  compare,
+}: {
+  parse: VersionParser;
+  compare: VersionComparator;
+}) => {
+  let schema: VersioningApi = {} as any;
+  if (parse) {
+    schema = { ...schema, ...parser(parse) };
+  }
+  if (compare) {
+    schema = { ...schema, ...comparer(compare) };
+  }
+  return schema;
 };
 
 export abstract class GenericVersioningApi<

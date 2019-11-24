@@ -244,6 +244,139 @@ export function branchExists(branchName: string) {
   return config.storage.branchExists(branchName);
 }
 
+export function isBranchStale(branchName: string) {
+  logger.debug(`isBranchStale(${branchName})`);
+  return config.storage.isBranchStale(branchName);
+}
+
+// Gets details for a PR
+export async function getPr(prNo: number, refreshCache?: boolean) {
+  logger.debug(`getPr(${prNo})`);
+  if (!prNo) {
+    return null;
+  }
+
+  const res = await api.get(
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
+    { useCache: !refreshCache }
+  );
+
+  const pr: any = {
+    displayNumber: `Pull Request #${res.body.id}`,
+    ...utils.prInfo(res.body),
+    reviewers: res.body.reviewers.map(
+      (r: { user: { name: any } }) => r.user.name
+    ),
+    isModified: false,
+  };
+
+  pr.version = updatePrVersion(pr.number, pr.version);
+
+  if (pr.state === 'open') {
+    const mergeRes = await api.get(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
+      { useCache: !refreshCache }
+    );
+    pr.isConflicted = !!mergeRes.body.conflicted;
+    pr.canMerge = !!mergeRes.body.canMerge;
+
+    const prCommits = (await api.get(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
+      { useCache: !refreshCache }
+    )).body;
+
+    if (prCommits.totalCount === 1) {
+      if (global.gitAuthor) {
+        const commitAuthorEmail = prCommits.values[0].author.emailAddress;
+        if (commitAuthorEmail !== global.gitAuthor.email) {
+          logger.debug(
+            { prNo },
+            'PR is modified: 1 commit but not by configured gitAuthor'
+          );
+          pr.isModified = true;
+        }
+      }
+    } else {
+      logger.debug(
+        { prNo },
+        `PR is modified: Found ${prCommits.totalCount} commits`
+      );
+      pr.isModified = true;
+    }
+  }
+
+  if (await branchExists(pr.branchName)) {
+    pr.isStale = await isBranchStale(pr.branchName);
+  }
+
+  return pr;
+}
+
+// TODO: coverage
+// istanbul ignore next
+function matchesState(state: string, desiredState: string) {
+  if (desiredState === 'all') {
+    return true;
+  }
+  if (desiredState[0] === '!') {
+    return state !== desiredState.substring(1);
+  }
+  return state === desiredState;
+}
+
+// TODO: coverage
+// istanbul ignore next
+const isRelevantPr = (
+  branchName: string,
+  prTitle: string | null | undefined,
+  state: string
+) => (p: { branchName: string; title: string; state: string }) =>
+  p.branchName === branchName &&
+  (!prTitle || p.title === prTitle) &&
+  matchesState(p.state, state);
+
+// TODO: coverage
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getPrList(_args?: any) {
+  logger.debug(`getPrList()`);
+  // istanbul ignore next
+  if (!config.prList) {
+    const query = new URLSearchParams({
+      state: 'ALL',
+      'role.1': 'AUTHOR',
+      'username.1': config.username,
+    }).toString();
+    const values = await utils.accumulateValues(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
+    );
+
+    config.prList = values.map(utils.prInfo);
+    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+  } else {
+    logger.debug('returning cached PR list');
+  }
+  return config.prList;
+}
+
+// TODO: coverage
+// istanbul ignore next
+export async function findPr(
+  branchName: string,
+  prTitle?: string,
+  state = 'all',
+  refreshCache?: boolean
+) {
+  logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
+  const prList = await getPrList({ refreshCache });
+  const pr = prList.find(isRelevantPr(branchName, prTitle, state));
+  if (pr) {
+    logger.debug(`Found PR #${pr.number}`);
+  } else {
+    logger.debug(`DID NOT Found PR from branch #${branchName}`);
+  }
+  return pr;
+}
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string, refreshCache?: boolean) {
   logger.debug(`getBranchPr(${branchName})`);
@@ -254,11 +387,6 @@ export async function getBranchPr(branchName: string, refreshCache?: boolean) {
 export function getAllRenovateBranches(branchPrefix: string) {
   logger.debug('getAllRenovateBranches');
   return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string) {
-  logger.debug(`isBranchStale(${branchName})`);
-  return config.storage.isBranchStale(branchName);
 }
 
 export async function commitFilesToBranch(
@@ -656,71 +784,6 @@ export async function ensureCommentRemoval(prNo: number, topic: string) {
   }
 }
 
-// TODO: coverage
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getPrList(_args?: any) {
-  logger.debug(`getPrList()`);
-  // istanbul ignore next
-  if (!config.prList) {
-    const query = new URLSearchParams({
-      state: 'ALL',
-      'role.1': 'AUTHOR',
-      'username.1': config.username,
-    }).toString();
-    const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
-    );
-
-    config.prList = values.map(utils.prInfo);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
-  } else {
-    logger.debug('returning cached PR list');
-  }
-  return config.prList;
-}
-
-// TODO: coverage
-// istanbul ignore next
-function matchesState(state: string, desiredState: string) {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState[0] === '!') {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
-// TODO: coverage
-// istanbul ignore next
-const isRelevantPr = (
-  branchName: string,
-  prTitle: string | null | undefined,
-  state: string
-) => (p: { branchName: string; title: string; state: string }) =>
-  p.branchName === branchName &&
-  (!prTitle || p.title === prTitle) &&
-  matchesState(p.state, state);
-
-// TODO: coverage
-// istanbul ignore next
-export async function findPr(
-  branchName: string,
-  prTitle?: string,
-  state = 'all',
-  refreshCache?: boolean
-) {
-  logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
-  const prList = await getPrList({ refreshCache });
-  const pr = prList.find(isRelevantPr(branchName, prTitle, state));
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
-  } else {
-    logger.debug(`DID NOT Found PR from branch #${branchName}`);
-  }
-  return pr;
-}
-
 // Pull Request
 
 const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
@@ -803,69 +866,6 @@ export async function createPr(
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
-  }
-
-  return pr;
-}
-
-// Gets details for a PR
-export async function getPr(prNo: number, refreshCache?: boolean) {
-  logger.debug(`getPr(${prNo})`);
-  if (!prNo) {
-    return null;
-  }
-
-  const res = await api.get(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    { useCache: !refreshCache }
-  );
-
-  const pr: any = {
-    displayNumber: `Pull Request #${res.body.id}`,
-    ...utils.prInfo(res.body),
-    reviewers: res.body.reviewers.map(
-      (r: { user: { name: any } }) => r.user.name
-    ),
-    isModified: false,
-  };
-
-  pr.version = updatePrVersion(pr.number, pr.version);
-
-  if (pr.state === 'open') {
-    const mergeRes = await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
-      { useCache: !refreshCache }
-    );
-    pr.isConflicted = !!mergeRes.body.conflicted;
-    pr.canMerge = !!mergeRes.body.canMerge;
-
-    const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
-      { useCache: !refreshCache }
-    )).body;
-
-    if (prCommits.totalCount === 1) {
-      if (global.gitAuthor) {
-        const commitAuthorEmail = prCommits.values[0].author.emailAddress;
-        if (commitAuthorEmail !== global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            'PR is modified: 1 commit but not by configured gitAuthor'
-          );
-          pr.isModified = true;
-        }
-      }
-    } else {
-      logger.debug(
-        { prNo },
-        `PR is modified: Found ${prCommits.totalCount} commits`
-      );
-      pr.isModified = true;
-    }
-  }
-
-  if (await branchExists(pr.branchName)) {
-    pr.isStale = await isBranchStale(pr.branchName);
   }
 
   return pr;

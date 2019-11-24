@@ -11,9 +11,7 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { RangeStrategy } from '../common';
 
-export { getNewValue };
-
-function getNewValue(
+export function getNewValue(
   currentValue: string,
   rangeStrategy: RangeStrategy,
   fromVersion: string,

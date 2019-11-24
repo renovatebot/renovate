@@ -15,6 +15,126 @@ const datasources = {
   gitlab,
 };
 
+export function replaceArgs(
+  obj: string | string[] | object | object[],
+  argMapping: Record<string, any>
+) {
+  if (is.string(obj)) {
+    let returnStr = obj;
+    for (const [arg, argVal] of Object.entries(argMapping)) {
+      const re = regEx(`{{${arg}}}`, 'g');
+      returnStr = returnStr.replace(re, argVal);
+    }
+    return returnStr;
+  }
+  if (is.array(obj)) {
+    const returnArray = [];
+    for (const item of obj) {
+      returnArray.push(replaceArgs(item, argMapping));
+    }
+    return returnArray;
+  }
+  if (is.object(obj)) {
+    const returnObj = {};
+    for (const [key, val] of Object.entries(obj)) {
+      returnObj[key] = replaceArgs(val, argMapping);
+    }
+    return returnObj;
+  }
+  return obj;
+}
+
+export function parsePreset(input: string): ParsedPreset {
+  let str = input;
+  let datasource: string;
+  let packageName: string;
+  let presetName: string;
+  let params: string[];
+  if (str.startsWith('github>')) {
+    datasource = 'github';
+    str = str.substring('github>'.length);
+  } else if (str.startsWith('gitlab>')) {
+    datasource = 'gitlab';
+    str = str.substring('gitlab>'.length);
+  }
+  str = str.replace(/^npm>/, '');
+  datasource = datasource || 'npm';
+  if (str.includes('(')) {
+    params = str
+      .slice(str.indexOf('(') + 1, -1)
+      .split(',')
+      .map(elem => elem.trim());
+    str = str.slice(0, str.indexOf('('));
+  }
+  if (str[0] === ':') {
+    // default namespace
+    packageName = 'renovate-config-default';
+    presetName = str.slice(1);
+  } else if (str[0] === '@') {
+    // scoped namespace
+    [, packageName] = str.match(/(@.*?)(:|$)/);
+    str = str.slice(packageName.length);
+    if (!packageName.includes('/')) {
+      packageName += '/renovate-config';
+    }
+    if (str === '') {
+      presetName = 'default';
+    } else {
+      presetName = str.slice(1);
+    }
+  } else {
+    // non-scoped namespace
+    [, packageName] = str.match(/(.*?)(:|$)/);
+    presetName = str.slice(packageName.length + 1);
+    if (datasource === 'npm' && !packageName.startsWith('renovate-config-')) {
+      packageName = `renovate-config-${packageName}`;
+    }
+    if (presetName === '') {
+      presetName = 'default';
+    }
+  }
+  return { datasource, packageName, presetName, params };
+}
+
+export async function getPreset(preset: string): Promise<RenovateConfig> {
+  logger.trace(`getPreset(${preset})`);
+  const { datasource, packageName, presetName, params } = parsePreset(preset);
+  let presetConfig = await datasources[datasource].getPreset(
+    packageName,
+    presetName
+  );
+  logger.trace({ presetConfig }, `Found preset ${preset}`);
+  if (params) {
+    const argMapping = {};
+    for (const [index, value] of params.entries()) {
+      argMapping[`arg${index}`] = value;
+    }
+    presetConfig = replaceArgs(presetConfig, argMapping);
+  }
+  logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
+  const presetKeys = Object.keys(presetConfig);
+  if (
+    presetKeys.length === 2 &&
+    presetKeys.includes('description') &&
+    presetKeys.includes('extends')
+  ) {
+    // preset is just a collection of other presets
+    delete presetConfig.description;
+  }
+  const packageListKeys = [
+    'description',
+    'packageNames',
+    'excludePackageNames',
+    'packagePatterns',
+    'excludePackagePatterns',
+  ];
+  if (presetKeys.every(key => packageListKeys.includes(key))) {
+    delete presetConfig.description;
+  }
+  const { migratedConfig } = migration.migrateConfig(presetConfig);
+  return massage.massageConfig(migratedConfig);
+}
+
 export async function resolveConfigPresets(
   inputConfig: RenovateConfig,
   ignorePresets?: string[],
@@ -120,129 +240,9 @@ export async function resolveConfigPresets(
   return config;
 }
 
-export function replaceArgs(
-  obj: string | string[] | object | object[],
-  argMapping: Record<string, any>
-) {
-  if (is.string(obj)) {
-    let returnStr = obj;
-    for (const [arg, argVal] of Object.entries(argMapping)) {
-      const re = regEx(`{{${arg}}}`, 'g');
-      returnStr = returnStr.replace(re, argVal);
-    }
-    return returnStr;
-  }
-  if (is.array(obj)) {
-    const returnArray = [];
-    for (const item of obj) {
-      returnArray.push(replaceArgs(item, argMapping));
-    }
-    return returnArray;
-  }
-  if (is.object(obj)) {
-    const returnObj = {};
-    for (const [key, val] of Object.entries(obj)) {
-      returnObj[key] = replaceArgs(val, argMapping);
-    }
-    return returnObj;
-  }
-  return obj;
-}
-
 export interface ParsedPreset {
   datasource: string;
   packageName: string;
   presetName: string;
   params?: string[];
-}
-
-export function parsePreset(input: string): ParsedPreset {
-  let str = input;
-  let datasource: string;
-  let packageName: string;
-  let presetName: string;
-  let params: string[];
-  if (str.startsWith('github>')) {
-    datasource = 'github';
-    str = str.substring('github>'.length);
-  } else if (str.startsWith('gitlab>')) {
-    datasource = 'gitlab';
-    str = str.substring('gitlab>'.length);
-  }
-  str = str.replace(/^npm>/, '');
-  datasource = datasource || 'npm';
-  if (str.includes('(')) {
-    params = str
-      .slice(str.indexOf('(') + 1, -1)
-      .split(',')
-      .map(elem => elem.trim());
-    str = str.slice(0, str.indexOf('('));
-  }
-  if (str[0] === ':') {
-    // default namespace
-    packageName = 'renovate-config-default';
-    presetName = str.slice(1);
-  } else if (str[0] === '@') {
-    // scoped namespace
-    [, packageName] = str.match(/(@.*?)(:|$)/);
-    str = str.slice(packageName.length);
-    if (!packageName.includes('/')) {
-      packageName += '/renovate-config';
-    }
-    if (str === '') {
-      presetName = 'default';
-    } else {
-      presetName = str.slice(1);
-    }
-  } else {
-    // non-scoped namespace
-    [, packageName] = str.match(/(.*?)(:|$)/);
-    presetName = str.slice(packageName.length + 1);
-    if (datasource === 'npm' && !packageName.startsWith('renovate-config-')) {
-      packageName = `renovate-config-${packageName}`;
-    }
-    if (presetName === '') {
-      presetName = 'default';
-    }
-  }
-  return { datasource, packageName, presetName, params };
-}
-
-export async function getPreset(preset: string): Promise<RenovateConfig> {
-  logger.trace(`getPreset(${preset})`);
-  const { datasource, packageName, presetName, params } = parsePreset(preset);
-  let presetConfig = await datasources[datasource].getPreset(
-    packageName,
-    presetName
-  );
-  logger.trace({ presetConfig }, `Found preset ${preset}`);
-  if (params) {
-    const argMapping = {};
-    for (const [index, value] of params.entries()) {
-      argMapping[`arg${index}`] = value;
-    }
-    presetConfig = replaceArgs(presetConfig, argMapping);
-  }
-  logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
-  const presetKeys = Object.keys(presetConfig);
-  if (
-    presetKeys.length === 2 &&
-    presetKeys.includes('description') &&
-    presetKeys.includes('extends')
-  ) {
-    // preset is just a collection of other presets
-    delete presetConfig.description;
-  }
-  const packageListKeys = [
-    'description',
-    'packageNames',
-    'excludePackageNames',
-    'packagePatterns',
-    'excludePackagePatterns',
-  ];
-  if (presetKeys.every(key => packageListKeys.includes(key))) {
-    delete presetConfig.description;
-  }
-  const { migratedConfig } = migration.migrateConfig(presetConfig);
-  return massage.massageConfig(migratedConfig);
 }

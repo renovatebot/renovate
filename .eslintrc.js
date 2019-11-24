@@ -27,7 +27,6 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/camelcase': 'off', // disabled until ??
-    '@typescript-eslint/no-use-before-define': 1,
     '@typescript-eslint/no-explicit-any': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [

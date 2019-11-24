@@ -4,8 +4,6 @@ import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { RangeStrategy } from '../common';
 
-export { getNewValue };
-
 function getFutureVersion(
   baseVersion: string,
   toVersion: string,
@@ -37,7 +35,7 @@ interface Range {
   version: string;
 }
 
-function getNewValue(
+export function getNewValue(
   currentValue: string,
   rangeStrategy: RangeStrategy,
   fromVersion: string,
