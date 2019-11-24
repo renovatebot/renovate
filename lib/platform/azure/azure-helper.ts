@@ -71,33 +71,18 @@ export async function getAzureBranchObj(
   };
 }
 
-export async function getChanges(
-  files: { name: string; contents: any }[],
-  repoId: string,
-  branchName: string
-) {
-  const changes = [];
-  for (const file of files) {
-    // Add or update
-    let changeType = 1;
-    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
-    if (fileAlreadyThere) {
-      changeType = 2;
-    }
-
-    changes.push({
-      changeType,
-      item: {
-        path: file.name,
-      },
-      newContent: {
-        Content: file.contents,
-        ContentType: 0, // RawText
-      },
+async function streamToString(stream: NodeJS.ReadableStream) {
+  const chunks: string[] = [];
+  /* eslint-disable promise/avoid-new */
+  const p = await new Promise<string>(resolve => {
+    stream.on('data', (chunk: any) => {
+      chunks.push(chunk.toString());
     });
-  }
-
-  return changes;
+    stream.on('end', () => {
+      resolve(chunks.join(''));
+    });
+  });
+  return p;
 }
 
 // if no branchName, look globaly
@@ -144,18 +129,33 @@ export async function getFile(
   return null; // no file found
 }
 
-async function streamToString(stream: NodeJS.ReadableStream) {
-  const chunks: string[] = [];
-  /* eslint-disable promise/avoid-new */
-  const p = await new Promise<string>(resolve => {
-    stream.on('data', (chunk: any) => {
-      chunks.push(chunk.toString());
+export async function getChanges(
+  files: { name: string; contents: any }[],
+  repoId: string,
+  branchName: string
+) {
+  const changes = [];
+  for (const file of files) {
+    // Add or update
+    let changeType = 1;
+    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
+    if (fileAlreadyThere) {
+      changeType = 2;
+    }
+
+    changes.push({
+      changeType,
+      item: {
+        path: file.name,
+      },
+      newContent: {
+        Content: file.contents,
+        ContentType: 0, // RawText
+      },
     });
-    stream.on('end', () => {
-      resolve(chunks.join(''));
-    });
-  });
-  return p;
+  }
+
+  return changes;
 }
 
 export function max4000Chars(str: string) {

@@ -42,6 +42,17 @@ export type ProcessBranchResult =
   | 'pr-edited'
   | 'pr-hourly-limit-reached';
 
+// TODO: proper typings
+function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
+  const titleRebase = branchPr.title && branchPr.title.startsWith('rebase!');
+  const labelRebase =
+    branchPr.labels && branchPr.labels.includes(config.rebaseLabel);
+  const prRebaseChecked =
+    branchPr.body && branchPr.body.includes(`- [x] <!-- ${appSlug}-rebase -->`);
+
+  return titleRebase || labelRebase || prRebaseChecked;
+}
+
 export async function processBranch(
   branchConfig: BranchConfig,
   prHourlyLimitReached?: boolean,
@@ -554,15 +565,4 @@ export async function processBranch(
     return 'pr-created';
   }
   return 'done';
-}
-
-// TODO: proper typings
-function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
-  const titleRebase = branchPr.title && branchPr.title.startsWith('rebase!');
-  const labelRebase =
-    branchPr.labels && branchPr.labels.includes(config.rebaseLabel);
-  const prRebaseChecked =
-    branchPr.body && branchPr.body.includes(`- [x] <!-- ${appSlug}-rebase -->`);
-
-  return titleRebase || labelRebase || prRebaseChecked;
 }

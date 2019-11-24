@@ -150,6 +150,43 @@ export function cleanRepo() {
   config = {} as any;
 }
 
+async function getBranchProtection(branchName: string) {
+  // istanbul ignore if
+  if (config.parentRepo) {
+    return {};
+  }
+  const res = await api.get(
+    `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`
+  );
+  return res.body;
+}
+
+// Return the commit SHA for a branch
+async function getBranchCommit(branchName: string) {
+  try {
+    const res = await api.get(
+      `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
+    );
+    return res.body.object.sha;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error getting branch commit');
+    if (err.statusCode === 404) {
+      throw new Error('repository-changed');
+    }
+    if (err.statusCode === 409) {
+      throw new Error('empty');
+    }
+    throw err;
+  }
+}
+
+async function getBaseCommitSHA() {
+  if (!config.baseCommitSHA) {
+    config.baseCommitSHA = await getBranchCommit(config.baseBranch);
+  }
+  return config.baseCommitSHA;
+}
+
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -429,43 +466,6 @@ export async function getRepoForceRebase() {
   return config.repoForceRebase;
 }
 
-// Return the commit SHA for a branch
-async function getBranchCommit(branchName: string) {
-  try {
-    const res = await api.get(
-      `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
-    );
-    return res.body.object.sha;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error getting branch commit');
-    if (err.statusCode === 404) {
-      throw new Error('repository-changed');
-    }
-    if (err.statusCode === 409) {
-      throw new Error('empty');
-    }
-    throw err;
-  }
-}
-
-async function getBaseCommitSHA() {
-  if (!config.baseCommitSHA) {
-    config.baseCommitSHA = await getBranchCommit(config.baseBranch);
-  }
-  return config.baseCommitSHA;
-}
-
-async function getBranchProtection(branchName: string) {
-  // istanbul ignore if
-  if (config.parentRepo) {
-    return {};
-  }
-  const res = await api.get(
-    `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`
-  );
-  return res.body;
-}
-
 // istanbul ignore next
 export async function setBaseBranch(branchName = config.baseBranch) {
   config.baseBranch = branchName;
@@ -551,6 +551,416 @@ export function commitFilesToBranch(
 // istanbul ignore next
 export function getCommitMessages() {
   return config.storage.getCommitMessages();
+}
+
+async function getClosedPrs() {
+  if (!config.closedPrList) {
+    config.closedPrList = {};
+    let query;
+    try {
+      const url = 'graphql';
+      // prettier-ignore
+      query = `
+      query {
+        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
+          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+            nodes {
+              number
+              state
+              headRefName
+              title
+              comments(last: 100) {
+                nodes {
+                  databaseId
+                  body
+                }
+              }
+            }
+          }
+        }
+      }
+      `;
+      const options = {
+        body: JSON.stringify({ query }),
+        json: false,
+      };
+      const res = JSON.parse((await api.post(url, options)).body);
+      const prNumbers: number[] = [];
+      // istanbul ignore if
+      if (!res.data) {
+        logger.info(
+          { query, res },
+          'No graphql res.data, returning empty list'
+        );
+        return {};
+      }
+      for (const pr of res.data.repository.pullRequests.nodes) {
+        // https://developer.github.com/v4/object/pullrequest/
+        pr.displayNumber = `Pull Request #${pr.number}`;
+        pr.state = pr.state.toLowerCase();
+        pr.branchName = pr.headRefName;
+        delete pr.headRefName;
+        pr.comments = pr.comments.nodes.map(
+          (comment: { databaseId: number; body: string }) => ({
+            id: comment.databaseId,
+            body: comment.body,
+          })
+        );
+        pr.body = 'dummy body'; // just in case
+        config.closedPrList[pr.number] = pr;
+        prNumbers.push(pr.number);
+      }
+      prNumbers.sort();
+      logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ query, err }, 'getClosedPrs error');
+    }
+  }
+  return config.closedPrList;
+}
+
+async function getOpenPrs() {
+  // istanbul ignore if
+  if (config.isGhe) {
+    logger.debug(
+      'Skipping unsupported graphql PullRequests.mergeStateStatus query on GHE'
+    );
+    return {};
+  }
+  if (!config.openPrList) {
+    config.openPrList = {};
+    let query;
+    try {
+      const url = 'graphql';
+      // https://developer.github.com/v4/previews/#mergeinfopreview---more-detailed-information-about-a-pull-requests-merge-state
+      const headers = {
+        accept: 'application/vnd.github.merge-info-preview+json',
+      };
+      // prettier-ignore
+      query = `
+      query {
+        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
+          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+            nodes {
+              number
+              headRefName
+              baseRefName
+              title
+              mergeable
+              mergeStateStatus
+              labels(last: 100) {
+                nodes {
+                  name
+                }
+              }
+              commits(first: 2) {
+                nodes {
+                  commit {
+                    author {
+                      email
+                    }
+                    committer {
+                      email
+                    }
+                    parents(last: 1) {
+                      edges {
+                        node {
+                          abbreviatedOid
+                          oid
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              body
+              reviews(first: 1, states:[CHANGES_REQUESTED]){
+                nodes{
+                  state
+                }
+              }
+            }
+          }
+        }
+      }
+      `;
+      const options = {
+        headers,
+        body: JSON.stringify({ query }),
+        json: false,
+      };
+      const res = JSON.parse((await api.post(url, options)).body);
+      const prNumbers: number[] = [];
+      // istanbul ignore if
+      if (!res.data) {
+        logger.info({ query, res }, 'No graphql res.data');
+        return {};
+      }
+      for (const pr of res.data.repository.pullRequests.nodes) {
+        // https://developer.github.com/v4/object/pullrequest/
+        pr.displayNumber = `Pull Request #${pr.number}`;
+        pr.state = 'open';
+        pr.branchName = pr.headRefName;
+        const branchName = pr.branchName;
+        const prNo = pr.number;
+        delete pr.headRefName;
+        pr.targetBranch = pr.baseRefName;
+        delete pr.baseRefName;
+        // https://developer.github.com/v4/enum/mergeablestate
+        const canMergeStates = ['BEHIND', 'CLEAN'];
+        const hasNegativeReview =
+          pr.reviews && pr.reviews.nodes && pr.reviews.nodes.length > 0;
+        pr.canMerge =
+          canMergeStates.includes(pr.mergeStateStatus) && !hasNegativeReview;
+        // https://developer.github.com/v4/enum/mergestatestatus
+        if (pr.mergeStateStatus === 'DIRTY') {
+          pr.isConflicted = true;
+        } else {
+          pr.isConflicted = false;
+        }
+        if (pr.commits.nodes.length === 1) {
+          if (global.gitAuthor) {
+            // Check against gitAuthor
+            const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
+            if (commitAuthorEmail === global.gitAuthor.email) {
+              pr.isModified = false;
+            } else {
+              logger.trace(
+                {
+                  branchName,
+                  prNo,
+                  commitAuthorEmail,
+                  gitAuthorEmail: global.gitAuthor.email,
+                },
+                'PR isModified=true: last committer has different email to the bot'
+              );
+              pr.isModified = true;
+            }
+          } else {
+            // assume the author is us
+            // istanbul ignore next
+            pr.isModified = false;
+          }
+        } else {
+          // assume we can't rebase if more than 1
+          logger.trace(
+            {
+              branchName,
+              prNo,
+            },
+            'PR isModified=true: PR has more than one commit'
+          );
+          pr.isModified = true;
+        }
+        pr.isStale = false;
+        if (pr.mergeStateStatus === 'BEHIND') {
+          pr.isStale = true;
+        } else {
+          const baseCommitSHA = await getBaseCommitSHA();
+          if (
+            pr.commits.nodes[0].commit.parents.edges.length &&
+            pr.commits.nodes[0].commit.parents.edges[0].node.oid !==
+              baseCommitSHA
+          ) {
+            pr.isStale = true;
+          }
+        }
+        if (pr.labels) {
+          pr.labels = pr.labels.nodes.map(
+            (label: { name: string }) => label.name
+          );
+        }
+        delete pr.mergeable;
+        delete pr.mergeStateStatus;
+        delete pr.commits;
+        config.openPrList[pr.number] = pr;
+        prNumbers.push(pr.number);
+      }
+      prNumbers.sort();
+      logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ query, err }, 'getOpenPrs error');
+    }
+  }
+  return config.openPrList;
+}
+
+// Gets details for a PR
+export async function getPr(prNo: number) {
+  if (!prNo) {
+    return null;
+  }
+  const openPr = (await getOpenPrs())[prNo];
+  if (openPr) {
+    logger.debug('Returning from graphql open PR list');
+    return openPr;
+  }
+  const closedPr = (await getClosedPrs())[prNo];
+  if (closedPr) {
+    logger.debug('Returning from graphql closed PR list');
+    return closedPr;
+  }
+  logger.info(
+    { prNo },
+    'PR not found in open or closed PRs list - trying to fetch it directly'
+  );
+  const pr = (await api.get(
+    `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+  )).body;
+  if (!pr) {
+    return null;
+  }
+  // Harmonise PR values
+  pr.displayNumber = `Pull Request #${pr.number}`;
+  if (pr.state === 'open') {
+    pr.isModified = true;
+    pr.branchName = pr.head ? pr.head.ref : undefined;
+    pr.sha = pr.head ? pr.head.sha : undefined;
+    if (pr.mergeable === true) {
+      pr.canMerge = true;
+    }
+    if (pr.mergeable_state === 'dirty') {
+      logger.debug({ prNo }, 'PR state is dirty so unmergeable');
+      pr.isConflicted = true;
+    }
+    if (pr.commits === 1) {
+      if (global.gitAuthor) {
+        // Check against gitAuthor
+        const commitAuthorEmail = (await api.get(
+          `repos/${config.parentRepo ||
+            config.repository}/pulls/${prNo}/commits`
+        )).body[0].commit.author.email;
+        if (commitAuthorEmail === global.gitAuthor.email) {
+          logger.debug(
+            { prNo },
+            '1 commit matches configured gitAuthor so can rebase'
+          );
+          pr.isModified = false;
+        } else {
+          logger.trace(
+            {
+              prNo,
+              commitAuthorEmail,
+              gitAuthorEmail: global.gitAuthor.email,
+            },
+            'PR isModified=true: 1 commit and not by configured gitAuthor so cannot rebase'
+          );
+          pr.isModified = true;
+        }
+      } else {
+        logger.debug(
+          { prNo },
+          '1 commit and no configured gitAuthor so can rebase'
+        );
+        pr.isModified = false;
+      }
+    } else {
+      // Check if only one author of all commits
+      logger.debug({ prNo }, 'Checking all commits');
+      const prCommits = (await api.get(
+        `repos/${config.parentRepo || config.repository}/pulls/${prNo}/commits`
+      )).body;
+      // Filter out "Update branch" presses
+      const remainingCommits = prCommits.filter(
+        (commit: {
+          committer: { login: string };
+          commit: { message: string };
+        }) => {
+          const isWebflow =
+            commit.committer && commit.committer.login === 'web-flow';
+          if (!isWebflow) {
+            // Not a web UI commit, so keep it
+            return true;
+          }
+          const isUpdateBranch =
+            commit.commit &&
+            commit.commit.message &&
+            commit.commit.message.startsWith("Merge branch 'master' into");
+          if (isUpdateBranch) {
+            // They just clicked the button
+            return false;
+          }
+          // They must have done some other edit through the web UI
+          return true;
+        }
+      );
+      if (remainingCommits.length <= 1) {
+        pr.isModified = false;
+      }
+    }
+    const baseCommitSHA = await getBaseCommitSHA();
+    if (!pr.base || pr.base.sha !== baseCommitSHA) {
+      pr.isStale = true;
+    }
+  }
+  return pr;
+}
+
+function matchesState(state: string, desiredState: string) {
+  if (desiredState === 'all') {
+    return true;
+  }
+  if (desiredState[0] === '!') {
+    return state !== desiredState.substring(1);
+  }
+  return state === desiredState;
+}
+
+export async function getPrList() {
+  logger.trace('getPrList()');
+  if (!config.prList) {
+    logger.debug('Retrieving PR list');
+    const res = await api.get(
+      `repos/${config.parentRepo ||
+        config.repository}/pulls?per_page=100&state=all`,
+      { paginate: true }
+    );
+    config.prList = res.body.map(
+      (pr: {
+        number: number;
+        head: { ref: string; sha: string; repo: { full_name: string } };
+        title: string;
+        state: string;
+        merged_at: string;
+        created_at: string;
+        closed_at: string;
+      }) => ({
+        number: pr.number,
+        branchName: pr.head.ref,
+        sha: pr.head.sha,
+        title: pr.title,
+        state:
+          pr.state === 'closed' && pr.merged_at && pr.merged_at.length
+            ? /* istanbul ignore next */ 'merged'
+            : pr.state,
+        createdAt: pr.created_at,
+        closed_at: pr.closed_at,
+        sourceRepo:
+          pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
+      })
+    );
+    logger.debug(`Retrieved ${config.prList!.length} Pull Requests`);
+  }
+  return config.prList!;
+}
+
+export async function findPr(
+  branchName: string,
+  prTitle?: string | null,
+  state = 'all'
+) {
+  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+  const prList = await getPrList();
+  const pr = prList.find(
+    p =>
+      p.branchName === branchName &&
+      (!prTitle || p.title === prTitle) &&
+      matchesState(p.state, state)
+  );
+  if (pr) {
+    logger.debug(`Found PR #${pr.number}`);
+  }
+  return pr;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -836,6 +1246,16 @@ export async function findIssue(title: string) {
   };
 }
 
+async function closeIssue(issueNumber: number) {
+  logger.debug(`closeIssue(${issueNumber})`);
+  await api.patch(
+    `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
+    {
+      body: { state: 'closed' },
+    }
+  );
+}
+
 export async function ensureIssue(
   title: string,
   rawbody: string,
@@ -912,16 +1332,6 @@ export async function ensureIssue(
   return null;
 }
 
-async function closeIssue(issueNumber: number) {
-  logger.debug(`closeIssue(${issueNumber})`);
-  await api.patch(
-    `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    }
-  );
-}
-
 export async function ensureIssueClosing(title: string) {
   logger.debug(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
@@ -983,31 +1393,6 @@ export async function deleteLabel(issueNo: number, label: string) {
   }
 }
 
-async function getComments(issueNo: number) {
-  const pr = (await getClosedPrs())[issueNo];
-  if (pr) {
-    logger.debug('Returning closed PR list comments');
-    return pr.comments;
-  }
-  // GET /repos/:owner/:repo/issues/:number/comments
-  logger.debug(`Getting comments for #${issueNo}`);
-  const url = `repos/${config.parentRepo ||
-    config.repository}/issues/${issueNo}/comments?per_page=100`;
-  try {
-    const comments = (await api.get<Comment[]>(url, {
-      paginate: true,
-    })).body;
-    logger.debug(`Found ${comments.length} comments`);
-    return comments;
-  } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
-      logger.debug('404 respose when retrieving comments');
-      throw new Error('platform-failure');
-    }
-    throw err;
-  }
-}
-
 async function addComment(issueNo: number, body: string) {
   // POST /repos/:owner/:repo/issues/:number/comments
   await api.post(
@@ -1036,6 +1421,31 @@ async function deleteComment(commentId: number) {
     `repos/${config.parentRepo ||
       config.repository}/issues/comments/${commentId}`
   );
+}
+
+async function getComments(issueNo: number) {
+  const pr = (await getClosedPrs())[issueNo];
+  if (pr) {
+    logger.debug('Returning closed PR list comments');
+    return pr.comments;
+  }
+  // GET /repos/:owner/:repo/issues/:number/comments
+  logger.debug(`Getting comments for #${issueNo}`);
+  const url = `repos/${config.parentRepo ||
+    config.repository}/issues/${issueNo}/comments?per_page=100`;
+  try {
+    const comments = (await api.get<Comment[]>(url, {
+      paginate: true,
+    })).body;
+    logger.debug(`Found ${comments.length} comments`);
+    return comments;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.debug('404 respose when retrieving comments');
+      throw new Error('platform-failure');
+    }
+    throw err;
+  }
 }
 
 export async function ensureComment(
@@ -1119,73 +1529,6 @@ export async function ensureCommentRemoval(issueNo: number, topic: string) {
 
 // Pull Request
 
-export async function getPrList() {
-  logger.trace('getPrList()');
-  if (!config.prList) {
-    logger.debug('Retrieving PR list');
-    const res = await api.get(
-      `repos/${config.parentRepo ||
-        config.repository}/pulls?per_page=100&state=all`,
-      { paginate: true }
-    );
-    config.prList = res.body.map(
-      (pr: {
-        number: number;
-        head: { ref: string; sha: string; repo: { full_name: string } };
-        title: string;
-        state: string;
-        merged_at: string;
-        created_at: string;
-        closed_at: string;
-      }) => ({
-        number: pr.number,
-        branchName: pr.head.ref,
-        sha: pr.head.sha,
-        title: pr.title,
-        state:
-          pr.state === 'closed' && pr.merged_at && pr.merged_at.length
-            ? /* istanbul ignore next */ 'merged'
-            : pr.state,
-        createdAt: pr.created_at,
-        closed_at: pr.closed_at,
-        sourceRepo:
-          pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
-      })
-    );
-    logger.debug(`Retrieved ${config.prList!.length} Pull Requests`);
-  }
-  return config.prList!;
-}
-
-function matchesState(state: string, desiredState: string) {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState[0] === '!') {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-) {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  const prList = await getPrList();
-  const pr = prList.find(
-    p =>
-      p.branchName === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
-  );
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
-  }
-  return pr;
-}
-
 // Creates PR and returns PR number
 export async function createPr(
   branchName: string,
@@ -1236,349 +1579,6 @@ export async function createPr(
     );
   }
   pr.isModified = false;
-  return pr;
-}
-
-async function getOpenPrs() {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql PullRequests.mergeStateStatus query on GHE'
-    );
-    return {};
-  }
-  if (!config.openPrList) {
-    config.openPrList = {};
-    let query;
-    try {
-      const url = 'graphql';
-      // https://developer.github.com/v4/previews/#mergeinfopreview---more-detailed-information-about-a-pull-requests-merge-state
-      const headers = {
-        accept: 'application/vnd.github.merge-info-preview+json',
-      };
-      // prettier-ignore
-      query = `
-      query {
-        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
-            nodes {
-              number
-              headRefName
-              baseRefName
-              title
-              mergeable
-              mergeStateStatus
-              labels(last: 100) {
-                nodes {
-                  name
-                }
-              }
-              commits(first: 2) {
-                nodes {
-                  commit {
-                    author {
-                      email
-                    }
-                    committer {
-                      email
-                    }
-                    parents(last: 1) {
-                      edges {
-                        node {
-                          abbreviatedOid
-                          oid
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              body
-              reviews(first: 1, states:[CHANGES_REQUESTED]){
-                nodes{
-                  state
-                }
-              }
-            }
-          }
-        }
-      }
-      `;
-      const options = {
-        headers,
-        body: JSON.stringify({ query }),
-        json: false,
-      };
-      const res = JSON.parse((await api.post(url, options)).body);
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!res.data) {
-        logger.info({ query, res }, 'No graphql res.data');
-        return {};
-      }
-      for (const pr of res.data.repository.pullRequests.nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = 'open';
-        pr.branchName = pr.headRefName;
-        const branchName = pr.branchName;
-        const prNo = pr.number;
-        delete pr.headRefName;
-        pr.targetBranch = pr.baseRefName;
-        delete pr.baseRefName;
-        // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN'];
-        const hasNegativeReview =
-          pr.reviews && pr.reviews.nodes && pr.reviews.nodes.length > 0;
-        pr.canMerge =
-          canMergeStates.includes(pr.mergeStateStatus) && !hasNegativeReview;
-        // https://developer.github.com/v4/enum/mergestatestatus
-        if (pr.mergeStateStatus === 'DIRTY') {
-          pr.isConflicted = true;
-        } else {
-          pr.isConflicted = false;
-        }
-        if (pr.commits.nodes.length === 1) {
-          if (global.gitAuthor) {
-            // Check against gitAuthor
-            const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
-            if (commitAuthorEmail === global.gitAuthor.email) {
-              pr.isModified = false;
-            } else {
-              logger.trace(
-                {
-                  branchName,
-                  prNo,
-                  commitAuthorEmail,
-                  gitAuthorEmail: global.gitAuthor.email,
-                },
-                'PR isModified=true: last committer has different email to the bot'
-              );
-              pr.isModified = true;
-            }
-          } else {
-            // assume the author is us
-            // istanbul ignore next
-            pr.isModified = false;
-          }
-        } else {
-          // assume we can't rebase if more than 1
-          logger.trace(
-            {
-              branchName,
-              prNo,
-            },
-            'PR isModified=true: PR has more than one commit'
-          );
-          pr.isModified = true;
-        }
-        pr.isStale = false;
-        if (pr.mergeStateStatus === 'BEHIND') {
-          pr.isStale = true;
-        } else {
-          const baseCommitSHA = await getBaseCommitSHA();
-          if (
-            pr.commits.nodes[0].commit.parents.edges.length &&
-            pr.commits.nodes[0].commit.parents.edges[0].node.oid !==
-              baseCommitSHA
-          ) {
-            pr.isStale = true;
-          }
-        }
-        if (pr.labels) {
-          pr.labels = pr.labels.nodes.map(
-            (label: { name: string }) => label.name
-          );
-        }
-        delete pr.mergeable;
-        delete pr.mergeStateStatus;
-        delete pr.commits;
-        config.openPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ query, err }, 'getOpenPrs error');
-    }
-  }
-  return config.openPrList;
-}
-
-async function getClosedPrs() {
-  if (!config.closedPrList) {
-    config.closedPrList = {};
-    let query;
-    try {
-      const url = 'graphql';
-      // prettier-ignore
-      query = `
-      query {
-        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
-            nodes {
-              number
-              state
-              headRefName
-              title
-              comments(last: 100) {
-                nodes {
-                  databaseId
-                  body
-                }
-              }
-            }
-          }
-        }
-      }
-      `;
-      const options = {
-        body: JSON.stringify({ query }),
-        json: false,
-      };
-      const res = JSON.parse((await api.post(url, options)).body);
-      const prNumbers: number[] = [];
-      // istanbul ignore if
-      if (!res.data) {
-        logger.info(
-          { query, res },
-          'No graphql res.data, returning empty list'
-        );
-        return {};
-      }
-      for (const pr of res.data.repository.pullRequests.nodes) {
-        // https://developer.github.com/v4/object/pullrequest/
-        pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = pr.state.toLowerCase();
-        pr.branchName = pr.headRefName;
-        delete pr.headRefName;
-        pr.comments = pr.comments.nodes.map(
-          (comment: { databaseId: number; body: string }) => ({
-            id: comment.databaseId,
-            body: comment.body,
-          })
-        );
-        pr.body = 'dummy body'; // just in case
-        config.closedPrList[pr.number] = pr;
-        prNumbers.push(pr.number);
-      }
-      prNumbers.sort();
-      logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ query, err }, 'getClosedPrs error');
-    }
-  }
-  return config.closedPrList;
-}
-
-// Gets details for a PR
-export async function getPr(prNo: number) {
-  if (!prNo) {
-    return null;
-  }
-  const openPr = (await getOpenPrs())[prNo];
-  if (openPr) {
-    logger.debug('Returning from graphql open PR list');
-    return openPr;
-  }
-  const closedPr = (await getClosedPrs())[prNo];
-  if (closedPr) {
-    logger.debug('Returning from graphql closed PR list');
-    return closedPr;
-  }
-  logger.info(
-    { prNo },
-    'PR not found in open or closed PRs list - trying to fetch it directly'
-  );
-  const pr = (await api.get(
-    `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-  )).body;
-  if (!pr) {
-    return null;
-  }
-  // Harmonise PR values
-  pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === 'open') {
-    pr.isModified = true;
-    pr.branchName = pr.head ? pr.head.ref : undefined;
-    pr.sha = pr.head ? pr.head.sha : undefined;
-    if (pr.mergeable === true) {
-      pr.canMerge = true;
-    }
-    if (pr.mergeable_state === 'dirty') {
-      logger.debug({ prNo }, 'PR state is dirty so unmergeable');
-      pr.isConflicted = true;
-    }
-    if (pr.commits === 1) {
-      if (global.gitAuthor) {
-        // Check against gitAuthor
-        const commitAuthorEmail = (await api.get(
-          `repos/${config.parentRepo ||
-            config.repository}/pulls/${prNo}/commits`
-        )).body[0].commit.author.email;
-        if (commitAuthorEmail === global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            '1 commit matches configured gitAuthor so can rebase'
-          );
-          pr.isModified = false;
-        } else {
-          logger.trace(
-            {
-              prNo,
-              commitAuthorEmail,
-              gitAuthorEmail: global.gitAuthor.email,
-            },
-            'PR isModified=true: 1 commit and not by configured gitAuthor so cannot rebase'
-          );
-          pr.isModified = true;
-        }
-      } else {
-        logger.debug(
-          { prNo },
-          '1 commit and no configured gitAuthor so can rebase'
-        );
-        pr.isModified = false;
-      }
-    } else {
-      // Check if only one author of all commits
-      logger.debug({ prNo }, 'Checking all commits');
-      const prCommits = (await api.get(
-        `repos/${config.parentRepo || config.repository}/pulls/${prNo}/commits`
-      )).body;
-      // Filter out "Update branch" presses
-      const remainingCommits = prCommits.filter(
-        (commit: {
-          committer: { login: string };
-          commit: { message: string };
-        }) => {
-          const isWebflow =
-            commit.committer && commit.committer.login === 'web-flow';
-          if (!isWebflow) {
-            // Not a web UI commit, so keep it
-            return true;
-          }
-          const isUpdateBranch =
-            commit.commit &&
-            commit.commit.message &&
-            commit.commit.message.startsWith("Merge branch 'master' into");
-          if (isUpdateBranch) {
-            // They just clicked the button
-            return false;
-          }
-          // They must have done some other edit through the web UI
-          return true;
-        }
-      );
-      if (remainingCommits.length <= 1) {
-        pr.isModified = false;
-      }
-    }
-    const baseCommitSHA = await getBaseCommitSHA();
-    if (!pr.base || pr.base.sha !== baseCommitSHA) {
-      pr.isStale = true;
-    }
-  }
   return pr;
 }
 

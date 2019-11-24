@@ -19,7 +19,7 @@ export async function extractPackageFile(
       logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;
     }
-    const chart = yaml.safeLoad(chartContents);
+    const chart = yaml.safeLoad(chartContents, { json: true });
     if (!(chart && chart.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
@@ -34,7 +34,7 @@ export async function extractPackageFile(
   let deps = [];
   let doc;
   try {
-    doc = yaml.safeLoad(content);
+    doc = yaml.safeLoad(content, { json: true });
   } catch (err) {
     logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
     return null;

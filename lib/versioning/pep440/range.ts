@@ -4,13 +4,11 @@ import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { RangeStrategy } from '../common';
 
-export { getNewValue };
-
 function getFutureVersion(
   baseVersion: string,
   toVersion: string,
   step: number
-) {
+): string {
   const toRelease: number[] = parseVersion(toVersion).release;
   const baseRelease: number[] = parseVersion(baseVersion).release;
   let found = false;
@@ -37,12 +35,12 @@ interface Range {
   version: string;
 }
 
-function getNewValue(
+export function getNewValue(
   currentValue: string,
   rangeStrategy: RangeStrategy,
   fromVersion: string,
   toVersion: string
-) {
+): string {
   // easy pin
   if (rangeStrategy === 'pin') {
     return '==' + toVersion;

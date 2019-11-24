@@ -75,7 +75,7 @@ export async function generateLockFile(
       if (config.cacheDir) {
         volumes.push(config.cacheDir);
       }
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       // istanbul ignore if
       if (config.dockerMapDotfiles) {
         const homeDir =
@@ -85,7 +85,7 @@ export async function generateLockFile(
       }
       const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
       cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/pnpm pnpm`;
     }
     logger.debug(`Using pnpm: ${cmd}`);

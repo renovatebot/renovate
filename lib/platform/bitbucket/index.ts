@@ -138,6 +138,13 @@ export function getRepoForceRebase() {
   return false;
 }
 
+// Search
+
+// Get full file list
+export function getFileList(branchName?: string) {
+  return config.storage.getFileList(branchName);
+}
+
 export async function setBaseBranch(branchName = config.baseBranch) {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
@@ -151,13 +158,6 @@ export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ) {
   return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-// Get full file list
-export function getFileList(branchName?: string) {
-  return config.storage.getFileList(branchName);
 }
 
 // Branch
@@ -177,6 +177,49 @@ export function isBranchStale(branchName: string) {
 
 export function getFile(filePath: string, branchName?: string) {
   return config.storage.getFile(filePath, branchName);
+}
+
+// istanbul ignore next
+function matchesState(state: string, desiredState: string) {
+  if (desiredState === 'all') {
+    return true;
+  }
+  if (desiredState[0] === '!') {
+    return state !== desiredState.substring(1);
+  }
+  return state === desiredState;
+}
+
+export async function getPrList() {
+  logger.debug('getPrList()');
+  if (!config.prList) {
+    logger.debug('Retrieving PR list');
+    let url = `/2.0/repositories/${config.repository}/pullrequests?`;
+    url += utils.prStates.all.map(state => 'state=' + state).join('&');
+    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
+    config.prList = prs.map(utils.prInfo);
+    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+  }
+  return config.prList;
+}
+
+export async function findPr(
+  branchName: string,
+  prTitle?: string | null,
+  state = 'all'
+) {
+  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+  const prList = await getPrList();
+  const pr = prList.find(
+    (p: { branchName: string; title: string; state: string }) =>
+      p.branchName === branchName &&
+      (!prTitle || p.title === prTitle) &&
+      matchesState(p.state, state)
+  );
+  if (pr) {
+    logger.debug(`Found PR #${pr.number}`);
+  }
+  return pr;
 }
 
 export async function deleteBranch(branchName: string, closePr?: boolean) {
@@ -220,6 +263,88 @@ export function commitFilesToBranch(
 
 export function getCommitMessages() {
   return config.storage.getCommitMessages();
+}
+
+async function isPrConflicted(prNo: number) {
+  const diff = (await api.get(
+    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
+    { json: false } as any
+  )).body;
+
+  return utils.isConflicted(parseDiff(diff));
+}
+
+// Gets details for a PR
+export async function getPr(prNo: number) {
+  const pr = (await api.get(
+    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+  )).body;
+
+  // istanbul ignore if
+  if (!pr) {
+    return null;
+  }
+
+  const res: any = {
+    displayNumber: `Pull Request #${pr.id}`,
+    ...utils.prInfo(pr),
+    isModified: false,
+  };
+
+  if (utils.prStates.open.includes(pr.state)) {
+    res.isConflicted = await isPrConflicted(prNo);
+
+    // TODO: Is that correct? Should we check getBranchStatus like gitlab?
+    res.canMerge = !res.isConflicted;
+
+    // we only want the first two commits, because size tells us the overall number
+    const url = pr.links.commits.href + '?pagelen=2';
+    const { body } = await api.get<utils.PagedResult<Commit>>(url);
+    const size = body.size || body.values.length;
+
+    // istanbul ignore if
+    if (size === undefined) {
+      logger.warn({ prNo, url, body }, 'invalid response so can rebase');
+    } else if (size === 1) {
+      if (global.gitAuthor) {
+        const author = addrs.parseOneAddress(
+          body.values[0].author.raw
+        ) as addrs.ParsedMailbox;
+        if (author.address !== global.gitAuthor.email) {
+          logger.debug(
+            { prNo },
+            'PR is modified: 1 commit but not by configured gitAuthor'
+          );
+          res.isModified = true;
+        }
+      }
+    } else {
+      logger.debug({ prNo }, `PR is modified: Found ${size} commits`);
+      res.isModified = true;
+    }
+  }
+  if (await branchExists(pr.source.branch.name)) {
+    res.isStale = await isBranchStale(pr.source.branch.name);
+  }
+
+  return res;
+}
+
+const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
+
+// Return the commit SHA for a branch
+async function getBranchCommit(branchName: string) {
+  try {
+    const branch = (await api.get(
+      `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
+        branchName
+      )}`
+    )).body;
+    return branch.target.hash;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
+    return null;
+  }
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -365,6 +490,15 @@ async function closeIssue(issueNumber: number) {
   );
 }
 
+export function getPrBody(input: string) {
+  // Remove any HTML we use
+  return smartTruncate(input, 50000)
+    .replace(/<\/?summary>/g, '**')
+    .replace(/<\/?details>/g, '')
+    .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
+    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
+}
+
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
@@ -497,36 +631,6 @@ export function ensureCommentRemoval(prNo: number, topic: string) {
   return comments.ensureCommentRemoval(config, prNo, topic);
 }
 
-// istanbul ignore next
-function matchesState(state: string, desiredState: string) {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState[0] === '!') {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-) {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  const prList = await getPrList();
-  const pr = prList.find(
-    (p: { branchName: string; title: string; state: string }) =>
-      p.branchName === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
-  );
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
-  }
-  return pr;
-}
-
 // Creates PR and returns PR number
 export async function createPr(
   branchName: string,
@@ -587,76 +691,12 @@ export async function createPr(
   return pr;
 }
 
-async function isPrConflicted(prNo: number) {
-  const diff = (await api.get(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-    { json: false } as any
-  )).body;
-
-  return utils.isConflicted(parseDiff(diff));
-}
-
 interface Reviewer {
   uuid: { raw: string };
 }
 
 interface Commit {
   author: { raw: string };
-}
-// Gets details for a PR
-export async function getPr(prNo: number) {
-  const pr = (await api.get(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
-  )).body;
-
-  // istanbul ignore if
-  if (!pr) {
-    return null;
-  }
-
-  const res: any = {
-    displayNumber: `Pull Request #${pr.id}`,
-    ...utils.prInfo(pr),
-    isModified: false,
-  };
-
-  if (utils.prStates.open.includes(pr.state)) {
-    res.isConflicted = await isPrConflicted(prNo);
-
-    // TODO: Is that correct? Should we check getBranchStatus like gitlab?
-    res.canMerge = !res.isConflicted;
-
-    // we only want the first two commits, because size tells us the overall number
-    const url = pr.links.commits.href + '?pagelen=2';
-    const { body } = await api.get<utils.PagedResult<Commit>>(url);
-    const size = body.size || body.values.length;
-
-    // istanbul ignore if
-    if (size === undefined) {
-      logger.warn({ prNo, url, body }, 'invalid response so can rebase');
-    } else if (size === 1) {
-      if (global.gitAuthor) {
-        const author = addrs.parseOneAddress(
-          body.values[0].author.raw
-        ) as addrs.ParsedMailbox;
-        if (author.address !== global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            'PR is modified: 1 commit but not by configured gitAuthor'
-          );
-          res.isModified = true;
-        }
-      }
-    } else {
-      logger.debug({ prNo }, `PR is modified: Found ${size} commits`);
-      res.isModified = true;
-    }
-  }
-  if (await branchExists(pr.source.branch.name)) {
-    res.isStale = await isBranchStale(pr.source.branch.name);
-  }
-
-  return res;
 }
 
 // Return a list of all modified files in a PR
@@ -703,46 +743,7 @@ export async function mergePr(prNo: number, branchName: string) {
   return true;
 }
 
-export function getPrBody(input: string) {
-  // Remove any HTML we use
-  return smartTruncate(input, 50000)
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
-}
-
-const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
-
-// Return the commit SHA for a branch
-async function getBranchCommit(branchName: string) {
-  try {
-    const branch = (await api.get(
-      `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
-        branchName
-      )}`
-    )).body;
-    return branch.target.hash;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
-    return null;
-  }
-}
-
 // Pull Request
-
-export async function getPrList() {
-  logger.debug('getPrList()');
-  if (!config.prList) {
-    logger.debug('Retrieving PR list');
-    let url = `/2.0/repositories/${config.repository}/pullrequests?`;
-    url += utils.prStates.all.map(state => 'state=' + state).join('&');
-    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
-    config.prList = prs.map(utils.prInfo);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
-  }
-  return config.prList;
-}
 
 export function cleanRepo() {
   // istanbul ignore if

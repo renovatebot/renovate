@@ -2,9 +2,7 @@ import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageFile, PackageDependency } from '../common';
 
-export { extractPackageFile };
-
-function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
