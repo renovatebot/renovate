@@ -4,6 +4,44 @@ import URL from 'url';
 
 import { ManagerConfig, PackageFile } from '../common';
 
+async function getUrl(
+  git: Git.SimpleGit,
+  gitModulesPath: string,
+  submoduleName: string
+): Promise<string> {
+  const path = (await Git().raw([
+    'config',
+    '--file',
+    gitModulesPath,
+    '--get',
+    `submodule.${submoduleName}.url`,
+  ])).trim();
+  if (!path.startsWith('../')) {
+    return path;
+  }
+  const remoteUrl = (await git.raw([
+    'config',
+    '--get',
+    'remote.origin.url',
+  ])).trim();
+  return URL.resolve(`${remoteUrl}/`, path);
+}
+
+async function getBranch(
+  gitModulesPath: string,
+  submoduleName: string
+): Promise<string> {
+  return (
+    (await Git().raw([
+      'config',
+      '--file',
+      gitModulesPath,
+      '--get',
+      `submodule.${submoduleName}.branch`,
+    ])) || 'master'
+  ).trim();
+}
+
 export default async function extractPackageFile(
   content: string,
   fileName: string,
@@ -46,42 +84,4 @@ export default async function extractPackageFile(
   );
 
   return { deps, datasource: 'gitSubmodules' };
-}
-
-async function getUrl(
-  git: Git.SimpleGit,
-  gitModulesPath: string,
-  submoduleName: string
-): Promise<string> {
-  const path = (await Git().raw([
-    'config',
-    '--file',
-    gitModulesPath,
-    '--get',
-    `submodule.${submoduleName}.url`,
-  ])).trim();
-  if (!path.startsWith('../')) {
-    return path;
-  }
-  const remoteUrl = (await git.raw([
-    'config',
-    '--get',
-    'remote.origin.url',
-  ])).trim();
-  return URL.resolve(`${remoteUrl}/`, path);
-}
-
-async function getBranch(
-  gitModulesPath: string,
-  submoduleName: string
-): Promise<string> {
-  return (
-    (await Git().raw([
-      'config',
-      '--file',
-      gitModulesPath,
-      '--get',
-      `submodule.${submoduleName}.branch`,
-    ])) || 'master'
-  ).trim();
 }

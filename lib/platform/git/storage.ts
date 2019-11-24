@@ -59,6 +59,14 @@ function throwBaseBranchValidationError(branchName) {
   throw error;
 }
 
+async function isDirectory(dir: string): Promise<boolean> {
+  try {
+    return (await fs.stat(dir)).isDirectory();
+  } catch (err) {
+    return false;
+  }
+}
+
 export class Storage {
   private _config: LocalConfig = {} as any;
 
