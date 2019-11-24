@@ -4,24 +4,24 @@ const limitsToInit = ['prCommitsPerRunLimit'];
 const l: Record<string, number> = {};
 const v: Record<string, number> = {};
 
+export function setLimit(name: string, value: number) {
+  logger.debug(`Limits.setLimit l[${name}] = ${value}`);
+  l[name] = value;
+}
+
 export function init(config: Record<string, any>) {
-  logger.info(`Limits.init enter method`);
+  logger.debug(`Limits.init enter method`);
   for (const limit of limitsToInit) {
-    logger.info(`Limits.init ${limit} processing`);
+    logger.debug(`Limits.init ${limit} processing`);
     if (config[limit]) {
       setLimit(limit, config[limit]);
       v[limit] = 0;
     } else {
-      logger.info(
+      logger.debug(
         `Limits.init ${limit} variable is not set. Ignoring ${limit}`
       );
     }
   }
-}
-
-export function setLimit(name: string, value: number) {
-  logger.debug(`Limits.setLimit l[${name}] = ${value}`);
-  l[name] = value;
 }
 
 export function getLimitRemaining(name: string) {

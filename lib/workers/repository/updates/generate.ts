@@ -23,6 +23,42 @@ function ifTypesGroup(
   );
 }
 
+function getTableValues(
+  upgrade: PackageDependency & ManagerConfig
+): [string, string, string, string] | null {
+  if (!upgrade.commitBodyTable) {
+    return null;
+  }
+  const {
+    datasource,
+    lookupName,
+    depName,
+    fromVersion,
+    toVersion,
+    displayFrom,
+    displayTo,
+  } = upgrade;
+  const name = lookupName || depName;
+  const from = fromVersion || displayFrom;
+  const to = toVersion || displayTo;
+  if (datasource && name && from && to) {
+    return [datasource, name, from, to];
+  }
+  logger.debug(
+    {
+      datasource,
+      lookupName,
+      depName,
+      fromVersion,
+      toVersion,
+      displayFrom,
+      displayTo,
+    },
+    'Cannot determine table values'
+  );
+  return null;
+}
+
 export function generateBranchConfig(branchUpgrades) {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
@@ -289,40 +325,4 @@ export function generateBranchConfig(branchUpgrades) {
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
   return config;
-}
-
-function getTableValues(
-  upgrade: PackageDependency & ManagerConfig
-): [string, string, string, string] | null {
-  if (!upgrade.commitBodyTable) {
-    return null;
-  }
-  const {
-    datasource,
-    lookupName,
-    depName,
-    fromVersion,
-    toVersion,
-    displayFrom,
-    displayTo,
-  } = upgrade;
-  const name = lookupName || depName;
-  const from = fromVersion || displayFrom;
-  const to = toVersion || displayTo;
-  if (datasource && name && from && to) {
-    return [datasource, name, from, to];
-  }
-  logger.debug(
-    {
-      datasource,
-      lookupName,
-      depName,
-      fromVersion,
-      toVersion,
-      displayFrom,
-      displayTo,
-    },
-    'Cannot determine table values'
-  );
-  return null;
 }

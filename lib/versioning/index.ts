@@ -18,9 +18,7 @@ for (const scheme of supportedSchemes) {
   schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
 }
 
-export { get };
-
-function get(versionScheme: string): VersioningApi {
+export function get(versionScheme: string): VersioningApi {
   if (!versionScheme) {
     logger.debug('Missing versionScheme');
     return schemes.semver as VersioningApi;

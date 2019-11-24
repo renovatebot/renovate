@@ -10,19 +10,21 @@ export function updateDependency(
   if (currentValue === newValue) return fileContent;
 
   const sectionBeginRegExp = new RegExp(`^${depType}:`);
-  const isSectionBegin = (line: string) => sectionBeginRegExp.test(line);
-  const isSectionEnd = (line: string) => /^[^\s]/.test(line);
+  const isSectionBegin = (line: string): boolean =>
+    sectionBeginRegExp.test(line);
+  const isSectionEnd = (line: string): boolean => /^[^\s]/.test(line);
 
   const simpleDepRegExp = new RegExp(`^\\s+${depName}:\\s*[^\\s]+\\s*$`);
-  const isOneLineDep = (line: string) => simpleDepRegExp.test(line);
+  const isOneLineDep = (line: string): boolean => simpleDepRegExp.test(line);
 
   const multilineDepRegExp = new RegExp(`^\\s+${depName}:\\s*$`);
-  const isMultilineDepRegExp = (line: string) => multilineDepRegExp.test(line);
+  const isMultilineDepRegExp = (line: string): boolean =>
+    multilineDepRegExp.test(line);
 
   const versionRegExp = new RegExp('^\\s+version:\\s*[^\\s]+\\s*$');
-  const isVersionLine = (line: string) => versionRegExp.test(line);
+  const isVersionLine = (line: string): boolean => versionRegExp.test(line);
 
-  const isValidVersion = (line: string) => {
+  const isValidVersion = (line: string): boolean => {
     const version = load(line.replace(/^.*:\s*/, '')).toString();
     return version === currentValue;
   };

@@ -14,7 +14,8 @@ import { platform } from '../../../platform';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
-const getDirs = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
+const getDirs = (arr: string[]): string[] =>
+  Array.from(new Set(arr.filter(Boolean)));
 
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
@@ -109,7 +110,7 @@ export function determineLockFileDirs(
 export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
-) {
+): Promise<void> {
   const lernaJson = await platform.getFile('lerna.json');
   if (lernaJson) {
     logger.debug(`Writing repo lerna.json (${config.localDir})`);
@@ -237,7 +238,9 @@ export async function writeExistingFiles(
 }
 
 // istanbul ignore next
-export async function writeUpdatedPackageFiles(config: PostUpdateConfig) {
+export async function writeUpdatedPackageFiles(
+  config: PostUpdateConfig
+): Promise<void> {
   logger.trace({ config }, 'writeUpdatedPackageFiles');
   logger.debug('Writing any updated package files');
   if (!config.updatedPackageFiles) {

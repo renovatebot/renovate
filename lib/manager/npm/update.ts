@@ -3,6 +3,79 @@ import { inc, ReleaseType } from 'semver';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
+// Return true if the match string is found at index in content
+function matchAt(content: string, index: number, match: string): boolean {
+  return content.substring(index, index + match.length) === match;
+}
+
+// Replace oldString with newString at location index of content
+function replaceAt(
+  content: string,
+  index: number,
+  oldString: string,
+  newString: string
+): string {
+  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
+  return (
+    content.substr(0, index) +
+    newString +
+    content.substr(index + oldString.length)
+  );
+}
+
+export function bumpPackageVersion(
+  content: string,
+  currentValue: string,
+  bumpVersion: ReleaseType | string
+): string {
+  if (!bumpVersion) {
+    return content;
+  }
+  logger.debug(
+    { bumpVersion, currentValue },
+    'Checking if we should bump package.json version'
+  );
+  let newPjVersion;
+  try {
+    if (bumpVersion.startsWith('mirror:')) {
+      const mirrorPackage = bumpVersion.replace('mirror:', '');
+      const parsedContent = JSON.parse(content);
+      newPjVersion =
+        (parsedContent.dependencies || {})[mirrorPackage] ||
+        (parsedContent.devDependencies || {})[mirrorPackage] ||
+        (parsedContent.optionalDependencies || {})[mirrorPackage] ||
+        (parsedContent.peerDependencies || {})[mirrorPackage];
+      if (!newPjVersion) {
+        logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
+        return content;
+      }
+    } else {
+      newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
+    }
+    logger.debug({ newPjVersion });
+    const bumpedContent = content.replace(
+      /("version":\s*")[^"]*/,
+      `$1${newPjVersion}`
+    );
+    if (bumpedContent === content) {
+      logger.debug('Version was already bumped');
+    } else {
+      logger.info('Bumped package.json version');
+    }
+    return bumpedContent;
+  } catch (err) {
+    logger.warn(
+      {
+        content,
+        currentValue,
+        bumpVersion,
+      },
+      'Failed to bumpVersion'
+    );
+    return content;
+  }
+}
+
 export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
@@ -133,78 +206,5 @@ export function updateDependency(
   } catch (err) {
     logger.info({ err }, 'updateDependency error');
     return null;
-  }
-}
-
-// Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
-
-export function bumpPackageVersion(
-  content: string,
-  currentValue: string,
-  bumpVersion: ReleaseType | string
-): string {
-  if (!bumpVersion) {
-    return content;
-  }
-  logger.debug(
-    { bumpVersion, currentValue },
-    'Checking if we should bump package.json version'
-  );
-  let newPjVersion;
-  try {
-    if (bumpVersion.startsWith('mirror:')) {
-      const mirrorPackage = bumpVersion.replace('mirror:', '');
-      const parsedContent = JSON.parse(content);
-      newPjVersion =
-        (parsedContent.dependencies || {})[mirrorPackage] ||
-        (parsedContent.devDependencies || {})[mirrorPackage] ||
-        (parsedContent.optionalDependencies || {})[mirrorPackage] ||
-        (parsedContent.peerDependencies || {})[mirrorPackage];
-      if (!newPjVersion) {
-        logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
-        return content;
-      }
-    } else {
-      newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
-    }
-    logger.debug({ newPjVersion });
-    const bumpedContent = content.replace(
-      /("version":\s*")[^"]*/,
-      `$1${newPjVersion}`
-    );
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.info('Bumped package.json version');
-    }
-    return bumpedContent;
-  } catch (err) {
-    logger.warn(
-      {
-        content,
-        currentValue,
-        bumpVersion,
-      },
-      'Failed to bumpVersion'
-    );
-    return content;
   }
 }

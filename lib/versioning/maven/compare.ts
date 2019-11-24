@@ -267,24 +267,8 @@ function isVersion(version: string) {
   return !!tokens.length;
 }
 
-function isValid(str: string) {
-  if (!str) {
-    return false;
-  }
-  return isVersion(str) || !!parseRange(str);
-}
-
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
-
-export interface Range {
-  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
-  leftValue: string;
-  leftBracket: string;
-  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
-  rightValue: string;
-  rightBracket: string;
-}
 
 function parseRange(rangeStr: string) {
   function emptyInterval(): Range {
@@ -381,6 +365,22 @@ function parseRange(rangeStr: string) {
     },
     [] as Range[]
   );
+}
+
+function isValid(str: string) {
+  if (!str) {
+    return false;
+  }
+  return isVersion(str) || !!parseRange(str);
+}
+
+export interface Range {
+  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
+  leftValue: string;
+  leftBracket: string;
+  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
+  rightValue: string;
+  rightBracket: string;
 }
 
 function rangeToStr(fullRange: Range[]): string | null {
