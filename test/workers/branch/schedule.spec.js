@@ -215,5 +215,17 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
+    it('approves on months of year', () => {
+      config.schedule = ['of January'];
+      mockDate.set('2017-01-02T06:00:00.000'); // Locally Monday, 2 January 2017 6am
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('rejects on months of year', () => {
+      config.schedule = ['of January'];
+      mockDate.set('2017-02-02T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
   });
 });
