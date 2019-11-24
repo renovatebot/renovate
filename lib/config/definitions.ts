@@ -530,9 +530,7 @@ const options: RenovateOptions[] = [
     name: 'aliases',
     description: 'Aliases for registries, package manager specific',
     type: 'object',
-    default: {
-      stable: 'https://kubernetes-charts.storage.googleapis.com/',
-    },
+    default: {},
     additionalProperties: {
       type: 'string',
       format: 'uri',
@@ -1617,6 +1615,9 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
+      aliases: {
+        stable: 'https://kubernetes-charts.storage.googleapis.com/',
+      },
       commitMessageTopic: 'helm chart {{depName}}',
       fileMatch: ['(^|/)requirements.yaml$'],
     },
