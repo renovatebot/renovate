@@ -18,10 +18,10 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
   const config: RenovateConfig = { hostRules: [] };
 
   const coersions = {
-    boolean: (val: string) => val === 'true',
-    array: (val: string) => val.split(',').map(el => el.trim()),
-    string: (val: string) => val.replace(/\\n/g, '\n'),
-    object: (val: string) => JSON.parse(val),
+    boolean: (val: string): boolean => val === 'true',
+    array: (val: string): string[] => val.split(',').map(el => el.trim()),
+    string: (val: string): string => val.replace(/\\n/g, '\n'),
+    object: (val: string): any => JSON.parse(val),
     integer: parseInt,
   };
 

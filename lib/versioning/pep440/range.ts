@@ -8,7 +8,7 @@ function getFutureVersion(
   baseVersion: string,
   toVersion: string,
   step: number
-) {
+): string {
   const toRelease: number[] = parseVersion(toVersion).release;
   const baseRelease: number[] = parseVersion(baseVersion).release;
   let found = false;
@@ -40,7 +40,7 @@ export function getNewValue(
   rangeStrategy: RangeStrategy,
   fromVersion: string,
   toVersion: string
-) {
+): string {
   // easy pin
   if (rangeStrategy === 'pin') {
     return '==' + toVersion;

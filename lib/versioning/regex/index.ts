@@ -113,7 +113,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     );
   }
 
-  matches(version: string, range: string) {
+  matches(version: string, range: string): boolean {
     return satisfies(
       asSemver(this._parse(version)),
       asSemver(this._parse(range))

@@ -14,7 +14,7 @@ try {
   RegEx = RegExp;
 }
 
-export function regEx(pattern: string, flags?: string) {
+export function regEx(pattern: string, flags?: string): RegExp {
   try {
     return new RegEx(pattern, flags);
   } catch (err) {

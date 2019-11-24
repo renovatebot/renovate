@@ -27,7 +27,7 @@ interface GemVersion {
 }
 type GemRequirement = [string, GemVersion];
 
-const ltr = (version: string, range: string) => {
+const ltr = (version: string, range: string): boolean => {
   const gemVersion: GemVersion = create(version);
   const requirements: GemRequirement[] = range.split(',').map(_parse);
 
