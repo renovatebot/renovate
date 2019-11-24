@@ -6,7 +6,7 @@ const fromRange = /^\s*"([^"]+)"\s*\.\.\.\s*$/;
 const binaryRange = /^\s*"([^"]+)"\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
 const toRange = /^\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
 
-function toSemverRange(range: string) {
+function toSemverRange(range: string): string {
   if (fromParam.test(range)) {
     const [, version] = range.match(fromParam);
     if (semver.valid(version)) {
@@ -39,7 +39,7 @@ function getNewValue(
   _rangeStrategy: RangeStrategy,
   _fromVersion: string,
   toVersion: string
-) {
+): string {
   if (fromParam.test(currentValue)) {
     return toVersion;
   }

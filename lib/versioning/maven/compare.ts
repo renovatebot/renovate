@@ -23,7 +23,7 @@ export interface QualifierToken extends BaseToken {
 
 export type Token = NumberToken | QualifierToken;
 
-function iterateChars(str: string, cb: (p: string, n: string) => void) {
+function iterateChars(str: string, cb: (p: string, n: string) => void): void {
   let prev = null;
   let next = null;
   for (let i = 0; i < str.length; i += 1) {
@@ -34,26 +34,26 @@ function iterateChars(str: string, cb: (p: string, n: string) => void) {
   cb(prev, null);
 }
 
-function isDigit(char: string) {
+function isDigit(char: string): boolean {
   return /^\d$/.test(char);
 }
 
-function isLetter(char: string) {
+function isLetter(char: string): boolean {
   return /^[a-z]$/i.test(char);
 }
 
-function isTransition(prevChar: string, nextChar: string) {
+function isTransition(prevChar: string, nextChar: string): boolean {
   return (
     (isDigit(prevChar) && isLetter(nextChar)) ||
     (isLetter(prevChar) && isDigit(nextChar))
   );
 }
 
-function iterateTokens(versionStr: string, cb: (token: Token) => void) {
+function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
   let currentPrefix = PREFIX_HYPHEN;
   let currentVal = '';
 
-  function yieldToken(transition = false) {
+  function yieldToken(transition = false): void {
     const val = currentVal || '0';
     if (/^\d+$/.test(val)) {
       cb({
@@ -93,7 +93,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void) {
   });
 }
 
-function isNull(token: Token) {
+function isNull(token: Token): boolean {
   const val = token.val;
   return (
     val === 0 ||
@@ -112,7 +112,7 @@ const zeroToken: NumberToken = {
   isTransition: false,
 };
 
-function tokenize(versionStr: string) {
+function tokenize(versionStr: string): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
@@ -147,7 +147,7 @@ function nullFor(token: Token): Token {
       };
 }
 
-function commonOrder(token: Token) {
+function commonOrder(token: Token): number {
   if (token.prefix === PREFIX_DOT && token.type === TYPE_QUALIFIER) {
     return 0;
   }
@@ -160,7 +160,7 @@ function commonOrder(token: Token) {
   return 3;
 }
 
-function qualifierOrder(token: Token) {
+function qualifierOrder(token: Token): number {
   const val = token.val;
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
     return 1;
@@ -192,7 +192,7 @@ function qualifierOrder(token: Token) {
   return null;
 }
 
-function qualifierCmp(left: Token, right: Token) {
+function qualifierCmp(left: Token, right: Token): number {
   const leftOrder = qualifierOrder(left);
   const rightOrder = qualifierOrder(right);
   if (leftOrder && rightOrder) {
@@ -214,7 +214,7 @@ function qualifierCmp(left: Token, right: Token) {
   return 1;
 }
 
-function tokenCmp(left: Token, right: Token) {
+function tokenCmp(left: Token, right: Token): number {
   if (left.prefix === right.prefix) {
     if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
       if (left.val === right.val) {
@@ -245,7 +245,7 @@ function tokenCmp(left: Token, right: Token) {
   return 1;
 }
 
-function compare(left: string, right: string) {
+function compare(left: string, right: string): number {
   const leftTokens = tokenize(left);
   const rightTokens = tokenize(right);
   const length = Math.max(leftTokens.length, rightTokens.length);
@@ -258,7 +258,7 @@ function compare(left: string, right: string) {
   return 0;
 }
 
-function isVersion(version: string) {
+function isVersion(version: string): boolean {
   if (!version) return false;
   if (!/^[a-z0-9.-]+$/i.test(version)) return false;
   if (/^[.-]/.test(version)) return false;
@@ -270,7 +270,7 @@ function isVersion(version: string) {
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
 
-function parseRange(rangeStr: string) {
+function parseRange(rangeStr: string): any {
   function emptyInterval(): Range {
     return {
       leftType: null,
@@ -367,7 +367,7 @@ function parseRange(rangeStr: string) {
   );
 }
 
-function isValid(str: string) {
+function isValid(str: string): boolean {
   if (!str) {
     return false;
   }
@@ -386,7 +386,7 @@ export interface Range {
 function rangeToStr(fullRange: Range[]): string | null {
   if (fullRange === null) return null;
 
-  const valToStr = (val: string) => (val === null ? '' : val);
+  const valToStr = (val: string): string => (val === null ? '' : val);
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];
@@ -417,7 +417,7 @@ function autoExtendMavenRange(
 ): string | null {
   const range = parseRange(currentRepresentation);
   if (!range) return currentRepresentation;
-  const isPoint = (vals: Range[]) => {
+  const isPoint = (vals: Range[]): boolean => {
     if (vals.length !== 1) return false;
     const { leftType, leftValue, rightType, rightValue } = vals[0];
     return (
@@ -454,7 +454,7 @@ function autoExtendMavenRange(
   return rangeToStr(range);
 }
 
-function isSubversion(majorVersion: string, minorVersion: string) {
+function isSubversion(majorVersion: string, minorVersion: string): boolean {
   const majorTokens = tokenize(majorVersion);
   const minorTokens = tokenize(minorVersion);
 

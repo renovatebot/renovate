@@ -109,7 +109,7 @@ function getFromVersion(
   return version.maxSatisfyingVersion(useVersions, currentValue);
 }
 
-function getBucket(config: LookupUpdateConfig, update: LookupUpdate) {
+function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
   const { separateMajorMinor, separateMultipleMajor } = config;
   const { updateType, newMajor } = update;
   if (updateType === 'lockfileUpdate') {

@@ -8,7 +8,7 @@ async function setStatusCheck(
   context: string,
   description: string,
   state: string
-) {
+): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
     context
@@ -33,7 +33,7 @@ export type StabilityConfig = RenovateConfig & {
   branchName: string;
 };
 
-export async function setStability(config: StabilityConfig) {
+export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
     return;
   }

@@ -16,7 +16,7 @@ export function getNewValue(
   rangeStrategy: RangeStrategy,
   fromVersion: string,
   toVersion: string
-) {
+): string {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return toVersion;
   }

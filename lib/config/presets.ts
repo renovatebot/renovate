@@ -18,7 +18,7 @@ const datasources = {
 export function replaceArgs(
   obj: string | string[] | object | object[],
   argMapping: Record<string, any>
-) {
+): any {
   if (is.string(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {

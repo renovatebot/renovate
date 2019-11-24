@@ -1,1 +1,1 @@
-export default ({ to }: { to: string }) => to;
+export default ({ to }: { to: string }): string => to;
