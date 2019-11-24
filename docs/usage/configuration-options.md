@@ -25,17 +25,17 @@ If you have any questions about the below config options, or would like to get h
 
 Package managers that support repo aliases can be configured here.
 
-Currently only helm is supported:
+Currently only helm is supported, which contains this default repository alias:
 
-The default is:
-
-```
+```json
 {
   "aliases": {
     "stable": "https://kubernetes-charts.storage.googleapis.com/",
   }
 }
 ```
+
+Alias values must be properly formatted URIs.
 
 ## ansible
 
