@@ -30,7 +30,7 @@ Currently only helm is supported, which contains this default repository alias:
 ```json
 {
   "aliases": {
-    "stable": "https://kubernetes-charts.storage.googleapis.com/",
+    "stable": "https://kubernetes-charts.storage.googleapis.com/"
   }
 }
 ```
