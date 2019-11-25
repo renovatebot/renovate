@@ -1,12 +1,11 @@
-const { createGlobalProxyAgent } = require('global-agent');
-
-module.exports = {
-  bootstrap,
-};
+import {
+  createGlobalProxyAgent,
+  ProxyAgentConfigurationType,
+} from 'global-agent';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
-function bootstrap() {
+export function bootstrap(): ProxyAgentConfigurationType {
   envVars.forEach(envVar => {
     if (
       typeof process.env[envVar] === 'undefined' &&
