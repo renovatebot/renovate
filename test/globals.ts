@@ -2,6 +2,7 @@ import { join } from 'upath';
 import { tmpdir } from 'os';
 import { init } from '../lib/workers/global/cache';
 
+jest.mock('simple-git/promise');
 jest.mock('../lib/platform', () => ({
   platform: jest.genMockFromModule('../lib/platform/github'),
   initPlatform: jest.fn(),

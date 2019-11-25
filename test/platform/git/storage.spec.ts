@@ -3,6 +3,8 @@ import Git from 'simple-git/promise';
 import tmp from 'tmp-promise';
 import GitStorage from '../../../lib/platform/git/storage';
 
+jest.unmock('simple-git/promise');
+
 describe('platform/git/storage', () => {
   jest.setTimeout(15000);
 
