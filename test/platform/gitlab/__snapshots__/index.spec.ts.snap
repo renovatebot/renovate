@@ -8,6 +8,17 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue if supported 1`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests/42?assignee_id=123",
+  ],
+  Array [
+    "projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124",
+  ],
+]
+`;
+
 exports[`platform/gitlab addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `
 Array [
   Array [

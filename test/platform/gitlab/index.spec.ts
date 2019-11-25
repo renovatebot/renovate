@@ -263,6 +263,10 @@ describe('platform/gitlab', () => {
       await gitlab.setBaseBranch('some-branch');
       expect(api.get.mock.calls).toMatchSnapshot();
     });
+    it('uses default base branch', async () => {
+      await initRepo();
+      await gitlab.setBaseBranch();
+    });
   });
   describe('getFileList()', () => {
     it('sends to gitFs', async () => {
@@ -490,6 +494,10 @@ describe('platform/gitlab', () => {
       } as any);
       await gitlab.deleteBranch('branch', true);
     });
+    it('defaults to not closing associated PR', async () => {
+      await initRepo();
+      await gitlab.deleteBranch('branch2');
+    });
   });
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
@@ -626,6 +634,16 @@ describe('platform/gitlab', () => {
       api.get.mockImplementationOnce({} as any);
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(api.put).toHaveBeenCalledTimes(0);
+    });
+    it('should add the given assignees to the issue if supported', async () => {
+      api.get.mockReturnValueOnce({
+        body: [{ id: 123 }],
+      } as any);
+      api.get.mockReturnValueOnce({
+        body: [{ id: 124 }],
+      } as any);
+      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
+      expect(api.put.mock.calls).toMatchSnapshot();
     });
   });
   describe('addReviewers(issueNo, reviewers)', () => {

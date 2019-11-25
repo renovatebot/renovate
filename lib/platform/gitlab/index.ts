@@ -1,6 +1,8 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
+import { bool } from 'aws-sdk/clients/signer';
+import simplegit from 'simple-git/promise';
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
@@ -41,7 +43,7 @@ export async function initPlatform({
 }: {
   token: string;
   endpoint: string;
-}) {
+}): Promise<any> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
@@ -71,7 +73,7 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos() {
+export async function getRepos(): Promise<any> {
   logger.info('Autodiscovering GitLab repositories');
   try {
     const url = `projects?membership=true&per_page=100`;
@@ -86,11 +88,11 @@ export async function getRepos() {
   }
 }
 
-function urlEscape(str: string) {
+function urlEscape(str: string): string {
   return str ? str.replace(/\//g, '%2F') : str;
 }
 
-export function cleanRepo() {
+export function cleanRepo(): any {
   // istanbul ignore if
   if (config.storage) {
     config.storage.cleanRepo();
@@ -104,7 +106,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: RepoParams) {
+}: RepoParams): Promise<any> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
@@ -204,11 +206,13 @@ export async function initRepo({
   return repoConfig;
 }
 
-export function getRepoForceRebase() {
+export function getRepoForceRebase(): bool {
   return false;
 }
 
-export async function setBaseBranch(branchName = config.baseBranch) {
+export async function setBaseBranch(
+  branchName = config.baseBranch
+): Promise<any> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   await config.storage.setBaseBranch(branchName);
@@ -216,19 +220,19 @@ export async function setBaseBranch(branchName = config.baseBranch) {
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
-) {
+): Promise<void> {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // Get full file list
-export function getFileList(branchName = config.baseBranch) {
+export function getFileList(branchName = config.baseBranch): Promise<string[]> {
   return config.storage.getFileList(branchName);
 }
 
 // Returns true if branch exists, otherwise false
-export function branchExists(branchName: string) {
+export function branchExists(branchName: string): Promise<boolean> {
   return config.storage.branchExists(branchName);
 }
 
@@ -454,7 +458,7 @@ export function getPrBody(input: string) {
 // Branch
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string) {
+export async function getBranchPr(branchName: string): Promise<any> {
   logger.debug(`getBranchPr(${branchName})`);
   // istanbul ignore if
   if (!(await branchExists(branchName))) {
@@ -480,11 +484,13 @@ export async function getBranchPr(branchName: string) {
   return getPr(pr.iid);
 }
 
-export function getAllRenovateBranches(branchPrefix: string) {
+export function getAllRenovateBranches(
+  branchPrefix: string
+): Promise<string[]> {
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export function isBranchStale(branchName: string) {
+export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
@@ -493,7 +499,7 @@ export function commitFilesToBranch(
   files: any[],
   message: string,
   parentBranch = config.baseBranch
-) {
+): Promise<void> {
   return config.storage.commitFilesToBranch(
     branchName,
     files,
@@ -502,11 +508,17 @@ export function commitFilesToBranch(
   );
 }
 
-export function getFile(filePath: string, branchName?: string) {
+export function getFile(
+  filePath: string,
+  branchName?: string
+): Promise<string> {
   return config.storage.getFile(filePath, branchName);
 }
 
-export async function deleteBranch(branchName: string, shouldClosePr = false) {
+export async function deleteBranch(
+  branchName: string,
+  shouldClosePr = false
+): Promise<any> {
   if (shouldClosePr) {
     logger.debug('Closing PR');
     const pr = await getBranchPr(branchName);
@@ -518,23 +530,23 @@ export async function deleteBranch(branchName: string, shouldClosePr = false) {
   return config.storage.deleteBranch(branchName);
 }
 
-export function mergeBranch(branchName: string) {
+export function mergeBranch(branchName: string): Promise<void> {
   return config.storage.mergeBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string) {
+export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-export function getRepoStatus() {
+export function getRepoStatus(): Promise<simplegit.StatusResult> {
   return config.storage.getRepoStatus();
 }
 
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-) {
+): Promise<any> {
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
@@ -556,7 +568,7 @@ export async function setBranchStatus(
   description: string,
   state: string,
   targetUrl?: string
-) {
+): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
@@ -590,7 +602,7 @@ export async function setBranchStatus(
 
 // Issue
 
-export async function getIssueList() {
+export async function getIssueList(): Promise<any[]> {
   if (!config.issueList) {
     const res = await api.get(
       `projects/${config.repository}/issues?state=opened`,
@@ -611,7 +623,12 @@ export async function getIssueList() {
   return config.issueList;
 }
 
-export async function findIssue(title: string) {
+export async function findIssue(
+  title: string
+): Promise<{
+  number: any;
+  body: any;
+}> {
   logger.debug(`findIssue(${title})`);
   try {
     const issueList = await getIssueList();
@@ -632,7 +649,10 @@ export async function findIssue(title: string) {
   }
 }
 
-export async function ensureIssue(title: string, body: string) {
+export async function ensureIssue(
+  title: string,
+  body: string
+): Promise<'updated' | 'created'> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
@@ -670,7 +690,7 @@ export async function ensureIssue(title: string, body: string) {
   return null;
 }
 
-export async function ensureIssueClosing(title: string) {
+export async function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing()`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
@@ -683,25 +703,43 @@ export async function ensureIssueClosing(title: string) {
   }
 }
 
-export async function addAssignees(iid: number, assignees: string[]) {
+export async function addAssignees(
+  iid: number,
+  assignees: string[]
+): Promise<any> {
   logger.debug(`Adding assignees ${assignees} to #${iid}`);
   try {
-    const assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
+    let assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
       .id;
-    let url = `projects/${config.repository}/merge_requests/${iid}`;
-    url += `?assignee_id=${assigneeId}`;
+    let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
     await api.put(url);
+    try {
+      if (assignees.length > 1) {
+        url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
+        for (let i = 1; i < assignees.length; i += 1) {
+          assigneeId = (await api.get(`users?username=${assignees[i]}`)).body[0]
+            .id;
+          url += `&assignee_ids[]=${assigneeId}`;
+        }
+        await api.put(url);
+      }
+    } catch (error) {
+      logger.error({ iid, assignees }, 'Failed to add multiple assignees');
+    }
   } catch (err) {
     logger.error({ iid, assignees }, 'Failed to add assignees');
   }
 }
 
-export function addReviewers(iid: number, reviewers: string[]) {
+export function addReviewers(iid: number, reviewers: string[]): any {
   logger.debug(`addReviewers('${iid}, '${reviewers})`);
   logger.warn('Unimplemented in GitLab: approvals');
 }
 
-export async function deleteLabel(issueNo: number, label: string) {
+export async function deleteLabel(
+  issueNo: number,
+  label: string
+): Promise<any> {
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
@@ -714,7 +752,7 @@ export async function deleteLabel(issueNo: number, label: string) {
   }
 }
 
-async function getComments(issueNo: number) {
+async function getComments(issueNo: number): Promise<any> {
   // GET projects/:owner/:repo/merge_requests/:number/notes
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
@@ -723,7 +761,7 @@ async function getComments(issueNo: number) {
   return comments;
 }
 
-async function addComment(issueNo: number, body: string) {
+async function addComment(issueNo: number, body: string): Promise<any> {
   // POST projects/:owner/:repo/merge_requests/:number/notes
   await api.post(
     `projects/${config.repository}/merge_requests/${issueNo}/notes`,
@@ -733,7 +771,11 @@ async function addComment(issueNo: number, body: string) {
   );
 }
 
-async function editComment(issueNo: number, commentId: number, body: string) {
+async function editComment(
+  issueNo: number,
+  commentId: number,
+  body: string
+): Promise<any> {
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
   await api.put(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
@@ -743,7 +785,7 @@ async function editComment(issueNo: number, commentId: number, body: string) {
   );
 }
 
-async function deleteComment(issueNo: number, commentId: number) {
+async function deleteComment(issueNo: number, commentId: number): Promise<any> {
   // DELETE projects/:owner/:repo/merge_requests/:number/notes/:id
   await api.delete(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`
@@ -754,7 +796,7 @@ export async function ensureComment(
   issueNo: number,
   topic: string | null | undefined,
   rawContent: string
-) {
+): Promise<any> {
   const content = sanitize(rawContent);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
@@ -794,7 +836,10 @@ export async function ensureComment(
   }
 }
 
-export async function ensureCommentRemoval(issueNo: number, topic: string) {
+export async function ensureCommentRemoval(
+  issueNo: number,
+  topic: string
+): Promise<any> {
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
   let commentId;
@@ -822,7 +867,7 @@ const mapPullRequests = (pr: {
   createdAt: pr.created_at,
 });
 
-async function fetchPrList() {
+async function fetchPrList(): Promise<any> {
   const query = new URLSearchParams({
     per_page: '100',
     author_id: `${authorId}`,
@@ -840,14 +885,14 @@ async function fetchPrList() {
   }
 }
 
-export async function getPrList() {
+export async function getPrList(): Promise<any> {
   if (!config.prList) {
     config.prList = await fetchPrList();
   }
   return config.prList;
 }
 
-function matchesState(state: string, desiredState: string) {
+function matchesState(state: string, desiredState: string): bool {
   if (desiredState === 'all') {
     return true;
   }
@@ -861,7 +906,7 @@ export async function findPr(
   branchName: string,
   prTitle?: string | null,
   state = 'all'
-) {
+): Promise<any> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   return prList.find(
@@ -872,10 +917,10 @@ export async function findPr(
   );
 }
 
-export function getCommitMessages() {
+export function getCommitMessages(): Promise<string[]> {
   return config.storage.getCommitMessages();
 }
 
-export function getVulnerabilityAlerts() {
+export function getVulnerabilityAlerts(): any[] {
   return [];
 }
