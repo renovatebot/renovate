@@ -3,8 +3,8 @@ export const SBT_PLUGINS_REPO =
 
 export function parseIndexDir(
   content: string,
-  filterFn = (x: string) => !/^\.+/.test(x)
-) {
+  filterFn = (x: string): boolean => !/^\.+/.test(x)
+): string[] {
   const unfiltered = content.match(/(?<=href=['"])[^'"]*(?=\/['"])/g) || [];
   return unfiltered.filter(filterFn);
 }

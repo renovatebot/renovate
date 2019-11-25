@@ -67,7 +67,7 @@ export function addMetaData(
   dep?: ReleaseResult,
   datasource?: string,
   lookupName?: string
-) {
+): void {
   if (!dep) {
     return;
   }
@@ -86,7 +86,7 @@ export function addMetaData(
   /**
    * @param {string} url
    */
-  const massageGithubUrl = url => {
+  const massageGithubUrl = (url: string): string => {
     return url
       .replace('http:', 'https:')
       .replace('www.github.com', 'github.com')

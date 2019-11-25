@@ -9,16 +9,22 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GotResponse } from '../../platform';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
+export interface RegistryRepository {
+  registry: string;
+  repository: string;
+}
+
 export function getRegistryRepository(
   lookupName: string,
   registryUrls: string[]
-) {
+): RegistryRepository {
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
@@ -48,7 +54,10 @@ export function getRegistryRepository(
   };
 }
 
-function getECRAuthToken(region: string, opts: hostRules.HostRule) {
+function getECRAuthToken(
+  region: string,
+  opts: hostRules.HostRule
+): Promise<string | null> {
   const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
   if (opts.username && opts.password) {
     config.accessKeyId = opts.username;
@@ -171,22 +180,22 @@ async function getAuthHeaders(
   }
 }
 
-function digestFromManifestStr(str: hasha.HashaInput) {
+function digestFromManifestStr(str: hasha.HashaInput): string {
   return 'sha256:' + hasha(str, { algorithm: 'sha256' });
 }
 
-function extractDigestFromResponse(manifestResponse) {
+function extractDigestFromResponse(manifestResponse: GotResponse): string {
   if (manifestResponse.headers['docker-content-digest'] === undefined) {
     return digestFromManifestStr(manifestResponse.body);
   }
-  return manifestResponse.headers['docker-content-digest'];
+  return manifestResponse.headers['docker-content-digest'] as string;
 }
 
 async function getManifestResponse(
   registry: string,
   repository: string,
   tag: string
-) {
+): Promise<GotResponse> {
   logger.debug(`getManifestResponse(${registry}, ${repository}, ${tag})`);
   try {
     const headers = await getAuthHeaders(registry, repository);
@@ -408,12 +417,15 @@ async function getTags(
   }
 }
 
-export function getConfigResponse(url: string, headers: OutgoingHttpHeaders) {
+export function getConfigResponse(
+  url: string,
+  headers: OutgoingHttpHeaders
+): Promise<GotResponse> {
   return got(url, {
     headers,
     hooks: {
       beforeRedirect: [
-        (options: any) => {
+        (options: any): void => {
           if (
             options.search &&
             options.search.indexOf('X-Amz-Algorithm') !== -1
