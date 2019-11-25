@@ -63,6 +63,7 @@ async function fetchReleases(
   const { datasource } = config;
   if (!datasource) {
     logger.warn('No datasource found');
+    return null;
   }
   if (!datasources[datasource]) {
     logger.warn('Unknown datasource: ' + datasource);
