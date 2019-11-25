@@ -3,7 +3,11 @@ import { DateTime } from 'luxon';
 import semver from 'semver';
 import mdTable from 'markdown-table';
 import { logger } from '../../../logger';
-import { mergeChildConfig, ManagerConfig } from '../../../config';
+import {
+  mergeChildConfig,
+  ManagerConfig,
+  RenovateConfig,
+} from '../../../config';
 import { PackageDependency } from '../../../manager/common';
 
 function ifTypesGroup(
@@ -23,7 +27,43 @@ function ifTypesGroup(
   );
 }
 
-export function generateBranchConfig(branchUpgrades) {
+function getTableValues(
+  upgrade: PackageDependency & ManagerConfig
+): [string, string, string, string] | null {
+  if (!upgrade.commitBodyTable) {
+    return null;
+  }
+  const {
+    datasource,
+    lookupName,
+    depName,
+    fromVersion,
+    toVersion,
+    displayFrom,
+    displayTo,
+  } = upgrade;
+  const name = lookupName || depName;
+  const from = fromVersion || displayFrom;
+  const to = toVersion || displayTo;
+  if (datasource && name && from && to) {
+    return [datasource, name, from, to];
+  }
+  logger.debug(
+    {
+      datasource,
+      lookupName,
+      depName,
+      fromVersion,
+      toVersion,
+      displayFrom,
+      displayTo,
+    },
+    'Cannot determine table values'
+  );
+  return null;
+}
+
+export function generateBranchConfig(branchUpgrades): RenovateConfig {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
   let config: any = {
@@ -289,40 +329,4 @@ export function generateBranchConfig(branchUpgrades) {
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
   return config;
-}
-
-function getTableValues(
-  upgrade: PackageDependency & ManagerConfig
-): [string, string, string, string] | null {
-  if (!upgrade.commitBodyTable) {
-    return null;
-  }
-  const {
-    datasource,
-    lookupName,
-    depName,
-    fromVersion,
-    toVersion,
-    displayFrom,
-    displayTo,
-  } = upgrade;
-  const name = lookupName || depName;
-  const from = fromVersion || displayFrom;
-  const to = toVersion || displayTo;
-  if (datasource && name && from && to) {
-    return [datasource, name, from, to];
-  }
-  logger.debug(
-    {
-      datasource,
-      lookupName,
-      depName,
-      fromVersion,
-      toVersion,
-      displayFrom,
-      displayTo,
-    },
-    'Cannot determine table values'
-  );
-  return null;
 }

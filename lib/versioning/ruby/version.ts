@@ -16,13 +16,13 @@ const parse = (version: string): RubyVersion => ({
   prerelease: prerelease(version),
 });
 
-const adapt = (left: string, right: string) =>
+const adapt = (left: string, right: string): string =>
   left
     .split('.')
     .slice(0, right.split('.').length)
     .join('.');
 
-const floor = (version: string) =>
+const floor = (version: string): string =>
   [
     ...create(version)
       .release()
@@ -32,7 +32,7 @@ const floor = (version: string) =>
   ].join('.');
 
 // istanbul ignore next
-const incrementLastSegment = (version: string) => {
+const incrementLastSegment = (version: string): string => {
   const segments = create(version)
     .release()
     .getSegments();
@@ -47,14 +47,14 @@ const incrementMajor = (
   min: number,
   ptch: number,
   pre: string[]
-) => (min === 0 || ptch === 0 || pre.length === 0 ? maj + 1 : maj);
+): number => (min === 0 || ptch === 0 || pre.length === 0 ? maj + 1 : maj);
 
 // istanbul ignore next
-const incrementMinor = (min: number, ptch: number, pre: string[]) =>
+const incrementMinor = (min: number, ptch: number, pre: string[]): number =>
   ptch === 0 || pre.length === 0 ? min + 1 : min;
 
 // istanbul ignore next
-const incrementPatch = (ptch: number, pre: string[]) =>
+const incrementPatch = (ptch: number, pre: string[]): number =>
   pre.length === 0 ? ptch + 1 : ptch;
 
 // istanbul ignore next

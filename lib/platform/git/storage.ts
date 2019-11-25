@@ -4,8 +4,7 @@ import { join } from 'path';
 import Git from 'simple-git/promise';
 import URL from 'url';
 import { logger } from '../../logger';
-
-const limits = require('../../workers/global/limits');
+import * as limits from '../../workers/global/limits';
 
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
@@ -24,6 +23,40 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: { [branch: string]: boolean };
   branchPrefix: string;
+}
+
+// istanbul ignore next
+function checkForPlatformFailure(err: Error) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+  const platformFailureStrings = [
+    'remote: Invalid username or password',
+    'gnutls_handshake() failed',
+    'The requested URL returned error: 5',
+    'The remote end hung up unexpectedly',
+    'access denied or repository not exported',
+    'Could not write new index file',
+    'Failed to connect to',
+    'Connection timed out',
+  ];
+  for (const errorStr of platformFailureStrings) {
+    if (err.message.includes(errorStr)) {
+      throw new Error('platform-failure');
+    }
+  }
+}
+
+function localName(branchName: string) {
+  return branchName.replace(/^origin\//, '');
+}
+
+function throwBaseBranchValidationError(branchName) {
+  const error = new Error('config-validation');
+  error.validationError = 'baseBranch not found';
+  error.validationMessage =
+    'The following configured baseBranch could not be found: ' + branchName;
+  throw error;
 }
 
 export class Storage {
@@ -348,8 +381,7 @@ export class Storage {
       logger.debug({ branchName }, 'Deleted remote branch');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
-      logger.info({ branchName, err }, 'Error deleting remote branch');
-      throw new Error('repository-changed');
+      logger.debug({ branchName }, 'No remote branch to delete');
     }
     try {
       await this._deleteLocalBranch(branchName);
@@ -488,40 +520,6 @@ export class Storage {
       pathname: repository + '.git',
     });
   }
-}
-
-function localName(branchName: string) {
-  return branchName.replace(/^origin\//, '');
-}
-
-// istanbul ignore next
-function checkForPlatformFailure(err: Error) {
-  if (process.env.NODE_ENV === 'test') {
-    return;
-  }
-  const platformFailureStrings = [
-    'remote: Invalid username or password',
-    'gnutls_handshake() failed',
-    'The requested URL returned error: 5',
-    'The remote end hung up unexpectedly',
-    'access denied or repository not exported',
-    'Could not write new index file',
-    'Failed to connect to',
-    'Connection timed out',
-  ];
-  for (const errorStr of platformFailureStrings) {
-    if (err.message.includes(errorStr)) {
-      throw new Error('platform-failure');
-    }
-  }
-}
-
-function throwBaseBranchValidationError(branchName) {
-  const error = new Error('config-validation');
-  error.validationError = 'baseBranch not found';
-  error.validationMessage =
-    'The following configured baseBranch could not be found: ' + branchName;
-  throw error;
 }
 
 export default Storage;

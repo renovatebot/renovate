@@ -22,6 +22,21 @@ Object {
 }
 `;
 
+exports[`lib/manager/helm/extract extractPackageFile() resolves aliased registry urls 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "registryUrls": Array [
+        "https://my-registry.gcr.io/",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/helm/extract extractPackageFile() skips invalid registry urls 1`] = `
 Object {
   "datasource": "helm",

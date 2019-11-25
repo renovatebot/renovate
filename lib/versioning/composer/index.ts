@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
-function padZeroes(input: string) {
+function padZeroes(input: string): string {
   const sections = input.split('.');
   while (sections.length < 3) {
     sections.push('0');
@@ -11,7 +11,7 @@ function padZeroes(input: string) {
   return sections.join('.');
 }
 
-function composer2npm(input: string) {
+function composer2npm(input: string): string {
   if (npm.isVersion(input)) {
     return input;
   }
@@ -26,43 +26,43 @@ function composer2npm(input: string) {
   return output;
 }
 
-const equals = (a: string, b: string) =>
+const equals = (a: string, b: string): boolean =>
   npm.equals(composer2npm(a), composer2npm(b));
 
-const getMajor = (version: string) =>
+const getMajor = (version: string): number =>
   npm.getMajor(coerce(composer2npm(version)));
 
-const getMinor = (version: string) =>
+const getMinor = (version: string): number =>
   npm.getMinor(coerce(composer2npm(version)));
 
-const getPatch = (version: string) =>
+const getPatch = (version: string): number =>
   npm.getPatch(coerce(composer2npm(version)));
 
-const isGreaterThan = (a: string, b: string) =>
+const isGreaterThan = (a: string, b: string): boolean =>
   npm.isGreaterThan(composer2npm(a), composer2npm(b));
 
-const isLessThanRange = (version: string, range: string) =>
+const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(composer2npm(version), composer2npm(range));
 
-const isSingleVersion = (input: string) =>
+const isSingleVersion = (input: string): string | boolean =>
   input && npm.isSingleVersion(composer2npm(input));
 
-const isStable = (version: string) =>
+const isStable = (version: string): boolean =>
   version && npm.isStable(composer2npm(version));
 
-export const isValid = (input: string) =>
+export const isValid = (input: string): string | boolean =>
   input && npm.isValid(composer2npm(input));
 
-export const isVersion = (input: string) =>
+export const isVersion = (input: string): string | boolean =>
   input && npm.isVersion(composer2npm(input));
 
-const matches = (version: string, range: string) =>
+const matches = (version: string, range: string): boolean =>
   npm.matches(composer2npm(version), composer2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string) =>
+const maxSatisfyingVersion = (versions: string[], range: string): string =>
   npm.maxSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
-const minSatisfyingVersion = (versions: string[], range: string) =>
+const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
 function getNewValue(
@@ -70,7 +70,7 @@ function getNewValue(
   rangeStrategy: RangeStrategy,
   fromVersion: string,
   toVersion: string
-) {
+): string {
   if (rangeStrategy === 'pin') {
     return toVersion;
   }
@@ -138,7 +138,7 @@ function getNewValue(
   return newValue;
 }
 
-function sortVersions(a: string, b: string) {
+function sortVersions(a: string, b: string): number {
   return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 

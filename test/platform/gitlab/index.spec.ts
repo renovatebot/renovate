@@ -125,17 +125,6 @@ describe('platform/gitlab', () => {
       expect(repos).toMatchSnapshot();
     });
   });
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      await gitlab.getRepoStatus();
-    });
-  });
-  describe('cleanRepo()', () => {
-    it('exists', () => {
-      gitlab.cleanRepo();
-    });
-  });
   function initRepo(args?: any) {
     // projects/${config.repository}
     api.get.mockImplementationOnce(
@@ -166,6 +155,17 @@ describe('platform/gitlab', () => {
       optimizeForDisabled: false,
     });
   }
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      await initRepo();
+      await gitlab.getRepoStatus();
+    });
+  });
+  describe('cleanRepo()', () => {
+    it('exists', () => {
+      gitlab.cleanRepo();
+    });
+  });
 
   describe('initRepo', () => {
     it(`should throw error if disabled in renovate.json`, async () => {

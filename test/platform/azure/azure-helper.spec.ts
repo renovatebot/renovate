@@ -349,20 +349,7 @@ describe('platform/azure/helpers', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => [
-              {
-                settings: {
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
-              },
-            ]),
+            getPolicyConfigurations: jest.fn(() => []),
           } as any)
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(

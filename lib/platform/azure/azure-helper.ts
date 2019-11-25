@@ -71,33 +71,18 @@ export async function getAzureBranchObj(
   };
 }
 
-export async function getChanges(
-  files: { name: string; contents: any }[],
-  repoId: string,
-  branchName: string
-) {
-  const changes = [];
-  for (const file of files) {
-    // Add or update
-    let changeType = 1;
-    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
-    if (fileAlreadyThere) {
-      changeType = 2;
-    }
-
-    changes.push({
-      changeType,
-      item: {
-        path: file.name,
-      },
-      newContent: {
-        Content: file.contents,
-        ContentType: 0, // RawText
-      },
+async function streamToString(stream: NodeJS.ReadableStream) {
+  const chunks: string[] = [];
+  /* eslint-disable promise/avoid-new */
+  const p = await new Promise<string>(resolve => {
+    stream.on('data', (chunk: any) => {
+      chunks.push(chunk.toString());
     });
-  }
-
-  return changes;
+    stream.on('end', () => {
+      resolve(chunks.join(''));
+    });
+  });
+  return p;
 }
 
 // if no branchName, look globaly
@@ -144,18 +129,33 @@ export async function getFile(
   return null; // no file found
 }
 
-async function streamToString(stream: NodeJS.ReadableStream) {
-  const chunks: string[] = [];
-  /* eslint-disable promise/avoid-new */
-  const p = await new Promise<string>(resolve => {
-    stream.on('data', (chunk: any) => {
-      chunks.push(chunk.toString());
+export async function getChanges(
+  files: { name: string; contents: any }[],
+  repoId: string,
+  branchName: string
+) {
+  const changes = [];
+  for (const file of files) {
+    // Add or update
+    let changeType = 1;
+    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
+    if (fileAlreadyThere) {
+      changeType = 2;
+    }
+
+    changes.push({
+      changeType,
+      item: {
+        path: file.name,
+      },
+      newContent: {
+        Content: file.contents,
+        ContentType: 0, // RawText
+      },
     });
-    stream.on('end', () => {
-      resolve(chunks.join(''));
-    });
-  });
-  return p;
+  }
+
+  return changes;
 }
 
 export function max4000Chars(str: string) {
@@ -177,7 +177,7 @@ export function getRenovatePRFormat(azurePr: {
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
-  pr.targetBranch = azurePr.targetRefName;
+  pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
 
   // status
   // export declare enum PullRequestStatus {
@@ -254,9 +254,11 @@ export async function getMergeMethod(
     )
     .map(p => p.settings)[0];
 
-  return (
-    Object.keys(policyConfigurations)
+  try {
+    return Object.keys(policyConfigurations)
       .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p) || GitPullRequestMergeStrategy.NoFastForward
-  );
+      .find(p => p);
+  } catch (err) {
+    return GitPullRequestMergeStrategy.NoFastForward;
+  }
 }
