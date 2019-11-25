@@ -40,7 +40,7 @@ const adapt = (left: string, right: string): string =>
     .slice(0, right.split('.').length)
     .join('.');
 
-const floor = (version: string) => {
+const floor = (version: string): string => {
   return [...releaseSegments(version).slice(0, -1), 0].join('.');
 };
 
