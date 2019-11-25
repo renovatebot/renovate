@@ -57,14 +57,14 @@ describe('platform/git/storage', () => {
     });
   });
 
-  afterEach(() => {
-    tmpDir.cleanup();
-    origin.cleanup();
+  afterEach(async () => {
+    await tmpDir.cleanup();
+    await origin.cleanup();
     git.cleanRepo();
   });
 
-  afterAll(() => {
-    base.cleanup();
+  afterAll(async () => {
+    await base.cleanup();
   });
 
   describe('setBaseBranch(branchName)', () => {
@@ -96,7 +96,7 @@ describe('platform/git/storage', () => {
       });
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toMatchSnapshot();
-      repo.reset(['--hard', 'HEAD^']);
+      await repo.reset(['--hard', 'HEAD^']);
     });
   });
   describe('branchExists(branchName)', () => {
@@ -370,7 +370,7 @@ describe('platform/git/storage', () => {
         url: base.path,
       });
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
-      repo.reset(['--hard', 'HEAD^']);
+      await repo.reset(['--hard', 'HEAD^']);
     });
   });
 });
