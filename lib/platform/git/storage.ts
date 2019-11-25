@@ -381,8 +381,7 @@ export class Storage {
       logger.debug({ branchName }, 'Deleted remote branch');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
-      logger.info({ branchName, err }, 'Error deleting remote branch');
-      throw new Error('repository-changed');
+      logger.debug({ branchName }, 'No remote branch to delete');
     }
     try {
       await this._deleteLocalBranch(branchName);
