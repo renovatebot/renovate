@@ -10,7 +10,7 @@ const query = `
         repository(owner: "testOwner", name: "testName") {
           testItem (orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "someone"}) {
             pageInfo {
-              startCursor
+              endCursor
               hasNextPage
             }
             nodes {
@@ -66,7 +66,7 @@ describe('platform/gh-graphql-wrapper', () => {
           repository: {
             testItem: {
               pageInfo: {
-                startCursor: 'cursor1',
+                endCursor: 'cursor1',
                 hasNextPage: true,
               },
               nodes: [
@@ -89,7 +89,7 @@ describe('platform/gh-graphql-wrapper', () => {
           repository: {
             testItem: {
               pageInfo: {
-                startCursor: 'cursor2',
+                endCursor: 'cursor2',
                 hasNextPage: true,
               },
               nodes: [
@@ -112,7 +112,7 @@ describe('platform/gh-graphql-wrapper', () => {
           repository: {
             testItem: {
               pageInfo: {
-                startCursor: 'cursor3',
+                endCursor: 'cursor3',
                 hasNextPage: false,
               },
               nodes: [

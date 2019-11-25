@@ -1127,7 +1127,7 @@ async function getGraphqlIssues() {
       repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
         issues(orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
           pageInfo {
-            startCursor
+            endCursor
             hasNextPage
           }
           nodes {

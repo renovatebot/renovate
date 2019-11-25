@@ -40,30 +40,31 @@ export async function getGraphqlNodes(
   let canIterate = true;
 
   while (canIterate) {
-    const replacement = `$1${fieldName}$2(first: ${count}, after: ${cursor}, `;
+    let replacement = `$1${fieldName}$2(first: ${count}`;
+    if (cursor) replacement += `, after: "${cursor}", `;
     const query = queryOrig.replace(regex, replacement);
     const res = await gqlGet(query);
-    if (!res.data && !res.errors) {
-      count = Math.floor(count / 2);
-      if (count === 0) {
-        logger.info({ query, res }, 'No graphql res.data');
-        canIterate = false;
-      }
-    } else if (
+    if (
+      res &&
       res.data &&
       res.data.repository &&
       res.data.repository[fieldName]
     ) {
       const { nodes, pageInfo } = res.data.repository[fieldName];
       result.push(...nodes);
-      if (pageInfo.hasNextPage) {
-        cursor = pageInfo.startCursor;
+
+      const { hasNextPage, endCursor } = pageInfo;
+      if (hasNextPage && endCursor) {
+        cursor = endCursor;
       } else {
         canIterate = false;
       }
     } else {
-      logger.info({ query, res }, `Error fetching graphql items`);
-      canIterate = false;
+      count = Math.floor(count / 2);
+      if (count === 0) {
+        logger.info({ query, res }, 'Error fetching GraphQL nodes');
+        canIterate = false;
+      }
     }
   }
 
