@@ -39,7 +39,7 @@ describe('datasource/index', () => {
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
-    npmDatasource.getPkgReleases.mockReturnValue({});
+    npmDatasource.getPkgReleases.mockReturnValueOnce({});
     const res = await datasource.getPkgReleases({
       datasource: 'npm',
       depName: 'react-native',
@@ -141,5 +141,73 @@ describe('datasource/index', () => {
     });
     const res = await datasource.baseUrlLegacyMassager(url);
     expect(res).toEqual('https://github.com/some/repo');
+  });
+  it('move bad url into homepage', async () => {
+    npmDatasource.getPkgReleases.mockReturnValueOnce({
+      datasource: 'npm',
+      depName: 'a',
+      sourceUrl: '/a/',
+    });
+    const res = await datasource.fetchReleases({
+      datasource: 'npm',
+      depName: 'a',
+    });
+    expect(res.sourceUrl).toEqual(undefined);
+    expect(res.homepage).toEqual('/a/');
+  });
+  it('test sourceUrl -> self-hosted bitbucket withcustom fqdn', async () => {
+    const url = 'https://somebitbucket.org/abc/edf.git';
+    hostRules.hosts.mockImplementationOnce(() => {
+      return ['somebitbucket.org'];
+    });
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://somebitbucket.org/abc/edf');
+  });
+  it('test sourceUrl -> bitbucket public service', async () => {
+    const url = 'https://bitbucket.org/abc/edf.git';
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://bitbucket.org/abc/edf');
+  });
+  it('test sourceUrl -> self-hosted bitbucket url git -> https', async () => {
+    hostRules.hosts.mockImplementation(param => {
+      let ret: any;
+      if (param.hostType === 'bitbucket-server') {
+        ret = ['bitbuckethost.org'];
+      } else {
+        ret = [];
+      }
+      return ret;
+    });
+    const url = 'git:bitbuckethost.org/abc/edf.git';
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('https://bitbuckethost.org/abc/edf');
+  });
+  it('test sourceUrl -> self-hosted bitbucket  http -> http', async () => {
+    hostRules.hosts.mockImplementation(param => {
+      let ret: any;
+      if (param.hostType === 'bitbucket-server') {
+        ret = ['bitbuckethost.org'];
+      } else {
+        ret = [];
+      }
+      return ret;
+    });
+    const url = 'http://bitbuckethost.org/abc/edf.git';
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('http://bitbuckethost.org/abc/edf');
+  });
+  it('test sourceUrl  -> self-hosted gitlab  http -> http', async () => {
+    hostRules.hosts.mockImplementation(param => {
+      let ret: any;
+      if (param.hostType === 'gitlab') {
+        ret = ['gitlabhost.com'];
+      } else {
+        ret = [];
+      }
+      return ret;
+    });
+    const url = 'http://gitlabhost.com/abc/edf.git';
+    const res = await datasource.baseUrlLegacyMassager(url);
+    expect(res).toEqual('http://gitlabhost.com/abc/edf');
   });
 });

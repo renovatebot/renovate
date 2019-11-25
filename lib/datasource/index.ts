@@ -98,7 +98,7 @@ function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   return global.repoCache[cacheKey];
 }
 
-async function fetchReleases(
+export async function fetchReleases(
   config: PkgReleaseConfig
 ): Promise<ReleaseResult | null> {
   const { datasource } = config;
@@ -119,6 +119,7 @@ async function fetchReleases(
       dep.sourceUrl = tmpSourceUrl;
     } else {
       /* istanbul ignore next */
+      dep.homepage = dep.sourceUrl;
       delete dep.sourceUrl;
     }
   }
@@ -192,11 +193,13 @@ export function baseUrlLegacyMassager(sourceUrl) {
       return url;
     }
   }
-  if (
-    parsedUrl.protocol &&
-    parsedUrl.host &&
-    parsedUrl.path // this to be swapped out with hosted-git-info.
-  ) {
+  if (parsedUrl.protocol && parsedUrl.host && parsedUrl.path) {
+    let tmpProtocol: string;
+    if (parsedUrl.protocol !== 'http:') {
+      tmpProtocol = 'https:';
+    } else {
+      tmpProtocol = 'http:';
+    }
     const getHostsFromRulesGitlab =
       hostRules.hosts({ hostType: 'gitlab' }) || [];
     const getHostsFromRulesBitbucket =
@@ -208,34 +211,30 @@ export function baseUrlLegacyMassager(sourceUrl) {
     if (gitInfo) {
       tmpurl = gitInfo.browse({ noGitPlus: true, noCommittish: true });
     }
-    /* istanbul ignore else */
     if (
       getHostsFromRulesGitlab.includes(parsedUrl.host) ||
       parsedUrl.host === 'gitlab.com'
     ) {
-      // istanbul ignore next
       if (gitInfo && gitInfo.type === 'gitlab') {
         url = tmpurl;
       } else {
-        url = `https://${parsedUrl.host}/${parsedUrl.path
-          .replace(RegExp('api/v[3|4]/'), '')
+        url = `${tmpProtocol}//${parsedUrl.host}${parsedUrl.path
+          .replace(RegExp('/api/v[3|4]/'), '')
           .replace(':', '')
           .replace(RegExp('.git$'), '')
           .split('/')
           .join('/')
           .replace(RegExp('/$'), '')}`;
       }
-      // istanbul ignore else
     } else if (
       getHostsFromRulesBitbucket.includes(parsedUrl.host) ||
       parsedUrl.host === 'bitbucket.org' ||
       getHostsFromRulesBitbucketServer.includes(parsedUrl.host)
     ) {
-      // istanbul ignore next
       if (gitInfo && gitInfo.type === 'bitbucket') {
         url = tmpurl;
       } else {
-        url = `https://${parsedUrl.host}/${parsedUrl.path
+        url = `${tmpProtocol}//${parsedUrl.host}${parsedUrl.path
           .replace(':', '')
           .split('/')
           .slice(0, 3)
