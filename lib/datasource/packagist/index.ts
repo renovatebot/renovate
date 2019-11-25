@@ -16,7 +16,7 @@ function getHostOpts(url: string) {
   };
   const { username, password } = hostRules.find({ hostType: 'packagist', url });
   if (username && password) {
-    opts.auth = `${opts.username}:${opts.password}`;
+    opts.auth = `${username}:${password}`;
   }
   return opts;
 }
