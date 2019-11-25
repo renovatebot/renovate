@@ -40,13 +40,13 @@ describe('platform/gh-graphql-wrapper', () => {
     });
     expect(await getGraphqlNodes(query, 'testItem')).toEqual([]);
   });
-  it('throws platform-error for invalid response', async () => {
+  it('throws platform-failure for invalid response', async () => {
     get.post.mockReturnValue({
       body: 'invalid json',
     });
 
     await expect(getGraphqlNodes(query, 'testItem')).rejects.toThrow(
-      'platform-error'
+      'platform-failure'
     );
   });
   it('halves node count and retries request', async () => {

@@ -22,8 +22,8 @@ async function gqlGet(query: string): Promise<GithubGraphqlResponse> {
     const res = await api.post('graphql', options);
     return JSON.parse(res.body);
   } catch (err) {
-    logger.warn({ query, err }, 'graphql.get error');
-    throw new Error('platform-error');
+    logger.warn({ query, err }, 'GraphQL request error');
+    throw new Error('platform-failure');
   }
 }
 
