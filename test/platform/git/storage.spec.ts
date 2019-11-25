@@ -15,6 +15,8 @@ describe('platform/git/storage', () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(base.path).silent(true);
     await repo.init();
+    await repo.addConfig('user.email', 'Jest@example.com');
+    await repo.addConfig('user.name', 'Jest');
     await fs.writeFile(base.path + '/past_file', 'past');
     await repo.add(['past_file']);
     await repo.commit('past message');
@@ -55,14 +57,14 @@ describe('platform/git/storage', () => {
     });
   });
 
-  afterEach(() => {
-    tmpDir.cleanup();
-    origin.cleanup();
+  afterEach(async () => {
+    await tmpDir.cleanup();
+    await origin.cleanup();
     git.cleanRepo();
   });
 
-  afterAll(() => {
-    base.cleanup();
+  afterAll(async () => {
+    await base.cleanup();
   });
 
   describe('setBaseBranch(branchName)', () => {
@@ -94,7 +96,7 @@ describe('platform/git/storage', () => {
       });
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toMatchSnapshot();
-      repo.reset(['--hard', 'HEAD^']);
+      await repo.reset(['--hard', 'HEAD^']);
     });
   });
   describe('branchExists(branchName)', () => {
@@ -368,7 +370,7 @@ describe('platform/git/storage', () => {
         url: base.path,
       });
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
-      repo.reset(['--hard', 'HEAD^']);
+      await repo.reset(['--hard', 'HEAD^']);
     });
   });
 });

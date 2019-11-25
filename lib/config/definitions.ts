@@ -62,6 +62,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
+  additionalProperties?: {} | boolean;
   mergeable?: boolean;
   type: 'object';
 }
@@ -524,6 +525,16 @@ const options: RenovateOptions[] = [
     default: {},
     mergeable: true,
     cli: false,
+  },
+  {
+    name: 'aliases',
+    description: 'Aliases for registries, package manager specific',
+    type: 'object',
+    default: {},
+    additionalProperties: {
+      type: 'string',
+      format: 'uri',
+    },
   },
   {
     name: 'registryUrls',
@@ -1081,7 +1092,6 @@ const options: RenovateOptions[] = [
       'Config to apply when a PR is necessary due to vulnerability of existing package version.',
     type: 'object',
     default: {
-      enabled: true,
       groupName: null,
       schedule: [],
       masterIssueApproval: false,
@@ -1392,7 +1402,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'ruby',
-    releaseStatus: 'alpha',
     description: 'Configuration object for ruby language',
     stage: 'package',
     type: 'object',
@@ -1402,12 +1411,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bundler',
-    releaseStatus: 'alpha',
     description: 'Configuration object for bundler Gemfiles',
     stage: 'package',
     type: 'object',
     default: {
-      enabled: false,
       fileMatch: ['(^|/)Gemfile$'],
       versionScheme: 'ruby',
     },
@@ -1439,12 +1446,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'mix',
-    releaseStatus: 'beta',
     description: 'Configuration object for Mix module renovation',
     stage: 'repository',
     type: 'object',
     default: {
-      enabled: false,
       fileMatch: ['(^|/)mix\\.exs$'],
       versionScheme: 'hex',
     },
@@ -1452,7 +1457,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'rust',
-    releaseStatus: 'unpublished',
     description: 'Configuration option for Rust package management.',
     stage: 'package',
     type: 'object',
@@ -1503,7 +1507,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      enabled: false,
       fileMatch: ['^.travis.yml$'],
       versionScheme: 'node',
     },
@@ -1525,7 +1528,6 @@ const options: RenovateOptions[] = [
   {
     name: 'pub',
     description: 'Configuration object for when renovating Dart pubspec files',
-    releaseStatus: 'beta',
     stage: 'package',
     type: 'object',
     default: {
@@ -1613,6 +1615,9 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
+      aliases: {
+        stable: 'https://kubernetes-charts.storage.googleapis.com/',
+      },
       commitMessageTopic: 'helm chart {{depName}}',
       fileMatch: ['(^|/)requirements.yaml$'],
     },
@@ -1705,7 +1710,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'pip_setup',
-    releaseStatus: 'beta',
     description: 'Configuration object for setup.py files',
     stage: 'package',
     type: 'object',
@@ -1717,7 +1721,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'pipenv',
-    releaseStatus: 'beta',
     description: 'Configuration object for Pipfile files',
     stage: 'package',
     type: 'object',
@@ -1729,7 +1732,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'poetry',
-    releaseStatus: 'beta',
     description: 'Configuration object for pyproject.toml files',
     stage: 'package',
     type: 'object',
@@ -1752,7 +1754,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'sbt',
-    releaseStatus: 'beta',
     description: 'Configuration object for *.sbt files',
     stage: 'package',
     type: 'object',
@@ -1766,7 +1767,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'leiningen',
-    releaseStatus: 'beta',
     description:
       'Configuration object for renovating Clojure leiningen projects',
     stage: 'package',
@@ -1780,7 +1780,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'deps-edn',
-    releaseStatus: 'beta',
     description:
       'Configuration object for renovating Clojure CLI-based projects (deps.edn)',
     stage: 'package',
@@ -1811,7 +1810,6 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'gradle',
-    releaseStatus: 'beta',
     description: 'Configuration object for build.gradle files',
     stage: 'package',
     type: 'object',
@@ -1892,12 +1890,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'homebrew',
-    releaseStatus: 'beta',
     description: 'Configuration object for homebrew',
     stage: 'package',
     type: 'object',
     default: {
-      enabled: true,
       commitMessageTopic: 'Homebrew Formula {{depName}}',
       managerBranchPrefix: 'homebrew-',
       fileMatch: ['^Formula/[^/]+[.]rb$'],
@@ -2059,6 +2055,6 @@ const options: RenovateOptions[] = [
   },
 ];
 
-export function getOptions() {
+export function getOptions(): any {
   return options;
 }

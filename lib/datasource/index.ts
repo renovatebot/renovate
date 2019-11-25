@@ -60,6 +60,37 @@ const datasources: Record<string, Datasource> = {
 
 const cacheNamespace = 'datasource-releases';
 
+async function fetchReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
+  const { datasource } = config;
+  if (!datasource) {
+    logger.warn('No datasource found');
+    return null;
+  }
+  if (!datasources[datasource]) {
+    logger.warn('Unknown datasource: ' + datasource);
+    return null;
+  }
+  const dep = await datasources[datasource].getPkgReleases(config);
+  addMetaData(dep, datasource, config.lookupName);
+  return dep;
+}
+
+function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
+  const cacheKey =
+    cacheNamespace +
+    config.datasource +
+    config.lookupName +
+    config.registryUrls;
+  // The repoCache is initialized for each repo
+  // By returning a Promise and reusing it, we should only fetch each package at most once
+  if (!global.repoCache[cacheKey]) {
+    global.repoCache[cacheKey] = fetchReleases(config);
+  }
+  return global.repoCache[cacheKey];
+}
+
 export async function getPkgReleases(config: PkgReleaseConfig) {
   const res = await getRawReleases({
     ...config,
@@ -83,7 +114,6 @@ export async function getPkgReleases(config: PkgReleaseConfig) {
   }
   return res;
 }
-
 function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   const cacheKey =
     cacheNamespace +

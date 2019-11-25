@@ -3,7 +3,7 @@ import { VersioningApi } from '../common';
 
 const pattern = /^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/;
 
-function parse(version: string) {
+function parse(version: string): any {
   const matches = pattern.exec(version);
   if (!matches) {
     return null;
@@ -13,7 +13,7 @@ function parse(version: string) {
   return { release, suffix: prereleasesuffix || '' };
 }
 
-function compare(version1: string, vervion2: string) {
+function compare(version1: string, vervion2: string): number {
   const parsed1 = parse(version1);
   const parsed2 = parse(vervion2);
   // istanbul ignore if
@@ -43,7 +43,7 @@ function compare(version1: string, vervion2: string) {
   return suffixComparison;
 }
 
-function isStable(version: string) {
+function isStable(version: string): boolean {
   const parsed = parse(version);
   return parsed && parsed.suffix === '';
 }

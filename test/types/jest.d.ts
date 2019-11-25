@@ -1,9 +1,9 @@
 declare namespace jest {
-  interface Matchers<R> {
+  interface Matchers<R, T> {
     /**
      * only available in `test/website-docs.spec.js`
      * @param arg
      */
-    toContainOption(arg: R): void;
+    toContainOption(arg: T): void;
   }
 }
