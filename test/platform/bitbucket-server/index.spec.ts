@@ -211,7 +211,11 @@ describe('platform/bitbucket-server', () => {
         it('sends to gitFs', async () => {
           expect.assertions(1);
           await initRepo();
-          await bitbucket.commitFilesToBranch('some-branch', [{}], 'message');
+          await bitbucket.commitFilesToBranch(
+            'some-branch',
+            [{ name: 'test', contents: 'dummy' }],
+            'message'
+          );
           expect(api.get.mock.calls).toMatchSnapshot();
         });
       });
