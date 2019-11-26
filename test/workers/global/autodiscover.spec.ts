@@ -40,7 +40,7 @@ describe('lib/workers/global/autodiscover', () => {
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => Promise.resolve([{}, {}]));
+    ghApi.getRepos = jest.fn(() => Promise.resolve(['a', 'b']));
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toHaveLength(2);
   });

@@ -25,6 +25,8 @@ module.exports = {
     'prefer-template': 'off',
     'no-underscore-dangle': 0,
 
+    '@typescript-eslint/explicit-function-return-type': 'error',
+
     // TODO: fix lint
     '@typescript-eslint/camelcase': 'off', // disabled until ??
     '@typescript-eslint/no-explicit-any': 0,

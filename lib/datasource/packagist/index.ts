@@ -6,12 +6,12 @@ import parse from 'github-url-from-git';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-function getHostOpts(url: string) {
-  const opts: any = {
+function getHostOpts(url: string): GotJSONOptions {
+  const opts: GotJSONOptions = {
     json: true,
   };
   const { username, password } = hostRules.find({ hostType: 'packagist', url });
@@ -173,7 +173,9 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const { packages, providersUrl, files, includesFiles } = registryMeta;
   const providerPackages: Record<string, string> = {};
   if (files) {
-    const queue = files.map(file => () => getPackagistFile(regUrl, file));
+    const queue = files.map(file => (): Promise<PackagistFile> =>
+      getPackagistFile(regUrl, file)
+    );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
     for (const res of resolvedFiles) {
       for (const [name, val] of Object.entries(res.providers)) {
@@ -204,7 +206,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   return allPackages;
 }
 
-async function packagistOrgLookup(name: string) {
+async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   const cacheNamespace = 'datasource-packagist-org';
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,

@@ -38,7 +38,7 @@ export type HTTPError = InstanceType<got.GotInstance['HTTPError']>;
 export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
   _?: number,
   err?: Partial<HTTPError>
-) => {
+): number => {
   if (numberOfRetries === 0) {
     return 0;
   }

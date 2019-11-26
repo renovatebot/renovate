@@ -260,7 +260,7 @@ describe('platform/gitlab', () => {
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
       await initRepo();
-      await gitlab.setBaseBranch('some-branch');
+      await gitlab.setBaseBranch();
       expect(api.get.mock.calls).toMatchSnapshot();
     });
     it('uses default base branch', async () => {

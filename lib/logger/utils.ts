@@ -24,19 +24,19 @@ export class ErrorStream extends Stream {
     this.writable = true;
   }
 
-  write(data: BunyanRecord) {
+  write(data: BunyanRecord): boolean {
     const err = { ...data };
     for (const prop of excludeProps) delete err[prop];
     this._errors.push(err);
     return true;
   }
 
-  getErrors() {
+  getErrors(): BunyanRecord[] {
     return this._errors;
   }
 }
 
-function sanitizeValue(value: any, seen = new WeakMap()) {
+function sanitizeValue(value: any, seen = new WeakMap()): any {
   if (Array.isArray(value)) {
     const length = value.length;
     const arrayResult = Array(length);
@@ -76,7 +76,7 @@ export function withSanitizer(streamConfig): bunyan.Stream {
 
   const stream = streamConfig.stream;
   if (stream && stream.writable) {
-    const write = (chunk: BunyanRecord, enc, cb) => {
+    const write = (chunk: BunyanRecord, enc, cb): void => {
       const raw = sanitizeValue(chunk);
       const result =
         streamConfig.type === 'raw'
