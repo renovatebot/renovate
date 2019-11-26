@@ -9,7 +9,6 @@ function getKey(namespace: string, key: string): string {
 
 let renovateCache: string;
 
-// istanbul ignore next
 async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
   await cacache.rm.entry(renovateCache, getKey(namespace, key));
@@ -19,12 +18,12 @@ async function get<T = never>(namespace: string, key: string): Promise<T> {
   try {
     const res = await cacache.get(renovateCache, getKey(namespace, key));
     const cachedValue = JSON.parse(res.data.toString());
+    // istanbul ignore else: only happens when cache is corrupted
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');
         return cachedValue.value;
       }
-      // istanbul ignore next
       await rm(namespace, key);
     }
   } catch (err) {
