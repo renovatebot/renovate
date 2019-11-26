@@ -1,5 +1,5 @@
-import { get as _get, put, rm as _rm } from 'cacache';
-import { join } from 'path';
+import * as cacache from 'cacache';
+import path from 'path';
 import { DateTime } from 'luxon';
 import { logger } from '../../logger';
 
@@ -12,12 +12,12 @@ let renovateCache: string;
 // istanbul ignore next
 async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
-  await _rm.entry(renovateCache, getKey(namespace, key));
+  await cacache.rm.entry(renovateCache, getKey(namespace, key));
 }
 
 async function get<T = never>(namespace: string, key: string): Promise<T> {
   try {
-    const res = await _get(renovateCache, getKey(namespace, key));
+    const res = await cacache.get(renovateCache, getKey(namespace, key));
     const cachedValue = JSON.parse(res.data.toString());
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
@@ -40,7 +40,7 @@ async function set(
   ttlMinutes = 5
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
-  await put(
+  await cacache.put(
     renovateCache,
     getKey(namespace, key),
     JSON.stringify({
@@ -51,11 +51,11 @@ async function set(
 }
 
 async function rmAll(): Promise<void> {
-  await _rm.all(renovateCache);
+  await cacache.rm.all(renovateCache);
 }
 
 export function init(cacheDir: string): void {
-  renovateCache = join(cacheDir, '/renovate/renovate-cache-v1');
+  renovateCache = path.join(cacheDir, '/renovate/renovate-cache-v1');
   logger.debug('Initializing Renovate internal cache into ' + renovateCache);
   global.renovateCache = global.renovateCache || { get, set, rm, rmAll };
 }

@@ -38,6 +38,8 @@ export interface RenovateConfig
   extends RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, any> {
+  autodiscover?: boolean;
+  autodiscoverFilter?: string;
   baseBranch?: string;
   baseBranches?: string[];
   branchList?: string[];

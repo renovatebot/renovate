@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { filter } from 'minimatch';
+import minimatch from 'minimatch';
 import { platform } from '../../platform';
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
@@ -25,7 +25,7 @@ export async function autodiscoverRepositories(
     return config;
   }
   if (config.autodiscoverFilter) {
-    discovered = discovered.filter(filter(config.autodiscoverFilter));
+    discovered = discovered.filter(minimatch.filter(config.autodiscoverFilter));
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.info('None of the discovered repositories matched the filter');
