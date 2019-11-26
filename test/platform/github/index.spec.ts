@@ -4,6 +4,7 @@ import { GotApi } from '../../../lib/platform/common';
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
   let api: jest.Mocked<GotApi>;
+  let got: any;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage: jest.Mock<typeof import('../../../lib/platform/git/storage')>;
   beforeEach(async () => {
@@ -16,6 +17,8 @@ describe('platform/github', () => {
     jest.mock('../../../lib/util/got');
     api = (await import('../../../lib/platform/github/gh-got-wrapper'))
       .api as any;
+    got = (await import('../../../lib/platform/github/gh-got-wrapper'))
+      .default as any;
     github = await import('../../../lib/platform/github');
     hostRules = (await import('../../../lib/util/host-rules')) as any;
     jest.mock('../../../lib/platform/git/storage');
@@ -856,7 +859,7 @@ describe('platform/github', () => {
   });
   describe('findIssue()', () => {
     beforeEach(() => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -889,7 +892,7 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('finds issue', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -923,7 +926,7 @@ describe('platform/github', () => {
   });
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -954,7 +957,7 @@ describe('platform/github', () => {
       expect(res).toEqual('created');
     });
     it('creates issue if not ensuring only once', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -985,7 +988,7 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('does not create issue if ensuring only once', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1017,7 +1020,7 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('closes others if ensuring only once', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1054,7 +1057,7 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('updates issue', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1086,7 +1089,7 @@ describe('platform/github', () => {
       expect(res).toEqual('updated');
     });
     it('skips update if unchanged', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1118,7 +1121,7 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('deletes if duplicate', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1150,7 +1153,7 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('creates issue if reopen flag false and issue is not open', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1182,7 +1185,7 @@ describe('platform/github', () => {
       expect(res).toEqual('created');
     });
     it('does not create issue if reopen flag false and issue is already open', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
@@ -1216,7 +1219,7 @@ describe('platform/github', () => {
   });
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
-      api.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: {
           data: {
             repository: {
