@@ -1,9 +1,13 @@
-const prWorker = require('../../../lib/workers/pr');
+import * as prWorker from '../../../lib/workers/pr';
+import * as _changelogHelper from '../../../lib/workers/pr/changelog';
+import { getConfig } from '../../../lib/config/defaults';
+import { platform as _platform } from '../../../lib/platform';
+
 /** @type any */
-const changelogHelper = require('../../../lib/workers/pr/changelog');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
+const changelogHelper = _changelogHelper;
 /** @type any */
-const { platform } = require('../../../lib/platform');
+const platform = _platform;
+const defaultConfig = getConfig();
 
 jest.mock('../../../lib/workers/pr/changelog');
 

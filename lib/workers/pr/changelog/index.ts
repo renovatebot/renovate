@@ -1,13 +1,9 @@
-const { logger } = require('../../../logger');
-const versioning = require('../../../versioning');
-const sourceGithub = require('./source-github');
-const { getReleases } = require('./releases');
+import { logger } from '../../../logger';
+import * as versioning from '../../../versioning';
+import * as sourceGithub from './source-github';
+import { getReleases } from './releases';
 
-module.exports = {
-  getChangeLogJSON,
-};
-
-async function getChangeLogJSON(args) {
+export async function getChangeLogJSON(args): Promise<any | null> {
   const { sourceUrl, versionScheme, fromVersion, toVersion } = args;
   if (!sourceUrl) {
     return null;
