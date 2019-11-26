@@ -1,16 +1,14 @@
-import releases from '../../../../lib/workers/pr/changelog/releases';
-
-const datasource = require('../../../../lib/datasource');
+import * as releases from '../../../../lib/workers/pr/changelog/releases';
+import * as datasource from '../../../../lib/datasource';
 
 jest.mock('../../../../lib/datasource');
 
-/** @type any */
-const ds = datasource;
+const ds: jest.Mocked<typeof datasource> = datasource as never;
 
 describe('workers/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
-      ds.getPkgReleases.mockReturnValueOnce({
+      ds.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '1.0.0',

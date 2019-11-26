@@ -6,8 +6,7 @@ import {
   getReleaseNotesMd,
 } from '../../../../lib/workers/pr/changelog/release-notes';
 
-/** @type any */
-const ghGot = got;
+const ghGot: jest.Mock<Promise<{ body: unknown }>> = got as never;
 
 const angularJsChangelogMd = fs.readFileSync(
   'test/workers/pr/_fixtures/angular.js.md',
@@ -40,7 +39,7 @@ describe('workers/pr/release-notes', () => {
   });
   describe('getReleaseNotes()', () => {
     it('should return undefined for release notes without body', async () => {
-      ghGot.mockReturnValueOnce({
+      ghGot.mockResolvedValueOnce({
         body: [{ tag_name: 'v1.0.0' }, { tag_name: 'v1.0.1' }],
       });
       const res = await getReleaseNotes(
@@ -55,7 +54,7 @@ describe('workers/pr/release-notes', () => {
     it.each([[''], ['v'], ['other-']])(
       'gets release notes with body',
       async prefix => {
-        ghGot.mockReturnValueOnce({
+        ghGot.mockResolvedValueOnce({
           body: [
             { tag_name: `${prefix}1.0.0` },
             {
@@ -87,7 +86,7 @@ describe('workers/pr/release-notes', () => {
       expect(res).toBeNull();
     });
     it('handles files mismatch', async () => {
-      ghGot.mockReturnValueOnce({
+      ghGot.mockResolvedValueOnce({
         body: [{ name: 'lib' }, { name: 'README.md' }],
       });
       const res = await getReleaseNotesMd(
@@ -100,8 +99,8 @@ describe('workers/pr/release-notes', () => {
     });
     it('handles wrong format', async () => {
       ghGot
-        .mockReturnValueOnce({ body: contentsResponse })
-        .mockReturnValueOnce({
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
           body: {
             content: Buffer.from('not really markdown').toString('base64'),
           },
@@ -116,8 +115,8 @@ describe('workers/pr/release-notes', () => {
     });
     it('handles bad markdown', async () => {
       ghGot
-        .mockReturnValueOnce({ body: contentsResponse })
-        .mockReturnValueOnce({
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
           body: {
             content: Buffer.from(`#\nha\nha\n#\nha\nha`).toString('base64'),
           },
@@ -132,8 +131,8 @@ describe('workers/pr/release-notes', () => {
     });
     it('parses angular.js', async () => {
       ghGot
-        .mockReturnValueOnce({ body: contentsResponse })
-        .mockReturnValueOnce({
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
           body: {
             content: Buffer.from(angularJsChangelogMd).toString('base64'),
           },
@@ -149,8 +148,8 @@ describe('workers/pr/release-notes', () => {
     });
     it('parses jest', async () => {
       ghGot
-        .mockReturnValueOnce({ body: contentsResponse })
-        .mockReturnValueOnce({
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
           body: {
             content: Buffer.from(jestChangelogMd).toString('base64'),
           },
@@ -166,8 +165,8 @@ describe('workers/pr/release-notes', () => {
     });
     it('parses js-yaml', async () => {
       ghGot
-        .mockReturnValueOnce({ body: contentsResponse })
-        .mockReturnValueOnce({
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
           body: {
             content: Buffer.from(jsYamlChangelogMd).toString('base64'),
           },
