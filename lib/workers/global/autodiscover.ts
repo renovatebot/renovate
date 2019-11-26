@@ -1,12 +1,17 @@
 import is from '@sindresorhus/is';
+import minimatch from 'minimatch';
 import { platform } from '../../platform';
+import { logger } from '../../logger';
+import { RenovateConfig } from '../../config';
 
-const minimatch = require('minimatch');
-const { logger } = require('../../logger');
+// istanbul ignore next
+function repoName(value: string | { repository: string }): string {
+  return String(is.string(value) ? value : value.repository).toLowerCase();
+}
 
-export { autodiscoverRepositories };
-
-async function autodiscoverRepositories(config) {
+export async function autodiscoverRepositories(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
   if (!config.autodiscover) {
     return config;
   }
@@ -40,7 +45,8 @@ async function autodiscoverRepositories(config) {
         if (repository === repoName(discovered[i])) {
           found = true;
           logger.debug({ repository }, 'Using configured repository settings');
-          discovered[i] = configuredRepo;
+          // TODO: fix typings
+          discovered[i] = configuredRepo as never;
         }
       }
       if (!found) {
@@ -52,9 +58,4 @@ async function autodiscoverRepositories(config) {
     }
   }
   return { ...config, repositories: discovered };
-}
-
-// istanbul ignore next
-function repoName(value) {
-  return String(is.string(value) ? value : value.repository).toLowerCase();
 }
