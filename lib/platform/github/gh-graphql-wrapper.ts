@@ -1,37 +1,42 @@
-import { api } from './gh-got-wrapper';
 import { logger } from '../../logger';
+import { GotJSONOptions } from '../../util/got';
+import got from './gh-got-wrapper';
 
-const gqlOpts = {
+const gqlOpts: GotJSONOptions = {
+  json: true,
+  method: 'POST',
   headers: {
     accept: 'application/vnd.github.merge-info-preview+json',
   },
-  json: false,
 };
 
-interface GithubGraphqlResponse {
+interface GithubGraphqlResponse<T = unknown> {
   data?: {
-    repository?: any;
+    repository?: T;
   };
-  errors?: any;
+  errors?: { message: string; locations: unknown }[];
 }
 
-async function gqlGet(query: string): Promise<GithubGraphqlResponse> {
+async function gqlGet<T = unknown>(
+  query: string
+): Promise<GithubGraphqlResponse<T>> {
   try {
-    const body = JSON.stringify({ query });
-    const options = { ...gqlOpts, body };
-    const res = await api.post('graphql', options);
-    return JSON.parse(res.body);
+    const body = { query };
+    const options: GotJSONOptions = { ...gqlOpts, body };
+    const okToRetry = false;
+    const res = await got('graphql', options, okToRetry);
+    return res && res.body;
   } catch (err) {
     logger.warn({ query, err }, 'GraphQL request error');
     throw new Error('platform-failure');
   }
 }
 
-export async function getGraphqlNodes(
+export async function getGraphqlNodes<T = Record<string, unknown>>(
   queryOrig: string,
   fieldName: string
-): Promise<any[]> {
-  const result = [];
+): Promise<T[]> {
+  const result: T[] = [];
 
   const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
 
@@ -43,14 +48,14 @@ export async function getGraphqlNodes(
     let replacement = `$1${fieldName}$2(first: ${count}`;
     if (cursor) replacement += `, after: "${cursor}", `;
     const query = queryOrig.replace(regex, replacement);
-    const res = await gqlGet(query);
+    const gqlRes = await gqlGet<T>(query);
     if (
-      res &&
-      res.data &&
-      res.data.repository &&
-      res.data.repository[fieldName]
+      gqlRes &&
+      gqlRes.data &&
+      gqlRes.data.repository &&
+      gqlRes.data.repository[fieldName]
     ) {
-      const { nodes, pageInfo } = res.data.repository[fieldName];
+      const { nodes, pageInfo } = gqlRes.data.repository[fieldName];
       result.push(...nodes);
 
       const { hasNextPage, endCursor } = pageInfo;
@@ -62,7 +67,7 @@ export async function getGraphqlNodes(
     } else {
       count = Math.floor(count / 2);
       if (count === 0) {
-        logger.info({ query, res }, 'Error fetching GraphQL nodes');
+        logger.info('Error fetching GraphQL nodes');
         canIterate = false;
       }
     }

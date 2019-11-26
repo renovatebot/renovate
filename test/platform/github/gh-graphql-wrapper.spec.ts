@@ -1,9 +1,9 @@
 import { getGraphqlNodes } from '../../../lib/platform/github/gh-graphql-wrapper';
 
 /** @type any */
-const get = require('../../../lib/platform/github/gh-got-wrapper').default;
+const got = require('../../../lib/util/got').default;
 
-jest.mock('../../../lib/platform/github/gh-got-wrapper');
+jest.mock('../../../lib/util/got');
 
 const query = `
       query {
@@ -25,24 +25,26 @@ describe('platform/gh-graphql-wrapper', () => {
     jest.resetAllMocks();
   });
   it('returns empty array for undefined data', async () => {
-    get.post.mockReturnValue({
-      body: JSON.stringify({
-        someprop: 'someval',
-      }),
+    got.mockReturnValue({
+      body: {
+        data: {
+          someprop: 'someval',
+        },
+      },
     });
     expect(await getGraphqlNodes(query, 'testItem')).toEqual([]);
   });
   it('returns empty array for undefined data.', async () => {
-    get.post.mockReturnValue({
-      body: JSON.stringify({
+    got.mockReturnValue({
+      body: {
         data: { repository: { otherField: 'someval' } },
-      }),
+      },
     });
     expect(await getGraphqlNodes(query, 'testItem')).toEqual([]);
   });
   it('throws platform-failure for invalid response', async () => {
-    get.post.mockReturnValue({
-      body: 'invalid json',
+    got.mockImplementation(() => {
+      throw new Error('error');
     });
 
     await expect(getGraphqlNodes(query, 'testItem')).rejects.toThrow(
@@ -50,18 +52,20 @@ describe('platform/gh-graphql-wrapper', () => {
     );
   });
   it('halves node count and retries request', async () => {
-    get.post.mockReturnValue({
-      body: JSON.stringify({
-        someprop: 'someval',
-      }),
+    got.mockReturnValue({
+      body: {
+        data: {
+          someprop: 'someval',
+        },
+      },
     });
 
     await getGraphqlNodes(query, 'testItem');
-    expect(get.post).toHaveBeenCalledTimes(7);
+    expect(got).toHaveBeenCalledTimes(7);
   });
   it('retrieves all data from all pages', async () => {
-    get.post.mockReturnValueOnce({
-      body: JSON.stringify({
+    got.mockReturnValueOnce({
+      body: {
         data: {
           repository: {
             testItem: {
@@ -80,11 +84,11 @@ describe('platform/gh-graphql-wrapper', () => {
             },
           },
         },
-      }),
+      },
     });
 
-    get.post.mockReturnValueOnce({
-      body: JSON.stringify({
+    got.mockReturnValueOnce({
+      body: {
         data: {
           repository: {
             testItem: {
@@ -103,11 +107,11 @@ describe('platform/gh-graphql-wrapper', () => {
             },
           },
         },
-      }),
+      },
     });
 
-    get.post.mockReturnValueOnce({
-      body: JSON.stringify({
+    got.mockReturnValueOnce({
+      body: {
         data: {
           repository: {
             testItem: {
@@ -126,11 +130,11 @@ describe('platform/gh-graphql-wrapper', () => {
             },
           },
         },
-      }),
+      },
     });
 
     const items = await getGraphqlNodes(query, 'testItem');
-    expect(get.post).toHaveBeenCalledTimes(3);
+    expect(got).toHaveBeenCalledTimes(3);
     expect(items.length).toEqual(3);
   });
 });

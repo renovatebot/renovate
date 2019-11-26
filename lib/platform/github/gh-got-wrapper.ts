@@ -4,11 +4,17 @@ import pAll from 'p-all';
 
 import got from '../../util/got';
 import { maskToken } from '../../util/mask';
-import { GotApi } from '../common';
+import { GotApi, GotResponse } from '../common';
 import { logger } from '../../logger';
 
 const hostType = 'github';
 let baseUrl = 'https://api.github.com/';
+
+function isGoodResult(res: GotResponse<unknown>): boolean {
+  const body = res.body;
+  if (typeof body === 'string' && body.startsWith('{"data":{')) return true;
+  return typeof body === 'object' && body.data && typeof body.data === 'object';
+}
 
 async function get(
   path: string,
@@ -76,8 +82,7 @@ async function get(
     }
     // istanbul ignore if
     if (method === 'POST' && path === 'graphql') {
-      const goodResult = '{"data":{';
-      if (res.body.startsWith(goodResult)) {
+      if (isGoodResult(res)) {
         if (!okToRetry) {
           logger.info('Recovered graphql query');
         }
