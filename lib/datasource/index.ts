@@ -4,6 +4,7 @@ import * as URL from 'url';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
+
 import * as cargo from './cargo';
 import * as dart from './dart';
 import * as docker from './docker';
@@ -34,7 +35,7 @@ import {
 } from './common';
 
 export * from './common';
-
+const cacheNamespace = 'datasource-releases';
 const datasources: Record<string, Datasource> = {
   cargo,
   dart,
@@ -57,90 +58,6 @@ const datasources: Record<string, Datasource> = {
   sbt,
   terraform,
 };
-
-const cacheNamespace = 'datasource-releases';
-
-export async function getPkgReleases(config: PkgReleaseConfig) {
-  const res = await getRawReleases({
-    ...config,
-    lookupName: config.lookupName || config.depName,
-  });
-  if (!res) {
-    return res;
-  }
-  const versionScheme =
-    config && config.versionScheme ? config.versionScheme : 'semver';
-  // Filter by version scheme
-  const version = versioning.get(versionScheme);
-  // Return a sorted list of valid Versions
-  function sortReleases(release1: Release, release2: Release) {
-    return version.sortVersions(release1.version, release2.version);
-  }
-  if (res.releases) {
-    res.releases = res.releases
-      .filter(release => version.isVersion(release.version))
-      .sort(sortReleases);
-  }
-  return res;
-}
-
-function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
-  const cacheKey =
-    cacheNamespace +
-    config.datasource +
-    config.lookupName +
-    config.registryUrls;
-  // The repoCache is initialized for each repo
-  // By returning a Promise and reusing it, we should only fetch each package at most once
-  if (!global.repoCache[cacheKey]) {
-    global.repoCache[cacheKey] = fetchReleases(config);
-  }
-  return global.repoCache[cacheKey];
-}
-
-export async function fetchReleases(
-  config: PkgReleaseConfig
-): Promise<ReleaseResult | null> {
-  const { datasource } = config;
-  // istanbul ignore if
-  if (!datasource) {
-    logger.warn('No datasource found');
-  }
-  if (!datasources[datasource]) {
-    logger.warn('Unknown datasource: ' + datasource);
-    return null;
-  }
-  const dep = await datasources[datasource].getPkgReleases(config);
-  addMetaData(dep, datasource, config.lookupName);
-  if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
-    const tmpSourceUrl: string | null = baseUrlLegacyMassager(dep.sourceUrl);
-    /* istanbul ignore if */
-    if (tmpSourceUrl !== null) {
-      dep.sourceUrl = tmpSourceUrl;
-    } else {
-      /* istanbul ignore next */
-      dep.homepage = dep.sourceUrl;
-      delete dep.sourceUrl;
-    }
-  }
-  return dep;
-}
-
-export function supportsDigests(config: DigestConfig) {
-  return !!datasources[config.datasource].getDigest;
-}
-
-export function getDigest(
-  config: DigestConfig,
-  value?: string
-): Promise<string | null> {
-  const lookupName = config.lookupName || config.depName;
-  const { registryUrls } = config;
-  return datasources[config.datasource].getDigest(
-    { lookupName, registryUrls },
-    value
-  );
-}
 
 export function baseUrlLegacyMassager(sourceUrl) {
   let url: string = sourceUrl.trim();
@@ -247,4 +164,83 @@ export function baseUrlLegacyMassager(sourceUrl) {
   }
   /* todo add azure support. */
   return null;
+}
+export async function fetchReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
+  const { datasource } = config;
+  // istanbul ignore if
+  if (!datasource) {
+    logger.warn('No datasource found');
+  }
+  if (!datasources[datasource]) {
+    logger.warn('Unknown datasource: ' + datasource);
+    return null;
+  }
+  const dep = await datasources[datasource].getPkgReleases(config);
+  addMetaData(dep, datasource, config.lookupName);
+  if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
+    const tmpSourceUrl: string | null = baseUrlLegacyMassager(dep.sourceUrl);
+    /* istanbul ignore if */
+    if (tmpSourceUrl !== null) {
+      dep.sourceUrl = tmpSourceUrl;
+    } else {
+      /* istanbul ignore next */
+      dep.homepage = dep.sourceUrl;
+      delete dep.sourceUrl;
+    }
+  }
+  return dep;
+}
+function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
+  const cacheKey =
+    cacheNamespace +
+    config.datasource +
+    config.lookupName +
+    config.registryUrls;
+  // The repoCache is initialized for each repo
+  // By returning a Promise and reusing it, we should only fetch each package at most once
+  if (!global.repoCache[cacheKey]) {
+    global.repoCache[cacheKey] = fetchReleases(config);
+  }
+  return global.repoCache[cacheKey];
+}
+export async function getPkgReleases(config: PkgReleaseConfig) {
+  const res = await getRawReleases({
+    ...config,
+    lookupName: config.lookupName || config.depName,
+  });
+  if (!res) {
+    return res;
+  }
+  const versionScheme =
+    config && config.versionScheme ? config.versionScheme : 'semver';
+  // Filter by version scheme
+  const version = versioning.get(versionScheme);
+  // Return a sorted list of valid Versions
+  function sortReleases(release1: Release, release2: Release) {
+    return version.sortVersions(release1.version, release2.version);
+  }
+  if (res.releases) {
+    res.releases = res.releases
+      .filter(release => version.isVersion(release.version))
+      .sort(sortReleases);
+  }
+  return res;
+}
+
+export function supportsDigests(config: DigestConfig) {
+  return !!datasources[config.datasource].getDigest;
+}
+
+export function getDigest(
+  config: DigestConfig,
+  value?: string
+): Promise<string | null> {
+  const lookupName = config.lookupName || config.depName;
+  const { registryUrls } = config;
+  return datasources[config.datasource].getDigest(
+    { lookupName, registryUrls },
+    value
+  );
 }
