@@ -27,6 +27,12 @@ type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig
 > = Partial<Record<UpdateType, T>>;
 
+export type RenovateRepository =
+  | string
+  | {
+      repository: string;
+    };
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends RenovateSharedConfig,
@@ -45,6 +51,7 @@ export interface RenovateConfig
   packageRules?: PackageRule[];
   privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
+  repositories?: RenovateRepository[];
   requireConfig?: boolean;
   warnings?: ValidationMessage[];
 }

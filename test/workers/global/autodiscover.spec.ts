@@ -1,12 +1,14 @@
-const {
-  autodiscoverRepositories,
-} = require('../../../lib/workers/global/autodiscover');
-const platform = require('../../../lib/platform');
-const hostRules = require('../../../lib/util/host-rules');
-const ghApi = require('../../../lib/platform/github');
+import { autodiscoverRepositories } from '../../../lib/workers/global/autodiscover';
+import * as platform from '../../../lib/platform';
+import * as _hostRules from '../../../lib/util/host-rules';
+import * as _ghApi from '../../../lib/platform/github';
 
 jest.mock('../../../lib/platform/github');
 jest.unmock('../../../lib/platform');
+
+// imports are readonly
+const hostRules = _hostRules;
+const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
 describe('lib/workers/global/autodiscover', () => {
   let config;
