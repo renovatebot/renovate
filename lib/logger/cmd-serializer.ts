@@ -1,6 +1,4 @@
-export default cmdSerializer;
-
 // istanbul ignore next
-function cmdSerializer(cmd) {
+export default function(cmd: string): string {
   return cmd.replace(/https:\/\/[^@]*@/g, 'https://**redacted**@');
 }
