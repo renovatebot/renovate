@@ -6,15 +6,10 @@ import {
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
 
-// import * as _releaseNotes from '../../../../lib/workers/pr/changelog/release-notes';
-
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
 const ghGot = mocked(api).get;
-// const releaseNotes = _releaseNotes;
-
-// releaseNotes.addReleaseNotes = jest.fn(input => input);
 
 const upgrade: ChangeLogConfig = {
   endpoint: 'https://api.github.com/',
