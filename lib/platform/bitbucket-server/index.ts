@@ -4,9 +4,17 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage from '../git/storage';
+import GitStorage, { File, StatusResult } from '../git/storage';
 import { logger } from '../../logger';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
+import {
+  PlatformConfig,
+  RepoParams,
+  RepoConfig,
+  Pr,
+  Issue,
+  VulnerabilityAlert,
+  GotResponse,
+} from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 
@@ -27,7 +35,7 @@ interface BbsConfig {
   fileList: any[];
   mergeMethod: string;
   owner: string;
-  prList: any[];
+  prList: Pr[];
   projectKey: string;
   repository: string;
   repositorySlug: string;
@@ -45,7 +53,7 @@ const defaults: any = {
 };
 
 /* istanbul ignore next */
-function updatePrVersion(pr: number, version: number) {
+function updatePrVersion(pr: number, version: number): number {
   const res = Math.max(config.prVersions.get(pr) || 0, version);
   config.prVersions.set(pr, res);
   return res;
@@ -59,7 +67,7 @@ export function initPlatform({
   endpoint: string;
   username: string;
   password: string;
-}) {
+}): PlatformConfig {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
@@ -78,7 +86,7 @@ export function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos() {
+export async function getRepos(): Promise<string[]> {
   logger.info('Autodiscovering Bitbucket Server repositories');
   try {
     const repos = await utils.accumulateValues(
@@ -96,7 +104,7 @@ export async function getRepos() {
   }
 }
 
-export function cleanRepo() {
+export function cleanRepo(): void {
   logger.debug(`cleanRepo()`);
   if (config.storage) {
     config.storage.cleanRepo();
@@ -111,7 +119,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: RepoParams) {
+}: RepoParams): Promise<RepoConfig> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -208,7 +216,7 @@ export async function initRepo({
   }
 }
 
-export function getRepoForceRebase() {
+export function getRepoForceRebase(): boolean {
   logger.debug(`getRepoForceRebase()`);
   // TODO if applicable
   // This function should return true only if the user has enabled a setting on the repo that enforces PRs to be kept up to date with master
@@ -217,21 +225,25 @@ export function getRepoForceRebase() {
   return false;
 }
 
-export async function setBaseBranch(branchName: string = config.defaultBranch) {
+export async function setBaseBranch(
+  branchName: string = config.defaultBranch
+): Promise<void> {
   config.baseBranch = branchName;
   await config.storage.setBaseBranch(branchName);
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
-) {
+): Promise<void> {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // Get full file list
-export function getFileList(branchName: string = config.baseBranch) {
+export function getFileList(
+  branchName: string = config.baseBranch
+): Promise<string[]> {
   logger.debug(`getFileList(${branchName})`);
   return config.storage.getFileList(branchName);
 }
@@ -239,18 +251,21 @@ export function getFileList(branchName: string = config.baseBranch) {
 // Branch
 
 // Returns true if branch exists, otherwise false
-export function branchExists(branchName: string) {
+export function branchExists(branchName: string): Promise<boolean> {
   logger.debug(`branchExists(${branchName})`);
   return config.storage.branchExists(branchName);
 }
 
-export function isBranchStale(branchName: string) {
+export function isBranchStale(branchName: string): Promise<boolean> {
   logger.debug(`isBranchStale(${branchName})`);
   return config.storage.isBranchStale(branchName);
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number, refreshCache?: boolean) {
+export async function getPr(
+  prNo: number,
+  refreshCache?: boolean
+): Promise<Pr | null> {
   logger.debug(`getPr(${prNo})`);
   if (!prNo) {
     return null;
@@ -314,7 +329,7 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
 
 // TODO: coverage
 // istanbul ignore next
-function matchesState(state: string, desiredState: string) {
+function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
@@ -330,14 +345,14 @@ const isRelevantPr = (
   branchName: string,
   prTitle: string | null | undefined,
   state: string
-) => (p: { branchName: string; title: string; state: string }) =>
+) => (p: Pr): boolean =>
   p.branchName === branchName &&
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
 // TODO: coverage
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getPrList(_args?: any) {
+export async function getPrList(_args?: any): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList) {
@@ -365,7 +380,7 @@ export async function findPr(
   prTitle?: string,
   state = 'all',
   refreshCache?: boolean
-) {
+): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
   const prList = await getPrList({ refreshCache });
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
@@ -378,23 +393,28 @@ export async function findPr(
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string, refreshCache?: boolean) {
+export async function getBranchPr(
+  branchName: string,
+  refreshCache?: boolean
+): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr(branchName, undefined, 'open');
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 
-export function getAllRenovateBranches(branchPrefix: string) {
+export function getAllRenovateBranches(
+  branchPrefix: string
+): Promise<string[]> {
   logger.debug('getAllRenovateBranches');
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
 export async function commitFilesToBranch(
   branchName: string,
-  files: any[],
+  files: File[],
   message: string,
   parentBranch: string = config.baseBranch
-) {
+): Promise<void> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
       { branchName, filesLength: files.length, message, parentBranch },
@@ -415,12 +435,15 @@ export async function commitFilesToBranch(
   await getBranchPr(branchName, true);
 }
 
-export function getFile(filePath: string, branchName: string) {
+export function getFile(filePath: string, branchName: string): Promise<string> {
   logger.debug(`getFile(${filePath}, ${branchName})`);
   return config.storage.getFile(filePath, branchName);
 }
 
-export async function deleteBranch(branchName: string, closePr = false) {
+export async function deleteBranch(
+  branchName: string,
+  closePr = false
+): Promise<void> {
   logger.debug(`deleteBranch(${branchName}, closePr=${closePr})`);
   // TODO: coverage
   // istanbul ignore next
@@ -428,27 +451,29 @@ export async function deleteBranch(branchName: string, closePr = false) {
     // getBranchPr
     const pr = await getBranchPr(branchName);
     if (pr) {
-      const { body } = await api.post(
+      const { body } = await api.post<{ version: number }>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
       );
 
-      updatePrVersion(pr, body);
+      updatePrVersion(pr.number, body.version);
     }
   }
   return config.storage.deleteBranch(branchName);
 }
 
-export function mergeBranch(branchName: string) {
+export function mergeBranch(branchName: string): Promise<void> {
   logger.debug(`mergeBranch(${branchName})`);
   return config.storage.mergeBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string) {
+export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   logger.debug(`getBranchLastCommitTime(${branchName})`);
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
-export /* istanbul ignore next */ function getRepoStatus() {
+export /* istanbul ignore next */ function getRepoStatus(): Promise<
+  StatusResult
+> {
   return config.storage.getRepoStatus();
 }
 
@@ -458,7 +483,7 @@ export /* istanbul ignore next */ function getRepoStatus() {
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks?: string[] | boolean | null
-) {
+): Promise<string> {
   logger.debug(
     `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
   );
@@ -495,7 +520,7 @@ export async function getBranchStatus(
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-) {
+): Promise<string | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
   const branchCommit = await config.storage.getBranchCommit(branchName);
@@ -530,7 +555,7 @@ export async function setBranchStatus(
   description: string,
   state: string | null,
   targetUrl?: string
-) {
+): Promise<void> {
   logger.debug(`setBranchStatus(${branchName})`);
 
   const existingStatus = await getBranchStatusCheck(branchName, context);
@@ -577,7 +602,9 @@ export async function setBranchStatus(
 //   return [];
 // }
 
-export /* istanbul ignore next */ function findIssue(title: string) {
+export /* istanbul ignore next */ function findIssue(
+  title: string
+): Issue | null {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -588,7 +615,7 @@ export /* istanbul ignore next */ function findIssue(title: string) {
 export /* istanbul ignore next */ function ensureIssue(
   title: string,
   body: string
-) {
+): Promise<'updated' | 'created' | null> {
   logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -596,13 +623,15 @@ export /* istanbul ignore next */ function ensureIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList() {
+export /* istanbul ignore next */ function getIssueList(): Issue[] {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return [];
 }
 
-export /* istanbul ignore next */ function ensureIssueClosing(title: string) {
+export /* istanbul ignore next */ function ensureIssueClosing(
+  title: string
+): void {
   logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -610,14 +639,17 @@ export /* istanbul ignore next */ function ensureIssueClosing(title: string) {
 }
 
 // eslint-disable-next-line no-unused-vars
-export function addAssignees(iid: number, assignees: string[]) {
+export function addAssignees(iid: number, assignees: string[]): void {
   logger.debug(`addAssignees(${iid}, ${assignees})`);
   // TODO: Needs implementation
   // Currently Renovate does "Create PR" and then "Add assignee" as a two-step process, with this being the second step.
   // BB Server doesnt support assignees
 }
 
-export async function addReviewers(prNo: number, reviewers: string[]) {
+export async function addReviewers(
+  prNo: number,
+  reviewers: string[]
+): Promise<void> {
   logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
 
   try {
@@ -653,13 +685,15 @@ export async function addReviewers(prNo: number, reviewers: string[]) {
 }
 
 // eslint-disable-next-line no-unused-vars
-export function deleteLabel(issueNo: number, label: string) {
+export function deleteLabel(issueNo: number, label: string): void {
   logger.debug(`deleteLabel(${issueNo}, ${label})`);
   // TODO: Needs implementation
   // Only used for the "request Renovate to rebase a PR using a label" feature
 }
 
-async function getComments(prNo: number) {
+type Comment = { text: string; id: number };
+
+async function getComments(prNo: number): Promise<Comment[]> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/activities
   let comments = await utils.accumulateValues(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`
@@ -670,14 +704,14 @@ async function getComments(prNo: number) {
       (a: { action: string; commentAction: string }) =>
         a.action === 'COMMENTED' && a.commentAction === 'ADDED'
     )
-    .map((a: { comment: string }) => a.comment);
+    .map((a: { comment: Comment }) => a.comment);
 
   logger.debug(`Found ${comments.length} comments`);
 
   return comments;
 }
 
-async function addComment(prNo: number, text: string) {
+async function addComment(prNo: number, text: string): Promise<void> {
   // POST /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments
   await api.post(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments`,
@@ -687,7 +721,10 @@ async function addComment(prNo: number, text: string) {
   );
 }
 
-async function getCommentVersion(prNo: number, commentId: number) {
+async function getCommentVersion(
+  prNo: number,
+  commentId: number
+): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   const { version } = (await api.get(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
@@ -696,7 +733,11 @@ async function getCommentVersion(prNo: number, commentId: number) {
   return version;
 }
 
-async function editComment(prNo: number, commentId: number, text: string) {
+async function editComment(
+  prNo: number,
+  commentId: number,
+  text: string
+): Promise<void> {
   const version = await getCommentVersion(prNo, commentId);
 
   // PUT /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
@@ -708,7 +749,7 @@ async function editComment(prNo: number, commentId: number, text: string) {
   );
 }
 
-async function deleteComment(prNo: number, commentId: number) {
+async function deleteComment(prNo: number, commentId: number): Promise<void> {
   const version = await getCommentVersion(prNo, commentId);
 
   // DELETE /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
@@ -721,7 +762,7 @@ export async function ensureComment(
   prNo: number,
   topic: string | null,
   rawContent: string
-) {
+): Promise<boolean> {
   const content = sanitize(rawContent);
   try {
     const comments = await getComments(prNo);
@@ -731,7 +772,7 @@ export async function ensureComment(
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
       body = `### ${topic}\n\n${content}`;
-      comments.forEach((comment: { text: string; id: number }) => {
+      comments.forEach(comment => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.text !== body;
@@ -740,7 +781,7 @@ export async function ensureComment(
     } else {
       logger.debug(`Ensuring content-only comment in #${prNo}`);
       body = `${content}`;
-      comments.forEach((comment: { text: string; id: number }) => {
+      comments.forEach(comment => {
         if (comment.text === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -766,12 +807,15 @@ export async function ensureComment(
   }
 }
 
-export async function ensureCommentRemoval(prNo: number, topic: string) {
+export async function ensureCommentRemoval(
+  prNo: number,
+  topic: string
+): Promise<void> {
   try {
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(prNo);
-    let commentId;
-    comments.forEach((comment: { text: string; id: any }) => {
+    let commentId: number;
+    comments.forEach(comment => {
       if (comment.text.startsWith(`### ${topic}\n\n`)) {
         commentId = comment.id;
       }
@@ -786,7 +830,8 @@ export async function ensureCommentRemoval(prNo: number, topic: string) {
 
 // Pull Request
 
-const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
+const escapeHash = (input: string): string =>
+  input ? input.replace(/#/g, '%23') : input;
 
 export async function createPr(
   branchName: string,
@@ -794,7 +839,7 @@ export async function createPr(
   rawDescription: string,
   _labels?: string[] | null,
   useDefaultBranch?: boolean
-) {
+): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -831,7 +876,7 @@ export async function createPr(
     },
     reviewers,
   };
-  let prInfoRes;
+  let prInfoRes: GotResponse;
   try {
     prInfoRes = await api.post(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
@@ -854,7 +899,7 @@ export async function createPr(
     throw err;
   }
 
-  const pr = {
+  const pr: Pr = {
     id: prInfoRes.body.id,
     displayNumber: `Pull Request #${prInfoRes.body.id}`,
     isModified: false,
@@ -873,24 +918,24 @@ export async function createPr(
 
 // Return a list of all modified files in a PR
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html
-export async function getPrFiles(prNo: number) {
+export async function getPrFiles(prNo: number): Promise<string[]> {
   logger.debug(`getPrFiles(${prNo})`);
   if (!prNo) {
     return [];
   }
 
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/changes
-  const values = await utils.accumulateValues(
+  const values = await utils.accumulateValues<{ path: { toString: string } }>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/changes?withComments=false`
   );
-  return values.map((f: { path: string }) => f.path.toString);
+  return values.map(f => f.path.toString);
 }
 
 export async function updatePr(
   prNo: number,
   title: string,
   rawDescription: string
-) {
+): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
@@ -900,7 +945,7 @@ export async function updatePr(
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
 
-    const { body } = await api.put(
+    const { body } = await api.put<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       {
         body: {
@@ -926,7 +971,10 @@ export async function updatePr(
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp261
-export async function mergePr(prNo: number, branchName: string) {
+export async function mergePr(
+  prNo: number,
+  branchName: string
+): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // Used for "automerge" feature
   try {
@@ -934,7 +982,7 @@ export async function mergePr(prNo: number, branchName: string) {
     if (!pr) {
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
-    const { body } = await api.post(
+    const { body } = await api.post<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
     );
     updatePrVersion(prNo, body.version);
@@ -956,7 +1004,7 @@ export async function mergePr(prNo: number, branchName: string) {
   return true;
 }
 
-export function getPrBody(input: string) {
+export function getPrBody(input: string): string {
   logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
@@ -966,12 +1014,12 @@ export function getPrBody(input: string) {
     .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 
-export function getCommitMessages() {
+export function getCommitMessages(): Promise<string[]> {
   logger.debug(`getCommitMessages()`);
   return config.storage.getCommitMessages();
 }
 
-export function getVulnerabilityAlerts() {
+export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
   logger.debug(`getVulnerabilityAlerts()`);
   return [];
 }

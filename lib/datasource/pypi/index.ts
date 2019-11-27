@@ -6,14 +6,14 @@ import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-function normalizeName(input: string) {
+function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
 }
 
 function compatibleVersions(
   releases: Record<string, { requires_python?: boolean }[]>,
   compatibility: Record<string, string>
-) {
+): string[] {
   const versions = Object.keys(releases);
   if (!(compatibility && compatibility.python)) {
     return versions;

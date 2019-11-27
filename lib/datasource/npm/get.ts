@@ -15,12 +15,12 @@ import { Release, ReleaseResult } from '../common';
 
 let memcache = {};
 
-export function resetMemCache() {
+export function resetMemCache(): void {
   logger.debug('resetMemCache()');
   memcache = {};
 }
 
-export function resetCache() {
+export function resetCache(): void {
   resetMemCache();
 }
 

@@ -17,7 +17,8 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
-WORKDIR /usr/src/app/
+ENV APP_ROOT=/usr/src/app
+WORKDIR ${APP_ROOT}
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
@@ -117,7 +118,7 @@ RUN chmod +x /usr/local/bin/composer
 RUN apt-get update && apt-get install -y bzr mercurial && \
     rm -rf /var/lib/apt/lists/*
 
-ENV GOLANG_VERSION 1.13
+ENV GOLANG_VERSION 1.13.4
 
 # Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
 # private repositories.
@@ -147,10 +148,11 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
-# Set up ubuntu user
+# Set up ubuntu user and home directory with access to users in the root group (0)
 
-RUN groupadd --gid 1000 ubuntu \
-  && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
+ENV HOME=/home/ubuntu
+RUN groupadd --gid 1000 ubuntu && \
+  useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu
 
 RUN chmod -R a+rw /usr
 
@@ -176,7 +178,7 @@ USER ubuntu
 # Cargo
 
 ENV RUST_BACKTRACE=1 \
-  PATH=/home/ubuntu/.cargo/bin:$PATH
+  PATH=${HOME}/.cargo/bin:$PATH
 
 RUN set -ex ;\
   curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
@@ -189,7 +191,7 @@ RUN mix local.rebar --force
 
 # Pipenv
 
-ENV PATH="/home/ubuntu/.local/bin:$PATH"
+ENV PATH="${HOME}/.local/bin:$PATH"
 
 RUN pip install --user pipenv
 
@@ -197,8 +199,8 @@ RUN pip install --user pipenv
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
-ENV PATH="/home/ubuntu/.poetry/bin:$PATH"
-RUN cp -r $HOME/.poetry/lib/poetry/_vendor/py3.7 $HOME/.poetry/lib/poetry/_vendor/py3.8
+ENV PATH="${HOME}/.poetry/bin:$PATH"
+RUN cp -r ${HOME}/.poetry/lib/poetry/_vendor/py3.7 ${HOME}/.poetry/lib/poetry/_vendor/py3.8
 RUN poetry config settings.virtualenvs.in-project false
 
 # npm
@@ -213,7 +215,7 @@ ENV YARN_VERSION=1.19.1
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
-ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.bin:$PATH"
+ENV PATH="${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin:$PATH"
 
 COPY package.json .
 COPY yarn.lock .
@@ -224,8 +226,11 @@ COPY bin bin
 COPY data data
 
 USER root
-RUN chown -R ubuntu:ubuntu /usr/src/app
-USER ubuntu
+RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
+  chmod -R g=u ${APP_ROOT} ${HOME}
+
+# Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
+USER 1000
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []

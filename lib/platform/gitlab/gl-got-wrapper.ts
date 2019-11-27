@@ -1,13 +1,13 @@
 import parseLinkHeader from 'parse-link-header';
 
-import { GotApi } from '../common';
+import { GotApi, GotResponse } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
 
 const hostType = 'gitlab';
 let baseUrl = 'https://gitlab.com/api/v4/';
 
-async function get(path: string, options: any) {
+async function get(path: string, options: any): Promise<GotResponse> {
   const opts = {
     hostType,
     baseUrl,
@@ -60,11 +60,11 @@ interface GlGotApi
 export const api: GlGotApi = {} as any;
 
 for (const x of helpers) {
-  (api as any)[x] = (url: string, opts: any) =>
+  (api as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-api.setBaseUrl = e => {
+api.setBaseUrl = (e: string): void => {
   baseUrl = e;
 };
 

@@ -65,6 +65,7 @@ async function fetchReleases(
   const { datasource } = config;
   if (!datasource) {
     logger.warn('No datasource found');
+    return null;
   }
   if (!datasources[datasource]) {
     logger.warn('Unknown datasource: ' + datasource);
@@ -75,7 +76,9 @@ async function fetchReleases(
   return dep;
 }
 
-function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
+function getRawReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
   const cacheKey =
     cacheNamespace +
     config.datasource +
@@ -89,7 +92,9 @@ function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   return global.repoCache[cacheKey];
 }
 
-export async function getPkgReleases(config: PkgReleaseConfig) {
+export async function getPkgReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
   const res = await getRawReleases({
     ...config,
     lookupName: config.lookupName || config.depName,
@@ -102,7 +107,7 @@ export async function getPkgReleases(config: PkgReleaseConfig) {
   // Filter by version scheme
   const version = versioning.get(versionScheme);
   // Return a sorted list of valid Versions
-  function sortReleases(release1: Release, release2: Release) {
+  function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);
   }
   if (res.releases) {
@@ -113,7 +118,7 @@ export async function getPkgReleases(config: PkgReleaseConfig) {
   return res;
 }
 
-export function supportsDigests(config: DigestConfig) {
+export function supportsDigests(config: DigestConfig): boolean {
   return !!datasources[config.datasource].getDigest;
 }
 
