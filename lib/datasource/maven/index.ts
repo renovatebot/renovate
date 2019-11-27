@@ -67,6 +67,17 @@ async function downloadMavenXml(
   }
 }
 
+function getDependencyParts(lookupName: string): MavenDependency {
+  const [group, name] = lookupName.split(':');
+  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  return {
+    display: lookupName,
+    group,
+    name,
+    dependencyUrl,
+  };
+}
+
 async function getDependencyInfo(
   dependency: MavenDependency,
   repoUrl: string,
@@ -127,17 +138,6 @@ interface MavenDependency {
   group?: string;
   name?: string;
   dependencyUrl: string;
-}
-
-function getDependencyParts(lookupName: string): MavenDependency {
-  const [group, name] = lookupName.split(':');
-  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
-  return {
-    display: lookupName,
-    group,
-    name,
-    dependencyUrl,
-  };
 }
 
 function extractVersions(metadata: XmlDocument): string[] {
