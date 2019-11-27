@@ -4,6 +4,10 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult } from '../common';
 
+function getPkgProp(pkgInfo: XmlElement, propName: string): string {
+  return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
+}
+
 export async function getPkgReleases(
   feedUrl: string,
   pkgName: string
@@ -36,7 +40,15 @@ export async function getPkgReleases(
         try {
           const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
           if (pkgIsLatestVersion === 'true') {
-            dep.sourceUrl = parse(getPkgProp(pkgInfo, 'ProjectUrl'));
+            const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
+            if (projectUrl) {
+              dep.sourceUrl = parse(projectUrl);
+              if (!dep.sourceUrl) {
+                // The project URL does not represent a known
+                // source URL, pass it on as homepage instead.
+                dep.homepage = projectUrl;
+              }
+            }
           }
         } catch (err) /* istanbul ignore next */ {
           logger.debug(
@@ -64,8 +76,4 @@ export async function getPkgReleases(
     );
     return null;
   }
-}
-
-function getPkgProp(pkgInfo: XmlElement, propName: string) {
-  return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
 }

@@ -1,43 +1,53 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
 
-const isComment = (str: string) => /^\s*\/\//.test(str);
+const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
-const isSingleLineDep = (str: string) =>
+const isSingleLineDep = (str: string): boolean =>
   /^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/.test(str);
 
-const isDepsBegin = (str: string) =>
+const isDepsBegin = (str: string): boolean =>
   /^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/.test(str);
 
-const isPluginDep = (str: string) => /^\s*addSbtPlugin\s*\(.*\)\s*$/.test(str);
+const isPluginDep = (str: string): boolean =>
+  /^\s*addSbtPlugin\s*\(.*\)\s*$/.test(str);
 
-const isStringLiteral = (str: string) => /^"[^"]*"$/.test(str);
+const isStringLiteral = (str: string): boolean => /^"[^"]*"$/.test(str);
 
-const isScalaVersion = (str: string) =>
+const isScalaVersion = (str: string): boolean =>
   /^\s*scalaVersion\s*:=\s*"[^"]*"\s*$/.test(str);
-const getScalaVersion = (str: string) =>
+
+const getScalaVersion = (str: string): string =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
 
-const isScalaVersionVariable = (str: string) =>
+const isScalaVersionVariable = (str: string): boolean =>
   /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
-const getScalaVersionVariable = (str: string) =>
+
+const getScalaVersionVariable = (str: string): string =>
   str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/\s*$/, '');
 
-const isResolver = (str: string) =>
+const isResolver = (str: string): boolean =>
   /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/.test(
     str
   );
-const getResolverUrl = (str: string) =>
+const getResolverUrl = (str: string): string =>
   str
     .replace(/^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"/, '')
     .replace(/"[\s,)]*$/, '');
 
-const isVarDef = (str: string) =>
+const isVarDef = (str: string): boolean =>
   /^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
-const getVarName = (str: string) =>
+
+const getVarName = (str: string): string =>
   str.replace(/^\s*val\s+/, '').replace(/\s*=\s*"[^"]*"\s*$/, '');
-const isVarName = (str: string) => /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
-const getVarInfo = (str: string, ctx: ParseContext) => {
+
+const isVarName = (str: string): boolean =>
+  /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
+
+const getVarInfo = (
+  str: string,
+  ctx: ParseContext
+): { val: string; fileReplacePosition: number } => {
   const { fileOffset } = ctx;
   const rightPart = str.replace(/^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/, '');
   const fileReplacePosition = str.search(rightPart) + fileOffset;
@@ -59,10 +69,10 @@ function parseDepExpr(
   const { scalaVersion, fileOffset, variables } = ctx;
   let { depType } = ctx;
 
-  const isValidToken = (str: string) =>
+  const isValidToken = (str: string): boolean =>
     isStringLiteral(str) || (isVarName(str) && !!variables[str]);
 
-  const resolveToken = (str: string) =>
+  const resolveToken = (str: string): string =>
     isStringLiteral(str)
       ? str.replace(/^"/, '').replace(/"$/, '')
       : variables[str].val;

@@ -27,11 +27,19 @@ type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig
 > = Partial<Record<UpdateType, T>>;
 
+export type RenovateRepository =
+  | string
+  | {
+      repository: string;
+    };
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, any> {
+  autodiscover?: boolean;
+  autodiscoverFilter?: string;
   baseBranch?: string;
   baseBranches?: string[];
   branchList?: string[];
@@ -45,6 +53,7 @@ export interface RenovateConfig
   packageRules?: PackageRule[];
   privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
+  repositories?: RenovateRepository[];
   requireConfig?: boolean;
   warnings?: ValidationMessage[];
 }

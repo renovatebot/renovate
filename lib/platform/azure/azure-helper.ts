@@ -1,18 +1,26 @@
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import {
+  GitPullRequestMergeStrategy,
+  GitRef,
+  GitCommit,
+  GitPullRequest,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 import * as azureApi from './azure-got-wrapper';
 import { logger } from '../../logger';
+import { Pr } from '../common';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
-export function getNewBranchName(branchName?: string) {
+export function getNewBranchName(branchName?: string): string {
   if (branchName && !branchName.startsWith('refs/heads/')) {
     return `refs/heads/${branchName}`;
   }
   return branchName;
 }
 
-export function getBranchNameWithoutRefsheadsPrefix(branchPath: string) {
+export function getBranchNameWithoutRefsheadsPrefix(
+  branchPath: string
+): string | undefined {
   if (!branchPath) {
     logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
     return undefined;
@@ -26,7 +34,9 @@ export function getBranchNameWithoutRefsheadsPrefix(branchPath: string) {
   return branchPath.substring(11, branchPath.length);
 }
 
-function getBranchNameWithoutRefsPrefix(branchPath?: string) {
+function getBranchNameWithoutRefsPrefix(
+  branchPath?: string
+): string | undefined {
   if (!branchPath) {
     logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
     return undefined;
@@ -40,7 +50,10 @@ function getBranchNameWithoutRefsPrefix(branchPath?: string) {
   return branchPath.substring(5, branchPath.length);
 }
 
-export async function getRefs(repoId: string, branchName?: string) {
+export async function getRefs(
+  repoId: string,
+  branchName?: string
+): Promise<GitRef[]> {
   logger.debug(`getRefs(${repoId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
   const refs = await azureApiGit.getRefs(
@@ -51,11 +64,16 @@ export async function getRefs(repoId: string, branchName?: string) {
   return refs;
 }
 
+export interface AzureBranchObj {
+  name: string;
+  oldObjectId: string;
+}
+
 export async function getAzureBranchObj(
   repoId: string,
   branchName: string,
   from?: string
-) {
+): Promise<AzureBranchObj> {
   const fromBranchName = getNewBranchName(from);
   const refs = await getRefs(repoId, fromBranchName);
   if (refs.length === 0) {
@@ -71,33 +89,18 @@ export async function getAzureBranchObj(
   };
 }
 
-export async function getChanges(
-  files: { name: string; contents: any }[],
-  repoId: string,
-  branchName: string
-) {
-  const changes = [];
-  for (const file of files) {
-    // Add or update
-    let changeType = 1;
-    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
-    if (fileAlreadyThere) {
-      changeType = 2;
-    }
-
-    changes.push({
-      changeType,
-      item: {
-        path: file.name,
-      },
-      newContent: {
-        Content: file.contents,
-        ContentType: 0, // RawText
-      },
+async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: string[] = [];
+  /* eslint-disable promise/avoid-new */
+  const p = await new Promise<string>(resolve => {
+    stream.on('data', (chunk: any) => {
+      chunks.push(chunk.toString());
     });
-  }
-
-  return changes;
+    stream.on('end', () => {
+      resolve(chunks.join(''));
+    });
+  });
+  return p;
 }
 
 // if no branchName, look globaly
@@ -105,7 +108,7 @@ export async function getFile(
   repoId: string,
   filePath: string,
   branchName: string
-) {
+): Promise<string | null> {
   logger.trace(`getFile(filePath=${filePath}, branchName=${branchName})`);
   const azureApiGit = await azureApi.gitApi();
   const item = await azureApiGit.getItemText(
@@ -144,40 +147,20 @@ export async function getFile(
   return null; // no file found
 }
 
-async function streamToString(stream: NodeJS.ReadableStream) {
-  const chunks: string[] = [];
-  /* eslint-disable promise/avoid-new */
-  const p = await new Promise<string>(resolve => {
-    stream.on('data', (chunk: any) => {
-      chunks.push(chunk.toString());
-    });
-    stream.on('end', () => {
-      resolve(chunks.join(''));
-    });
-  });
-  return p;
-}
-
-export function max4000Chars(str: string) {
+export function max4000Chars(str: string): string {
   if (str && str.length >= 4000) {
     return str.substring(0, 3999);
   }
   return str;
 }
 
-export function getRenovatePRFormat(azurePr: {
-  pullRequestId: any;
-  description: any;
-  status: number;
-  mergeStatus: number;
-  targetRefName: string;
-}) {
-  const pr = azurePr as any;
+export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
+  const pr: Pr = azurePr as any;
 
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
-  pr.targetBranch = azurePr.targetRefName;
+  pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
 
   // status
   // export declare enum PullRequestStatus {
@@ -213,14 +196,19 @@ export function getRenovatePRFormat(azurePr: {
   return pr;
 }
 
-export async function getCommitDetails(commit: string, repoId: string) {
+export async function getCommitDetails(
+  commit: string,
+  repoId: string
+): Promise<GitCommit> {
   logger.debug(`getCommitDetails(${commit}, ${repoId})`);
   const azureApiGit = await azureApi.gitApi();
   const results = await azureApiGit.getCommit(commit, repoId);
   return results;
 }
 
-export function getProjectAndRepo(str: string) {
+export function getProjectAndRepo(
+  str: string
+): { project: string; repo: string } {
   logger.trace(`getProjectAndRepo(${str})`);
   const strSplited = str.split(`/`);
   if (strSplited.length === 1) {
@@ -254,9 +242,11 @@ export async function getMergeMethod(
     )
     .map(p => p.settings)[0];
 
-  return (
-    Object.keys(policyConfigurations)
+  try {
+    return Object.keys(policyConfigurations)
       .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p) || GitPullRequestMergeStrategy.NoFastForward
-  );
+      .find(p => p);
+  } catch (err) {
+    return GitPullRequestMergeStrategy.NoFastForward;
+  }
 }

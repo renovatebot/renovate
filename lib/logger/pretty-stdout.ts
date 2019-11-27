@@ -35,12 +35,12 @@ const levels: Record<number, string> = {
   60: chalk.bgRed('FATAL'),
 };
 
-export function indent(str: string, leading = false) {
+export function indent(str: string, leading = false): string {
   const prefix = leading ? '       ' : '';
   return prefix + str.split(/\r?\n/).join('\n       ');
 }
 
-export function getMeta(rec: BunyanRecord) {
+export function getMeta(rec: BunyanRecord): string {
   if (!rec) {
     return '';
   }
@@ -56,7 +56,7 @@ export function getMeta(rec: BunyanRecord) {
   return chalk.gray(res);
 }
 
-export function getDetails(rec: BunyanRecord) {
+export function getDetails(rec: BunyanRecord): string {
   if (!rec) {
     return '';
   }
@@ -76,7 +76,7 @@ export function getDetails(rec: BunyanRecord) {
     .join(',\n')}\n`;
 }
 
-export function formatRecord(rec: BunyanRecord) {
+export function formatRecord(rec: BunyanRecord): string {
   const level = levels[rec.level];
   const msg = `${indent(rec.msg)}`;
   const meta = getMeta(rec);
@@ -96,7 +96,7 @@ export class RenovateStream extends Stream {
   }
 
   // istanbul ignore next
-  write(data: BunyanRecord) {
+  write(data: BunyanRecord): boolean {
     this.emit('data', formatRecord(data));
     return true;
   }

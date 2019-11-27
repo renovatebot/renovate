@@ -14,36 +14,6 @@ Object {
 }
 `;
 
-exports[`platform/azure/helpers getChanges should be get the commit obj formated (file to create) 1`] = `
-Array [
-  Object {
-    "changeType": 1,
-    "item": Object {
-      "path": "./myFilePath/test",
-    },
-    "newContent": Object {
-      "Content": "Hello world!",
-      "ContentType": 0,
-    },
-  },
-]
-`;
-
-exports[`platform/azure/helpers getChanges should be get the commit obj formated (file to update) 1`] = `
-Array [
-  Object {
-    "changeType": 2,
-    "item": Object {
-      "path": "./myFilePath/test",
-    },
-    "newContent": Object {
-      "Content": "Hello world!",
-      "ContentType": 0,
-    },
-  },
-]
-`;
-
 exports[`platform/azure/helpers getCommitDetails should get commit details 1`] = `
 Object {
   "parents": Array [

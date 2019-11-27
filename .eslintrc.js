@@ -25,12 +25,10 @@ module.exports = {
     'prefer-template': 'off',
     'no-underscore-dangle': 0,
 
+    '@typescript-eslint/explicit-function-return-type': 'error',
+
     // TODO: fix lint
     '@typescript-eslint/camelcase': 'off', // disabled until ??
-    '@typescript-eslint/no-var-requires': 'off', // disable until all files converted to typescript
-    '@typescript-eslint/no-use-before-define': 'off', // disable until all files converted to typescript
-    '@typescript-eslint/explicit-member-accessibility': 0,
-    '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/no-explicit-any': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
@@ -42,4 +40,15 @@ module.exports = {
       },
     ], // disable until proper interfaced api
   },
+  overrides: [
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 0,
+        '@typescript-eslint/no-use-before-define': 0,
+        '@typescript-eslint/explicit-member-accessibility': 0,
+        '@typescript-eslint/explicit-function-return-type': 0,
+      },
+    },
+  ],
 };

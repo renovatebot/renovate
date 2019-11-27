@@ -4,7 +4,7 @@ import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from '../operator';
 import { floor, increment, decrement } from '../version';
 import { parse as parseRange } from '../range';
 
-export default ({ range, to }: { range: string; to: string }) => {
+export default ({ range, to }: { range: string; to: string }): string => {
   const ranges = range.split(',').map(parseRange);
   const results = ranges.map(({ operator, version: ver }) => {
     switch (operator) {

@@ -57,31 +57,26 @@ const datasources: Record<string, Datasource> = {
 
 const cacheNamespace = 'datasource-releases';
 
-export async function getPkgReleases(config: PkgReleaseConfig) {
-  const res = await getRawReleases({
-    ...config,
-    lookupName: config.lookupName || config.depName,
-  });
-  if (!res) {
-    return res;
+async function fetchReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
+  const { datasource } = config;
+  if (!datasource) {
+    logger.warn('No datasource found');
+    return null;
   }
-  const versionScheme =
-    config && config.versionScheme ? config.versionScheme : 'semver';
-  // Filter by version scheme
-  const version = versioning.get(versionScheme);
-  // Return a sorted list of valid Versions
-  function sortReleases(release1: Release, release2: Release) {
-    return version.sortVersions(release1.version, release2.version);
+  if (!datasources[datasource]) {
+    logger.warn('Unknown datasource: ' + datasource);
+    return null;
   }
-  if (res.releases) {
-    res.releases = res.releases
-      .filter(release => version.isVersion(release.version))
-      .sort(sortReleases);
-  }
-  return res;
+  const dep = await datasources[datasource].getPkgReleases(config);
+  addMetaData(dep, datasource, config.lookupName);
+  return dep;
 }
 
-function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
+function getRawReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult | null> {
   const cacheKey =
     cacheNamespace +
     config.datasource +
@@ -95,23 +90,33 @@ function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   return global.repoCache[cacheKey];
 }
 
-async function fetchReleases(
+export async function getPkgReleases(
   config: PkgReleaseConfig
 ): Promise<ReleaseResult | null> {
-  const { datasource } = config;
-  if (!datasource) {
-    logger.warn('No datasource found');
+  const res = await getRawReleases({
+    ...config,
+    lookupName: config.lookupName || config.depName,
+  });
+  if (!res) {
+    return res;
   }
-  if (!datasources[datasource]) {
-    logger.warn('Unknown datasource: ' + datasource);
-    return null;
+  const versionScheme =
+    config && config.versionScheme ? config.versionScheme : 'semver';
+  // Filter by version scheme
+  const version = versioning.get(versionScheme);
+  // Return a sorted list of valid Versions
+  function sortReleases(release1: Release, release2: Release): number {
+    return version.sortVersions(release1.version, release2.version);
   }
-  const dep = await datasources[datasource].getPkgReleases(config);
-  addMetaData(dep, datasource, config.lookupName);
-  return dep;
+  if (res.releases) {
+    res.releases = res.releases
+      .filter(release => version.isVersion(release.version))
+      .sort(sortReleases);
+  }
+  return res;
 }
 
-export function supportsDigests(config: DigestConfig) {
+export function supportsDigests(config: DigestConfig): boolean {
   return !!datasources[config.datasource].getDigest;
 }
 

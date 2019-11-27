@@ -105,63 +105,6 @@ describe('platform/azure/helpers', () => {
     });
   });
 
-  describe('getChanges', () => {
-    it('should be get the commit obj formated (file to update)', async () => {
-      let eventCount = 0;
-      const mockEventStream = new Readable({
-        objectMode: true,
-        /* eslint-disable func-names */
-        /* eslint-disable object-shorthand */
-        read: function() {
-          if (eventCount < 1) {
-            eventCount += 1;
-            return this.push('{"hello": "test"}');
-          }
-          return this.push(null);
-        },
-      });
-
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: jest.fn(() => mockEventStream),
-          } as any)
-      );
-
-      const res = await azureHelper.getChanges(
-        [
-          {
-            name: './myFilePath/test',
-            contents: 'Hello world!',
-          },
-        ],
-        '123',
-        'repository'
-      );
-      expect(res).toMatchSnapshot();
-    });
-    it('should be get the commit obj formated (file to create)', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: jest.fn(() => null),
-          } as any)
-      );
-
-      const res = await azureHelper.getChanges(
-        [
-          {
-            name: './myFilePath/test',
-            contents: 'Hello world!',
-          },
-        ],
-        '123',
-        'repository'
-      );
-      expect(res).toMatchSnapshot();
-    });
-  });
-
   describe('getFile', () => {
     it('should return null error GitItemNotFoundException', async () => {
       let eventCount = 0;
@@ -349,20 +292,7 @@ describe('platform/azure/helpers', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => [
-              {
-                settings: {
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
-              },
-            ]),
+            getPolicyConfigurations: jest.fn(() => []),
           } as any)
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(

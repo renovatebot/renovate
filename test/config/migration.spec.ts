@@ -22,12 +22,12 @@ describe('config/migration', () => {
         ],
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
-        onboarding: 'false' as any,
+        onboarding: 'false' as never,
         multipleMajorPrs: true,
         gitFs: false,
         separateMajorReleases: true,
         separatePatchReleases: true,
-        automerge: 'none' as any,
+        automerge: 'none' as never,
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
@@ -41,7 +41,7 @@ describe('config/migration', () => {
           enabled: true,
         },
         meteor: true,
-        autodiscover: 'true',
+        autodiscover: 'true' as never,
         schedule: 'on the last day of the month',
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
@@ -58,7 +58,7 @@ describe('config/migration', () => {
         },
         packageRules: [
           {
-            packagePatterns: '^(@angular|typescript)' as any,
+            packagePatterns: '^(@angular|typescript)' as never,
             groupName: ['angular packages'],
             excludedPackageNames: 'foo',
           },
@@ -76,7 +76,7 @@ describe('config/migration', () => {
         lockFileMaintenance: {
           exposeEnv: false,
           gitFs: true,
-          automerge: 'any' as any,
+          automerge: 'any' as never,
           schedule: 'before 5am every day',
         },
         devDependencies: {
@@ -222,7 +222,7 @@ describe('config/migration', () => {
     });
     it('it overrides existing automerge setting', () => {
       const config: RenovateConfig = {
-        automerge: 'minor' as any,
+        automerge: 'minor' as never,
         packages: [
           {
             packagePatterns: '^(@angular|typescript)',
