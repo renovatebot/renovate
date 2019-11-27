@@ -560,6 +560,9 @@ function generateServerResponses(endpoint) {
         ],
       },
     },
+    [`${endpoint}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`]: {
+      GET: {},
+    },
     [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`]: {
       GET: {
         isLastPage: true,

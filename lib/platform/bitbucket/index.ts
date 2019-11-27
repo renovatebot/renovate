@@ -372,6 +372,17 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketStatus[]> {
+  const sha = await getBranchCommit(branchName);
+  return utils.accumulateValues<utils.BitbucketStatus>(
+    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
+    'get',
+    { useCache }
+  );
+}
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -388,14 +399,8 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return 'failed';
   }
-  const sha = await getBranchCommit(branchName);
-  const statuses = await utils.accumulateValues(
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
-  );
-  logger.debug(
-    { branch: branchName, sha, statuses },
-    'branch status check result'
-  );
+  const statuses = await getStatus(branchName);
+  logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
     return 'pending';
@@ -419,13 +424,8 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<string | null> {
-  const sha = await getBranchCommit(branchName);
-  const statuses = await utils.accumulateValues(
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
-  );
-  const bbState = (
-    statuses.find((status: { key: string }) => status.key === context) || {}
-  ).state;
+  const statuses = await getStatus(branchName);
+  const bbState = (statuses.find(status => status.key === context) || {}).state;
 
   return (
     Object.keys(utils.buildStates).find(
@@ -458,6 +458,8 @@ export async function setBranchStatus(
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
+  // update status cache
+  await getStatus(branchName, false);
 }
 
 type BbIssue = { id: number; content?: { raw: string } };

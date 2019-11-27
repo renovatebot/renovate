@@ -447,9 +447,9 @@ describe('platform/gitlab', () => {
     it('returns status if name found', async () => {
       api.get.mockReturnValueOnce({
         body: [
-          { name: 'context-1', state: 'pending' },
-          { name: 'some-context', state: 'success' },
-          { name: 'context-3', state: 'failed' },
+          { name: 'context-1', status: 'pending' },
+          { name: 'some-context', status: 'success' },
+          { name: 'context-3', status: 'failed' },
         ],
       } as any);
       const res = await gitlab.getBranchStatusCheck(
