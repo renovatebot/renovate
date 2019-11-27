@@ -20,9 +20,27 @@ const query = `
         }
       }`;
 
+async function getError(q: string, f: string) {
+  let error;
+  try {
+    await getGraphqlNodes(q, f);
+  } catch (err) {
+    error = err;
+  }
+  return error;
+}
+
 describe('platform/gh-graphql-wrapper', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    delete global.appMode;
+  });
+  it('supports app mode', async () => {
+    global.appMode = true;
+    await getGraphqlNodes(query, 'testItem');
+    expect(got.mock.calls[0][1].headers.accept).toEqual(
+      'application/vnd.github.machine-man-preview+json, application/vnd.github.merge-info-preview+json'
+    );
   });
   it('returns empty array for undefined data', async () => {
     got.mockReturnValue({
@@ -42,14 +60,14 @@ describe('platform/gh-graphql-wrapper', () => {
     });
     expect(await getGraphqlNodes(query, 'testItem')).toEqual([]);
   });
-  it('throws platform-failure for invalid response', async () => {
-    got.mockImplementation(() => {
-      throw new Error('error');
-    });
-
-    await expect(getGraphqlNodes(query, 'testItem')).rejects.toThrow(
-      'platform-failure'
-    );
+  it('throws errors for invalid responses', async () => {
+    const gotErr = {
+      statusCode: 418,
+      message: 'Sorry, this is a teapot',
+    };
+    got.mockImplementationOnce(() => Promise.reject(gotErr));
+    const e = await getError(query, 'someItem');
+    expect(e).toBe(gotErr);
   });
   it('halves node count and retries request', async () => {
     got.mockReturnValue({

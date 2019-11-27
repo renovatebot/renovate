@@ -1144,10 +1144,15 @@ async function getGraphqlIssues() {
   const result = await getGraphqlNodes(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map(issue => ({
-    ...issue,
-    state: issue.state.toLowerCase(),
-  }));
+  return result.map(issue => {
+    const state = issue.state;
+    return state && typeof state === 'string'
+      ? {
+          ...issue,
+          state: state.toLowerCase(),
+        }
+      : issue;
+  });
 }
 
 // istanbul ignore next

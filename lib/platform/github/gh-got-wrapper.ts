@@ -2,18 +2,102 @@ import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import pAll from 'p-all';
 
-import got from '../../util/got';
+import { GotError } from 'got';
+import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
-import { GotApi, GotResponse } from '../common';
+import { GotApi } from '../common';
 import { logger } from '../../logger';
 
 const hostType = 'github';
-let baseUrl = 'https://api.github.com/';
+export const getHostType = (): string => hostType;
 
-function isGoodResult(res: GotResponse<unknown>): boolean {
-  const body = res.body;
-  if (typeof body === 'string' && body.startsWith('{"data":{')) return true;
-  return typeof body === 'object' && body.data && typeof body.data === 'object';
+let baseUrl = 'https://api.github.com/';
+export const getBaseUrl = (): string => baseUrl;
+
+type GotRequestError<T = unknown> = GotError & {
+  body: {
+    message?: string;
+    errors?: Record<string, T>[];
+  };
+  headers?: Record<string, T>;
+};
+
+export function gotErrorToRenovate(
+  err: GotRequestError,
+  path: string,
+  opts: GotJSONOptions & { token?: string }
+): Error | GotError {
+  let message = err.message;
+  if (err.body && err.body.message) {
+    message = err.body.message;
+  }
+  if (
+    err.name === 'RequestError' &&
+    (err.code === 'ENOTFOUND' ||
+      err.code === 'ETIMEDOUT' ||
+      err.code === 'EAI_AGAIN')
+  ) {
+    logger.info({ err }, 'GitHub failure: RequestError');
+    return new Error('platform-failure');
+  }
+  if (err.name === 'ParseError') {
+    logger.info({ err }, 'GitHub failure: ParseError');
+    return new Error('platform-failure');
+  }
+  if (err.statusCode >= 500 && err.statusCode < 600) {
+    logger.info({ err }, 'GitHub failure: 5xx');
+    return new Error('platform-failure');
+  }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('You have triggered an abuse detection mechanism')
+  ) {
+    logger.info({ err }, 'GitHub failure: abuse detection');
+    return new Error('platform-failure');
+  }
+  if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
+    logger.debug({ path }, 'Endpoint needs paid GitHub plan');
+    return err;
+  }
+  if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
+    logger.info({ err }, 'GitHub failure: rate limit');
+    return new Error('rate-limit-exceeded');
+  }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('Resource not accessible by integration')
+  ) {
+    logger.info(
+      { err },
+      'GitHub failure: Resource not accessible by integration'
+    );
+    return new Error('integration-unauthorized');
+  }
+  if (err.statusCode === 401 && message.includes('Bad credentials')) {
+    const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
+    logger.info(
+      {
+        token: maskToken(opts.token),
+        err,
+      },
+      'GitHub failure: Bad credentials'
+    );
+    if (rateLimit === '60') {
+      return new Error('platform-failure');
+    }
+    return new Error('bad-credentials');
+  }
+  if (err.statusCode === 422) {
+    if (
+      err.body &&
+      err.body.errors &&
+      err.body.errors.find((e: any) => e.code === 'invalid')
+    ) {
+      return new Error('repository-changed');
+    }
+    return new Error('platform-failure');
+  }
+  return err;
 }
 
 async function get(
@@ -82,7 +166,8 @@ async function get(
     }
     // istanbul ignore if
     if (method === 'POST' && path === 'graphql') {
-      if (isGoodResult(res)) {
+      const goodResult = '{"data":{';
+      if (res.body.startsWith(goodResult)) {
         if (!okToRetry) {
           logger.info('Recovered graphql query');
         }
@@ -93,75 +178,8 @@ async function get(
       }
     }
     return res;
-  } catch (err) /* istanbul ignore next */ {
-    let message = err.message;
-    if (err.body && err.body.message) {
-      message = err.body.message;
-    }
-    if (
-      err.name === 'RequestError' &&
-      (err.code === 'ENOTFOUND' ||
-        err.code === 'ETIMEDOUT' ||
-        err.code === 'EAI_AGAIN')
-    ) {
-      logger.info({ err }, 'GitHub failure: RequestError');
-      throw new Error('platform-failure');
-    }
-    if (err.name === 'ParseError') {
-      logger.info({ err }, 'GitHub failure: ParseError');
-      throw new Error('platform-failure');
-    }
-    if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.info({ err }, 'GitHub failure: 5xx');
-      throw new Error('platform-failure');
-    }
-    if (
-      err.statusCode === 403 &&
-      message.startsWith('You have triggered an abuse detection mechanism')
-    ) {
-      logger.info({ err }, 'GitHub failure: abuse detection');
-      throw new Error('platform-failure');
-    }
-    if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
-      logger.debug({ path }, 'Endpoint needs paid GitHub plan');
-      throw err;
-    }
-    if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
-      logger.info({ err }, 'GitHub failure: rate limit');
-      throw new Error('rate-limit-exceeded');
-    } else if (
-      err.statusCode === 403 &&
-      message.startsWith('Resource not accessible by integration')
-    ) {
-      logger.info(
-        { err },
-        'GitHub failure: Resource not accessible by integration'
-      );
-      throw new Error('integration-unauthorized');
-    } else if (err.statusCode === 401 && message.includes('Bad credentials')) {
-      const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
-      logger.info(
-        {
-          token: maskToken(opts.token),
-          err,
-        },
-        'GitHub failure: Bad credentials'
-      );
-      if (rateLimit === '60') {
-        throw new Error('platform-failure');
-      }
-      throw new Error('bad-credentials');
-    } else if (err.statusCode === 422) {
-      if (
-        err.body &&
-        err.body.errors &&
-        err.body.errors.find((e: any) => e.code === 'invalid')
-      ) {
-        throw new Error('repository-changed');
-      }
-      throw new Error('platform-failure');
-    }
-    throw err;
+  } catch (gotErr) {
+    throw gotErrorToRenovate(gotErr, path, opts);
   }
 }
 

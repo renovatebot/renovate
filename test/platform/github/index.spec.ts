@@ -17,8 +17,7 @@ describe('platform/github', () => {
     jest.mock('../../../lib/util/got');
     api = (await import('../../../lib/platform/github/gh-got-wrapper'))
       .api as any;
-    got = (await import('../../../lib/platform/github/gh-got-wrapper'))
-      .default as any;
+    got = (await import('../../../lib/util/got')).default as any;
     github = await import('../../../lib/platform/github');
     hostRules = (await import('../../../lib/util/host-rules')) as any;
     jest.mock('../../../lib/platform/git/storage');
