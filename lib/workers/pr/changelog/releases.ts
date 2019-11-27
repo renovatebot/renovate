@@ -20,6 +20,8 @@ function matchesUnstable(
 
 export type ReleaseConfig = PkgReleaseConfig & {
   fromVersion: string;
+  releases?: Release[];
+  sourceUrl?: string;
   toVersion: string;
 };
 

@@ -34,7 +34,7 @@ describe('workers/pr/release-notes', () => {
   describe('addReleaseNotes()', () => {
     it('returns input if invalid', async () => {
       const input = { a: 1 };
-      expect(await addReleaseNotes(input)).toEqual(input);
+      expect(await addReleaseNotes(input as never)).toEqual(input);
     });
   });
   describe('getReleaseNotes()', () => {

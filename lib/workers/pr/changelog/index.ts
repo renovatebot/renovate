@@ -2,8 +2,13 @@ import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import * as sourceGithub from './source-github';
 import { getReleases } from './releases';
+import { ChangeLogConfig, ChangeLogResult } from './common';
 
-export async function getChangeLogJSON(args): Promise<any | null> {
+export * from './common';
+
+export async function getChangeLogJSON(
+  args: ChangeLogConfig
+): Promise<ChangeLogResult | null> {
   const { sourceUrl, versionScheme, fromVersion, toVersion } = args;
   if (!sourceUrl) {
     return null;

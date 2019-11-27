@@ -4,6 +4,8 @@ import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
+import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
+import { Release } from '../../../datasource';
 
 const ghGot = api.get;
 
@@ -49,7 +51,7 @@ export async function getChangeLogJSON({
   releases,
   depName,
   manager,
-}): Promise<any> {
+}: ChangeLogConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.debug('No release notes for @types');
     return null;
@@ -92,10 +94,7 @@ export async function getChangeLogJSON({
 
   let tags: string[];
 
-  async function getRef(release: {
-    version: string;
-    gitRef: string;
-  }): Promise<string | null> {
+  async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
       tags = await getTags(endpoint, versionScheme, repository);
     }
@@ -117,7 +116,7 @@ export async function getChangeLogJSON({
     return `${manager}:${depName}:${prev}:${next}`;
   }
 
-  const changelogReleases = [];
+  const changelogReleases: ChangeLogRelease[] = [];
   // compare versions
   const include = (v: string): boolean =>
     version.isGreaterThan(v, fromVersion) &&
@@ -155,7 +154,7 @@ export async function getChangeLogJSON({
     }
   }
 
-  let res = {
+  let res: ChangeLogResult = {
     project: {
       githubApiBaseURL,
       githubBaseURL,

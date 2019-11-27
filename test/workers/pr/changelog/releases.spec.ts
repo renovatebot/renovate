@@ -1,9 +1,10 @@
 import * as releases from '../../../../lib/workers/pr/changelog/releases';
 import * as datasource from '../../../../lib/datasource';
+import { mocked } from '../../../util';
 
 jest.mock('../../../../lib/datasource');
 
-const ds: jest.Mocked<typeof datasource> = datasource as never;
+const ds = mocked(datasource);
 
 describe('workers/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {

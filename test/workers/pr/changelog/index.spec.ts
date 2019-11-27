@@ -1,6 +1,9 @@
 import { api } from '../../../../lib/platform/github/gh-got-wrapper';
 import * as hostRules from '../../../../lib/util/host-rules';
-import { getChangeLogJSON } from '../../../../lib/workers/pr/changelog';
+import {
+  getChangeLogJSON,
+  ChangeLogConfig,
+} from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
 
 // import * as _releaseNotes from '../../../../lib/workers/pr/changelog/release-notes';
@@ -13,7 +16,7 @@ const ghGot = mocked(api).get;
 
 // releaseNotes.addReleaseNotes = jest.fn(input => input);
 
-const upgrade = {
+const upgrade: ChangeLogConfig = {
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versionScheme: 'semver',

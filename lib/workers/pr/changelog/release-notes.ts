@@ -4,24 +4,17 @@ import MarkdownIt from 'markdown-it';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
+import { ChangeLogResult, ChangeLogNotes } from './common';
 
 const ghGot = api.get;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
-export type GithubRelease = {
-  url: string;
-  id: number;
-  tag: string;
-  name: string;
-  body: string;
-};
-
 export async function getReleaseList(
   githubApiBaseURL: string,
   repository: string
-): Promise<GithubRelease[]> {
+): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   // istanbul ignore if
   if (!githubApiBaseURL) {
@@ -30,7 +23,15 @@ export async function getReleaseList(
   try {
     let url = githubApiBaseURL.replace(/\/?$/, '/');
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await ghGot(url);
+    const res = await ghGot<
+      {
+        html_url: string;
+        id: number;
+        tag_name: string;
+        name: string;
+        body: string;
+      }[]
+    >(url);
     return res.body.map(release => ({
       url: release.html_url,
       id: release.id,
@@ -79,10 +80,10 @@ export async function getReleaseNotes(
   depName: string,
   githubBaseURL: string,
   githubApiBaseURL: string
-): Promise<GithubRelease | undefined> {
+): Promise<ChangeLogNotes | undefined> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getReleaseList(githubApiBaseURL, repository);
-  let releaseNotes: GithubRelease | undefined;
+  let releaseNotes: ChangeLogNotes | undefined;
   releaseList.forEach(release => {
     if (
       release.tag === version ||
@@ -129,14 +130,12 @@ function sectionize(text: string, level: number): string[] {
   return result;
 }
 
-export type ReleaseNotesMd = { body: string; url: string };
-
 export async function getReleaseNotesMd(
   repository: string,
   version: string,
   githubBaseURL: string,
   githubApiBaseUrl: string
-): Promise<ReleaseNotesMd | null> {
+): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
   // istanbul ignore if
@@ -218,19 +217,21 @@ export async function getReleaseNotesMd(
   return null;
 }
 
-export async function addReleaseNotes(input): Promise<any> {
+export async function addReleaseNotes(
+  input: ChangeLogResult
+): Promise<ChangeLogResult> {
   if (!(input && input.project && input.project.github && input.versions)) {
     logger.debug('Missing project or versions');
     return input;
   }
-  const output = { ...input, versions: [] };
+  const output: ChangeLogResult = { ...input, versions: [] };
   const repository = input.project.github.replace(/\.git$/, '');
   const cacheNamespace = 'changelog-github-notes';
   function getCacheKey(version: string): string {
     return `${repository}:${version}`;
   }
   for (const v of input.versions) {
-    let releaseNotes;
+    let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await renovateCache.get(cacheNamespace, cacheKey);
     if (!releaseNotes) {
