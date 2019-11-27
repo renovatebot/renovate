@@ -193,6 +193,18 @@ export function extractPackage(
   return result;
 }
 
+function cleanResult(
+  packageFiles: PackageFile<Record<string, any>>[]
+): PackageFile<Record<string, any>>[] {
+  packageFiles.forEach(packageFile => {
+    delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
+    packageFile.deps.forEach(dep => {
+      delete dep.propSource; // eslint-disable-line no-param-reassign
+    });
+  });
+  return packageFiles;
+}
+
 export function postprocessExtractedPackages(
   packages: PackageFile[]
 ): PackageFile[] {
@@ -265,18 +277,6 @@ export function postprocessExtractedPackages(
   }));
 
   return cleanResult(processedPackages);
-}
-
-function cleanResult(
-  packageFiles: PackageFile<Record<string, any>>[]
-): PackageFile<Record<string, any>>[] {
-  packageFiles.forEach(packageFile => {
-    delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
-    packageFile.deps.forEach(dep => {
-      delete dep.propSource; // eslint-disable-line no-param-reassign
-    });
-  });
-  return packageFiles;
 }
 
 function applyGrouping(
