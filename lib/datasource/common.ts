@@ -16,7 +16,6 @@ export type DigestConfig = Config;
 
 export interface Release {
   changelogUrl?: string;
-  gitref?: string;
   gitRef?: string;
   isDeprecated?: boolean;
 
