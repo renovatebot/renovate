@@ -2,6 +2,25 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
+function replaceType(url: string): string {
+  return url.replace('bin', 'all');
+}
+
+async function getChecksum(url: string): Promise<string> {
+  try {
+    const response = await got(url);
+    return response.body as string;
+  } catch (err) {
+    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
+      logger.info('Gradle checksum lookup failure: not found');
+      logger.debug({ err });
+    } else {
+      logger.warn({ err }, 'Gradle checksum lookup failure: Unknown error');
+    }
+    throw err;
+  }
+}
+
 export async function updateDependency(
   fileContent: string,
   upgrade: Upgrade
@@ -32,24 +51,5 @@ export async function updateDependency(
   } catch (err) {
     logger.info({ err }, 'Error setting new Gradle Wrapper release value');
     return null;
-  }
-}
-
-function replaceType(url: string): string {
-  return url.replace('bin', 'all');
-}
-
-async function getChecksum(url: string): Promise<string> {
-  try {
-    const response = await got(url);
-    return response.body as string;
-  } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info('Gradle checksum lookup failure: not found');
-      logger.debug({ err });
-    } else {
-      logger.warn({ err }, 'Gradle checksum lookup failure: Unknown error');
-    }
-    throw err;
   }
 }

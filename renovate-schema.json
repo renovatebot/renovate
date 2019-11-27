@@ -167,7 +167,7 @@
       "type": "boolean"
     },
     "persistRepoData": {
-      "description": "If set to false, repository data will preserved between runs instead of deleted.",
+      "description": "If set to true, repository data will preserved between runs instead of deleted.",
       "type": "boolean",
       "default": false
     },
@@ -290,6 +290,16 @@
       "default": {},
       "$ref": "#"
     },
+    "aliases": {
+      "description": "Aliases for registries, package manager specific",
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "$ref": "#"
+    },
     "registryUrls": {
       "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "type": "array",
@@ -312,6 +322,7 @@
         "maven",
         "node",
         "npm",
+        "nuget",
         "pep440",
         "poetry",
         "regex",
@@ -665,7 +676,6 @@
       "description": "Config to apply when a PR is necessary due to vulnerability of existing package version.",
       "type": "object",
       "default": {
-        "enabled": true,
         "groupName": null,
         "schedule": [],
         "masterIssueApproval": false,
@@ -900,7 +910,6 @@
       "description": "Configuration object for bundler Gemfiles",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["(^|/)Gemfile$"],
         "versionScheme": "ruby"
       },
@@ -929,7 +938,6 @@
       "description": "Configuration object for Mix module renovation",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["(^|/)mix\\.exs$"],
         "versionScheme": "hex"
       },
@@ -948,7 +956,8 @@
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
         "fileMatch": ["(^|/)Cargo.toml$"],
-        "versionScheme": "cargo"
+        "versionScheme": "cargo",
+        "rangeStrategy": "bump"
       },
       "$ref": "#"
     },
@@ -974,7 +983,6 @@
       "description": "Configuration object for .travis.yml node version renovation",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["^.travis.yml$"],
         "versionScheme": "node"
       },
@@ -1060,6 +1068,9 @@
       "description": "Configuration object for helm requirements.yaml files.",
       "type": "object",
       "default": {
+        "aliases": {
+          "stable": "https://kubernetes-charts.storage.googleapis.com/"
+        },
         "commitMessageTopic": "helm chart {{depName}}",
         "fileMatch": ["(^|/)requirements.yaml$"]
       },
@@ -1258,7 +1269,6 @@
       "description": "Configuration object for homebrew",
       "type": "object",
       "default": {
-        "enabled": true,
         "commitMessageTopic": "Homebrew Formula {{depName}}",
         "managerBranchPrefix": "homebrew-",
         "fileMatch": ["^Formula/[^/]+[.]rb$"]

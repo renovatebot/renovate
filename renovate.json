@@ -28,6 +28,10 @@
   "prCreation": "not-pending",
   "packageRules": [
     {
+      "datasources": ["docker"],
+      "automerge": false
+    },
+    {
       "updateTypes": ["major"],
       "masterIssueApproval": true
     },

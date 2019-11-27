@@ -165,12 +165,10 @@ describe('manager/gradle', () => {
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
-      expect(exec.mock.calls[0][0]).toBe(
-        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
-      );
+      expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
     });
 
-    it('should use dcoker even if gradlew is available', async () => {
+    it('should use docker even if gradlew is available', async () => {
       const configWithDocker = {
         binarySource: 'docker',
         ...config,
@@ -178,9 +176,7 @@ describe('manager/gradle', () => {
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
-      expect(exec.mock.calls[0][0]).toBe(
-        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
-      );
+      expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
     });
   });
 

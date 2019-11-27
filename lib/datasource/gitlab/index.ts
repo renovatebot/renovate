@@ -7,6 +7,28 @@ const glGot = api.get;
 
 const GitLabApiUrl = 'https://gitlab.com/api/v4/projects';
 
+async function getDefaultBranchName(
+  urlEncodedPkgName: string
+): Promise<string> {
+  const branchesUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/branches`;
+  type GlBranch = {
+    default: boolean;
+    name: string;
+  }[];
+
+  const res = await glGot<GlBranch>(branchesUrl);
+  const branches = res.body;
+  let defautlBranchName = 'master';
+  for (const branch of branches) {
+    if (branch.default) {
+      defautlBranchName = branch.name;
+      break;
+    }
+  }
+
+  return defautlBranchName;
+}
+
 export async function getPreset(
   pkgName: string,
   presetName = 'default'
@@ -41,7 +63,11 @@ export async function getPreset(
 }
 
 const cacheNamespace = 'datasource-gitlab';
-function getCacheKey(depHost: string, repo: string, lookupType: string) {
+function getCacheKey(
+  depHost: string,
+  repo: string,
+  lookupType: string
+): string {
   const type = lookupType || 'tags';
   return `${depHost}:${repo}:${type}`;
 }
@@ -115,24 +141,4 @@ export async function getPkgReleases({
     cacheMinutes
   );
   return dependency;
-}
-
-async function getDefaultBranchName(urlEncodedPkgName: string) {
-  const branchesUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/branches`;
-  type GlBranch = {
-    default: boolean;
-    name: string;
-  }[];
-
-  const res = await glGot<GlBranch>(branchesUrl);
-  const branches = res.body;
-  let defautlBranchName = 'master';
-  for (const branch of branches) {
-    if (branch.default) {
-      defautlBranchName = branch.name;
-      break;
-    }
-  }
-
-  return defautlBranchName;
 }

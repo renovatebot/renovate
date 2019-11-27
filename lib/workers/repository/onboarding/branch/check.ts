@@ -36,7 +36,10 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
   return false;
 };
 
-const closedPrExists = () =>
+// TODO: types
+export type Pr = any;
+
+const closedPrExists = (): Promise<Pr> =>
   platform.findPr(onboardingBranch, onboardingPrTitle, '!open');
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
@@ -88,4 +91,5 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   throw new Error('disabled');
 };
 
-export const onboardingPrExists = () => platform.getBranchPr(onboardingBranch);
+export const onboardingPrExists = async (): Promise<boolean> =>
+  (await platform.getBranchPr(onboardingBranch)) != null;

@@ -66,7 +66,7 @@ export async function getPreset(
 }
 
 const cacheNamespace = 'datasource-github';
-function getCacheKey(repo: string, type: string) {
+function getCacheKey(repo: string, type: string): string {
   return `${repo}:${type}`;
 }
 
