@@ -91,5 +91,5 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   throw new Error('disabled');
 };
 
-export const onboardingPrExists = (): Promise<boolean> =>
-  platform.getBranchPr(onboardingBranch);
+export const onboardingPrExists = async (): Promise<boolean> =>
+  (await platform.getBranchPr(onboardingBranch)) != null;

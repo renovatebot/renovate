@@ -7,7 +7,9 @@ const glGot = api.get;
 
 const GitLabApiUrl = 'https://gitlab.com/api/v4/projects';
 
-async function getDefaultBranchName(urlEncodedPkgName: string) {
+async function getDefaultBranchName(
+  urlEncodedPkgName: string
+): Promise<string> {
   const branchesUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/branches`;
   type GlBranch = {
     default: boolean;
@@ -61,7 +63,11 @@ export async function getPreset(
 }
 
 const cacheNamespace = 'datasource-gitlab';
-function getCacheKey(depHost: string, repo: string, lookupType: string) {
+function getCacheKey(
+  depHost: string,
+  repo: string,
+  lookupType: string
+): string {
   const type = lookupType || 'tags';
   return `${depHost}:${repo}:${type}`;
 }

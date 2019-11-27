@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult } from '../common';
 
-function getPkgProp(pkgInfo: XmlElement, propName: string) {
+function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
 }
 

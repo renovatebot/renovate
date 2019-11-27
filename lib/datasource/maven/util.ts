@@ -2,13 +2,13 @@ import url from 'url';
 import got from '../../util/got';
 import { logger } from '../../logger';
 
-function isMavenCentral(pkgUrl: url.URL | string) {
+function isMavenCentral(pkgUrl: url.URL | string): boolean {
   return (
     (typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host) === 'central.maven.org'
   );
 }
 
-function isTemporalError(err: { code: string; statusCode: number }) {
+function isTemporalError(err: { code: string; statusCode: number }): boolean {
   return (
     err.code === 'ECONNRESET' ||
     err.statusCode === 429 ||
@@ -16,19 +16,19 @@ function isTemporalError(err: { code: string; statusCode: number }) {
   );
 }
 
-function isHostError(err: { code: string }) {
+function isHostError(err: { code: string }): boolean {
   return err.code === 'ETIMEDOUT';
 }
 
-function isNotFoundError(err: { code: string; statusCode: number }) {
+function isNotFoundError(err: { code: string; statusCode: number }): boolean {
   return err.code === 'ENOTFOUND' || err.statusCode === 404;
 }
 
-function isPermissionsIssue(err: { statusCode: number }) {
+function isPermissionsIssue(err: { statusCode: number }): boolean {
   return err.statusCode === 401 || err.statusCode === 403;
 }
 
-function isConnectionError(err: { code: string }) {
+function isConnectionError(err: { code: string }): boolean {
   return err.code === 'ECONNREFUSED';
 }
 
@@ -42,7 +42,7 @@ export async function downloadHttpProtocol(
       hostType,
       hooks: {
         beforeRedirect: [
-          (options: any) => {
+          (options: any): void => {
             if (
               options.search &&
               options.search.indexOf('X-Amz-Algorithm') !== -1

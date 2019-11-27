@@ -154,22 +154,23 @@
     "validator": "11.1.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.19.1",
+    "yarn": "1.19.2",
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
     "re2": "1.10.4"
   },
   "devDependencies": {
-    "@babel/cli": "7.7.0",
-    "@babel/core": "7.7.2",
-    "@babel/node": "7.7.0",
-    "@babel/plugin-proposal-class-properties": "7.7.0",
-    "@babel/plugin-proposal-object-rest-spread": "7.6.2",
-    "@babel/plugin-syntax-dynamic-import": "7.2.0",
-    "@babel/preset-env": "7.7.1",
-    "@babel/preset-typescript": "7.7.2",
+    "@babel/cli": "7.7.4",
+    "@babel/core": "7.7.4",
+    "@babel/node": "7.7.4",
+    "@babel/plugin-proposal-class-properties": "7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.7.4",
+    "@babel/plugin-syntax-dynamic-import": "7.7.4",
+    "@babel/preset-env": "7.7.4",
+    "@babel/preset-typescript": "7.7.4",
     "@types/bunyan": "1.8.6",
+    "@types/cacache": "12.0.1",
     "@types/chai": "4.2.5",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "8.0.1",
@@ -237,9 +238,7 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "lib/**/*.{js,ts}",
-      "!lib/**/*.d.ts",
-      "!lib/versioning/maven/index.js",
-      "!lib/proxy.js"
+      "!lib/**/*.d.ts"
     ],
     "coverageReporters": [
       "html",
