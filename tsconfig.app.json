@@ -5,8 +5,7 @@
     "isolatedModules": true,
     "sourceMap": true,
     "inlineSources": true,
-    "types": ["node"],
-    "paths": {}
+    "types": ["node"]
   },
   "include": ["lib/**/*"]
 }
