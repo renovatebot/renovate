@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "strict": true,
     "noImplicitAny": false /* required for js files */,
     "strictNullChecks": false /* required for js files */,
@@ -14,7 +15,8 @@
     "resolveJsonModule": false,
     "isolatedModules": true,
     "lib": ["es2018"],
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "paths": { "lib/*": ["./lib/*"], "test/*": ["./test/*"] }
   },
   "include": ["lib/**/*", "test/**/*"],
   "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]

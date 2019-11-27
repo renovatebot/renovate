@@ -1,12 +1,14 @@
-import { api } from '../../../../lib/platform/github/gh-got-wrapper';
+import { api } from 'lib/platform/github/gh-got-wrapper';
+import { mocked } from 'test/util';
 import * as hostRules from '../../../../lib/util/host-rules';
 import { getChangeLogJSON } from '../../../../lib/workers/pr/changelog';
+
 // import * as _releaseNotes from '../../../../lib/workers/pr/changelog/release-notes';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
-const ghGot: jest.Mock<Promise<{ body: unknown }>> = api.get as never;
+const ghGot = mocked(api).get;
 // const releaseNotes = _releaseNotes;
 
 // releaseNotes.addReleaseNotes = jest.fn(input => input);
@@ -97,7 +99,7 @@ describe('workers/pr/changelog', () => {
           { name: '2.2.2' },
           { name: 'v2.4.2' },
         ],
-      });
+      } as never);
       expect(
         await getChangeLogJSON({
           ...upgrade,
