@@ -14,18 +14,22 @@ export const getHostType = (): string => hostType;
 let baseUrl = 'https://api.github.com/';
 export const getBaseUrl = (): string => baseUrl;
 
-type GotRequestError<T = unknown> = GotError & {
+type GotRequestError<E = unknown, T = unknown> = GotError & {
   body: {
     message?: string;
-    errors?: Record<string, T>[];
+    errors?: E[];
   };
   headers?: Record<string, T>;
+};
+
+type GotRequestOptions = GotJSONOptions & {
+  token?: string;
 };
 
 export function gotErrorToRenovate(
   err: GotRequestError,
   path: string,
-  opts: GotJSONOptions & { token?: string }
+  opts: GotRequestOptions
 ): Error | GotError {
   let message = err.message;
   if (err.body && err.body.message) {
