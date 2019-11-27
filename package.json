@@ -238,9 +238,7 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "lib/**/*.{js,ts}",
-      "!lib/**/*.d.ts",
-      "!lib/versioning/maven/index.js",
-      "!lib/proxy.js"
+      "!lib/**/*.d.ts"
     ],
     "coverageReporters": [
       "html",
