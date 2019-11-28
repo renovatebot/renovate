@@ -16,6 +16,7 @@ export const MANAGER_GIT_SUBMODULES = 'git-submodules';
 export const MANAGER_GO_MOD = 'gomod';
 export const MANAGER_GRADLE = 'gradle';
 export const MANAGER_GRADLE_WRAPPER = 'gradle-wrapper';
+export const MANAGER_HELM_VALUES = 'helm-values';
 export const MANAGER_HELM_REQUIREMENTS = 'helm-requirements';
 export const MANAGER_HOMEBREW = 'homebrew';
 export const MANAGER_KUBERNETES = 'kubernetes';

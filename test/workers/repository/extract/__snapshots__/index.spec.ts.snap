@@ -59,6 +59,9 @@ Object {
   "helm-requirements": Array [
     Object {},
   ],
+  "helm-values": Array [
+    Object {},
+  ],
   "homebrew": Array [
     Object {},
   ],
