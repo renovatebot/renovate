@@ -1,6 +1,6 @@
 import * as hostedGitInfo from 'hosted-git-info';
 import parse from 'github-url-from-git';
-import * as URL from 'url';
+import URL from 'url';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
