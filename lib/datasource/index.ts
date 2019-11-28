@@ -59,7 +59,7 @@ const datasources: Record<string, Datasource> = {
   terraform,
 };
 
-export function baseUrlLegacyMassager(sourceUrl) {
+export function baseUrlLegacyMassager(sourceUrl: string): string {
   let url: string = sourceUrl.trim();
 
   if (url.startsWith('git@')) {
