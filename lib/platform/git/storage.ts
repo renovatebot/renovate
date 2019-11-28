@@ -76,6 +76,14 @@ function throwBaseBranchValidationError(branchName: string): never {
   throw error;
 }
 
+async function isDirectory(dir: string): Promise<boolean> {
+  try {
+    return (await fs.stat(dir)).isDirectory();
+  } catch (err) {
+    return false;
+  }
+}
+
 export class Storage {
   private _config: LocalConfig = {} as any;
 
@@ -175,6 +183,7 @@ export class Storage {
     const submodules = await this.getSubmodules();
     for (const submodule of submodules) {
       try {
+        logger.debug(`Cloning git submodule at ${submodule}`);
         await this._git.submoduleUpdate(['--init', '--', submodule]);
       } catch (err) {
         logger.warn(`Unable to initialise git submodule at ${submodule}`);
@@ -470,6 +479,9 @@ export class Storage {
         // istanbul ignore if
         if (file.name === '|delete|') {
           deleted.push(file.contents);
+        } else if (await isDirectory(join(this._cwd!, file.name))) {
+          fileNames.push(file.name);
+          await this._git!.add(file.name);
         } else {
           fileNames.push(file.name);
           await fs.outputFile(
