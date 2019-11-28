@@ -1,7 +1,5 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from '../../../lib/manager/gomod/update';
-import { logger } from '../../../lib/logger';
-import { regExp } from '@sindresorhus/is';
 
 const gomod1 = readFileSync('test/manager/gomod/_fixtures/1/go.mod', 'utf8');
 const gomod2 = readFileSync('test/manager/gomod/_fixtures/2/go.mod', 'utf8');
@@ -248,7 +246,6 @@ describe('manager/gomod/update', () => {
         updateType: 'major',
       };
       const res = updateDependency(gomod1, upgrade);
-      logger.debug(res);
       expect(res).not.toEqual(gomod1);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toContain(upgrade.depName + '/v6');
