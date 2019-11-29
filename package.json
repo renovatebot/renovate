@@ -192,7 +192,7 @@
     "@types/semver": "6.2.0",
     "@types/shelljs": "0.8.6",
     "@types/tmp": "0.1.0",
-    "@types/traverse": "^0.6.32",
+    "@types/traverse": "0.6.32",
     "@types/validator": "10.11.3",
     "@types/xmldoc": "1.1.4",
     "@typescript-eslint/eslint-plugin": "2.9.0",
