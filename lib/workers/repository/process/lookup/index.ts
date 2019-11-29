@@ -344,7 +344,7 @@ export async function lookupUpdates(
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
-    if (config.currentDigest) {
+    if (config.currentDigest && config.datasource !== 'gitSubmodules') {
       if (!config.digestOneAndOnly || !res.updates.length) {
         // digest update
         res.updates.push({
@@ -361,6 +361,12 @@ export async function lookupUpdates(
           newValue: config.currentValue,
         });
       }
+    } else if (config.datasource === 'gitSubmodules') {
+      const dependency = clone(await getPkgReleases(config));
+      res.updates.push({
+        updateType: 'digest',
+        newValue: dependency.releases[0].version,
+      });
     }
     if (version.valueToVersion) {
       for (const update of res.updates || []) {

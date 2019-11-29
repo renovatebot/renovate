@@ -77,6 +77,8 @@ export function updateDependency(
         upgrade.newMajor > 1 &&
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
+        // If package has no version, pin to latest one.
+        newLine = newLine.replace(depName, depName + '/v' + upgrade.newMajor);
         if (upgrade.currentValue.match(/^v(0|1)\./)) {
           // Add version
           newLine = newLine.replace(
@@ -94,7 +96,12 @@ export function updateDependency(
       }
     }
     if (lineToChange.endsWith('+incompatible')) {
-      newLine += '+incompatible';
+      let toAdd = '+incompatible';
+
+      if (upgrade.updateType === 'major' && upgrade.newMajor >= 2) {
+        toAdd = '';
+      }
+      newLine += toAdd;
     }
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');

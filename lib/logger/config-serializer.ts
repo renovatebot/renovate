@@ -1,8 +1,9 @@
-const traverse = require('traverse');
+import traverse from 'traverse';
+import { RenovateConfig } from '../config/common';
 
-module.exports = configSerializer;
-
-function configSerializer(config) {
+export default function configSerializer(
+  config: RenovateConfig
+): RenovateConfig {
   const redactedFields = [
     'authorization',
     'token',
@@ -23,10 +24,10 @@ function configSerializer(config) {
     'yarnLockParsed',
   ];
   const arrayFields = ['packageFiles', 'upgrades'];
+
   return traverse(config).map(
-    /** @this {{key:string, update: (val:any) => void}} */
     // eslint-disable-next-line array-callback-return
-    function scrub(val) {
+    function scrub(val: string) {
       if (val && redactedFields.includes(this.key)) {
         this.update('***********');
       }

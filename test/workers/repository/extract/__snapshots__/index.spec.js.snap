@@ -38,6 +38,9 @@ Object {
   "droneci": Array [
     Object {},
   ],
+  "git-submodules": Array [
+    Object {},
+  ],
   "github-actions": Array [
     Object {},
   ],

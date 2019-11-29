@@ -22,6 +22,7 @@ const managerList = [
   'docker-compose',
   'dockerfile',
   'droneci',
+  'git-submodules',
   'github-actions',
   'gitlabci',
   'gitlabci-include',
