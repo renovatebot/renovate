@@ -2,6 +2,8 @@
 const composer = require('../../../lib/manager/composer');
 /** @type any */
 const npm = require('../../../lib/manager/npm');
+/** @type any */
+const gitSubmodules = require('../../../lib/manager/git-submodules');
 const {
   getUpdatedPackageFiles,
 } = require('../../../lib/workers/branch/get-updated');
@@ -11,6 +13,7 @@ const { platform } = require('../../../lib/platform');
 
 jest.mock('../../../lib/manager/composer');
 jest.mock('../../../lib/manager/npm');
+jest.mock('../../../lib/manager/git-submodules');
 
 describe('workers/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
@@ -108,6 +111,15 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles git submodules', async () => {
+      config.upgrades.push({
+        manager: 'git-submodules',
+        datasource: 'gitSubmodules',
+      });
+      gitSubmodules.updateDependency.mockReturnValue('existing content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
