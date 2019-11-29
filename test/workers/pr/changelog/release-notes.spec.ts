@@ -38,7 +38,7 @@ describe('workers/pr/release-notes', () => {
     });
   });
   describe('getReleaseNotes()', () => {
-    it('should return undefined for release notes without body', async () => {
+    it('should return null for release notes without body', async () => {
       ghGot.mockResolvedValueOnce({
         body: [{ tag_name: 'v1.0.0' }, { tag_name: 'v1.0.1' }],
       });
@@ -49,7 +49,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).toBeUndefined();
+      expect(res).toBeNull();
     });
     it.each([[''], ['v'], ['other-']])(
       'gets release notes with body',
