@@ -1,10 +1,27 @@
 import upath from 'upath';
 import fs from 'fs-extra';
 import { hrtime } from 'process';
+import { ExecOptions } from 'child_process';
 import { platform } from '../../platform';
-import { exec } from '../../util/exec';
+import { exec, ExecResult } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+
+async function tryExec(
+  cmd: string,
+  tag: string,
+  opts: ExecOptions
+): Promise<ExecResult> {
+  let result = null;
+  try {
+    result = await exec(cmd, opts);
+  } catch (err) {
+    if (tag !== 'latest' && err.message.startsWith('Unable to find image')) {
+      result = await tryExec(cmd.replace(`:${tag}`, ':latest'), 'latest', opts);
+    } else throw err;
+  }
+  return result;
+}
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -53,17 +70,27 @@ export async function updateArtifacts(
     return null;
   }
 
-  const cmdParts =
-    config.binarySource === 'docker'
-      ? [
-          'docker',
-          'run',
-          '--rm',
-          `-v ${cwd}:${cwd}`,
-          `-w ${cwd}`,
-          'renovate/pod pod',
-        ]
-      : ['pod'];
+  const cmdParts = [];
+  let cocoapodsVersion: string = null;
+  if (config.binarySource === 'docker') {
+    const match = existingLockFileContent.match(
+      /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
+    ) || { groups: { cocoapodsVersion: 'latest' } };
+    cocoapodsVersion = match.groups.cocoapodsVersion;
+
+    cmdParts.push(
+      ...[
+        'docker',
+        'run',
+        '--rm',
+        `-v ${cwd}:${cwd}`,
+        `-w ${cwd}`,
+        `renovate/cocoapods:${cocoapodsVersion} pod`,
+      ]
+    );
+  } else {
+    cmdParts.push('pod');
+  }
   cmdParts.push('install');
 
   const startTime = hrtime();
@@ -72,7 +99,7 @@ export async function updateArtifacts(
   /* istanbul ignore next */
   try {
     const command = cmdParts.join(' ');
-    execResult = await exec(command, { cwd });
+    execResult = await tryExec(command, cocoapodsVersion, { cwd });
   } catch (err) {
     execError = err;
   }

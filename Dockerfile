@@ -168,11 +168,6 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   -C /usr/local/bin docker/docker \
   && rm docker-${DOCKER_VERSION}.tgz
 
-# CocoaPods
-
-ENV COCOAPODS_VERSION 1.8.3
-RUN apt-get update && apt-get install -y ruby-full && apt-get clean && gem install cocoapods -v ${COCOAPODS_VERSION}
-
 USER ubuntu
 
 # Cargo

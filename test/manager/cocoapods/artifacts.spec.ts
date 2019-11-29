@@ -113,4 +113,29 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts('Podfile', ['foo'], '', config)
     ).toMatchSnapshot();
   });
+  it('falls back to the `latest` Docker image tag', async () => {
+    let firstCommand = '';
+    let secondCommand = '';
+
+    platform.getFile.mockReturnValueOnce('COCOAPODS: 1.2.3.4');
+    exec.mockImplementationOnce(cmd => {
+      firstCommand = cmd;
+      throw new Error('Unable to find image');
+    });
+    exec.mockImplementationOnce(cmd => {
+      secondCommand = cmd;
+      return {
+        stdout: '',
+        stderr: '',
+      };
+    });
+    fs.readFile.mockImplementationOnce(() => 'New Podfile');
+    await updateArtifacts('Podfile', ['foo'], '', {
+      ...config,
+      binarySource: 'docker',
+    });
+    expect(firstCommand).toContain('renovate/cocoapods:1.2.3.4');
+    expect(secondCommand).toContain('renovate/cocoapods:latest');
+    expect(exec).toBeCalledTimes(2);
+  });
 });
