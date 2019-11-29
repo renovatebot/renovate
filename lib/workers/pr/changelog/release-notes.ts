@@ -80,10 +80,10 @@ export async function getReleaseNotes(
   depName: string,
   githubBaseURL: string,
   githubApiBaseURL: string
-): Promise<ChangeLogNotes | undefined> {
+): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getReleaseList(githubApiBaseURL, repository);
-  let releaseNotes: ChangeLogNotes | undefined;
+  let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach(release => {
     if (
       release.tag === version ||
@@ -94,7 +94,7 @@ export async function getReleaseNotes(
       releaseNotes.url = `${githubBaseURL}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, githubBaseURL);
       if (!releaseNotes.body.length) {
-        releaseNotes = undefined;
+        releaseNotes = null;
       } else {
         releaseNotes.body = linkify(releaseNotes.body, {
           repository: `https://github.com/${repository}`,
