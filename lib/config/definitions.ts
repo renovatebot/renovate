@@ -1695,6 +1695,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
+      enabled: false,
       versionScheme: 'git',
       fileMatch: ['(^|/).gitmodules$'],
     },
