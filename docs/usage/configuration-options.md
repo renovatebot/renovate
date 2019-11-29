@@ -309,6 +309,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## git-submodules
+
 ## gitLabAutomerge
 
 Please note that when this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.

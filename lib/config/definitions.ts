@@ -555,6 +555,7 @@ const options: RenovateOptions[] = [
       'cargo',
       'composer',
       'docker',
+      'git',
       'hashicorp',
       'hex',
       'ivy',
@@ -1684,6 +1685,19 @@ const options: RenovateOptions[] = [
     default: {
       fileMatch: ['(^|/)([\\w-]*)composer.json$'],
       versionScheme: 'composer',
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'git-submodules',
+    description: 'Configuration object for git submodule files',
+    stage: 'package',
+    type: 'object',
+    default: {
+      enabled: false,
+      versionScheme: 'git',
+      fileMatch: ['(^|/).gitmodules$'],
     },
     mergeable: true,
     cli: false,
