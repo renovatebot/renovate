@@ -1126,6 +1126,7 @@
       "description": "Configuration object for git submodule files",
       "type": "object",
       "default": {
+        "enabled": false,
         "versionScheme": "git",
         "fileMatch": ["(^|/).gitmodules$"]
       },
