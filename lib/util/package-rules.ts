@@ -194,15 +194,35 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
       currentValue && version.isVersion(currentValue)
         ? currentValue // it's a version so we can match against it
         : lockedVersion || fromVersion; // need to match against this fromVersion, if available
-    if (compareVersion && version.isVersion(compareVersion)) {
-      const isMatch = version.matches(compareVersion, matchCurrentVersion);
-      // istanbul ignore if
-      if (!isMatch) {
+    if (compareVersion) {
+      // istanbul ignore next
+      if (version.isVersion(compareVersion)) {
+        const isMatch = version.matches(compareVersion, matchCurrentVersion);
+        // istanbul ignore if
+        if (!isMatch) {
+          return false;
+        }
+        positiveMatch = true;
+      } else {
         return false;
       }
-      positiveMatch = true;
     } else {
-      return false;
+      // Handle the case where the match version is exact and current value is a range
+      try {
+        const matchCurrentVersionStr = matchCurrentVersion.toString();
+        if (version.isVersion(matchCurrentVersionStr)) {
+          const isMatch = version.matches(matchCurrentVersionStr, currentValue);
+          if (!isMatch) {
+            return false;
+          }
+          positiveMatch = true;
+        } else {
+          return false;
+        }
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ err }, 'Error trying reverse compare');
+        return false;
+      }
     }
   }
   return positiveMatch;
