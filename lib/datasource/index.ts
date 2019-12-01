@@ -180,7 +180,7 @@ export async function fetchReleases(
   const dep = await datasources[datasource].getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
   if (dep && Object.entries(dep).length !== 0 && dep.sourceUrl !== undefined) {
-    const tmpSourceUrl: string | null = baseUrlLegacyMassager(dep.sourceUrl);
+    const tmpSourceUrl = baseUrlLegacyMassager(dep.sourceUrl);
     /* istanbul ignore if */
     if (tmpSourceUrl !== null) {
       dep.sourceUrl = tmpSourceUrl;
