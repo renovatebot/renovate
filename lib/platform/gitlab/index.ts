@@ -80,7 +80,7 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.info('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
     const res = await api.get(url, { paginate: true });
     logger.info(`Discovered ${res.body.length} project(s)`);
     return res.body.map(
