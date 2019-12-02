@@ -296,9 +296,12 @@ const options: RenovateOptions[] = [
   // Master Issue
   {
     name: 'masterIssue',
-    description: 'Whether to create a "Master Issue" within the repository.',
-    type: 'boolean',
-    default: false,
+    description: 'Whether to create a "Master Issue" within the repository, and which labels apply if enabled.',
+    type: 'object',
+    default: {
+      'enabled': false,
+      'labels': []
+    },
   },
   {
     name: 'masterIssueApproval',

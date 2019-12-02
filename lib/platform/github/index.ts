@@ -1280,7 +1280,8 @@ export async function ensureIssue(
   title: string,
   rawbody: string,
   once = false,
-  reopen = true
+  reopen = true,
+  labels: string[] = []
 ): Promise<string | null> {
   logger.debug(`ensureIssue(${title})`);
   const body = sanitize(rawbody);
@@ -1326,11 +1327,15 @@ export async function ensureIssue(
         return 'updated';
       }
     }
+
+    const postBody = {
+      title,
+      body,
+      labels
+    };
+
     await api.post(`repos/${config.parentRepo || config.repository}/issues`, {
-      body: {
-        title,
-        body,
-      },
+      body: postBody,
     });
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed

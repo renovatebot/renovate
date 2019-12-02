@@ -706,6 +706,7 @@ This value defaults to an empty string, because historically no prefix was neces
 ## masterIssue
 
 Configuring `masterIssue` to `true` will lead to the creation of a mini-dashboard "Master Issue" within the repository. This Master Issue contains a list of all PRs pending, open, closed (unmerged) or in error. The goal of this master issue is to give visibility into all updates that Renovate is managing.
+You can also specify which labels attach to the `masterIssue` with a `labels` attribute in the configuration object.
 
 Examples of what having a master issue will allow you to do:
 

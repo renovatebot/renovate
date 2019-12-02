@@ -131,7 +131,8 @@ export interface Platform {
     title: string,
     body: string,
     once?: boolean,
-    shouldReopen?: boolean
+    shouldReopen?: boolean,
+    labels?: string,
   ): Promise<'updated' | 'created' | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;

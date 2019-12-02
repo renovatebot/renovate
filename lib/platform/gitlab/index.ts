@@ -671,7 +671,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 export async function ensureIssue(
   title: string,
-  body: string
+  body: string,
+  once = false,
+  reopen = true,
+  labels: string[] = []
 ): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
@@ -690,11 +693,14 @@ export async function ensureIssue(
         return 'updated';
       }
     } else {
+      const postBody = {
+        title,
+        description,
+        labels,
+      };
+
       await api.post(`projects/${config.repository}/issues`, {
-        body: {
-          title,
-          description,
-        },
+        body: postBody,
       });
       // delete issueList so that it will be refetched as necessary
       delete config.issueList;
