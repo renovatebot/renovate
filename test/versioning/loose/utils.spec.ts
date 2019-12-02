@@ -20,13 +20,13 @@ describe('loose/utils', () => {
     const props = [];
     let o = obj;
 
-    // eslint-disable-next-line no-cond-assign
     do {
       Object.getOwnPropertyNames(o).forEach(prop => {
         if (props.indexOf(prop) === -1) {
           props.push(prop);
         }
       });
+      // eslint-disable-next-line no-cond-assign
     } while ((o = Object.getPrototypeOf(o)));
 
     return props;
