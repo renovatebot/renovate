@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
-import { GotApi } from '../../../lib/platform/common';
+import { GotApi, GotResponse } from '../../../lib/platform/common';
 
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
   let api: jest.Mocked<GotApi>;
-  let got: jest.Mock<Promise<{ body: object }>>;
+  let got: jest.Mock<Promise<Partial<GotResponse>>>;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage: jest.Mock<typeof import('../../../lib/platform/git/storage')>;
   beforeEach(async () => {
