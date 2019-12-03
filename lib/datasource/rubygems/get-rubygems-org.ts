@@ -2,16 +2,9 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { ReleaseResult } from '../common';
 
-let lastSync: Date;
-let packageReleases: Record<string, string[]>;
-
-export function resetCache(): void {
-  lastSync = new Date('2000-01-01');
-  packageReleases = Object.create(null); // Because we might need a "constructor" key
-}
-resetCache();
-
-const contentLength = 0;
+let lastSync = new Date('2000-01-01');
+let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
+let contentLength = 0;
 
 async function updateRubyGemsVersions(): Promise<void> {
   const url = 'https://rubygems.org/versions';
@@ -21,17 +14,15 @@ async function updateRubyGemsVersions(): Promise<void> {
       range: `bytes=${contentLength}-`,
     },
   };
-  let newLines: string[];
+  let newLines: string;
   try {
     logger.debug('Rubygems: Fetching rubygems.org versions');
-    const res = await got(url, options);
-    const isValidBody = res && res.body && typeof res.body === 'string';
-    const body = isValidBody ? res.body : null;
-    newLines = body ? body.split('\n') : [];
+    newLines = (await got(url, options)).body;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode !== 416) {
       logger.warn({ err }, 'Rubygems error - resetting cache');
-      resetCache();
+      contentLength = 0;
+      packageReleases = Object.create(null); // Because we might need a "constructor" key
       throw new Error('registry-failure');
     }
     logger.debug('Rubygems: No update');
@@ -71,7 +62,7 @@ async function updateRubyGemsVersions(): Promise<void> {
     }
   }
 
-  for (const line of newLines) {
+  for (const line of newLines.split('\n')) {
     processLine(line);
   }
   lastSync = new Date();
