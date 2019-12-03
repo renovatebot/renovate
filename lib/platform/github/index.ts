@@ -1204,6 +1204,7 @@ export async function getIssueList(): Promise<Issue[]> {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     const filterBySupportMinimumGheVersion = '2.17.0';
+    // istanbul ignore next
     config.issueList =
       config.enterpriseVersion &&
       semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
