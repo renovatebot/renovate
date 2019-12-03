@@ -2397,6 +2397,20 @@ Object {
 }
 `;
 
+exports[`datasource/rubygems getPkgReleases uses rubygems.org if no registry urls were provided 1`] = `
+Object {
+  "name": "1pass",
+  "releases": Array [
+    Object {
+      "version": "0.1.0",
+    },
+    Object {
+      "version": "0.1.1",
+    },
+  ],
+}
+`;
+
 exports[`datasource/rubygems getPkgReleases works with real data 1`] = `
 Object {
   "changelogUrl": null,
