@@ -992,6 +992,29 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+type BranchState = 'failure' | 'pending' | 'success';
+
+interface BranchStatus {
+  context: string;
+  state: BranchState;
+}
+
+interface CombinedBranchStatus {
+  state: BranchState;
+  statuses: BranchStatus[];
+}
+
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<CombinedBranchStatus> {
+  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
+    branchName
+  )}/status`;
+
+  return (await api.get(commitStatusUrl, { useCache })).body;
+}
+
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -1008,12 +1031,9 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return 'failed';
   }
-  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
-    branchName
-  )}/status`;
   let commitStatus;
   try {
-    commitStatus = (await api.get(commitStatusUrl)).body;
+    commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.info(
@@ -1085,15 +1105,24 @@ export async function getBranchStatus(
   return 'pending';
 }
 
+async function getStatusCheck(
+  branchName: string,
+  useCache = true
+): Promise<BranchStatus[]> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
+
+  return (await api.get(url, { useCache })).body;
+}
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<string> {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-  const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
   try {
-    const res = await api.get(url);
-    for (const check of res.body) {
+    const res = await getStatusCheck(branchName);
+    for (const check of res) {
       if (check.context === context) {
         return check.state;
       }
@@ -1136,6 +1165,10 @@ export async function setBranchStatus(
     options.target_url = targetUrl;
   }
   await api.post(url, { body: options });
+
+  // update status cache
+  await getStatus(branchName, false);
+  await getStatusCheck(branchName, false);
 }
 
 // Issue

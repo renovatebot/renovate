@@ -61,3 +61,15 @@ export async function accumulateValues<T = any>(
 
   return accumulator;
 }
+
+export interface BitbucketCommitStatus {
+  failed: number;
+  inProgress: number;
+  successful: number;
+}
+
+export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+export interface BitbucketStatus {
+  key: string;
+  state: BitbucketBranchState;
+}

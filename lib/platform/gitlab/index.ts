@@ -248,6 +248,24 @@ export function branchExists(branchName: string): Promise<boolean> {
   return config.storage.branchExists(branchName);
 }
 
+type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
+
+interface BranchStatus {
+  status: BranchState;
+  name: string;
+  allow_failure?: boolean;
+}
+
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<BranchStatus[]> {
+  const branchSha = await config.storage.getBranchCommit(branchName);
+  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
+
+  return (await api.get(url, { paginate: true, useCache })).body;
+}
+
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -268,19 +286,15 @@ export async function getBranchStatus(
     throw new Error('repository-changed');
   }
 
-  // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
-  // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
-  const res = await api.get(url, { paginate: true });
-  logger.debug(`Got res with ${res.body.length} results`);
-  if (res.body.length === 0) {
+  const res = await getStatus(branchName);
+  logger.debug(`Got res with ${res.length} results`);
+  if (res.length === 0) {
     // Return 'pending' if we have no status checks
     return 'pending';
   }
   let status = 'success';
   // Return 'success' if all are success
-  res.body.forEach((check: { status: string; allow_failure?: boolean }) => {
+  res.forEach(check => {
     // If one is failed then don't overwrite that
     if (status !== 'failure') {
       if (!check.allow_failure) {
@@ -559,16 +573,12 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<string | null> {
-  // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
-  // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
   // cache-bust in case we have rebased
-  const res = await api.get(url, { useCache: false });
-  logger.debug(`Got res with ${res.body.length} results`);
-  for (const check of res.body) {
+  const res = await getStatus(branchName, false);
+  logger.debug(`Got res with ${res.length} results`);
+  for (const check of res) {
     if (check.name === context) {
-      return check.state;
+      return check.status;
     }
   }
   return null;
@@ -595,6 +605,9 @@ export async function setBranchStatus(
   }
   try {
     await api.post(url, { body: options });
+
+    // update status cache
+    await getStatus(branchName, false);
   } catch (err) /* istanbul ignore next */ {
     if (
       err.body &&
