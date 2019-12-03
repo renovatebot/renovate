@@ -23,6 +23,7 @@ import { RenovateConfig } from '../../config';
 const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
+  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -79,7 +80,7 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.info('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
     const res = await api.get(url, { paginate: true });
     logger.info(`Discovered ${res.body.length} project(s)`);
     return res.body.map(
@@ -107,11 +108,13 @@ export function cleanRepo(): void {
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
+  gitPrivateKey,
   localDir,
   optimizeForDisabled,
 }: RepoParams): Promise<RepoConfig> {
   config = {} as any;
   config.repository = urlEscape(repository);
+  config.gitPrivateKey = gitPrivateKey;
   config.localDir = localDir;
   let res: GotResponse<{
     archived: boolean;

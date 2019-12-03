@@ -38,7 +38,7 @@ export async function updateArtifacts(
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    const customEnv = ['GOPATH', 'GOPROXY'];
+    const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
     const env = getChildProcessEnv(customEnv);
     const startTime = process.hrtime();
     let cmd: string;

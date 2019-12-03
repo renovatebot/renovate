@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 
-export default function errSerializer(err) {
+// TODO: remove any type
+export default function errSerializer(err: any): any {
   const response = {
     ...err,
   };
