@@ -14,14 +14,13 @@ const get: <T extends object = any>(
   okToRetry?: boolean
 ) => Promise<Response<T>> = api as any;
 
-async function getError() {
-  let error;
+async function getError(): Promise<Error> {
   try {
     await get('some-url', {}, false);
   } catch (err) {
-    error = err;
+    return err;
   }
-  return error;
+  return null;
 }
 
 describe('platform/gh-got-wrapper', () => {
@@ -173,7 +172,7 @@ describe('platform/gh-got-wrapper', () => {
       statusCode: 403,
       body: { message: 'Upgrade to GitHub Pro' },
     };
-    got.mockImplementationOnce(() => Promise.reject(gotErr));
+    got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
     expect(e).toBe(gotErr);
@@ -183,7 +182,7 @@ describe('platform/gh-got-wrapper', () => {
       statusCode: 403,
       message: 'You have triggered an abuse detection mechanism',
     };
-    got.mockImplementationOnce(() => Promise.reject(gotErr));
+    got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
@@ -196,7 +195,7 @@ describe('platform/gh-got-wrapper', () => {
         errors: [{ code: 'invalid' }],
       },
     };
-    got.mockImplementationOnce(() => Promise.reject(gotErr));
+    got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('repository-changed');
@@ -206,7 +205,7 @@ describe('platform/gh-got-wrapper', () => {
       statusCode: 422,
       message: 'foobar',
     };
-    got.mockImplementationOnce(() => Promise.reject(gotErr));
+    got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
@@ -216,7 +215,7 @@ describe('platform/gh-got-wrapper', () => {
       statusCode: 418,
       message: 'Sorry, this is a teapot',
     };
-    got.mockImplementationOnce(() => Promise.reject(gotErr));
+    got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBe(gotErr);
   });

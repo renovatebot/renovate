@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
-import { getHostType, getBaseUrl, gotErrorToRenovate } from './gh-got-wrapper';
+import { getHostType, getBaseUrl, dispatchError } from './gh-got-wrapper';
 
 const accept = 'application/vnd.github.merge-info-preview+json';
 
@@ -22,6 +22,8 @@ interface GithubGraphqlResponse<T = unknown> {
 async function get<T = unknown>(
   query: string
 ): Promise<GithubGraphqlResponse<T>> {
+  let result = null;
+
   const path = 'graphql';
   const options: GotJSONOptions = {
     ...gqlOpts,
@@ -44,10 +46,11 @@ async function get<T = unknown>(
 
   try {
     const res = await got('graphql', options);
-    return res && res.body;
+    result = res && res.body;
   } catch (gotErr) {
-    throw gotErrorToRenovate(gotErr, path, options);
+    dispatchError(gotErr, path, options);
   }
+  return result;
 }
 
 export async function getGraphqlNodes<T = Record<string, unknown>>(
@@ -85,7 +88,7 @@ export async function getGraphqlNodes<T = Record<string, unknown>>(
     } else {
       count = Math.floor(count / 2);
       if (count === 0) {
-        logger.info('Error fetching GraphQL nodes');
+        logger.error('Error fetching GraphQL nodes');
         canIterate = false;
       }
     }
