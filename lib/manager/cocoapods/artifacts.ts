@@ -73,24 +73,20 @@ export async function updateArtifacts(
   const cmdParts = [];
   let cocoapodsVersion: string = null;
   if (config.binarySource === 'docker') {
+    cmdParts.push('docker run --rm');
+
+    if (config.dockerUser) cmdParts.push(`--user=${config.dockerUser}`);
+
+    cmdParts.push(`-v ${cwd}:${cwd}`);
+    cmdParts.push(`-w ${cwd}`);
+
     const match = existingLockFileContent.match(
       /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
     ) || { groups: { cocoapodsVersion: 'latest' } };
     cocoapodsVersion = match.groups.cocoapodsVersion;
-
-    cmdParts.push(
-      ...[
-        'docker',
-        'run',
-        '--rm',
-        `-v ${cwd}:${cwd}`,
-        `-w ${cwd}`,
-        `renovate/cocoapods:${cocoapodsVersion} pod`,
-      ]
-    );
-  } else {
-    cmdParts.push('pod');
+    cmdParts.push(`renovate/cocoapods:${cocoapodsVersion}`);
   }
+  cmdParts.push('pod');
   cmdParts.push('install');
 
   const startTime = hrtime();

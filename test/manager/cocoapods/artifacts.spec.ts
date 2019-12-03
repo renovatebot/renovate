@@ -133,9 +133,12 @@ describe('.updateArtifacts()', () => {
     await updateArtifacts('Podfile', ['foo'], '', {
       ...config,
       binarySource: 'docker',
+      dockerUser: 'ubuntu',
     });
     expect(firstCommand).toContain('renovate/cocoapods:1.2.3.4');
+    expect(firstCommand).toContain('user=ubuntu');
     expect(secondCommand).toContain('renovate/cocoapods:latest');
+    expect(secondCommand).toContain('user=ubuntu');
     expect(exec).toBeCalledTimes(2);
   });
 });
