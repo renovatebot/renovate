@@ -48,7 +48,7 @@ allprojects {
         def deps = (buildscript.configurations + configurations)
           .collect { it.dependencies }
           .flatten()
-          .findAll { it instanceof DefaultExternalModuleDependency }
+          .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
           .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
         project.dependencies = deps
     }

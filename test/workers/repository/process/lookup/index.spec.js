@@ -9,9 +9,12 @@ const vueJson = require('../../../../config/npm/_fixtures/vue.json');
 const typescriptJson = require('../../../../config/npm/_fixtures/typescript.json');
 /** @type any */
 const docker = require('../../../../../lib/datasource/docker');
+/** @type any */
+const gitSubmodules = require('../../../../../lib/datasource/git-submodules');
 const defaults = require('../../../../../lib/config/defaults');
 
 jest.mock('../../../../../lib/datasource/docker');
+jest.mock('../../../../../lib/datasource/git-submodules');
 
 qJson.latestVersion = '1.4.1';
 
@@ -1224,6 +1227,19 @@ describe('workers/repository/process/lookup', () => {
         ],
       });
       docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles git submodule update', async () => {
+      config.datasource = 'gitSubmodules';
+      config.versionScheme = 'git';
+      gitSubmodules.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+          },
+        ],
+      });
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
