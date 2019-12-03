@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/terraform-provider/extract extractPackageFile() extracts 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.36.1",
+      "datasource": "terraformProvider",
+      "depName": "azurerm",
+      "depNameShort": "azurerm",
+      "depType": "terraform",
+      "managerData": Object {
+        "lineNumber": 2,
+      },
+      "moduleName": "azurerm",
+    },
+    Object {
+      "currentValue": "=2.4",
+      "datasource": "terraformProvider",
+      "depName": "gitlab",
+      "depNameShort": "gitlab",
+      "depType": "terraform",
+      "managerData": Object {
+        "lineNumber": 7,
+      },
+      "moduleName": "gitlab",
+    },
+    Object {
+      "currentValue": "=1.3",
+      "datasource": "terraformProvider",
+      "depName": "gitlab",
+      "depNameShort": "gitlab",
+      "depType": "terraform",
+      "managerData": Object {
+        "lineNumber": 12,
+      },
+      "moduleName": "gitlab",
+    },
+    Object {
+      "datasource": "terraformProvider",
+      "depName": "helm",
+      "depNameShort": "helm",
+      "depType": "terraform",
+      "managerData": Object {
+        "lineNumber": undefined,
+      },
+      "moduleName": "helm",
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "V1.9",
+      "datasource": "terraformProvider",
+      "depName": "newrelic",
+      "depNameShort": "newrelic",
+      "depType": "terraform",
+      "managerData": Object {
+        "lineNumber": 28,
+      },
+      "moduleName": "newrelic",
+      "skipReason": "unsupported-version",
+    },
+  ],
+}
+`;

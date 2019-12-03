@@ -271,7 +271,7 @@ This is a way to "whitelist" certain package managers and disable all others.
 
 By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
 
-Possible managers are: `'ansible', 'bazel', 'buildkite', 'bundler', 'cargo', 'circleci', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'homebrew', 'kubernetes', 'leiningen', 'maven', 'meteor', 'mix', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'sbt', 'swift', 'terraform', 'travis', 'ruby-version'`
+Possible managers are: `'ansible', 'bazel', 'buildkite', 'bundler', 'cargo', 'circleci', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'homebrew', 'kubernetes', 'leiningen', 'maven', 'meteor', 'mix', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'sbt', 'swift', 'terraform', 'terraform-provider', 'travis', 'ruby-version'`
 
 Example:
 
@@ -1244,6 +1244,24 @@ module "consul" {
   source  = "hashicorp/consul/aws"
   version = "0.0.5"
   servers = 3
+}
+```
+
+The following _range_ constraints are also supported:
+
+- `>= 1.2.0`: version 1.2.0 or newer
+- `<= 1.2.0`: version 1.2.0 or older
+- `~> 1.2.0`: any non-beta version >= 1.2.0 and < 1.3.0, e.g. 1.2.X
+- `~> 1.2`: any non-beta version >= 1.2.0 and < 2.0.0, e.g. 1.X.Y
+- `>= 1.0.0`, <= 2.0.0`: any version between 1.0.0 and 2.0.0 inclusive
+
+## terraform-provider
+
+Fixed versions like the following will receive a PR whenever there is a newer version available:
+
+```
+provider "azurerm" {
+  version = "=1.36.1"
 }
 ```
 

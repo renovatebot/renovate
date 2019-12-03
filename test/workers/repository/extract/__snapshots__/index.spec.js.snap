@@ -113,6 +113,9 @@ Object {
   "terraform": Array [
     Object {},
   ],
+  "terraform-provider": Array [
+    Object {},
+  ],
   "travis": Array [
     Object {},
   ],

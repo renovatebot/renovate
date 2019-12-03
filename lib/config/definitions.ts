@@ -1446,6 +1446,18 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'terraform-provider',
+    description: 'Configuration object for Terraform provider renovation',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'Terraform provider {{depNameShort}}',
+      fileMatch: ['\\.tf$'],
+      versionScheme: 'hashicorp',
+    },
+    mergeable: true,
+  },
+  {
     name: 'mix',
     description: 'Configuration object for Mix module renovation',
     stage: 'repository',

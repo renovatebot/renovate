@@ -935,6 +935,16 @@
       },
       "$ref": "#"
     },
+    "terraform-provider": {
+      "description": "Configuration object for Terraform provider renovation",
+      "type": "object",
+      "default": {
+        "commitMessageTopic": "Terraform provider {{depNameShort}}",
+        "fileMatch": ["\\.tf$"],
+        "versionScheme": "hashicorp"
+      },
+      "$ref": "#"
+    },
     "mix": {
       "description": "Configuration object for Mix module renovation",
       "type": "object",
