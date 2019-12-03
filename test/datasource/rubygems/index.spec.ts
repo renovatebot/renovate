@@ -2,6 +2,7 @@ import _got from '../../../lib/util/got';
 import railsInfo from './_fixtures/rails/info.json';
 import railsVersions from './_fixtures/rails/versions.json';
 import * as rubygems from '../../../lib/datasource/rubygems';
+import { resetCache } from '../../../lib/datasource/rubygems/get-rubygems-org';
 
 const got: any = _got;
 
@@ -36,6 +37,7 @@ describe('datasource/rubygems', () => {
     };
 
     beforeEach(() => {
+      resetCache();
       process.env.RENOVATE_SKIP_CACHE = 'true';
       jest.resetAllMocks();
     });
@@ -71,6 +73,7 @@ describe('datasource/rubygems', () => {
 
     it('works with real data', async () => {
       got
+        .mockReturnValueOnce({ body: rubygemsOrgVersions })
         .mockReturnValueOnce({ body: railsInfo })
         .mockReturnValueOnce({ body: railsVersions });
 
@@ -79,6 +82,7 @@ describe('datasource/rubygems', () => {
 
     it('uses multiple source urls', async () => {
       got
+        .mockReturnValueOnce({ body: rubygemsOrgVersions })
         .mockImplementationOnce(() =>
           Promise.reject({
             statusCode: 404,
@@ -91,7 +95,10 @@ describe('datasource/rubygems', () => {
     });
 
     it('returns null if mismatched name', async () => {
-      got.mockReturnValueOnce({ body: { ...railsInfo, name: 'oooops' } });
+      got
+        .mockReturnValueOnce({ body: rubygemsOrgVersions })
+        .mockReturnValueOnce({ body: { ...railsInfo, name: 'oooops' } })
+        .mockReturnValueOnce({ body: null });
       expect(await rubygems.getPkgReleases(params)).toBeNull();
     });
 
