@@ -9761,10 +9761,10 @@ yargs@13.3.0, yargs@^11.0.0, yargs@^13.2.4, yargs@^13.3.0, yargs@^15.0.1:
     y18n "^4.0.0"
     yargs-parser "^13.1.1"
 
-yarn@1.19.2:
-  version "1.19.2"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.19.2.tgz#cf5fc9b24ad97a11c65d7cb0b2ac945eb936122f"
-  integrity sha512-OdLN/K/sA+KnW4ggNQwHYK6YJdLkSWxbx6IYd+WIQJ6xDfk8CIYKckBfwGxTBmDaEluWs83InzjFCmUqPtpY+w==
+yarn@1.21.0:
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.0.tgz#e0827d97a24f6714f1540cf2e8328b2e8eed682c"
+  integrity sha512-g9cvrdKXPZlz1eJYpKanQm3eywEmecudeyDkwiVWeswBrpHK3nJFBholkphHF9eNc8y/FNEhSQ8Et5ZAx4XyLw==
 
 yawn-yaml@1.4.0:
   version "1.4.0"
