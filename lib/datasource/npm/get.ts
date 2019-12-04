@@ -3,7 +3,7 @@ import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
 import parse from 'github-url-from-git';
-import { isBase64 } from 'validator';
+import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';

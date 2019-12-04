@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import { isBase64 } from 'validator';
+import isBase64 from 'validator/lib/isBase64';
 import { logger } from '../../logger';
 
 let npmrc: Record<string, any> | null = null;
