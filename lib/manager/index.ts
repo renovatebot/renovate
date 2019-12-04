@@ -46,6 +46,7 @@ const managerList = [
   'sbt',
   'swift',
   'terraform',
+  'terraform-provider',
   'travis',
   'ruby-version',
 ];
