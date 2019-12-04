@@ -77,7 +77,7 @@ async function executeGradle(
   } catch (err) {
     // istanbul ignore if
     if (err.code === TIMEOUT_CODE) {
-      logger.error(' Process killed. Possibly gradle timed out.');
+      logger.warn({ err }, ' Process killed. Possibly gradle timed out.');
     }
     // istanbul ignore if
     if (err.message.includes('Could not resolve all files for configuration')) {
