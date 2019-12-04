@@ -6,6 +6,7 @@ export interface LookupUpdate {
   displayTo?: string;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
+  isCap?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
   isSingleVersion?: boolean;

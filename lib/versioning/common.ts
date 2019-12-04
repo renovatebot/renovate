@@ -3,6 +3,7 @@ import { SemVer, Range } from 'semver';
 export type RangeStrategy =
   | 'auto'
   | 'bump'
+  | 'cap'
   | 'future'
   | 'pin'
   | 'replace'
@@ -39,6 +40,8 @@ export interface VersioningApi {
   matches(version: string, range: string | Range): boolean;
 
   valueToVersion?(version: string): string;
+
+  increment?(version: string): string;
 }
 
 export interface VersioningApiConstructor {

@@ -17,6 +17,12 @@ export function getNewValue(
   fromVersion: string,
   toVersion: string
 ): string {
+  if (rangeStrategy === 'cap') {
+    if (isVersion(currentValue)) {
+      return `<= ${currentValue}`;
+    }
+    return `${currentValue} <=${fromVersion}`;
+  }
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return toVersion;
   }

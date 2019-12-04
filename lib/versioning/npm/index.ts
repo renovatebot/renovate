@@ -26,6 +26,16 @@ const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
   (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
 
+function increment(version: string): string | null {
+  const match = version.match(
+    /^(?<prefix>.*[^\d])(?<lowest>\d+)(?<suffix>[^\d]*)$/
+  );
+  if (!match) return null;
+  const { prefix, lowest, suffix } = match.groups;
+  const incLowest = parseInt(lowest, 10) + 1;
+  return `${prefix}${incLowest}${suffix}`;
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -43,6 +53,7 @@ export const api: VersioningApi = {
   maxSatisfyingVersion,
   minSatisfyingVersion,
   sortVersions,
+  increment,
 };
 
 export default api;
