@@ -1,12 +1,8 @@
-const { getPkgReleases } = require('../../../datasource');
-const { logger } = require('../../../logger');
-const versioning = require('../../../versioning');
+import { getPkgReleases, Release, PkgReleaseConfig } from '../../../datasource';
+import { logger } from '../../../logger';
+import { get, VersioningApi } from '../../../versioning';
 
-module.exports = {
-  getReleases,
-};
-
-function matchesMMP(version, v1, v2) {
+function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
   return (
     version.getMajor(v1) === version.getMajor(v2) &&
     version.getMinor(v1) === version.getMinor(v2) &&
@@ -14,15 +10,28 @@ function matchesMMP(version, v1, v2) {
   );
 }
 
-function matchesUnstable(version, v1, v2) {
+function matchesUnstable(
+  version: VersioningApi,
+  v1: string,
+  v2: string
+): boolean {
   return !version.isStable(v1) && matchesMMP(version, v1, v2);
 }
 
-async function getReleases(config) {
+export type ReleaseConfig = PkgReleaseConfig & {
+  fromVersion: string;
+  releases?: Release[];
+  sourceUrl?: string;
+  toVersion: string;
+};
+
+export async function getReleases(
+  config: ReleaseConfig
+): Promise<Release[] | null> {
   const { versionScheme, fromVersion, toVersion, depName, datasource } = config;
   try {
     const pkgReleases = (await getPkgReleases(config)).releases;
-    const version = versioning.get(versionScheme);
+    const version = get(versionScheme);
 
     const releases = pkgReleases
       .filter(release => version.isCompatible(release.version, fromVersion))

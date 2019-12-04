@@ -4,21 +4,17 @@ import MarkdownIt from 'markdown-it';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
+import { ChangeLogResult, ChangeLogNotes } from './common';
 
 const ghGot = api.get;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
-export {
-  getReleaseList,
-  massageBody,
-  getReleaseNotesMd,
-  getReleaseNotes,
-  addReleaseNotes,
-};
-
-async function getReleaseList(githubApiBaseURL, repository) {
+export async function getReleaseList(
+  githubApiBaseURL: string,
+  repository: string
+): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   // istanbul ignore if
   if (!githubApiBaseURL) {
@@ -27,7 +23,15 @@ async function getReleaseList(githubApiBaseURL, repository) {
   try {
     let url = githubApiBaseURL.replace(/\/?$/, '/');
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await ghGot(url);
+    const res = await ghGot<
+      {
+        html_url: string;
+        id: number;
+        tag_name: string;
+        name: string;
+        body: string;
+      }[]
+    >(url);
     return res.body.map(release => ({
       url: release.html_url,
       id: release.id,
@@ -41,7 +45,10 @@ async function getReleaseList(githubApiBaseURL, repository) {
   }
 }
 
-function massageBody(input, githubBaseURL) {
+export function massageBody(
+  input: string | undefined | null,
+  githubBaseURL: string
+): string {
   let body = input || '';
   // Convert line returns
   body = body.replace(/\r\n/g, '\n');
@@ -67,16 +74,16 @@ function massageBody(input, githubBaseURL) {
   return body.trim();
 }
 
-async function getReleaseNotes(
-  repository,
-  version,
-  depName,
-  githubBaseURL,
-  githubApiBaseURL
-) {
+export async function getReleaseNotes(
+  repository: string,
+  version: string,
+  depName: string,
+  githubBaseURL: string,
+  githubApiBaseURL: string
+): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getReleaseList(githubApiBaseURL, repository);
-  let releaseNotes;
+  let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach(release => {
     if (
       release.tag === version ||
@@ -87,7 +94,7 @@ async function getReleaseNotes(
       releaseNotes.url = `${githubBaseURL}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, githubBaseURL);
       if (!releaseNotes.body.length) {
-        releaseNotes = undefined;
+        releaseNotes = null;
       } else {
         releaseNotes.body = linkify(releaseNotes.body, {
           repository: `https://github.com/${repository}`,
@@ -99,10 +106,10 @@ async function getReleaseNotes(
   return releaseNotes;
 }
 
-function sectionize(text, level) {
-  const sections = [];
+function sectionize(text: string, level: number): string[] {
+  const sections: [number, number][] = [];
   const lines = text.split('\n');
-  const tokens = markdown.parse(text);
+  const tokens = markdown.parse(text, undefined);
   tokens.forEach(token => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substr(1);
@@ -112,7 +119,7 @@ function sectionize(text, level) {
     }
   });
   sections.push([-1, lines.length]);
-  const result = [];
+  const result: string[] = [];
   for (let i = 1; i < sections.length; i += 1) {
     const [lev, start] = sections[i - 1];
     const [, end] = sections[i];
@@ -123,25 +130,25 @@ function sectionize(text, level) {
   return result;
 }
 
-async function getReleaseNotesMd(
-  repository,
-  version,
-  githubBaseURL,
-  githubApiBaseUrl
-) {
+export async function getReleaseNotesMd(
+  repository: string,
+  version: string,
+  githubBaseURL: string,
+  githubApiBaseUrl: string
+): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
   // istanbul ignore if
   if (skippedRepos.includes(repository)) {
     return null;
   }
-  let changelogFile;
+  let changelogFile: string;
   let changelogMd = '';
   try {
     let apiPrefix = githubApiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
-    const filesRes = await ghGot(apiPrefix);
+    const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
       .map(f => f.name)
       .filter(f => changelogFilenameRegex.test(f));
@@ -156,7 +163,9 @@ async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
-    const fileRes = await ghGot(`${apiPrefix}/${changelogFile}`);
+    const fileRes = await ghGot<{ content: string }>(
+      `${apiPrefix}/${changelogFile}`
+    );
     changelogMd =
       Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
   } catch (err) {
@@ -208,19 +217,21 @@ async function getReleaseNotesMd(
   return null;
 }
 
-async function addReleaseNotes(input) {
+export async function addReleaseNotes(
+  input: ChangeLogResult
+): Promise<ChangeLogResult> {
   if (!(input && input.project && input.project.github && input.versions)) {
     logger.debug('Missing project or versions');
     return input;
   }
-  const output = { ...input, versions: [] };
+  const output: ChangeLogResult = { ...input, versions: [] };
   const repository = input.project.github.replace(/\.git$/, '');
   const cacheNamespace = 'changelog-github-notes';
-  function getCacheKey(version) {
+  function getCacheKey(version: string): string {
     return `${repository}:${version}`;
   }
   for (const v of input.versions) {
-    let releaseNotes;
+    let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await renovateCache.get(cacheNamespace, cacheKey);
     if (!releaseNotes) {

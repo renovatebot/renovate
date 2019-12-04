@@ -1,19 +1,17 @@
 import { api } from '../../../../lib/platform/github/gh-got-wrapper';
+import * as hostRules from '../../../../lib/util/host-rules';
+import {
+  getChangeLogJSON,
+  ChangeLogConfig,
+} from '../../../../lib/workers/pr/changelog';
+import { mocked } from '../../../util';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
-/** @type any */
-const ghGot = api.get;
+const ghGot = mocked(api).get;
 
-const hostRules = require('../../../../lib/util/host-rules');
-
-const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');
-const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes');
-
-releaseNotes.addReleaseNotes = jest.fn(input => input);
-
-const upgrade = {
+const upgrade: ChangeLogConfig = {
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versionScheme: 'semver',
@@ -90,18 +88,16 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
-      ghGot.mockReturnValueOnce(
-        Promise.resolve({
-          body: [
-            { name: '0.9.0' },
-            { name: '1.0.0' },
-            { name: '1.4.0' },
-            { name: 'v2.3.0' },
-            { name: '2.2.2' },
-            { name: 'v2.4.2' },
-          ],
-        })
-      );
+      ghGot.mockResolvedValueOnce({
+        body: [
+          { name: '0.9.0' },
+          { name: '1.0.0' },
+          { name: '1.4.0' },
+          { name: 'v2.3.0' },
+          { name: '2.2.2' },
+          { name: 'v2.4.2' },
+        ],
+      } as never);
       expect(
         await getChangeLogJSON({
           ...upgrade,

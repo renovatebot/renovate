@@ -1,4 +1,4 @@
-module.exports = `### Release Notes
+export default `### Release Notes
 
 {{#each upgrades as |upgrade|}}
 
