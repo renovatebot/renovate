@@ -1,6 +1,6 @@
 import { emojify } from '../../../../util/emoji';
 import { logger } from '../../../../logger';
-import * as appStrings from '../../../../config/app-strings';
+import { appName } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { Upgrade } from '../../../../manager/common';
 
@@ -22,7 +22,7 @@ export function getPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  prDesc += `With your current configuration, ${appStrings.appName} will create ${branches.length} Pull Request`;
+  prDesc += `With your current configuration, ${appName} will create ${branches.length} Pull Request`;
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {

@@ -15,11 +15,16 @@ import {
   VulnerabilityAlert,
 } from '../common';
 
-import * as appStrings from '../../config/app-strings';
+import {
+  appName,
+  appSlug,
+  configFileNames,
+  urls,
+} from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 
-const defaultConfigFile = appStrings.configFileNames[0];
+const defaultConfigFile = configFileNames[0];
 
 interface Comment {
   id: number;
@@ -1639,10 +1644,10 @@ export async function createPr(
     logger.debug('Setting statusCheckVerify');
     await setBranchStatus(
       branchName,
-      `${appStrings.appSlug}/verify`,
-      `${appStrings.appName} verified pull request`,
+      `${appSlug}/verify`,
+      `${appName} verified pull request`,
       'success',
-      appStrings.urls.homepage
+      urls.homepage
     );
   }
   pr.isModified = false;

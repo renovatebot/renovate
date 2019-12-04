@@ -3,7 +3,7 @@ import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/Gi
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import * as appStrings from '../../config/app-strings';
+import { appSlug } from '../../config/app-strings';
 import GitStorage, { StatusResult, File } from '../git/storage';
 import { logger } from '../../logger';
 import {
@@ -519,10 +519,7 @@ export async function mergePr(pr: number): Promise<void> {
 export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 4000)
-    .replace(
-      new RegExp(`\n---\n\n.*?<!-- ${appStrings.appSlug}-rebase -->.*?\n`),
-      ''
-    )
+    .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
     .replace('<summary>', '**')
     .replace('</summary>', '**')
     .replace('<details>', '')

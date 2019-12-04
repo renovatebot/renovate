@@ -7,7 +7,7 @@ import { logger, setMeta, getErrors } from '../../logger';
 import * as configParser from '../../config';
 import * as repositoryWorker from '../repository';
 import * as cache from './cache';
-import * as appStrings from '../../config/app-strings';
+import { appName } from '../../config/app-strings';
 import { autodiscoverRepositories } from './autodiscover';
 import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
@@ -106,7 +106,7 @@ export async function start(): Promise<0 | 1> {
     }
     setMeta({});
     printStats();
-    logger.info(`${appStrings.appName} finished`);
+    logger.info(`${appName} finished`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));

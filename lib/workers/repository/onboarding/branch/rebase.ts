@@ -1,10 +1,13 @@
 import { logger } from '../../../../logger';
 import { getOnboardingConfig } from './config';
-import * as appStrings from '../../../../config/app-strings';
+import {
+  configFileNames,
+  onboardingBranch,
+} from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 
-const defaultConfigFile = appStrings.configFileNames[0];
+const defaultConfigFile = configFileNames[0];
 
 function getCommitMessage(config: RenovateConfig): string {
   let commitMessage: string;
@@ -26,14 +29,14 @@ export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<void> {
   logger.debug('Checking if onboarding branch needs rebasing');
-  const pr = await platform.getBranchPr(appStrings.onboardingBranch);
+  const pr = await platform.getBranchPr(onboardingBranch);
   if (pr.isModified) {
     logger.info('Onboarding branch has been edited and cannot be rebased');
     return;
   }
   const existingContents = await platform.getFile(
     defaultConfigFile,
-    appStrings.onboardingBranch
+    onboardingBranch
   );
   const contents = await getOnboardingConfig(config);
   if (contents === existingContents && !pr.isStale) {
@@ -49,7 +52,7 @@ export async function rebaseOnboardingBranch(
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
   } else {
     await platform.commitFilesToBranch(
-      appStrings.onboardingBranch,
+      onboardingBranch,
       [
         {
           name: defaultConfigFile,

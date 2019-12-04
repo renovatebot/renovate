@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import * as appStrings from '../../config/app-strings';
+import { appSlug } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 
@@ -25,10 +25,7 @@ export async function getParentBranch(
       logger.info('Manual rebase requested via PR title for #' + pr.number);
       return { parentBranch: undefined };
     }
-    if (
-      pr.body &&
-      pr.body.includes(`- [x] <!-- ${appStrings.appSlug}-rebase -->`)
-    ) {
+    if (pr.body && pr.body.includes(`- [x] <!-- ${appSlug}-rebase -->`)) {
       logger.info('Manual rebase requested via PR checkbox for #' + pr.number);
       return { parentBranch: undefined };
     }

@@ -14,13 +14,13 @@ import {
   Issue,
   VulnerabilityAlert,
 } from '../common';
-import * as appStrings from '../../config/app-strings';
+import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { RenovateConfig } from '../../config';
 
-const defaultConfigFile = appStrings.configFileNames[0];
+const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
   gitPrivateKey?: string;
