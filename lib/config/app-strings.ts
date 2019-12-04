@@ -1,8 +1,10 @@
-export const appName = 'Renovate';
+/* eslint-disable import/no-mutable-exports  */
 
-export const appSlug = 'renovate';
+export let appName = 'Renovate';
 
-export const configFileNames = [
+export let appSlug = 'renovate';
+
+export let configFileNames = [
   'renovate.json',
   'renovate.json5',
   '.github/renovate.json',
@@ -12,11 +14,21 @@ export const configFileNames = [
   'package.json',
 ];
 
-export const onboardingBranch = 'renovate/configure';
-export const onboardingPrTitle = 'Configure Renovate';
+export let onboardingBranch = 'renovate/configure';
+export let onboardingPrTitle = 'Configure Renovate';
 
-export const urls = {
+export let urls = {
   documentation: 'https://docs.renovatebot.com/',
   help: 'https://github.com/renovatebot/config-help/issues',
   homepage: 'https://renovatebot.com',
 };
+
+// istanbul ignore next
+export function setAppStrings(appStrings: any): void {
+  appName = appStrings.appName;
+  appSlug = appStrings.appSlug;
+  configFileNames = appStrings.configFileNames;
+  onboardingBranch = appStrings.onboardingBranch;
+  onboardingPrTitle = appStrings.onboardingPrTitle;
+  urls = appStrings.urls;
+}
