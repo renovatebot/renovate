@@ -1,13 +1,10 @@
 import { logger } from '../../../../logger';
 import { getOnboardingConfig } from './config';
-import {
-  configFileNames,
-  onboardingBranch,
-} from '../../../../config/app-strings';
+import * as appStrings from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 
-const defaultConfigFile = configFileNames[0];
+const defaultConfigFile = appStrings.configFileNames[0];
 
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
@@ -32,7 +29,7 @@ export async function createOnboardingBranch(
     logger.info('DRY-RUN: Would commit files to onboarding branch');
   } else {
     await platform.commitFilesToBranch(
-      onboardingBranch,
+      appStrings.onboardingBranch,
       [
         {
           name: defaultConfigFile,

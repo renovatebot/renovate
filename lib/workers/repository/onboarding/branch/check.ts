@@ -1,12 +1,6 @@
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import {
-  appName,
-  appSlug,
-  configFileNames,
-  onboardingBranch,
-  onboardingPrTitle,
-} from '../../../../config/app-strings';
+import * as appStrings from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 
 const findFile = async (fileName: string): Promise<boolean> => {
@@ -16,7 +10,7 @@ const findFile = async (fileName: string): Promise<boolean> => {
 };
 
 const configFileExists = async (): Promise<boolean> => {
-  for (const fileName of configFileNames) {
+  for (const fileName of appStrings.configFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
       return true;
     }
@@ -27,7 +21,7 @@ const configFileExists = async (): Promise<boolean> => {
 const packageJsonConfigExists = async (): Promise<boolean> => {
   try {
     const pJson = JSON.parse(await platform.getFile('package.json'));
-    if (pJson[appSlug]) {
+    if (pJson[appStrings.appSlug]) {
       return true;
     }
   } catch (err) {
@@ -40,11 +34,15 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
 export type Pr = any;
 
 const closedPrExists = (): Promise<Pr> =>
-  platform.findPr(onboardingBranch, onboardingPrTitle, '!open');
+  platform.findPr(
+    appStrings.onboardingBranch,
+    appStrings.onboardingPrTitle,
+    '!open'
+  );
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
-  const title = `Action required: Add a ${appName} config`;
+  const title = `Action required: Add a ${appStrings.appName} config`;
   // Repo is onboarded if admin is bypassing onboarding and does not require a
   // configuration file.
   if (config.requireConfig === false && config.onboarding === false) {
@@ -84,12 +82,12 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     // ensure PR comment
     await platform.ensureComment(
       pr.number,
-      `${appName} is disabled`,
-      `${appName} is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
+      `${appStrings.appName} is disabled`,
+      `${appStrings.appName} is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
     );
   }
   throw new Error('disabled');
 };
 
 export const onboardingPrExists = async (): Promise<boolean> =>
-  (await platform.getBranchPr(onboardingBranch)) != null;
+  (await platform.getBranchPr(appStrings.onboardingBranch)) != null;

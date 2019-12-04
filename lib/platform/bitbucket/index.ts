@@ -6,7 +6,7 @@ import * as hostRules from '../../util/host-rules';
 import { logger } from '../../logger';
 import GitStorage, { StatusResult, File } from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { appSlug } from '../../config/app-strings';
+import * as appStrings from '../../config/app-strings';
 import * as comments from './comments';
 import {
   PlatformConfig,
@@ -517,7 +517,10 @@ export function getPrBody(input: string): string {
   return smartTruncate(input, 50000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
+    .replace(
+      new RegExp(`\n---\n\n.*?<!-- ${appStrings.appSlug}-rebase -->.*?\n`),
+      ''
+    )
     .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
 }
 

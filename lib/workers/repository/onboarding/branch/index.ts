@@ -3,7 +3,7 @@ import { extractAllDependencies } from '../../extract';
 import { createOnboardingBranch } from './create';
 import { rebaseOnboardingBranch } from './rebase';
 import { isOnboarded, onboardingPrExists } from './check';
-import { onboardingBranch } from '../../../../config/app-strings';
+import * as appStrings from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 
@@ -33,8 +33,8 @@ export async function checkOnboardingBranch(
     await createOnboardingBranch(config);
   }
   if (!config.dryRun) {
-    await platform.setBaseBranch(onboardingBranch);
+    await platform.setBaseBranch(appStrings.onboardingBranch);
   }
-  const branchList = [onboardingBranch];
+  const branchList = [appStrings.onboardingBranch];
   return { ...config, repoIsOnboarded, branchList };
 }
