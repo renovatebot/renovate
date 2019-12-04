@@ -30,16 +30,13 @@ async function get(
   try {
     if (global.appMode) {
       const appAccept = 'application/vnd.github.machine-man-preview+json';
-      opts.headers = Object.assign(
-        {},
-        {
-          accept: appAccept,
-          'user-agent':
-            process.env.RENOVATE_USER_AGENT ||
-            'https://github.com/renovatebot/renovate',
-        },
-        opts.headers
-      );
+      opts.headers = {
+        accept: appAccept,
+        'user-agent':
+          process.env.RENOVATE_USER_AGENT ||
+          'https://github.com/renovatebot/renovate',
+        ...opts.headers,
+      };
       if (opts.headers.accept !== appAccept) {
         opts.headers.accept = `${appAccept}, ${opts.headers.accept}`;
       }
@@ -164,7 +161,7 @@ const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
 for (const x of helpers) {
   (get as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
-    get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
+    get(url, { ...opts, method: x.toUpperCase() });
 }
 
 get.setBaseUrl = (u: string): void => {
