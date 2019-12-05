@@ -103,6 +103,10 @@ This option is useful for troubleshooting, particularly if using presets. e.g. r
 
 ## privateKey
 
+## productLinks
+
+Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+
 ## repositories
 
 ## requireConfig

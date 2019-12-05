@@ -15,12 +15,7 @@ import {
   VulnerabilityAlert,
 } from '../common';
 
-import {
-  appName,
-  appSlug,
-  configFileNames,
-  urls,
-} from '../../config/app-strings';
+import { appName, appSlug, configFileNames } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 
@@ -70,6 +65,7 @@ interface LocalRepoConfig {
   localDir: string;
   isGhe: boolean;
   renovateUsername: string;
+  productLinks: any;
 }
 
 type BranchProtection = any;
@@ -1647,7 +1643,7 @@ export async function createPr(
       `${appSlug}/verify`,
       `${appName} verified pull request`,
       'success',
-      urls.homepage
+      'https://github.com/renovatebot/renovate'
     );
   }
   pr.isModified = false;

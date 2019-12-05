@@ -73,7 +73,7 @@ Array [
         "context": "renovate/verify",
         "description": "Renovate verified pull request",
         "state": "success",
-        "target_url": "https://renovatebot.com",
+        "target_url": "https://github.com/renovatebot/renovate",
       },
     },
   ],

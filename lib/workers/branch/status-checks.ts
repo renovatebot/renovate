@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { appSlug, urls } from '../../config/app-strings';
+import { appSlug } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 
@@ -7,7 +7,8 @@ async function setStatusCheck(
   branchName: string,
   context: string,
   description: string,
-  state: string
+  state: string,
+  url: string
 ): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
@@ -23,7 +24,7 @@ async function setStatusCheck(
       context,
       description,
       state,
-      urls.documentation
+      url
     );
   }
 }
@@ -46,7 +47,8 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     config.branchName,
     context,
     description,
-    config.stabilityStatus
+    config.stabilityStatus,
+    config.productLinks.documentation
   );
 }
 
@@ -68,5 +70,11 @@ export async function setUnpublishable(
   const description = config.canBeUnpublished
     ? 'Packages < 24 hours old can be unpublished'
     : 'Packages cannot be unpublished';
-  await setStatusCheck(config.branchName, context, description, state);
+  await setStatusCheck(
+    config.branchName,
+    context,
+    description,
+    state,
+    config.productLinks.docs
+  );
 }
