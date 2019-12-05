@@ -18,7 +18,6 @@ const automerge = require('../../../lib/workers/branch/automerge');
 const prWorker = require('../../../lib/workers/pr');
 /** @type any */
 const getUpdated = require('../../../lib/workers/branch/get-updated');
-const { appSlug } = require('../../../lib/config/app-strings');
 /** @type any */
 const { platform } = require('../../../lib/platform');
 
@@ -425,7 +424,7 @@ describe('workers/branch', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: 'open',
-        body: `- [x] <!-- ${appSlug}-rebase -->`,
+        body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       });
 
@@ -456,7 +455,7 @@ describe('workers/branch', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: 'open',
-        body: `- [x] <!-- ${appSlug}-rebase -->`,
+        body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       });
 
@@ -484,7 +483,7 @@ describe('workers/branch', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: 'open',
-        body: `- [x] <!-- ${appSlug}-rebase -->`,
+        body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       });
 

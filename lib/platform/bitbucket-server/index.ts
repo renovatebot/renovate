@@ -477,6 +477,18 @@ export /* istanbul ignore next */ function getRepoStatus(): Promise<
   return config.storage.getRepoStatus();
 }
 
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketCommitStatus> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  return (await api.get(
+    `./rest/build-status/1.0/commits/stats/${branchCommit}`,
+    { useCache }
+  )).body;
+}
+
 // Returns the combined status for a branch.
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
@@ -498,12 +510,8 @@ export async function getBranchStatus(
     throw new Error('repository-changed');
   }
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-
   try {
-    const commitStatus = (await api.get(
-      `./rest/build-status/1.0/commits/stats/${branchCommit}`
-    )).body;
+    const commitStatus = await getStatus(branchName);
 
     logger.debug({ commitStatus }, 'branch status check result');
 
@@ -516,6 +524,19 @@ export async function getBranchStatus(
   }
 }
 
+async function getStatusCheck(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketStatus[]> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  return utils.accumulateValues(
+    `./rest/build-status/1.0/commits/${branchCommit}`,
+    'get',
+    { useCache }
+  );
+}
+
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatusCheck(
   branchName: string,
@@ -523,12 +544,8 @@ export async function getBranchStatusCheck(
 ): Promise<string | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-
   try {
-    const states = await utils.accumulateValues(
-      `./rest/build-status/1.0/commits/${branchCommit}`
-    );
+    const states = await getStatusCheck(branchName);
 
     for (const state of states) {
       if (state.key === context) {
@@ -587,6 +604,10 @@ export async function setBranchStatus(
     }
 
     await api.post(`./rest/build-status/1.0/commits/${branchCommit}`, { body });
+
+    // update status cache
+    await getStatus(branchName, false);
+    await getStatusCheck(branchName, false);
   } catch (err) {
     logger.warn({ err }, `Failed to set branch status`);
   }

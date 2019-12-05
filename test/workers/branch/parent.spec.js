@@ -65,7 +65,7 @@ describe('workers/branch/parent', () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
         title: 'Update foo to v4',
-        body: 'blah\nblah\n- [x] <!-- renovate-rebase -->foo\n',
+        body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBeUndefined();

@@ -1,22 +1,25 @@
+import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
-
-const URL = require('url');
-const { logger } = require('../../../logger');
-const hostRules = require('../../../util/host-rules');
-const versioning = require('../../../versioning');
-const { addReleaseNotes } = require('./release-notes');
+import { logger } from '../../../logger';
+import * as hostRules from '../../../util/host-rules';
+import * as versioning from '../../../versioning';
+import { addReleaseNotes } from './release-notes';
+import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
+import { Release } from '../../../datasource';
 
 const ghGot = api.get;
 
-export { getChangeLogJSON };
-
-async function getTags(endpoint, versionScheme, repository) {
+async function getTags(
+  endpoint: string,
+  versionScheme: string,
+  repository: string
+): Promise<string[]> {
   let url = endpoint
     ? endpoint.replace(/\/?$/, '/')
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
   url += `repos/${repository}/tags?per_page=100`;
   try {
-    const res = await ghGot(url, {
+    const res = await ghGot<{ name: string }[]>(url, {
       paginate: true,
     });
 
@@ -39,7 +42,7 @@ async function getTags(endpoint, versionScheme, repository) {
   }
 }
 
-async function getChangeLogJSON({
+export async function getChangeLogJSON({
   endpoint,
   versionScheme,
   fromVersion,
@@ -48,7 +51,7 @@ async function getChangeLogJSON({
   releases,
   depName,
   manager,
-}) {
+}: ChangeLogConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.debug('No release notes for @types');
     return null;
@@ -89,9 +92,9 @@ async function getChangeLogJSON({
     return null;
   }
 
-  let tags;
+  let tags: string[];
 
-  async function getRef(release) {
+  async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
       tags = await getTags(endpoint, versionScheme, repository);
     }
@@ -109,13 +112,13 @@ async function getChangeLogJSON({
   }
 
   const cacheNamespace = 'changelog-github-release';
-  function getCacheKey(prev, next) {
+  function getCacheKey(prev: string, next: string): string {
     return `${manager}:${depName}:${prev}:${next}`;
   }
 
-  const changelogReleases = [];
+  const changelogReleases: ChangeLogRelease[] = [];
   // compare versions
-  const include = v =>
+  const include = (v: string): boolean =>
     version.isGreaterThan(v, fromVersion) &&
     !version.isGreaterThan(v, toVersion);
   for (let i = 1; i < validReleases.length; i += 1) {
@@ -151,7 +154,7 @@ async function getChangeLogJSON({
     }
   }
 
-  let res = {
+  let res: ChangeLogResult = {
     project: {
       githubApiBaseURL,
       githubBaseURL,

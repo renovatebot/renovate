@@ -846,6 +846,12 @@ describe('platform/github', () => {
             },
           } as any)
       );
+      api.get.mockResolvedValueOnce({
+        body: {},
+      } as any);
+      api.get.mockResolvedValueOnce({
+        body: {},
+      } as any);
       await github.setBranchStatus(
         'some-branch',
         'some-context',
@@ -1425,6 +1431,12 @@ describe('platform/github', () => {
             },
           } as any)
       );
+      api.get.mockResolvedValueOnce({
+        body: {},
+      } as any);
+      api.get.mockResolvedValueOnce({
+        body: [],
+      } as any);
       const pr = await github.createPr(
         'some-branch',
         'The Title',

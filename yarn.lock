@@ -1252,6 +1252,11 @@
   resolved "https://registry.yarnpkg.com/@types/later/-/later-1.2.5.tgz#56297f82ea0002549159219d75844a9380ad18bd"
   integrity sha512-oROpXZfXR+6uQyz4wBs2gZYxvZJ5Zp+iSEJWrIWgvipSnzLcHCpR9br4XUqRBPFS1EP971JlnWfXhr5so5E1sg==
 
+"@types/linkify-it@*":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-2.1.0.tgz#ea3dd64c4805597311790b61e872cbd1ed2cd806"
+  integrity sha512-Q7DYAOi9O/+cLLhdaSvKdaumWyHbm7HAk/bFwwyTuU0arR5yyCeW5GOoqt4tJTpDRxhpx9Q8kQL6vMpuw9hDSw==
+
 "@types/lodash@4.14.149":
   version "4.14.149"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.149.tgz#1342d63d948c6062838fbf961012f74d4e638440"
@@ -1261,6 +1266,13 @@
   version "1.21.0"
   resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.21.0.tgz#db792d29f535d49522cb6d94dd9da053efc950a1"
   integrity sha512-Zhrf65tpjOlVIYrUhX9eu1VzRo8iixQDLFPbfqFxPpG4pBTNNPZ2BFhYE0IAsDfW9GWg+RcrUqiLwrGJH4rq4w==
+
+"@types/markdown-it@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-0.0.9.tgz#a5d552f95216c478e0a27a5acc1b28dcffd989ce"
+  integrity sha512-IFSepyZXbF4dgSvsk8EsgaQ/8Msv1I5eTL0BZ0X3iGO9jw6tCVtPG8HchIPm3wrkmGdqZOD42kE0zplVi1gYDA==
+  dependencies:
+    "@types/linkify-it" "*"
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -1359,10 +1371,10 @@
   resolved "https://registry.yarnpkg.com/@types/traverse/-/traverse-0.6.32.tgz#f9fdfa40cd4898deaa975a14511aec731de8235e"
   integrity sha512-RBz2uRZVCXuMg93WD//aTS5B120QlT4lR/gL+935QtGsKHLS6sCtZBaKfWjIfk7ZXv/r8mtGbwjVIee6/3XTow==
 
-"@types/validator@10.11.3":
-  version "10.11.3"
-  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-10.11.3.tgz#945799bef24a953c5bc02011ca8ad79331a3ef25"
-  integrity sha512-GKF2VnEkMmEeEGvoo03ocrP9ySMuX1ypKazIYMlsjfslfBMhOAtC5dmEWKdJioW4lJN7MZRS88kalTsVClyQ9w==
+"@types/validator@12.0.1":
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-12.0.1.tgz#73dbc7f5f730ff7131754bca682824eb3c260b79"
+  integrity sha512-l57fIANZLMe8DArz+SDb+7ATXnDm15P7u2wHBw5mb0aSMd+UuvmvhouBF2hdLgQPDMJ39sh9g2MJO4GkZ0VAdQ==
 
 "@types/xmldoc@1.1.4":
   version "1.1.4"
@@ -3087,10 +3099,10 @@ end-of-stream@^1.0.0, end-of-stream@^1.1.0:
   dependencies:
     once "^1.4.0"
 
-entities@~1.1.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.2.tgz#bdfa735299664dfafd34529ed4f8522a275fea56"
-  integrity sha512-f2LZMYl1Fzu7YSBKg+RoROelpOaNrcGmE9AZubeDfrCEia483oW4MI4VyFd5VNHIgQ/7qm1I0wUHK1eJnn2y2w==
+entities@~2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/entities/-/entities-2.0.0.tgz#68d6084cab1b079767540d80e56a39b423e4abf4"
+  integrity sha512-D9f7V0JSRwIxlRI2mjMqufDrRDnx8p+eEOz7aUM9SuvF8gsBzra0/6tbjl1m8eQHrZlYj6PxqE00hZ1SAIKPLw==
 
 env-ci@^4.0.0:
   version "4.5.1"
@@ -3288,10 +3300,10 @@ eslint-visitor-keys@^1.0.0, eslint-visitor-keys@^1.1.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-1.1.0.tgz#e2a82cea84ff246ad6fb57f9bde5b46621459ec2"
   integrity sha512-8y9YjtM1JBJU/A9Kc+SbaOV4y29sSWckBwMHa+FGtVj5gN/sbnKDf6xJUl+8g7FAij9LVaP8C24DUiH/f/2Z9A==
 
-eslint@6.7.1:
-  version "6.7.1"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-6.7.1.tgz#269ccccec3ef60ab32358a44d147ac209154b919"
-  integrity sha512-UWzBS79pNcsDSxgxbdjkmzn/B6BhsXMfUaOHnNwyE8nD+Q6pyT96ow2MccVayUTV4yMid4qLhMiQaywctRkBLA==
+eslint@6.7.2:
+  version "6.7.2"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-6.7.2.tgz#c17707ca4ad7b2d8af986a33feba71e18a9fecd1"
+  integrity sha512-qMlSWJaCSxDFr8fBPvJM9kJwbazrhNcBU3+DszDW1OlEwKBBRWsJc7NJFelvwQpanHCR14cOLD41x8Eqvo3Nng==
   dependencies:
     "@babel/code-frame" "^7.0.0"
     ajv "^6.10.0"
@@ -5917,13 +5929,13 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.3.tgz#6155e10416efaafab665d466ce598216375195f5"
   integrity sha512-XUi5HJhhV5R74k8/0H2oCbCiYf/u4cO/rX8tnGkRvrqhsr5BRNU6Mg0yt/8UIx1iIS8220BNJsDb7XnILhLepw==
 
-markdown-it@9.1.0:
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-9.1.0.tgz#df9601c168568704d554b1fff9af0c5b561168d9"
-  integrity sha512-xHKG4C8iPriyfu/jc2hsCC045fKrMQ0VexX2F1FGYiRxDxqMB2aAhF8WauJ3fltn2kb90moGBkiiEdooGIg55w==
+markdown-it@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-10.0.0.tgz#abfc64f141b1722d663402044e43927f1f50a8dc"
+  integrity sha512-YWOP1j7UbDNz+TumYP1kpwnP0aEa711cJjrAQrzd0UXlbJfc5aAq0F/PZHjiioqDC1NKgvIMX+o+9Bk7yuM2dg==
   dependencies:
     argparse "^1.0.7"
-    entities "~1.1.1"
+    entities "~2.0.0"
     linkify-it "^2.0.0"
     mdurl "^1.0.1"
     uc.micro "^1.0.5"
@@ -9430,10 +9442,10 @@ validate-npm-package-name@3.0.0, validate-npm-package-name@^3.0.0, validate-npm-
   dependencies:
     builtins "^1.0.3"
 
-validator@11.1.0:
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/validator/-/validator-11.1.0.tgz#ac18cac42e0aa5902b603d7a5d9b7827e2346ac4"
-  integrity sha512-qiQ5ktdO7CD6C/5/mYV4jku/7qnqzjrxb3C/Q5wR3vGGinHTgJZN/TdFT3ZX4vXhX2R1PXx42fB1cn5W+uJ4lg==
+validator@12.1.0:
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-12.1.0.tgz#a3a7315d5238cbc15e46ad8d5e479aafa7119925"
+  integrity sha512-gIC2RBuFRi574Rb9vewGCJ7TCLxHXNx6EKthEgs+Iz0pYa9a9Te1VLG/bGLsAyGWrqR5FfR7tbFUI7FEF2LiGA==
 
 verror@1.10.0:
   version "1.10.0"
@@ -9749,10 +9761,10 @@ yargs@13.3.0, yargs@^11.0.0, yargs@^13.2.4, yargs@^13.3.0, yargs@^15.0.1:
     y18n "^4.0.0"
     yargs-parser "^13.1.1"
 
-yarn@1.19.2:
-  version "1.19.2"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.19.2.tgz#cf5fc9b24ad97a11c65d7cb0b2ac945eb936122f"
-  integrity sha512-OdLN/K/sA+KnW4ggNQwHYK6YJdLkSWxbx6IYd+WIQJ6xDfk8CIYKckBfwGxTBmDaEluWs83InzjFCmUqPtpY+w==
+yarn@1.21.0:
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.0.tgz#e0827d97a24f6714f1540cf2e8328b2e8eed682c"
+  integrity sha512-g9cvrdKXPZlz1eJYpKanQm3eywEmecudeyDkwiVWeswBrpHK3nJFBholkphHF9eNc8y/FNEhSQ8Et5ZAx4XyLw==
 
 yawn-yaml@1.4.0:
   version "1.4.0"
