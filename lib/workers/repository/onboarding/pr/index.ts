@@ -5,12 +5,7 @@ import { getConfigDesc } from './config-description';
 import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
 import { getBaseBranchDesc } from './base-branch';
 import { getPrList, BranchConfig } from './pr-list';
-import {
-  appName,
-  onboardingBranch,
-  onboardingPrTitle,
-  urls,
-} from '../../../../config/app-strings';
+import { appName, urls } from '../../../../config/app-strings';
 import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
@@ -25,7 +20,7 @@ export async function ensureOnboardingPr(
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
-  const existingPr = await platform.getBranchPr(onboardingBranch);
+  const existingPr = await platform.getBranchPr(config.onboardingBranch);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [${appName}](${urls.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate += config.requireConfig
@@ -127,8 +122,8 @@ If you need any further assistance then you can also [request help here](${urls.
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
       const pr = await platform.createPr(
-        onboardingBranch,
-        onboardingPrTitle,
+        config.onboardingBranch,
+        config.onboardingPrTitle,
         prBody,
         labels,
         useDefaultBranch
@@ -147,7 +142,7 @@ If you need any further assistance then you can also [request help here](${urls.
       )
     ) {
       logger.info('Onboarding PR already exists but cannot find it');
-      await platform.deleteBranch(onboardingBranch);
+      await platform.deleteBranch(config.onboardingBranch);
       return;
     }
     throw err;

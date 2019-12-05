@@ -1,9 +1,6 @@
 import { logger } from '../../../../logger';
 import { getOnboardingConfig } from './config';
-import {
-  configFileNames,
-  onboardingBranch,
-} from '../../../../config/app-strings';
+import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 
@@ -32,7 +29,7 @@ export async function createOnboardingBranch(
     logger.info('DRY-RUN: Would commit files to onboarding branch');
   } else {
     await platform.commitFilesToBranch(
-      onboardingBranch,
+      config.onboardingBranch,
       [
         {
           name: defaultConfigFile,

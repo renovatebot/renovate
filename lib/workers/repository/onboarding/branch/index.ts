@@ -3,7 +3,6 @@ import { extractAllDependencies } from '../../extract';
 import { createOnboardingBranch } from './create';
 import { rebaseOnboardingBranch } from './rebase';
 import { isOnboarded, onboardingPrExists } from './check';
-import { onboardingBranch } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 
@@ -21,7 +20,7 @@ export async function checkOnboardingBranch(
     throw new Error('fork');
   }
   logger.info('Repo is not onboarded');
-  if (await onboardingPrExists()) {
+  if (await onboardingPrExists(config)) {
     logger.debug('Onboarding PR already exists');
     await rebaseOnboardingBranch(config);
   } else {
@@ -33,8 +32,8 @@ export async function checkOnboardingBranch(
     await createOnboardingBranch(config);
   }
   if (!config.dryRun) {
-    await platform.setBaseBranch(onboardingBranch);
+    await platform.setBaseBranch(config.onboardingBranch);
   }
-  const branchList = [onboardingBranch];
+  const branchList = [config.onboardingBranch];
   return { ...config, repoIsOnboarded, branchList };
 }

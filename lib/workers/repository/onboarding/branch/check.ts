@@ -4,8 +4,6 @@ import {
   appName,
   appSlug,
   configFileNames,
-  onboardingBranch,
-  onboardingPrTitle,
 } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 
@@ -39,8 +37,8 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
 // TODO: types
 export type Pr = any;
 
-const closedPrExists = (): Promise<Pr> =>
-  platform.findPr(onboardingBranch, onboardingPrTitle, '!open');
+const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
+  platform.findPr(config.onboardingBranch, config.onboardingPrTitle, '!open');
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
@@ -69,7 +67,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     throw new Error('disabled');
   }
 
-  const pr = await closedPrExists();
+  const pr = await closedPrExists(config);
   if (!pr) {
     logger.debug('Found no closed onboarding PR');
     return false;
@@ -91,5 +89,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   throw new Error('disabled');
 };
 
-export const onboardingPrExists = async (): Promise<boolean> =>
-  (await platform.getBranchPr(onboardingBranch)) != null;
+export const onboardingPrExists = async (
+  config: RenovateConfig
+): Promise<boolean> =>
+  (await platform.getBranchPr(config.onboardingBranch)) != null;

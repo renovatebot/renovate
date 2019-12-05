@@ -12,9 +12,6 @@ export const configFileNames = [
   'package.json',
 ];
 
-export const onboardingBranch = 'renovate/configure';
-export const onboardingPrTitle = 'Configure Renovate';
-
 export const urls = {
   documentation: 'https://docs.renovatebot.com/',
   help: 'https://github.com/renovatebot/config-help/issues',

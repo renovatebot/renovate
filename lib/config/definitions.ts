@@ -77,6 +77,24 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'onboardingBranch',
+    description:
+      'Change this value in order to override the default onboarding branch name.',
+    type: 'string',
+    default: 'renovate/configure',
+    admin: true,
+    cli: false,
+  },
+  {
+    name: 'onboardingPrTitle',
+    description:
+      'Change this value in order to override the default onboarding PR title.',
+    type: 'string',
+    default: 'Configure Renovate',
+    admin: true,
+    cli: false,
+  },
+  {
     name: 'extends',
     description:
       'Configuration presets to use/extend. Note: does not work if configured in config.js',
