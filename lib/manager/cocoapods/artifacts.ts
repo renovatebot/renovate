@@ -79,14 +79,16 @@ export async function updateArtifacts(
 
     cmdParts.push(`-v ${cwd}:${cwd}`);
     cmdParts.push(`-w ${cwd}`);
+    cmdParts.push(`--entrypoint pod`);
 
     const match = existingLockFileContent.match(
       /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
     ) || { groups: { cocoapodsVersion: 'latest' } };
     cocoapodsVersion = match.groups.cocoapodsVersion;
     cmdParts.push(`renovate/cocoapods:${cocoapodsVersion}`);
+  } else {
+    cmdParts.push('pod');
   }
-  cmdParts.push('pod');
   cmdParts.push('install');
 
   const startTime = hrtime();

@@ -148,6 +148,11 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
+# CocoaPods
+RUN apt-get update && apt-get install -y ruby && apt-get clean
+ENV COCOAPODS_VERSION 1.8.3
+RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
+
 # Set up ubuntu user and home directory with access to users in the root group (0)
 
 ENV HOME=/home/ubuntu
