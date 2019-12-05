@@ -1,6 +1,6 @@
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import { appName, configFileNames } from '../../../../config/app-strings';
+import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 
 const findFile = async (fileName: string): Promise<boolean> => {
@@ -38,7 +38,7 @@ const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
-  const title = `Action required: Add a ${appName} config`;
+  const title = `Action required: Add a Renovate config`;
   // Repo is onboarded if admin is bypassing onboarding and does not require a
   // configuration file.
   if (config.requireConfig === false && config.onboarding === false) {
@@ -78,8 +78,8 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     // ensure PR comment
     await platform.ensureComment(
       pr.number,
-      `${appName} is disabled`,
-      `${appName} is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
+      `Renovate is disabled`,
+      `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
     );
   }
   throw new Error('disabled');

@@ -18,7 +18,6 @@ import {
 } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
 import { ensurePr, checkAutoMerge } from '../pr';
-import { appName } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
@@ -97,14 +96,14 @@ export async function processBranch(
         'Closed PR already exists. Skipping branch.'
       );
       if (existingPr.state === 'closed') {
-        const subject = `${appName} Ignore Notification`;
+        const subject = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
-          content = `As this PR has been closed unmerged, ${appName} will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then ${appName} will then reenable updates for minor and patch updates automatically.`;
+          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
         } else if (config.updateType === 'digest') {
-          content = `As this PR has been closed unmerged, ${appName} will ignore this upgrade updateType and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
+          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade updateType and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
         } else {
-          content = `As this PR has been closed unmerged, ${appName} will now ignore this update (${config.newValue}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the \`ignoreDeps\` array of your renovate config.`;
+          content = `As this PR has been closed unmerged, Renovate will now ignore this update (${config.newValue}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the \`ignoreDeps\` array of your renovate config.`;
         }
         content +=
           '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
@@ -180,9 +179,9 @@ export async function processBranch(
             }
           } else {
             let content = emojify(
-              `:construction_worker: This PR has received other commits, so ${appName} will stop updating it to avoid conflicts or other problems.`
+              `:construction_worker: This PR has received other commits, so Renovate will stop updating it to avoid conflicts or other problems.`
             );
-            content += ` If you wish to abandon your changes and have ${appName} start over you may click the "rebase" checkbox in the PR body/description.`;
+            content += ` If you wish to abandon your changes and have Renovate start over you may click the "rebase" checkbox in the PR body/description.`;
             if (!config.suppressNotifications.includes('prEditNotification')) {
               if (config.dryRun) {
                 logger.info(
@@ -467,13 +466,13 @@ export async function processBranch(
           { artifactErrors: config.artifactErrors },
           'artifactErrors'
         );
-        let content = `${appName} failed to update `;
+        let content = `Renovate failed to update `;
         content +=
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
         content +=
           ' related to this branch. You probably do not want to merge this PR as-is.';
         content += emojify(
-          `\n\n:recycle: ${appName} will retry this branch, including artifacts, only when one of the following happens:\n\n`
+          `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`
         );
         content +=
           ' - any of the package files in this branch needs updating, or \n';

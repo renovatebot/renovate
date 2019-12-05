@@ -1,6 +1,5 @@
 import { emojify } from '../../../../util/emoji';
 import { logger } from '../../../../logger';
-import { appName } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
 
@@ -23,7 +22,7 @@ export function getErrors(config: RenovateConfig): string {
     return '';
   }
   errorText = `\n# Errors (${config.errors.length})\n\n`;
-  errorText += `${appName} has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
+  errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
   config.errors.forEach(e => {
     errorText += `-   \`${e.depName}\`: ${e.message}\n`;
   });
