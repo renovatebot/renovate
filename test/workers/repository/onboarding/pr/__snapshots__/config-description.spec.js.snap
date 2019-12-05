@@ -6,7 +6,7 @@ exports[`workers/repository/onboarding/pr/config-description getConfigDesc() ass
 
 Based on the default config's presets, Renovate will:
 
-  - Start dependency updates only once this Configure Renovate PR is merged
+  - Start dependency updates only once this onboarding PR is merged
   - Run Renovate on following schedule: before 5am
 
 :abcd: Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch with your custom config and the list of Pull Requests in the \\"What to Expect\\" section below will be updated the next time Renovate runs.
@@ -21,7 +21,7 @@ exports[`workers/repository/onboarding/pr/config-description getConfigDesc() ret
 
 Based on the default config's presets, Renovate will:
 
-  - Start dependency updates only once this Configure Renovate PR is merged
+  - Start dependency updates only once this onboarding PR is merged
   - description 1
   - description two
   - something else
@@ -38,7 +38,7 @@ exports[`workers/repository/onboarding/pr/config-description getConfigDesc() ret
 
 Based on the default config's presets, Renovate will:
 
-  - Start dependency updates only once this Configure Renovate PR is merged
+  - Start dependency updates only once this onboarding PR is merged
   - description 1
   - description two
   - something else

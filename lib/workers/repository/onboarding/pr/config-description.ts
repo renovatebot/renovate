@@ -1,10 +1,6 @@
 import { emojify } from '../../../../util/emoji';
 import { logger } from '../../../../logger';
-import {
-  appName,
-  configFileNames,
-  onboardingPrTitle,
-} from '../../../../config/app-strings';
+import { appName, configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
 
@@ -54,7 +50,7 @@ export function getConfigDesc(
     descriptionArr = descriptionArr.filter(val => !val.includes('Docker-only'));
   }
   let desc = `\n### Configuration Summary\n\nBased on the default config's presets, ${appName} will:\n\n`;
-  desc += `  - Start dependency updates only once this ${onboardingPrTitle} PR is merged\n`;
+  desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
   descriptionArr.forEach(d => {
     desc += `  - ${d}\n`;
   });
