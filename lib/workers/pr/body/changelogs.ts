@@ -1,15 +1,14 @@
+import { compile } from 'handlebars';
 import releaseNotesHbs from '../changelog/hbs-template';
+import { PrBodyConfig } from './common';
 
-const handlebars = require('handlebars');
-
-export function getChangelogs(config) {
+export function getChangelogs(config: PrBodyConfig): string {
   let releaseNotes = '';
   // istanbul ignore if
   if (!config.hasReleaseNotes) {
     return releaseNotes;
   }
-  releaseNotes +=
-    '\n\n---\n\n' + handlebars.compile(releaseNotesHbs)(config) + '\n\n';
+  releaseNotes += '\n\n---\n\n' + compile(releaseNotesHbs)(config) + '\n\n';
   releaseNotes = releaseNotes.replace(/### \[`vv/g, '### [`v');
   // Generic replacements/link-breakers
 
