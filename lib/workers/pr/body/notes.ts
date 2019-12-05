@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { compile } from 'handlebars';
+import handlebars from 'handlebars';
 import { logger } from '../../../logger';
 import { emojify } from '../../../util/emoji';
 import { PrBodyConfig } from './common';
@@ -10,7 +10,9 @@ export function getPrNotes(config: PrBodyConfig): string {
     if (is.nonEmptyArray(upgrade.prBodyNotes)) {
       for (const note of upgrade.prBodyNotes) {
         try {
-          const res = compile(note)(upgrade).trim();
+          const res = handlebars
+            .compile(note)(upgrade)
+            .trim();
           if (res && res.length) {
             notes.push(res);
           }

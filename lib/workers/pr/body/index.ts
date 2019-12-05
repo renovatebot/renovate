@@ -1,4 +1,4 @@
-import { registerHelper, compile } from 'handlebars';
+import handlebars from 'handlebars';
 import { platform } from '../../../platform';
 import { get } from '../../../versioning';
 import { getPrConfigDescription } from './config-description';
@@ -10,7 +10,7 @@ import { getChangelogs } from './changelogs';
 import { getControls } from './controls';
 import { PrBodyConfig } from './common';
 
-registerHelper('encodeURIComponent', encodeURIComponent);
+handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
 function massageUpdateMetadata(config: PrBodyConfig): void {
   config.upgrades.forEach(upgrade => {
@@ -80,7 +80,7 @@ export async function getPrBody(config: PrBodyConfig): Promise<string> {
   const defaultPrBodyTemplate =
     '{{{banner}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
   const prBodyTemplate = config.prBodyTemplate || defaultPrBodyTemplate;
-  let prBody = compile(prBodyTemplate)(content);
+  let prBody = handlebars.compile(prBodyTemplate)(content);
   prBody = prBody.trim();
   prBody = prBody.replace(/\n\n\n+/g, '\n\n');
   prBody = platform.getPrBody(prBody);

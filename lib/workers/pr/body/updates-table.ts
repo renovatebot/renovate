@@ -1,4 +1,4 @@
-import { compile } from 'handlebars';
+import handlebars from 'handlebars';
 import { logger } from '../../../logger';
 import { PrBodyConfig } from './common';
 
@@ -43,7 +43,9 @@ export function getPrUpdatesTable(config: PrBodyConfig): string {
       try {
         // istanbul ignore else
         if (value) {
-          res[header] = compile(value)(upgrade).replace(/^``$/, '');
+          res[header] = handlebars
+            .compile(value)(upgrade)
+            .replace(/^``$/, '');
         } else {
           res[header] = '';
         }
