@@ -1,10 +1,6 @@
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import {
-  appName,
-  appSlug,
-  configFileNames,
-} from '../../../../config/app-strings';
+import { appName, configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 
 const findFile = async (fileName: string): Promise<boolean> => {
@@ -25,7 +21,7 @@ const configFileExists = async (): Promise<boolean> => {
 const packageJsonConfigExists = async (): Promise<boolean> => {
   try {
     const pJson = JSON.parse(await platform.getFile('package.json'));
-    if (pJson[appSlug]) {
+    if (pJson.renovate) {
       return true;
     }
   } catch (err) {

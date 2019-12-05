@@ -1,5 +1,4 @@
 import { logger } from '../../logger';
-import { appSlug } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 
@@ -38,7 +37,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
     return;
   }
-  const context = `${appSlug}/stability-days`;
+  const context = `renovate/stability-days`;
   const description =
     config.stabilityStatus === 'success'
       ? 'Updates have met stability days requirement'
@@ -64,7 +63,7 @@ export async function setUnpublishable(
   if (!config.unpublishSafe) {
     return;
   }
-  const context = `${appSlug}/unpublish-safe`;
+  const context = `renovate/unpublish-safe`;
   // Set canBeUnpublished status check
   const state = config.canBeUnpublished ? 'pending' : 'success';
   const description = config.canBeUnpublished

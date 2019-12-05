@@ -1,4 +1,4 @@
-import { appName, appSlug } from './app-strings';
+import { appName } from './app-strings';
 import { RenovateConfigStage } from './common';
 
 export interface RenovateOptionBase {
@@ -906,7 +906,7 @@ const options: RenovateOptions[] = [
     description: 'Prefix to use for all branch names',
     stage: 'branch',
     type: 'string',
-    default: `${appSlug}/`,
+    default: `renovate/`,
   },
   {
     name: 'bumpVersion',

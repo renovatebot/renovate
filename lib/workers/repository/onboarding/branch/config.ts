@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { clone } from '../../../../util/clone';
 import { platform } from '../../../../platform';
 import { logger } from '../../../../logger';
-import { appSlug } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 
 export async function getOnboardingConfig(
@@ -20,13 +19,15 @@ export async function getOnboardingConfig(
     const { label, branchName, ignore } = greenkeeperConfig;
     if (label) {
       logger.info({ label }, 'Migrating Greenkeeper label');
-      onboardingConfig.labels = [String(label).replace('greenkeeper', appSlug)];
+      onboardingConfig.labels = [
+        String(label).replace('greenkeeper', 'renovate'),
+      ];
     }
     if (branchName) {
       logger.info({ branch: branchName }, 'Migrating Greenkeeper branchName');
       onboardingConfig.branchName = String(branchName).replace(
         'greenkeeper',
-        appSlug
+        'renovate'
       );
     }
     if (is.nonEmptyArray(ignore)) {
