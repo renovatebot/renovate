@@ -2,7 +2,50 @@ import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
-import { regEx } from '../../util/regex';
+
+function parseHashArgs(str: string): Partial<PackageDependency> {
+  const result: Partial<PackageDependency> = {};
+
+  const parsed: Record<string, string> = {
+    git: null,
+    github: null,
+    tag: null,
+  };
+
+  for (const [key] of Object.entries(parsed)) {
+    const regex = new RegExp(
+      `,\\s*(:${key}\\s*=>|${key}\\s*:)\\s*(['"])(?<value>[^'"]+)\\2`
+    );
+    const match = str.match(regex);
+    if (match) parsed[key] = match.groups.value;
+  }
+
+  const { tag, git, github } = parsed;
+
+  if (!tag) return null;
+  result.depType = 'tags';
+  result.currentValue = tag;
+  if (!isValid(tag.replace(/^v/, ''))) result.skipReason = 'invalid-value';
+
+  if (git) {
+    result.datasource = 'github';
+    const gitMatch = git.match(
+      /[@/]github\.com[:/](?<user>[^/]+)\/(?<repo>[^/]+)\.git$/
+    );
+    if (gitMatch) {
+      const { user, repo } = gitMatch.groups;
+      result.lookupName = `${user}/${repo}`;
+    } else {
+      result.skipReason = 'invalid';
+    }
+  } else if (github) {
+    result.datasource = 'github';
+    const [user, repo] = github.split('/');
+    result.lookupName = repo ? `${user}/${repo}` : `${user}/${user}`;
+  }
+
+  return result;
+}
 
 export async function extractPackageFile(
   content: string,
@@ -13,56 +56,42 @@ export async function extractPackageFile(
     deps: [],
   };
   const lines = content.split('\n');
-  const delimiters = ['"', "'"];
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
-    let sourceMatch: RegExpMatchArray;
-    for (const delimiter of delimiters) {
-      sourceMatch =
-        sourceMatch ||
-        line.match(
-          regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`)
-        );
-    }
+    const sourceMatch = line.match(
+      /^\s*source\s+(['"])(?<source>[^'"]+)\1\s*$/
+    );
     if (sourceMatch) {
-      res.registryUrls.push(sourceMatch[1]);
+      const { source } = sourceMatch.groups;
+      res.registryUrls.push(source);
     }
-    let rubyMatch: RegExpMatchArray;
-    for (const delimiter of delimiters) {
-      rubyMatch =
-        rubyMatch ||
-        line.match(regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`));
-    }
+    const rubyMatch = line.match(/^\s*ruby\s+(['"])(?<ruby>[^'"]+)\1/);
     if (rubyMatch) {
-      res.compatibility = { ruby: rubyMatch[1] };
+      const { ruby } = rubyMatch.groups;
+      res.compatibility = { ruby };
     }
-    let gemMatch: RegExpMatchArray;
-    let gemDelimiter: string;
-    for (const delimiter of delimiters) {
-      const gemMatchRegex = `^gem ${delimiter}([^${delimiter}]+)${delimiter}(,\\s+${delimiter}([^${delimiter}]+)${delimiter}){0,2}`;
-      if (line.match(regEx(gemMatchRegex))) {
-        gemDelimiter = delimiter;
-        gemMatch = gemMatch || line.match(regEx(gemMatchRegex));
-      }
-    }
+    const gemMatchRegex = /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(?<versions>(\s*,\s*(['"])[^'"]+\5)+)?(?<hashArgs>.*)$/;
+    const gemMatch = line.match(gemMatchRegex);
     if (gemMatch) {
+      const { depName, versions, hashArgs } = gemMatch.groups;
       const dep: PackageDependency = {
-        depName: gemMatch[1],
+        depName,
         managerData: { lineNumber },
+        ...parseHashArgs(hashArgs),
       };
-      if (gemMatch[3]) {
-        dep.currentValue = gemMatch[0]
-          .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
-          .replace(regEx(gemDelimiter, 'g'), '')
-          .trim();
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = 'invalid-value';
+      if (!dep.currentValue && !dep.skipReason) {
+        if (versions) {
+          dep.currentValue = versions
+            .replace(/\s*,\s*/, '')
+            .replace(/['"]/g, '')
+            .trim();
+          if (!isValid(dep.currentValue)) {
+            dep.skipReason = 'invalid-value';
+          }
+        } else {
+          dep.skipReason = 'no-version';
         }
-      } else {
-        dep.skipReason = 'no-version';
-      }
-      if (!dep.skipReason) {
-        dep.datasource = 'rubygems';
+        if (!dep.skipReason) dep.datasource = 'rubygems';
       }
       res.deps.push(dep);
     }
@@ -95,34 +124,33 @@ export async function extractPackageFile(
         );
       }
     }
-    for (const delimiter of delimiters) {
-      const sourceBlockMatch = line.match(
-        regEx(`^source\\s+${delimiter}(.*?)${delimiter}\\s+do`)
-      );
-      if (sourceBlockMatch) {
-        const repositoryUrl = sourceBlockMatch[1];
-        const sourceLineNumber = lineNumber;
-        let sourceContent = '';
-        let sourceLine = '';
-        while (lineNumber < lines.length && sourceLine !== 'end') {
-          lineNumber += 1;
-          sourceLine = lines[lineNumber];
-          if (sourceLine !== 'end') {
-            sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
-          }
+    const sourceBlockMatch = line.match(
+      /^\s*source\s+(['"])(?<repositoryUrl>[^'"]+)\1\s+do\s*$/
+    );
+
+    if (sourceBlockMatch) {
+      const { repositoryUrl } = sourceBlockMatch.groups;
+      const sourceLineNumber = lineNumber;
+      let sourceContent = '';
+      let sourceLine = '';
+      while (lineNumber < lines.length && sourceLine !== 'end') {
+        lineNumber += 1;
+        sourceLine = lines[lineNumber];
+        if (sourceLine !== 'end') {
+          sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
         }
-        const sourceRes = await extractPackageFile(sourceContent);
-        if (sourceRes) {
-          res.deps = res.deps.concat(
-            sourceRes.deps.map(dep => ({
-              ...dep,
-              registryUrls: [repositoryUrl],
-              managerData: {
-                lineNumber: dep.managerData.lineNumber + sourceLineNumber + 1,
-              },
-            }))
-          );
-        }
+      }
+      const sourceRes = await extractPackageFile(sourceContent);
+      if (sourceRes) {
+        res.deps = res.deps.concat(
+          sourceRes.deps.map(dep => ({
+            ...dep,
+            registryUrls: [repositoryUrl],
+            managerData: {
+              lineNumber: dep.managerData.lineNumber + sourceLineNumber + 1,
+            },
+          }))
+        );
       }
     }
     const platformsMatch = line.match(/^platforms\s+(.*?)\s+do/);

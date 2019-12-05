@@ -1,5 +1,84 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/bundler/extract extractPackageFile() parses git deps 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "github",
+      "depName": "nonsense",
+      "depType": "tags",
+      "managerData": Object {
+        "lineNumber": 0,
+      },
+      "skipReason": "invalid",
+    },
+    Object {
+      "currentValue": "nonsense",
+      "datasource": "github",
+      "depName": "nonsense2",
+      "depType": "tags",
+      "lookupName": "example/nonsense",
+      "managerData": Object {
+        "lineNumber": 1,
+      },
+      "skipReason": "invalid-value",
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "github",
+      "depName": "foo-gem",
+      "depType": "tags",
+      "lookupName": "example/foo",
+      "managerData": Object {
+        "lineNumber": 3,
+      },
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "github",
+      "depName": "foo-gem2",
+      "depType": "tags",
+      "lookupName": "example/foo",
+      "managerData": Object {
+        "lineNumber": 4,
+      },
+    },
+    Object {
+      "currentValue": "2.0.0",
+      "datasource": "github",
+      "depName": "bar-gem",
+      "depType": "tags",
+      "lookupName": "example/bar",
+      "managerData": Object {
+        "lineNumber": 6,
+      },
+    },
+    Object {
+      "currentValue": "v1.2.3",
+      "datasource": "github",
+      "depName": "baz-gem",
+      "depType": "tags",
+      "lookupName": "baz/baz",
+      "managerData": Object {
+        "lineNumber": 8,
+      },
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "datasource": "github",
+      "depName": "quux-gem",
+      "depType": "tags",
+      "lookupName": "example/quux",
+      "managerData": Object {
+        "lineNumber": 10,
+      },
+    },
+  ],
+  "registryUrls": Array [],
+}
+`;
+
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
   "compatibility": Object {

@@ -1,0 +1,11 @@
+gem 'nonsense', git: 'git@example.com:example/nonsense.git', tag: '1.0.0'
+gem 'nonsense2', git: 'git@github.com:example/nonsense.git', tag: 'nonsense'
+
+gem 'foo-gem', "1.2.3", git: 'git@github.com:example/foo.git', tag: '1.0.0'
+gem 'foo-gem2', git: 'git@github.com:example/foo.git', tag: '1.0.0'
+
+gem 'bar-gem', git: "https://github.com/example/bar.git", tag: '2.0.0'
+
+gem 'baz-gem', github: 'baz', tag: 'v1.2.3'
+
+gem 'quux-gem', github: 'example/quux', tag: '0.0.1'

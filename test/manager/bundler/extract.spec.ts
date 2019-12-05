@@ -18,6 +18,11 @@ const sourceGroupGemfile = readFileSync(
   'utf8'
 );
 
+const githubGemfile = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.github',
+  'utf8'
+);
+
 function validateGems(raw, parsed) {
   const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
   const parsedGemCount = parsed.deps.length;
@@ -39,6 +44,10 @@ describe('lib/manager/bundler/extract', () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       validateGems(sourceGroupGemfile, res);
+    });
+    it('parses git deps', async () => {
+      const res = await extractPackageFile(githubGemfile, 'Gemfile');
+      expect(res).toMatchSnapshot();
     });
   });
 });
