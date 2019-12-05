@@ -15,7 +15,7 @@ import {
   VulnerabilityAlert,
 } from '../common';
 
-import { appName, appSlug, configFileNames } from '../../config/app-strings';
+import { appName, configFileNames } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 
@@ -1640,7 +1640,7 @@ export async function createPr(
     logger.debug('Setting statusCheckVerify');
     await setBranchStatus(
       branchName,
-      `${appSlug}/verify`,
+      `renovate/verify`,
       `${appName} verified pull request`,
       'success',
       'https://github.com/renovatebot/renovate'

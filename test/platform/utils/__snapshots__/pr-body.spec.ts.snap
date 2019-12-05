@@ -35,7 +35,7 @@ exports[`platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 ##### Features
 
--   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togi</details>
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithu</details>
 
 ---
 
@@ -51,7 +51,7 @@ exports[`platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 ---
 
- - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
 
 ---
 

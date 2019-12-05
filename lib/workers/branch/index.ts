@@ -18,7 +18,7 @@ import {
 } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
 import { ensurePr, checkAutoMerge } from '../pr';
-import { appName, appSlug } from '../../config/app-strings';
+import { appName } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
@@ -48,7 +48,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
   const labelRebase =
     branchPr.labels && branchPr.labels.includes(config.rebaseLabel);
   const prRebaseChecked =
-    branchPr.body && branchPr.body.includes(`- [x] <!-- ${appSlug}-rebase -->`);
+    branchPr.body && branchPr.body.includes(`- [x] <!-- rebase-check -->`);
 
   return titleRebase || labelRebase || prRebaseChecked;
 }
@@ -507,7 +507,7 @@ export async function processBranch(
             );
           }
         }
-        const context = `${appSlug}/artifacts`;
+        const context = `renovate/artifacts`;
         const description = 'Artifact file update failure';
         const state = 'failure';
         const existingState = await platform.getBranchStatusCheck(
