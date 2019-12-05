@@ -60,7 +60,7 @@ export async function initPlatform({
   let gitAuthor: string;
   try {
     const user = (await api.get(`user`, { token })).body;
-    gitAuthor = user.email;
+    gitAuthor = `${user.name} <${user.email}>`;
     authorId = user.id;
   } catch (err) {
     logger.info(
