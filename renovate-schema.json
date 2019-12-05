@@ -49,7 +49,7 @@
       }
     },
     "enabled": {
-      "description": "Enable or disable Renovate",
+      "description": "Enable or disable the bot",
       "type": "boolean"
     },
     "force": {

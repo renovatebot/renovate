@@ -1,4 +1,3 @@
-import { appName } from './app-strings';
 import { RenovateConfigStage } from './common';
 
 export interface RenovateOptionBase {
@@ -143,7 +142,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'enabled',
-    description: `Enable or disable ${appName}`,
+    description: `Enable or disable the bot`,
     stage: 'package',
     type: 'boolean',
     cli: false,
@@ -319,7 +318,7 @@ const options: RenovateOptions[] = [
     name: 'masterIssueTitle',
     description: 'Title to use for the Master Issue',
     type: 'string',
-    default: `Update Dependencies (${appName} Bot)`,
+    default: `Update Dependencies (Renovate Bot)`,
   },
   {
     name: 'configWarningReuseIssue',

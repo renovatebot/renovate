@@ -1,5 +1,3 @@
-export const appName = 'Renovate';
-
 export const configFileNames = [
   'renovate.json',
   'renovate.json5',
