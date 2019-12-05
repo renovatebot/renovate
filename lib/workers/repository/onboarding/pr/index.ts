@@ -5,7 +5,7 @@ import { getConfigDesc } from './config-description';
 import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
 import { getBaseBranchDesc } from './base-branch';
 import { getPrList, BranchConfig } from './pr-list';
-import { appName, urls } from '../../../../config/app-strings';
+import { appName } from '../../../../config/app-strings';
 import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
@@ -22,7 +22,7 @@ export async function ensureOnboardingPr(
   logger.trace({ config });
   const existingPr = await platform.getBranchPr(config.onboardingBranch);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [${appName}](${urls.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  let prTemplate = `Welcome to [${appName}](${config.productLinks.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate += config.requireConfig
     ? emojify(
         `:vertical_traffic_light: To activate ${appName}, merge this Pull Request. To disable ${appName}, simply close this Pull Request unmerged.\n\n`
@@ -43,8 +43,8 @@ export async function ensureOnboardingPr(
 
 ---
 
-:question: Got questions? Check out ${appName}'s [Docs](${urls.documentation}), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${urls.help}).
+:question: Got questions? Check out ${appName}'s [Docs](${config.productLinks.documentation}), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${config.productLinks.help}).
 `
   );
   let prBody = prTemplate;
@@ -68,7 +68,7 @@ If you need any further assistance then you can also [request help here](${urls.
     configDesc = getConfigDesc(config, packageFiles);
   } else {
     configDesc = emojify(
-      `### Configuration\n\n:abcd: ${appName} has detected a custom config for this PR. Feel free to ask for [help](${urls.help}) if you have any doubts and would like it reviewed.\n\n`
+      `### Configuration\n\n:abcd: ${appName} has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
     if (existingPr.isConflicted) {
       configDesc += emojify(

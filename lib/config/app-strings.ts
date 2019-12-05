@@ -11,9 +11,3 @@ export const configFileNames = [
   '.renovaterc.json',
   'package.json',
 ];
-
-export const urls = {
-  documentation: 'https://docs.renovatebot.com/',
-  help: 'https://github.com/renovatebot/config-help/issues',
-  homepage: 'https://renovatebot.com',
-};
