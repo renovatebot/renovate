@@ -69,6 +69,7 @@ describe('platform/gitlab', () => {
           ({
             body: {
               email: 'a@b.com',
+              name: 'Renovate Bot',
             },
           } as any)
       );
@@ -83,6 +84,7 @@ describe('platform/gitlab', () => {
           ({
             body: {
               email: 'a@b.com',
+              name: 'Renovate Bot',
             },
           } as any)
       );

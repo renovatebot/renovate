@@ -1,8 +1,8 @@
+import handlebars from 'handlebars';
 import releaseNotesHbs from '../changelog/hbs-template';
+import { PrBodyConfig } from './common';
 
-const handlebars = require('handlebars');
-
-export function getChangelogs(config) {
+export function getChangelogs(config: PrBodyConfig): string {
   let releaseNotes = '';
   // istanbul ignore if
   if (!config.hasReleaseNotes) {
