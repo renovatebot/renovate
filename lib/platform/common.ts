@@ -93,7 +93,7 @@ export interface Issue {
   title?: string;
 }
 
-export type BranchStatus = 'pending' | 'success' | 'failed';
+export type BranchStatus = 'pending' | 'success' | 'failed' | 'running';
 
 export type PlatformPrOptions = {
   azureAutoComplete: boolean;
