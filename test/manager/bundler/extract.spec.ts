@@ -23,6 +23,11 @@ const githubGemfile = readFileSync(
   'utf8'
 );
 
+const manageiqGemfile = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.manageiq',
+  'utf8'
+);
+
 function validateGems(raw, parsed) {
   const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
   const parsedGemCount = parsed.deps.length;
@@ -39,6 +44,11 @@ describe('lib/manager/bundler/extract', () => {
       const res = await extractPackageFile(railsGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       validateGems(railsGemfile, res);
+    });
+    it('parses manageiq Gemfile', async () => {
+      const res = await extractPackageFile(manageiqGemfile, 'Gemfile');
+      expect(res.deps).toHaveLength(91);
+      expect(res).toMatchSnapshot();
     });
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');

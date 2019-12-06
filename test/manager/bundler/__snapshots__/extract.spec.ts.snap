@@ -79,6 +79,815 @@ Object {
 }
 `;
 
+exports[`lib/manager/bundler/extract extractPackageFile() parses manageiq Gemfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "datasource": "github",
+      "depName": "manageiq-gems-pending",
+      "lookupName": "ManageIQ/manageiq-gems-pending",
+      "managerData": Object {
+        "lineNumber": 12,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "v0.2.5-5",
+      "datasource": "github",
+      "depName": "handsoap",
+      "depType": "tags",
+      "lookupName": "ManageIQ/handsoap",
+      "managerData": Object {
+        "lineNumber": 15,
+      },
+    },
+    Object {
+      "currentValue": "~>1.5.0",
+      "datasource": "rubygems",
+      "depName": "activerecord-virtual_attributes",
+      "managerData": Object {
+        "lineNumber": 27,
+      },
+    },
+    Object {
+      "currentValue": "~>1.1",
+      "datasource": "rubygems",
+      "depName": "activerecord-session_store",
+      "managerData": Object {
+        "lineNumber": 28,
+      },
+    },
+    Object {
+      "currentValue": "~>2.7",
+      "datasource": "rubygems",
+      "depName": "acts_as_tree",
+      "managerData": Object {
+        "lineNumber": 29,
+      },
+    },
+    Object {
+      "currentValue": "~>3.0.7",
+      "datasource": "rubygems",
+      "depName": "ancestry",
+      "managerData": Object {
+        "lineNumber": 30,
+      },
+    },
+    Object {
+      "currentValue": "~>1.0",
+      "datasource": "rubygems",
+      "depName": "aws-sdk-s3",
+      "managerData": Object {
+        "lineNumber": 31,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.1.10",
+      "datasource": "rubygems",
+      "depName": "bcrypt",
+      "managerData": Object {
+        "lineNumber": 32,
+      },
+    },
+    Object {
+      "currentValue": ">=1.15",
+      "datasource": "rubygems",
+      "depName": "bundler",
+      "managerData": Object {
+        "lineNumber": 33,
+      },
+    },
+    Object {
+      "depName": "byebug",
+      "managerData": Object {
+        "lineNumber": 34,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>1.8",
+      "datasource": "rubygems",
+      "depName": "color",
+      "managerData": Object {
+        "lineNumber": 35,
+      },
+    },
+    Object {
+      "currentValue": "~>2.0",
+      "datasource": "rubygems",
+      "depName": "config",
+      "managerData": Object {
+        "lineNumber": 36,
+      },
+    },
+    Object {
+      "currentValue": "=2.7.6",
+      "datasource": "rubygems",
+      "depName": "dalli",
+      "managerData": Object {
+        "lineNumber": 37,
+      },
+    },
+    Object {
+      "currentValue": "~>3.3",
+      "datasource": "rubygems",
+      "depName": "default_value_for",
+      "managerData": Object {
+        "lineNumber": 38,
+      },
+    },
+    Object {
+      "currentValue": "~>1.33.6",
+      "datasource": "rubygems",
+      "depName": "docker-api",
+      "managerData": Object {
+        "lineNumber": 39,
+      },
+    },
+    Object {
+      "currentValue": "=0.1.0",
+      "datasource": "rubygems",
+      "depName": "elif",
+      "managerData": Object {
+        "lineNumber": 40,
+      },
+    },
+    Object {
+      "currentValue": "~>2.0.1",
+      "datasource": "rubygems",
+      "depName": "fast_gettext",
+      "managerData": Object {
+        "lineNumber": 41,
+      },
+    },
+    Object {
+      "currentValue": "~>1.7.2",
+      "datasource": "rubygems",
+      "depName": "gettext_i18n_rails",
+      "managerData": Object {
+        "lineNumber": 42,
+      },
+    },
+    Object {
+      "currentValue": "~>1.3.0",
+      "datasource": "rubygems",
+      "depName": "gettext_i18n_rails_js",
+      "managerData": Object {
+        "lineNumber": 43,
+      },
+    },
+    Object {
+      "currentValue": "~>2.8.5",
+      "datasource": "rubygems",
+      "depName": "hamlit",
+      "managerData": Object {
+        "lineNumber": 44,
+      },
+    },
+    Object {
+      "currentValue": "~>1.6.21",
+      "datasource": "rubygems",
+      "depName": "highline",
+      "managerData": Object {
+        "lineNumber": 45,
+      },
+    },
+    Object {
+      "currentValue": "~>3.0",
+      "datasource": "rubygems",
+      "depName": "inifile",
+      "managerData": Object {
+        "lineNumber": 46,
+      },
+    },
+    Object {
+      "currentValue": "~>0.2.0",
+      "datasource": "rubygems",
+      "depName": "inventory_refresh",
+      "managerData": Object {
+        "lineNumber": 47,
+      },
+    },
+    Object {
+      "currentValue": "~>4.0",
+      "datasource": "rubygems",
+      "depName": "kubeclient",
+      "managerData": Object {
+        "lineNumber": 48,
+      },
+    },
+    Object {
+      "currentValue": "~>1.2.4",
+      "datasource": "rubygems",
+      "depName": "linux_admin",
+      "managerData": Object {
+        "lineNumber": 49,
+      },
+    },
+    Object {
+      "currentValue": "~>0.1",
+      "datasource": "rubygems",
+      "depName": "log_decorator",
+      "managerData": Object {
+        "lineNumber": 50,
+      },
+    },
+    Object {
+      "currentValue": "~>0.3.3",
+      "datasource": "rubygems",
+      "depName": "manageiq-api-client",
+      "managerData": Object {
+        "lineNumber": 51,
+      },
+    },
+    Object {
+      "currentValue": "~>0.3.0",
+      "datasource": "rubygems",
+      "depName": "manageiq-loggers",
+      "managerData": Object {
+        "lineNumber": 52,
+      },
+    },
+    Object {
+      "currentValue": "~>0.1.4",
+      "datasource": "rubygems",
+      "depName": "manageiq-messaging",
+      "managerData": Object {
+        "lineNumber": 53,
+      },
+    },
+    Object {
+      "currentValue": "~>0.3",
+      "datasource": "rubygems",
+      "depName": "manageiq-password",
+      "managerData": Object {
+        "lineNumber": 54,
+      },
+    },
+    Object {
+      "currentValue": "~>3.1",
+      "datasource": "rubygems",
+      "depName": "manageiq-postgres_ha_admin",
+      "managerData": Object {
+        "lineNumber": 55,
+      },
+    },
+    Object {
+      "currentValue": "~>0.15.0",
+      "datasource": "rubygems",
+      "depName": "memoist",
+      "managerData": Object {
+        "lineNumber": 56,
+      },
+    },
+    Object {
+      "currentValue": "~>3.0",
+      "datasource": "rubygems",
+      "depName": "mime-types",
+      "managerData": Object {
+        "lineNumber": 57,
+      },
+    },
+    Object {
+      "currentValue": "~>6.13.5",
+      "datasource": "rubygems",
+      "depName": "money",
+      "managerData": Object {
+        "lineNumber": 58,
+      },
+    },
+    Object {
+      "currentValue": "~>3.7",
+      "datasource": "rubygems",
+      "depName": "more_core_extensions",
+      "managerData": Object {
+        "lineNumber": 59,
+      },
+    },
+    Object {
+      "currentValue": "~>0.16.1",
+      "datasource": "rubygems",
+      "depName": "net-ldap",
+      "managerData": Object {
+        "lineNumber": 60,
+      },
+    },
+    Object {
+      "currentValue": "~>1.7.4",
+      "datasource": "rubygems",
+      "depName": "net-ping",
+      "managerData": Object {
+        "lineNumber": 61,
+      },
+    },
+    Object {
+      "currentValue": "~>0.4.8",
+      "datasource": "rubygems",
+      "depName": "openscap",
+      "managerData": Object {
+        "lineNumber": 62,
+      },
+    },
+    Object {
+      "currentValue": "~>3.0",
+      "datasource": "rubygems",
+      "depName": "optimist",
+      "managerData": Object {
+        "lineNumber": 63,
+      },
+    },
+    Object {
+      "depName": "pg",
+      "managerData": Object {
+        "lineNumber": 64,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>0.1.0",
+      "datasource": "rubygems",
+      "depName": "pg-dsn_parser",
+      "managerData": Object {
+        "lineNumber": 65,
+      },
+    },
+    Object {
+      "currentValue": "~>0.1.0",
+      "datasource": "rubygems",
+      "depName": "query_relation",
+      "managerData": Object {
+        "lineNumber": 66,
+      },
+    },
+    Object {
+      "currentValue": "~>5.1.7",
+      "datasource": "rubygems",
+      "depName": "rails",
+      "managerData": Object {
+        "lineNumber": 67,
+      },
+    },
+    Object {
+      "currentValue": "~>5.x",
+      "datasource": "rubygems",
+      "depName": "rails-i18n",
+      "managerData": Object {
+        "lineNumber": 68,
+      },
+    },
+    Object {
+      "currentValue": ">=11.0",
+      "datasource": "rubygems",
+      "depName": "rake",
+      "managerData": Object {
+        "lineNumber": 69,
+      },
+    },
+    Object {
+      "currentValue": "~>2.0.0",
+      "datasource": "rubygems",
+      "depName": "rest-client",
+      "managerData": Object {
+        "lineNumber": 70,
+      },
+    },
+    Object {
+      "currentValue": "~>1.5.1",
+      "datasource": "rubygems",
+      "depName": "ripper_ruby_parser",
+      "managerData": Object {
+        "lineNumber": 71,
+      },
+    },
+    Object {
+      "currentValue": "~>1.7.0",
+      "datasource": "rubygems",
+      "depName": "ruby-progressbar",
+      "managerData": Object {
+        "lineNumber": 72,
+      },
+    },
+    Object {
+      "currentValue": "~>1.3.0",
+      "datasource": "rubygems",
+      "depName": "rubyzip",
+      "managerData": Object {
+        "lineNumber": 73,
+      },
+    },
+    Object {
+      "currentValue": "~>1.2.0",
+      "datasource": "rubygems",
+      "depName": "snmp",
+      "managerData": Object {
+        "lineNumber": 74,
+      },
+    },
+    Object {
+      "currentValue": "~>3.0",
+      "datasource": "rubygems",
+      "depName": "sprockets",
+      "managerData": Object {
+        "lineNumber": 75,
+      },
+    },
+    Object {
+      "currentValue": "~>1.3.0",
+      "datasource": "rubygems",
+      "depName": "sqlite3",
+      "managerData": Object {
+        "lineNumber": 76,
+      },
+    },
+    Object {
+      "currentValue": "~>1.3.1",
+      "datasource": "rubygems",
+      "depName": "sys-filesystem",
+      "managerData": Object {
+        "lineNumber": 77,
+      },
+    },
+    Object {
+      "depName": "terminal",
+      "managerData": Object {
+        "lineNumber": 78,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "v0.28.2-1",
+      "datasource": "github",
+      "depName": "rugged",
+      "depType": "tags",
+      "lookupName": "ManageIQ/rugged",
+      "managerData": Object {
+        "lineNumber": 81,
+      },
+    },
+    Object {
+      "currentValue": "v1.7.0-3",
+      "datasource": "github",
+      "depName": "ruport",
+      "depType": "tags",
+      "lookupName": "ManageIQ/ruport",
+      "managerData": Object {
+        "lineNumber": 82,
+      },
+    },
+    Object {
+      "depName": "american_date",
+      "managerData": Object {
+        "lineNumber": 88,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "datasource": "github",
+      "depName": "amazon_ssa_support",
+      "depTypes": Array [
+        "amazon",
+        "manageiq_default",
+      ],
+      "lookupName": "ManageIQ/amazon_ssa_support",
+      "managerData": Object {
+        "lineNumber": 96,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "datasource": "github",
+      "depName": "foreman_api_client",
+      "depTypes": Array [
+        "foreman",
+        "manageiq_default",
+      ],
+      "lookupName": "ManageIQ/foreman_api_client",
+      "managerData": Object {
+        "lineNumber": 113,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>0.26.0",
+      "datasource": "rubygems",
+      "depName": "qpid_proton",
+      "depTypes": Array [
+        "qpid_proton",
+        "optional => true",
+      ],
+      "managerData": Object {
+        "lineNumber": 141,
+      },
+    },
+    Object {
+      "currentValue": "~>1.1.0",
+      "datasource": "rubygems",
+      "depName": "dbus-systemd",
+      "depTypes": Array [
+        "systemd",
+        "optional => true",
+      ],
+      "managerData": Object {
+        "lineNumber": 145,
+      },
+    },
+    Object {
+      "currentValue": "~>1.4.0",
+      "datasource": "rubygems",
+      "depName": "systemd-journal",
+      "depTypes": Array [
+        "systemd",
+        "optional => true",
+      ],
+      "managerData": Object {
+        "lineNumber": 146,
+      },
+    },
+    Object {
+      "currentValue": "~>3.0.1",
+      "datasource": "rubygems",
+      "depName": "ovirt_metrics",
+      "depTypes": Array [
+        "ovirt",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 159,
+      },
+    },
+    Object {
+      "currentValue": "~>0.4.0",
+      "datasource": "rubygems",
+      "depName": "vmware_web_service",
+      "depTypes": Array [
+        "vmware",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 168,
+      },
+    },
+    Object {
+      "currentValue": "~>1.8.0",
+      "datasource": "rubygems",
+      "depName": "sshkey",
+      "depTypes": Array [
+        "google",
+        "openshift",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 173,
+      },
+    },
+    Object {
+      "currentValue": "~>1.0",
+      "datasource": "rubygems",
+      "depName": "pg-logical_replication",
+      "depTypes": Array [
+        "replication",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 183,
+      },
+    },
+    Object {
+      "depName": "rufus-scheduler",
+      "depTypes": Array [
+        "scheduler",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 197,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 1.2.2",
+      "datasource": "rubygems",
+      "depName": "et-orbi",
+      "managerData": Object {
+        "lineNumber": 200,
+      },
+    },
+    Object {
+      "currentValue": "~>0.3.1",
+      "datasource": "rubygems",
+      "depName": "manageiq-smartstate",
+      "depTypes": Array [
+        "smartstate",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 207,
+      },
+    },
+    Object {
+      "currentValue": "v0.1.1-1",
+      "datasource": "github",
+      "depName": "jquery-rjs",
+      "depType": "tags",
+      "depTypes": Array [
+        "ui_dependencies",
+      ],
+      "lookupName": "ManageIQ/jquery-rjs",
+      "managerData": Object {
+        "lineNumber": 218,
+      },
+    },
+    Object {
+      "currentValue": "~>4.2",
+      "datasource": "rubygems",
+      "depName": "puma",
+      "depTypes": Array [
+        "web_server",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 226,
+      },
+    },
+    Object {
+      "currentValue": "~>2.0",
+      "datasource": "rubygems",
+      "depName": "responders",
+      "depTypes": Array [
+        "web_server",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 227,
+      },
+    },
+    Object {
+      "depName": "ruby-dbus",
+      "depTypes": Array [
+        "web_server",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 228,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>3.0.0",
+      "datasource": "rubygems",
+      "depName": "secure_headers",
+      "depTypes": Array [
+        "web_server",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 229,
+      },
+    },
+    Object {
+      "currentValue": "~>1.0.5",
+      "datasource": "rubygems",
+      "depName": "surro-gate",
+      "depTypes": Array [
+        "web_socket",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 233,
+      },
+    },
+    Object {
+      "currentValue": "~>0.6.3",
+      "datasource": "rubygems",
+      "depName": "websocket-driver",
+      "depTypes": Array [
+        "web_socket",
+        "manageiq_default",
+      ],
+      "managerData": Object {
+        "lineNumber": 234,
+      },
+    },
+    Object {
+      "depName": "foreman",
+      "managerData": Object {
+        "lineNumber": 243,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "PoParser",
+      "managerData": Object {
+        "lineNumber": 244,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>1.3",
+      "datasource": "rubygems",
+      "depName": "rubocop-performance",
+      "managerData": Object {
+        "lineNumber": 245,
+      },
+    },
+    Object {
+      "depName": "ruby_parser",
+      "managerData": Object {
+        "lineNumber": 247,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "yard",
+      "managerData": Object {
+        "lineNumber": 248,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>3.3",
+      "datasource": "rubygems",
+      "depName": "brakeman",
+      "managerData": Object {
+        "lineNumber": 252,
+      },
+    },
+    Object {
+      "currentValue": "~>2.5.0",
+      "datasource": "rubygems",
+      "depName": "capybara",
+      "managerData": Object {
+        "lineNumber": 253,
+      },
+    },
+    Object {
+      "depName": "coveralls",
+      "managerData": Object {
+        "lineNumber": 254,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>5.1",
+      "datasource": "rubygems",
+      "depName": "factory_bot",
+      "managerData": Object {
+        "lineNumber": 255,
+      },
+    },
+    Object {
+      "currentValue": "~>1.8",
+      "datasource": "rubygems",
+      "depName": "faker",
+      "managerData": Object {
+        "lineNumber": 259,
+      },
+    },
+    Object {
+      "currentValue": "~>0.9",
+      "datasource": "rubygems",
+      "depName": "timecop",
+      "managerData": Object {
+        "lineNumber": 260,
+      },
+    },
+    Object {
+      "currentValue": "~>5.0",
+      "datasource": "rubygems",
+      "depName": "vcr",
+      "managerData": Object {
+        "lineNumber": 261,
+      },
+    },
+    Object {
+      "currentValue": "~>3.7",
+      "datasource": "rubygems",
+      "depName": "webmock",
+      "managerData": Object {
+        "lineNumber": 262,
+      },
+    },
+    Object {
+      "depName": "parallel_tests",
+      "managerData": Object {
+        "lineNumber": 266,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~>3.9.0",
+      "datasource": "rubygems",
+      "depName": "rspec-rails",
+      "managerData": Object {
+        "lineNumber": 267,
+      },
+    },
+  ],
+  "registryUrls": Array [
+    "https://rubygems.org",
+  ],
+}
+`;
+
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
   "compatibility": Object {
@@ -125,7 +934,9 @@ Object {
       },
     },
     Object {
+      "datasource": "github",
       "depName": "webpacker",
+      "lookupName": "rails/webpacker",
       "managerData": Object {
         "lineNumber": 16,
       },
@@ -294,10 +1105,12 @@ Object {
       "skipReason": "no-version",
     },
     Object {
+      "datasource": "github",
       "depName": "queue_classic",
       "depTypes": Array [
         "job",
       ],
+      "lookupName": "rafaelfranca/queue_classic",
       "managerData": Object {
         "lineNumber": 54,
       },
@@ -395,10 +1208,12 @@ Object {
       "skipReason": "no-version",
     },
     Object {
+      "datasource": "github",
       "depName": "websocket-client-simple",
       "depTypes": Array [
         "cable",
       ],
+      "lookupName": "matthewd/websocket-client-simple",
       "managerData": Object {
         "lineNumber": 71,
       },
@@ -607,27 +1422,33 @@ Object {
       },
     },
     Object {
+      "datasource": "github",
       "depName": "activerecord-jdbcsqlite3-adapter",
+      "lookupName": "jruby/activerecord-jdbc-adapter",
       "managerData": Object {
         "lineNumber": 129,
       },
       "skipReason": "no-version",
     },
     Object {
+      "datasource": "github",
       "depName": "activerecord-jdbcmysql-adapter",
       "depTypes": Array [
         "db",
       ],
+      "lookupName": "jruby/activerecord-jdbc-adapter",
       "managerData": Object {
         "lineNumber": 131,
       },
       "skipReason": "no-version",
     },
     Object {
+      "datasource": "github",
       "depName": "activerecord-jdbcpostgresql-adapter",
       "depTypes": Array [
         "db",
       ],
+      "lookupName": "jruby/activerecord-jdbc-adapter",
       "managerData": Object {
         "lineNumber": 132,
       },
@@ -680,7 +1501,9 @@ Object {
       },
     },
     Object {
+      "datasource": "github",
       "depName": "activerecord-oracle_enhanced-adapter",
+      "lookupName": "rsim/oracle-enhanced",
       "managerData": Object {
         "lineNumber": 154,
       },

@@ -22,11 +22,6 @@ function parseHashArgs(str: string): Partial<PackageDependency> {
 
   const { tag, git, github } = parsed;
 
-  if (!tag) return null;
-  result.depType = 'tags';
-  result.currentValue = tag;
-  if (!isValid(tag.replace(/^v/, ''))) result.skipReason = 'invalid-value';
-
   if (git) {
     result.datasource = 'github';
     const gitMatch = git.match(
@@ -42,6 +37,18 @@ function parseHashArgs(str: string): Partial<PackageDependency> {
     result.datasource = 'github';
     const [user, repo] = github.split('/');
     result.lookupName = repo ? `${user}/${repo}` : `${user}/${user}`;
+  }
+
+  if (result.datasource) {
+    if (tag) {
+      result.depType = 'tags';
+      result.currentValue = tag;
+      if (!isValid(tag.replace(/^v/, ''))) {
+        result.skipReason = 'invalid-value';
+      }
+    } else {
+      result.skipReason = 'no-version';
+    }
   }
 
   return result;
