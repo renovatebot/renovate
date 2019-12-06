@@ -1,7 +1,13 @@
-const handlebars = require('handlebars');
-const { logger } = require('../../../logger');
+import handlebars from 'handlebars';
+import { logger } from '../../../logger';
+import { PrBodyConfig } from './common';
 
-function getTableDefinition(config) {
+type TableDefinition = {
+  header: string;
+  value: string;
+};
+
+function getTableDefinition(config: PrBodyConfig): TableDefinition[] {
   const res = [];
   for (const header of config.prBodyColumns) {
     const value = config.prBodyDefinitions[header];
@@ -10,8 +16,11 @@ function getTableDefinition(config) {
   return res;
 }
 
-function getNonEmptyColumns(definitions, rows) {
-  const res = [];
+function getNonEmptyColumns(
+  definitions: TableDefinition[],
+  rows: Record<string, string>[]
+): string[] {
+  const res: string[] = [];
   for (const column of definitions) {
     const { header } = column;
     for (const row of rows) {
@@ -25,10 +34,10 @@ function getNonEmptyColumns(definitions, rows) {
   return res;
 }
 
-export function getPrUpdatesTable(config) {
+export function getPrUpdatesTable(config: PrBodyConfig): string {
   const tableDefinitions = getTableDefinition(config);
   const tableValues = config.upgrades.map(upgrade => {
-    const res = {};
+    const res: Record<string, string> = {};
     for (const column of tableDefinitions) {
       const { header, value } = column;
       try {
