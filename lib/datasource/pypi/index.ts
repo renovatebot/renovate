@@ -108,7 +108,7 @@ async function getSimpleDependency(
       logger.debug({ dependency: depName }, 'pip package not found');
       return null;
     }
-    const root: HTMLElement = parse(dep) as any;
+    const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
     const links = root.querySelectorAll('a');
     const versions = new Set<string>();
     for (const link of Array.from(links)) {
