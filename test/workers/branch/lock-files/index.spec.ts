@@ -1,23 +1,26 @@
-/** @type any */
-const fs = require('fs-extra');
-const lockFiles = require('../../../../lib/manager/npm/post-update');
-const defaultConfig = require('../../../../lib/config/defaults').getConfig();
-// const upath = require('upath');
+import _fs from 'fs-extra';
+import * as _lockFiles from '../../../../lib/manager/npm/post-update';
+import { getConfig } from '../../../../lib/config/defaults';
+import * as _npm from '../../../../lib/manager/npm/post-update/npm';
+import * as _yarn from '../../../../lib/manager/npm/post-update/yarn';
+import * as _pnpm from '../../../../lib/manager/npm/post-update/pnpm';
+import * as _lerna from '../../../../lib/manager/npm/post-update/lerna';
+import * as _hostRules from '../../../../lib/util/host-rules';
+import { platform as _platform } from '../../../../lib/platform';
+import { mocked } from '../../../util';
 
-/** @type any */
-const npm = require('../../../../lib/manager/npm/post-update/npm');
-/** @type any */
-const yarn = require('../../../../lib/manager/npm/post-update/yarn');
-/** @type any */
-const pnpm = require('../../../../lib/manager/npm/post-update/pnpm');
-const lerna = require('../../../../lib/manager/npm/post-update/lerna');
+const defaultConfig = getConfig();
 
-const hostRules = require('../../../../lib/util/host-rules');
+const fs = mocked(_fs);
+const lockFiles = mocked(_lockFiles);
+const npm = mocked(_npm);
+const yarn = mocked(_yarn);
+const pnpm = mocked(_pnpm);
+const lerna = mocked(_lerna);
+const hostRules = mocked(_hostRules);
+const platform = mocked(_platform);
 
-/** @type any */
-const { platform } = require('../../../../lib/platform');
-
-hostRules.find = jest.fn(() => ({
+hostRules.find = jest.fn(_ => ({
   token: 'abc',
 }));
 
@@ -301,17 +304,17 @@ describe('manager/npm/post-update', () => {
         ...defaultConfig,
         localDir: 'some-tmp-dir',
       };
-      platform.getFile.mockReturnValue('some lock file contents');
+      platform.getFile.mockResolvedValueOnce('some lock file contents');
       npm.generateLockFile = jest.fn();
-      npm.generateLockFile.mockReturnValue({
+      npm.generateLockFile.mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
       yarn.generateLockFile = jest.fn();
-      yarn.generateLockFile.mockReturnValue({
+      yarn.generateLockFile.mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
       pnpm.generateLockFile = jest.fn();
-      pnpm.generateLockFile.mockReturnValue({
+      pnpm.generateLockFile.mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
       lerna.generateLockFiles = jest.fn();
@@ -330,7 +333,7 @@ describe('manager/npm/post-update', () => {
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
       config.parentBranch = 'renovate/lock-file-maintenance';
-      platform.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockResolvedValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
       expect(res.artifactErrors).toHaveLength(0);
