@@ -136,7 +136,7 @@
     "moment-timezone": "0.5.27",
     "node-emoji": "1.10.0",
     "node-html-parser": "1.1.16",
-    "npm": "6.13.1",
+    "npm": "6.13.2",
     "p-all": "2.1.0",
     "parse-diff": "0.6.0",
     "parse-link-header": "1.0.1",
@@ -222,7 +222,7 @@
     "semantic-release": "15.13.31",
     "shelljs": "0.8.3",
     "tmp-promise": "2.0.2",
-    "typescript": "3.7.2"
+    "typescript": "3.7.3"
   },
   "resolutions": {
     "lodash": "4.17.15",
