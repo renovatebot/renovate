@@ -1,8 +1,6 @@
-/** @type any */
-const managerFiles = require('../../../../lib/workers/repository/extract/manager-files');
-const {
-  extractAllDependencies,
-} = require('../../../../lib/workers/repository/extract');
+import * as managerFiles from '../../../../lib/workers/repository/extract/manager-files';
+
+import { extractAllDependencies } from '../../../../lib/workers/repository/extract';
 
 jest.mock('../../../../lib/workers/repository/extract/manager-files');
 

@@ -1,14 +1,13 @@
-const { logger } = require('../../../logger');
-const { getManagerList } = require('../../../manager');
-const { getManagerConfig } = require('../../../config');
-const { getManagerPackageFiles } = require('./manager-files');
+import { logger } from '../../../logger';
+import { getManagerList } from '../../../manager';
+import { getManagerConfig, RenovateConfig } from '../../../config';
+import { getManagerPackageFiles } from './manager-files';
+import { PackageFile } from '../../../manager/common';
 
-module.exports = {
-  extractAllDependencies,
-};
-
-async function extractAllDependencies(config) {
-  const extractions = {};
+export async function extractAllDependencies(
+  config: RenovateConfig
+): Promise<PackageFile[]> {
+  let extractions: PackageFile[] = [];
   let fileCount = 0;
   for (const manager of getManagerList()) {
     if (

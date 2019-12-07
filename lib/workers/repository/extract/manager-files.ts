@@ -1,23 +1,18 @@
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
-
-module.exports = {
-  getManagerPackageFiles,
-};
-
-const {
+import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
-} = require('../../../manager');
-
-const {
-  getIncludedFiles,
+} from '../../../manager';
+import { platform } from '../../../platform';
+import { logger } from '../../../logger';
+import {
   filterIgnoredFiles,
+  getIncludedFiles,
   getMatchingFiles,
-} = require('./file-match');
+} from './file-match';
+import { PackageFile } from '../../../manager/common';
 
-async function getManagerPackageFiles(config) {
+export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
