@@ -43,9 +43,7 @@ function parseHashArgs(str: string): Partial<PackageDependency> {
     if (tag) {
       result.depType = 'tags';
       result.currentValue = tag;
-      if (!isValid(tag.replace(/^v/, ''))) {
-        result.skipReason = 'invalid-value';
-      }
+      if (!isValid(tag)) result.skipReason = 'invalid-value';
     } else {
       result.skipReason = 'no-version';
     }
