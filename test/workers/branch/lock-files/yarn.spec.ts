@@ -58,7 +58,7 @@ describe('generateLockFile', () => {
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
-    exec.mockRejectedValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
       stderr: 'some-error',
     });
