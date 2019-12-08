@@ -60,19 +60,27 @@ By default, Renovate raises PRs but leaves them to someone/something else to mer
 Usually you won't want to automerge _all_ PRs, for example most people would want to leave major dependency updates to a human to review first. In that case you will want to embed this setting inside `major`, `minor`, or `patch` configuration options. For example, you could add this to your `renovate.json` to automerge only non-major updates:
 
 ```json
-  "automerge": true,
-  "major": {
-    "automerge": false
-  }
+{
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
+  ]
+}
 ```
 
 Also note that this option can be combined with other nested settings, such as dependency type. So for example you could elect to automerge all `devDependencies` only this way:
 
 ```json
-  "packageRules": [{
-    "depTypeList": ["devDependencies"],
-    "automerge": true
-  }]
+{
+  "packageRules": [
+    {
+      "depTypeList": ["devDependencies"],
+      "automerge": true
+    }
+  ]
+}
 ```
 
 Warning: GitHub currently has a bug where automerge won't work if a GitHub Organization has protected their master branch, and there is no way to configure around this. Hence, automerging will try and fail in such situations. This doc will be updated once that bug/limitation is fixed by GitHub.
@@ -168,8 +176,8 @@ This is used whenever a commit `"body"` is needed, e.g. for adding `[skip ci]` o
 
 For example, To add `[skip ci]` to every commit you could configure:
 
-```
-  "commitBody": "[skip ci]"
+```json
+{ "commitBody": "[skip ci]" }
 ```
 
 ## commitBodyTable
@@ -203,8 +211,10 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
-"compatibility": {
-  "python": "2.7"
+{
+  "compatibility": {
+    "python": "2.7"
+  }
 }
 ```
 
@@ -249,19 +259,23 @@ Renovate is enabled for all packages by default, but this setting allows you to 
 To disable Renovate for all `eslint` packages, you can configure a package rule like:
 
 ```json
-"packageRules": [
-  {
-    "packagePatterns": ["^eslint"],
-    "enabled": false
-  }
-]
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["^eslint"],
+      "enabled": false
+    }
+  ]
+}
 ```
 
 To disable Renovate for `dependencies` but keep it for `devDependencies` you could configure:
 
 ```json
-"dependencies": {
-  "enabled": false
+{
+  "dependencies": {
+    "enabled": false
+  }
 }
 ```
 
@@ -360,8 +374,10 @@ There are multiple cases where it can be useful to group multiple upgrades toget
 By default, Renovate will "slugify" the groupName to determine the branch name. For example if you named your group "All eslint packages" then the branchName would be `renovate/all-eslint-packages`. If you wished to override this then you could set like this:
 
 ```json
+{
   "groupName": "eslint packages",
   "groupSlug": "eslint"
+}
 ```
 
 And then the branchName would be `renovate/eslint` instead.
@@ -420,9 +436,13 @@ Example:
 Use this figure to adjust the timeout for queries. The default is 60s, which is quite high. To adjust it down to 10s for all queries, do this:
 
 ```json
-  "hostRules": [{
-    "timeout": 10000,
-  }]
+{
+  "hostRules": [
+    {
+      "timeout": 10000
+    }
+  ]
+}
 ```
 
 ## ignoreDeprecated
@@ -434,7 +454,9 @@ By default, Renovate won't update any packages to deprecated versions unless the
 The `ignoreDeps` configuration field allows you to define a list of dependency names to be ignored by Renovate. Currently it supports only "exact match" dependency names and not any patterns. e.g. to ignore both `eslint` and `eslint-config-base` you would add this to your config:
 
 ```json
+{
   "ignoreDeps": ["eslint", "eslint-config-base"]
+}
 ```
 
 You could also configure this using `packageRules`, especially if you need patterns.
@@ -541,7 +563,9 @@ This feature can be used to "maintain" lock files for each `package.json` if the
 This feature is off by default. If you wish to enable this feature then you could add this to your configuration:
 
 ```json
+{
   "lockFileMaintenance": { "enabled": true }
+}
 ```
 
 To reduce "noise" in the repository, it defaults its schedule to "before 5am on monday", i.e. to achieve once per week semantics. Renovate may run a few times within that time - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
@@ -650,12 +674,14 @@ For settings common to all node.js version updates (e.g. travis, nvm, etc) you c
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
 ```json
-"packageRules": [
-  {
-    "packagePatterns": ["^eslint"],
-    "groupName": "eslint packages"
-  }
-]
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["^eslint"],
+      "groupName": "eslint packages"
+    }
+  ]
+}
 ```
 
 Note how the above uses `packagePatterns` with a regex value.
@@ -663,17 +689,20 @@ Note how the above uses `packagePatterns` with a regex value.
 Here is an example where you might want to limit the "noisy" package `aws-sdk` to updates just once per week:
 
 ```json
+{
   "packageRules": [
     {
       "packageNames": ["aws-sdk"],
       "schedule": ["after 9pm on sunday"]
     }
   ]
+}
 ```
 
 Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match. Example:
 
 ```json
+{
   "packageRules": [
     {
       "packageNames": ["neutrino"],
@@ -681,6 +710,7 @@ Note how the above uses `packageNames` instead of `packagePatterns` because it i
       "groupName": "neutrino monorepo"
     }
   ]
+}
 ```
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
@@ -688,12 +718,14 @@ The above rule will group together the `neutrino` package and any package matchi
 Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
+{
   "packageRules": [
     {
       "paths": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
     }
   ]
+}
 ```
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match. Therefore, you should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if necessary.
@@ -702,11 +734,15 @@ Important to know: Renovate will evaluate all `packageRules` and not stop once i
 
 Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
 
-```
-  "packageRules": [{
-    "packageNames": ["angular"],
-    "allowedVersions": "<=1.5"
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["angular"],
+      "allowedVersions": "<=1.5"
+    }
+  ]
+}
 ```
 
 ### depTypeList
@@ -719,11 +755,15 @@ Use this field if you want to limit a `packageRule` to certain `depType` values.
 
 Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
 
-```
-  "packageRules": [{
-    "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["eslint-foo"]
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["^eslint"],
+      "excludePackageNames": ["eslint-foo"]
+    }
+  ]
+}
 ```
 
 The above will match all package names starting with `eslint` but exclude the specific package `eslint-foo`.
@@ -732,11 +772,15 @@ The above will match all package names starting with `eslint` but exclude the sp
 
 Use this field if you want to have one or more package name patterns excluded in your package rule. See also `packagePatterns`.
 
-```
-  "packageRules": [{
-    "packagePatterns": ["^eslint"],
-    "excludePackagePatterns": ["^eslint-foo"]
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["^eslint"],
+      "excludePackagePatterns": ["^eslint-foo"]
+    }
+  ]
+}
 ```
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
@@ -745,47 +789,63 @@ The above will match all package names starting with `eslint` but exclude ones s
 
 Use this field to restrict rules to a particular language. e.g.
 
-```
-  "packageRules": [{
-    "packageNames": ["request"],
-    "languages": ["python"],
-    "enabled": false
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["request"],
+      "languages": ["python"],
+      "enabled": false
+    }
+  ]
+}
 ```
 
 ### baseBranchList
 
 Use this field to restrict rules to a particular branch. e.g.
 
-```
-  "packageRules": [{
-    "baseBranchList": ["master"],
-    "excludePackagePatterns": ["^eslint"],
-    "enabled": false
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "baseBranchList": ["master"],
+      "excludePackagePatterns": ["^eslint"],
+      "enabled": false
+    }
+  ]
+}
 ```
 
 ### managers
 
 Use this field to restrict rules to a particular package manager. e.g.
 
-```
-  "packageRules": [{
-    "packageNames": ["node"],
-    "managers": ["dockerfile"],
-    "enabled": false
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["node"],
+      "managers": ["dockerfile"],
+      "enabled": false
+    }
+  ]
+}
 ```
 
 ### datasources
 
 Use this field to restrict rules to a particular datasource. e.g.
 
-```
-  "packageRules": [{
-    "datasources": ["orb"],
-    "labels": ["circleci-orb!!"]
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["orb"],
+      "labels": ["circleci-orb!!"]
+    }
+  ]
+}
 ```
 
 ### matchCurrentVersion
@@ -796,11 +856,15 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 Use this field if you want to have one or more exact name matches in your package rule. See also `excludedPackageNames`.
 
-```
-  "packageRules": [{
-    "packageNames": ["angular"],
-    "rangeStrategy": "pin"
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["angular"],
+      "rangeStrategy": "pin"
+    }
+  ]
+}
 ```
 
 The above will enable set `rangeStrategy` to `pin` only for the package `angular`.
@@ -809,11 +873,15 @@ The above will enable set `rangeStrategy` to `pin` only for the package `angular
 
 Use this field if you want to have one or more package names patterns in your package rule. See also `excludePackagePatterns`.
 
-```
-  "packageRules": [{
-    "packagePatterns": ["^angular"],
-    "rangeStrategy": "replace"
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["^angular"],
+      "rangeStrategy": "replace"
+    }
+  ]
+}
 ```
 
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
@@ -848,11 +916,15 @@ Here's an example of where you use this to group together all packages from the 
 
 Use this field to match rules against types of updates. For example to apply a special label for Major updates:
 
-```
-  "packageRules: [{
-    "updateTypes": ["major"],
-    "labels": ["UPDATE-MAJOR"]
-  }]
+```json
+{
+  "packageRules": [
+    {
+      "updateTypes": ["major"],
+      "labels": ["UPDATE-MAJOR"]
+    }
+  ]
+}
 ```
 
 ## patch
@@ -924,9 +996,11 @@ You can configure this object to either (a) modify the template for an existing 
 Here is an example of modifying the default value for the `"Package"` column to put it inside a `<code></code>` block:
 
 ```json
+{
   "prBodyDefinitions": {
     "Package": "`{{{depName}}}`"
   }
+}
 ```
 
 Here is an example of adding a custom `"Sourcegraph"` column definition:
@@ -1139,7 +1213,9 @@ on friday and saturday
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates. You could then configure a schedule like this at the repository level:
 
 ```json
-"schedule": ["after 10pm and before 5am on every weekday", "every weekend"]
+{
+  "schedule": ["after 10pm and before 5am on every weekday", "every weekend"]
+}
 ```
 
 This would mean that Renovate can run for 7 hours each night plus all the time on weekends.
@@ -1149,12 +1225,14 @@ This scheduling feature can also be particularly useful for "noisy" packages tha
 To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 
 ```json
+{
   "packageRules": [
     {
       "packageNames": ["aws-sdk"],
       "extends": ["schedule:monthly"]
     }
   ]
+}
 ```
 
 Technical details: We mostly rely on the text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
@@ -1216,7 +1294,9 @@ Language support is limited to those listed below:
 Use this field to suppress various types of warnings and other notifications from Renovate. Example:
 
 ```json
-"suppressNotifications": ["prIgnoreNotification"]
+{
+  "suppressNotifications": ["prIgnoreNotification"]
+}
 ```
 
 The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
