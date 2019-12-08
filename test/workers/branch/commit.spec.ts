@@ -1,11 +1,13 @@
-const { commitFilesToBranch } = require('../../../lib/workers/branch/commit');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import {
+  commitFilesToBranch,
+  CommitConfig,
+} from '../../../lib/workers/branch/commit';
+import { defaultConfig, platform } from '../../util';
+import { RenovateConfig } from '../../../lib/config';
 
 describe('workers/branch/automerge', () => {
   describe('commitFilesToBranch', () => {
-    let config;
+    let config: RenovateConfig & CommitConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -18,7 +20,7 @@ describe('workers/branch/automerge', () => {
         updatedArtifacts: [],
       };
       jest.resetAllMocks();
-      platform.commitFilesToBranch.mockReturnValueOnce('created');
+      platform.commitFilesToBranch.mockResolvedValueOnce();
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
