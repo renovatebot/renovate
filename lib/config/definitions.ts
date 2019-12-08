@@ -1337,7 +1337,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fileMatch',
-    description: 'JS RegExp pattern for matching manager files',
+    description: 'RegEx (re2) pattern for matching manager files',
     type: 'array',
     subType: 'string',
     format: 'regex',
