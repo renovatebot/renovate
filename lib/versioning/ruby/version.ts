@@ -3,13 +3,7 @@ import {
   create,
   SegmentElement,
 } from '@renovatebot/ruby-semver/dist/ruby/version';
-import {
-  diff,
-  major,
-  minor,
-  patch,
-  prerelease,
-} from '@renovatebot/ruby-semver';
+import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
 
 interface RubyVersion {
   major: number;
@@ -76,21 +70,20 @@ const increment = (from: string, to: string): string => {
   ptch = ptch || 0;
 
   let nextVersion: string;
-  switch (diff(from, adapt(to, from))) {
-    case 'major':
-      nextVersion = [incrementMajor(maj, min, ptch, pre || []), 0, 0].join('.');
-      break;
-    case 'minor':
-      nextVersion = [maj, incrementMinor(min, ptch, pre || []), 0].join('.');
-      break;
-    case 'patch':
-      nextVersion = [maj, min, incrementPatch(ptch, pre || [])].join('.');
-      break;
-    case 'prerelease':
-      nextVersion = [maj, min, ptch].join('.');
-      break;
-    default:
-      return incrementLastSegment(from);
+  const adapted = adapt(to, from);
+  if (eq(from, adapted)) return incrementLastSegment(from);
+
+  const isStable = (x: string): boolean => /^[0-9.-/]+$/.test(x);
+  if (major(from) !== major(adapted)) {
+    nextVersion = [incrementMajor(maj, min, ptch, pre || []), 0, 0].join('.');
+  } else if (minor(from) !== minor(adapted)) {
+    nextVersion = [maj, incrementMinor(min, ptch, pre || []), 0].join('.');
+  } else if (patch(from) !== patch(adapted)) {
+    nextVersion = [maj, min, incrementPatch(ptch, pre || [])].join('.');
+  } else if (isStable(from) && isStable(adapted)) {
+    nextVersion = [maj, min, incrementPatch(ptch, pre || [])].join('.');
+  } else {
+    nextVersion = [maj, min, ptch].join('.');
   }
 
   return increment(nextVersion, to);
