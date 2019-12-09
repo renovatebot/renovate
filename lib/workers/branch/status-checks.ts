@@ -29,7 +29,7 @@ async function setStatusCheck(
 }
 
 export type StabilityConfig = RenovateConfig & {
-  stabilityStatus: string;
+  stabilityStatus?: string;
   branchName: string;
 };
 

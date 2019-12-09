@@ -1,6 +1,5 @@
-/** @type any */
-const mockDate = require('mockdate');
-const schedule = require('../../../lib/workers/branch/schedule');
+import mockDate from 'mockdate';
+import * as schedule from '../../../lib/workers/branch/schedule';
 
 describe('workers/branch/schedule', () => {
   describe('hasValidTimezone(schedule)', () => {

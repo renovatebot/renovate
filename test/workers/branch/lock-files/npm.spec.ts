@@ -1,30 +1,30 @@
-const { getInstalledPath } = require('get-installed-path');
+import { getInstalledPath } from 'get-installed-path';
+import path from 'path';
+import _fs from 'fs-extra';
+import * as _exec from '../../../../lib/util/exec';
+import * as npmHelper from '../../../../lib/manager/npm/post-update/npm';
+import { mocked } from '../../../util';
 
 jest.mock('fs-extra');
 jest.mock('../../../../lib/util/exec');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
-
-const path = require('path');
-/** @type any */
-const fs = require('fs-extra');
-/** @type any */
-const { exec } = require('../../../../lib/util/exec');
-const npmHelper = require('../../../../lib/manager/npm/post-update/npm');
+const exec = mocked(_exec).exec;
+const fs = mocked(_fs);
 
 describe('generateLockFile', () => {
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
     const res = await npmHelper.generateLockFile(
@@ -39,15 +39,15 @@ describe('generateLockFile', () => {
   });
   it('performs lock file updates', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
     const updates = [
       { depName: 'some-dep', toVersion: '1.0.1', isLockfileUpdate: true },
@@ -65,17 +65,17 @@ describe('generateLockFile', () => {
   });
   it('performs npm-shrinkwrap.json updates', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.pathExists.mockResolvedValueOnce(true);
+    fs.pathExists.mockImplementationOnce(() => true);
     fs.move = jest.fn();
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -101,17 +101,17 @@ describe('generateLockFile', () => {
   });
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.pathExists.mockResolvedValueOnce(false);
+    fs.pathExists.mockImplementationOnce(() => false);
     fs.move = jest.fn();
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn((_, _1) => 'package-lock-contents') as never;
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -133,11 +133,11 @@ describe('generateLockFile', () => {
   });
   it('performs full install', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = false;
     const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
@@ -152,13 +152,13 @@ describe('generateLockFile', () => {
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: 'some-error',
+      stderr: 'some-error',
     });
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
-    });
+    }) as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -176,11 +176,11 @@ describe('generateLockFile', () => {
     getInstalledPath.mockImplementationOnce(
       () => '/node_modules/renovate/node_modules/npm'
     );
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -198,11 +198,11 @@ describe('generateLockFile', () => {
       throw new Error('not found');
     });
     getInstalledPath.mockImplementationOnce(() => '/node_modules/npm');
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
@@ -222,11 +222,11 @@ describe('generateLockFile', () => {
     getInstalledPath.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    exec.mockReturnValueOnce({
+    exec.mockResolvedValueOnce({
       stdout: '',
-      stderror: '',
+      stderr: '',
     });
-    fs.readFile = jest.fn(() => 'package-lock-contents');
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
