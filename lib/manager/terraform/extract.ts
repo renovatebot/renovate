@@ -3,9 +3,9 @@ import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
 
 export enum TerraformDependencyTypes {
-  unknown,
-  module,
-  provider,
+  unknown = 'unknown',
+  module = 'module',
+  provider = 'provider',
 }
 
 export function getTerraformDependencyType(
