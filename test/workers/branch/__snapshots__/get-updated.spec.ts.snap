@@ -41,7 +41,7 @@ exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock file e
 Object {
   "artifactErrors": Array [
     Object {
-      "name": "composer.lock",
+      "lockFile": "composer.lock",
       "stderr": "some error",
     },
   ],
@@ -93,7 +93,7 @@ exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lockFileMai
 Object {
   "artifactErrors": Array [
     Object {
-      "name": "composer.lock",
+      "lockFile": "composer.lock",
       "stderr": "some error",
     },
   ],

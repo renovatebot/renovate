@@ -7,25 +7,16 @@ import {
   getAdditionalFiles,
   AdditionalPackageFiles,
 } from '../../manager/npm/post-update';
-import { commitFilesToBranch, CommitConfig } from './commit';
+import { commitFilesToBranch } from './commit';
 import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
-import {
-  setStability,
-  setUnpublishable,
-  StabilityConfig,
-  UnpublishableConfig,
-} from './status-checks';
+import { setStability, setUnpublishable } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
 import { ensurePr, checkAutoMerge } from '../pr';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
-
-export type BranchConfig = RenovateConfig &
-  StabilityConfig &
-  UnpublishableConfig &
-  CommitConfig;
+import { BranchConfig } from '../common';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -57,7 +48,7 @@ export async function processBranch(
   prHourlyLimitReached?: boolean,
   packageFiles?: AdditionalPackageFiles
 ): Promise<ProcessBranchResult> {
-  const config = { ...branchConfig };
+  const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
     .map(upgrade => upgrade.depName)
     .filter(v => v) // remove nulls (happens for lock file maintenance)
