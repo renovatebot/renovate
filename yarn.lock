@@ -982,10 +982,10 @@
   dependencies:
     xregexp "4.2.0"
 
-"@renovatebot/ruby-semver@^0.1.0":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.1.tgz#e975fa7a30c45e3d954b4b4b8647fa79e0daa4bd"
-  integrity sha512-Xg8qfwYf17M/slcAohRmqfrh9GjYZJEEtriVADgiPBr0LgiwTDwi1sTihUUibMxNn7X0YXkVALf0FdOCLfHGkQ==
+"@renovatebot/ruby-semver@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.3.tgz#dfa43139d5a465dddec9e0e712d9d359bf7ea167"
+  integrity sha512-tGd5CMTCrFrmJhGxIhLP2Imv5bkzfZQY/6gfV+T6TOhMfca9hRBA7hj/xAexSDLAFN5QmEjGPK0SFusVUPPHIw==
 
 "@semantic-release/commit-analyzer@^6.1.0":
   version "6.3.3"
