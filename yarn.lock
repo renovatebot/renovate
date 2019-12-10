@@ -7528,10 +7528,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.10.4:
-  version "1.10.4"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.10.4.tgz#cbf15d521f0139479fa6d4bc1b34f0b69b5f8c41"
-  integrity sha512-SDmTeowmNBnJFA0X4vVEuMIOg0lSDwkHnwxIDBL69j1jpGhsxuZvYEjZyod4d4AlKWdT/gHWRjteQFlYCDgtzQ==
+re2@1.10.5:
+  version "1.10.5"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.10.5.tgz#b3730438121c6bf59d459aff3471177eef513445"
+  integrity sha512-ssO3AD8/YJzuQUgEasS8PxA8n1yg8JB2VNSJhCebuuHLwaGiufhtFGUypS2bONrCPDbjwlMy7OZD9LkcrQMr1g==
   dependencies:
     nan "^2.14.0"
 
