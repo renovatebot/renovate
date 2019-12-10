@@ -40,6 +40,9 @@ function createSingleConfig(option) {
   if (option.default !== undefined) {
     temp.default = option.default;
   }
+  if (option.additionalProperties !== undefined) {
+    temp.additionalProperties = option.additionalProperties;
+  }
   if (temp.type === 'object' && !option.freeChoice) {
     temp.$ref = '#';
   }

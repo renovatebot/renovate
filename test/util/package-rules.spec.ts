@@ -474,6 +474,33 @@ describe('applyPackageRules()', () => {
     });
     expect(res1.x).toBeDefined();
   });
+  it('checks if matchCurrentVersion selector is a version and matches if currentValue is a range', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          packageNames: ['test'],
+          matchCurrentVersion: '2.1.0',
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '^2.0.0',
+      },
+    });
+    expect(res1.x).toBeDefined();
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '~2.0.0',
+      },
+    });
+    expect(res2.x).toBeUndefined();
+  });
   it('checks if matchCurrentVersion selector works with static values', () => {
     const config: TestConfig = {
       packageRules: [

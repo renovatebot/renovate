@@ -1,6 +1,7 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
+import { File } from './git/storage';
 
 export interface FileData {
   name: string;
@@ -77,7 +78,13 @@ export interface RepoParams {
 /**
  * TODO: Proper typing
  */
-export type Pr = any;
+export type Pr = {
+  branchName: string;
+  title: string;
+  state: string;
+  isConflicted?: boolean;
+  isModified?: boolean;
+} & Record<string, any>;
 
 /**
  * TODO: Proper typing
@@ -89,7 +96,12 @@ export interface Issue {
   title?: string;
 }
 
-export type BranchStatus = 'pending' | 'success' | 'failed';
+export type BranchStatus =
+  | 'pending'
+  | 'success'
+  | 'failed'
+  | 'running'
+  | 'failure';
 
 export type PlatformPrOptions = {
   azureAutoComplete: boolean;
@@ -158,7 +170,7 @@ export interface Platform {
   setBaseBranch(baseBranch: string): Promise<void>;
   commitFilesToBranch(
     branchName: string,
-    updatedFiles: any[],
+    updatedFiles: File[],
     commitMessage: string,
     parentBranch?: string
   ): Promise<void>;
@@ -173,7 +185,7 @@ export interface Platform {
     branchName: string,
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus>;
-  getBranchPr(branchName: string): Promise<Pr>;
+  getBranchPr(branchName: string): Promise<Pr | null>;
   getRepoStatus(): Promise<Git.StatusResult>;
   getFile(lockFileName: string, branchName?: string): Promise<string>;
   initPlatform(config: RenovateConfig): Promise<PlatformConfig>;

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import { isBase64 } from 'validator';
+import isBase64 from 'validator/lib/isBase64';
 import { logger } from '../../logger';
 
 let npmrc: Record<string, any> | null = null;
@@ -27,7 +27,7 @@ function envReplace(value: any, env = process.env): any {
   });
 }
 
-export function setNpmrc(input?: string) {
+export function setNpmrc(input?: string): void {
   if (input) {
     if (input === npmrcRaw) {
       return;

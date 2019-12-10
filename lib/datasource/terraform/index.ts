@@ -4,7 +4,15 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-function getRegistryRepository(lookupName: string, registryUrls: string[]) {
+interface RegistryRepository {
+  registry: string;
+  repository: string;
+}
+
+function getRegistryRepository(
+  lookupName: string,
+  registryUrls: string[]
+): RegistryRepository {
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 3 && split[0].includes('.')) {

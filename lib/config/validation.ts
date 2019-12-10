@@ -222,7 +222,7 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (type === 'object') {
+        } else if (type === 'object' && currentPath !== 'compatibility') {
           if (is.object(val)) {
             const ignoredObjects = options
               .filter(option => option.freeChoice)

@@ -12,7 +12,7 @@ async function resolvePackageReleases(
   const indexContent = await downloadHttpProtocol(searchRoot, 'sbt');
   if (indexContent) {
     const releases: string[] = [];
-    const parseSubdirs = (content: string) =>
+    const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, x => {
         if (x === artifact) return true;
         if (x.indexOf(`${artifact}_native`) === 0) return false;
@@ -27,7 +27,7 @@ async function resolvePackageReleases(
     ) {
       searchSubdirs = [`${artifact}_${scalaVersion}`];
     }
-    const parseReleases = (content: string) =>
+    const parseReleases = (content: string): string[] =>
       parseIndexDir(content, x => !/^\.+$/.test(x));
     for (const searchSubdir of searchSubdirs) {
       const content = await downloadHttpProtocol(
@@ -49,9 +49,9 @@ async function resolvePluginReleases(
   rootUrl: string,
   artifact: string,
   scalaVersion: string
-) {
+): Promise<string[]> {
   const searchRoot = `${rootUrl}/${artifact}`;
-  const parse = (content: string) =>
+  const parse = (content: string): string[] =>
     parseIndexDir(content, x => !/^\.+$/.test(x));
   const indexContent = await downloadHttpProtocol(searchRoot, 'sbt');
   if (indexContent) {

@@ -15,23 +15,37 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   labels?: string[];
   managers?: string | string[];
+  platform?: string;
+  productLinks?: Record<string, string>;
+  rebaseStalePrs?: boolean;
+  recreateClosed?: boolean;
+  requiredStatusChecks?: string[];
   schedule?: string | string[];
 
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
   statusCheckVerify?: boolean;
+  timezone?: string;
 }
 
 type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig
 > = Partial<Record<UpdateType, T>>;
 
+export type RenovateRepository =
+  | string
+  | {
+      repository: string;
+    };
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, any> {
+  autodiscover?: boolean;
+  autodiscoverFilter?: string;
   baseBranch?: string;
   baseBranches?: string[];
   branchList?: string[];
@@ -45,6 +59,7 @@ export interface RenovateConfig
   packageRules?: PackageRule[];
   privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
+  repositories?: RenovateRepository[];
   requireConfig?: boolean;
   warnings?: ValidationMessage[];
 }

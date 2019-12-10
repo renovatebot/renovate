@@ -8,6 +8,17 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue if supported 1`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests/42?assignee_id=123",
+  ],
+  Array [
+    "projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124",
+  ],
+]
+`;
+
 exports[`platform/gitlab addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `
 Array [
   Array [
@@ -253,7 +264,7 @@ Array [
 exports[`platform/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [
-    "projects?membership=true&per_page=100",
+    "projects?membership=true&per_page=100&with_merge_requests_enabled=true",
     Object {
       "paginate": true,
     },
@@ -271,14 +282,14 @@ Array [
 exports[`platform/gitlab initPlatform() should accept custom endpoint 1`] = `
 Object {
   "endpoint": "https://gitlab.renovatebot.com/",
-  "gitAuthor": "a@b.com",
+  "gitAuthor": "Renovate Bot <a@b.com>",
 }
 `;
 
 exports[`platform/gitlab initPlatform() should default to gitlab.com 1`] = `
 Object {
   "endpoint": "https://gitlab.com/api/v4/",
-  "gitAuthor": "a@b.com",
+  "gitAuthor": "Renovate Bot <a@b.com>",
 }
 `;
 

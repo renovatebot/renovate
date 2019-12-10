@@ -4,7 +4,7 @@ import pAll from 'p-all';
 
 import got from '../../util/got';
 import { maskToken } from '../../util/mask';
-import { GotApi } from '../common';
+import { GotApi, GotResponse } from '../common';
 import { logger } from '../../logger';
 
 const hostType = 'github';
@@ -14,7 +14,7 @@ async function get(
   path: string,
   options?: any,
   okToRetry = true
-): Promise<any> {
+): Promise<GotResponse> {
   const opts = {
     hostType,
     baseUrl,
@@ -30,16 +30,13 @@ async function get(
   try {
     if (global.appMode) {
       const appAccept = 'application/vnd.github.machine-man-preview+json';
-      opts.headers = Object.assign(
-        {},
-        {
-          accept: appAccept,
-          'user-agent':
-            process.env.RENOVATE_USER_AGENT ||
-            'https://github.com/renovatebot/renovate',
-        },
-        opts.headers
-      );
+      opts.headers = {
+        accept: appAccept,
+        'user-agent':
+          process.env.RENOVATE_USER_AGENT ||
+          'https://github.com/renovatebot/renovate',
+        ...opts.headers,
+      };
       if (opts.headers.accept !== appAccept) {
         opts.headers.accept = `${appAccept}, ${opts.headers.accept}`;
       }
@@ -58,7 +55,7 @@ async function get(
           new Array(lastPage),
           (x, i) => i + 1
         ).slice(1);
-        const queue = pageNumbers.map(page => () => {
+        const queue = pageNumbers.map(page => (): Promise<GotResponse> => {
           const nextUrl = URL.parse(linkHeader.next.url, true);
           delete nextUrl.search;
           nextUrl.query.page = page.toString();
@@ -163,11 +160,11 @@ async function get(
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
 for (const x of helpers) {
-  (get as any)[x] = (url: string, opts: any) =>
-    get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
+  (get as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
+    get(url, { ...opts, method: x.toUpperCase() });
 }
 
-get.setBaseUrl = (u: string) => {
+get.setBaseUrl = (u: string): void => {
   baseUrl = u;
 };
 

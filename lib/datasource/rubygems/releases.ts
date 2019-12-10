@@ -7,7 +7,10 @@ export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  const registries = is.nonEmptyArray(registryUrls) ? registryUrls : [];
+  const defaultRegistry = 'https://rubygems.org';
+  const registries = is.nonEmptyArray(registryUrls)
+    ? registryUrls
+    : [defaultRegistry];
 
   for (const registry of registries) {
     let pkg: ReleaseResult;

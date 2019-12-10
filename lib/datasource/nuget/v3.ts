@@ -9,7 +9,7 @@ import { ReleaseResult } from '../common';
 const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
 const cacheNamespace = 'datasource-nuget';
 
-export function getDefaultFeed() {
+export function getDefaultFeed(): string {
   return defaultNugetFeed;
 }
 

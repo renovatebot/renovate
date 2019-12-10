@@ -7,7 +7,7 @@ import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
-  parentBranch: string;
+  parentBranch?: string;
   updatedPackageFiles: FileData[];
   updatedArtifacts: FileData[];
 }
@@ -68,6 +68,12 @@ export async function getUpdatedPackageFiles(
           });
         }
         logger.debug('Updating packageFile content');
+        updatedFileContents[packageFile] = newContent;
+      }
+      if (
+        newContent === existingContent &&
+        upgrade.datasource === 'gitSubmodules'
+      ) {
         updatedFileContents[packageFile] = newContent;
       }
     }

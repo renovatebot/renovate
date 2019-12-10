@@ -6,15 +6,16 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage from '../git/storage';
-import { PlatformConfig, RepoParams, RepoConfig } from '../common';
-
+import GitStorage, { StatusResult, File } from '../git/storage';
 import {
-  appName,
-  appSlug,
-  configFileNames,
-  urls,
-} from '../../config/app-strings';
+  PlatformConfig,
+  RepoParams,
+  RepoConfig,
+  Issue,
+  VulnerabilityAlert,
+} from '../common';
+
+import { configFileNames } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 
@@ -50,8 +51,8 @@ interface LocalRepoConfig {
   parentRepo: string;
   baseCommitSHA: string | null;
   forkToken?: string;
-  closedPrList: { [num: number]: Pr } | null;
-  openPrList: { [num: number]: Pr } | null;
+  closedPrList: PrList | null;
+  openPrList: PrList | null;
   prList: Pr[] | null;
   issueList: any[] | null;
   mergeMethod: string;
@@ -64,7 +65,11 @@ interface LocalRepoConfig {
   localDir: string;
   isGhe: boolean;
   renovateUsername: string;
+  productLinks: any;
 }
+
+type BranchProtection = any;
+type PrList = Record<number, Pr>;
 
 let config: LocalRepoConfig = {} as any;
 
@@ -73,7 +78,8 @@ const defaults = {
   endpoint: 'https://api.github.com/',
 };
 
-const escapeHash = input => (input ? input.replace(/#/g, '%23') : input);
+const escapeHash = (input: string): string =>
+  input ? input.replace(/#/g, '%23') : input;
 
 export async function initPlatform({
   endpoint,
@@ -81,7 +87,7 @@ export async function initPlatform({
 }: {
   endpoint: string;
   token: string;
-}) {
+}): Promise<PlatformConfig> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
@@ -130,7 +136,7 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos() {
+export async function getRepos(): Promise<string[]> {
   logger.info('Autodiscovering GitHub repositories');
   try {
     const res = await api.get('user/repos?per_page=100', { paginate: true });
@@ -141,7 +147,7 @@ export async function getRepos() {
   }
 }
 
-export function cleanRepo() {
+export function cleanRepo(): void {
   // istanbul ignore if
   if (config.storage) {
     config.storage.cleanRepo();
@@ -150,7 +156,9 @@ export function cleanRepo() {
   config = {} as any;
 }
 
-async function getBranchProtection(branchName: string) {
+async function getBranchProtection(
+  branchName: string
+): Promise<BranchProtection> {
   // istanbul ignore if
   if (config.parentRepo) {
     return {};
@@ -162,7 +170,7 @@ async function getBranchProtection(branchName: string) {
 }
 
 // Return the commit SHA for a branch
-async function getBranchCommit(branchName: string) {
+async function getBranchCommit(branchName: string): Promise<string> {
   try {
     const res = await api.get(
       `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
@@ -180,7 +188,7 @@ async function getBranchCommit(branchName: string) {
   }
 }
 
-async function getBaseCommitSHA() {
+async function getBaseCommitSHA(): Promise<string> {
   if (!config.baseCommitSHA) {
     config.baseCommitSHA = await getBranchCommit(config.baseBranch);
   }
@@ -198,7 +206,7 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
-}: RepoParams) {
+}: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   logger.info('Authenticated as user: ' + renovateUsername);
   logger.info('Using renovate version: ' + global.renovateVersion);
@@ -421,7 +429,7 @@ export async function initRepo({
   return repoConfig;
 }
 
-export async function getRepoForceRebase() {
+export async function getRepoForceRebase(): Promise<boolean> {
   if (config.repoForceRebase === undefined) {
     try {
       config.repoForceRebase = false;
@@ -467,63 +475,73 @@ export async function getRepoForceRebase() {
 }
 
 // istanbul ignore next
-export async function setBaseBranch(branchName = config.baseBranch) {
+export async function setBaseBranch(
+  branchName = config.baseBranch
+): Promise<void> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
   await config.storage.setBaseBranch(branchName);
 }
 
 // istanbul ignore next
-export function setBranchPrefix(branchPrefix: string) {
+export function setBranchPrefix(branchPrefix: string): Promise<void> {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // istanbul ignore next
-export function getFileList(branchName = config.baseBranch) {
+export function getFileList(branchName = config.baseBranch): Promise<string[]> {
   return config.storage.getFileList(branchName);
 }
 
 // Branch
 
 // istanbul ignore next
-export function branchExists(branchName: string) {
+export function branchExists(branchName: string): Promise<boolean> {
   return config.storage.branchExists(branchName);
 }
 
 // istanbul ignore next
-export function getAllRenovateBranches(branchPrefix: string) {
+export function getAllRenovateBranches(
+  branchPrefix: string
+): Promise<string[]> {
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
 // istanbul ignore next
-export function isBranchStale(branchName: string) {
+export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
 // istanbul ignore next
-export function getFile(filePath: string, branchName?: string) {
+export function getFile(
+  filePath: string,
+  branchName?: string
+): Promise<string> {
   return config.storage.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
-export function deleteBranch(branchName: string, closePr?: boolean) {
+export function deleteBranch(
+  branchName: string,
+  closePr?: boolean
+): Promise<void> {
   return config.storage.deleteBranch(branchName);
 }
 
 // istanbul ignore next
-export function getBranchLastCommitTime(branchName: string) {
+export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-export function getRepoStatus() {
+export function getRepoStatus(): Promise<StatusResult> {
   return config.storage.getRepoStatus();
 }
 
 // istanbul ignore next
-export function mergeBranch(branchName: string) {
+export function mergeBranch(branchName: string): Promise<void> {
   if (config.pushProtection) {
     logger.info(
       { branch: branchName },
@@ -536,10 +554,10 @@ export function mergeBranch(branchName: string) {
 // istanbul ignore next
 export function commitFilesToBranch(
   branchName: string,
-  files: any[],
+  files: File[],
   message: string,
   parentBranch = config.baseBranch
-) {
+): Promise<void> {
   return config.storage.commitFilesToBranch(
     branchName,
     files,
@@ -549,11 +567,11 @@ export function commitFilesToBranch(
 }
 
 // istanbul ignore next
-export function getCommitMessages() {
+export function getCommitMessages(): Promise<string[]> {
   return config.storage.getCommitMessages();
 }
 
-async function getClosedPrs() {
+async function getClosedPrs(): Promise<PrList> {
   if (!config.closedPrList) {
     config.closedPrList = {};
     let query;
@@ -619,7 +637,7 @@ async function getClosedPrs() {
   return config.closedPrList;
 }
 
-async function getOpenPrs() {
+async function getOpenPrs(): Promise<PrList> {
   // istanbul ignore if
   if (config.isGhe) {
     logger.debug(
@@ -786,7 +804,7 @@ async function getOpenPrs() {
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number) {
+export async function getPr(prNo: number): Promise<Pr | null> {
   if (!prNo) {
     return null;
   }
@@ -896,7 +914,7 @@ export async function getPr(prNo: number) {
   return pr;
 }
 
-function matchesState(state: string, desiredState: string) {
+function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
@@ -906,7 +924,7 @@ function matchesState(state: string, desiredState: string) {
   return state === desiredState;
 }
 
-export async function getPrList() {
+export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
@@ -948,7 +966,7 @@ export async function findPr(
   branchName: string,
   prTitle?: string | null,
   state = 'all'
-) {
+): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -964,17 +982,40 @@ export async function findPr(
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string) {
+export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr(branchName, null, 'open');
   return existingPr ? getPr(existingPr.number) : null;
+}
+
+type BranchState = 'failure' | 'pending' | 'success';
+
+interface BranchStatus {
+  context: string;
+  state: BranchState;
+}
+
+interface CombinedBranchStatus {
+  state: BranchState;
+  statuses: BranchStatus[];
+}
+
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<CombinedBranchStatus> {
+  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
+    branchName
+  )}/status`;
+
+  return (await api.get(commitStatusUrl, { useCache })).body;
 }
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks: any
-) {
+): Promise<string> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
@@ -986,12 +1027,9 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return 'failed';
   }
-  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
-    branchName
-  )}/status`;
   let commitStatus;
   try {
-    commitStatus = (await api.get(commitStatusUrl)).body;
+    commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.info(
@@ -1063,15 +1101,24 @@ export async function getBranchStatus(
   return 'pending';
 }
 
+async function getStatusCheck(
+  branchName: string,
+  useCache = true
+): Promise<BranchStatus[]> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
+
+  return (await api.get(url, { useCache })).body;
+}
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-) {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-  const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
+): Promise<string> {
   try {
-    const res = await api.get(url);
-    for (const check of res.body) {
+    const res = await getStatusCheck(branchName);
+    for (const check of res) {
       if (check.context === context) {
         return check.state;
       }
@@ -1092,7 +1139,7 @@ export async function setBranchStatus(
   description: string,
   state: string,
   targetUrl?: string
-) {
+): Promise<void> {
   // istanbul ignore if
   if (config.parentRepo) {
     logger.info('Cannot set branch status when in forking mode');
@@ -1114,12 +1161,18 @@ export async function setBranchStatus(
     options.target_url = targetUrl;
   }
   await api.post(url, { body: options });
+
+  // update status cache
+  await getStatus(branchName, false);
+  await getStatusCheck(branchName, false);
 }
 
 // Issue
 
 /* istanbul ignore next */
-async function getGraphqlIssues(afterCursor: string | null = null) {
+async function getGraphqlIssues(
+  afterCursor: string | null = null
+): Promise<[boolean, Issue[], string | null]> {
   const url = 'graphql';
   const headers = {
     accept: 'application/vnd.github.merge-info-preview+json',
@@ -1170,7 +1223,7 @@ async function getGraphqlIssues(afterCursor: string | null = null) {
 }
 
 // istanbul ignore next
-async function getRestIssues() {
+async function getRestIssues(): Promise<Issue[]> {
   logger.debug('Retrieving issueList');
   const res = await api.get<
     {
@@ -1197,7 +1250,7 @@ async function getRestIssues() {
     }));
 }
 
-export async function getIssueList() {
+export async function getIssueList(): Promise<Issue[]> {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     const filterBySupportMinimumGheVersion = '2.17.0';
@@ -1228,7 +1281,7 @@ export async function getIssueList() {
   return config.issueList;
 }
 
-export async function findIssue(title: string) {
+export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
     i => i.state === 'open' && i.title === title
@@ -1246,7 +1299,7 @@ export async function findIssue(title: string) {
   };
 }
 
-async function closeIssue(issueNumber: number) {
+async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   await api.patch(
     `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
@@ -1261,7 +1314,7 @@ export async function ensureIssue(
   rawbody: string,
   once = false,
   reopen = true
-) {
+): Promise<string | null> {
   logger.debug(`ensureIssue(${title})`);
   const body = sanitize(rawbody);
   try {
@@ -1332,7 +1385,7 @@ export async function ensureIssue(
   return null;
 }
 
-export async function ensureIssueClosing(title: string) {
+export async function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
@@ -1343,7 +1396,10 @@ export async function ensureIssueClosing(title: string) {
   }
 }
 
-export async function addAssignees(issueNo: number, assignees: string[]) {
+export async function addAssignees(
+  issueNo: number,
+  assignees: string[]
+): Promise<void> {
   logger.debug(`Adding assignees ${assignees} to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   await api.post(`repos/${repository}/issues/${issueNo}/assignees`, {
@@ -1353,7 +1409,10 @@ export async function addAssignees(issueNo: number, assignees: string[]) {
   });
 }
 
-export async function addReviewers(prNo: number, reviewers: string[]) {
+export async function addReviewers(
+  prNo: number,
+  reviewers: string[]
+): Promise<void> {
   logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
 
   const userReviewers = reviewers.filter(e => !e.startsWith('team:'));
@@ -1373,7 +1432,10 @@ export async function addReviewers(prNo: number, reviewers: string[]) {
   );
 }
 
-async function addLabels(issueNo: number, labels: string[] | null) {
+async function addLabels(
+  issueNo: number,
+  labels: string[] | null
+): Promise<void> {
   logger.debug(`Adding labels ${labels} to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   if (is.array(labels) && labels.length) {
@@ -1383,7 +1445,10 @@ async function addLabels(issueNo: number, labels: string[] | null) {
   }
 }
 
-export async function deleteLabel(issueNo: number, label: string) {
+export async function deleteLabel(
+  issueNo: number,
+  label: string
+): Promise<void> {
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   try {
@@ -1393,7 +1458,7 @@ export async function deleteLabel(issueNo: number, label: string) {
   }
 }
 
-async function addComment(issueNo: number, body: string) {
+async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
   await api.post(
     `repos/${config.parentRepo ||
@@ -1404,7 +1469,7 @@ async function addComment(issueNo: number, body: string) {
   );
 }
 
-async function editComment(commentId: number, body: string) {
+async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
   await api.patch(
     `repos/${config.parentRepo ||
@@ -1415,7 +1480,7 @@ async function editComment(commentId: number, body: string) {
   );
 }
 
-async function deleteComment(commentId: number) {
+async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
   await api.delete(
     `repos/${config.parentRepo ||
@@ -1423,7 +1488,7 @@ async function deleteComment(commentId: number) {
   );
 }
 
-async function getComments(issueNo: number) {
+async function getComments(issueNo: number): Promise<Comment[]> {
   const pr = (await getClosedPrs())[issueNo];
   if (pr) {
     logger.debug('Returning closed PR list comments');
@@ -1452,7 +1517,7 @@ export async function ensureComment(
   issueNo: number,
   topic: string | null,
   rawContent: string
-) {
+): Promise<boolean> {
   const content = sanitize(rawContent);
   try {
     const comments = await getComments(issueNo);
@@ -1509,10 +1574,13 @@ export async function ensureComment(
   }
 }
 
-export async function ensureCommentRemoval(issueNo: number, topic: string) {
+export async function ensureCommentRemoval(
+  issueNo: number,
+  topic: string
+): Promise<void> {
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
-  let commentId;
+  let commentId: number;
   comments.forEach(comment => {
     if (comment.body.startsWith(`### ${topic}\n\n`)) {
       commentId = comment.id;
@@ -1537,7 +1605,7 @@ export async function createPr(
   labels: string[] | null,
   useDefaultBranch: boolean,
   platformOptions: { statusCheckVerify?: boolean } = {}
-) {
+): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
@@ -1572,10 +1640,10 @@ export async function createPr(
     logger.debug('Setting statusCheckVerify');
     await setBranchStatus(
       branchName,
-      `${appSlug}/verify`,
-      `${appName} verified pull request`,
+      `renovate/verify`,
+      `Renovate verified pull request`,
       'success',
-      urls.homepage
+      'https://github.com/renovatebot/renovate'
     );
   }
   pr.isModified = false;
@@ -1583,7 +1651,7 @@ export async function createPr(
 }
 
 // Return a list of all modified files in a PR
-export async function getPrFiles(prNo: number) {
+export async function getPrFiles(prNo: number): Promise<string[]> {
   logger.debug({ prNo }, 'getPrFiles');
   if (!prNo) {
     return [];
@@ -1594,7 +1662,11 @@ export async function getPrFiles(prNo: number) {
   return files.map((f: { filename: string }) => f.filename);
 }
 
-export async function updatePr(prNo: number, title: string, rawBody?: string) {
+export async function updatePr(
+  prNo: number,
+  title: string,
+  rawBody?: string
+): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
@@ -1622,7 +1694,10 @@ export async function updatePr(prNo: number, title: string, rawBody?: string) {
   }
 }
 
-export async function mergePr(prNo: number, branchName: string) {
+export async function mergePr(
+  prNo: number,
+  branchName: string
+): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
   if (config.isGhe && config.pushProtection) {
@@ -1721,7 +1796,7 @@ export async function mergePr(prNo: number, branchName: string) {
   return true;
 }
 
-export function getPrBody(input: string) {
+export function getPrBody(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }
@@ -1733,7 +1808,7 @@ export function getPrBody(input: string) {
   return smartTruncate(massagedInput, 60000);
 }
 
-export async function getVulnerabilityAlerts() {
+export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   // istanbul ignore if
   if (config.isGhe) {
     logger.debug(

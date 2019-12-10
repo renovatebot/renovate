@@ -18,6 +18,7 @@ export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
   global?: any;
   gradle?: { timeout?: number };
+  aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
 
   skipInstalls?: boolean;
@@ -144,6 +145,7 @@ export interface Upgrade<T = Record<string, any>>
   currentVersion?: string;
   depGroup?: string;
   downloadUrl?: string;
+  localDir?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;
