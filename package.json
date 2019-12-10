@@ -161,13 +161,13 @@
     "re2": "1.10.5"
   },
   "devDependencies": {
-    "@babel/cli": "7.7.4",
-    "@babel/core": "7.7.4",
+    "@babel/cli": "7.7.5",
+    "@babel/core": "7.7.5",
     "@babel/node": "7.7.4",
     "@babel/plugin-proposal-class-properties": "7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "7.7.4",
     "@babel/plugin-syntax-dynamic-import": "7.7.4",
-    "@babel/preset-env": "7.7.4",
+    "@babel/preset-env": "7.7.6",
     "@babel/preset-typescript": "7.7.4",
     "@types/bunyan": "1.8.6",
     "@types/cacache": "12.0.1",
