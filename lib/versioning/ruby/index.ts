@@ -13,32 +13,44 @@ import { parse as parseRange, ltr } from './range';
 import { isSingleOperator, isValidOperator } from './operator';
 import { pin, bump, replace } from './strategies';
 
-const equals = (left: string, right: string): boolean => eq(left, right);
+function vtrim<T = unknown>(version: T): string | T {
+  if (typeof version === 'string') return version.replace(/^v/, '');
+  return version;
+}
 
-const getMajor = (version: string): number => parseVersion(version).major;
-const getMinor = (version: string): number => parseVersion(version).minor;
-const getPatch = (version: string): number => parseVersion(version).patch;
+const equals = (left: string, right: string): boolean =>
+  eq(vtrim(left), vtrim(right));
 
-export const isVersion = (version: string): boolean => !!valid(version);
-const isGreaterThan = (left: string, right: string): boolean => gt(left, right);
+const getMajor = (version: string): number =>
+  parseVersion(vtrim(version)).major;
+const getMinor = (version: string): number =>
+  parseVersion(vtrim(version)).minor;
+const getPatch = (version: string): number =>
+  parseVersion(vtrim(version)).patch;
+
+export const isVersion = (version: string): boolean => !!valid(vtrim(version));
+const isGreaterThan = (left: string, right: string): boolean =>
+  gt(vtrim(left), vtrim(right));
 const isLessThanRange = (version: string, range: string): boolean =>
-  ltr(version, range);
+  ltr(vtrim(version), vtrim(range));
 
 const isSingleVersion = (range: string): boolean => {
-  const { version, operator } = parseRange(range);
+  const { version, operator } = parseRange(vtrim(range));
 
   return operator
     ? isVersion(version) && isSingleOperator(operator)
     : isVersion(version);
 };
 
-const isStable = (version: string): boolean =>
-  parseVersion(version).prerelease ? false : isVersion(version);
+function isStable(version: string): boolean {
+  const v = vtrim(version);
+  return parseVersion(v).prerelease ? false : isVersion(v);
+}
 
 export const isValid = (input: string): boolean =>
   input
     .split(',')
-    .map(piece => piece.trim())
+    .map(piece => vtrim(piece.trim()))
     .every(range => {
       const { version, operator } = parseRange(range);
 
@@ -48,11 +60,11 @@ export const isValid = (input: string): boolean =>
     });
 
 export const matches = (version: string, range: string): boolean =>
-  satisfies(version, range);
+  satisfies(vtrim(version), vtrim(range));
 const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  maxSatisfying(versions, range);
+  maxSatisfying(versions.map(vtrim), vtrim(range));
 const minSatisfyingVersion = (versions: string[], range: string): string =>
-  minSatisfying(versions, range);
+  minSatisfying(versions.map(vtrim), vtrim(range));
 
 const getNewValue = (
   currentValue: string,
@@ -60,22 +72,31 @@ const getNewValue = (
   _fromVersion: string,
   toVersion: string
 ): string => {
+  let result = null;
   switch (rangeStrategy) {
     case 'pin':
-      return pin({ to: toVersion });
+      result = pin({ to: vtrim(toVersion) });
+      break;
     case 'bump':
-      return bump({ range: currentValue, to: toVersion });
+      result = bump({ range: vtrim(currentValue), to: vtrim(toVersion) });
+      break;
     case 'replace':
-      return replace({ range: currentValue, to: toVersion });
+      result = replace({ range: vtrim(currentValue), to: vtrim(toVersion) });
+      break;
     // istanbul ignore next
     default:
       logger.warn(`Unsupported strategy ${rangeStrategy}`);
-      return null;
   }
+
+  if (currentValue !== vtrim(currentValue) && isSingleVersion(result)) {
+    result = `v${result}`;
+  }
+
+  return result;
 };
 
 export const sortVersions = (left: string, right: string): number =>
-  gt(left, right) ? 1 : -1;
+  gt(vtrim(left), vtrim(right)) ? 1 : -1;
 
 export const api: VersioningApi = {
   equals,

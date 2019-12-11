@@ -1031,7 +1031,7 @@ export function getPrBody(input: string): string {
   return smartTruncate(input, 30000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
+    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 

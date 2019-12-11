@@ -41,7 +41,7 @@ export function getRegistryRepository(
   if (!registry.match('^https?://')) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ url: registry });
+  const opts = hostRules.find({ hostType: 'docker', url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
