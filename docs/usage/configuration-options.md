@@ -460,6 +460,10 @@ Use this if you are extending a complex preset but won't want to use every "sub 
 
 It would take the entire `"config:base"` preset - which contains a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
+## ignoreScripts
+
+Applicable for npm and composer only for now. Set this to `true` if running scripts causes problems.
+
 ## ignoreUnstable
 
 By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
