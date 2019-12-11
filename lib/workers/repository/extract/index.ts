@@ -6,8 +6,8 @@ import { PackageFile } from '../../../manager/common';
 
 export async function extractAllDependencies(
   config: RenovateConfig
-): Promise<PackageFile[]> {
-  const extractions: PackageFile[] = [];
+): Promise<Record<string, PackageFile[]>> {
+  const extractions: Record<string, PackageFile[]> = {};
   let fileCount = 0;
   for (const manager of getManagerList()) {
     if (
