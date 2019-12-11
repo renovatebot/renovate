@@ -1,17 +1,66 @@
-const sampleSize = require('lodash/sampleSize');
+import sampleSize from 'lodash/sampleSize';
+import { logger } from '../../logger';
+import { getChangeLogJSON } from './changelog';
+import { getPrBody } from './body';
+import { platform, BranchStatus, Pr } from '../../platform';
+import { BranchConfig } from '../common';
 
-const { logger } = require('../../logger');
-const changelogHelper = require('./changelog');
-const { getPrBody } = require('./body');
-const { platform } = require('../../platform');
+function noWhitespace(input: string): string {
+  return input.replace(/\r?\n|\r|\s/g, '');
+}
 
-module.exports = {
-  ensurePr,
-  checkAutoMerge,
-};
+async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
+  if (config.assignees.length > 0) {
+    try {
+      let assignees = config.assignees.map(assignee =>
+        assignee.length && assignee[0] === '@' ? assignee.slice(1) : assignee
+      );
+      if (config.assigneesSampleSize !== null) {
+        assignees = sampleSize(assignees, config.assigneesSampleSize);
+      }
+      // istanbul ignore if
+      if (config.dryRun) {
+        logger.info('DRY-RUN: Would add assignees to PR #' + pr.number);
+      } else {
+        await platform.addAssignees(pr.number, assignees);
+        logger.info({ assignees }, 'Added assignees');
+      }
+    } catch (err) {
+      logger.info(
+        { assignees: config.assignees, err },
+        'Failed to add assignees'
+      );
+    }
+  }
+  if (config.reviewers.length > 0) {
+    try {
+      let reviewers = config.reviewers.map(reviewer =>
+        reviewer.length && reviewer[0] === '@' ? reviewer.slice(1) : reviewer
+      );
+      if (config.reviewersSampleSize !== null) {
+        reviewers = sampleSize(reviewers, config.reviewersSampleSize);
+      }
+      // istanbul ignore if
+      if (config.dryRun) {
+        logger.info('DRY-RUN: Would add reviewers to PR #' + pr.number);
+      } else {
+        await platform.addReviewers(pr.number, reviewers);
+        logger.info({ reviewers }, 'Added reviewers');
+      }
+    } catch (err) {
+      logger.info(
+        { reviewers: config.reviewers, err },
+        'Failed to add reviewers'
+      );
+    }
+  }
+}
+
 // Ensures that PR exists with matching title/body
-async function ensurePr(prConfig) {
-  const config = { ...prConfig };
+export async function ensurePr(
+  prConfig: BranchConfig
+): Promise<Pr | 'needs-pr-approval'> {
+  const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
@@ -29,8 +78,8 @@ async function ensurePr(prConfig) {
     config.forcePr = true;
   }
 
-  let branchStatus;
-  async function getBranchStatus() {
+  let branchStatus: BranchStatus;
+  async function getBranchStatus(): Promise<BranchStatus> {
     if (!branchStatus) {
       branchStatus = await platform.getBranchStatus(
         branchName,
@@ -133,7 +182,7 @@ async function ensurePr(prConfig) {
     processedUpgrades.push(upgradeKey);
     upgrade.hasUrls = !!(upgrade.sourceUrl || upgrade.homepage);
 
-    const logJSON = await changelogHelper.getChangeLogJSON(upgrade);
+    const logJSON = await getChangeLogJSON(upgrade);
 
     if (logJSON) {
       upgrade.githubName = logJSON.project ? logJSON.project.github : undefined;
@@ -240,12 +289,12 @@ async function ensurePr(prConfig) {
     if (config.updateType === 'rollback') {
       logger.info('Creating Rollback PR');
     }
-    let pr;
+    let pr: Pr;
     try {
       // istanbul ignore if
       if (config.dryRun) {
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
-        pr = { number: 0, displayNumber: 'Dry run PR' };
+        pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
         const platformOptions = {
           azureAutoComplete: config.azureAutoComplete,
@@ -342,54 +391,7 @@ async function ensurePr(prConfig) {
   return null;
 }
 
-async function addAssigneesReviewers(config, pr) {
-  if (config.assignees.length > 0) {
-    try {
-      let assignees = config.assignees.map(assignee =>
-        assignee.length && assignee[0] === '@' ? assignee.slice(1) : assignee
-      );
-      if (config.assigneesSampleSize !== null) {
-        assignees = sampleSize(assignees, config.assigneesSampleSize);
-      }
-      // istanbul ignore if
-      if (config.dryRun) {
-        logger.info('DRY-RUN: Would add assignees to PR #' + pr.number);
-      } else {
-        await platform.addAssignees(pr.number, assignees);
-        logger.info({ assignees }, 'Added assignees');
-      }
-    } catch (err) {
-      logger.info(
-        { assignees: config.assignees, err },
-        'Failed to add assignees'
-      );
-    }
-  }
-  if (config.reviewers.length > 0) {
-    try {
-      let reviewers = config.reviewers.map(reviewer =>
-        reviewer.length && reviewer[0] === '@' ? reviewer.slice(1) : reviewer
-      );
-      if (config.reviewersSampleSize !== null) {
-        reviewers = sampleSize(reviewers, config.reviewersSampleSize);
-      }
-      // istanbul ignore if
-      if (config.dryRun) {
-        logger.info('DRY-RUN: Would add reviewers to PR #' + pr.number);
-      } else {
-        await platform.addReviewers(pr.number, reviewers);
-        logger.info({ reviewers }, 'Added reviewers');
-      }
-    } catch (err) {
-      logger.info(
-        { reviewers: config.reviewers, err },
-        'Failed to add reviewers'
-      );
-    }
-  }
-}
-
-async function checkAutoMerge(pr, config) {
+export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
   logger.trace({ config }, 'checkAutoMerge');
   const {
     branchName,
@@ -455,8 +457,4 @@ async function checkAutoMerge(pr, config) {
   }
   logger.debug('No automerge');
   return false;
-}
-
-function noWhitespace(input) {
-  return input.replace(/\r?\n|\r|\s/g, '');
 }

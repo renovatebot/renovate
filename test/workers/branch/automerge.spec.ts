@@ -1,11 +1,10 @@
-const { tryBranchAutomerge } = require('../../../lib/workers/branch/automerge');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import { tryBranchAutomerge } from '../../../lib/workers/branch/automerge';
+import { defaultConfig, platform } from '../../util';
+import { RenovateConfig } from '../../../lib/config';
 
 describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -23,20 +22,20 @@ describe('workers/branch/automerge', () => {
     it('returns false if branch status is not success', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockReturnValueOnce('pending');
+      platform.getBranchStatus.mockResolvedValueOnce('pending');
       expect(await tryBranchAutomerge(config)).toBe('no automerge');
     });
     it('returns branch status error if branch status is failure', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockReturnValueOnce('failure');
+      platform.getBranchStatus.mockResolvedValueOnce('failure');
       expect(await tryBranchAutomerge(config)).toBe('branch status error');
     });
     it('returns false if PR exists', async () => {
-      platform.getBranchPr.mockReturnValueOnce({});
+      platform.getBranchPr.mockResolvedValueOnce({} as never);
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.getBranchStatus.mockResolvedValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe(
         'automerge aborted - PR exists'
       );
@@ -44,7 +43,7 @@ describe('workers/branch/automerge', () => {
     it('returns false if automerge fails', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.getBranchStatus.mockResolvedValueOnce('success');
       platform.mergeBranch.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
@@ -53,14 +52,14 @@ describe('workers/branch/automerge', () => {
     it('returns true if automerge succeeds', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.getBranchStatus.mockResolvedValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
     it('returns true if automerge succeeds (dry-run)', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       config.dryRun = true;
-      platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.getBranchStatus.mockResolvedValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
   });

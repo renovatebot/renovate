@@ -15,12 +15,7 @@ import {
   VulnerabilityAlert,
 } from '../common';
 
-import {
-  appName,
-  appSlug,
-  configFileNames,
-  urls,
-} from '../../config/app-strings';
+import { configFileNames } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 
@@ -70,6 +65,7 @@ interface LocalRepoConfig {
   localDir: string;
   isGhe: boolean;
   renovateUsername: string;
+  productLinks: any;
 }
 
 type BranchProtection = any;
@@ -1154,21 +1150,26 @@ export async function setBranchStatus(
     return;
   }
   logger.info({ branch: branchName, context, state }, 'Setting branch status');
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-  const url = `repos/${config.repository}/statuses/${branchCommit}`;
-  const options: any = {
-    state,
-    description,
-    context,
-  };
-  if (targetUrl) {
-    options.target_url = targetUrl;
-  }
-  await api.post(url, { body: options });
+  try {
+    const branchCommit = await config.storage.getBranchCommit(branchName);
+    const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    const options: any = {
+      state,
+      description,
+      context,
+    };
+    if (targetUrl) {
+      options.target_url = targetUrl;
+    }
+    await api.post(url, { body: options });
 
-  // update status cache
-  await getStatus(branchName, false);
-  await getStatusCheck(branchName, false);
+    // update status cache
+    await getStatus(branchName, false);
+    await getStatusCheck(branchName, false);
+  } catch (err) /* istanbul ignore next */ {
+    logger.info({ err }, 'Caught error setting branch status - aborting');
+    throw new Error('repository-changed');
+  }
 }
 
 // Issue
@@ -1644,10 +1645,10 @@ export async function createPr(
     logger.debug('Setting statusCheckVerify');
     await setBranchStatus(
       branchName,
-      `${appSlug}/verify`,
-      `${appName} verified pull request`,
+      `renovate/verify`,
+      `Renovate verified pull request`,
       'success',
-      urls.homepage
+      'https://github.com/renovatebot/renovate'
     );
   }
   pr.isModified = false;

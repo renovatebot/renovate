@@ -1,13 +1,10 @@
-const {
-  prAlreadyExisted,
-} = require('../../../lib/workers/branch/check-existing');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import { prAlreadyExisted } from '../../../lib/workers/branch/check-existing';
+import { defaultConfig, platform } from '../../util';
+import { RenovateConfig } from '../../../lib/config';
 
 describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -27,8 +24,11 @@ describe('workers/branch/check-existing', () => {
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });
     it('returns true if first check hits', async () => {
-      platform.findPr.mockReturnValueOnce({ number: 12 });
-      platform.getPr.mockReturnValueOnce({ number: 12, state: 'closed' });
+      platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
+      platform.getPr.mockResolvedValueOnce({
+        number: 12,
+        state: 'closed',
+      } as never);
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });
