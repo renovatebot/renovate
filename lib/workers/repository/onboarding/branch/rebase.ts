@@ -1,9 +1,6 @@
 import { logger } from '../../../../logger';
 import { getOnboardingConfig } from './config';
-import {
-  configFileNames,
-  onboardingBranch,
-} from '../../../../config/app-strings';
+import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 
@@ -29,14 +26,14 @@ export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<void> {
   logger.debug('Checking if onboarding branch needs rebasing');
-  const pr = await platform.getBranchPr(onboardingBranch);
+  const pr = await platform.getBranchPr(config.onboardingBranch);
   if (pr.isModified) {
     logger.info('Onboarding branch has been edited and cannot be rebased');
     return;
   }
   const existingContents = await platform.getFile(
     defaultConfigFile,
-    onboardingBranch
+    config.onboardingBranch
   );
   const contents = await getOnboardingConfig(config);
   if (contents === existingContents && !pr.isStale) {
@@ -52,7 +49,7 @@ export async function rebaseOnboardingBranch(
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
   } else {
     await platform.commitFilesToBranch(
-      onboardingBranch,
+      config.onboardingBranch,
       [
         {
           name: defaultConfigFile,

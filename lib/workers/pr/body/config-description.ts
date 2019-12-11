@@ -1,13 +1,11 @@
-const { appName, urls } = require('../../../config/app-strings');
-const { platform } = require('../../../platform');
-const { emojify } = require('../../../util/emoji');
+import { platform } from '../../../platform';
+import { emojify } from '../../../util/emoji';
+import { PrBodyConfig } from './common';
 
-module.exports = {
-  getPrConfigDescription,
-};
-
-async function getPrConfigDescription(config) {
-  let prBody = `\n\n---\n\n### ${appName} configuration\n\n`;
+export async function getPrConfigDescription(
+  config: PrBodyConfig
+): Promise<string> {
+  let prBody = `\n\n---\n\n### Renovate configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
   if (
     config.schedule &&
@@ -55,7 +53,7 @@ async function getPrConfigDescription(config) {
   }
   if (config.recreateClosed) {
     prBody += emojify(
-      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${urls.help}) if that's undesired.\n\n`
+      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks.help}) if that's undesired.\n\n`
     );
   } else {
     prBody += emojify(
