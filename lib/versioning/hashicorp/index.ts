@@ -45,6 +45,7 @@ export const api: VersioningApi = {
   maxSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
+  increment: _ => null,
 };
 
 export const isVersion = api.isVersion;

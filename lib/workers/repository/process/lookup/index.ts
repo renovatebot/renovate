@@ -13,7 +13,6 @@ import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
 import { RenovateConfig } from '../../../../config';
 import { clone } from '../../../../util/clone';
-import { VersioningApi } from '../../../../versioning/common';
 
 export interface LookupWarning {
   updateType: 'warning';
@@ -130,20 +129,15 @@ function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
 }
 
 function isUncappedVersion(
-  version: VersioningApi,
+  version: versioning.VersioningApi,
   fromVersion: string,
   currentValue: string,
   allVersions: string[]
 ): boolean | null {
   if (version.isSingleVersion(currentValue)) return true;
-  if (version.increment) {
-    const maxSatisfying = version.maxSatisfyingVersion(
-      allVersions,
-      currentValue
-    );
-    const incremented = version.increment(maxSatisfying);
-    return version.matches(incremented, currentValue);
-  }
+  const maxSatisfying = version.maxSatisfyingVersion(allVersions, currentValue);
+  const incremented = version.increment(maxSatisfying);
+  if (incremented) return version.matches(incremented, currentValue);
   return null;
 }
 
@@ -274,8 +268,10 @@ export async function lookupUpdates(
         allVersions
       );
       if (isUncapped === null) {
-        logger.error('Missing support for cap strategy');
-        rangeStrategy = 'auto';
+        logger.error(
+          'Missing support for "cap" strategy, falling back to "replace"'
+        );
+        rangeStrategy = 'replace';
       } else if (isUncapped) {
         res.updates.push({
           updateType: 'cap',

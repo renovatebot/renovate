@@ -54,6 +54,7 @@ export const api: VersioningApi = {
     compare,
   }),
   isStable,
+  increment: _ => null,
 };
 
 export default api;

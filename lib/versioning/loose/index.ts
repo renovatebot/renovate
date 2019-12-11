@@ -42,9 +42,12 @@ function compare(version1: string, vervion2: string): number {
   return parsed1.suffix.localeCompare(parsed2.suffix);
 }
 
-export const api: VersioningApi = generic.create({
-  parse,
-  compare,
-});
+export const api: VersioningApi = {
+  ...generic.create({
+    parse,
+    compare,
+  }),
+  increment: _ => null,
+};
 
 export default api;

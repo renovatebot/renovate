@@ -27,13 +27,7 @@ const isSingleVersion = (constraint: string): string =>
   (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
 
 function increment(version: string): string | null {
-  const match = version.match(
-    /^(?<prefix>.*[^\d])(?<lowest>\d+)(?<suffix>[^\d]*)$/
-  );
-  if (!match) return null;
-  const { prefix, lowest, suffix } = match.groups;
-  const incLowest = parseInt(lowest, 10) + 1;
-  return `${prefix}${incLowest}${suffix}`;
+  return semver.inc(version, 'patch');
 }
 
 export const api: VersioningApi = {

@@ -206,4 +206,9 @@ export abstract class GenericVersioningApi<
   matches(version: string, range: string): boolean {
     return this.equals(version, range);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  increment(_: string): string | null {
+    return null;
+  }
 }

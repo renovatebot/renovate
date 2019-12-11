@@ -119,6 +119,11 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       asSemver(this._parse(range))
     );
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  increment(_: string): string | null {
+    return null;
+  }
 }
 
 export const api: VersioningApiConstructor = RegExpVersioningApi;

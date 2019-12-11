@@ -41,7 +41,8 @@ export interface VersioningApi {
 
   valueToVersion?(version: string): string;
 
-  increment?(version: string): string;
+  // null stands for 'not implemented'
+  increment?(version: string): string | null;
 }
 
 export interface VersioningApiConstructor {

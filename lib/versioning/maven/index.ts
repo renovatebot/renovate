@@ -150,6 +150,7 @@ export const api: VersioningApi = {
   minSatisfyingVersion: maxSatisfyingVersion,
   getNewValue,
   sortVersions: compare,
+  increment: _ => null,
 };
 
 export default api;

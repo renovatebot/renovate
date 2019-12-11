@@ -49,5 +49,6 @@ export const api: VersioningApi = {
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
+  increment: _ => null,
 };
 export default api;

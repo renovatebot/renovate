@@ -25,5 +25,6 @@ export { isValid };
 export const api: VersioningApi = {
   ...npm,
   getNewValue,
+  increment: _ => null,
 };
 export default api;

@@ -16,6 +16,7 @@ export const api: VersioningApi = {
   }),
   isCompatible,
   valueToVersion,
+  increment: _ => null,
 };
 
 export default api;

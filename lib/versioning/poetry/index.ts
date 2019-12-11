@@ -126,5 +126,6 @@ export const api: VersioningApi = {
   matches,
   maxSatisfyingVersion,
   minSatisfyingVersion,
+  increment: _ => null,
 };
 export default api;
