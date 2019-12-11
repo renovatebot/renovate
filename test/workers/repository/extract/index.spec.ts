@@ -1,6 +1,6 @@
 import * as _managerFiles from '../../../../lib/workers/repository/extract/manager-files';
 import { extractAllDependencies } from '../../../../lib/workers/repository/extract';
-import { mocked } from '../../../util';
+import { mocked, defaultConfig } from '../../../util';
 import { RenovateConfig } from '../../../../lib/config';
 
 jest.mock('../../../../lib/workers/repository/extract/manager-files');
@@ -12,7 +12,7 @@ describe('workers/repository/extract/index', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = { ...require('../../../config/config/_fixtures') };
+      config = { ...defaultConfig };
     });
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
