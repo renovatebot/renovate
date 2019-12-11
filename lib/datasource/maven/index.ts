@@ -92,7 +92,7 @@ async function getDependencyInfo(
   return result;
 }
 
-function getLatestVersion(versions: string[]): string | null {
+function getLatestStableVersion(versions: string[]): string | null {
   const stableVersions = versions.filter(mavenVersion.isStable);
   if (stableVersions.length) {
     return stableVersions.reduce((latestVersion, version) =>
@@ -158,7 +158,7 @@ export async function getPkgReleases({
       const newVersions = extractVersions(mavenMetadata).filter(
         version => !versions.includes(version)
       );
-      const latestVersion = getLatestVersion(newVersions);
+      const latestVersion = getLatestStableVersion(newVersions);
       if (latestVersion) {
         repoForVersions[latestVersion] = repoUrl;
       }
@@ -174,7 +174,7 @@ export async function getPkgReleases({
   logger.debug(`Found ${versions.length} versions for ${dependency.display}`);
 
   let dependencyInfo = {};
-  const latestVersion = getLatestVersion(versions);
+  const latestVersion = getLatestStableVersion(versions);
   if (latestVersion) {
     const repoUrl = repoForVersions[latestVersion];
     dependencyInfo = await getDependencyInfo(
