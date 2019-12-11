@@ -68,6 +68,7 @@ describe('semverRuby', () => {
 
     it('returns false when version is invalid', () => {
       expect(semverRuby.isVersion(undefined)).toBe(false);
+      expect(semverRuby.isVersion('')).toBe(false);
       expect(semverRuby.isVersion(null)).toBe(false);
       expect(semverRuby.isVersion('v')).toBe(false);
       expect(semverRuby.isVersion('tottally-not-a-version')).toBe(false);
