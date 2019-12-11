@@ -78,10 +78,13 @@ export interface RepoParams {
 /**
  * TODO: Proper typing
  */
-export type Pr = { branchName: string; title: string; state: string } & Record<
-  string,
-  any
->;
+export type Pr = {
+  branchName: string;
+  title: string;
+  state: string;
+  isConflicted?: boolean;
+  isModified?: boolean;
+} & Record<string, any>;
 
 /**
  * TODO: Proper typing
@@ -93,7 +96,12 @@ export interface Issue {
   title?: string;
 }
 
-export type BranchStatus = 'pending' | 'success' | 'failed';
+export type BranchStatus =
+  | 'pending'
+  | 'success'
+  | 'failed'
+  | 'running'
+  | 'failure';
 
 export type PlatformPrOptions = {
   azureAutoComplete: boolean;

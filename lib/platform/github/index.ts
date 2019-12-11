@@ -1151,21 +1151,26 @@ export async function setBranchStatus(
     return;
   }
   logger.info({ branch: branchName, context, state }, 'Setting branch status');
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-  const url = `repos/${config.repository}/statuses/${branchCommit}`;
-  const options: any = {
-    state,
-    description,
-    context,
-  };
-  if (targetUrl) {
-    options.target_url = targetUrl;
-  }
-  await api.post(url, { body: options });
+  try {
+    const branchCommit = await config.storage.getBranchCommit(branchName);
+    const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    const options: any = {
+      state,
+      description,
+      context,
+    };
+    if (targetUrl) {
+      options.target_url = targetUrl;
+    }
+    await api.post(url, { body: options });
 
-  // update status cache
-  await getStatus(branchName, false);
-  await getStatusCheck(branchName, false);
+    // update status cache
+    await getStatus(branchName, false);
+    await getStatusCheck(branchName, false);
+  } catch (err) /* istanbul ignore next */ {
+    logger.info({ err }, 'Caught error setting branch status - aborting');
+    throw new Error('repository-changed');
+  }
 }
 
 // Issue

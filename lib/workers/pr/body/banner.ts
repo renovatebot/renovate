@@ -1,7 +1,8 @@
-const handlebars = require('handlebars');
+import handlebars from 'handlebars';
+import { PrBodyConfig } from './common';
 
 // istanbul ignore next
-export function getPrBanner(config) {
+export function getPrBanner(config: PrBodyConfig): string {
   if (config.global && config.global.prBanner) {
     return handlebars.compile(config.global.prBanner)(config) + '\n\n';
   }

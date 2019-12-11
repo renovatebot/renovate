@@ -91,7 +91,7 @@ export async function generateLockFile(
     logger.debug(`Using pnpm: ${cmd}`);
     cmd += ' install';
     cmd += ' --lockfile-only';
-    if (global.trustLevel !== 'high') {
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
       cmd += ' --ignore-scripts';
       cmd += ' --ignore-pnpmfile';
     }
