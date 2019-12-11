@@ -123,7 +123,7 @@ export async function updateArtifacts(
         ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
     }
     args += ' --ignore-platform-reqs --no-ansi --no-interaction';
-    if (global.trustLevel !== 'high') {
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

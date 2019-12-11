@@ -1,22 +1,18 @@
+import handlebars from 'handlebars';
 import { platform } from '../../../platform';
-
-const handlebars = require('handlebars');
-
-const versioning = require('../../../versioning');
-
-const { getPrConfigDescription } = require('./config-description');
-const { getPrBanner } = require('./banner');
-const { getPrFooter } = require('./footer');
-const { getPrUpdatesTable } = require('./updates-table');
-const { getPrNotes, getPrExtraNotes } = require('./notes');
-const { getChangelogs } = require('./changelogs');
-const { getControls } = require('./controls');
+import { get } from '../../../versioning';
+import { getPrConfigDescription } from './config-description';
+import { getPrBanner } from './banner';
+import { getPrFooter } from './footer';
+import { getPrUpdatesTable } from './updates-table';
+import { getPrNotes, getPrExtraNotes } from './notes';
+import { getChangelogs } from './changelogs';
+import { getControls } from './controls';
+import { PrBodyConfig } from './common';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-export { getPrBody };
-
-function massageUpdateMetadata(config) {
+function massageUpdateMetadata(config: PrBodyConfig): void {
   config.upgrades.forEach(upgrade => {
     /* eslint-disable no-param-reassign */
     const { homepage, sourceUrl, sourceDirectory, changelogUrl } = upgrade;
@@ -36,7 +32,7 @@ function massageUpdateMetadata(config) {
       depNameLinked += ` (${otherLinks.join(', ')})`;
     }
     upgrade.depNameLinked = depNameLinked;
-    const references = [];
+    const references: string[] = [];
     if (homepage) {
       references.push(`[homepage](${homepage})`);
     }
@@ -58,7 +54,7 @@ function massageUpdateMetadata(config) {
     // istanbul ignore if
     if (updateType === 'minor') {
       try {
-        const version = versioning.get(versionScheme);
+        const version = get(versionScheme);
         if (version.getMinor(fromVersion) === version.getMinor(toVersion)) {
           upgrade.updateType = 'patch';
         }
@@ -70,7 +66,7 @@ function massageUpdateMetadata(config) {
   });
 }
 
-async function getPrBody(config) {
+export async function getPrBody(config: PrBodyConfig): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
     banner: getPrBanner(config),

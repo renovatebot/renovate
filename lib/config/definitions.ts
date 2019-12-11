@@ -387,6 +387,14 @@ const options: RenovateOptions[] = [
     default: 'low',
   },
   {
+    name: 'ignoreScripts',
+    description:
+      'Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files',
+    stage: 'package',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',

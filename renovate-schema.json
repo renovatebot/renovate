@@ -200,6 +200,11 @@
       "type": "string",
       "default": "low"
     },
+    "ignoreScripts": {
+      "description": "Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files",
+      "type": "boolean",
+      "default": false
+    },
     "platform": {
       "description": "Platform type of repository",
       "type": "string",

@@ -52,18 +52,25 @@ describe('semverRuby', () => {
 
   describe('.isVersion', () => {
     it('returns true when version is valid', () => {
+      expect(semverRuby.isVersion('0')).toBe(true);
+      expect(semverRuby.isVersion('v0')).toBe(true);
+      expect(semverRuby.isVersion('v1')).toBe(true);
+      expect(semverRuby.isVersion('v1.2')).toBe(true);
+      expect(semverRuby.isVersion('v1.2.3')).toBe(true);
       expect(semverRuby.isVersion('1')).toBe(true);
       expect(semverRuby.isVersion('1.1')).toBe(true);
       expect(semverRuby.isVersion('1.1.2')).toBe(true);
       expect(semverRuby.isVersion('1.1.2.3')).toBe(true);
       expect(semverRuby.isVersion('1.1.2-4')).toBe(true);
       expect(semverRuby.isVersion('1.1.2.pre.4')).toBe(true);
+      expect(semverRuby.isVersion('v1.1.2.pre.4')).toBe(true);
     });
 
     it('returns false when version is invalid', () => {
       expect(semverRuby.isVersion(undefined)).toBe(false);
       expect(semverRuby.isVersion('')).toBe(false);
       expect(semverRuby.isVersion(null)).toBe(false);
+      expect(semverRuby.isVersion('v')).toBe(false);
       expect(semverRuby.isVersion('tottally-not-a-version')).toBe(false);
     });
   });
@@ -270,6 +277,15 @@ describe('semverRuby', () => {
         false
       );
     });
+
+    it('returns null for garbage version input', () => {
+      expect(semverRuby.isLessThanRange('asdf', '> 1.2.2, ~> 2.0.0')).toBe(
+        null
+      );
+      expect(
+        semverRuby.isLessThanRange(null as string, '> 1.2.2, ~> 2.0.0')
+      ).toBe(null);
+    });
   });
 
   describe('.isValid', () => {
@@ -349,6 +365,7 @@ describe('semverRuby', () => {
     it('returns correct version for pin strategy', () => {
       [
         ['1.2.3', '1.0.3', 'pin', '1.0.3', '1.2.3'],
+        ['v1.2.3', 'v1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '= 1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '!= 1.0.3', 'pin', '1.0.4', '1.2.3'],
         ['1.2.3', '> 1.0.3', 'pin', '1.0.4', '1.2.3'],
@@ -367,10 +384,13 @@ describe('semverRuby', () => {
     it('returns correct version for bump strategy', () => {
       [
         ['1.2.3', '1.0.3', 'bump', '1.0.3', '1.2.3'],
+        ['v1.2.3', 'v1.0.3', 'bump', '1.0.3', '1.2.3'],
         ['= 1.2.3', '= 1.0.3', 'bump', '1.0.3', '1.2.3'],
         ['!= 1.0.3', '!= 1.0.3', 'bump', '1.0.0', '1.2.3'],
         ['> 1.2.2', '> 1.0.3', 'bump', '1.0.4', '1.2.3'],
+        ['> 1.2.3', '> 1.2.3', 'bump', '1.0.0', '1.0.3'],
         ['< 1.2.4', '< 1.0.3', 'bump', '1.0.0', '1.2.3'],
+        ['< 1.2.3', '< 1.2.3', 'bump', '1.0.0', '1.0.3'],
         ['< 1.2.4', '< 1.2.2', 'bump', '1.0.0', '1.2.3'],
         ['< 1.2.4', '< 1.2.3', 'bump', '1.0.0', '1.2.3'],
         ['< 1.3', '< 1.2', 'bump', '1.0.0', '1.2.3'],
@@ -396,6 +416,7 @@ describe('semverRuby', () => {
     it('returns correct version for replace strategy', () => {
       [
         ['1.2.3', '1.0.3', 'replace', '1.0.3', '1.2.3'],
+        ['v1.2.3', 'v1.0.3', 'replace', '1.0.3', '1.2.3'],
         ['= 1.2.3', '= 1.0.3', 'replace', '1.0.3', '1.2.3'],
         ['!= 1.0.3', '!= 1.0.3', 'replace', '1.0.0', '1.2.3'],
         ['< 1.2.4', '< 1.0.3', 'replace', '1.0.0', '1.2.3'],

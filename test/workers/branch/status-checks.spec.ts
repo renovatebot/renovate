@@ -1,18 +1,18 @@
-const {
+import {
   setStability,
   setUnpublishable,
-} = require('../../../lib/workers/branch/status-checks');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-
-/** @type any */
-const { platform } = require('../../../lib/platform');
+  StabilityConfig,
+  UnpublishableConfig,
+} from '../../../lib/workers/branch/status-checks';
+import { defaultConfig, platform } from '../../util';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {
-    let config;
+    let config: StabilityConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
+        branchName: 'renovate/some-branch',
       };
     });
     afterEach(() => {
@@ -36,10 +36,11 @@ describe('workers/branch/status-checks', () => {
     });
   });
   describe('setUnpublishable', () => {
-    let config;
+    let config: UnpublishableConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
+        branchName: 'renovate/some-branch',
       };
     });
     afterEach(() => {
@@ -65,7 +66,7 @@ describe('workers/branch/status-checks', () => {
     it('finds canBeUnpublished false and skips status', async () => {
       config.unpublishSafe = true;
       config.canBeUnpublished = false;
-      platform.getBranchStatusCheck.mockReturnValueOnce('success');
+      platform.getBranchStatusCheck.mockResolvedValueOnce('success');
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
