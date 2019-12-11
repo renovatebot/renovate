@@ -7,7 +7,7 @@ import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
-  parentBranch: string;
+  parentBranch?: string;
   updatedPackageFiles: FileData[];
   updatedArtifacts: FileData[];
 }

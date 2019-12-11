@@ -1,15 +1,12 @@
-/** @type any */
-const composer = require('../../../lib/manager/composer');
-/** @type any */
-const npm = require('../../../lib/manager/npm');
-/** @type any */
-const gitSubmodules = require('../../../lib/manager/git-submodules');
-const {
-  getUpdatedPackageFiles,
-} = require('../../../lib/workers/branch/get-updated');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import * as _composer from '../../../lib/manager/composer';
+import * as _npm from '../../../lib/manager/npm';
+import * as _gitSubmodules from '../../../lib/manager/git-submodules';
+import { getUpdatedPackageFiles } from '../../../lib/workers/branch/get-updated';
+import { mocked, defaultConfig, platform } from '../../util';
+
+const composer = mocked(_composer);
+const gitSubmodules = mocked(_gitSubmodules);
+const npm = mocked(_npm);
 
 jest.mock('../../../lib/manager/composer');
 jest.mock('../../../lib/manager/npm');
@@ -24,7 +21,7 @@ describe('workers/branch/get-updated', () => {
         upgrades: [],
       };
       npm.updateDependency = jest.fn();
-      platform.getFile.mockReturnValueOnce('existing content');
+      platform.getFile.mockResolvedValueOnce('existing content');
     });
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);
@@ -52,7 +49,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.updateArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
             name: 'composer.json',
@@ -69,7 +66,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
         updateType: 'lockFileMaintenance',
       });
-      composer.updateArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
             name: 'composer.json',
@@ -86,10 +83,10 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
         updateType: 'lockFileMaintenance',
       });
-      composer.updateArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            name: 'composer.lock',
+            lockFile: 'composer.lock',
             stderr: 'some error',
           },
         },
@@ -103,10 +100,10 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.updateArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
-            name: 'composer.lock',
+            lockFile: 'composer.lock',
             stderr: 'some error',
           },
         },
@@ -119,7 +116,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'git-submodules',
         datasource: 'gitSubmodules',
       });
-      gitSubmodules.updateDependency.mockReturnValue('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
