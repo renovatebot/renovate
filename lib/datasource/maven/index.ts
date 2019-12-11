@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { compare } from '../../versioning/maven/compare';
+import mavenVersion from '../../versioning/maven';
 import { containsPlaceholder } from '../../manager/maven/extract';
 import { downloadHttpProtocol } from './util';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
@@ -92,10 +93,13 @@ async function getDependencyInfo(
 }
 
 function getLatestVersion(versions: string[]): string | null {
-  if (versions.length === 0) return null;
-  return versions.reduce((latestVersion, version) =>
-    compare(version, latestVersion) === 1 ? version : latestVersion
-  );
+  const stableVersions = versions.filter(mavenVersion.isStable);
+  if (stableVersions.length) {
+    return stableVersions.reduce((latestVersion, version) =>
+      compare(version, latestVersion) === 1 ? version : latestVersion
+    );
+  }
+  return null;
 }
 
 interface MavenDependency {
@@ -168,13 +172,17 @@ export async function getPkgReleases({
     return null;
   }
   logger.debug(`Found ${versions.length} versions for ${dependency.display}`);
+
+  let dependencyInfo = {};
   const latestVersion = getLatestVersion(versions);
-  const repoUrl = repoForVersions[latestVersion];
-  const dependencyInfo = await getDependencyInfo(
-    dependency,
-    repoUrl,
-    latestVersion
-  );
+  if (latestVersion) {
+    const repoUrl = repoForVersions[latestVersion];
+    dependencyInfo = await getDependencyInfo(
+      dependency,
+      repoUrl,
+      latestVersion
+    );
+  }
 
   return {
     ...dependency,
