@@ -1,13 +1,13 @@
-const { initApis } = require('../../../../lib/workers/repository/init/apis');
+import { initApis } from '../../../../lib/workers/repository/init/apis';
+import { RenovateConfig, getConfig } from '../../../util';
 
 jest.mock('../../../../lib/platform/github');
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
-    /** @type any */
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
-      config = require('../../../config/config/_fixtures');
+      config = { ...getConfig() };
       config.errors = [];
       config.warnings = [];
       config.token = 'some-token';

@@ -17,8 +17,10 @@ async function getPlatformConfig(config): Promise<WorkerPlatformConfig> {
 }
 
 // TODO: fix types
-export async function initApis(input): Promise<WorkerPlatformConfig> {
-  let config: WorkerPlatformConfig = { ...input };
+export async function initApis(
+  input: RenovateConfig
+): Promise<WorkerPlatformConfig> {
+  let config: WorkerPlatformConfig = { ...input } as never;
   config = await getPlatformConfig(config);
   npmApi.resetMemCache();
   npmApi.setNpmrc(config.npmrc);

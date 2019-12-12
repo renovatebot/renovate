@@ -1,18 +1,13 @@
-/** @type any */
-let config;
+import { checkBaseBranch } from '../../../../lib/workers/repository/init/base';
+import { platform, getConfig, RenovateConfig } from '../../../util';
+
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../config/config/_fixtures');
+  config = { ...getConfig() };
   config.errors = [];
   config.warnings = [];
 });
-
-const {
-  checkBaseBranch,
-} = require('../../../../lib/workers/repository/init/base');
-
-/** @type any */
-const { platform } = require('../../../../lib/platform');
 
 describe('workers/repository/init/base', () => {
   describe('checkBaseBranch()', () => {
@@ -23,7 +18,7 @@ describe('workers/repository/init/base', () => {
     });
     it('sets baseBranch', async () => {
       config.baseBranch = 'ssome-base';
-      platform.branchExists.mockReturnValue(true);
+      platform.branchExists.mockResolvedValue(true);
       const res = await checkBaseBranch(config);
       expect(res.errors).toHaveLength(0);
       expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
