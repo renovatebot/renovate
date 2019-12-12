@@ -1,11 +1,9 @@
-const {
-  flattenPackageRules,
-} = require('../../../../lib/workers/repository/init/flatten');
+import { flattenPackageRules } from '../../../../lib/workers/repository/init/flatten';
 
 describe('workers/repository/init/flatten', () => {
   describe('flattenPackageRules()', () => {
     it('returns empty', () => {
-      expect(flattenPackageRules({})).toEqual([]);
+      expect(flattenPackageRules([])).toEqual([]);
     });
     it('flattens some and returns others', () => {
       const packageRules = [
