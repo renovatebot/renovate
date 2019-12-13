@@ -37,7 +37,7 @@ export interface RenovateArrayOption<T extends string | object = any>
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
-  subType: 'string';
+  subType: 'string' | 'object';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
@@ -1960,6 +1960,7 @@ const options: RenovateOptions[] = [
     name: 'hostRules',
     description: 'Host rules/configuration including credentials',
     type: 'array',
+    subType: 'object',
     default: [
       {
         timeout: 60000,
