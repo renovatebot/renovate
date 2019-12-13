@@ -155,7 +155,7 @@ export async function ensurePr(
       const elapsedHours = Math.round(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
-      if (elapsedHours < config.prNotPendingHours) {
+      if (!masterIssueCheck && elapsedHours < config.prNotPendingHours) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
