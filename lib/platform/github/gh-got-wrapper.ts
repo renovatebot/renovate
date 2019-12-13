@@ -2,19 +2,115 @@ import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import pAll from 'p-all';
 
-import got from '../../util/got';
+import { GotError } from 'got';
+import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { GotApi, GotResponse } from '../common';
 import { logger } from '../../logger';
 
 const hostType = 'github';
+export const getHostType = (): string => hostType;
+
 let baseUrl = 'https://api.github.com/';
+export const getBaseUrl = (): string => baseUrl;
+
+type GotRequestError<E = unknown, T = unknown> = GotError & {
+  body: {
+    message?: string;
+    errors?: E[];
+  };
+  headers?: Record<string, T>;
+};
+
+type GotRequestOptions = GotJSONOptions & {
+  token?: string;
+};
+
+export function dispatchError(
+  err: GotRequestError,
+  path: string,
+  opts: GotRequestOptions
+): never {
+  let message = err.message;
+  if (err.body && err.body.message) {
+    message = err.body.message;
+  }
+  if (
+    err.name === 'RequestError' &&
+    (err.code === 'ENOTFOUND' ||
+      err.code === 'ETIMEDOUT' ||
+      err.code === 'EAI_AGAIN')
+  ) {
+    logger.info({ err }, 'GitHub failure: RequestError');
+    throw new Error('platform-failure');
+  }
+  if (err.name === 'ParseError') {
+    logger.info({ err }, 'GitHub failure: ParseError');
+    throw new Error('platform-failure');
+  }
+  if (err.statusCode >= 500 && err.statusCode < 600) {
+    logger.info({ err }, 'GitHub failure: 5xx');
+    throw new Error('platform-failure');
+  }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('You have triggered an abuse detection mechanism')
+  ) {
+    logger.info({ err }, 'GitHub failure: abuse detection');
+    throw new Error('platform-failure');
+  }
+  if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
+    logger.debug({ path }, 'Endpoint needs paid GitHub plan');
+    throw err;
+  }
+  if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
+    logger.info({ err }, 'GitHub failure: rate limit');
+    throw new Error('rate-limit-exceeded');
+  }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('Resource not accessible by integration')
+  ) {
+    logger.info(
+      { err },
+      'GitHub failure: Resource not accessible by integration'
+    );
+    throw new Error('integration-unauthorized');
+  }
+  if (err.statusCode === 401 && message.includes('Bad credentials')) {
+    const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
+    logger.info(
+      {
+        token: maskToken(opts.token),
+        err,
+      },
+      'GitHub failure: Bad credentials'
+    );
+    if (rateLimit === '60') {
+      throw new Error('platform-failure');
+    }
+    throw new Error('bad-credentials');
+  }
+  if (err.statusCode === 422) {
+    if (
+      err.body &&
+      err.body.errors &&
+      err.body.errors.find((e: any) => e.code === 'invalid')
+    ) {
+      throw new Error('repository-changed');
+    }
+    throw new Error('platform-failure');
+  }
+  throw err;
+}
 
 async function get(
   path: string,
   options?: any,
   okToRetry = true
 ): Promise<GotResponse> {
+  let result = null;
+
   const opts = {
     hostType,
     baseUrl,
@@ -41,11 +137,11 @@ async function get(
         opts.headers.accept = `${appAccept}, ${opts.headers.accept}`;
       }
     }
-    const res = await got(path, opts);
+    result = await got(path, opts);
     if (opts.paginate) {
       // Check if result is paginated
       const pageLimit = opts.pageLimit || 10;
-      const linkHeader = parseLinkHeader(res.headers.link as string);
+      const linkHeader = parseLinkHeader(result.headers.link as string);
       if (linkHeader && linkHeader.next && linkHeader.last) {
         let lastPage = +linkHeader.last.page;
         if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
@@ -66,7 +162,7 @@ async function get(
           );
         });
         const pages = await pAll<{ body: any[] }>(queue, { concurrency: 5 });
-        res.body = res.body.concat(
+        result.body = result.body.concat(
           ...pages.filter(Boolean).map(page => page.body)
         );
       }
@@ -74,7 +170,7 @@ async function get(
     // istanbul ignore if
     if (method === 'POST' && path === 'graphql') {
       const goodResult = '{"data":{';
-      if (res.body.startsWith(goodResult)) {
+      if (result.body.startsWith(goodResult)) {
         if (!okToRetry) {
           logger.info('Recovered graphql query');
         }
@@ -84,77 +180,10 @@ async function get(
         return get(path, opts, !okToRetry);
       }
     }
-    return res;
-  } catch (err) /* istanbul ignore next */ {
-    let message = err.message;
-    if (err.body && err.body.message) {
-      message = err.body.message;
-    }
-    if (
-      err.name === 'RequestError' &&
-      (err.code === 'ENOTFOUND' ||
-        err.code === 'ETIMEDOUT' ||
-        err.code === 'EAI_AGAIN')
-    ) {
-      logger.info({ err }, 'GitHub failure: RequestError');
-      throw new Error('platform-failure');
-    }
-    if (err.name === 'ParseError') {
-      logger.info({ err }, 'GitHub failure: ParseError');
-      throw new Error('platform-failure');
-    }
-    if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.info({ err }, 'GitHub failure: 5xx');
-      throw new Error('platform-failure');
-    }
-    if (
-      err.statusCode === 403 &&
-      message.startsWith('You have triggered an abuse detection mechanism')
-    ) {
-      logger.info({ err }, 'GitHub failure: abuse detection');
-      throw new Error('platform-failure');
-    }
-    if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
-      logger.debug({ path }, 'Endpoint needs paid GitHub plan');
-      throw err;
-    }
-    if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
-      logger.info({ err }, 'GitHub failure: rate limit');
-      throw new Error('rate-limit-exceeded');
-    } else if (
-      err.statusCode === 403 &&
-      message.startsWith('Resource not accessible by integration')
-    ) {
-      logger.info(
-        { err },
-        'GitHub failure: Resource not accessible by integration'
-      );
-      throw new Error('integration-unauthorized');
-    } else if (err.statusCode === 401 && message.includes('Bad credentials')) {
-      const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
-      logger.info(
-        {
-          token: maskToken(opts.token),
-          err,
-        },
-        'GitHub failure: Bad credentials'
-      );
-      if (rateLimit === '60') {
-        throw new Error('platform-failure');
-      }
-      throw new Error('bad-credentials');
-    } else if (err.statusCode === 422) {
-      if (
-        err.body &&
-        err.body.errors &&
-        err.body.errors.find((e: any) => e.code === 'invalid')
-      ) {
-        throw new Error('repository-changed');
-      }
-      throw new Error('platform-failure');
-    }
-    throw err;
+  } catch (gotErr) {
+    dispatchError(gotErr, path, opts);
   }
+  return result;
 }
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
