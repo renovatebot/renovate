@@ -202,7 +202,7 @@ describe('datasource/pypi', () => {
         })
       ).toMatchSnapshot();
     });
-    it('returns null for empty resonse', async () => {
+    it('returns null for empty response', async () => {
       got.mockReturnValueOnce({});
       const config = {
         registryUrls: ['https://pypi.org/simple/'],

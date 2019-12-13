@@ -1,13 +1,10 @@
-const minimatch = require('minimatch');
-const { logger } = require('../../../logger');
+import minimatch from 'minimatch';
+import { logger } from '../../../logger';
 
-module.exports = {
-  getIncludedFiles,
-  filterIgnoredFiles,
-  getMatchingFiles,
-};
-
-function getIncludedFiles(fileList, includePaths) {
+export function getIncludedFiles(
+  fileList: string[],
+  includePaths: string[]
+): string[] {
   if (!(includePaths && includePaths.length)) {
     return fileList;
   }
@@ -19,7 +16,10 @@ function getIncludedFiles(fileList, includePaths) {
   );
 }
 
-function filterIgnoredFiles(fileList, ignorePaths) {
+export function filterIgnoredFiles(
+  fileList: string[],
+  ignorePaths: string[]
+): string[] {
   if (!(ignorePaths && ignorePaths.length)) {
     return fileList;
   }
@@ -33,12 +33,16 @@ function filterIgnoredFiles(fileList, ignorePaths) {
   );
 }
 
-function getMatchingFiles(fileList, manager, fileMatch) {
+export function getMatchingFiles(
+  fileList: string[],
+  manager: string,
+  fileMatchList: string[]
+): string[] {
   let matchedFiles = [];
-  for (const match of fileMatch) {
-    logger.debug(`Using file match: ${match} for manager ${manager}`);
+  for (const fileMatch of fileMatchList) {
+    logger.debug(`Using file match: ${fileMatch} for manager ${manager}`);
     matchedFiles = matchedFiles.concat(
-      fileList.filter(file => file.match(new RegExp(match)))
+      fileList.filter(file => file.match(new RegExp(fileMatch)))
     );
   }
   // filter out duplicates
