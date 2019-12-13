@@ -451,6 +451,9 @@ export async function processBranch(
     if (pr === 'needs-pr-approval') {
       return 'needs-pr-approval';
     }
+    if (pr === 'pending') {
+      return 'pending';
+    }
     if (pr) {
       const topic = emojify(':warning: Artifact update problem');
       if (config.artifactErrors && config.artifactErrors.length) {

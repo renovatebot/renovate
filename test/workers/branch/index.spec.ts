@@ -257,6 +257,19 @@ describe('workers/branch', () => {
         'needs-pr-approval'
       );
     });
+    it('returns if branch exists but pending', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as never);
+      platform.branchExists.mockResolvedValueOnce(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce('pending');
+      expect(await branchWorker.processBranch(config)).toEqual('pending');
+    });
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
