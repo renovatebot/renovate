@@ -1,5 +1,4 @@
 import { logger } from '../../logger';
-import { appSlug, urls } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 
@@ -7,8 +6,9 @@ async function setStatusCheck(
   branchName: string,
   context: string,
   description: string,
-  state: string
-) {
+  state: string,
+  url: string
+): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
     context
@@ -23,21 +23,21 @@ async function setStatusCheck(
       context,
       description,
       state,
-      urls.documentation
+      url
     );
   }
 }
 
 export type StabilityConfig = RenovateConfig & {
-  stabilityStatus: string;
+  stabilityStatus?: string;
   branchName: string;
 };
 
-export async function setStability(config: StabilityConfig) {
+export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
     return;
   }
-  const context = `${appSlug}/stability-days`;
+  const context = `renovate/stability-days`;
   const description =
     config.stabilityStatus === 'success'
       ? 'Updates have met stability days requirement'
@@ -46,7 +46,8 @@ export async function setStability(config: StabilityConfig) {
     config.branchName,
     context,
     description,
-    config.stabilityStatus
+    config.stabilityStatus,
+    config.productLinks.documentation
   );
 }
 
@@ -62,11 +63,17 @@ export async function setUnpublishable(
   if (!config.unpublishSafe) {
     return;
   }
-  const context = `${appSlug}/unpublish-safe`;
+  const context = `renovate/unpublish-safe`;
   // Set canBeUnpublished status check
   const state = config.canBeUnpublished ? 'pending' : 'success';
   const description = config.canBeUnpublished
     ? 'Packages < 24 hours old can be unpublished'
     : 'Packages cannot be unpublished';
-  await setStatusCheck(config.branchName, context, description, state);
+  await setStatusCheck(
+    config.branchName,
+    context,
+    description,
+    state,
+    config.productLinks.docs
+  );
 }

@@ -766,5 +766,15 @@ Array [
       "lineNumber": 11,
     },
   },
+  Object {
+    "currentValue": "v3.5.0+incompatible",
+    "datasource": "go",
+    "depName": "github.com/caarlos0/env",
+    "depNameShort": "caarlos0/env",
+    "depType": "require",
+    "managerData": Object {
+      "lineNumber": 13,
+    },
+  },
 ]
 `;

@@ -69,6 +69,7 @@ describe('platform/gitlab', () => {
           ({
             body: {
               email: 'a@b.com',
+              name: 'Renovate Bot',
             },
           } as any)
       );
@@ -83,6 +84,7 @@ describe('platform/gitlab', () => {
           ({
             body: {
               email: 'a@b.com',
+              name: 'Renovate Bot',
             },
           } as any)
       );
@@ -125,17 +127,6 @@ describe('platform/gitlab', () => {
       expect(repos).toMatchSnapshot();
     });
   });
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      await gitlab.getRepoStatus();
-    });
-  });
-  describe('cleanRepo()', () => {
-    it('exists', () => {
-      gitlab.cleanRepo();
-    });
-  });
   function initRepo(args?: any) {
     // projects/${config.repository}
     api.get.mockImplementationOnce(
@@ -166,6 +157,17 @@ describe('platform/gitlab', () => {
       optimizeForDisabled: false,
     });
   }
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      await initRepo();
+      await gitlab.getRepoStatus();
+    });
+  });
+  describe('cleanRepo()', () => {
+    it('exists', () => {
+      gitlab.cleanRepo();
+    });
+  });
 
   describe('initRepo', () => {
     it(`should throw error if disabled in renovate.json`, async () => {
@@ -260,8 +262,12 @@ describe('platform/gitlab', () => {
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
       await initRepo();
-      await gitlab.setBaseBranch('some-branch');
+      await gitlab.setBaseBranch();
       expect(api.get.mock.calls).toMatchSnapshot();
+    });
+    it('uses default base branch', async () => {
+      await initRepo();
+      await gitlab.setBaseBranch();
     });
   });
   describe('getFileList()', () => {
@@ -443,9 +449,9 @@ describe('platform/gitlab', () => {
     it('returns status if name found', async () => {
       api.get.mockReturnValueOnce({
         body: [
-          { name: 'context-1', state: 'pending' },
-          { name: 'some-context', state: 'success' },
-          { name: 'context-3', state: 'failed' },
+          { name: 'context-1', status: 'pending' },
+          { name: 'some-context', status: 'success' },
+          { name: 'context-3', status: 'failed' },
         ],
       } as any);
       const res = await gitlab.getBranchStatusCheck(
@@ -489,6 +495,10 @@ describe('platform/gitlab', () => {
         ],
       } as any);
       await gitlab.deleteBranch('branch', true);
+    });
+    it('defaults to not closing associated PR', async () => {
+      await initRepo();
+      await gitlab.deleteBranch('branch2');
     });
   });
   describe('findIssue()', () => {
@@ -626,6 +636,16 @@ describe('platform/gitlab', () => {
       api.get.mockImplementationOnce({} as any);
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(api.put).toHaveBeenCalledTimes(0);
+    });
+    it('should add the given assignees to the issue if supported', async () => {
+      api.get.mockReturnValueOnce({
+        body: [{ id: 123 }],
+      } as any);
+      api.get.mockReturnValueOnce({
+        body: [{ id: 124 }],
+      } as any);
+      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
+      expect(api.put.mock.calls).toMatchSnapshot();
     });
   });
   describe('addReviewers(issueNo, reviewers)', () => {

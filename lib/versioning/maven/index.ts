@@ -12,14 +12,14 @@ import {
 } from './compare';
 import { RangeStrategy, VersioningApi } from '../common';
 
-const equals = (a: string, b: string) => compare(a, b) === 0;
+const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
-function matches(a: string, b: string) {
+function matches(a: string, b: string): boolean {
   if (!b) return false;
   if (isVersion(b)) return equals(a, b);
   const ranges = parseRange(b);
   if (!ranges) return false;
-  return ranges.reduce((result, range) => {
+  return ranges.reduce((result, range): any => {
     if (result) return result;
 
     const { leftType, leftValue, rightType, rightValue } = range;
@@ -83,7 +83,7 @@ const getPatch = (version: string): number | null => {
   return null;
 };
 
-const isGreaterThan = (a: string, b: string) => compare(a, b) === 1;
+const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 
 const isStable = (version: string): boolean | null => {
   if (isVersion(version)) {

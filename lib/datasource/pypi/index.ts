@@ -6,14 +6,14 @@ import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-function normalizeName(input: string) {
+function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
 }
 
 function compatibleVersions(
   releases: Record<string, { requires_python?: boolean }[]>,
   compatibility: Record<string, string>
-) {
+): string[] {
   const versions = Object.keys(releases);
   if (!(compatibility && compatibility.python)) {
     return versions;
@@ -26,33 +26,6 @@ function compatibleVersions(
       return matches(compatibility.python, release.requires_python);
     })
   );
-}
-
-export async function getPkgReleases({
-  compatibility,
-  lookupName,
-  registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  let hostUrls = ['https://pypi.org/pypi/'];
-  if (is.nonEmptyArray(registryUrls)) {
-    hostUrls = registryUrls;
-  }
-  if (process.env.PIP_INDEX_URL) {
-    hostUrls = [process.env.PIP_INDEX_URL];
-  }
-  for (let hostUrl of hostUrls) {
-    hostUrl += hostUrl.endsWith('/') ? '' : '/';
-    let dep: ReleaseResult;
-    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
-      dep = await getSimpleDependency(lookupName, hostUrl);
-    } else {
-      dep = await getDependency(lookupName, hostUrl, compatibility);
-    }
-    if (dep !== null) {
-      return dep;
-    }
-  }
-  return null;
 }
 
 async function getDependency(
@@ -108,6 +81,31 @@ async function getDependency(
   }
 }
 
+function extractVersionFromLinkText(
+  text: string,
+  depName: string
+): string | null {
+  const prefix = `${depName}-`;
+  const suffix = '.tar.gz';
+  if (text.startsWith(prefix) && text.endsWith(suffix)) {
+    return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+  }
+
+  // pep-0427 wheel packages
+  //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+  const wheelPrefix = depName.replace(/[^\w\d.]+/g, '_') + '-';
+  const wheelSuffix = '.whl';
+  if (
+    text.startsWith(wheelPrefix) &&
+    text.endsWith(wheelSuffix) &&
+    text.split('-').length > 2
+  ) {
+    return text.split('-')[1];
+  }
+
+  return null;
+}
+
 async function getSimpleDependency(
   depName: string,
   hostUrl: string
@@ -123,7 +121,7 @@ async function getSimpleDependency(
       logger.debug({ dependency: depName }, 'pip package not found');
       return null;
     }
-    const root: HTMLElement = parse(dep) as any;
+    const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
     const links = root.querySelectorAll('a');
     const versions = new Set<string>();
     for (const link of Array.from(links)) {
@@ -147,14 +145,29 @@ async function getSimpleDependency(
   }
 }
 
-function extractVersionFromLinkText(
-  text: string,
-  depName: string
-): string | null {
-  const prefix = `${depName}-`;
-  const suffix = '.tar.gz';
-  if (!(text.startsWith(prefix) && text.endsWith(suffix))) {
-    return null;
+export async function getPkgReleases({
+  compatibility,
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+  let hostUrls = ['https://pypi.org/pypi/'];
+  if (is.nonEmptyArray(registryUrls)) {
+    hostUrls = registryUrls;
   }
-  return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+  if (process.env.PIP_INDEX_URL) {
+    hostUrls = [process.env.PIP_INDEX_URL];
+  }
+  for (let hostUrl of hostUrls) {
+    hostUrl += hostUrl.endsWith('/') ? '' : '/';
+    let dep: ReleaseResult;
+    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+      dep = await getSimpleDependency(lookupName, hostUrl);
+    } else {
+      dep = await getDependency(lookupName, hostUrl, compatibility);
+    }
+    if (dep !== null) {
+      return dep;
+    }
+  }
+  return null;
 }

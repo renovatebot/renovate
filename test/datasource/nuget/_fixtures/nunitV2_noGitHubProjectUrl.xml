@@ -1,0 +1,28 @@
+<feed xml:base="https://www.nuget.org/api/v2"
+  xmlns="http://www.w3.org/2005/Atom"
+  xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"
+  xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+  xmlns:georss="http://www.georss.org/georss"
+  xmlns:gml="http://www.opengis.net/gml">
+  <id>http://schemas.datacontract.org/2004/07/</id>
+  <title/>
+  <updated>2019-02-04T12:51:36Z</updated>
+  <link rel="self" href="https://www.nuget.org/api/v2/Packages"/>
+  <entry>
+    <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.11.0')</id>
+    <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
+    <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.11.0')"/>
+    <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.11.0')"/>
+    <title type="text">NUnit</title>
+    <updated>2019-02-04T12:51:36Z</updated>
+    <author>
+      <name/>
+    </author>
+    <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.11.0"/>
+    <m:properties>
+      <d:Version>3.11.0</d:Version>
+      <d:IsLatestVersion>true</d:IsLatestVersion>
+      <d:ProjectUrl>https://nunit.org</d:ProjectUrl>
+    </m:properties>
+  </entry>
+</feed>

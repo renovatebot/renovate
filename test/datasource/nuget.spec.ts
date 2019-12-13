@@ -15,6 +15,10 @@ const pkgListV3WithoutProkjectUrl = fs.readFileSync(
   'test/datasource/nuget/_fixtures/nunitV3_withoutProjectUrl.json',
   'utf8'
 );
+const pkgListV3NoGitHubProjectUrl = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV3_noGitHubProjectUrl.json',
+  'utf8'
+);
 const pkgInfoV3FromNuget = fs.readFileSync(
   'test/datasource/nuget/_fixtures/nunitv3_nuget-org.xml',
   'utf8'
@@ -22,6 +26,10 @@ const pkgInfoV3FromNuget = fs.readFileSync(
 
 const pkgListV2 = fs.readFileSync(
   'test/datasource/nuget/_fixtures/nunitV2.xml',
+  'utf8'
+);
+const pkgListV2NoGitHubProjectUrl = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2_noGitHubProjectUrl.xml',
   'utf8'
 );
 const pkgListV2NoRelease = fs.readFileSync(
@@ -246,7 +254,6 @@ describe('datasource/nuget', () => {
         })
       ).toBeNull();
     });
-
     it('processes real data (v3) feed is a nuget.org', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(nugetIndexV3),
@@ -314,6 +321,21 @@ describe('datasource/nuget', () => {
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).not.toBeDefined();
     });
+    it('processes real data with no github project url (v3)', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(nugetIndexV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse(pkgListV3NoGitHubProjectUrl),
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV3NotNugetOrg,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
     it('processes real data (v2)', async () => {
       got.mockReturnValueOnce({
         body: pkgListV2,
@@ -347,6 +369,17 @@ describe('datasource/nuget', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).not.toBeDefined();
+    });
+    it('processes real data with no github project url (v2)', async () => {
+      got.mockReturnValueOnce({
+        body: pkgListV2NoGitHubProjectUrl,
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV2,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
     });
     it('handles paginated results (v2)', async () => {
       got.mockReturnValueOnce({

@@ -75,7 +75,7 @@ export async function generateLockFile(
       if (config.cacheDir) {
         volumes.push(config.cacheDir);
       }
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       // istanbul ignore if
       if (config.dockerMapDotfiles) {
         const homeDir =
@@ -85,14 +85,16 @@ export async function generateLockFile(
       }
       const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
       cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/pnpm pnpm`;
     }
     logger.debug(`Using pnpm: ${cmd}`);
     cmd += ' install';
     cmd += ' --lockfile-only';
-    cmd += ' --ignore-scripts';
-    cmd += ' --ignore-pnpmfile';
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+      cmd += ' --ignore-scripts';
+      cmd += ' --ignore-pnpmfile';
+    }
     // TODO: Switch to native util.promisify once using only node 8
     ({ stdout, stderr } = await exec(cmd, {
       cwd,

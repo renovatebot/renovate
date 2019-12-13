@@ -20,6 +20,16 @@
         "name": "cglib-nodep",
         "group": "cglib",
         "version": "3.1"
+      },
+      {
+        "name": "scala-library",
+        "group": "org.scala-lang",
+        "version": "%scala-version%"
+      },
+      {
+        "name": "scala-logging_%%",
+        "group": "com.typesafe.scala-logging",
+        "version": "3.9.0"
       }
     ]
   }

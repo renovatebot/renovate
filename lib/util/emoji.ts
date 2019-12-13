@@ -3,7 +3,7 @@ import { RenovateConfig } from '../config';
 
 let unicodeEmoji = false;
 
-export function setEmojiConfig(_config: RenovateConfig) {
+export function setEmojiConfig(_config: RenovateConfig): void {
   unicodeEmoji = _config.unicodeEmoji;
 }
 

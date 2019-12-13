@@ -72,12 +72,14 @@ describe('docs', () => {
     toContainOption(received, argument) {
       if (received.includes(argument)) {
         return {
-          message: () => `Option "${argument}" should be within definitions`,
+          message: (): string =>
+            `Option "${argument}" should be within definitions`,
           pass: true,
         };
       }
       return {
-        message: () => `Option "${argument}" doesn't exist within definitions`,
+        message: (): string =>
+          `Option "${argument}" doesn't exist within definitions`,
         pass: false,
       };
     },

@@ -1,7 +1,7 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
-import { GotResponse } from '../common';
+import { GotResponse, Pr } from '../common';
 
 export interface Config {
   baseBranch: string;
@@ -11,7 +11,7 @@ export interface Config {
   has_issues: boolean;
   mergeMethod: string;
   owner: string;
-  prList: any[];
+  prList: Pr[];
   repository: string;
   storage: Storage;
   bbUseDefaultReviewers: boolean;
@@ -26,7 +26,21 @@ export interface PagedResult<T = any> {
   values: T[];
 }
 
-export function repoInfoTransformer(repoInfoBody: any) {
+export interface RepoInfo {
+  isFork: boolean;
+  owner: string;
+  mainbranch: string;
+  mergeMethod: string;
+  has_issues: boolean;
+}
+
+export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+export interface BitbucketStatus {
+  key: string;
+  state: BitbucketBranchState;
+}
+
+export function repoInfoTransformer(repoInfoBody: any): RepoInfo {
   return {
     isFork: !!repoInfoBody.parent,
     owner: repoInfoBody.owner.username,
@@ -45,17 +59,17 @@ export const prStates = {
 };
 
 export const buildStates: {
-  [key: string]: string;
-  success: string;
-  failed: string;
-  pending: string;
+  [key: string]: BitbucketBranchState;
+  success: BitbucketBranchState;
+  failed: BitbucketBranchState;
+  pending: BitbucketBranchState;
 } = {
   success: 'SUCCESSFUL',
   failed: 'FAILED',
   pending: 'INPROGRESS',
 };
 
-const addMaxLength = (inputUrl: string, pagelen = 100) => {
+const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
   const maxedUrl = url.format({
     ...parsedUrl,
@@ -69,7 +83,7 @@ export async function accumulateValues<T = any>(
   method = 'get',
   options?: any,
   pagelen?: number
-) {
+): Promise<T[]> {
   let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, pagelen);
   const lowerCaseMethod = method.toLocaleLowerCase();
@@ -86,7 +100,7 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-export /* istanbul ignore next */ function isConflicted(files: any) {
+export /* istanbul ignore next */ function isConflicted(files: any): boolean {
   for (const file of files) {
     for (const chunk of file.chunks) {
       for (const change of chunk.changes) {
@@ -99,7 +113,7 @@ export /* istanbul ignore next */ function isConflicted(files: any) {
   return false;
 }
 
-export function prInfo(pr: any) {
+export function prInfo(pr: any): Pr {
   return {
     number: pr.id,
     body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,

@@ -17,7 +17,7 @@ function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
 export function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-) {
+): RenovateConfig[] {
   const updates = [];
   const updateTypes = [
     'major',

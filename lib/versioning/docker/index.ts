@@ -1,7 +1,7 @@
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
-function parse(version: string) {
+function parse(version: string): any {
   const versionPieces = version.replace(/^v/, '').split('-');
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
@@ -12,12 +12,12 @@ function parse(version: string) {
   return { release, suffix };
 }
 
-function valueToVersion(value: string) {
+function valueToVersion(value: string): string {
   // Remove any suffix after '-', e.g. '-alpine'
   return value ? value.split('-')[0] : value;
 }
 
-function compare(version1: string, vervion2: string) {
+function compare(version1: string, vervion2: string): number {
   const parsed1 = parse(version1);
   const parsed2 = parse(vervion2);
   // istanbul ignore if
@@ -43,7 +43,7 @@ function compare(version1: string, vervion2: string) {
   return parsed2.suffix.localeCompare(parsed1.suffix);
 }
 
-function isCompatible(version: string, range: string) {
+function isCompatible(version: string, range: string): boolean {
   const parsed1 = parse(version);
   const parsed2 = parse(range);
   return (

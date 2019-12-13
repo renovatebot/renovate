@@ -25,7 +25,7 @@ function cleanBranchName(branchName: string): string {
 export function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-) {
+): RenovateConfig {
   logger.debug('branchifyUpgrades');
   const updates = flattenUpdates(config, packageFiles);
   logger.debug(
@@ -43,7 +43,8 @@ export function branchifyUpgrades(
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;
     // massage for handlebars
-    const upper = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
+    const upper = (str: string): string =>
+      str.charAt(0).toUpperCase() + str.substr(1);
     if (update.updateType) {
       update[`is${upper(update.updateType)}`] = true;
     }

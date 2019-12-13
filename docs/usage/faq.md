@@ -62,7 +62,7 @@ The timezone must be one of the valid
 
 Now that your timezone is set, you can define days of week or hours of the day
 in which renovate will make changes. For this we rely on text parsing of the
-library [later](http://bunkat.github.io/later/parsers.html#text) and its
+library [later](https://bunkat.github.io/later/parsers.html#text) and its
 concepts of "days", "time_before", and "time_after".
 
 Example scheduling:
@@ -91,15 +91,6 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 
 Note that schedule must be in the form of an array, even if only one schedule is
 present. Multiple entries in the array means "or".
-
-### Selectively enable or disable renovate for specific `package.json` files
-
-You could:
-
-- Use `ignorePaths` to ignore certain paths in the repository, or
-- Explicitly list every package file you want renovated, in the `packageFiles` configuration object, or
-- Add a `renovate` section to any `package.json` files you don't want renovated,
-  with the configuration option `"enabled": false`
 
 ### Disable renovate for certain dependency types
 

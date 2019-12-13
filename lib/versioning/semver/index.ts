@@ -19,7 +19,7 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string) => valid(input);
+export const isVersion = (input: string): string => valid(input);
 
 export { isVersion as isValid, maxSatisfyingVersion };
 
@@ -28,7 +28,7 @@ function getNewValue(
   _rangeStrategy: RangeStrategy,
   _fromVersion: string,
   toVersion: string
-) {
+): string {
   return toVersion;
 }
 

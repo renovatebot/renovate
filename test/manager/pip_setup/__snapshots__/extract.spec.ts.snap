@@ -138,7 +138,7 @@ exports[`lib/manager/pip_setup/extract getPythonAlias finds python 1`] = `
       "python3 --version",
     ],
     Array [
-      "python3.7 --version",
+      "python3.8 --version",
     ],
   ],
   "results": Array [

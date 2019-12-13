@@ -31,16 +31,12 @@ interface ComposerConfig {
  *
  * Entries with type vcs or git will be added to repositories,
  * other entries will be added to registryUrls
- *
- * @param repoJson
- * @param repositories
- * @param registryUrls
  */
 function parseRepositories(
   repoJson: ComposerConfig['repositories'],
   repositories: Record<string, Repo>,
   registryUrls: string[]
-) {
+): void {
   try {
     let packagist = true;
     Object.entries(repoJson).forEach(([key, repo]) => {

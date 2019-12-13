@@ -36,11 +36,12 @@ export function extractFromVectors(
   let version = '';
   let fileReplacePosition: number = null;
 
-  const isSpace = (ch: string) => ch && /[\s,]/.test(ch);
+  const isSpace = (ch: string): boolean => ch && /[\s,]/.test(ch);
 
-  const cleanStrLiteral = (s: string) => s.replace(/^"/, '').replace(/"$/, '');
+  const cleanStrLiteral = (s: string): string =>
+    s.replace(/^"/, '').replace(/"$/, '');
 
-  const yieldDep = () => {
+  const yieldDep = (): void => {
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
@@ -122,7 +123,7 @@ function extractLeinRepos(content: string): string[] {
 }
 
 export function extractPackageFile(content: string): PackageFile {
-  const collect = (key: string, ctx: ExtractContext) => {
+  const collect = (key: string, ctx: ExtractContext): PackageDependency[] => {
     let result: PackageDependency[] = [];
     let restContent = trimAtKey(content, key);
     while (restContent) {

@@ -6,7 +6,7 @@ let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
 let contentLength = 0;
 
-async function updateRubyGemsVersions() {
+async function updateRubyGemsVersions(): Promise<void> {
   const url = 'https://rubygems.org/versions';
   const options = {
     headers: {
@@ -30,7 +30,7 @@ async function updateRubyGemsVersions() {
     return;
   }
 
-  function processLine(line: string) {
+  function processLine(line: string): void {
     let split: string[];
     let pkg: string;
     let versions: string;
@@ -68,14 +68,14 @@ async function updateRubyGemsVersions() {
   lastSync = new Date();
 }
 
-function isDataStale() {
+function isDataStale(): boolean {
   const minutesElapsed = Math.floor(
     (new Date().getTime() - lastSync.getTime()) / (60 * 1000)
   );
   return minutesElapsed >= 5;
 }
 
-async function syncVersions() {
+async function syncVersions(): Promise<void> {
   if (isDataStale()) {
     global.updateRubyGemsVersions =
       global.updateRubyGemsVersions || updateRubyGemsVersions();

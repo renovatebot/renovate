@@ -12,20 +12,20 @@ pr:
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   CI: true
-  AZP_CACHING_TAR: true
+  Agent.Source.Git.ShallowFetchDepth: 1
 
 jobs:
   - job: 'Windows'
     strategy:
       matrix:
-        Node10 Py3.7:
+        Node10 Py3.8:
           nodeVersion: '10.x'
-          pythonVersion: '3.7'
-        Node12 Py3.7:
+          pythonVersion: '3.8'
+        Node12 Py3.8:
           nodeVersion: '12.x'
-          pythonVersion: '3.7'
+          pythonVersion: '3.8'
     pool:
-      vmImage: vs2017-win2016
+      vmImage: windows-2019
     steps:
       - bash: |
           set -e
@@ -38,22 +38,22 @@ jobs:
   - job: 'Linux'
     strategy:
       matrix:
-        Node10 Py3.7:
+        Node10 Py3.8:
           nodeVersion: '10.x'
-          pythonVersion: '3.7'
+          pythonVersion: '3.8'
     pool:
-      vmImage: ubuntu-16.04
+      vmImage: ubuntu-18.04
     steps:
       - template: .azure/steps.yml
 
   - job: 'MacOS'
     strategy:
       matrix:
-        Node10 Py3.7:
+        Node10 Py3.8:
           nodeVersion: '10.x'
-          pythonVersion: '3.7'
+          pythonVersion: '3.8'
     pool:
-      vmImage: macOS-10.14
+      vmImage: macOS-10.13
 
     steps:
       - template: .azure/steps.yml

@@ -33,7 +33,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
   const config: RenovateCliConfig = {};
 
   const coersions = {
-    boolean: (val: string) => {
+    boolean: (val: string): boolean => {
       if (val === 'true' || val === '') return true;
       if (val === 'false') return false;
       throw new Error(
@@ -42,7 +42,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
           "'"
       );
     },
-    array: (val: string) => {
+    array: (val: string): string[] => {
       if (val === '') {
         return [];
       }
@@ -52,7 +52,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
         return val.split(',').map(el => el.trim());
       }
     },
-    object: (val: string) => {
+    object: (val: string): any => {
       if (val === '') {
         return {};
       }
@@ -62,7 +62,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
         throw new Error("Invalid JSON value: '" + val + "'");
       }
     },
-    string: (val: string) => val,
+    string: (val: string): string => val,
     integer: parseInt,
   };
 

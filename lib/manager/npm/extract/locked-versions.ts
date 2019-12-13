@@ -4,7 +4,9 @@ import { getNpmLock } from './npm';
 import { getYarnLock } from './yarn';
 import { PackageFile } from '../../common';
 
-export async function getLockedVersions(packageFiles: PackageFile[]) {
+export async function getLockedVersions(
+  packageFiles: PackageFile[]
+): Promise<void> {
   const lockFileCache: Record<string, Record<string, string>> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {

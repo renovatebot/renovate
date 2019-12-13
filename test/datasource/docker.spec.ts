@@ -12,6 +12,12 @@ jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
 describe('api/docker', () => {
+  describe('getRegistryRepository', () => {
+    it('handles local registries', () => {
+      const res = docker.getRegistryRepository('registry:5000/org/package', []);
+      expect(res).toMatchSnapshot();
+    });
+  });
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();

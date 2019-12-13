@@ -211,7 +211,11 @@ describe('platform/bitbucket-server', () => {
         it('sends to gitFs', async () => {
           expect.assertions(1);
           await initRepo();
-          await bitbucket.commitFilesToBranch('some-branch', [{}], 'message');
+          await bitbucket.commitFilesToBranch(
+            'some-branch',
+            [{ name: 'test', contents: 'dummy' }],
+            'message'
+          );
           expect(api.get.mock.calls).toMatchSnapshot();
         });
       });
@@ -689,7 +693,7 @@ describe('platform/bitbucket-server', () => {
         it('sanitizes HTML comments in the body', () => {
           const prBody = bitbucket.getPrBody(`---
 
-- [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---

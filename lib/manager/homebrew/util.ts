@@ -17,12 +17,6 @@ export function isSpace(c: string): boolean {
   return /\s/.test(c);
 }
 
-export function removeComments(content: string): string {
-  let newContent = removeLineComments(content);
-  newContent = removeMultiLineComments(newContent);
-  return newContent;
-}
-
 // Remove line comments starting with #
 function removeLineComments(content: string): string {
   let newContent = '';
@@ -63,5 +57,11 @@ function removeMultiLineComments(content: string): string {
     i = newContent.search(beginRegExp);
     j = newContent.search(endRegExp);
   }
+  return newContent;
+}
+
+export function removeComments(content: string): string {
+  let newContent = removeLineComments(content);
+  newContent = removeMultiLineComments(newContent);
   return newContent;
 }

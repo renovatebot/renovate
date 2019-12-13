@@ -20,7 +20,7 @@ export function parsePom(raw: string): XmlDocument | null {
   return project;
 }
 
-export function containsPlaceholder(str: string) {
+export function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
 }
 
@@ -73,7 +73,7 @@ function applyProps(
   dep: PackageDependency<Record<string, any>>,
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
-  const replaceAll = (str: string) =>
+  const replaceAll = (str: string): string =>
     str.replace(/\${.*?}/g, substr => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];

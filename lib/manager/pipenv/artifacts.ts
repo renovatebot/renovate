@@ -41,10 +41,10 @@ export async function updateArtifacts(
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir, process.env.PIPENV_CACHE_DIR];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = ['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR'];
       cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/pipenv pipenv`;
     } else {
       logger.info('Running pipenv via global command');

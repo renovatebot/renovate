@@ -3,12 +3,13 @@ import upath from 'upath';
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageFile, PackageDependency, ExtractConfig } from '../common';
 import { platform } from '../../platform';
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
+  fileName: string,
+  config: ExtractConfig
 ): Promise<PackageFile> {
   try {
     const baseDir = upath.parse(fileName).dir;
@@ -18,7 +19,7 @@ export async function extractPackageFile(
       logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;
     }
-    const chart = yaml.safeLoad(chartContents);
+    const chart = yaml.safeLoad(chartContents, { json: true });
     if (!(chart && chart.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
@@ -33,7 +34,7 @@ export async function extractPackageFile(
   let deps = [];
   let doc;
   try {
-    doc = yaml.safeLoad(content);
+    doc = yaml.safeLoad(content, { json: true });
   } catch (err) {
     logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
     return null;
@@ -50,6 +51,13 @@ export async function extractPackageFile(
     if (dep.repository) {
       res.registryUrls = [dep.repository];
       if (dep.repository.startsWith('@')) {
+        const repoWithAtRemoved = dep.repository.slice(1);
+        const alias = config.aliases[repoWithAtRemoved];
+        if (alias) {
+          res.registryUrls = [alias];
+          return res;
+        }
+
         res.skipReason = 'placeholder-url';
       } else {
         try {

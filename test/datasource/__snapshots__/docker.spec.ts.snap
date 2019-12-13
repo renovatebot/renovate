@@ -396,3 +396,10 @@ exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
   ],
 }
 `;
+
+exports[`api/docker getRegistryRepository handles local registries 1`] = `
+Object {
+  "registry": "https://registry:5000",
+  "repository": "org/package",
+}
+`;

@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 export function extractPackageFile(content: string): PackageFile | null {
   let doc;
   try {
-    doc = yaml.safeLoad(content);
+    doc = yaml.safeLoad(content, { json: true });
   } catch (err) {
     logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
     return null;

@@ -22,14 +22,14 @@ const {
   sortVersions,
 } = maven;
 
-function isVersion(str: string) {
+function isVersion(str: string): string | boolean {
   if (!str) {
     return false;
   }
   return isSingleVersion(str) || !!parseDynamicRevision(str);
 }
 
-function matches(a: string, b: string) {
+function matches(a: string, b: string): boolean {
   if (!a) return false;
   if (!b) return false;
   const dynamicRevision = parseDynamicRevision(b);

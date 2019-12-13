@@ -85,6 +85,10 @@ describe('datasource/maven', () => {
     nock.enableNetConnect();
   });
 
+  function generateReleases(versions) {
+    return versions.map(v => ({ version: v }));
+  }
+
   describe('getPkgReleases', () => {
     it('should return empty if library is not found', async () => {
       const releases = await datasource.getPkgReleases({
@@ -277,7 +281,3 @@ describe('datasource/maven', () => {
     });
   });
 });
-
-function generateReleases(versions) {
-  return versions.map(v => ({ version: v }));
-}

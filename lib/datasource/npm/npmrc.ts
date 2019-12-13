@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import { isBase64 } from 'validator';
+import isBase64 from 'validator/lib/isBase64';
 import { logger } from '../../logger';
 
 let npmrc: Record<string, any> | null = null;
@@ -10,7 +10,24 @@ export function getNpmrc(): Record<string, any> | null {
   return npmrc;
 }
 
-export function setNpmrc(input?: string) {
+function envReplace(value: any, env = process.env): any {
+  // istanbul ignore if
+  if (!is.string(value)) {
+    return value;
+  }
+
+  const ENV_EXPR = /(\\*)\$\{([^}]+)\}/g;
+
+  return value.replace(ENV_EXPR, (match, esc, envVarName) => {
+    if (env[envVarName] === undefined) {
+      logger.warn('Failed to replace env in config: ' + match);
+      throw new Error('env-replace');
+    }
+    return env[envVarName];
+  });
+}
+
+export function setNpmrc(input?: string): void {
   if (input) {
     if (input === npmrcRaw) {
       return;
@@ -55,21 +72,4 @@ export function setNpmrc(input?: string) {
     npmrc = null;
     npmrcRaw = null;
   }
-}
-
-function envReplace(value: any, env = process.env): any {
-  // istanbul ignore if
-  if (!is.string(value)) {
-    return value;
-  }
-
-  const ENV_EXPR = /(\\*)\$\{([^}]+)\}/g;
-
-  return value.replace(ENV_EXPR, (match, esc, envVarName) => {
-    if (env[envVarName] === undefined) {
-      logger.warn('Failed to replace env in config: ' + match);
-      throw new Error('env-replace');
-    }
-    return env[envVarName];
-  });
 }

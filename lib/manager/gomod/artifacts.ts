@@ -38,7 +38,7 @@ export async function updateArtifacts(
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    const customEnv = ['GOPATH', 'GOPROXY'];
+    const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
     const env = getChildProcessEnv(customEnv);
     const startTime = process.hrtime();
     let cmd: string;
@@ -50,11 +50,11 @@ export async function updateArtifacts(
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir, process.env.GOPATH];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = customEnv;
       cmd += envVars.map(e => `-e ${e} `).join('');
       cmd += '-e CGO_ENABLED=0 ';
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/go `;
       const credentials = find({
         hostType: 'github',

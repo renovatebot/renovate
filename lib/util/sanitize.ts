@@ -1,6 +1,6 @@
 const secrets = new Set<string>();
 
-export function sanitize(input: string) {
+export function sanitize(input: string): string {
   if (!input) return input;
   let output: string = input;
   secrets.forEach(secret => {
@@ -11,10 +11,10 @@ export function sanitize(input: string) {
   return output;
 }
 
-export function add(secret: string) {
+export function add(secret: string): void {
   secrets.add(secret);
 }
 
-export function clear() {
+export function clear(): void {
   secrets.clear();
 }

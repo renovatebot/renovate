@@ -36,7 +36,9 @@ export async function setPlatformApi(name: string): Promise<void> {
   _platform = await import('./' + name);
 }
 
-export async function initPlatform(config: RenovateConfig) {
+export async function initPlatform(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
   await setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);

@@ -1,8 +1,11 @@
 import { GotJSONOptions } from 'got';
 import got from '../../util/got';
-import { GotApi, GotApiOptions } from '../common';
+import { GotApi, GotApiOptions, GotResponse } from '../common';
 
-async function get(path: string, options: GotApiOptions & GotJSONOptions) {
+async function get(
+  path: string,
+  options: GotApiOptions & GotJSONOptions
+): Promise<GotResponse> {
   const opts: GotApiOptions & GotJSONOptions = {
     json: true,
     hostType: 'bitbucket',
@@ -18,8 +21,8 @@ const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 export const api: GotApi = {} as any;
 
 for (const x of helpers) {
-  (api as any)[x] = (url: string, opts: any) =>
-    get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
+  (api as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
+    get(url, { ...opts, method: x.toUpperCase() });
 }
 
 export default api;

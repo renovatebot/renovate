@@ -5,7 +5,7 @@ import {
   satisfies,
   maxSatisfying,
   minSatisfying,
-} from '@snyk/ruby-semver';
+} from '@renovatebot/ruby-semver';
 import { VersioningApi, RangeStrategy } from '../common';
 import { logger } from '../../logger';
 import { parse as parseVersion } from './version';
@@ -13,31 +13,44 @@ import { parse as parseRange, ltr } from './range';
 import { isSingleOperator, isValidOperator } from './operator';
 import { pin, bump, replace } from './strategies';
 
-const equals = (left: string, right: string) => eq(left, right);
+function vtrim<T = unknown>(version: T): string | T {
+  if (typeof version === 'string') return version.replace(/^v/, '');
+  return version;
+}
 
-const getMajor = (version: string) => parseVersion(version).major;
-const getMinor = (version: string) => parseVersion(version).minor;
-const getPatch = (version: string) => parseVersion(version).patch;
+const equals = (left: string, right: string): boolean =>
+  eq(vtrim(left), vtrim(right));
 
-export const isVersion = (version: string) => !!valid(version);
-const isGreaterThan = (left: string, right: string) => gt(left, right);
-const isLessThanRange = (version: string, range: string) => ltr(version, range);
+const getMajor = (version: string): number =>
+  parseVersion(vtrim(version)).major;
+const getMinor = (version: string): number =>
+  parseVersion(vtrim(version)).minor;
+const getPatch = (version: string): number =>
+  parseVersion(vtrim(version)).patch;
 
-const isSingleVersion = (range: string) => {
-  const { version, operator } = parseRange(range);
+export const isVersion = (version: string): boolean => !!valid(vtrim(version));
+const isGreaterThan = (left: string, right: string): boolean =>
+  gt(vtrim(left), vtrim(right));
+const isLessThanRange = (version: string, range: string): boolean =>
+  ltr(vtrim(version), vtrim(range));
+
+const isSingleVersion = (range: string): boolean => {
+  const { version, operator } = parseRange(vtrim(range));
 
   return operator
     ? isVersion(version) && isSingleOperator(operator)
     : isVersion(version);
 };
 
-const isStable = (version: string) =>
-  parseVersion(version).prerelease ? false : isVersion(version);
+function isStable(version: string): boolean {
+  const v = vtrim(version);
+  return parseVersion(v).prerelease ? false : isVersion(v);
+}
 
-export const isValid = (input: string) =>
+export const isValid = (input: string): boolean =>
   input
     .split(',')
-    .map(piece => piece.trim())
+    .map(piece => vtrim(piece.trim()))
     .every(range => {
       const { version, operator } = parseRange(range);
 
@@ -46,35 +59,44 @@ export const isValid = (input: string) =>
         : isVersion(version);
     });
 
-export const matches = (version: string, range: string) =>
-  satisfies(version, range);
-const maxSatisfyingVersion = (versions: string[], range: string) =>
-  maxSatisfying(versions, range);
-const minSatisfyingVersion = (versions: string[], range: string) =>
-  minSatisfying(versions, range);
+export const matches = (version: string, range: string): boolean =>
+  satisfies(vtrim(version), vtrim(range));
+const maxSatisfyingVersion = (versions: string[], range: string): string =>
+  maxSatisfying(versions.map(vtrim), vtrim(range));
+const minSatisfyingVersion = (versions: string[], range: string): string =>
+  minSatisfying(versions.map(vtrim), vtrim(range));
 
 const getNewValue = (
   currentValue: string,
   rangeStrategy: RangeStrategy,
   _fromVersion: string,
   toVersion: string
-) => {
+): string => {
+  let result = null;
   switch (rangeStrategy) {
     case 'pin':
-      return pin({ to: toVersion });
+      result = pin({ to: vtrim(toVersion) });
+      break;
     case 'bump':
-      return bump({ range: currentValue, to: toVersion });
+      result = bump({ range: vtrim(currentValue), to: vtrim(toVersion) });
+      break;
     case 'replace':
-      return replace({ range: currentValue, to: toVersion });
+      result = replace({ range: vtrim(currentValue), to: vtrim(toVersion) });
+      break;
     // istanbul ignore next
     default:
       logger.warn(`Unsupported strategy ${rangeStrategy}`);
-      return null;
   }
+
+  if (currentValue !== vtrim(currentValue) && isSingleVersion(result)) {
+    result = `v${result}`;
+  }
+
+  return result;
 };
 
-export const sortVersions = (left: string, right: string) =>
-  gt(left, right) ? 1 : -1;
+export const sortVersions = (left: string, right: string): number =>
+  gt(vtrim(left), vtrim(right)) ? 1 : -1;
 
 export const api: VersioningApi = {
   equals,

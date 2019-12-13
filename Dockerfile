@@ -1,4 +1,4 @@
-FROM amd64/node:10.16.3@sha256:925162bdc4b23422763cb2d08ecf1661bbbd856ab54b959517924054e17813fc AS tsbuild
+FROM amd64/node:10.17.0@sha256:93e9a9283f0e2ead937a8f77a2c72b18f80005c10b57b4f1cfd40d2b3aa6595f AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,23 +11,26 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:3e83eca7870ee14a03b8026660e71ba761e6919b6982fb920d10254688a363d4
+FROM amd64/ubuntu:18.04@sha256:134c7fe821b9d359490cd009ce7ca322453f4f2d018623f849e580a89a685e5d
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
-WORKDIR /usr/src/app/
+ENV APP_ROOT=/usr/src/app
+WORKDIR ${APP_ROOT}
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && apt-get clean -y
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Node.js
 
@@ -86,7 +89,7 @@ ENV ERLANG_VERSION=22.0.2-1
 RUN apt-get update && \
     apt-cache policy esl-erlang && \
     apt-get install -y esl-erlang=1:$ERLANG_VERSION && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 # Elixir
 
@@ -101,7 +104,8 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
-RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
+RUN apt-get update && apt-get install -y php-cli php-mbstring && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV COMPOSER_VERSION=1.8.6
 
@@ -111,9 +115,10 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-RUN apt-get update && apt-get install -y bzr && apt-get clean
+RUN apt-get update && apt-get install -y bzr mercurial && \
+    rm -rf /var/lib/apt/lists/*
 
-ENV GOLANG_VERSION 1.13
+ENV GOLANG_VERSION 1.13.4
 
 # Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
 # private repositories.
@@ -133,19 +138,21 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
+RUN apt-get update && apt-get install -y python3.8-dev python3-distutils && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
-RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
+RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.8 /usr/bin/python3
+RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 # Pip
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
-# Set up ubuntu user
+# Set up ubuntu user and home directory with access to users in the root group (0)
 
-RUN groupadd --gid 1000 ubuntu \
-  && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
+ENV HOME=/home/ubuntu
+RUN groupadd --gid 1000 ubuntu && \
+  useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu
 
 RUN chmod -R a+rw /usr
 
@@ -166,7 +173,7 @@ USER ubuntu
 # Cargo
 
 ENV RUST_BACKTRACE=1 \
-  PATH=/home/ubuntu/.cargo/bin:$PATH
+  PATH=${HOME}/.cargo/bin:$PATH
 
 RUN set -ex ;\
   curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
@@ -179,7 +186,7 @@ RUN mix local.rebar --force
 
 # Pipenv
 
-ENV PATH="/home/ubuntu/.local/bin:$PATH"
+ENV PATH="${HOME}/.local/bin:$PATH"
 
 RUN pip install --user pipenv
 
@@ -187,8 +194,9 @@ RUN pip install --user pipenv
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
-ENV PATH="/home/ubuntu/.poetry/bin:$PATH"
-RUN poetry config settings.virtualenvs.create false
+ENV PATH="${HOME}/.poetry/bin:$PATH"
+RUN cp -r ${HOME}/.poetry/lib/poetry/_vendor/py3.7 ${HOME}/.poetry/lib/poetry/_vendor/py3.8
+RUN poetry config settings.virtualenvs.in-project false
 
 # npm
 
@@ -198,11 +206,11 @@ RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.17.3
+ENV YARN_VERSION=1.19.1
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
-ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.bin:$PATH"
+ENV PATH="${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin:$PATH"
 
 COPY package.json .
 COPY yarn.lock .
@@ -213,8 +221,11 @@ COPY bin bin
 COPY data data
 
 USER root
-RUN chown -R ubuntu:ubuntu /usr/src/app
-USER ubuntu
+RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
+  chmod -R g=u ${APP_ROOT} ${HOME}
+
+# Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
+USER 1000
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []

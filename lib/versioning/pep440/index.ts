@@ -16,7 +16,7 @@ const {
   eq: equals,
 } = pep440;
 
-const isStable = (input: string) => {
+const isStable = (input: string): boolean => {
   const version = explain(input);
   if (!version) {
     return false;
@@ -25,19 +25,19 @@ const isStable = (input: string) => {
 };
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string) => validRange(input);
+export const isValid = (input: string): string => validRange(input);
 
-const maxSatisfyingVersion = (versions: string[], range: string) => {
+const maxSatisfyingVersion = (versions: string[], range: string): string => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
 };
 
-const minSatisfyingVersion = (versions: string[], range: string) => {
+const minSatisfyingVersion = (versions: string[], range: string): string => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];
 };
 
-export const isSingleVersion = (constraint: string) =>
+export const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
   (constraint.startsWith('==') && isVersion(constraint.substring(2).trim()));
 

@@ -106,10 +106,10 @@ export async function updateArtifacts(
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir, process.env.COMPOSER_CACHE_DIR];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = ['COMPOSER_CACHE_DIR'];
       cmd += envVars.map(e => `-e ${e} `);
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/composer composer`;
     } else {
       logger.info('Running composer via global composer');
@@ -123,7 +123,7 @@ export async function updateArtifacts(
         ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
     }
     args += ' --ignore-platform-reqs --no-ansi --no-interaction';
-    if (global.trustLevel !== 'high') {
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

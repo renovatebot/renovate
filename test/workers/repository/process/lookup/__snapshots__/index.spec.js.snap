@@ -178,6 +178,22 @@ Object {
 }
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() handles git submodule update 1`] = `
+Object {
+  "skipReason": "unsupported-value",
+  "updates": Array [
+    Object {
+      "fromVersion": undefined,
+      "newValue": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "newVersion": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "toVersion": undefined,
+      "updateType": "digest",
+    },
+  ],
+  "warnings": Array [],
+}
+`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() handles github 404 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles packagist 1`] = `Array []`;

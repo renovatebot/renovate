@@ -14,7 +14,7 @@ function matchesAnyPattern(val: string, patterns: string[]): boolean {
   return res;
 }
 
-export function detectMonorepos(packageFiles: Partial<PackageFile>[]) {
+export function detectMonorepos(packageFiles: Partial<PackageFile>[]): void {
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
     const {

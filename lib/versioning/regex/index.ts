@@ -13,6 +13,15 @@ export interface RegExpVersion extends GenericVersion {
   compatibility: string;
 }
 
+// convenience method for passing a Version object into any semver.* method.
+function asSemver(version: RegExpVersion): string {
+  let vstring = `${version.release[0]}.${version.release[1]}.${version.release[2]}`;
+  if (typeof version.prerelease !== 'undefined') {
+    vstring += `-${version.prerelease}`;
+  }
+  return vstring;
+}
+
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   // config is expected to be overridden by a user-specified RegExp value
   // sample values:
@@ -59,7 +68,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   // convenience method for passing a string into a Version given current config.
   protected _parse(version: string): RegExpVersion | null {
-    const match = version.match(this._config);
+    const match = version ? version.match(this._config) : null;
     if (match === null) {
       return null;
     }
@@ -104,21 +113,12 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     );
   }
 
-  matches(version: string, range: string) {
+  matches(version: string, range: string): boolean {
     return satisfies(
       asSemver(this._parse(version)),
       asSemver(this._parse(range))
     );
   }
-}
-
-// convenience method for passing a Version object into any semver.* method.
-function asSemver(version: RegExpVersion): string {
-  let vstring = `${version.release[0]}.${version.release[1]}.${version.release[2]}`;
-  if (typeof version.prerelease !== 'undefined') {
-    vstring += `-${version.prerelease}`;
-  }
-  return vstring;
 }
 
 export const api: VersioningApiConstructor = RegExpVersioningApi;

@@ -20,16 +20,16 @@ const {
   eq: equals,
 } = semver;
 
-export const isValid = (input: string) =>
+export const isValid = (input: string): boolean =>
   !!valid(input) || !!validRange(toSemverRange(input));
-export const isVersion = (input: string) => !!valid(input);
-const maxSatisfyingVersion = (versions: string[], range: string) =>
+export const isVersion = (input: string): boolean => !!valid(input);
+const maxSatisfyingVersion = (versions: string[], range: string): string =>
   maxSatisfying(versions, toSemverRange(range));
-const minSatisfyingVersion = (versions: string[], range: string) =>
+const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(versions, toSemverRange(range));
-const isLessThanRange = (version: string, range: string) =>
+const isLessThanRange = (version: string, range: string): boolean =>
   ltr(version, toSemverRange(range));
-const matches = (version: string, range: string) =>
+const matches = (version: string, range: string): boolean =>
   satisfies(version, toSemverRange(range));
 
 export const api: VersioningApi = {

@@ -3,14 +3,14 @@ import { major, minor } from 'semver';
 import { api as npm } from '../npm';
 import { RangeStrategy, VersioningApi } from '../common';
 
-function notEmpty(s: string) {
+function notEmpty(s: string): boolean {
   return s !== '';
 }
 
 // This function works like cargo2npm, but it doesn't
 // add a '^', because poetry treats versions without operators as
 // exact versions.
-function poetry2npm(input: string) {
+function poetry2npm(input: string): string {
   const versions = input
     .split(',')
     .map(str => str.trim())
@@ -21,7 +21,7 @@ function poetry2npm(input: string) {
 // NOTE: This function is copied from cargo versionsing code.
 // Poetry uses commas (like in cargo) instead of spaces (like in npm)
 // for AND operation.
-function npm2poetry(input: string) {
+function npm2poetry(input: string): string {
   // Note: this doesn't remove the ^
   const res = input
     .split(' ')
@@ -37,22 +37,23 @@ function npm2poetry(input: string) {
   return res.join(', ');
 }
 
-const isLessThanRange = (version: string, range: string) =>
+const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(version, poetry2npm(range));
 
-export const isValid = (input: string) => npm.isValid(poetry2npm(input));
+export const isValid = (input: string): string | boolean =>
+  npm.isValid(poetry2npm(input));
 
-const isVersion = (input: string) => npm.isVersion(input);
-const matches = (version: string, range: string) =>
+const isVersion = (input: string): string | boolean => npm.isVersion(input);
+const matches = (version: string, range: string): boolean =>
   npm.matches(version, poetry2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string) =>
+const maxSatisfyingVersion = (versions: string[], range: string): string =>
   npm.maxSatisfyingVersion(versions, poetry2npm(range));
 
-const minSatisfyingVersion = (versions: string[], range: string) =>
+const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, poetry2npm(range));
 
-const isSingleVersion = (constraint: string) =>
+const isSingleVersion = (constraint: string): string | boolean =>
   (constraint.trim().startsWith('=') &&
     isVersion(
       constraint
@@ -62,12 +63,31 @@ const isSingleVersion = (constraint: string) =>
     )) ||
   isVersion(constraint.trim());
 
+function handleShort(
+  operator: string,
+  currentValue: string,
+  toVersion: string
+): string {
+  const toVersionMajor = major(toVersion);
+  const toVersionMinor = minor(toVersion);
+  const split = currentValue.split('.');
+  if (split.length === 1) {
+    // [^,~]4
+    return operator + toVersionMajor;
+  }
+  if (split.length === 2) {
+    // [^,~]4.1
+    return operator + toVersionMajor + '.' + toVersionMinor;
+  }
+  return null;
+}
+
 function getNewValue(
   currentValue: string,
   rangeStrategy: RangeStrategy,
   fromVersion: string,
   toVersion: string
-) {
+): string {
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     const parsedRange = parseRange(npmCurrentValue);
@@ -95,25 +115,6 @@ function getNewValue(
   );
   const newPoetry = npm2poetry(newSemver);
   return newPoetry;
-}
-
-function handleShort(
-  operator: string,
-  currentValue: string,
-  toVersion: string
-) {
-  const toVersionMajor = major(toVersion);
-  const toVersionMinor = minor(toVersion);
-  const split = currentValue.split('.');
-  if (split.length === 1) {
-    // [^,~]4
-    return operator + toVersionMajor;
-  }
-  if (split.length === 2) {
-    // [^,~]4.1
-    return operator + toVersionMajor + '.' + toVersionMinor;
-  }
-  return null;
 }
 
 export const api: VersioningApi = {

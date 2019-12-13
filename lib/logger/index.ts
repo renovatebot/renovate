@@ -98,7 +98,7 @@ loggerLevels.forEach(loggerLevel => {
 });
 
 // setMeta overrides existing meta
-export function setMeta(obj: any) {
+export function setMeta(obj: any): void {
   meta = { ...obj };
 }
 
@@ -112,6 +112,6 @@ export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
 
-export function getErrors() {
+export function getErrors(): any {
   return errors.getErrors();
 }

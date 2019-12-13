@@ -4,6 +4,20 @@ import * as v2 from './v2';
 import * as v3 from './v3';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 
+function detectFeedVersion(url: string): 2 | 3 | null {
+  try {
+    const parsecUrl = urlApi.parse(url);
+    // Official client does it in the same way
+    if (parsecUrl.pathname.endsWith('.json')) {
+      return 3;
+    }
+    return 2;
+  } catch (e) {
+    logger.debug({ e }, `nuget registry failure: can't parse ${url}`);
+    return null;
+  }
+}
+
 export async function getPkgReleases({
   lookupName,
   registryUrls,
@@ -31,18 +45,4 @@ export async function getPkgReleases({
     );
   }
   return dep;
-}
-
-function detectFeedVersion(url: string): 2 | 3 | null {
-  try {
-    const parsecUrl = urlApi.parse(url);
-    // Official client does it in the same way
-    if (parsecUrl.pathname.endsWith('.json')) {
-      return 3;
-    }
-    return 2;
-  } catch (e) {
-    logger.debug({ e }, `nuget registry failure: can't parse ${url}`);
-    return null;
-  }
 }

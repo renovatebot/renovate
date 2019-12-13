@@ -11,12 +11,12 @@ interface HostStats {
 let stats: Record<string, number[]> = {};
 
 // istanbul ignore next
-export const resetStats = () => {
+export const resetStats = (): void => {
   stats = {};
 };
 
 // istanbul ignore next
-export const printStats = () => {
+export const printStats = (): void => {
   logger.trace({ stats }, 'Host transfer stats (milliseconds)');
   const hostStats: Record<string, HostStats> = {};
   for (const [hostname, entries] of Object.entries(stats)) {

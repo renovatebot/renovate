@@ -33,31 +33,6 @@ interface PipRequirement {
   git?: string;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.debug('pipenv.extractPackageFile()');
-
-  let pipfile: PipFile;
-  try {
-    pipfile = toml.parse(content);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing Pipfile');
-    return null;
-  }
-  const res: PackageFile = { deps: [] };
-  if (pipfile.source) {
-    res.registryUrls = pipfile.source.map(source => source.url);
-  }
-
-  res.deps = [
-    ...extractFromSection(pipfile, 'packages'),
-    ...extractFromSection(pipfile, 'dev-packages'),
-  ];
-  if (res.deps.length) {
-    return res;
-  }
-  return null;
-}
-
 function extractFromSection(
   pipfile: PipFile,
   section: 'packages' | 'dev-packages'
@@ -133,4 +108,29 @@ function extractFromSection(
     })
     .filter(Boolean);
   return deps;
+}
+
+export function extractPackageFile(content: string): PackageFile | null {
+  logger.debug('pipenv.extractPackageFile()');
+
+  let pipfile: PipFile;
+  try {
+    pipfile = toml.parse(content);
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing Pipfile');
+    return null;
+  }
+  const res: PackageFile = { deps: [] };
+  if (pipfile.source) {
+    res.registryUrls = pipfile.source.map(source => source.url);
+  }
+
+  res.deps = [
+    ...extractFromSection(pipfile, 'packages'),
+    ...extractFromSection(pipfile, 'dev-packages'),
+  ];
+  if (res.deps.length) {
+    return res;
+  }
+  return null;
 }

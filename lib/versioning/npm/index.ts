@@ -19,10 +19,10 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string) => validRange(input);
-export const isVersion = (input: string) => valid(input);
+export const isValid = (input: string): string => validRange(input);
+export const isVersion = (input: string): string => valid(input);
 
-const isSingleVersion = (constraint: string) =>
+const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
   (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
 

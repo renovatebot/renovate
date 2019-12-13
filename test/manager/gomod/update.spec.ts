@@ -235,5 +235,20 @@ describe('manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res.includes(upgrade.newDigest.substring(0, 12))).toBe(true);
     });
+    it('handles no pinned version to latest available version', () => {
+      const upgrade = {
+        depName: 'github.com/caarlos0/env',
+        managerData: { lineNumber: 13 },
+        newValue: 'v6.1.0',
+        depType: 'require',
+        currentValue: 'v3.5.0+incompatible',
+        newMajor: 6,
+        updateType: 'major',
+      };
+      const res = updateDependency(gomod1, upgrade);
+      expect(res).not.toEqual(gomod1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res).toContain(upgrade.depName + '/v6');
+    });
   });
 });

@@ -1,7 +1,2 @@
-import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
-
-module.exports = {
-  extractPackageFile,
-  updateDependency,
-};
+export { extractPackageFile } from './extract';
+export { updateDependency } from './update';

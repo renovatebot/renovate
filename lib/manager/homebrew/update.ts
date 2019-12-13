@@ -6,6 +6,133 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
+function replaceUrl(
+  idx: number,
+  content: string,
+  oldUrl: string,
+  newUrl: string
+): string | null {
+  let i = idx;
+  i += 'url'.length;
+  i = skip(i, content, c => isSpace(c));
+  const chr = content[i];
+  if (chr !== '"' && chr !== "'") {
+    return null;
+  }
+  i += 1;
+  const newContent =
+    content.substring(0, i) + content.substring(i).replace(oldUrl, newUrl);
+  return newContent;
+}
+
+function getUrlTestContent(
+  content: string,
+  oldUrl: string,
+  newUrl: string
+): string {
+  const urlRegExp = /(^|\s)url(\s)/;
+  const cleanContent = removeComments(content);
+  let j = cleanContent.search(urlRegExp);
+  if (isSpace(cleanContent[j])) {
+    j += 1;
+  }
+  const testContent = replaceUrl(j, cleanContent, oldUrl, newUrl);
+  return testContent;
+}
+
+function updateUrl(
+  content: string,
+  oldUrl: string,
+  newUrl: string
+): string | null {
+  const urlRegExp = /(^|\s)url(\s)/;
+  let i = content.search(urlRegExp);
+  if (i === -1) {
+    return null;
+  }
+  if (isSpace(content[i])) {
+    i += 1;
+  }
+  let newContent = replaceUrl(i, content, oldUrl, newUrl);
+  const testContent = getUrlTestContent(content, oldUrl, newUrl);
+  if (!newContent || !testContent) {
+    return null;
+  }
+  while (removeComments(newContent) !== testContent) {
+    i += 'url'.length;
+    i += content.substring(i).search(urlRegExp);
+    if (isSpace(content[i])) {
+      i += 1;
+    }
+    newContent = replaceUrl(i, content, oldUrl, newUrl);
+  }
+  return newContent;
+}
+
+function replaceSha256(
+  idx: number,
+  content: string,
+  oldSha256: string,
+  newSha256: string
+): string | null {
+  let i = idx;
+  i += 'sha256'.length;
+  i = skip(i, content, c => isSpace(c));
+  const chr = content[i];
+  if (chr !== '"' && chr !== "'") {
+    return null;
+  }
+  i += 1;
+  const newContent =
+    content.substring(0, i) +
+    content.substring(i).replace(oldSha256, newSha256);
+  return newContent;
+}
+
+function getSha256TestContent(
+  content: string,
+  oldSha256: string,
+  newSha256: string
+): string | null {
+  const sha256RegExp = /(^|\s)sha256(\s)/;
+  const cleanContent = removeComments(content);
+  let j = cleanContent.search(sha256RegExp);
+  if (isSpace(cleanContent[j])) {
+    j += 1;
+  }
+  const testContent = replaceSha256(j, cleanContent, oldSha256, newSha256);
+  return testContent;
+}
+
+function updateSha256(
+  content: string,
+  oldSha256: string,
+  newSha256: string
+): string | null {
+  const sha256RegExp = /(^|\s)sha256(\s)/;
+  let i = content.search(sha256RegExp);
+  if (i === -1) {
+    return null;
+  }
+  if (isSpace(content[i])) {
+    i += 1;
+  }
+  let newContent = replaceSha256(i, content, oldSha256, newSha256);
+  const testContent = getSha256TestContent(content, oldSha256, newSha256);
+  if (!newContent || !testContent) {
+    return null;
+  }
+  while (removeComments(newContent) !== testContent) {
+    i += 'sha256'.length;
+    i += content.substring(i).search(sha256RegExp);
+    if (isSpace(content[i])) {
+      i += 1;
+    }
+    newContent = replaceSha256(i, content, oldSha256, newSha256);
+  }
+  return newContent;
+}
+
 // TODO: Refactor
 export async function updateDependency(
   content: string,
@@ -78,132 +205,5 @@ export async function updateDependency(
     logger.debug(`Failed to update sha256 for dependency ${upgrade.depName}`);
     return content;
   }
-  return newContent;
-}
-
-function updateUrl(
-  content: string,
-  oldUrl: string,
-  newUrl: string
-): string | null {
-  const urlRegExp = /(^|\s)url(\s)/;
-  let i = content.search(urlRegExp);
-  if (i === -1) {
-    return null;
-  }
-  if (isSpace(content[i])) {
-    i += 1;
-  }
-  let newContent = replaceUrl(i, content, oldUrl, newUrl);
-  const testContent = getUrlTestContent(content, oldUrl, newUrl);
-  if (!newContent || !testContent) {
-    return null;
-  }
-  while (removeComments(newContent) !== testContent) {
-    i += 'url'.length;
-    i += content.substring(i).search(urlRegExp);
-    if (isSpace(content[i])) {
-      i += 1;
-    }
-    newContent = replaceUrl(i, content, oldUrl, newUrl);
-  }
-  return newContent;
-}
-
-function getUrlTestContent(
-  content: string,
-  oldUrl: string,
-  newUrl: string
-): string {
-  const urlRegExp = /(^|\s)url(\s)/;
-  const cleanContent = removeComments(content);
-  let j = cleanContent.search(urlRegExp);
-  if (isSpace(cleanContent[j])) {
-    j += 1;
-  }
-  const testContent = replaceUrl(j, cleanContent, oldUrl, newUrl);
-  return testContent;
-}
-
-function replaceUrl(
-  idx: number,
-  content: string,
-  oldUrl: string,
-  newUrl: string
-): string | null {
-  let i = idx;
-  i += 'url'.length;
-  i = skip(i, content, c => isSpace(c));
-  const chr = content[i];
-  if (chr !== '"' && chr !== "'") {
-    return null;
-  }
-  i += 1;
-  const newContent =
-    content.substring(0, i) + content.substring(i).replace(oldUrl, newUrl);
-  return newContent;
-}
-
-function updateSha256(
-  content: string,
-  oldSha256: string,
-  newSha256: string
-): string | null {
-  const sha256RegExp = /(^|\s)sha256(\s)/;
-  let i = content.search(sha256RegExp);
-  if (i === -1) {
-    return null;
-  }
-  if (isSpace(content[i])) {
-    i += 1;
-  }
-  let newContent = replaceSha256(i, content, oldSha256, newSha256);
-  const testContent = getSha256TestContent(content, oldSha256, newSha256);
-  if (!newContent || !testContent) {
-    return null;
-  }
-  while (removeComments(newContent) !== testContent) {
-    i += 'sha256'.length;
-    i += content.substring(i).search(sha256RegExp);
-    if (isSpace(content[i])) {
-      i += 1;
-    }
-    newContent = replaceSha256(i, content, oldSha256, newSha256);
-  }
-  return newContent;
-}
-
-function getSha256TestContent(
-  content: string,
-  oldSha256: string,
-  newSha256: string
-): string | null {
-  const sha256RegExp = /(^|\s)sha256(\s)/;
-  const cleanContent = removeComments(content);
-  let j = cleanContent.search(sha256RegExp);
-  if (isSpace(cleanContent[j])) {
-    j += 1;
-  }
-  const testContent = replaceSha256(j, cleanContent, oldSha256, newSha256);
-  return testContent;
-}
-
-function replaceSha256(
-  idx: number,
-  content: string,
-  oldSha256: string,
-  newSha256: string
-): string | null {
-  let i = idx;
-  i += 'sha256'.length;
-  i = skip(i, content, c => isSpace(c));
-  const chr = content[i];
-  if (chr !== '"' && chr !== "'") {
-    return null;
-  }
-  i += 1;
-  const newContent =
-    content.substring(0, i) +
-    content.substring(i).replace(oldSha256, newSha256);
   return newContent;
 }

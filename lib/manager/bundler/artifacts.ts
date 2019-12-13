@@ -98,10 +98,10 @@ export async function updateArtifacts(
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir];
-      cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = [];
       cmd += envVars.map(e => `-e ${e} `);
-      cmd += `-w ${cwd} `;
+      cmd += `-w "${cwd}" `;
       cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';

@@ -21,6 +21,22 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
+## aliases
+
+Package managers that support repo aliases can be configured here.
+
+Currently only helm is supported, which contains this default repository alias:
+
+```json
+{
+  "aliases": {
+    "stable": "https://kubernetes-charts.storage.googleapis.com/"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
+
 ## ansible
 
 Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
@@ -295,6 +311,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## git-submodules
+
 ## gitLabAutomerge
 
 Please note that when this option is enabled it is possible that MRs with failing pipelines are getting merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
@@ -443,6 +461,10 @@ Use this if you are extending a complex preset but won't want to use every "sub 
 ```
 
 It would take the entire `"config:base"` preset - which contains a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+
+## ignoreScripts
+
+Applicable for npm and composer only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreUnstable
 
@@ -665,7 +687,7 @@ Note how the above uses `packageNames` instead of `packagePatterns` because it i
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
-Path rules are convenient to use if you wish to apply configuration rules to certain package files without needing to configure them all in the `packageFiles` array. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
+Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
   "packageRules": [
@@ -1091,6 +1113,8 @@ Set this to false either globally, per-language, or per-package if you want to d
 
 ## ruby-version
 
+## rust
+
 ## sbt
 
 It isn't supporting Scala version inference well (`%%` operator), just searching for package like `<artifactId>_<scalaVersion>` without any additional resolving.
@@ -1135,7 +1159,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
   ]
 ```
 
-Technical details: We mostly rely on the text parsing of the library [later](http://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
+Technical details: We mostly rely on the text parsing of the library [later](https://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
 
 ## semanticCommitScope
 
