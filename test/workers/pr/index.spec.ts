@@ -155,7 +155,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockResolvedValueOnce('failed');
       config.prCreation = 'status-success';
       const pr = await prWorker.ensurePr(config);
-      expect(pr).toBeNull();
+      expect(pr).toEqual('pending');
     });
     it('should return needs-approval if prCreation set to approval', async () => {
       platform.getBranchStatus.mockResolvedValueOnce('success');
@@ -236,7 +236,7 @@ describe('workers/pr', () => {
       );
       config.prCreation = 'not-pending';
       const pr = await prWorker.ensurePr(config);
-      expect(pr).toBeNull();
+      expect(pr).toEqual('pending');
     });
     it('should create PR if pending timeout hit', async () => {
       platform.getBranchStatus.mockResolvedValueOnce('pending');
