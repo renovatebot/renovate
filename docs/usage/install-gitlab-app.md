@@ -7,11 +7,11 @@ description: How to install the Renovate GitLab App
 
 ### Overview
 
-Renovate runs as the user [@renovate-bot](https://gitlab.com/renovate-bot) on [gitlab.com](https://gitlab.com). To enable the hosted Renovate App on your GitLab.com project, you can do any of the following:
+WhiteSource Renovate runs as the user [@renovate-bot](https://gitlab.com/renovate-bot) on [gitlab.com](https://gitlab.com). To enable the hosted WhiteSource Renovate App on your GitLab.com project, you can do any of the following:
 
 - Add [@renovate-bot](https://gitlab.com/renovate-bot) as a Developer directly to each project, or
 - Add [@renovate-bot](https://gitlab.com/renovate-bot) to a team that has Developer access to the project
-- Install using the Renovate Dashboard's UI
+- Install using the WhiteSource Renovate Dashboard's UI
 
 ### Dashboard
 
@@ -19,7 +19,9 @@ First, sign into the [Dashboard](https://app.renovatebot.com/dashboard) using Gi
 
 ![Renovate Dashboard Sign In Screenshot](assets/images/dashboard-login.png)
 
-The sidebar will load a list of any already-installed repositories that you have access to, if there are any.
+If it is your first time signing in, you will be asked to submit WhiteSource's registration form after logging in.
+
+The Dashboard sidebar will load a list of any already-installed repositories that you have access to, if there are any.
 
 Now click the "Settings" icon ![Renovate Dashboard Settings icon](assets/images/dashboard-settings.png) at the top of the side bar and it will soon load a list of all GitLab.com repositories that you have admin rights to.
 
@@ -43,7 +45,7 @@ Whenever that screen is loaded, the Dashboard client will check every installed 
 
 ### Pricing
 
-The Renovate App is currently free for all GitLab projects. Later, charging for private repositories will be added and probably at the same pricing tiers as [the GitHub App](https://github.com/marketplace/renovate). We will provide at least one month's notice before implementing paid plans for private repositories. Public repositories will remain free.
+WhiteSource Renovate is free for both public and private repositories, so no payment is necessary.
 
 ### Details and Known Limitations
 
