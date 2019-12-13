@@ -1318,11 +1318,6 @@
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array",
-      "default": [
-        {
-          "timeout": 60000
-        }
-      ],
       "items": {
         "allOf": [
           {
@@ -1355,7 +1350,12 @@
             }
           }
         ]
-      }
+      },
+      "default": [
+        {
+          "timeout": 60000
+        }
+      ]
     },
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",
