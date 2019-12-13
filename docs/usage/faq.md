@@ -92,15 +92,6 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 Note that schedule must be in the form of an array, even if only one schedule is
 present. Multiple entries in the array means "or".
 
-### Selectively enable or disable renovate for specific `package.json` files
-
-You could:
-
-- Use `ignorePaths` to ignore certain paths in the repository, or
-- Explicitly list every package file you want renovated, in the `packageFiles` configuration object, or
-- Add a `renovate` section to any `package.json` files you don't want renovated,
-  with the configuration option `"enabled": false`
-
 ### Disable renovate for certain dependency types
 
 Define a packageRules entry which has the dependency type(s) in `depTypeList` and `"enabled": false`.

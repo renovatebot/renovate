@@ -1,4 +1,4 @@
-const fileMatch = require('../../../../lib/workers/repository/extract/file-match');
+import * as fileMatch from '../../../../lib/workers/repository/extract/file-match';
 
 describe('workers/repository/extract/file-match', () => {
   const fileList = ['package.json', 'frontend/package.json'];

@@ -56,26 +56,27 @@ export async function downloadHttpProtocol(
       },
     });
   } catch (err) {
+    const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
-      logger.debug(`Url not found ${pkgUrl}`);
+      logger.debug({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
       // istanbul ignore next
-      logger.warn({ pkgUrl }, `Cannot connect to ${hostType} host`);
+      logger.warn({ failedUrl }, `Cannot connect to ${hostType} host`);
     } else if (isPermissionsIssue(err)) {
       logger.warn(
-        { pkgUrl },
+        { failedUrl },
         'Dependency lookup unauthorized. Please add authentication with a hostRule'
       );
     } else if (isTemporalError(err)) {
-      logger.info({ err }, `Temporary error requesting ${pkgUrl}`);
+      logger.info({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
         throw new Error('registry-failure');
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next
-      logger.info({ pkgUrl }, 'Connection refused to maven registry');
+      logger.info({ failedUrl }, 'Connection refused to maven registry');
     } else {
-      logger.warn({ err }, `Unknown error requesting ${pkgUrl}`);
+      logger.warn({ failedUrl, err }, 'Unknown error');
     }
     return null;
   }
