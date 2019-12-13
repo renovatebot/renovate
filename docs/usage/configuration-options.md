@@ -685,7 +685,7 @@ Note how the above uses `packageNames` instead of `packagePatterns` because it i
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
-Path rules are convenient to use if you wish to apply configuration rules to certain package files without needing to configure them all in the `packageFiles` array. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
+Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
   "packageRules": [
