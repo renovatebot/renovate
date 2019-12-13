@@ -982,10 +982,10 @@
   dependencies:
     xregexp "4.2.0"
 
-"@renovatebot/ruby-semver@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.3.tgz#dfa43139d5a465dddec9e0e712d9d359bf7ea167"
-  integrity sha512-tGd5CMTCrFrmJhGxIhLP2Imv5bkzfZQY/6gfV+T6TOhMfca9hRBA7hj/xAexSDLAFN5QmEjGPK0SFusVUPPHIw==
+"@renovatebot/ruby-semver@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.4.tgz#adc36fa426f249cffbe005aaa0c86b9e907f2286"
+  integrity sha512-lM1snOgcu2mJeccOmaFMj2+yCPEdifqfW1alObgNrOgArAGJB1vSH4YgfG41YuOulZX4BwSK/c+2W3XifTYh8g==
 
 "@semantic-release/commit-analyzer@^6.1.0":
   version "6.3.3"
@@ -6649,7 +6649,6 @@ npm@6.13.2, npm@^6.10.3:
     cmd-shim "^3.0.3"
     columnify "~1.5.4"
     config-chain "^1.1.12"
-    debuglog "*"
     detect-indent "~5.0.0"
     detect-newline "^2.1.0"
     dezalgo "~1.0.3"
@@ -6664,7 +6663,6 @@ npm@6.13.2, npm@^6.10.3:
     has-unicode "~2.0.1"
     hosted-git-info "^2.8.5"
     iferr "^1.0.2"
-    imurmurhash "*"
     infer-owner "^1.0.4"
     inflight "~1.0.6"
     inherits "^2.0.4"
@@ -6683,14 +6681,8 @@ npm@6.13.2, npm@^6.10.3:
     libnpx "^10.2.0"
     lock-verify "^2.1.0"
     lockfile "^1.0.4"
-    lodash._baseindexof "*"
     lodash._baseuniq "~4.6.0"
-    lodash._bindcallback "*"
-    lodash._cacheindexof "*"
-    lodash._createcache "*"
-    lodash._getnative "*"
     lodash.clonedeep "~4.5.0"
-    lodash.restparam "*"
     lodash.union "~4.6.0"
     lodash.uniq "~4.5.0"
     lodash.without "~4.4.0"
