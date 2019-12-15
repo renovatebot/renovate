@@ -1476,11 +1476,12 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'terraform',
-    description: 'Configuration object for Terraform module renovation',
+    description: 'Configuration object for Terraform dependencies renovation',
     stage: 'repository',
     type: 'object',
     default: {
-      commitMessageTopic: 'Terraform module {{depNameShort}}',
+      commitMessageTopic:
+        'Terraform {{managerData.terraformDependencyType}} {{depNameShort}}',
       fileMatch: ['\\.tf$'],
       versionScheme: 'hashicorp',
     },
