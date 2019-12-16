@@ -154,6 +154,10 @@ ENV HOME=/home/ubuntu
 RUN groupadd --gid 1000 ubuntu && \
   useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu
 
+
+RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
+  chmod -R g=u ${APP_ROOT} ${HOME}
+
 # Docker client and group
 
 RUN groupadd -g 999 docker
@@ -219,9 +223,6 @@ COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data
 
-USER root
-RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
-  chmod -R g=u ${APP_ROOT} ${HOME}
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
 USER 1000
