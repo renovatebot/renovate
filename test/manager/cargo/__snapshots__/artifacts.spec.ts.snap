@@ -3,7 +3,7 @@
 exports[`.updateArtifacts() catches errors 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "Cargo.lock",
       "stderr": "not found",
     },
