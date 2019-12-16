@@ -64,12 +64,8 @@ jobs:
 
     steps:
       - bash: |
-          docker pull renovate/renovate:slim
-        displayName: Pull old slim renovate image as cache
-
-      - bash: |
           export DOCKER_BUILDKIT=1
-          docker build --cache-from renovate/renovate:slim -t renovate-test -f Dockerfile.slim .
+          docker build -t renovate-test -f Dockerfile.slim .
         displayName: Build slim renovate image
 
       - bash: |
@@ -82,12 +78,8 @@ jobs:
 
     steps:
       - bash: |
-          docker pull renovate/renovate
-        displayName: Pull old full renovate image as cache
-
-      - bash: |
           export DOCKER_BUILDKIT=1
-          docker build --cache-from renovate/renovate -t renovate-test -f Dockerfile .
+          docker build -t renovate-test -f Dockerfile .
         displayName: Build full renovate image
 
       - bash: |
