@@ -32,7 +32,7 @@ export async function updateArtifacts(
     logger.warn({ err }, 'mix.exs could not be written');
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },
@@ -74,7 +74,7 @@ export async function updateArtifacts(
 
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },
