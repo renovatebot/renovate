@@ -73,9 +73,9 @@
       "default": false
     },
     "binarySource": {
-      "description": "Where to source binaries like `npm` and `yarn` from, choices are `bundled`, `global` and `docker`",
+      "description": "Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`",
       "type": "string",
-      "default": "bundled"
+      "default": "auto"
     },
     "baseDir": {
       "description": "The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.",

@@ -111,7 +111,7 @@ export async function updateArtifacts(
     logger.warn({ err }, 'Failed to update Cargo lock file');
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },

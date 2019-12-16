@@ -101,7 +101,7 @@ export async function updateArtifacts(
     logger.info({ err }, `Failed to update ${lockFileName} file`);
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },

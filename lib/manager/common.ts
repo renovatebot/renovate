@@ -168,7 +168,6 @@ export interface ArtifactError {
 export interface UpdateArtifactsResult {
   artifactError?: ArtifactError;
   file?: { name: string; contents: string };
-  lockFileError?: ArtifactError;
 }
 
 export interface ManagerApi {
