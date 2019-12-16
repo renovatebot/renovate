@@ -1,4 +1,7 @@
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import {
+  GitPullRequestMergeStrategy,
+  GitPullRequest,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
@@ -25,8 +28,9 @@ interface Config {
   defaultBranch: string;
   owner: string;
   repoId: string;
+  project: string;
   azureWorkItemId: any;
-  prList: null;
+  prList: Pr[];
   fileList: null;
   repository: string;
 }
@@ -96,6 +100,7 @@ export async function initRepo({
   )[0];
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   config.repoId = repo.id!;
+  config.project = repo.project!.name;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
@@ -239,6 +244,31 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   return pr;
 }
 
+export async function getPrList(): Promise<Pr[]> {
+  logger.debug('getPrList()');
+  if (!config.prList) {
+    const azureApiGit = await azureApi.gitApi();
+    let prs: GitPullRequest[] = [];
+    let fetchedPrs: GitPullRequest[];
+    let skip = 0;
+    do {
+      fetchedPrs = await azureApiGit.getPullRequests(
+        config.repoId,
+        { status: 4 },
+        config.project,
+        0,
+        skip,
+        100
+      );
+      prs = prs.concat(fetchedPrs);
+      skip += 100;
+    } while (fetchedPrs.length > 0);
+    config.prList = prs.map(azureHelper.getRenovatePRFormat);
+    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+  }
+  return config.prList;
+}
+
 export async function findPr(
   branchName: string,
   prTitle: string | null,
@@ -248,8 +278,7 @@ export async function findPr(
   // TODO: fix typing
   let prsFiltered: any[] = [];
   try {
-    const azureApiGit = await azureApi.gitApi();
-    const prs = await azureApiGit.getPullRequests(config.repoId, { status: 4 });
+    const prs = await getPrList();
 
     prsFiltered = prs.filter(
       item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
@@ -337,10 +366,6 @@ export /* istanbul ignore next */ function getCommitMessages(): Promise<
   string[]
 > {
   return config.storage.getCommitMessages();
-}
-
-export function getPrList(): Pr[] {
-  return [];
 }
 
 export async function getBranchStatusCheck(
