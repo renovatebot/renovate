@@ -1,8 +1,5 @@
-import { create, Version } from '@renovatebot/ruby-semver/dist/ruby/version';
-import {
-  parse as _parse,
-  ParsedRequirement,
-} from '@renovatebot/ruby-semver/dist/ruby/requirement';
+import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
+import { parse as _parse } from '@snyk/ruby-semver/lib/ruby/gem-requirement';
 import { logger } from '../../logger';
 import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from './operator';
 
@@ -30,13 +27,16 @@ const parse = (range: string): Range => {
   };
 };
 
-const ltr = (version: string, range: string): boolean | null => {
-  const gemVersion: Version | null = create(version);
-  if (!gemVersion || !version) {
-    logger.warn(`Invalid ruby version '${version}'`);
-    return null;
-  }
-  const requirements: ParsedRequirement[] = range.split(',').map(_parse);
+interface GemVersion {
+  release(): GemVersion;
+  compare(ver: GemVersion): number;
+  bump(): GemVersion;
+}
+type GemRequirement = [string, GemVersion];
+
+const ltr = (version: string, range: string): boolean => {
+  const gemVersion: GemVersion = create(version);
+  const requirements: GemRequirement[] = range.split(',').map(_parse);
 
   const results = requirements.map(([operator, ver]) => {
     switch (operator) {

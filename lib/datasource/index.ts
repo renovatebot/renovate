@@ -24,6 +24,8 @@ import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as terraform from './terraform';
 import * as opam from './opam';
+import * as terraformProvider from './terraform-provider';
+
 import {
   Datasource,
   PkgReleaseConfig,
@@ -57,6 +59,7 @@ const datasources: Record<string, Datasource> = {
   sbt,
   terraform,
   opam,
+  terraformProvider,
 };
 
 const cacheNamespace = 'datasource-releases';

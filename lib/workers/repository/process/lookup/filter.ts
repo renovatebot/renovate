@@ -66,10 +66,13 @@ export function filterVersions(
         semver.satisfies(semver.coerce(v), allowedVersions)
       );
     } else {
-      logger.warn(
-        { depName: config.depName },
-        `Invalid allowedVersions: "${allowedVersions}"`
-      );
+      const error = new Error('config-validation');
+      error.configFile = 'config';
+      error.validationError = 'Invalid `allowedVersions`';
+      error.validationMessage =
+        'The following allowedVersions does not parse as a valid version or range: ' +
+        JSON.stringify(allowedVersions);
+      throw error;
     }
   }
 

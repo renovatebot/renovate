@@ -3,7 +3,7 @@
 exports[`.updateArtifacts() catches errors 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "mix.lock",
       "stderr": "not found",
     },

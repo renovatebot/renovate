@@ -96,8 +96,8 @@
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
-    "@renovatebot/ruby-semver": "0.1.4",
     "@sindresorhus/is": "1.2.0",
+    "@snyk/ruby-semver": "2.0.4",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.585.0",
     "azure-devops-node-api": "9.0.1",
@@ -136,7 +136,7 @@
     "moment-timezone": "0.5.27",
     "node-emoji": "1.10.0",
     "node-html-parser": "1.1.16",
-    "npm": "6.13.2",
+    "npm": "6.13.4",
     "p-all": "2.1.0",
     "parse-diff": "0.6.0",
     "parse-link-header": "1.0.1",
@@ -154,7 +154,7 @@
     "validator": "12.1.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.21.0",
+    "yarn": "1.21.1",
     "yawn-yaml": "1.4.0"
   },
   "optionalDependencies": {
@@ -171,7 +171,7 @@
     "@babel/preset-typescript": "7.7.4",
     "@types/bunyan": "1.8.6",
     "@types/cacache": "12.0.1",
-    "@types/chai": "4.2.6",
+    "@types/chai": "4.2.7",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "8.0.1",
     "@types/github-url-from-git": "1.5.0",
