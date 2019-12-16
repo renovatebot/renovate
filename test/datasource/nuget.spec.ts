@@ -1,6 +1,9 @@
 import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
+import * as _hostRules from '../../lib/util/host-rules';
+
+const hostRules: any = _hostRules;
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
@@ -92,6 +95,7 @@ describe('datasource/nuget', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      hostRules.hosts = jest.fn(() => []);
       global.repoCache = {};
     });
 
