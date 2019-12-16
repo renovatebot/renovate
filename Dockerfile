@@ -154,8 +154,6 @@ ENV HOME=/home/ubuntu
 RUN groupadd --gid 1000 ubuntu && \
   useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu
 
-RUN chmod -R a+rw /usr
-
 # Docker client and group
 
 RUN groupadd -g 999 docker
