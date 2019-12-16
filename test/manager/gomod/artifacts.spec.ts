@@ -80,6 +80,21 @@ describe('.updateArtifacts()', () => {
       })
     ).not.toBeNull();
   });
+  it('supports global mode', async () => {
+    platform.getFile.mockReturnValueOnce('Current go.sum');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
+    fs.readFile = jest.fn(() => 'New go.sum');
+    expect(
+      await gomod.updateArtifacts('go.mod', [], gomod1, {
+        ...config,
+        binarySource: 'global',
+      })
+    ).not.toBeNull();
+  });
   it('supports docker mode with credentials', async () => {
     hostRules.find.mockReturnValue({
       token: 'some-token',
