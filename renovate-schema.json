@@ -200,6 +200,11 @@
       "type": "string",
       "default": "low"
     },
+    "ignoreScripts": {
+      "description": "Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files",
+      "type": "boolean",
+      "default": false
+    },
     "platform": {
       "description": "Platform type of repository",
       "type": "string",
@@ -851,7 +856,7 @@
       "default": null
     },
     "fileMatch": {
-      "description": "JS RegExp pattern for matching manager files",
+      "description": "RegEx (re2) pattern for matching manager files",
       "type": "array",
       "items": {
         "type": "string",
@@ -950,10 +955,10 @@
       "$ref": "#"
     },
     "terraform": {
-      "description": "Configuration object for Terraform module renovation",
+      "description": "Configuration object for Terraform dependencies renovation",
       "type": "object",
       "default": {
-        "commitMessageTopic": "Terraform module {{depNameShort}}",
+        "commitMessageTopic": "Terraform {{managerData.terraformDependencyType}} {{depNameShort}}",
         "fileMatch": ["\\.tf$"],
         "versionScheme": "hashicorp"
       },
@@ -1313,11 +1318,6 @@
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array",
-      "default": [
-        {
-          "timeout": 60000
-        }
-      ],
       "items": {
         "allOf": [
           {
@@ -1350,7 +1350,12 @@
             }
           }
         ]
-      }
+      },
+      "default": [
+        {
+          "timeout": 60000
+        }
+      ]
     },
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",

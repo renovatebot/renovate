@@ -220,7 +220,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
           return false;
         }
       } else {
-        logger.warn(
+        logger.info(
           { matchCurrentVersionStr, currentValue },
           'Could not find a version to compare'
         );

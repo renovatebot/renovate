@@ -37,7 +37,7 @@ export interface RenovateArrayOption<T extends string | object = any>
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
-  subType: 'string';
+  subType: 'string' | 'object';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
@@ -385,6 +385,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: 'low',
+  },
+  {
+    name: 'ignoreScripts',
+    description:
+      'Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files',
+    stage: 'package',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'platform',
@@ -1329,7 +1337,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fileMatch',
-    description: 'JS RegExp pattern for matching manager files',
+    description: 'RegEx (re2) pattern for matching manager files',
     type: 'array',
     subType: 'string',
     format: 'regex',
@@ -1468,11 +1476,12 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'terraform',
-    description: 'Configuration object for Terraform module renovation',
+    description: 'Configuration object for Terraform dependencies renovation',
     stage: 'repository',
     type: 'object',
     default: {
-      commitMessageTopic: 'Terraform module {{depNameShort}}',
+      commitMessageTopic:
+        'Terraform {{managerData.terraformDependencyType}} {{depNameShort}}',
       fileMatch: ['\\.tf$'],
       versionScheme: 'hashicorp',
     },
@@ -1952,6 +1961,7 @@ const options: RenovateOptions[] = [
     name: 'hostRules',
     description: 'Host rules/configuration including credentials',
     type: 'array',
+    subType: 'object',
     default: [
       {
         timeout: 60000,

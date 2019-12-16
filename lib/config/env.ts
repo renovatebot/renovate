@@ -1,5 +1,8 @@
+import is from '@sindresorhus/is';
+
 import { getOptions, RenovateOptions } from './definitions';
 import { RenovateConfig } from './common';
+import { logger } from '../logger';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
@@ -29,8 +32,25 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
     if (option.env !== false) {
       const envName = getEnvName(option);
       if (env[envName]) {
-        const coerce = coersions[option.type];
-        config[option.name] = coerce(env[envName]);
+        // istanbul ignore if
+        if (option.type === 'array' && option.subType === 'object') {
+          try {
+            const parsed = JSON.parse(env[envName]);
+            if (is.array(parsed)) {
+              config[option.name] = parsed;
+            } else {
+              logger.debug(
+                { val: env[envName], envName },
+                'Could not parse object array'
+              );
+            }
+          } catch (err) {
+            logger.debug({ val: env[envName], envName }, 'Could not parse CLI');
+          }
+        } else {
+          const coerce = coersions[option.type];
+          config[option.name] = coerce(env[envName]);
+        }
       }
     }
   });
