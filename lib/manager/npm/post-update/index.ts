@@ -224,10 +224,8 @@ export async function writeExistingFiles(
         writtenLockFiles[yarnLock] = true;
       }
     }
-    // TODO: Update the below with this once https://github.com/pnpm/pnpm/issues/992 is fixed
-    const pnpmBug992 = true;
     // istanbul ignore next
-    if (packageFile.pnpmShrinkwrap && config.reuseLockFiles && !pnpmBug992) {
+    if (packageFile.pnpmShrinkwrap && config.reuseLockFiles) {
       logger.debug(`Writing pnpm-lock.yaml to ${basedir}`);
       const shrinkwrap = await platform.getFile(packageFile.pnpmShrinkwrap);
       await fs.outputFile(upath.join(basedir, 'pnpm-lock.yaml'), shrinkwrap);
