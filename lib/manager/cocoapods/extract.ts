@@ -10,7 +10,7 @@ const regexMappings = [
   /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
 ];
 
-interface ParsedLine {
+export interface ParsedLine {
   depName?: string;
   groupName?: string;
   spec?: string;
