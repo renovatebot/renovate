@@ -95,7 +95,12 @@ describe('datasource/cocoapods', () => {
       api.get.mockReturnValueOnce({
         body: 'foo/1.2.3',
       });
-      expect(await getPkgReleases(config)).toEqual({
+      expect(
+        await getPkgReleases({
+          ...config,
+          registryUrls: ['https://cdn.cocoapods.org'],
+        })
+      ).toEqual({
         releases: [
           {
             version: '1.2.3',

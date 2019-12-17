@@ -59,6 +59,8 @@ async function makeRequest<T = any>(
   return null;
 }
 
+const githubRegex = /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)$/;
+
 async function getReleasesFromGithub(
   lookupName,
   registryUrl,
@@ -67,7 +69,7 @@ async function getReleasesFromGithub(
   const match = registryUrl
     .replace(/\.git$/, '')
     .replace(/\/+$/, '')
-    .match(/https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)$/);
+    .match(githubRegex);
   const groups = (match && match.groups) || {};
   const opts = { ...groups, useShard };
   const url = releasesGithubUrl(lookupName, opts);
@@ -84,15 +86,16 @@ async function getReleasesFromGithub(
   return null;
 }
 
-function releasesCDNUrl(lookupName: string): string {
+function releasesCDNUrl(lookupName: string, registryUrl: string): string {
   const shard = shardParts(lookupName).join('_');
-  return `https://cdn.cocoapods.org/all_pods_versions_${shard}.txt`;
+  return `${registryUrl}/all_pods_versions_${shard}.txt`;
 }
 
 async function getReleasesFromCDN(
-  lookupName: string
+  lookupName: string,
+  registryUrl: string
 ): Promise<ReleaseResult | null> {
-  const url = releasesCDNUrl(lookupName);
+  const url = releasesCDNUrl(lookupName, registryUrl);
   const resp = await makeRequest<string>(url, lookupName, false);
   if (resp) {
     const lines = resp.split('\n');
@@ -108,10 +111,8 @@ async function getReleasesFromCDN(
   return null;
 }
 
-const registryUrlsWithCDNAvailable = new Set<string>([
-  'https://github.com/CocoaPods/Specs.git',
-  'https://cdn.cocoapods.org',
-]);
+const defaultRepo = 'https://github.com/CocoaPods/Specs.git';
+const defaultCDN = 'https://cdn.cocoapods.org';
 
 export async function getPkgReleases(
   config: Partial<PkgReleaseConfig>
@@ -135,11 +136,17 @@ export async function getPkgReleases(
     return cachedResult;
   }
 
-  let result = await getReleasesFromCDN(podName);
+  let result = null;
   for (let idx = 0; !result && idx < registryUrls.length; idx += 1) {
-    const registryUrl = registryUrls[idx];
-    if (!registryUrlsWithCDNAvailable.has(registryUrl)) {
+    let registryUrl = registryUrls[idx].replace(/\/+$/, '');
+
+    // In order to not abuse github API limits, query CDN instead
+    if (registryUrl === defaultRepo) registryUrl = defaultCDN;
+
+    if (registryUrl.match(githubRegex)) {
       result = await getReleasesFromGithub(podName, registryUrl);
+    } else {
+      result = await getReleasesFromCDN(podName, registryUrl);
     }
   }
 
