@@ -1,7 +1,10 @@
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { RenovateConfig } from '../../../config';
 
-async function checkBaseBranch(config) {
+export async function checkBaseBranch(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
   logger.debug('checkBaseBranch()');
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
   let error = [];
@@ -23,7 +26,3 @@ async function checkBaseBranch(config) {
   }
   return { ...config, errors: config.errors.concat(error) };
 }
-
-module.exports = {
-  checkBaseBranch,
-};

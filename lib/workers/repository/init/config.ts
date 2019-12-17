@@ -1,23 +1,25 @@
-const jsonValidator = require('json-dup-key-validator');
-const JSON5 = require('json5');
-const path = require('path');
+import jsonValidator from 'json-dup-key-validator';
+import JSON5 from 'json5';
+import path from 'path';
 
-const { logger } = require('../../../logger');
-const { mergeChildConfig } = require('../../../config');
-const { migrateAndValidate } = require('../../../config/migrate-validate');
-const { decryptConfig } = require('../../../config/decrypt');
-const presets = require('../../../config/presets');
-const npmApi = require('../../../datasource/npm');
-const { flattenPackageRules } = require('./flatten');
-const hostRules = require('../../../util/host-rules');
-const { configFileNames } = require('../../../config/app-strings');
-const { platform } = require('../../../platform');
+import { logger } from '../../../logger';
+import { mergeChildConfig, RenovateConfig } from '../../../config';
+import { migrateAndValidate } from '../../../config/migrate-validate';
+import { decryptConfig } from '../../../config/decrypt';
+import * as presets from '../../../config/presets';
+import * as npmApi from '../../../datasource/npm';
+import { flattenPackageRules } from './flatten';
+import * as hostRules from '../../../util/host-rules';
+import { configFileNames } from '../../../config/app-strings';
+import { platform } from '../../../platform';
 
 // Check for repository config
-async function mergeRenovateConfig(config) {
+export async function mergeRenovateConfig(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   const fileList = await platform.getFileList();
-  async function detectConfigFile() {
+  async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
         try {
@@ -180,7 +182,3 @@ async function mergeRenovateConfig(config) {
   }
   return returnConfig;
 }
-
-module.exports = {
-  mergeRenovateConfig,
-};

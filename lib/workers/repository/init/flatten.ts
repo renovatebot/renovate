@@ -1,8 +1,10 @@
-const { logger } = require('../../../logger');
-const { mergeChildConfig } = require('../../../config');
+import { logger } from '../../../logger';
+import { mergeChildConfig, PackageRule } from '../../../config';
 
-function flattenPackageRules(packageRules) {
-  const res = [];
+export function flattenPackageRules(
+  packageRules: PackageRule[]
+): PackageRule[] {
+  const res: PackageRule[] = [];
   if (!(packageRules && packageRules.length)) {
     return res;
   }
@@ -20,7 +22,3 @@ function flattenPackageRules(packageRules) {
   }
   return res;
 }
-
-module.exports = {
-  flattenPackageRules,
-};

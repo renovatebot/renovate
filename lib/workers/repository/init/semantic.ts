@@ -1,8 +1,11 @@
-const conventionalCommitsDetector = require('conventional-commits-detector');
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
+import conventionalCommitsDetector from 'conventional-commits-detector';
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { RenovateConfig } from '../../../config';
 
-async function detectSemanticCommits(config) {
+export async function detectSemanticCommits(
+  config: RenovateConfig
+): Promise<boolean> {
   logger.debug('detectSemanticCommits()');
   logger.trace({ config });
   if (config.semanticCommits !== null) {
@@ -26,7 +29,3 @@ async function detectSemanticCommits(config) {
   logger.debug('No semantic commits detected');
   return false;
 }
-
-module.exports = {
-  detectSemanticCommits,
-};
