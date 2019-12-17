@@ -30,6 +30,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   compatibility?: Record<string, string>;
   cacheDir?: string;
   postUpdateOptions?: string[];
+  ignoreScripts?: boolean;
 }
 
 export interface PackageUpdateConfig {
@@ -167,7 +168,6 @@ export interface ArtifactError {
 export interface UpdateArtifactsResult {
   artifactError?: ArtifactError;
   file?: { name: string; contents: string };
-  lockFileError?: ArtifactError;
 }
 
 export interface ManagerApi {

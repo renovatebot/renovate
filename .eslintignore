@@ -1,2 +1,4 @@
 test/**/**/_fixtures
 lib/types/**/*.d.ts
+**/__mocks__/**/*.ts
+/config.js

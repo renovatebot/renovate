@@ -111,9 +111,15 @@ export async function updateArtifacts(
       cmd += envVars.map(e => `-e ${e} `);
       cmd += `-w "${cwd}" `;
       cmd += `renovate/composer composer`;
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running composer via global composer');
       cmd = 'composer';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
+      cmd = 'bundle';
     }
     let args;
     if (config.isLockFileMaintenance) {
@@ -123,7 +129,7 @@ export async function updateArtifacts(
         ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
     }
     args += ' --ignore-platform-reqs --no-ansi --no-interaction';
-    if (global.trustLevel !== 'high') {
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');

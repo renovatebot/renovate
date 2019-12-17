@@ -103,6 +103,20 @@ describe('.updateArtifacts()', () => {
       })
     ).not.toBeNull();
   });
+  it('supports global mode', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'New composer.lock');
+    expect(
+      await composer.updateArtifacts('composer.json', [], '{}', {
+        ...config,
+        binarySource: 'global',
+      })
+    ).not.toBeNull();
+  });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
     fs.outputFile = jest.fn(() => {

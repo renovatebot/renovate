@@ -105,8 +105,14 @@ export async function updateArtifacts(
       cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running bundler via global bundler');
+      cmd = 'bundle';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
       cmd = 'bundle';
     }
     cmd += ` lock --update ${updatedDeps.join(' ')}`;

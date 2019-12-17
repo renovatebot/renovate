@@ -6,6 +6,9 @@ let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
 let contentLength = 0;
 
+/* https://bugs.chromium.org/p/v8/issues/detail?id=2869 */
+const copystr = (x: string): string => (' ' + x).slice(1);
+
 async function updateRubyGemsVersions(): Promise<void> {
   const url = 'https://rubygems.org/versions';
   const options = {
@@ -41,6 +44,7 @@ async function updateRubyGemsVersions(): Promise<void> {
       }
       split = l.split(' ');
       [pkg, versions] = split;
+      pkg = copystr(pkg);
       packageReleases[pkg] = packageReleases[pkg] || [];
       const lineVersions = versions.split(',').map(version => version.trim());
       for (const lineVersion of lineVersions) {
@@ -51,7 +55,7 @@ async function updateRubyGemsVersions(): Promise<void> {
             version => version !== deletedVersion
           );
         } else {
-          packageReleases[pkg].push(lineVersion);
+          packageReleases[pkg].push(copystr(lineVersion));
         }
       }
     } catch (err) /* istanbul ignore next */ {

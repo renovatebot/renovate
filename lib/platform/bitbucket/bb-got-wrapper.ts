@@ -22,7 +22,7 @@ export const api: GotApi = {} as any;
 
 for (const x of helpers) {
   (api as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
-    get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
+    get(url, { ...opts, method: x.toUpperCase() });
 }
 
 export default api;

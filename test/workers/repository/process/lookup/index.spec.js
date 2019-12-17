@@ -178,7 +178,9 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(2);
+      await expect(lookup.lookupUpdates(config)).rejects.toThrow(
+        Error('config-validation')
+      );
     });
     it('returns minor update if separate patches not configured', async () => {
       config.currentValue = '0.9.0';

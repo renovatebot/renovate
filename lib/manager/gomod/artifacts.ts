@@ -70,9 +70,15 @@ export async function updateArtifacts(
       } else {
         cmd += 'go';
       }
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running go via global command');
       cmd = 'go';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
+      cmd = 'bundle';
     }
     let args = 'get -d ./...';
     if (cmd.includes('.insteadOf')) {

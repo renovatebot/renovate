@@ -15,12 +15,18 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   labels?: string[];
   managers?: string | string[];
+  platform?: string;
+  productLinks?: Record<string, string>;
+  rebaseStalePrs?: boolean;
+  recreateClosed?: boolean;
+  requiredStatusChecks?: string[];
   schedule?: string | string[];
 
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
   statusCheckVerify?: boolean;
+  timezone?: string;
 }
 
 type UpdateConfig<
@@ -46,6 +52,10 @@ export interface RenovateConfig
   description?: string[];
   dryRun?: boolean;
   errors?: ValidationMessage[];
+
+  /** TODO: Type? */
+  global?: Record<string, any>;
+
   includeForks?: boolean;
   isFork?: boolean;
   onboarding?: boolean;

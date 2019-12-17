@@ -215,7 +215,11 @@ export async function lookupUpdates(
       }
       res.updates.push(rollback);
     }
-    const rangeStrategy = getRangeStrategy(config);
+    let rangeStrategy = getRangeStrategy(config);
+    // istanbul ignore if
+    if (rangeStrategy === 'update-lockfile' && !lockedVersion) {
+      rangeStrategy = 'bump';
+    }
     const nonDeprecatedVersions = releases
       .filter(release => !release.isDeprecated)
       .map(release => release.version);
