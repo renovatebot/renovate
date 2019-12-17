@@ -1792,7 +1792,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: 'poetry',
       fileMatch: ['(^|/)pyproject\\.toml$'],
     },
     mergeable: true,

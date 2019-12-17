@@ -1195,7 +1195,6 @@
       "description": "Configuration object for pyproject.toml files",
       "type": "object",
       "default": {
-        "versionScheme": "poetry",
         "fileMatch": ["(^|/)pyproject\\.toml$"]
       },
       "$ref": "#"
