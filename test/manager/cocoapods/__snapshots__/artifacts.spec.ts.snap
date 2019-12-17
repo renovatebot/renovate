@@ -33,6 +33,10 @@ Array [
 ]
 `;
 
+exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `"docker run --rm --user=ubuntu -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo --entrypoint pod renovate/cocoapods:1.2.4 install"`;
+
+exports[`.updateArtifacts() falls back to the \`latest\` Docker image tag 1`] = `"docker run --rm --user=ubuntu -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo --entrypoint pod renovate/cocoapods:latest install"`;
+
 exports[`.updateArtifacts() returns pod exec error 1`] = `
 Array [
   Object {
@@ -65,3 +69,5 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() returns updated Podfile 2`] = `"docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo --entrypoint pod renovate/cocoapods:latest install"`;

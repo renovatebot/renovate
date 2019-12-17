@@ -51,9 +51,13 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile', async () => {
     platform.getFile.mockResolvedValueOnce('Old Podfile');
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    let dockerCommand = '';
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderr: '',
+      });
     });
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     expect(
@@ -62,6 +66,7 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).toMatchSnapshot();
+    expect(dockerCommand).toMatchSnapshot();
   });
   it('catches write error', async () => {
     platform.getFile.mockResolvedValueOnce('Current Podfile');
@@ -118,8 +123,6 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
   });
   it('dynamically selects Docker image tag', async () => {
-    let command = '';
-
     platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -131,45 +134,47 @@ describe('.updateArtifacts()', () => {
         { version: '1.2.5' },
       ],
     });
+
+    let dockerCommand = '';
     exec.mockImplementationOnce(cmd => {
-      command = cmd;
+      dockerCommand = cmd;
       return Promise.resolve({
         stdout: '',
         stderr: '',
       });
     });
+
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     await updateArtifacts('Podfile', ['foo'], '', {
       ...config,
       binarySource: 'docker',
       dockerUser: 'ubuntu',
     });
-    expect(command).toContain('renovate/cocoapods:1.2.4');
-    expect(command).toContain('user=ubuntu');
+    expect(dockerCommand).toMatchSnapshot();
     expect(exec).toBeCalledTimes(1);
   });
   it('falls back to the `latest` Docker image tag', async () => {
-    let command = '';
-
     platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [],
     });
+
+    let dockerCommand = '';
     exec.mockImplementationOnce(cmd => {
-      command = cmd;
+      dockerCommand = cmd;
       return Promise.resolve({
         stdout: '',
         stderr: '',
       });
     });
+
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     await updateArtifacts('Podfile', ['foo'], '', {
       ...config,
       binarySource: 'docker',
       dockerUser: 'ubuntu',
     });
-    expect(command).toContain('renovate/cocoapods:latest');
-    expect(command).toContain('user=ubuntu');
+    expect(dockerCommand).toMatchSnapshot();
     expect(exec).toBeCalledTimes(1);
   });
 });
