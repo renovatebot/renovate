@@ -5,7 +5,7 @@ import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
-import { getPkgReleases } from '../../datasource';
+import { getPkgReleases } from '../../datasource/docker';
 import { get as getVersioning } from '../../versioning';
 
 async function getImageTag(

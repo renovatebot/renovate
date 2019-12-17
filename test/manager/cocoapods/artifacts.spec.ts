@@ -2,7 +2,7 @@ import _fs from 'fs-extra';
 import * as _exec from '../../../lib/util/exec';
 import { platform as _platform } from '../../../lib/platform';
 import { updateArtifacts } from '../../../lib/manager/cocoapods';
-import * as _datasource from '../../../lib/datasource';
+import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
@@ -13,7 +13,7 @@ const datasource = mocked(_datasource);
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 jest.mock('../../../lib/platform');
-jest.mock('../../../lib/datasource');
+jest.mock('../../../lib/datasource/docker');
 
 const config = {
   localDir: '/tmp/github/some/repo',
