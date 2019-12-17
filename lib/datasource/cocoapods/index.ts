@@ -108,6 +108,11 @@ async function getReleasesFromCDN(
   return null;
 }
 
+const omitRegistryUrls = new Set<string>([
+  'https://github.com/CocoaPods/Specs.git',
+  'https://cdn.cocoapods.org',
+]);
+
 export async function getPkgReleases(
   config: Partial<PkgReleaseConfig>
 ): Promise<ReleaseResult | null> {
@@ -133,7 +138,9 @@ export async function getPkgReleases(
   let result = await getReleasesFromCDN(podName);
   for (let idx = 0; !result && idx < registryUrls.length; idx += 1) {
     const registryUrl = registryUrls[idx];
-    result = await getReleasesFromGithub(podName, registryUrl);
+    if (!omitRegistryUrls.has(registryUrl)) {
+      result = await getReleasesFromGithub(podName, registryUrl);
+    }
   }
 
   if (result) {

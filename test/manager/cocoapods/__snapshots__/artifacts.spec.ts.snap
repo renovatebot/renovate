@@ -3,7 +3,7 @@
 exports[`.updateArtifacts() catches read error 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "Podfile.lock",
       "stderr": "read error",
     },
@@ -14,7 +14,7 @@ Array [
 exports[`.updateArtifacts() catches write error 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "Podfile.lock",
       "stderr": "not found",
     },
@@ -36,7 +36,7 @@ Array [
 exports[`.updateArtifacts() returns pod exec error 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "Podfile.lock",
       "stderr": "exec exception",
     },
@@ -47,7 +47,7 @@ Array [
 exports[`.updateArtifacts() returns pod exec stderr 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "Podfile.lock",
       "stderr": "Something happened",
     },

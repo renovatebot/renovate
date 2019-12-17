@@ -79,7 +79,9 @@ Array [
     "managerData": Object {
       "lineNumber": 8,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 1.28.3",
@@ -89,7 +91,9 @@ Array [
     "managerData": Object {
       "lineNumber": 9,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.1.4",
@@ -99,7 +103,9 @@ Array [
     "managerData": Object {
       "lineNumber": 11,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.2.1",
@@ -109,7 +115,9 @@ Array [
     "managerData": Object {
       "lineNumber": 12,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.2.1",
@@ -119,7 +127,9 @@ Array [
     "managerData": Object {
       "lineNumber": 13,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.2.1",
@@ -129,7 +139,9 @@ Array [
     "managerData": Object {
       "lineNumber": 14,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.2.1",
@@ -139,7 +151,9 @@ Array [
     "managerData": Object {
       "lineNumber": 15,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 1.1.0",
@@ -149,7 +163,9 @@ Array [
     "managerData": Object {
       "lineNumber": 17,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.1.16",
@@ -159,7 +175,9 @@ Array [
     "managerData": Object {
       "lineNumber": 18,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.1.0",
@@ -169,7 +187,9 @@ Array [
     "managerData": Object {
       "lineNumber": 19,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.1.2",
@@ -179,7 +199,9 @@ Array [
     "managerData": Object {
       "lineNumber": 20,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 1.0.4",
@@ -189,7 +211,9 @@ Array [
     "managerData": Object {
       "lineNumber": 21,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 5.0",
@@ -199,7 +223,9 @@ Array [
     "managerData": Object {
       "lineNumber": 22,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 1.80",
@@ -209,7 +235,9 @@ Array [
     "managerData": Object {
       "lineNumber": 23,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.0",
@@ -219,7 +247,9 @@ Array [
     "managerData": Object {
       "lineNumber": 24,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 3.2.1",
@@ -229,7 +259,9 @@ Array [
     "managerData": Object {
       "lineNumber": 26,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.5.1",
@@ -239,7 +271,9 @@ Array [
     "managerData": Object {
       "lineNumber": 27,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.7.5",
@@ -249,7 +283,9 @@ Array [
     "managerData": Object {
       "lineNumber": 31,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 1.0.1",
@@ -259,7 +295,9 @@ Array [
     "managerData": Object {
       "lineNumber": 32,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "depName": "LYEmptyView",
@@ -274,7 +312,9 @@ Array [
     "managerData": Object {
       "lineNumber": 35,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "depName": "fishhook",
@@ -289,7 +329,9 @@ Array [
     "managerData": Object {
       "lineNumber": 39,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 1.2",
@@ -299,7 +341,9 @@ Array [
     "managerData": Object {
       "lineNumber": 41,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.3",
@@ -309,7 +353,9 @@ Array [
     "managerData": Object {
       "lineNumber": 43,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.3",
@@ -319,7 +365,9 @@ Array [
     "managerData": Object {
       "lineNumber": 44,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "currentValue": "~> 2.3",
@@ -329,7 +377,9 @@ Array [
     "managerData": Object {
       "lineNumber": 46,
     },
-    "registryUrls": Array [],
+    "registryUrls": Array [
+      "https://github.com/CocoaPods/Specs.git",
+    ],
   },
   Object {
     "depName": "MLeaksFinder",

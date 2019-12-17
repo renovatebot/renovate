@@ -56,7 +56,7 @@ export async function updateArtifacts(
     logger.warn({ err }, 'Podfile could not be written');
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },
@@ -119,7 +119,7 @@ export async function updateArtifacts(
 
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },
@@ -137,7 +137,7 @@ export async function updateArtifacts(
 
       return [
         {
-          lockFileError: {
+          artifactError: {
             lockFile: lockFileName,
             stderr: err.message,
           },
@@ -148,7 +148,7 @@ export async function updateArtifacts(
     if (execResult && execResult.stderr) {
       return [
         {
-          lockFileError: {
+          artifactError: {
             lockFile: lockFileName,
             stderr: execResult.stderr,
           },

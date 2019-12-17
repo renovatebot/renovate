@@ -72,7 +72,6 @@ export function extractPackageFile(content: string): PackageFile {
   const lines = content.split('\n');
 
   const registryUrls = [];
-  const registryUrlsSet = new Set<string>();
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
@@ -88,7 +87,7 @@ export function extractPackageFile(content: string): PackageFile {
     } = parsedLine;
 
     if (source) {
-      registryUrlsSet.add(source.replace(/\/*$/, ''));
+      registryUrls.push(source.replace(/\/*$/, ''));
     }
 
     if (depName) {
@@ -127,14 +126,6 @@ export function extractPackageFile(content: string): PackageFile {
       }
 
       deps.push(dep);
-    }
-  }
-
-  registryUrlsSet.delete('https://github.com/CocoaPods/Specs.git');
-  registryUrlsSet.delete('https://cdn.cocoapods.org');
-  if (registryUrlsSet.size > 0) {
-    for (const url of registryUrlsSet.values()) {
-      registryUrls.push(url);
     }
   }
 
