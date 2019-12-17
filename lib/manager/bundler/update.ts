@@ -46,7 +46,7 @@ function updateLine(line: string, upgrade: Upgrade): string | null {
       delimiter,
       versionPart,
       argsPart = '',
-      whitespacePart = '',
+      whitespacePart,
     } = gemLineMatch.groups;
     if (gemName !== depName) return null;
 
