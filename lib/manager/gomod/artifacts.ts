@@ -45,7 +45,6 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
