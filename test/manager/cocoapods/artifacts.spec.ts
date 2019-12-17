@@ -2,14 +2,18 @@ import _fs from 'fs-extra';
 import { exec as _exec } from '../../../lib/util/exec';
 import { platform as _platform } from '../../../lib/platform';
 import { updateArtifacts } from '../../../lib/manager/cocoapods';
+import * as datasource from '../../../lib/datasource';
+import { mocked } from '../../util';
 
 const fs: any = _fs;
 const exec: any = _exec;
 const platform: any = _platform;
+const ds = mocked(datasource);
 
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 jest.mock('../../../lib/platform');
+jest.mock('../../../lib/datasource');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -113,17 +117,22 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts('Podfile', ['foo'], '', config)
     ).toMatchSnapshot();
   });
-  it('falls back to the `latest` Docker image tag', async () => {
-    let firstCommand = '';
-    let secondCommand = '';
+  it('dynamically selects Docker image tag', async () => {
+    let command = '';
 
-    platform.getFile.mockReturnValueOnce('COCOAPODS: 1.2.3.4');
-    exec.mockImplementationOnce(cmd => {
-      firstCommand = cmd;
-      throw new Error('Unable to find image');
+    platform.getFile.mockReturnValueOnce('COCOAPODS: 1.2.4');
+    ds.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.2.0' },
+        { version: '1.2.1' },
+        { version: '1.2.2' },
+        { version: '1.2.3' },
+        { version: '1.2.4' },
+        { version: '1.2.5' },
+      ],
     });
     exec.mockImplementationOnce(cmd => {
-      secondCommand = cmd;
+      command = cmd;
       return {
         stdout: '',
         stderr: '',
@@ -135,10 +144,32 @@ describe('.updateArtifacts()', () => {
       binarySource: 'docker',
       dockerUser: 'ubuntu',
     });
-    expect(firstCommand).toContain('renovate/cocoapods:1.2.3.4');
-    expect(firstCommand).toContain('user=ubuntu');
-    expect(secondCommand).toContain('renovate/cocoapods:latest');
-    expect(secondCommand).toContain('user=ubuntu');
-    expect(exec).toBeCalledTimes(2);
+    expect(command).toContain('renovate/cocoapods:1.2.4');
+    expect(command).toContain('user=ubuntu');
+    expect(exec).toBeCalledTimes(1);
+  });
+  it('falls back to the `latest` Docker image tag', async () => {
+    let command = '';
+
+    platform.getFile.mockReturnValueOnce('COCOAPODS: 1.2.4');
+    ds.getPkgReleases.mockResolvedValueOnce({
+      releases: [],
+    });
+    exec.mockImplementationOnce(cmd => {
+      command = cmd;
+      return {
+        stdout: '',
+        stderr: '',
+      };
+    });
+    fs.readFile.mockImplementationOnce(() => 'New Podfile');
+    await updateArtifacts('Podfile', ['foo'], '', {
+      ...config,
+      binarySource: 'docker',
+      dockerUser: 'ubuntu',
+    });
+    expect(command).toContain('renovate/cocoapods:latest');
+    expect(command).toContain('user=ubuntu');
+    expect(exec).toBeCalledTimes(1);
   });
 });

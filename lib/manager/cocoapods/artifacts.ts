@@ -1,24 +1,41 @@
 import upath from 'upath';
 import fs from 'fs-extra';
 import { hrtime } from 'process';
-import { ExecOptions } from 'child_process';
 import { platform } from '../../platform';
-import { exec, ExecResult } from '../../util/exec';
+import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { getPkgReleases } from '../../datasource';
+import { get as getVersioning } from '../../versioning';
 
-async function tryExec(
-  cmd: string,
-  tag: string,
-  opts: ExecOptions
-): Promise<ExecResult> {
-  let result = null;
-  try {
-    result = await exec(cmd, opts);
-  } catch (err) {
-    if (tag !== 'latest' && err.message.startsWith('Unable to find image')) {
-      result = await tryExec(cmd.replace(`:${tag}`, ':latest'), 'latest', opts);
-    } else throw err;
+async function getImageTag(
+  lookupName: string,
+  versionScheme: string,
+  constraint?: string
+): Promise<string> {
+  const releases = await getPkgReleases({
+    lookupName,
+  });
+  let result = 'latest';
+  if (releases && releases.releases) {
+    const versioning = getVersioning(versionScheme);
+    let versions = releases.releases.map(release => release.version);
+    versions = versions.filter(version => versioning.isVersion(version));
+    if (constraint) {
+      versions = versions.filter(version =>
+        versioning.matches(version, constraint)
+      );
+    }
+    versions = versions.sort(versioning.sortVersions);
+    if (versions.length) {
+      result = versions.pop();
+    }
+  }
+  if (result === 'latest') {
+    logger.warn(
+      { constraint },
+      'Failed to find a tag satisfying the constraint, using latest image instead'
+    );
   }
   return result;
 }
@@ -83,9 +100,11 @@ export async function updateArtifacts(
 
     const match = existingLockFileContent.match(
       /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
-    ) || { groups: { cocoapodsVersion: 'latest' } };
-    cocoapodsVersion = match.groups.cocoapodsVersion;
-    cmdParts.push(`renovate/cocoapods:${cocoapodsVersion}`);
+    );
+    cocoapodsVersion = match ? match.groups.cocoapodsVersion : null;
+    const imageName = 'renovate/cocoapods';
+    const imageTag = await getImageTag(imageName, 'ruby', cocoapodsVersion);
+    cmdParts.push(`${imageName}:${imageTag}`);
   } else {
     cmdParts.push('pod');
   }
@@ -97,7 +116,7 @@ export async function updateArtifacts(
   /* istanbul ignore next */
   try {
     const command = cmdParts.join(' ');
-    execResult = await tryExec(command, cocoapodsVersion, { cwd });
+    execResult = await exec(command, { cwd });
   } catch (err) {
     execError = err;
   }
