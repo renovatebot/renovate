@@ -47,9 +47,13 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockReturnValueOnce('Old mix.lock');
-    exec.mockReturnValue({
-      stdout: '',
-      stderr: '',
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
     });
     fs.readFile.mockImplementationOnce(() => 'New mix.lock');
     expect(
@@ -58,6 +62,7 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).toMatchSnapshot();
+    expect(dockerCommand).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current mix.lock');
