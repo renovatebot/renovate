@@ -117,7 +117,7 @@ const defaultCDN = 'https://cdn.cocoapods.org';
 export async function getPkgReleases(
   config: Partial<PkgReleaseConfig>
 ): Promise<ReleaseResult | null> {
-  const { registryUrls = [], lookupName } = config;
+  const { registryUrls = [defaultCDN], lookupName } = config;
 
   if (!lookupName) {
     logger.debug(config, `CocoaPods: invalid lookup name`);
