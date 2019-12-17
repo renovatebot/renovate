@@ -55,6 +55,28 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
   });
+  it('returns updated poetry.lock using docker', async () => {
+    platform.getFile.mockReturnValueOnce('Old poetry.lock');
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
+    });
+    fs.readFile = jest.fn(() => 'New poetry.lock');
+    const updatedDeps = ['dep1'];
+    global.trustLevel = 'high';
+    expect(
+      await updateArtifacts('pyproject.toml', updatedDeps, '{}', {
+        ...config,
+        binarySource: 'docker',
+        dockerUser: 'foobar',
+      })
+    ).not.toBeNull();
+    expect(dockerCommand).toMatchSnapshot();
+  });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current poetry.lock');
     fs.outputFile = jest.fn(() => {
