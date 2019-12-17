@@ -1,8 +1,10 @@
 import { api as _api } from '../../lib/platform/github/gh-got-wrapper';
 
 import { getPkgReleases } from '../../lib/datasource/cocoapods';
+import { mocked } from '../util';
+import { GotResponse } from '../../lib/platform';
 
-const api: any = _api;
+const api = mocked(_api);
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 
@@ -15,8 +17,8 @@ describe('datasource/cocoapods', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => global.renovateCache.rmAll());
     it('returns null for invalid inputs', async () => {
-      api.get.mockReturnValue(null);
-      expect(await getPkgReleases({})).toBeNull();
+      api.get.mockResolvedValueOnce(null);
+      expect(await getPkgReleases({ registryUrls: [] })).toBeNull();
       expect(
         await getPkgReleases({
           lookupName: null,
@@ -30,14 +32,14 @@ describe('datasource/cocoapods', () => {
       ).toBeNull();
     });
     it('returns null for empty result', async () => {
-      api.get.mockReturnValueOnce(null);
+      api.get.mockResolvedValueOnce(null);
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('returns null for missing fields', async () => {
-      api.get.mockReturnValueOnce({});
+      api.get.mockResolvedValueOnce({} as GotResponse);
       expect(await getPkgReleases(config)).toBeNull();
 
-      api.get.mockReturnValueOnce({ body: '' });
+      api.get.mockResolvedValueOnce({ body: '' } as GotResponse);
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -92,9 +94,9 @@ describe('datasource/cocoapods', () => {
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('processes real data from CDN', async () => {
-      api.get.mockReturnValueOnce({
+      api.get.mockResolvedValueOnce({
         body: 'foo/1.2.3',
-      });
+      } as GotResponse);
       expect(
         await getPkgReleases({
           ...config,
@@ -109,11 +111,15 @@ describe('datasource/cocoapods', () => {
       });
     });
     it('processes real data from Github', async () => {
-      api.get.mockReturnValueOnce(null);
-      api.get.mockReturnValueOnce({
+      api.get.mockResolvedValueOnce({
         body: [{ name: '1.2.3' }],
-      });
-      expect(await getPkgReleases(config)).toEqual({
+      } as GotResponse);
+      expect(
+        await getPkgReleases({
+          ...config,
+          registryUrls: ['https://github.com/Artsy/Specs'],
+        })
+      ).toEqual({
         releases: [
           {
             version: '1.2.3',

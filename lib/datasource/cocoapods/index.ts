@@ -59,17 +59,14 @@ async function makeRequest<T = any>(
   return null;
 }
 
-const githubRegex = /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)$/;
+const githubRegex = /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/;
 
 async function getReleasesFromGithub(
   lookupName,
   registryUrl,
   useShard = false
 ): Promise<ReleaseResult | null> {
-  const match = registryUrl
-    .replace(/\.git$/, '')
-    .replace(/\/+$/, '')
-    .match(githubRegex);
+  const match = registryUrl.match(githubRegex);
   const groups = (match && match.groups) || {};
   const opts = { ...groups, useShard };
   const url = releasesGithubUrl(lookupName, opts);
@@ -111,13 +108,26 @@ async function getReleasesFromCDN(
   return null;
 }
 
-const defaultRepo = 'https://github.com/CocoaPods/Specs.git';
 const defaultCDN = 'https://cdn.cocoapods.org';
+
+function isDefaultRepo(url: string): boolean {
+  const match = url.match(githubRegex);
+  if (match) {
+    const { account, repo } = match.groups;
+    return (
+      account.toLowerCase() === 'cocoapods' && repo.toLowerCase() === 'specs'
+    ); // https://github.com/CocoaPods/Specs.git
+  }
+  return false;
+}
 
 export async function getPkgReleases(
   config: Partial<PkgReleaseConfig>
 ): Promise<ReleaseResult | null> {
-  const { registryUrls = [defaultCDN], lookupName } = config;
+  const { lookupName } = config;
+  let { registryUrls } = config;
+  registryUrls =
+    registryUrls && registryUrls.length ? registryUrls : [defaultCDN];
 
   if (!lookupName) {
     logger.debug(config, `CocoaPods: invalid lookup name`);
@@ -141,7 +151,7 @@ export async function getPkgReleases(
     let registryUrl = registryUrls[idx].replace(/\/+$/, '');
 
     // In order to not abuse github API limits, query CDN instead
-    if (registryUrl === defaultRepo) registryUrl = defaultCDN;
+    if (isDefaultRepo(registryUrl)) registryUrl = defaultCDN;
 
     if (registryUrl.match(githubRegex)) {
       result = await getReleasesFromGithub(podName, registryUrl);
