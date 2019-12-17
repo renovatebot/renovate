@@ -13,7 +13,6 @@ import {
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 
-// istanbul ignore next
 export async function updateArtifacts(
   packageFileName: string,
   updatedDeps: string[],
@@ -93,14 +92,11 @@ export async function updateArtifacts(
         bundlerVersion = ' -v ' + bundlerConstraint;
       }
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      const envVars = [];
-      cmd += envVars.map(e => `-e ${e} `);
       cmd += `-w "${cwd}" `;
       cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
@@ -143,7 +139,7 @@ export async function updateArtifacts(
         },
       },
     ];
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     if (
       (err.stdout &&
         err.stdout.includes('Please supply credentials for this source')) ||
