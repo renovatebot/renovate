@@ -108,7 +108,7 @@ async function getReleasesFromCDN(
   return null;
 }
 
-const omitRegistryUrls = new Set<string>([
+const registryUrlsWithCDNAvailable = new Set<string>([
   'https://github.com/CocoaPods/Specs.git',
   'https://cdn.cocoapods.org',
 ]);
@@ -138,7 +138,7 @@ export async function getPkgReleases(
   let result = await getReleasesFromCDN(podName);
   for (let idx = 0; !result && idx < registryUrls.length; idx += 1) {
     const registryUrl = registryUrls[idx];
-    if (!omitRegistryUrls.has(registryUrl)) {
+    if (!registryUrlsWithCDNAvailable.has(registryUrl)) {
       result = await getReleasesFromGithub(podName, registryUrl);
     }
   }
