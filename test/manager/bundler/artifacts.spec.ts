@@ -106,7 +106,7 @@ describe('bundler.updateArtifacts()', () => {
           binarySource: 'docker',
         })
       ).toMatchSnapshot();
-      expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
+      expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
     });
     it('compatibility options', async () => {
       let dockerCommand = null;
@@ -141,7 +141,7 @@ describe('bundler.updateArtifacts()', () => {
           },
         })
       ).toMatchSnapshot();
-      expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
+      expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
     });
   });
 });
