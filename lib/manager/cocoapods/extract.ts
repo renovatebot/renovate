@@ -45,9 +45,9 @@ export function parseLine(line: string): ParsedLine {
   return result;
 }
 
-export function gitDep(parsedLine: ParsedLine): PackageDependency {
+export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
-  if (git.startsWith('https://github.com/')) {
+  if (git && git.startsWith('https://github.com/')) {
     const githubMatch = git.match(
       /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/
     );
@@ -66,12 +66,12 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency {
   return null; // TODO: gitlab or gitTags datasources?
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const lines = content.split('\n');
+  const lines: string[] = content.split('\n');
 
-  const registryUrls = [];
+  const registryUrls: string[] = [];
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
@@ -84,7 +84,7 @@ export function extractPackageFile(content: string): PackageFile {
       tag,
       path,
       source,
-    } = parsedLine;
+    }: ParsedLine = parsedLine;
 
     if (source) {
       registryUrls.push(source.replace(/\/*$/, ''));
@@ -129,5 +129,5 @@ export function extractPackageFile(content: string): PackageFile {
     }
   }
 
-  return { deps };
+  return deps.length ? { deps } : null;
 }

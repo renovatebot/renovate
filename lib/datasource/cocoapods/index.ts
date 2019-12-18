@@ -26,11 +26,11 @@ function releasesGithubUrl(
   return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
 }
 
-async function makeRequest<T = any>(
+async function makeRequest<T = unknown>(
   url: string,
   lookupName: string,
   json = true
-): Promise<T> {
+): Promise<T | null> {
   try {
     const resp = await api.get(url, { json });
     if (resp && resp.body) {
@@ -62,13 +62,13 @@ async function makeRequest<T = any>(
 const githubRegex = /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/;
 
 async function getReleasesFromGithub(
-  lookupName,
-  registryUrl,
+  lookupName: string,
+  registryUrl: string,
   useShard = false
 ): Promise<ReleaseResult | null> {
   const match = registryUrl.match(githubRegex);
-  const groups = (match && match.groups) || {};
-  const opts = { ...groups, useShard };
+  const { account, repo } = (match && match.groups) || {};
+  const opts = { account, repo, useShard };
   const url = releasesGithubUrl(lookupName, opts);
   const resp = await makeRequest<{ name: string }[]>(url, lookupName);
   if (resp) {
@@ -113,7 +113,7 @@ const defaultCDN = 'https://cdn.cocoapods.org';
 function isDefaultRepo(url: string): boolean {
   const match = url.match(githubRegex);
   if (match) {
-    const { account, repo } = match.groups;
+    const { account, repo } = match.groups || {};
     return (
       account.toLowerCase() === 'cocoapods' && repo.toLowerCase() === 'specs'
     ); // https://github.com/CocoaPods/Specs.git
@@ -146,7 +146,7 @@ export async function getPkgReleases(
     return cachedResult;
   }
 
-  let result = null;
+  let result: ReleaseResult | null = null;
   for (let idx = 0; !result && idx < registryUrls.length; idx += 1) {
     let registryUrl = registryUrls[idx].replace(/\/+$/, '');
 
@@ -162,7 +162,7 @@ export async function getPkgReleases(
 
   if (result) {
     await renovateCache.set(cacheNamespace, podName, result, cacheMinutes);
-    return result;
   }
-  return null;
+
+  return result;
 }

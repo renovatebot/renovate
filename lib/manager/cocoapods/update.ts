@@ -11,13 +11,20 @@ export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
 ): string | null {
-  const { currentValue, newValue } = upgrade;
+  const { currentValue, managerData, depName, newValue } = upgrade;
+
+  // istanbul ignore if
+  if (!currentValue || !managerData || !depName) {
+    logger.warn('Cocoapods: invalid upgrade object');
+    return null;
+  }
+
   logger.debug(`cocoapods.updateDependency: ${newValue}`);
 
   const lines = fileContent.split('\n');
-  const lineToChange = lines[upgrade.managerData.lineNumber];
+  const lineToChange = lines[managerData.lineNumber];
 
-  if (!lineContainsDep(lineToChange, upgrade.depName)) return null;
+  if (!lineContainsDep(lineToChange, depName)) return null;
 
   const regex = new RegExp(`(['"])${currentValue.replace('.', '\\.')}\\1`);
   const newLine = lineToChange.replace(regex, `$1${newValue}$1`);
@@ -27,6 +34,6 @@ export function updateDependency(
     return fileContent;
   }
 
-  lines[upgrade.managerData.lineNumber] = newLine;
+  lines[managerData.lineNumber] = newLine;
   return lines.join('\n');
 }

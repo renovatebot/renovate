@@ -2,7 +2,7 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import { hrtime } from 'process';
 import { platform } from '../../platform';
-import { exec } from '../../util/exec';
+import { exec, ExecResult } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { getPkgReleases } from '../../datasource/docker';
@@ -11,7 +11,7 @@ import { get as getVersioning } from '../../versioning';
 async function getImageTag(
   lookupName: string,
   versionScheme: string,
-  constraint?: string
+  constraint?: string | null
 ): Promise<string> {
   const releases = await getPkgReleases({
     lookupName,
@@ -19,7 +19,7 @@ async function getImageTag(
   let result = 'latest';
   if (releases && releases.releases) {
     const versioning = getVersioning(versionScheme);
-    let versions = releases.releases.map(release => release.version);
+    let versions: string[] = releases.releases.map(release => release.version);
     versions = versions.filter(version => versioning.isVersion(version));
     if (constraint) {
       versions = versions.filter(version =>
@@ -28,7 +28,7 @@ async function getImageTag(
     }
     versions = versions.sort(versioning.sortVersions);
     if (versions.length) {
-      result = versions.pop();
+      result = versions[versions.length - 1];
     }
   }
   if (result === 'latest') {
@@ -87,8 +87,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  const cmdParts = [];
-  let cocoapodsVersion: string = null;
+  const cmdParts: string[] = [];
   if (config.binarySource === 'docker') {
     cmdParts.push('docker run --rm');
 
@@ -101,7 +100,8 @@ export async function updateArtifacts(
     const match = existingLockFileContent.match(
       /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
     );
-    cocoapodsVersion = match ? match.groups.cocoapodsVersion : null;
+    const cocoapodsVersion =
+      match && match.groups ? match.groups.cocoapodsVersion : null;
     const imageName = 'renovate/cocoapods';
     const imageTag = await getImageTag(imageName, 'ruby', cocoapodsVersion);
     cmdParts.push(`${imageName}:${imageTag}`);
@@ -111,8 +111,8 @@ export async function updateArtifacts(
   cmdParts.push('install');
 
   const startTime = hrtime();
-  let execResult = null;
-  let execError = null;
+  let execResult: ExecResult | null = null;
+  let execError: Error | null = null;
   /* istanbul ignore next */
   try {
     const command = cmdParts.join(' ');
@@ -126,7 +126,7 @@ export async function updateArtifacts(
   logger.info({ seconds, type: 'Podfile.lock' }, 'Updated lockfile');
   logger.debug(`Returning updated lockfile: ${lockFileName}`);
 
-  let newPodfileLockContent = null;
+  let newPodfileLockContent: string | null = null;
   try {
     newPodfileLockContent = await fs.readFile(lockFileAbsolutePath, 'utf8');
   } catch (readError) {
