@@ -10,3 +10,5 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() returns updated Cargo.lock with docker 1`] = `"docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1"`;

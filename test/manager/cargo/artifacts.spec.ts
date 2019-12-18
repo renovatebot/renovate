@@ -56,6 +56,28 @@ describe('.updateArtifacts()', () => {
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
   });
+  it('returns updated Cargo.lock with docker', async () => {
+    let dockerCommand = null;
+    platform.getFile.mockReturnValueOnce('Old Cargo.lock');
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
+    });
+    fs.readFile = jest.fn(() => 'New Cargo.lock');
+    const updatedDeps = ['dep1'];
+    global.trustLevel = 'high';
+    expect(
+      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', {
+        ...config,
+        binarySource: 'docker',
+        dockerUser: 'foobar',
+      })
+    ).not.toBeNull();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+  });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current Cargo.lock');
     fs.outputFile = jest.fn(() => {

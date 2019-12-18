@@ -9,7 +9,7 @@ export function updateDependency(
     logger.debug(`nuget.updateDependency(): ${upgrade.newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    const regex = /(Version\s*=\s*")([^"]+)/;
+    const regex = /(Version\s*=\s*"\[?)([^",\])]+)/;
     const newLine = lineToChange.replace(regex, `$1${upgrade.newVersion}`);
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');

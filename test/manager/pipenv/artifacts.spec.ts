@@ -53,9 +53,13 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode', async () => {
     platform.getFile.mockReturnValueOnce('Current Pipfile.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
     });
     platform.getRepoStatus.mockResolvedValue({ modified: ['Pipfile.lock'] });
     fs.readFile = jest.fn(() => 'New Pipfile.lock');
@@ -63,8 +67,10 @@ describe('.updateArtifacts()', () => {
       await pipenv.updateArtifacts('Pipfile', [], '{}', {
         ...config,
         binarySource: 'docker',
+        dockerUser: 'foobar',
       })
     ).not.toBeNull();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current Pipfile.lock');
