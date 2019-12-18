@@ -66,7 +66,7 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).toMatchSnapshot();
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
   });
   it('catches write error', async () => {
     platform.getFile.mockResolvedValueOnce('Current Podfile');
@@ -150,7 +150,7 @@ describe('.updateArtifacts()', () => {
       binarySource: 'docker',
       dockerUser: 'ubuntu',
     });
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
     expect(exec).toBeCalledTimes(1);
   });
   it('falls back to the `latest` Docker image tag', async () => {
@@ -174,7 +174,7 @@ describe('.updateArtifacts()', () => {
       binarySource: 'docker',
       dockerUser: 'ubuntu',
     });
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
     expect(exec).toBeCalledTimes(1);
   });
 });
