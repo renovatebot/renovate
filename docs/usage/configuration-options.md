@@ -719,7 +719,7 @@ Note: Enabling the Master Issue does not itself change any of the "control flow"
 
 ## masterIssueApproval
 
-Setting `masterIssueApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Master Issue.
+Setting `masterIssueApproval` to `{enabled: true}` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Master Issue.
 
 In this case, the Master Issue _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue. Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc. i.e. it is possible to require approval for only certain types of updates only.
 
