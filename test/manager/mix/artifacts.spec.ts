@@ -62,7 +62,7 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).toMatchSnapshot();
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current mix.lock');

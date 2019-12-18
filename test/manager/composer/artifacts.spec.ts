@@ -109,7 +109,7 @@ describe('.updateArtifacts()', () => {
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
   });
   it('supports global mode', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');

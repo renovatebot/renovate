@@ -84,7 +84,7 @@ describe('.updateArtifacts()', () => {
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
   });
   it('supports global mode', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');
@@ -122,7 +122,7 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).not.toBeNull();
-    expect(dockerCommand).toMatchSnapshot();
+    expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
   });
   it('supports docker mode with credentials, appMode and trustLevel=high', async () => {
     hostRules.find.mockReturnValue({
@@ -151,7 +151,7 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodTidy'],
         })
       ).not.toBeNull();
-      expect(dockerCommand).toMatchSnapshot();
+      expect(dockerCommand.replace(/\\(\w)/, '/$1')).toMatchSnapshot();
     } finally {
       delete global.appMode;
       delete global.trustLevel;
