@@ -91,17 +91,25 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
     });
+
     fs.readFile = jest.fn(() => 'New composer.lock');
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', {
         ...config,
         binarySource: 'docker',
+        dockerUser: 'foobar',
       })
     ).not.toBeNull();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
   });
   it('supports global mode', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');

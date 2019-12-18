@@ -101,7 +101,6 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }

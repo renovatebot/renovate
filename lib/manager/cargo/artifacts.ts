@@ -38,18 +38,14 @@ export async function updateArtifacts(
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
       let cmd: string;
-      // istanbul ignore if
       if (config.binarySource === 'docker') {
         logger.info('Running cargo via docker');
         cmd = `docker run --rm `;
-        // istanbul ignore if
         if (config.dockerUser) {
           cmd += `--user=${config.dockerUser} `;
         }
         const volumes = [cwd];
         cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-        const envVars = [];
-        cmd += envVars.map(e => `-e ${e} `).join('');
         cmd += `-w "${cwd}" `;
         cmd += `renovate/rust cargo`;
       } else {

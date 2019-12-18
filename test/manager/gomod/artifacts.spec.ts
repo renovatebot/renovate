@@ -67,9 +67,13 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode without credentials', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
     });
     platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
@@ -77,8 +81,10 @@ describe('.updateArtifacts()', () => {
       await gomod.updateArtifacts('go.mod', [], gomod1, {
         ...config,
         binarySource: 'docker',
+        dockerUser: 'foobar',
       })
     ).not.toBeNull();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
   });
   it('supports global mode', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');
@@ -100,9 +106,13 @@ describe('.updateArtifacts()', () => {
       token: 'some-token',
     });
     platform.getFile.mockReturnValueOnce('Current go.sum');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
     });
     platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
@@ -112,12 +122,21 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).not.toBeNull();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
   });
   it('supports docker mode with credentials, appMode and trustLevel=high', async () => {
     hostRules.find.mockReturnValue({
       token: 'some-token',
     });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
+    let dockerCommand = null;
+    exec.mockImplementationOnce(cmd => {
+      dockerCommand = cmd;
+      return Promise.resolve({
+        stdout: '',
+        stderror: '',
+      });
+    });
     platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile.mockResolvedValue('New go.sum 1');
     fs.readFile.mockResolvedValue('New go.sum 2');
@@ -132,6 +151,7 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodTidy'],
         })
       ).not.toBeNull();
+      expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
     } finally {
       delete global.appMode;
       delete global.trustLevel;
