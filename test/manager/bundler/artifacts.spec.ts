@@ -1,18 +1,18 @@
 import _fs from 'fs-extra';
+import { exec as _exec } from 'child_process';
 import Git from 'simple-git/promise';
 import { updateArtifacts } from '../../../lib/manager/bundler';
-import * as _exec from '../../../lib/util/exec';
 import { platform as _platform } from '../../../lib/platform';
 import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec = mocked(_exec).exec;
+const exec: jest.Mock<typeof _exec> = _exec as any;
 const platform = mocked(_platform);
 const datasource = mocked(_datasource);
 
 jest.mock('fs-extra');
-jest.mock('../../../lib/util/exec');
+jest.mock('child_process');
 jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
 
@@ -31,9 +31,9 @@ describe('bundler.updateArtifacts()', () => {
   it('returns null if Gemfile.lock was not changed', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: [],
@@ -46,9 +46,9 @@ describe('bundler.updateArtifacts()', () => {
   it('works for default binarySource', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
@@ -61,9 +61,9 @@ describe('bundler.updateArtifacts()', () => {
   it('works explicit global binarySource', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
@@ -89,12 +89,10 @@ describe('bundler.updateArtifacts()', () => {
           { version: '1.3.0' },
         ],
       });
-      exec.mockImplementationOnce(cmd => {
+      exec.mockImplementationOnce((cmd, _options, callback) => {
         dockerCommand = cmd;
-        return Promise.resolve({
-          stdout: '',
-          stderr: '',
-        });
+        callback(null, '', '');
+        return undefined;
       });
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
@@ -119,12 +117,10 @@ describe('bundler.updateArtifacts()', () => {
           { version: '1.3.0' },
         ],
       });
-      exec.mockImplementationOnce(cmd => {
+      exec.mockImplementationOnce((cmd, _options, callback) => {
         dockerCommand = cmd;
-        return Promise.resolve({
-          stdout: '',
-          stderr: '',
-        });
+        callback(null, '', '');
+        return undefined;
       });
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
