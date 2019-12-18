@@ -111,6 +111,33 @@ Array [
     },
     "skipReason": "not-version",
   },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "nuget",
+    "depName": "Range1",
+    "depType": "nuget",
+    "managerData": Object {
+      "lineNumber": 24,
+    },
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "nuget",
+    "depName": "Range2",
+    "depType": "nuget",
+    "managerData": Object {
+      "lineNumber": 25,
+    },
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "nuget",
+    "depName": "Range3",
+    "depType": "nuget",
+    "managerData": Object {
+      "lineNumber": 26,
+    },
+  },
 ]
 `;
 
