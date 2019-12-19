@@ -138,7 +138,7 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.8-dev python3-distutils && \
+RUN apt-get update && apt-get install -y python3.8-dev python3.8-venv python3-distutils && \
     rm -rf /var/lib/apt/lists/*
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.8 /usr/bin/python3
