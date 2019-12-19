@@ -1,31 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_setup/extract getPythonAlias finds python 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "python --version",
-    ],
-    Array [
-      "python3 --version",
-    ],
-    Array [
-      "python3.8 --version",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 1`] = `"python3.8"`;
+
+exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 2`] = `
+Array [
+  "python --version",
+  "python3 --version",
+  "python3.8 --version",
+]
 `;
