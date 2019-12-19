@@ -1,13 +1,15 @@
 import _fs from 'fs-extra';
+import { exec as _exec } from 'child_process';
 import * as cargo from '../../../lib/manager/cargo/artifacts';
 import { platform as _platform } from '../../../lib/platform';
+import { mocked } from '../../util';
 
 jest.mock('fs-extra');
-jest.mock('../../../lib/util/exec');
-const { exec } = require('../../../lib/util/exec');
+jest.mock('child_process');
 
-const platform: any = _platform;
-const fs: any = _fs;
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const platform = mocked(_platform);
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -32,24 +34,24 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockReturnValueOnce('Current Cargo.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'Current Cargo.lock');
+    fs.readFile.mockReturnValueOnce('Current Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns updated Cargo.lock', async () => {
-    platform.getFile.mockReturnValueOnce('Old Cargo.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'New Cargo.lock');
+    fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     global.trustLevel = 'high';
     expect(
@@ -58,15 +60,13 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Cargo.lock with docker', async () => {
     let dockerCommand = null;
-    platform.getFile.mockReturnValueOnce('Old Cargo.lock');
-    exec.mockImplementationOnce(cmd => {
+    platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      return Promise.resolve({
-        stdout: '',
-        stderror: '',
-      });
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'New Cargo.lock');
+    fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     global.trustLevel = 'high';
     expect(
@@ -79,8 +79,8 @@ describe('.updateArtifacts()', () => {
     expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockReturnValueOnce('Current Cargo.lock');
-    fs.outputFile = jest.fn(() => {
+    platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
+    fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     const updatedDeps = ['dep1'];
