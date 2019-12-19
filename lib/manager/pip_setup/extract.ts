@@ -19,6 +19,7 @@ export function parsePythonVersion(str: string): number[] {
 }
 
 export async function getPythonAlias(): Promise<string> {
+  // istanbul ignore if
   if (pythonAlias) {
     return pythonAlias;
   }
