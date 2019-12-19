@@ -35,7 +35,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
@@ -47,7 +47,7 @@ describe('.updateArtifacts()', () => {
   it('uses hostRules to write auth.json', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
@@ -67,7 +67,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated composer.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
@@ -82,7 +82,7 @@ describe('.updateArtifacts()', () => {
   it('performs lockFileMaintenance', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
@@ -102,7 +102,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
 
@@ -119,7 +119,7 @@ describe('.updateArtifacts()', () => {
   it('supports global mode', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);

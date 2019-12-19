@@ -40,7 +40,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current mix.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockResolvedValueOnce('Current mix.lock' as any);
@@ -51,7 +51,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockResolvedValueOnce('New mix.lock' as any);
