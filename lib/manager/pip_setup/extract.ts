@@ -8,7 +8,7 @@ import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
 
-export function resetModule() {
+export function resetModule(): void {
   pythonAlias = null;
 }
 
