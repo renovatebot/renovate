@@ -27,6 +27,9 @@ jobs:
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
 
+      - name: Docker version
+        run: docker version
+
       - name: Build the Docker image
         run: |
           docker buildx build \
@@ -58,6 +61,9 @@ jobs:
 
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: Docker version
+        run: docker version
 
       - name: Build the Docker image
         run: |
