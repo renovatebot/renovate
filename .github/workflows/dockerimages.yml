@@ -35,3 +35,6 @@ jobs:
 
       - name: Image history
         run: docker history renovate
+
+      - name: Image size
+        run: docker image ls | grep renovate
