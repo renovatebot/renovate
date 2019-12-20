@@ -14,7 +14,9 @@ jobs:
       TAG: latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
         id: buildx
@@ -44,7 +46,9 @@ jobs:
       TAG: slim
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
         id: buildx
@@ -61,7 +65,7 @@ jobs:
             --platform ${PLATFORM} \
             --output "type=image,push=false" \
             --tag renovate/renovate:${TAG} \
-            --file ./Dockerfile .
+            --file ./Dockerfile.slim .
 
       - name: Image history
         run: docker history renovate/renovate:${TAG}
