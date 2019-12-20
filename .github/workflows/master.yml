@@ -12,6 +12,7 @@ jobs:
 
     strategy:
       matrix:
+        # testing, to be removed
         tag: [test] #'latest','slim'
 
     steps:
@@ -43,12 +44,13 @@ jobs:
         run: |
           docker buildx build \
             --cache-from "type=registry,ref=${{ steps.prepare.outputs.image }}:${{ matrix.tag }}" \
-            --output "type=registry" \
+            --cache-to "type=registry,ref=${{ steps.prepare.outputs.image }}:${{ matrix.tag }},mode=max" \
+            --output "type=docker" \
             --tag ${{ steps.prepare.outputs.image }}:${{ matrix.tag }} \
             --file ./${{ steps.prepare.outputs.file }} .
 
-      # - name: Image history
-      #   run: docker history ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}
+      - name: Image history
+        run: docker history ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}
 
       - name: Image size
         run: docker image ls | grep ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}
