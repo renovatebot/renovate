@@ -1,0 +1,27 @@
+name: Docker Images CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-full:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag renovate/renovate
+      - name: Image history
+        run: docker history renovate/renovate
+
+  build-slim:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag renovate/renovate:slim
+      - name: Image history
+        run: docker history renovate/renovate:slim
