@@ -1,14 +1,10 @@
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
-
-module.exports = {
-  pruneStaleBranches,
-};
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled },
   remainingBranches
-) {
+): Promise<void> {
   for (const branchName of remainingBranches) {
     try {
       const pr = await platform.findPr(branchName, null, 'open');
@@ -63,7 +59,7 @@ async function cleanUpBranches(
   }
 }
 
-async function pruneStaleBranches(config, branchList) {
+export async function pruneStaleBranches(config, branchList): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);

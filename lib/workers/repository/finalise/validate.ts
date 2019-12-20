@@ -1,23 +1,23 @@
-const JSON5 = require('json5');
-const { logger, setMeta } = require('../../../logger');
-const { migrateAndValidate } = require('../../../config/migrate-validate');
-const { configFileNames } = require('../../../config/app-strings');
-const { platform } = require('../../../platform');
+import JSON5 from 'json5';
+import { logger, setMeta } from '../../../logger';
+import { migrateAndValidate } from '../../../config/migrate-validate';
+import { configFileNames } from '../../../config/app-strings';
+import { platform, Pr } from '../../../platform';
 
-async function getRenovatePrs(branchPrefix) {
+async function getRenovatePrs(branchPrefix): Promise<Pr[]> {
   return (await platform.getPrList())
     .filter(pr => pr.state === 'open')
     .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
     .filter(pr => pr.title && pr.title.match(new RegExp('renovate', 'i')));
 }
 
-async function getRenovateFiles(prNo) {
+async function getRenovateFiles(prNo): Promise<string[]> {
   return (await platform.getPrFiles(prNo)).filter(file =>
     configFileNames.includes(file)
   );
 }
 
-async function validatePrs(config) {
+export async function validatePrs(config): Promise<void> {
   if (
     config.suppressNotifications &&
     config.suppressNotifications.includes('prValidation')
@@ -126,7 +126,3 @@ async function validatePrs(config) {
     }
   }
 }
-
-module.exports = {
-  validatePrs,
-};

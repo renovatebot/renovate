@@ -1,10 +1,7 @@
-const cleanup = require('../../../../lib/workers/repository/finalise/prune');
+import * as cleanup from '../../../../lib/workers/repository/finalise/prune';
+import { platform, RenovateConfig } from '../../../util';
 
-/** @type any */
-const { platform } = require('../../../../lib/platform');
-
-/** @type any */
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = require('../../../config/config/_fixtures');
@@ -22,22 +19,22 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('returns if no renovate branches', async () => {
       config.branchList = [];
-      platform.getAllRenovateBranches.mockReturnValueOnce([]);
+      platform.getAllRenovateBranches.mockResolvedValueOnce([]);
       await cleanup.pruneStaleBranches(config, config.branchList);
     });
     it('returns if no remaining branches', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      platform.getAllRenovateBranches.mockReturnValueOnce(config.branchList);
+      platform.getAllRenovateBranches.mockResolvedValueOnce(config.branchList);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
     });
     it('renames deletes remaining branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
-      platform.getAllRenovateBranches.mockReturnValueOnce(
+      platform.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(1);
@@ -46,10 +43,10 @@ describe('workers/repository/finalise/prune', () => {
     it('does nothing on dryRun', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.dryRun = true;
-      platform.getAllRenovateBranches.mockReturnValueOnce(
+      platform.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
@@ -59,10 +56,10 @@ describe('workers/repository/finalise/prune', () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.dryRun = false;
       config.pruneStaleBranches = false;
-      platform.getAllRenovateBranches.mockReturnValueOnce(
+      platform.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
@@ -71,11 +68,11 @@ describe('workers/repository/finalise/prune', () => {
     it('posts comment if someone pushed to PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.dryRun = false;
-      platform.getAllRenovateBranches.mockReturnValueOnce(
+      platform.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockReturnValueOnce({ isModified: true });
-      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      platform.getBranchPr.mockResolvedValueOnce({ isModified: true } as never);
+      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
@@ -85,11 +82,11 @@ describe('workers/repository/finalise/prune', () => {
     it('skips comment if dry run', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.dryRun = true;
-      platform.getAllRenovateBranches.mockReturnValueOnce(
+      platform.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockReturnValueOnce({ isModified: true });
-      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      platform.getBranchPr.mockResolvedValueOnce({ isModified: true } as never);
+      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
