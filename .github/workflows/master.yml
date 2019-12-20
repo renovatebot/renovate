@@ -29,8 +29,7 @@ jobs:
 
       - name: Docker login
         run: |
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
 
       - name: Checkout source
         uses: actions/checkout@v2
