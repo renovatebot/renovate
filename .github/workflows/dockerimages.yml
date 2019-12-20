@@ -6,12 +6,13 @@ env:
   PLATFORM: linux/amd64
 
 jobs:
-  build-full:
-    name: Build full image
+  build:
+    name: Build image
     runs-on: ubuntu-latest
 
-    env:
-      TAG: latest
+    strategy:
+      matrix:
+        file: [Dockerfile, Dockerfile.slim]
 
     steps:
       - uses: actions/checkout@v2
@@ -24,54 +25,11 @@ jobs:
         with:
           version: latest
 
-      - name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
-
-      - name: Docker version
-        run: docker version
-
       - name: Build the Docker image
         run: |
           docker buildx build \
-            --platform ${PLATFORM} \
-            --output "type=image,push=false" \
-            --tag renovate/renovate:${TAG} \
-            --file ./Dockerfile .
+            --tag renovate \
+            --file ./${{ matrix.file }} .
 
       - name: Image history
-        run: docker history renovate/renovate:${TAG}
-
-  build-slim:
-    name: Build slim image
-    runs-on: ubuntu-latest
-
-    env:
-      TAG: slim
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: latest
-
-      - name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
-
-      - name: Docker version
-        run: docker version
-
-      - name: Build the Docker image
-        run: |
-          docker buildx build \
-            --platform ${PLATFORM} \
-            --output "type=image,push=false" \
-            --tag renovate/renovate:${TAG} \
-            --file ./Dockerfile.slim .
-
-      - name: Image history
-        run: docker history renovate/renovate:${TAG}
+        run: docker history renovate
