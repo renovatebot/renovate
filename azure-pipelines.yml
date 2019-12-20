@@ -57,21 +57,3 @@ jobs:
 
     steps:
       - template: .azure/steps.yml
-
-  - job: 'DockerSlim'
-    pool:
-      vmImage: ubuntu-16.04
-
-    steps:
-      - bash: |
-          docker pull renovate/renovate:slim
-        displayName: Pull old slim renovate image as cache
-
-      - bash: |
-          export DOCKER_BUILDKIT=1
-          docker build --cache-from renovate/renovate:slim -t renovate-test -f Dockerfile.slim .
-        displayName: Build slim renovate image
-
-      - bash: |
-          docker run --rm -t renovate-test --version
-        displayName: Test slim renovate image
