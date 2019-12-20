@@ -423,12 +423,13 @@ describe('semverRuby', () => {
         ['~> 1.0.3', '~> 1.0.3', 'replace', '1.0.0', '1.0.4'],
         ['~> 4.7, >= 4.7.4', '~> 4.7, >= 4.7.4', 'replace', '1.0.0', '4.7.9'],
         [
-          '>= 2.0.0, <= 2.20.0',
+          '>= 2.0.0, <= 2.20',
           '>= 2.0.0, <= 2.15',
           'replace',
           '2.15.0',
           '2.20.0',
         ],
+        ['~> 6.0.0', '~> 5.2.0', 'replace', '5.2.4.1', '6.0.2.1'],
       ].forEach(([expected, current, range, from, to]) => {
         expect(semverRuby.getNewValue(current, range as any, from, to)).toEqual(
           expected

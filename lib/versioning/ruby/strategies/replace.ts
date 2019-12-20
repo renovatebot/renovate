@@ -9,7 +9,15 @@ export default ({ to, range }: { range: string; to: string }): string => {
     .split(',')
     .map(part => part.trim())
     .pop();
-  const newLastPart = bump({ to, range: lastPart });
-  // TODO: match precision
+  const lastPartPrecision = lastPart.split('.').length;
+  const toPrecision = to.split('.').length;
+  let massagedTo: string = to;
+  if (toPrecision > lastPartPrecision) {
+    massagedTo = to
+      .split('.')
+      .slice(0, lastPartPrecision)
+      .join('.');
+  }
+  const newLastPart = bump({ to: massagedTo, range: lastPart });
   return range.replace(lastPart, newLastPart);
 };
