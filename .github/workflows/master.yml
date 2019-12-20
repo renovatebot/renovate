@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: ['slim'] #'latest',
+        tag: [test] #'latest','slim'
 
     steps:
       - name: Prepare
@@ -43,7 +43,6 @@ jobs:
         run: |
           docker buildx build \
             --cache-from "type=registry,ref=${{ steps.prepare.outputs.file }}:${{ matrix.tag }}" \
-            --cache-to "type=inline,mode=max" \
             --output "type=registry" \
             --tag ${{ steps.prepare.outputs.image }}:${{ matrix.tag }} \
             --file ./${{ steps.prepare.outputs.file }} .
