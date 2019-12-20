@@ -307,21 +307,21 @@ Object {
 
 exports[`datasource/nuget getPkgReleases processes real data with no github project url (v2) 1`] = `
 Object {
-  "homepage": "https://nunit.org",
   "pkgName": "nunit",
   "releases": Array [
     Object {
       "version": "3.11.0",
     },
   ],
+  "sourceUrl": "https://nunit.org",
 }
 `;
 
 exports[`datasource/nuget getPkgReleases processes real data with no github project url (v3) 1`] = `
 Object {
-  "homepage": "https://nunit.org",
   "pkgName": "nunit",
   "releases": Array [],
+  "sourceUrl": "https://nunit.org",
 }
 `;
 

@@ -257,7 +257,7 @@ Object {
   "changelogUrl": undefined,
   "homepage": undefined,
   "sourceDirectory": "test",
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "canBeUnpublished": false,

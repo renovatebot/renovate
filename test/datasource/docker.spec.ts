@@ -26,6 +26,7 @@ describe('api/docker', () => {
         username: 'some-username',
         password: 'some-password',
       });
+      hostRules.hosts = jest.fn(() => []);
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
