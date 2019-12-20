@@ -27,14 +27,15 @@ jobs:
             echo ::set-output name=file::Dockerfile.${{ matrix.tag }}
           fi
 
-      - name: Docker Login
+      - name: Docker login
         uses: azure/docker-login@v1
         with:
           login-server: docker.pkg.github.com
           username: $GITHUB_ACTOR
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v2
+      - name: Checkout source
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
 
