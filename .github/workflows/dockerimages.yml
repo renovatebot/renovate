@@ -4,6 +4,7 @@ on: [pull_request]
 
 jobs:
   build-full:
+    name: Build full image
     runs-on: ubuntu-latest
 
     steps:
@@ -14,6 +15,7 @@ jobs:
         run: docker history renovate/renovate
 
   build-slim:
+    name: Build slim image
     runs-on: ubuntu-latest
 
     steps:
