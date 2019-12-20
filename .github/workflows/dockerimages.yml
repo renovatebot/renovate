@@ -2,7 +2,8 @@ name: Docker Images CI
 
 on: [pull_request]
 
-env: PLATFORM=linux/amd64
+env:
+  PLATFORM: linux/amd64
 
 jobs:
   build-full:
