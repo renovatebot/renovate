@@ -32,7 +32,5 @@ jobs:
             --output "type=docker,name=renovate" \
             --file ./${{ matrix.file }} .
 
-      - name: Image list
-        run: docker image ls
-      # - name: Image history
-      #   run: docker history renovate
+      - name: Image history
+        run: docker history renovate
