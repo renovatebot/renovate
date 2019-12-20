@@ -34,7 +34,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current poetry.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
@@ -46,7 +46,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated poetry.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Old poetry.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -61,7 +61,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);

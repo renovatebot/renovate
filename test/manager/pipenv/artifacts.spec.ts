@@ -31,7 +31,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('Current Pipfile.lock' as any);
@@ -42,7 +42,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Pipfile.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValue({
@@ -59,7 +59,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValue({

@@ -36,7 +36,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     exec.mockImplementation((_cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
   });
@@ -48,7 +48,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     exec.mockImplementationOnce((_cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -61,7 +61,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated go.sum', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     exec.mockImplementationOnce((_cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -77,7 +77,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -96,7 +96,7 @@ describe('.updateArtifacts()', () => {
   it('supports global mode', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -118,7 +118,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -141,7 +141,7 @@ describe('.updateArtifacts()', () => {
     let dockerCommand = null;
     exec.mockImplementationOnce((cmd, _options, callback) => {
       dockerCommand = cmd;
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({

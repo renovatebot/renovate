@@ -32,7 +32,7 @@ describe('bundler.updateArtifacts()', () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -47,7 +47,7 @@ describe('bundler.updateArtifacts()', () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -62,7 +62,7 @@ describe('bundler.updateArtifacts()', () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
     exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, '', '');
+      callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -91,7 +91,7 @@ describe('bundler.updateArtifacts()', () => {
       });
       exec.mockImplementationOnce((cmd, _options, callback) => {
         dockerCommand = cmd;
-        callback(null, '', '');
+        callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
       platform.getRepoStatus.mockResolvedValueOnce({
@@ -119,7 +119,7 @@ describe('bundler.updateArtifacts()', () => {
       });
       exec.mockImplementationOnce((cmd, _options, callback) => {
         dockerCommand = cmd;
-        callback(null, '', '');
+        callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
       platform.getRepoStatus.mockResolvedValueOnce({
