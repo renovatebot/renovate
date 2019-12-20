@@ -42,7 +42,7 @@ jobs:
       - name: Build the Docker image
         run: |
           docker buildx build \
-            --cache-from "type=registry,ref=${{ steps.prepare.outputs.file }}:${{ matrix.tag }}" \
+            --cache-from "type=registry,ref=${{ steps.prepare.outputs.image }}:${{ matrix.tag }}" \
             --output "type=registry" \
             --tag ${{ steps.prepare.outputs.image }}:${{ matrix.tag }} \
             --file ./${{ steps.prepare.outputs.file }} .
