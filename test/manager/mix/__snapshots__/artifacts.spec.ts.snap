@@ -3,7 +3,7 @@
 exports[`.updateArtifacts() catches errors 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "mix.lock",
       "stderr": "not found",
     },
@@ -21,3 +21,5 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() returns updated mix.lock 2`] = `"docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/mix mix deps.update plug"`;

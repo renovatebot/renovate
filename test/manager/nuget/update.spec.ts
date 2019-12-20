@@ -8,13 +8,24 @@ const csProj = readFileSync(
 
 describe('manager/nuget/update', () => {
   describe('updateDependency', () => {
-    it('replaces existing value', () => {
+    it('replaces simple value', () => {
       const upgrade = {
         managerData: { lineNumber: 13 },
         newVersion: '5.0.0',
       };
       const res = updateDependency(csProj, upgrade);
       expect(res).not.toEqual(csProj);
+    });
+    it('replaces left boundary value', () => {
+      let res = csProj;
+      for (let i = 24; i <= 26; i += 1) {
+        const upgrade = {
+          managerData: { lineNumber: i },
+          newVersion: i + '.2.1',
+        };
+        res = updateDependency(res, upgrade);
+      }
+      expect(res).toMatchSnapshot();
     });
     it('keeps intact when same version', () => {
       const upgrade = {

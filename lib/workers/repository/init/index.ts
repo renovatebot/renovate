@@ -1,16 +1,17 @@
-const { logger } = require('../../../logger');
-const { checkOnboardingBranch } = require('../onboarding/branch');
-const { checkIfConfigured } = require('../configured');
-const { initApis } = require('../init/apis');
-const { checkBaseBranch } = require('./base');
-const { mergeRenovateConfig } = require('./config');
-const { detectSemanticCommits } = require('./semantic');
-const { detectVulnerabilityAlerts } = require('./vulnerability');
-const { platform } = require('../../../platform');
+import { logger } from '../../../logger';
+import { checkOnboardingBranch } from '../onboarding/branch';
+import { checkIfConfigured } from '../configured';
+import { initApis } from './apis';
+import { checkBaseBranch } from './base';
+import { mergeRenovateConfig } from './config';
+import { detectSemanticCommits } from './semantic';
+import { detectVulnerabilityAlerts } from './vulnerability';
+import { platform } from '../../../platform';
+import { RenovateConfig } from '../../../config';
 
-async function initRepo(input) {
+export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   global.repoCache = {};
-  let config = {
+  let config: RenovateConfig = {
     ...input,
     errors: [],
     warnings: [],
@@ -31,7 +32,3 @@ async function initRepo(input) {
   }
   return config;
 }
-
-module.exports = {
-  initRepo,
-};

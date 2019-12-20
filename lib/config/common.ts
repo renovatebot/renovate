@@ -52,6 +52,10 @@ export interface RenovateConfig
   description?: string[];
   dryRun?: boolean;
   errors?: ValidationMessage[];
+
+  /** TODO: Type? */
+  global?: Record<string, any>;
+
   includeForks?: boolean;
   isFork?: boolean;
   onboarding?: boolean;

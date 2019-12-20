@@ -13,7 +13,6 @@ import {
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 
-// istanbul ignore next
 export async function updateArtifacts(
   packageFileName: string,
   updatedDeps: string[],
@@ -93,20 +92,23 @@ export async function updateArtifacts(
         bundlerVersion = ' -v ' + bundlerConstraint;
       }
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      const envVars = [];
-      cmd += envVars.map(e => `-e ${e} `);
       cmd += `-w "${cwd}" `;
       cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running bundler via global bundler');
+      cmd = 'bundle';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
       cmd = 'bundle';
     }
     cmd += ` lock --update ${updatedDeps.join(' ')}`;
@@ -137,7 +139,7 @@ export async function updateArtifacts(
         },
       },
     ];
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     if (
       (err.stdout &&
         err.stdout.includes('Please supply credentials for this source')) ||

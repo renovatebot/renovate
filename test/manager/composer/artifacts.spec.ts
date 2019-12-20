@@ -1,16 +1,19 @@
 import _fs from 'fs-extra';
+import { exec as _exec } from 'child_process';
 import * as composer from '../../../lib/manager/composer/artifacts';
 import { platform as _platform } from '../../../lib/platform';
+import { mocked } from '../../util';
+import { StatusResult } from '../../../lib/platform/git/storage';
 
 jest.mock('fs-extra');
-jest.mock('../../../lib/util/exec');
+jest.mock('child_process');
 jest.mock('../../../lib/util/host-rules');
 
-const { exec } = require('../../../lib/util/exec');
 const hostRules = require('../../../lib/util/host-rules');
 
-const platform: any = _platform;
-const fs: any = _fs;
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const platform = mocked(_platform);
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -30,24 +33,24 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'Current composer.lock');
-    platform.getRepoStatus.mockResolvedValue({ modified: [] });
+    fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
+    platform.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
   it('uses hostRules to write auth.json', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'Current composer.lock');
+    fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
     const authConfig = {
       localDir: '/tmp/github/some/repo',
       registryUrls: ['https://packagist.renovatebot.com'],
@@ -56,32 +59,36 @@ describe('.updateArtifacts()', () => {
       username: 'some-username',
       password: 'some-password',
     });
-    platform.getRepoStatus.mockResolvedValue({ modified: [] });
+    platform.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', authConfig)
     ).toBeNull();
   });
   it('returns updated composer.lock', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'New composer.lock');
+    fs.readFile.mockReturnValueOnce('New composer.lock' as any);
     global.trustLevel = 'high';
-    platform.getRepoStatus.mockResolvedValue({ modified: ['composer.lock'] });
+    platform.getRepoStatus.mockResolvedValue({
+      modified: ['composer.lock'],
+    } as StatusResult);
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', config)
     ).not.toBeNull();
   });
   it('performs lockFileMaintenance', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'New composer.lock');
-    platform.getRepoStatus.mockResolvedValue({ modified: ['composer.lock'] });
+    fs.readFile.mockReturnValueOnce('New composer.lock' as any);
+    platform.getRepoStatus.mockResolvedValue({
+      modified: ['composer.lock'],
+    } as StatusResult);
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', {
         ...config,
@@ -90,22 +97,42 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
   });
   it('supports docker mode', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+
+    let dockerCommand = null;
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      dockerCommand = cmd;
+      callback(null, '', '');
+      return undefined;
     });
-    fs.readFile = jest.fn(() => 'New composer.lock');
+
+    fs.readFile.mockReturnValueOnce('New composer.lock' as any);
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', {
         ...config,
         binarySource: 'docker',
+        dockerUser: 'foobar',
+      })
+    ).not.toBeNull();
+    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+  });
+  it('supports global mode', async () => {
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    exec.mockImplementationOnce((cmd, _options, callback) => {
+      callback(null, '', '');
+      return undefined;
+    });
+    fs.readFile.mockReturnValueOnce('New composer.lock' as any);
+    expect(
+      await composer.updateArtifacts('composer.json', [], '{}', {
+        ...config,
+        binarySource: 'global',
       })
     ).not.toBeNull();
   });
   it('catches errors', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    fs.outputFile = jest.fn(() => {
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -113,8 +140,8 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
   });
   it('catches unmet requirements errors', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    fs.outputFile = jest.fn(() => {
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.outputFile.mockImplementationOnce(() => {
       throw new Error(
         'fooYour requirements could not be resolved to an installable set of packages.bar'
       );
@@ -124,8 +151,8 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
   });
   it('throws for disk space', async () => {
-    platform.getFile.mockReturnValueOnce('Current composer.lock');
-    fs.outputFile = jest.fn(() => {
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.outputFile.mockImplementationOnce(() => {
       throw new Error(
         'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
       );

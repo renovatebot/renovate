@@ -1,5 +1,6 @@
 import { platform as _platform } from '../lib/platform';
 import { getConfig } from '../lib/config/defaults';
+import { RenovateConfig as _RenovateConfig } from '../lib/config';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -11,4 +12,9 @@ export function mocked<T>(module: T): jest.Mocked<T> {
 
 export const platform = mocked(_platform);
 
+// Required because of isolatedModules
+export type RenovateConfig = _RenovateConfig;
+
 export const defaultConfig = getConfig();
+
+export { getConfig };

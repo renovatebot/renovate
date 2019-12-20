@@ -185,10 +185,10 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Where to source binaries like `npm` and `yarn` from, choices are `bundled`, `global` and `docker`',
+      'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`',
     admin: true,
     type: 'string',
-    default: 'bundled',
+    default: 'auto',
   },
   {
     name: 'baseDir',

@@ -1,4 +1,4 @@
-FROM amd64/node:10.17.0@sha256:93e9a9283f0e2ead937a8f77a2c72b18f80005c10b57b4f1cfd40d2b3aa6595f AS tsbuild
+FROM amd64/node:10.18.0@sha256:15a23eefad1798c98238fe71b22b65e20c26c17f139505cf6abcab53a740554a AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:134c7fe821b9d359490cd009ce7ca322453f4f2d018623f849e580a89a685e5d
+FROM amd64/ubuntu:18.04@sha256:2695d3e10e69cc500a16eae6d6629c803c43ab075fa5ce60813a0fc49c47e859
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -138,7 +138,7 @@ ENV CGO_ENABLED=0
 
 # Python
 
-RUN apt-get update && apt-get install -y python3.8-dev python3-distutils && \
+RUN apt-get update && apt-get install -y python3.8-dev python3.8-venv python3-distutils && \
     rm -rf /var/lib/apt/lists/*
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.8 /usr/bin/python3
@@ -192,11 +192,12 @@ RUN pip install --user pipenv
 
 # Poetry
 
-RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+ENV POETRY_VERSION=1.0.0
+
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${POETRY_VERSION}
 
 ENV PATH="${HOME}/.poetry/bin:$PATH"
-RUN cp -r ${HOME}/.poetry/lib/poetry/_vendor/py3.7 ${HOME}/.poetry/lib/poetry/_vendor/py3.8
-RUN poetry config settings.virtualenvs.in-project false
+RUN poetry config virtualenvs.in-project false
 
 # npm
 
