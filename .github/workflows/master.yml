@@ -6,7 +6,6 @@ on: push
 #    branches: master
 
 env:
-  PLATFORM: linux/amd64
   CACHE_IMAGE: docker.pkg.github.com/renovatebot/renovate/cache
 
 jobs:
@@ -48,7 +47,6 @@ jobs:
       - name: Build the Docker image
         run: |
           docker buildx build \
-            --platform ${PLATFORM} \
             --cache-from "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }}" \
             --cache-to "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }},mode=max" \
             --output "type=docker" \
