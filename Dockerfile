@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openss
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && \
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jre-headless gradle && \
     rm -rf /var/lib/apt/lists/*
 
 ## Node.js
@@ -154,7 +154,9 @@ ENV HOME=/home/ubuntu
 RUN groupadd --gid 1000 ubuntu && \
   useradd --uid 1000 --gid ubuntu --groups 0 --shell /bin/bash --home-dir ${HOME} --create-home ubuntu
 
-RUN chmod -R a+rw /usr
+
+RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
+  chmod -R g=u ${APP_ROOT} ${HOME}
 
 # Docker client and group
 
@@ -175,9 +177,10 @@ USER ubuntu
 ENV RUST_BACKTRACE=1 \
   PATH=${HOME}/.cargo/bin:$PATH
 
+ENV RUST_VERSION=1.36.0
+
 RUN set -ex ;\
-  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
-  rustup toolchain install 1.36.0
+  curl https://sh.rustup.rs -sSf | sh -s -- --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} -y
 
 # Mix and Rebar
 
@@ -221,9 +224,6 @@ COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data
 
-USER root
-RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
-  chmod -R g=u ${APP_ROOT} ${HOME}
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
 USER 1000
