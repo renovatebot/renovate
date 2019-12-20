@@ -5,9 +5,6 @@ on: push
 #  push:
 #    branches: master
 
-env:
-  CACHE_IMAGE: docker.pkg.github.com/renovatebot/renovate/cache
-
 jobs:
   build:
     name: Build image
@@ -26,10 +23,10 @@ jobs:
           else
             echo ::set-output name=file::Dockerfile.${{ matrix.tag }}
           fi
+          echo ::set-output name=image::docker.pkg.github.com/${{ github.repository }}/cache
 
       - name: Docker login
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Checkout source
         uses: actions/checkout@v2
@@ -45,10 +42,10 @@ jobs:
       - name: Build the Docker image
         run: |
           docker buildx build \
-            --cache-from "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }}" \
+            --cache-from "type=registry,ref=${{ steps.prepare.outputs.file }}:${{ matrix.tag }}" \
             --cache-to "type=inline,mode=max" \
             --output "type=registry" \
-            --tag ${CACHE_IMAGE}:${{ matrix.tag }} \
+            --tag ${{ steps.prepare.outputs.file }}:${{ matrix.tag }} \
             --file ./${{ steps.prepare.outputs.file }} .
 
       # - name: Image history
