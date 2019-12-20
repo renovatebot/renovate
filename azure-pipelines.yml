@@ -71,17 +71,3 @@ jobs:
       - bash: |
           docker run --rm -t renovate-test --version
         displayName: Test slim renovate image
-
-  - job: 'DockerFull'
-    pool:
-      vmImage: ubuntu-18.04
-
-    steps:
-      - bash: |
-          export DOCKER_BUILDKIT=1
-          docker build -t renovate-test -f Dockerfile .
-        displayName: Build full renovate image
-
-      - bash: |
-          docker run --rm -t renovate-test --version
-        displayName: Test full renovate image
