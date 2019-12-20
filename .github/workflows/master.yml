@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: ['latest', 'slim']
+        tag: ['slim'] #'latest',
 
     steps:
       - name: Prepare
@@ -28,10 +28,10 @@ jobs:
           fi
 
       - name: Docker login
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+        run: |
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
 
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout source
         uses: actions/checkout@v2
         with:
@@ -47,13 +47,14 @@ jobs:
         run: |
           docker buildx build \
             --cache-from "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }}" \
-            --cache-to "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }},mode=max" \
-            --output "type=docker" \
-            --tag renovate:${{ matrix.tag }} \
+            --cache-to "type=inline,mode=max" \
+            --output "type=registry" \
+            --tag ${CACHE_IMAGE}:${{ matrix.tag }} \
             --file ./${{ steps.prepare.outputs.file }} .
 
-      - name: Image history
-        run: docker history renovate:${{ matrix.tag }}
+      # - name: Image history
+      #   run: docker history ${CACHE_IMAGE}:${{ matrix.tag }}
 
       - name: Image size
-        run: docker image ls | grep renovate:${{ matrix.tag }}
+        run: docker image ls
+        #| grep ${CACHE_IMAGE}:${{ matrix.tag }}
