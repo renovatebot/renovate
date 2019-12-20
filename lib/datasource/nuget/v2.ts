@@ -1,4 +1,3 @@
-import parse from 'github-url-from-git';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import got from '../../util/got';
@@ -42,12 +41,7 @@ export async function getPkgReleases(
           if (pkgIsLatestVersion === 'true') {
             const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
             if (projectUrl) {
-              dep.sourceUrl = parse(projectUrl);
-              if (!dep.sourceUrl) {
-                // The project URL does not represent a known
-                // source URL, pass it on as homepage instead.
-                dep.homepage = projectUrl;
-              }
+              dep.sourceUrl = projectUrl;
             }
           }
         } catch (err) /* istanbul ignore next */ {
