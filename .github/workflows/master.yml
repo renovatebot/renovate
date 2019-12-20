@@ -27,6 +27,13 @@ jobs:
             echo ::set-output name=file::Dockerfile.${{ matrix.tag }}
           fi
 
+      - name: Docker Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: docker.pkg.github.com
+          username: $GITHUB_ACTOR
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
@@ -36,13 +43,6 @@ jobs:
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           version: v0.3.1
-
-      - name: Docker Login
-        uses: azure/docker-login@v1
-        with:
-          login-server: docker.pkg.github.com
-          username: $GITHUB_ACTOR
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build the Docker image
         run: |
