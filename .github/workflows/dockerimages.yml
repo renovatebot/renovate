@@ -28,8 +28,13 @@ jobs:
       - name: Build the Docker image
         run: |
           docker buildx build \
-            --tag renovate \
+            --platform ${PLATFORM} \
+            --output "type=oci" \
+            --tag renovate:test \
             --file ./${{ matrix.file }} .
 
+      - name: Image list
+        run: docker image ls
+
       - name: Image history
-        run: docker history renovate
+        run: docker history renovate:test
