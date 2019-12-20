@@ -280,18 +280,11 @@ export async function findPr(
   try {
     const prs = await getPrList();
 
-    prsFiltered = prs.filter(
-      item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
-    );
+    prsFiltered = prs.filter(item => item.head.ref === branchName);
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter(item => item.title === prTitle);
     }
-
-    // update format
-    prsFiltered = prsFiltered.map(item =>
-      azureHelper.getRenovatePRFormat(item)
-    );
 
     switch (state) {
       case 'all':
