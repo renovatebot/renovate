@@ -23,13 +23,14 @@ jobs:
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
-          version: latest
+          version: v0.3.1
 
       - name: Build the Docker image
         run: |
           docker buildx build \
             --platform ${PLATFORM} \
-            --output "type=docker,name=renovate" \
+            --output "type=docker" \
+            --tag renovate
             --file ./${{ matrix.file }} .
 
       - name: Image history
