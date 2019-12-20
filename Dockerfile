@@ -177,9 +177,10 @@ USER ubuntu
 ENV RUST_BACKTRACE=1 \
   PATH=${HOME}/.cargo/bin:$PATH
 
+ENV RUST_VERSION=1.36.0
+
 RUN set -ex ;\
-  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
-  rustup toolchain install 1.36.0
+  curl https://sh.rustup.rs -sSf | sh -s -- --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} -y
 
 # Mix and Rebar
 
