@@ -45,12 +45,11 @@ jobs:
             --cache-from "type=registry,ref=${{ steps.prepare.outputs.file }}:${{ matrix.tag }}" \
             --cache-to "type=inline,mode=max" \
             --output "type=registry" \
-            --tag ${{ steps.prepare.outputs.file }}:${{ matrix.tag }} \
+            --tag ${{ steps.prepare.outputs.image }}:${{ matrix.tag }} \
             --file ./${{ steps.prepare.outputs.file }} .
 
       # - name: Image history
-      #   run: docker history ${CACHE_IMAGE}:${{ matrix.tag }}
+      #   run: docker history ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}
 
       - name: Image size
-        run: docker image ls
-        #| grep ${CACHE_IMAGE}:${{ matrix.tag }}
+        run: docker image ls | grep ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}
