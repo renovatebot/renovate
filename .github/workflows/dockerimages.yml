@@ -30,7 +30,7 @@ jobs:
           docker buildx build \
             --platform ${PLATFORM} \
             --output "type=docker" \
-            --tag renovate
+            --tag renovate \
             --file ./${{ matrix.file }} .
 
       - name: Image history
