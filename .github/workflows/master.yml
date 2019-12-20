@@ -1,0 +1,62 @@
+name: Master
+
+# TODO: only master, currently for testing
+on: push
+#  push:
+#    branches: master
+
+env:
+  PLATFORM: linux/amd64
+  CACHE_IMAGE: docker.pkg.github.com/renovatebot/renovate/cache
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        tag: ['latest', 'slim']
+
+    steps:
+      - name: Prepare
+        id: prepare
+        run: |
+          if [[ ${{ matrix.tag }} == latest ]]; then
+            echo ::set-output name=file::Dockerfile
+          else
+            echo ::set-output name=file::Dockerfile.${{ matrix.tag }}
+          fi
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: v0.3.1
+
+      - name: Docker Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: docker.pkg.github.com
+          username: $GITHUB_ACTOR
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the Docker image
+        run: |
+          docker buildx build \
+            --platform ${PLATFORM} \
+            --cache-from "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }}" \
+            --cache-to "type=registry,ref=${CACHE_IMAGE}:${{ matrix.tag }},mode=max" \
+            --output "type=docker" \
+            --tag renovate:${{ matrix.tag }} \
+            --file ./${{ steps.prepare.outputs.file }} .
+
+      - name: Image history
+        run: docker history renovate:${{ matrix.tag }}
+
+      - name: Image size
+        run: docker image ls | grep renovate:${{ matrix.tag }}
