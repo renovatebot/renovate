@@ -419,12 +419,8 @@ export async function processBranch(
     }
     if (err.message === 'update-failure') {
       logger.warn('Error updating branch: update failure');
-    } else if (
-      err.message === 'bundler-fs' ||
-      err.message === 'bundler-credentials' ||
-      err.message === 'bundler-unknown'
-    ) {
-      // we have already warned, so just return
+    } else if (err.message.startsWith('bundler-')) {
+      // we have already warned inside the bundler artifacts error handling, so just return
       return 'error';
     } else if (
       err.messagee &&
