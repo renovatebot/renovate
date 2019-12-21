@@ -1,7 +1,7 @@
 import { parse, join } from 'upath';
 import { hrtime } from 'process';
 import { outputFile, readFile } from 'fs-extra';
-import { exec } from '../../util/exec';
+import { exec, ExecOptions } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
@@ -43,28 +43,24 @@ export async function updateArtifacts(
     logger.debug(`Updating ${lockFileName}`);
     const cwd = join(config.localDir, subDirectory);
     const env = getChildProcessEnv();
-    let cmd: string;
+    let cmd = 'poetry';
+    const execOptions: ExecOptions = { cwd, env };
     if (config.binarySource === 'docker') {
       logger.info('Running poetry via docker');
-      cmd = `docker run --rm `;
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/poetry poetry`;
+      execOptions.docker = {
+        image: 'renovate/poetry',
+        tag: null,
+        dockerUser: config.dockerUser,
+        volumes: [cwd],
+        cwd,
+      };
     } else {
       logger.info('Running poetry via global poetry');
-      cmd = 'poetry';
     }
     for (let i = 0; i < updatedDeps.length; i += 1) {
       const dep = updatedDeps[i];
       cmd += ` update --lock --no-interaction ${dep}`;
-      ({ stdout, stderr } = await exec(cmd, {
-        cwd,
-        env,
-      }));
+      ({ stdout, stderr } = await exec(cmd, execOptions));
     }
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
