@@ -469,6 +469,14 @@ export class Storage {
     }
   }
 
+  async hasDiff(branchName: string): Promise<boolean> {
+    try {
+      return (await this._git!.diff(['HEAD', branchName])) !== '';
+    } catch (err) {
+      return true;
+    }
+  }
+
   async commitFilesToBranch({
     branchName,
     files,
@@ -498,7 +506,10 @@ export class Storage {
         }
       }
       // istanbul ignore if
-      if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
+      if (
+        fileNames.length === 1 &&
+        (fileNames[0] === 'renovate.json' || fileNames[0] === '.gitmodules')
+      ) {
         fileNames.unshift('-f');
       }
       if (fileNames.length) await this._git!.add(fileNames);
@@ -513,6 +524,10 @@ export class Storage {
         }
       }
       await this._git!.commit(message);
+      if (!(await this.hasDiff(`origin/${branchName}`))) {
+        logger.info('No files changed. Skipping git push');
+        return;
+      }
       await this._git!.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
         '-u': true,
