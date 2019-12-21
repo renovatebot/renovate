@@ -1,8 +1,6 @@
-const { logger } = require('../../../logger');
+import { logger } from '../../../logger';
 
-module.exports = { sortBranches };
-
-function sortBranches(branches) {
+export function sortBranches(branches): void {
   // Sort branches
   const sortOrder = [
     'pin',

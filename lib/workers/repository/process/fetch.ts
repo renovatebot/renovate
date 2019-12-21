@@ -1,17 +1,12 @@
 import is from '@sindresorhus/is';
+import pAll from 'p-all';
+import { logger } from '../../../logger';
+import { getPackageUpdates } from '../../../manager';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import { applyPackageRules } from '../../../util/package-rules';
+import { lookupUpdates } from './lookup';
 
-const pAll = require('p-all');
-const { logger } = require('../../../logger');
-
-const { getPackageUpdates } = require('../../../manager');
-const { mergeChildConfig } = require('../../../config');
-const { applyPackageRules } = require('../../../util/package-rules');
-const { getManagerConfig } = require('../../../config');
-const { lookupUpdates } = require('./lookup');
-
-export { fetchUpdates };
-
-async function fetchDepUpdates(packageFileConfig, dep) {
+async function fetchDepUpdates(packageFileConfig, dep): Promise<void> {
   /* eslint-disable no-param-reassign */
   dep.updates = [];
   if (dep.skipReason) {
@@ -69,23 +64,31 @@ async function fetchDepUpdates(packageFileConfig, dep) {
   /* eslint-enable no-param-reassign */
 }
 
-async function fetchManagerPackagerFileUpdates(config, managerConfig, pFile) {
+async function fetchManagerPackagerFileUpdates(
+  config,
+  managerConfig,
+  pFile
+): Promise<void> {
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  const queue = pFile.deps.map(dep => () =>
+  const queue = pFile.deps.map(dep => (): Promise<void> =>
     fetchDepUpdates(packageFileConfig, dep)
   );
   await pAll(queue, { concurrency: 10 });
 }
 
-async function fetchManagerUpdates(config, packageFiles, manager) {
+async function fetchManagerUpdates(
+  config,
+  packageFiles,
+  manager
+): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
-  const queue = packageFiles[manager].map(pFile => () =>
+  const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
   );
   await pAll(queue, { concurrency: 5 });
 }
 
-async function fetchUpdates(config, packageFiles) {
+export async function fetchUpdates(config, packageFiles): Promise<void> {
   logger.debug(`manager.fetchUpdates()`);
   const allManagerJobs = Object.keys(packageFiles).map(manager =>
     fetchManagerUpdates(config, packageFiles, manager)

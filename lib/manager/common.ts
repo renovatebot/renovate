@@ -123,6 +123,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
+  deprecationMessage?: string;
   digestOneAndOnly?: boolean;
   fromVersion?: string;
   lockedVersion?: string;

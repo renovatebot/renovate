@@ -1,13 +1,9 @@
-const { logger, setMeta } = require('../../../logger');
-const { mergeChildConfig } = require('../../../config');
-const { extractAndUpdate } = require('./extract-update');
-const { platform } = require('../../../platform');
+import { logger, setMeta } from '../../../logger';
+import { mergeChildConfig } from '../../../config';
+import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
+import { platform } from '../../../platform';
 
-module.exports = {
-  processRepo,
-};
-
-async function processRepo(config) {
+export async function processRepo(config): Promise<ExtractAndUpdateResult> {
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.masterIssueChecks = {};

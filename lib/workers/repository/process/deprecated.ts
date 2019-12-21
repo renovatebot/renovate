@@ -1,11 +1,11 @@
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { PackageFile } from '../../../manager/common';
 
-module.exports = {
-  raiseDeprecationWarnings,
-};
-
-async function raiseDeprecationWarnings(config, packageFiles) {
+export async function raiseDeprecationWarnings(
+  config,
+  packageFiles: Record<string, PackageFile[]>
+): Promise<void> {
   if (!config.repoIsOnboarded) {
     return;
   }
@@ -16,7 +16,10 @@ async function raiseDeprecationWarnings(config, packageFiles) {
     return;
   }
   for (const [manager, files] of Object.entries(packageFiles)) {
-    const deprecatedPackages = {};
+    const deprecatedPackages: Record<
+      string,
+      { deprecationMessage?: string; depPackageFiles: string[] }
+    > = {};
     for (const packageFile of files) {
       for (const dep of packageFile.deps) {
         const { deprecationMessage } = dep;

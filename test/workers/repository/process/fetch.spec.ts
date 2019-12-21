@@ -1,12 +1,8 @@
 import { fetchUpdates } from '../../../../lib/workers/repository/process/fetch';
-import * as _npm from '../../../../lib/manager/npm';
-import { lookupUpdates as _lookupUpdates } from '../../../../lib/workers/repository/process/lookup';
+import * as lookup from '../../../../lib/workers/repository/process/lookup';
+import { mocked } from '../../../util';
 
-/** @type any */
-const npm = _npm;
-
-/** @type any */
-const lookupUpdates = _lookupUpdates;
+const lookupUpdates = mocked(lookup).lookupUpdates;
 
 jest.mock('../../../../lib/workers/repository/process/lookup');
 
@@ -32,7 +28,7 @@ describe('workers/repository/process/fetch', () => {
           enabled: false,
         },
       ];
-      const packageFiles = {
+      const packageFiles: any = {
         npm: [
           {
             packageFile: 'package.json',
@@ -59,7 +55,7 @@ describe('workers/repository/process/fetch', () => {
     });
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
-      const packageFiles = {
+      const packageFiles: any = {
         npm: [
           {
             packageFile: 'package.json',
@@ -75,8 +71,11 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockReturnValue(['a', 'b']);
-      npm.getPackageUpdates = jest.fn(() => ['a', 'b']);
+      lookupUpdates.mockResolvedValue({
+        releases: [],
+        updates: [],
+        warnings: [],
+      });
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();

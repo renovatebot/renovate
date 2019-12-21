@@ -1,14 +1,8 @@
-const moment = require('moment');
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
+import moment from 'moment';
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
 
-module.exports = {
-  getPrHourlyRemaining,
-  getConcurrentPrsRemaining,
-  getPrsRemaining,
-};
-
-async function getPrHourlyRemaining(config) {
+export async function getPrHourlyRemaining(config): Promise<number> {
   if (config.prHourlyLimit) {
     logger.debug('Calculating hourly PRs remaining');
     const prList = await platform.getPrList();
@@ -41,7 +35,10 @@ async function getPrHourlyRemaining(config) {
   return 99;
 }
 
-async function getConcurrentPrsRemaining(config, branches) {
+export async function getConcurrentPrsRemaining(
+  config,
+  branches
+): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
     let currentlyOpen = 0;
@@ -58,12 +55,9 @@ async function getConcurrentPrsRemaining(config, branches) {
   return 99;
 }
 
-async function getPrsRemaining(config, branches) {
-  const hourlyRemaining = await module.exports.getPrHourlyRemaining(config);
-  const concurrentRemaining = await module.exports.getConcurrentPrsRemaining(
-    config,
-    branches
-  );
+export async function getPrsRemaining(config, branches): Promise<number> {
+  const hourlyRemaining = await getPrHourlyRemaining(config);
+  const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
   return hourlyRemaining < concurrentRemaining
     ? hourlyRemaining
     : concurrentRemaining;

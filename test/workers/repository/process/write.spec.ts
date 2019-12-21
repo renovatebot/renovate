@@ -1,20 +1,19 @@
-const {
-  writeUpdates,
-} = require('../../../../lib/workers/repository/process/write');
-/** @type any */
-const branchWorker = require('../../../../lib/workers/branch');
-/** @type any */
-const limits = require('../../../../lib/workers/repository/process/limits');
-/** @type any */
+import { writeUpdates } from '../../../../lib/workers/repository/process/write';
+import * as _branchWorker from '../../../../lib/workers/branch';
+import * as _limits from '../../../../lib/workers/repository/process/limits';
+import { mocked, getConfig } from '../../../util';
+
+const branchWorker = mocked(_branchWorker);
+const limits = mocked(_limits);
 
 branchWorker.processBranch = jest.fn();
 
-limits.getPrsRemaining = jest.fn(() => 99);
+limits.getPrsRemaining = jest.fn().mockResolvedValue(99);
 
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../../config/config/_fixtures') };
+  config = getConfig();
 });
 
 describe('workers/repository/write', () => {
@@ -28,9 +27,9 @@ describe('workers/repository/write', () => {
     });
     it('stops after automerge', async () => {
       const branches = [{}, {}, {}, {}];
-      branchWorker.processBranch.mockReturnValueOnce('created');
-      branchWorker.processBranch.mockReturnValueOnce('delete');
-      branchWorker.processBranch.mockReturnValueOnce('automerged');
+      branchWorker.processBranch.mockResolvedValueOnce('pr-created');
+      branchWorker.processBranch.mockResolvedValueOnce('already-existed');
+      branchWorker.processBranch.mockResolvedValueOnce('automerged');
       const res = await writeUpdates(config, packageFiles, branches);
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(3);
