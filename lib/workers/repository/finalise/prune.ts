@@ -1,9 +1,10 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { RenovateConfig } from '../../../config';
 
 async function cleanUpBranches(
-  { dryRun, pruneStaleBranches: enabled },
-  remainingBranches
+  { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
+  remainingBranches: string[]
 ): Promise<void> {
   for (const branchName of remainingBranches) {
     try {
@@ -59,7 +60,10 @@ async function cleanUpBranches(
   }
 }
 
-export async function pruneStaleBranches(config, branchList): Promise<void> {
+export async function pruneStaleBranches(
+  config: RenovateConfig,
+  branchList: string[]
+): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);

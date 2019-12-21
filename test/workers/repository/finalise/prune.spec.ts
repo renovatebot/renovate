@@ -1,10 +1,10 @@
 import * as cleanup from '../../../../lib/workers/repository/finalise/prune';
-import { platform, RenovateConfig } from '../../../util';
+import { platform, RenovateConfig, getConfig } from '../../../util';
 
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../config/config/_fixtures');
+  config = getConfig();
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];
