@@ -1,4 +1,4 @@
-name: Test
+name: Test CI
 
 on:
   push:
@@ -18,7 +18,8 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        # linux tests run by circle-ci
+        os: [macos-latest, windows-latest]
         node-version: [10.x, 12.x]
         python-version: [3.8]
 
