@@ -12,7 +12,7 @@ export default ({ to, range }: { range: string; to: string }): string => {
   const lastPartPrecision = lastPart.split('.').length;
   const toPrecision = to.split('.').length;
   let massagedTo: string = to;
-  if (toPrecision > lastPartPrecision) {
+  if (!lastPart.startsWith('<') && toPrecision > lastPartPrecision) {
     massagedTo = to
       .split('.')
       .slice(0, lastPartPrecision)
