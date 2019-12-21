@@ -93,5 +93,8 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Unit tests
+        run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
+
       - name: E2E Test
         run: yarn test-e2e
