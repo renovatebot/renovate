@@ -3,7 +3,7 @@ import { logger, setMeta } from '../../../logger';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
-import { RenovateConfig } from '../../../../test/util';
+import { RenovateConfig } from '../../../config';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())

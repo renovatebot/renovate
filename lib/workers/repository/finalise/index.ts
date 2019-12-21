@@ -1,7 +1,7 @@
 import { validatePrs } from './validate';
 import { pruneStaleBranches } from './prune';
 import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../../test/util';
+import { RenovateConfig } from '../../../config';
 
 // istanbul ignore next
 export async function finaliseRepo(
