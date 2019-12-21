@@ -152,16 +152,32 @@ export async function updateArtifacts(
       global.repoCache.bundlerArtifactsError = 'bundler-credentials';
       throw new Error('bundler-credentials');
     }
-    if (err.stderr && err.stderr.includes('incompatible marshal file format')) {
-      const gemrcFile = await platform.getFile(join(cwd, '.gemrc'));
-      logger.debug(
-        { err, gemfile: newPackageFileContent, gemrcFile },
-        'Gemfile marshalling error'
-      );
-      logger.warn('Gemfile.lock update failed due to marshalling error');
-    } else {
-      logger.warn({ err }, 'Failed to generate Gemfile.lock (unknown error)');
+    const resolveMatch = /\s+(.*) was resolved to/g;
+    if (err.stderr && err.stderr.match(resolveMatch)) {
+      logger.debug({ err }, 'Bundler has a resolve error');
+      const resolveMatches = [...err.stderr.matchAll(resolveMatch)]
+        .map(match => match[1])
+        .map(match => match.split(' ').shift());
+      if (resolveMatches.some(match => !updatedDeps.includes(match))) {
+        logger.debug(
+          { resolveMatches, updatedDeps },
+          'Found new resolve matches - reattempting recursively'
+        );
+        const newUpdatedDeps = [
+          ...new Set([...updatedDeps, ...resolveMatches]),
+        ];
+        return updateArtifacts(
+          packageFileName,
+          newUpdatedDeps,
+          newPackageFileContent,
+          config
+        );
+      }
+      logger.warn({ err }, 'Cannot resolve bundler lock update error');
+      // Do not set global.repoCache because we don't want to stop trying other branches
+      throw new Error('bundler-resolve');
     }
+    logger.warn({ err }, 'Unknown bundler lock file update error');
     global.repoCache.bundlerArtifactsError = 'bundler-unknown';
     throw new Error('bundler-unknown');
   }
