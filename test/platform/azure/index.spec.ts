@@ -390,7 +390,7 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('gsetBranchStatus(branchName, requiredStatusChecks)', () => {
+  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', null);
