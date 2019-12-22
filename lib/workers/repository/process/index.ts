@@ -1,9 +1,16 @@
 import { logger, setMeta } from '../../../logger';
-import { mergeChildConfig } from '../../../config';
-import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
+import { mergeChildConfig, RenovateConfig } from '../../../config';
+import {
+  extractAndUpdate,
+  ExtractAndUpdateResult,
+  BranchConfig,
+} from './extract-update';
 import { platform } from '../../../platform';
+import { WriteUpdateResult } from './write';
 
-export async function processRepo(config): Promise<ExtractAndUpdateResult> {
+export async function processRepo(
+  config: RenovateConfig
+): Promise<ExtractAndUpdateResult> {
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.masterIssueChecks = {};
@@ -39,9 +46,9 @@ export async function processRepo(config): Promise<ExtractAndUpdateResult> {
   }
   if (config.baseBranches && config.baseBranches.length) {
     logger.info({ baseBranches: config.baseBranches }, 'baseBranches');
-    let res;
-    let branches = [];
-    let branchList = [];
+    let res: WriteUpdateResult | undefined;
+    let branches: BranchConfig[] = [];
+    let branchList: string[] = [];
     for (const baseBranch of config.baseBranches) {
       setMeta({
         repository: config.repository,

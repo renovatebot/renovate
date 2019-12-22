@@ -17,6 +17,7 @@ export interface RenovateSharedConfig {
   managers?: string | string[];
   platform?: string;
   productLinks?: Record<string, string>;
+  prPriority?: number;
   rebaseStalePrs?: boolean;
   recreateClosed?: boolean;
   requiredStatusChecks?: string[];
@@ -26,6 +27,7 @@ export interface RenovateSharedConfig {
   semanticCommitScope?: string;
   semanticCommitType?: string;
   statusCheckVerify?: boolean;
+  suppressNotifications?: string[];
   timezone?: string;
 }
 

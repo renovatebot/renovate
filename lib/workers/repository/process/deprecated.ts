@@ -1,9 +1,10 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { PackageFile } from '../../../manager/common';
+import { RenovateConfig } from '../../../config';
 
 export async function raiseDeprecationWarnings(
-  config,
+  config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   if (!config.repoIsOnboarded) {
@@ -36,7 +37,7 @@ export async function raiseDeprecationWarnings(
     }
 
     logger.debug({ deprecatedPackages });
-    const issueTitleList = [];
+    const issueTitleList: string[] = [];
     const issueTitlePrefix = 'Dependency deprecation warning:';
     for (const [depName, val] of Object.entries(deprecatedPackages)) {
       const { deprecationMessage, depPackageFiles } = val;

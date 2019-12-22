@@ -2,13 +2,17 @@ import { logger } from '../../../logger';
 import { processBranch } from '../../branch';
 import { getPrsRemaining } from './limits';
 import { getLimitRemaining } from '../../global/limits';
+import { RenovateConfig } from '../../../config';
+import { PackageFile } from '../../../manager/common';
+import { AdditionalPackageFiles } from '../../../manager/npm/post-update';
+import { BranchConfig } from '../../common';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
 export async function writeUpdates(
-  config,
-  packageFiles,
-  allBranches: any[]
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]> | AdditionalPackageFiles,
+  allBranches: BranchConfig[]
 ): Promise<WriteUpdateResult> {
   let branches = allBranches;
   logger.info(

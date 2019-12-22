@@ -1,8 +1,15 @@
 import moment from 'moment';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { RenovateConfig } from '../../../config';
+import { BranchConfig } from '../../common';
 
-export async function getPrHourlyRemaining(config): Promise<number> {
+export type LimitBranchConfig = Pick<BranchConfig, 'branchName'> &
+  Partial<BranchConfig>;
+
+export async function getPrHourlyRemaining(
+  config: RenovateConfig
+): Promise<number> {
   if (config.prHourlyLimit) {
     logger.debug('Calculating hourly PRs remaining');
     const prList = await platform.getPrList();
@@ -36,8 +43,8 @@ export async function getPrHourlyRemaining(config): Promise<number> {
 }
 
 export async function getConcurrentPrsRemaining(
-  config,
-  branches
+  config: RenovateConfig,
+  branches: LimitBranchConfig[]
 ): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
@@ -55,7 +62,10 @@ export async function getConcurrentPrsRemaining(
   return 99;
 }
 
-export async function getPrsRemaining(config, branches): Promise<number> {
+export async function getPrsRemaining(
+  config: RenovateConfig,
+  branches: LimitBranchConfig[]
+): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
   return hourlyRemaining < concurrentRemaining

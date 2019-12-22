@@ -6,16 +6,20 @@ import { raiseDeprecationWarnings } from './deprecated';
 import { branchifyUpgrades } from '../updates/branchify';
 import { extractAllDependencies } from '../extract';
 import { PackageFile } from '../../../manager/common';
+import { RenovateConfig } from '../../../config';
+
+// TODO: fix type
+export type BranchConfig = any;
 
 export type ExtractAndUpdateResult = {
-  res: WriteUpdateResult;
-  branches: any[];
+  res: WriteUpdateResult | undefined;
+  branches: BranchConfig[];
   branchList: string[];
   packageFiles?: Record<string, PackageFile[]>;
 };
 
 export async function extractAndUpdate(
-  config
+  config: RenovateConfig
 ): Promise<ExtractAndUpdateResult> {
   logger.debug('extractAndUpdate()');
   const packageFiles = await extractAllDependencies(config);
@@ -25,7 +29,7 @@ export async function extractAndUpdate(
   await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = branchifyUpgrades(config, packageFiles);
   sortBranches(branches);
-  let res;
+  let res: WriteUpdateResult | undefined;
   if (config.repoIsOnboarded) {
     res = await writeUpdates(config, packageFiles, branches);
   }

@@ -2,11 +2,25 @@ import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
+import {
+  getManagerConfig,
+  mergeChildConfig,
+  RenovateConfig,
+  ManagerConfig,
+} from '../../../config';
 import { applyPackageRules } from '../../../util/package-rules';
-import { lookupUpdates } from './lookup';
+import { lookupUpdates, LookupUpdateConfig, UpdateResult } from './lookup';
+import {
+  PackageFile,
+  PackageUpdateConfig,
+  PackageDependency,
+  PackageUpdateResult,
+} from '../../../manager/common';
 
-async function fetchDepUpdates(packageFileConfig, dep): Promise<void> {
+async function fetchDepUpdates(
+  packageFileConfig: ManagerConfig,
+  dep: PackageDependency & { updates?: any[] }
+): Promise<void> {
   /* eslint-disable no-param-reassign */
   dep.updates = [];
   if (dep.skipReason) {
@@ -14,7 +28,11 @@ async function fetchDepUpdates(packageFileConfig, dep): Promise<void> {
   }
   const { manager, packageFile } = packageFileConfig;
   const { depName, currentValue } = dep;
-  let depConfig = mergeChildConfig(packageFileConfig, dep);
+  // TODO: fix types
+  let depConfig: LookupUpdateConfig & PackageUpdateConfig = mergeChildConfig(
+    packageFileConfig,
+    dep
+  ) as never;
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
@@ -32,7 +50,7 @@ async function fetchDepUpdates(packageFileConfig, dep): Promise<void> {
     logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
     dep.skipReason = 'disabled';
   } else {
-    let lookupResults;
+    let lookupResults: UpdateResult | PackageUpdateResult[];
     if (depConfig.datasource) {
       lookupResults = await lookupUpdates(depConfig);
     } else {
@@ -65,9 +83,9 @@ async function fetchDepUpdates(packageFileConfig, dep): Promise<void> {
 }
 
 async function fetchManagerPackagerFileUpdates(
-  config,
-  managerConfig,
-  pFile
+  config: RenovateConfig,
+  managerConfig: ManagerConfig,
+  pFile: PackageFile
 ): Promise<void> {
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const queue = pFile.deps.map(dep => (): Promise<void> =>
@@ -77,9 +95,9 @@ async function fetchManagerPackagerFileUpdates(
 }
 
 async function fetchManagerUpdates(
-  config,
-  packageFiles,
-  manager
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>,
+  manager: string
 ): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
   const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
@@ -88,7 +106,10 @@ async function fetchManagerUpdates(
   await pAll(queue, { concurrency: 5 });
 }
 
-export async function fetchUpdates(config, packageFiles): Promise<void> {
+export async function fetchUpdates(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>
+): Promise<void> {
   logger.debug(`manager.fetchUpdates()`);
   const allManagerJobs = Object.keys(packageFiles).map(manager =>
     fetchManagerUpdates(config, packageFiles, manager)
