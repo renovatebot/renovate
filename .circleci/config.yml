@@ -14,6 +14,18 @@ commands:
             git config --global user.name "Renovate Bot"
             git --version
 
+      - restore_cache:
+        keys:
+          - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          - dependency-cache-{{ .Branch }}-
+          - dependency-cache-
+
+      - restore_cache:
+        keys:
+          - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          - yarn-packages-v1-{{ .Branch }}-
+          - yarn-packages-v1-
+
       - run:
           name: Installing Dependencies
           command: |
@@ -26,6 +38,11 @@ commands:
             - ./node_modules
             - '.cache'
             - '.eslintcache'
+
+      - save_cache:
+        paths:
+          - ~/.cache/yarn
+        key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
       - run:
           name: Lint
@@ -69,16 +86,21 @@ jobs:
       - image: amd64/node:10.18.0@sha256:15a23eefad1798c98238fe71b22b65e20c26c17f139505cf6abcab53a740554a
     steps:
       - test
-  test_node_12:
-    docker:
-      - image: amd64/node:12.14.0@sha256:11a46719b3aa4314c39eb41e7638308c9c1976fac55bfe2a6cbb0aa7ab56a95f
-    steps:
-      - test
   release:
     docker:
       - image: amd64/node:10.18.0@sha256:15a23eefad1798c98238fe71b22b65e20c26c17f139505cf6abcab53a740554a
     steps:
       - checkout
+      - restore_cache:
+        keys:
+          - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          - dependency-cache-{{ .Branch }}-
+          - dependency-cache-
+      - restore_cache:
+        keys:
+          - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          - yarn-packages-v1-{{ .Branch }}-
+          - yarn-packages-v1-
       - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn semantic-release
@@ -89,11 +111,9 @@ workflows:
   test_and_release:
     jobs:
       - test_node_10
-      - test_node_12
       - release:
           requires:
             - test_node_10
-            - test_node_12
           filters:
             branches:
               only:
