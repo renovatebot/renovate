@@ -1,12 +1,9 @@
 import { logger, setMeta } from '../../../logger';
 import { mergeChildConfig, RenovateConfig } from '../../../config';
-import {
-  extractAndUpdate,
-  ExtractAndUpdateResult,
-  BranchConfig,
-} from './extract-update';
+import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
 import { platform } from '../../../platform';
 import { WriteUpdateResult } from './write';
+import { BranchConfig } from '../../common';
 
 export async function processRepo(
   config: RenovateConfig

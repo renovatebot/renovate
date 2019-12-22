@@ -1,11 +1,8 @@
 import moment from 'moment';
-import * as _limits from '../../../../lib/workers/repository/process/limits';
+import * as limits from '../../../../lib/workers/repository/process/limits';
+import { platform, getConfig, RenovateConfig } from '../../../util';
 
-import { mocked, platform, getConfig } from '../../../util';
-
-const limits = mocked(_limits);
-
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -46,17 +43,17 @@ describe('workers/repository/process/limits', () => {
       expect(res).toEqual(99);
     });
   });
+
   describe('getPrsRemaining()', () => {
     it('returns hourly limit', async () => {
-      limits.getPrHourlyRemaining = jest.fn().mockResolvedValue(5);
-      limits.getConcurrentPrsRemaining = jest.fn().mockResolvedValue(10);
-      const res = await limits.getPrsRemaining(undefined, undefined);
+      config.prHourlyLimit = 5;
+      platform.getPrList.mockResolvedValueOnce([]);
+      const res = await limits.getPrsRemaining(config, []);
       expect(res).toEqual(5);
     });
     it('returns concurrent limit', async () => {
-      limits.getPrHourlyRemaining = jest.fn().mockResolvedValue(10);
-      limits.getConcurrentPrsRemaining = jest.fn().mockResolvedValue(5);
-      const res = await limits.getPrsRemaining(undefined, undefined);
+      config.prConcurrentLimit = 5;
+      const res = await limits.getPrsRemaining(config, []);
       expect(res).toEqual(5);
     });
   });

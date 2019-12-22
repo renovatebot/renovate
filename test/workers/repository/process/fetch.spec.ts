@@ -1,7 +1,10 @@
 import { fetchUpdates } from '../../../../lib/workers/repository/process/fetch';
+import * as _npm from '../../../../lib/manager/npm';
 import * as lookup from '../../../../lib/workers/repository/process/lookup';
 import { mocked } from '../../../util';
+import { ManagerApi } from '../../../../lib/manager/common';
 
+const npm: ManagerApi = _npm;
 const lookupUpdates = mocked(lookup).lookupUpdates;
 
 jest.mock('../../../../lib/workers/repository/process/lookup');
@@ -71,11 +74,9 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({
-        releases: [],
-        updates: [],
-        warnings: [],
-      });
+      // TODO: fix types
+      npm.getPackageUpdates = jest.fn(_ => ['a', 'b'] as never);
+      lookupUpdates.mockResolvedValue(['a', 'b'] as never);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();

@@ -63,6 +63,8 @@ export interface RenovateConfig
   onboarding?: boolean;
   onboardingConfig?: RenovateSharedConfig;
   packageRules?: PackageRule[];
+  prConcurrentLimit?: number;
+  prHourlyLimit?: number;
   privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
   repositories?: RenovateRepository[];

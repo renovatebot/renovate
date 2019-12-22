@@ -7,10 +7,7 @@ import { branchifyUpgrades } from '../updates/branchify';
 import { extractAllDependencies } from '../extract';
 import { PackageFile } from '../../../manager/common';
 import { RenovateConfig } from '../../../config';
-import { BranchConfig as _BranchConfig } from '../../common';
-
-// TODO: fix type
-export type BranchConfig = _BranchConfig;
+import { BranchConfig } from '../../common';
 
 export type ExtractAndUpdateResult = {
   res: WriteUpdateResult | undefined;
@@ -31,6 +28,7 @@ export async function extractAndUpdate(
   const { branches, branchList } = branchifyUpgrades(config, packageFiles);
   sortBranches(branches);
   let res: WriteUpdateResult | undefined;
+  // istanbul ignore else
   if (config.repoIsOnboarded) {
     res = await writeUpdates(config, packageFiles, branches);
   }
