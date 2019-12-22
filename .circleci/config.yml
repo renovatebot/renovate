@@ -16,15 +16,10 @@ commands:
 
       - restore_cache:
           keys:
-            - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - dependency-cache-{{ .Branch }}-
+            - dependency-cache-v2-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - dependency-cache-v2-{{ .Branch }}-
+            - dependency-cache-v2-
             - dependency-cache-
-
-      - restore_cache:
-          keys:
-            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - yarn-packages-v1-{{ .Branch }}-
-            - yarn-packages-v1-
 
       - run:
           name: Installing Dependencies
@@ -33,16 +28,12 @@ commands:
             pip install --user -r requirements.txt
 
       - save_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
+          key: dependency-cache-v2-{{ checksum "yarn.lock" }}
           paths:
+            - ~/.cache/yarn
             - ./node_modules
             - '.cache'
             - '.eslintcache'
-
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
       - run:
           name: Lint
@@ -93,14 +84,10 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - dependency-cache-{{ .Branch }}-
+            - dependency-cache-v2-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - dependency-cache-v2-{{ .Branch }}-
+            - dependency-cache-v2-
             - dependency-cache-
-      - restore_cache:
-          keys:
-            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - yarn-packages-v1-{{ .Branch }}-
-            - yarn-packages-v1-
       - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn semantic-release
