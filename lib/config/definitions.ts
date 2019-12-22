@@ -1683,6 +1683,18 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'helm-values',
+    description: 'Configuration object for helm values.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm values {{depName}}',
+      fileMatch: ['(^|/)values.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
     name: 'circleci',
     description:
       'Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.',

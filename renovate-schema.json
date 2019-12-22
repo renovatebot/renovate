@@ -1113,6 +1113,15 @@
       },
       "$ref": "#"
     },
+    "helm-values": {
+      "description": "Configuration object for helm values.yaml files.",
+      "type": "object",
+      "default": {
+        "commitMessageTopic": "helm values {{depName}}",
+        "fileMatch": ["(^|/)default-chart-init-values.yaml$"]
+      },
+      "$ref": "#"
+    },
     "circleci": {
       "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
