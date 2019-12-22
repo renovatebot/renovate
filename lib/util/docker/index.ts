@@ -1,5 +1,3 @@
-// istanbul ignore file
-
 type Opt<T> = T | null | undefined;
 
 export interface DockerOptions {
@@ -19,9 +17,9 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
   if (dockerUser) result.push(`--user=${dockerUser}`);
 
   if (volumes)
-    result.filter(x => !!x).push(...volumes.map(vol => `-v "${vol}":"${vol}"`));
+    result.push(...volumes.filter(x => !!x).map(vol => `-v "${vol}":"${vol}"`));
 
-  if (envVars) result.filter(x => !!x).push(...envVars.map(e => `-e ${e}`));
+  if (envVars) result.push(...envVars.filter(x => !!x).map(e => `-e ${e}`));
 
   if (cwd) result.push(`-w "${cwd}"`);
 
@@ -32,7 +30,7 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
     const regex = /{{\s*cmd\s*}}/;
     if (regex.test(cmdWrap)) {
       result.push(cmdWrap.replace(regex, cmd));
-    } else {
+    } /* istanbul ignore next */ else {
       throw new Error(
         'dockerCmd(): Provide {{ cmd }} placeholder inside `wrapCmd` parameter'
       );

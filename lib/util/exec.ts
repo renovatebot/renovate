@@ -1,4 +1,3 @@
-// istanbul ignore file
 import { promisify } from 'util';
 import {
   exec as cpExec,
