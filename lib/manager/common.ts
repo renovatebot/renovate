@@ -1,5 +1,6 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy } from '../versioning';
+import { ValidationMessage } from '../config';
 
 export type Result<T> = T | Promise<T>;
 
@@ -119,7 +120,7 @@ export interface Package<T> extends ManagerData<T> {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
-  warnings?: { message: string }[];
+  warnings?: ValidationMessage[];
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
@@ -135,6 +136,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   skipReason?: string;
   source?: string;
   sourceLine?: number;
+  updates?: PackageUpdateResult[];
   versionLine?: number;
 }
 

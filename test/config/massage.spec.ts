@@ -10,7 +10,7 @@ describe('config/massage', () => {
     });
     it('massages strings to array', () => {
       const config: RenovateConfig = {
-        schedule: 'before 5am',
+        schedule: 'before 5am' as never,
       };
       const res = massage.massageConfig(config);
       expect(Array.isArray(res.schedule)).toBe(true);

@@ -7,9 +7,10 @@ import { branchifyUpgrades } from '../updates/branchify';
 import { extractAllDependencies } from '../extract';
 import { PackageFile } from '../../../manager/common';
 import { RenovateConfig } from '../../../config';
+import { BranchConfig as _BranchConfig } from '../../common';
 
 // TODO: fix type
-export type BranchConfig = any;
+export type BranchConfig = _BranchConfig;
 
 export type ExtractAndUpdateResult = {
   res: WriteUpdateResult | undefined;

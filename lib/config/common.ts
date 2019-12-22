@@ -21,7 +21,7 @@ export interface RenovateSharedConfig {
   rebaseStalePrs?: boolean;
   recreateClosed?: boolean;
   requiredStatusChecks?: string[];
-  schedule?: string | string[];
+  schedule?: string[];
 
   semanticCommits?: boolean;
   semanticCommitScope?: string;

@@ -12,14 +12,13 @@ import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates, LookupUpdateConfig, UpdateResult } from './lookup';
 import {
   PackageFile,
-  PackageUpdateConfig,
   PackageDependency,
   PackageUpdateResult,
 } from '../../../manager/common';
 
 async function fetchDepUpdates(
-  packageFileConfig: ManagerConfig,
-  dep: PackageDependency & { updates?: any[] }
+  packageFileConfig: ManagerConfig & PackageFile,
+  dep: PackageDependency
 ): Promise<void> {
   /* eslint-disable no-param-reassign */
   dep.updates = [];
@@ -29,10 +28,7 @@ async function fetchDepUpdates(
   const { manager, packageFile } = packageFileConfig;
   const { depName, currentValue } = dep;
   // TODO: fix types
-  let depConfig: LookupUpdateConfig & PackageUpdateConfig = mergeChildConfig(
-    packageFileConfig,
-    dep
-  ) as never;
+  let depConfig = mergeChildConfig(packageFileConfig, dep);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
@@ -52,7 +48,7 @@ async function fetchDepUpdates(
   } else {
     let lookupResults: UpdateResult | PackageUpdateResult[];
     if (depConfig.datasource) {
-      lookupResults = await lookupUpdates(depConfig);
+      lookupResults = await lookupUpdates(depConfig as LookupUpdateConfig);
     } else {
       lookupResults = await getPackageUpdates(manager, depConfig);
     }
