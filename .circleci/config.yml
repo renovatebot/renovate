@@ -15,16 +15,16 @@ commands:
             git --version
 
       - restore_cache:
-        keys:
-          - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          - dependency-cache-{{ .Branch }}-
-          - dependency-cache-
+          keys:
+            - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - dependency-cache-{{ .Branch }}-
+            - dependency-cache-
 
       - restore_cache:
-        keys:
-          - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          - yarn-packages-v1-{{ .Branch }}-
-          - yarn-packages-v1-
+          keys:
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
 
       - run:
           name: Installing Dependencies
@@ -40,9 +40,9 @@ commands:
             - '.eslintcache'
 
       - save_cache:
-        paths:
-          - ~/.cache/yarn
-        key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
       - run:
           name: Lint
@@ -92,15 +92,15 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-        keys:
-          - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          - dependency-cache-{{ .Branch }}-
-          - dependency-cache-
+          keys:
+            - dependency-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - dependency-cache-{{ .Branch }}-
+            - dependency-cache-
       - restore_cache:
-        keys:
-          - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          - yarn-packages-v1-{{ .Branch }}-
-          - yarn-packages-v1-
+          keys:
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
       - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn semantic-release
