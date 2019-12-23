@@ -14,6 +14,13 @@ commands:
             git config --global user.name "Renovate Bot"
             git --version
 
+      - restore_cache:
+          keys:
+            - dependency-cache-v2-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - dependency-cache-v2-{{ .Branch }}-
+            - dependency-cache-v2-
+            - dependency-cache-
+
       - run:
           name: Installing Dependencies
           command: |
@@ -21,8 +28,9 @@ commands:
             pip install --user -r requirements.txt
 
       - save_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
+          key: dependency-cache-v2-{{ checksum "yarn.lock" }}
           paths:
+            - ~/.cache/yarn
             - ./node_modules
             - '.cache'
             - '.eslintcache'
@@ -69,16 +77,17 @@ jobs:
       - image: amd64/node:10.18.0@sha256:15a23eefad1798c98238fe71b22b65e20c26c17f139505cf6abcab53a740554a
     steps:
       - test
-  test_node_12:
-    docker:
-      - image: amd64/node:12.14.0@sha256:11a46719b3aa4314c39eb41e7638308c9c1976fac55bfe2a6cbb0aa7ab56a95f
-    steps:
-      - test
   release:
     docker:
       - image: amd64/node:10.18.0@sha256:15a23eefad1798c98238fe71b22b65e20c26c17f139505cf6abcab53a740554a
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - dependency-cache-v2-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - dependency-cache-v2-{{ .Branch }}-
+            - dependency-cache-v2-
+            - dependency-cache-
       - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn semantic-release
@@ -89,11 +98,9 @@ workflows:
   test_and_release:
     jobs:
       - test_node_10
-      - test_node_12
       - release:
           requires:
             - test_node_10
-            - test_node_12
           filters:
             branches:
               only:
