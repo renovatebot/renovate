@@ -14,15 +14,13 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);
   } catch (err) {
+    // istanbul ignore if
     if (err instanceof SyntaxError) {
-      // extract first line of error stack message
-      const errorStackMessage = err.stack.split('\n')[0];
-      const file = errorStackMessage.split(':')[0];
-      const line = errorStackMessage.split(':')[1];
-      logger.fatal({ file, line }, err.message);
-    } else {
-      logger.debug('No config file found on disk - skipping');
+      logger.fatal(`Could not parse config file \n ${err.stack}`);
+      process.exit(1);
     }
+    // Do nothing
+    logger.debug('No config file found on disk - skipping');
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
