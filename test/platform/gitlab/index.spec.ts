@@ -931,7 +931,11 @@ These updates have all been created already. Click a checkbox below to force a r
     it('sends to gitFs', async () => {
       expect.assertions(1);
       await initRepo();
-      await gitlab.commitFilesToBranch('some-branch', [{}], '');
+      await gitlab.commitFilesToBranch({
+        branchName: 'some-branch',
+        files: [{ name: 'SomeFile', contents: 'Some Content' }],
+        message: '',
+      });
       expect(api.get.mock.calls).toMatchSnapshot();
     });
   });

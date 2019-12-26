@@ -473,7 +473,11 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.commitFilesToBranch('test', [], 'message');
+        await bitbucket.commitFilesToBranch({
+          branchName: 'test',
+          files: [],
+          message: 'message',
+        });
       });
     });
   });

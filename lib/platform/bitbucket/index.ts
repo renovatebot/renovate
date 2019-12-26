@@ -4,7 +4,7 @@ import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import { logger } from '../../logger';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import {
@@ -263,18 +263,18 @@ export function mergeBranch(branchName: string): Promise<void> {
   return config.storage.mergeBranch(branchName);
 }
 
-export function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export function getCommitMessages(): Promise<string[]> {

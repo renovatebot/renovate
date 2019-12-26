@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -520,18 +520,18 @@ export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
-export function commitFilesToBranch(
-  branchName: string,
-  files: any[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export function getFile(

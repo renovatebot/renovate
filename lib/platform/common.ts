@@ -1,7 +1,7 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
-import { File } from './git/storage';
+import { CommitFilesConfig } from './git/storage';
 
 export interface FileData {
   name: string;
@@ -168,12 +168,7 @@ export interface Platform {
   ): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   setBaseBranch(baseBranch: string): Promise<void>;
-  commitFilesToBranch(
-    branchName: string,
-    updatedFiles: File[],
-    commitMessage: string,
-    parentBranch?: string
-  ): Promise<void>;
+  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
   getPr(number: number): Promise<Pr>;
   findPr(
     branchName: string,

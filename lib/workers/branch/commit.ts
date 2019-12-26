@@ -39,12 +39,12 @@ export async function commitFilesToBranch(
       logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     } else {
       // API will know whether to create new branch or not
-      await platform.commitFilesToBranch(
-        config.branchName,
-        updatedFiles,
-        config.commitMessage,
-        config.baseBranch || undefined
-      );
+      await platform.commitFilesToBranch({
+        branchName: config.branchName,
+        files: updatedFiles,
+        message: config.commitMessage,
+        parentBranch: config.baseBranch || undefined,
+      });
       logger.info({ branch: config.branchName }, `files committed`);
     }
   } else {
