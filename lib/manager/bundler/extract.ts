@@ -107,6 +107,11 @@ export async function extractPackageFile(
         while (lineNumber < lines.length && sourceLine !== 'end') {
           lineNumber += 1;
           sourceLine = lines[lineNumber];
+          // istanbul ignore if
+          if (!sourceLine) {
+            logger.error({ content, filename }, 'Undefined sourceLine');
+            sourceLine = 'end';
+          }
           if (sourceLine !== 'end') {
             sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
           }
