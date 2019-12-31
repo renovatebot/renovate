@@ -52,6 +52,33 @@ describe('lib/manager/pip_setup/index', () => {
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(4);
     });
+    it('returns found deps (docker)', async () => {
+      jest.resetAllMocks();
+      jest.resetModules();
+      extract.resetModule();
+
+      // docker pull
+      exec.mockImplementationOnce((cmd, _options, callback) => {
+        callback(null, { stdout: jsonContent, stderr: '' });
+        return undefined;
+      });
+
+      let command = null;
+      exec.mockImplementationOnce((cmd, _options, callback) => {
+        command = cmd;
+        callback(null, { stdout: jsonContent, stderr: '' });
+        return undefined;
+      });
+
+      expect(command).toMatchSnapshot();
+      expect(
+        await extractPackageFile(content, packageFile, {
+          ...config,
+          binarySource: 'docker',
+        })
+      ).toMatchSnapshot();
+      expect(exec).toHaveBeenCalledTimes(2);
+    });
     it('should return null for invalid file', async () => {
       exec.mockImplementationOnce((_cmd, _options, _callback) => {
         throw new Error();
