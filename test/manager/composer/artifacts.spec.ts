@@ -18,14 +18,12 @@ const platform = mocked(_platform);
 const config = {
   localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
+  binarySource: 'auto',
 };
 
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-  });
-  afterEach(() => {
-    delete global.trustLevel;
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -34,7 +32,14 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -43,10 +48,19 @@ describe('.updateArtifacts()', () => {
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('uses hostRules to write auth.json', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -63,25 +77,42 @@ describe('.updateArtifacts()', () => {
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', authConfig)
     ).toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('returns updated composer.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
-    global.trustLevel = 'high';
     platform.getRepoStatus.mockResolvedValue({
       modified: ['composer.lock'],
     } as StatusResult);
     expect(
       await composer.updateArtifacts('composer.json', [], '{}', config)
     ).not.toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -95,13 +126,20 @@ describe('.updateArtifacts()', () => {
         isLockFileMaintenance: true,
       })
     ).not.toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
 
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -114,11 +152,19 @@ describe('.updateArtifacts()', () => {
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('supports global mode', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -129,6 +175,8 @@ describe('.updateArtifacts()', () => {
         binarySource: 'global',
       })
     ).not.toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockResolvedValueOnce('Current composer.lock');

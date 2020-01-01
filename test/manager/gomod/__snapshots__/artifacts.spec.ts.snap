@@ -11,8 +11,140 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode with credentials 1`] = `"docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\""`;
+exports[`.updateArtifacts() catches errors 2`] = `Array []`;
 
-exports[`.updateArtifacts() supports docker mode with credentials, appMode and trustLevel=high 1`] = `"docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\""`;
+exports[`.updateArtifacts() catches errors 3`] = `Array []`;
 
-exports[`.updateArtifacts() supports docker mode without credentials 1`] = `"docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go go get -d ./..."`;
+exports[`.updateArtifacts() returns if no go.sum found 1`] = `Array []`;
+
+exports[`.updateArtifacts() returns if no go.sum found 2`] = `Array []`;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  "go get -d ./...",
+]
+`;
+
+exports[`.updateArtifacts() returns null if unchanged 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated go.sum 1`] = `
+Array [
+  "go get -d ./...",
+]
+`;
+
+exports[`.updateArtifacts() returns updated go.sum 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode with credentials 1`] = `
+Array [
+  "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode with credentials 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode with credentials and appMode enabled 1`] = `
+Array [
+  "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+  "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go mod tidy\\"",
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode with credentials and appMode enabled 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode without credentials 1`] = `
+Array [
+  "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go go get -d ./...",
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode without credentials 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports global mode 1`] = `
+Array [
+  "go get -d ./...",
+]
+`;
+
+exports[`.updateArtifacts() supports global mode 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "GOPATH": "/tmp/renovate/cache/others/go",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;

@@ -35,19 +35,35 @@ const config = {
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    exec.mockImplementation((_cmd, _options, callback) => {
+  });
+  it('returns if no go.sum found', async () => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-  });
-  it('returns if no go.sum found', async () => {
     expect(
       await gomod.updateArtifacts('go.mod', [], gomod1, config)
     ).toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    exec.mockImplementationOnce((_cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -57,10 +73,19 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts('go.mod', [], gomod1, config)
     ).toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('returns updated go.sum', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    exec.mockImplementationOnce((_cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -71,12 +96,19 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts('go.mod', [], gomod1, config)
     ).not.toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -91,11 +123,19 @@ describe('.updateArtifacts()', () => {
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('supports global mode', async () => {
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -109,15 +149,22 @@ describe('.updateArtifacts()', () => {
         binarySource: 'global',
       })
     ).not.toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -131,16 +178,22 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).not.toBeNull();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
-  it('supports docker mode with credentials, appMode and trustLevel=high', async () => {
+  it('supports docker mode with credentials and appMode enabled', async () => {
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -152,7 +205,6 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
     try {
       global.appMode = true;
-      global.trustLevel = 'high';
       expect(
         await gomod.updateArtifacts('go.mod', [], gomod1, {
           ...config,
@@ -160,13 +212,24 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodTidy'],
         })
       ).not.toBeNull();
-      expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     } finally {
       delete global.appMode;
-      delete global.trustLevel;
     }
   });
   it('catches errors', async () => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
+    });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
@@ -174,5 +237,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts('go.mod', [], gomod1, config)
     ).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
 });

@@ -22,15 +22,19 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-  afterEach(() => {
-    delete global.trustLevel;
-  });
   it('returns if no Pipfile.lock found', async () => {
     expect(await pipenv.updateArtifacts('Pipfile', [], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -38,10 +42,19 @@ describe('.updateArtifacts()', () => {
     expect(
       await pipenv.updateArtifacts('Pipfile', [], '{}', config)
     ).toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('returns updated Pipfile.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -49,16 +62,22 @@ describe('.updateArtifacts()', () => {
       modified: ['Pipfile.lock'],
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
-    global.trustLevel = 'high';
     expect(
       await pipenv.updateArtifacts('Pipfile', [], '{}', config)
     ).not.toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -73,7 +92,8 @@ describe('.updateArtifacts()', () => {
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');

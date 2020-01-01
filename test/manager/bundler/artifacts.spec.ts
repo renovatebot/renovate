@@ -31,7 +31,14 @@ describe('bundler.updateArtifacts()', () => {
   it('returns null if Gemfile.lock was not changed', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -42,11 +49,21 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
     ).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('works for default binarySource', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
+
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -57,11 +74,20 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
     ).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push({
+        ...options,
+        env: { ...options.env, PATH: null, HOME: null },
+      });
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -75,10 +101,11 @@ describe('bundler.updateArtifacts()', () => {
         binarySource: 'global',
       })
     ).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   describe('Docker', () => {
     it('.ruby-version', async () => {
-      let dockerCommand = null;
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
       platform.getFile.mockResolvedValueOnce('1.2.0');
@@ -89,8 +116,14 @@ describe('bundler.updateArtifacts()', () => {
           { version: '1.3.0' },
         ],
       });
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        dockerCommand = cmd;
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementation((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push({
+          ...options,
+          env: { ...options.env, PATH: null, HOME: null },
+        });
         callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
@@ -104,10 +137,10 @@ describe('bundler.updateArtifacts()', () => {
           binarySource: 'docker',
         })
       ).toMatchSnapshot();
-      expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
     it('compatibility options', async () => {
-      let dockerCommand = null;
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -117,8 +150,14 @@ describe('bundler.updateArtifacts()', () => {
           { version: '1.3.0' },
         ],
       });
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        dockerCommand = cmd;
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementation((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push({
+          ...options,
+          env: { ...options.env, PATH: null, HOME: null },
+        });
         callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
@@ -137,7 +176,8 @@ describe('bundler.updateArtifacts()', () => {
           },
         })
       ).toMatchSnapshot();
-      expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
   });
 });

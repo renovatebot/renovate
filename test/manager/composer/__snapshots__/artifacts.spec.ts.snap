@@ -22,4 +22,122 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode 1`] = `"docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/composer\\":\\"/tmp/renovate/cache/others/composer\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader"`;
+exports[`.updateArtifacts() performs lockFileMaintenance 1`] = `
+Array [
+  "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
+]
+`;
+
+exports[`.updateArtifacts() performs lockFileMaintenance 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
+]
+`;
+
+exports[`.updateArtifacts() returns null if unchanged 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated composer.lock 1`] = `
+Array [
+  "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
+]
+`;
+
+exports[`.updateArtifacts() returns updated composer.lock 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode 1`] = `
+Array [
+  "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/composer\\":\\"/tmp/renovate/cache/others/composer\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports global mode 1`] = `
+Array [
+  "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
+]
+`;
+
+exports[`.updateArtifacts() supports global mode 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() uses hostRules to write auth.json 1`] = `
+Array [
+  "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
+]
+`;
+
+exports[`.updateArtifacts() uses hostRules to write auth.json 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;

@@ -39,18 +39,26 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current mix.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockResolvedValueOnce('Current mix.lock' as any);
     expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Old mix.lock');
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -61,7 +69,8 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).toMatchSnapshot();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockResolvedValueOnce('Current mix.lock');

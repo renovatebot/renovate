@@ -11,4 +11,59 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Cargo.lock with docker 1`] = `"docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1"`;
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  "cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1",
+]
+`;
+
+exports[`.updateArtifacts() returns null if unchanged 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated Cargo.lock 1`] = `
+Array [
+  "cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1",
+]
+`;
+
+exports[`.updateArtifacts() returns updated Cargo.lock 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated Cargo.lock with docker 1`] = `
+Array [
+  "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1",
+]
+`;
+
+exports[`.updateArtifacts() returns updated Cargo.lock with docker 2`] = `
+Array [
+  Object {
+    "cwd": "/tmp/github/some/repo",
+    "encoding": "utf-8",
+    "env": Object {
+      "HOME": null,
+      "PATH": null,
+    },
+  },
+]
+`;
