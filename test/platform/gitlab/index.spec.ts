@@ -246,7 +246,7 @@ describe('platform/gitlab', () => {
       ).rejects.toThrow(Error('disabled'));
     });
     it('should throw an error if repository has empty_repo property', async () => {
-      api.get.mockReturnValue({ body: { empty_repo: null } } as any);
+      api.get.mockReturnValue({ body: { empty_repo: true } } as any);
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
