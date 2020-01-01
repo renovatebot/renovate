@@ -120,8 +120,11 @@ export async function initRepo({
     archived: boolean;
     mirror: boolean;
     default_branch: string;
+    empty_repo: boolean;
     http_url_to_repo: string;
     forked_from_project: boolean;
+    repository_access_level: 'disabled' | 'private' | 'enabled';
+    merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   }>;
   try {
     res = await api.get(`projects/${config.repository}`);
@@ -137,7 +140,19 @@ export async function initRepo({
       );
       throw new Error('mirror');
     }
-    if (res.body.default_branch === null) {
+    if (res.body.repository_access_level === 'disabled') {
+      logger.info(
+        'Repository portion of project is disabled - throwing error to abort renovation'
+      );
+      throw new Error('disabled');
+    }
+    if (res.body.merge_requests_access_level === 'disabled') {
+      logger.info(
+        'MRs are disabled for the project - throwing error to abort renovation'
+      );
+      throw new Error('disabled');
+    }
+    if (res.body.default_branch === null || res.body.empty_repo) {
       throw new Error('empty');
     }
     if (optimizeForDisabled) {
