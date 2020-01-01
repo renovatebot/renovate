@@ -60,7 +60,6 @@ describe('config/index', () => {
       ]);
       const env: NodeJS.ProcessEnv = {};
       const parsed = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsed).toMatchSnapshot();
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
     });
   });
