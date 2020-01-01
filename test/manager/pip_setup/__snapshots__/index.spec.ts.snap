@@ -5,7 +5,7 @@ Array [
   "python --version",
   "python3 --version",
   "python3.8 --version",
-  "python \\"/Users/sergio/Work/renovate/lib/manager/pip_setup/extract.py\\" \\"../../../../tmp/folders/foobar.py\\"",
+  "python \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"/tmp/folders/foobar.py\\"",
 ]
 `;
 
@@ -21,7 +21,7 @@ Array [
     "encoding": "utf-8",
   },
   Object {
-    "cwd": ".",
+    "cwd": "/tmp/github/some/repo",
     "encoding": "utf-8",
     "timeout": 5000,
   },
@@ -159,7 +159,7 @@ Object {
 exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 2`] = `
 Array [
   "docker pull renovate/pip",
-  "docker run -i --rm -v .:. -v /Users/sergio/Work/renovate/lib/manager/pip_setup:/Users/sergio/Work/renovate/lib/manager/pip_setup -w . renovate/pip python \\"/Users/sergio/Work/renovate/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
+  "docker run -i --rm -v /tmp/github/some/repo:/tmp/github/some/repo -v /root/project/lib/manager/pip_setup:/root/project/lib/manager/pip_setup -w /tmp/github/some/repo renovate/pip python \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
 ]
 `;
 
@@ -169,7 +169,7 @@ Array [
     "encoding": "utf-8",
   },
   Object {
-    "cwd": ".",
+    "cwd": "/tmp/github/some/repo",
     "encoding": "utf-8",
     "timeout": 5000,
   },
@@ -306,14 +306,14 @@ Object {
 
 exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps 2`] = `
 Array [
-  "python3 \\"/Users/sergio/Work/renovate/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
+  "python3 \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
 ]
 `;
 
 exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps 3`] = `
 Array [
   Object {
-    "cwd": ".",
+    "cwd": "/tmp/github/some/repo",
     "encoding": "utf-8",
     "timeout": 5000,
   },
@@ -322,14 +322,14 @@ Array [
 
 exports[`lib/manager/pip_setup/index extractPackageFile() should return null for invalid file 1`] = `
 Array [
-  "python3 \\"/Users/sergio/Work/renovate/lib/manager/pip_setup/extract.py\\" \\"../../../../tmp/folders/foobar.py\\"",
+  "python3 \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"/tmp/folders/foobar.py\\"",
 ]
 `;
 
 exports[`lib/manager/pip_setup/index extractPackageFile() should return null for invalid file 2`] = `
 Array [
   Object {
-    "cwd": ".",
+    "cwd": "/tmp/github/some/repo",
     "encoding": "utf-8",
     "timeout": 5000,
   },

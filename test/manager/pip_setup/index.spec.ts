@@ -1,6 +1,5 @@
 import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
-import { relative } from 'path';
 import * as extract from '../../../lib/manager/pip_setup/extract';
 import { extractPackageFile } from '../../../lib/manager/pip_setup';
 
@@ -11,17 +10,19 @@ const packageFileJson = 'test/manager/pip_setup/_fixtures/setup.py.json';
 const jsonContent = readFileSync(packageFileJson, 'utf8');
 
 const config = {
-  localDir: '.',
+  localDir: '/tmp/github/some/repo',
 };
 
 let processEnv;
 
+const cleanCmd = (str: string) =>
+  str
+    .split(process.cwd())
+    .join('/root/project')
+    .replace(/\\(\w)/g, '/$1');
+
 const exec: jest.Mock<typeof _exec> = _exec as any;
 jest.mock('child_process');
-
-function tmpFile() {
-  return relative('.', '/tmp/folders/foobar.py');
-}
 
 describe('lib/manager/pip_setup/index', () => {
   describe('extractPackageFile()', () => {
@@ -58,7 +59,7 @@ describe('lib/manager/pip_setup/index', () => {
       const execCommands = [];
       const execOptions = [];
       exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execCommands.push(cleanCmd(cmd));
         execOptions.push(options);
         callback(null, { stdout: jsonContent, stderr: '' });
         return undefined;
@@ -80,14 +81,14 @@ describe('lib/manager/pip_setup/index', () => {
 
       // docker pull
       exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execCommands.push(cleanCmd(cmd));
         execOptions.push(options);
         callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
 
       exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execCommands.push(cleanCmd(cmd));
         execOptions.push(options);
         callback(null, { stdout: jsonContent, stderr: '' });
         return undefined;
@@ -107,13 +108,17 @@ describe('lib/manager/pip_setup/index', () => {
       const execCommands = [];
       const execOptions = [];
       exec.mockImplementationOnce((cmd, options, _callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execCommands.push(cleanCmd(cmd));
         execOptions.push(options);
         throw new Error();
       });
 
       expect(
-        await extractPackageFile('raise Exception()', tmpFile(), config)
+        await extractPackageFile(
+          'raise Exception()',
+          '/tmp/folders/foobar.py',
+          config
+        )
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
       expect(execCommands).toMatchSnapshot();
@@ -126,12 +131,16 @@ describe('lib/manager/pip_setup/index', () => {
       jest.resetModules();
       extract.resetModule();
       exec.mockImplementation((cmd, options, _callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execCommands.push(cleanCmd(cmd));
         execOptions.push(options);
         throw new Error();
       });
       expect(
-        await extractPackageFile('raise Exception()', tmpFile(), config)
+        await extractPackageFile(
+          'raise Exception()',
+          '/tmp/folders/foobar.py',
+          config
+        )
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
       expect(execCommands).toMatchSnapshot();
