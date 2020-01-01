@@ -1,5 +1,499 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/index .parseConfigs(env, defaultArgv) massages trailing slash into endpoint 1`] = `
+Object {
+  "aliases": Object {},
+  "ansible": Object {
+    "fileMatch": Array [
+      "(^|/)tasks/[^/]+\\\\.ya?ml$",
+    ],
+  },
+  "assignAutomerge": false,
+  "assignees": Array [],
+  "assigneesSampleSize": null,
+  "autodiscover": false,
+  "autodiscoverFilter": null,
+  "automerge": false,
+  "automergeComment": "automergeComment",
+  "automergeType": "pr",
+  "azureAutoComplete": false,
+  "azureWorkItemId": 0,
+  "baseBranches": Array [],
+  "baseDir": "/tmp/renovate",
+  "bazel": Object {
+    "fileMatch": Array [
+      "(^|/)WORKSPACE$",
+      "\\\\.bzl$",
+    ],
+  },
+  "bbUseDefaultReviewers": true,
+  "binarySource": "docker",
+  "branchName": "{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}",
+  "branchPrefix": "renovate/",
+  "branchTopic": "{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}",
+  "buildkite": Object {
+    "commitMessageExtra": "to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}",
+    "commitMessageTopic": "buildkite plugin {{depName}}",
+    "fileMatch": Array [
+      "buildkite\\\\.ya?ml",
+      "\\\\.buildkite/.+\\\\.ya?ml$",
+    ],
+    "managerBranchPrefix": "buildkite-",
+  },
+  "bumpVersion": null,
+  "bundler": Object {
+    "fileMatch": Array [
+      "(^|/)Gemfile$",
+    ],
+    "versionScheme": "ruby",
+  },
+  "cacheDir": null,
+  "cargo": Object {
+    "commitMessageTopic": "Rust crate {{depName}}",
+    "fileMatch": Array [
+      "(^|/)Cargo.toml$",
+    ],
+    "managerBranchPrefix": "rust-",
+    "rangeStrategy": "bump",
+    "versionScheme": "cargo",
+  },
+  "circleci": Object {
+    "fileMatch": Array [
+      "(^|/).circleci/config.yml$",
+    ],
+  },
+  "commitBody": null,
+  "commitBodyTable": false,
+  "commitMessage": "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}",
+  "commitMessageAction": "Update",
+  "commitMessageExtra": "to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
+  "commitMessagePrefix": null,
+  "commitMessageSuffix": null,
+  "commitMessageTopic": "dependency {{depName}}",
+  "compatibility": Object {},
+  "composer": Object {
+    "fileMatch": Array [
+      "(^|/)([\\\\w-]*)composer.json$",
+    ],
+    "versionScheme": "composer",
+  },
+  "configWarningReuseIssue": true,
+  "deps-edn": Object {
+    "fileMatch": Array [
+      "(^|/)deps\\\\.edn$",
+    ],
+    "versionScheme": "maven",
+  },
+  "description": Array [],
+  "digest": Object {
+    "branchTopic": "{{{depNameSanitized}}}-digest",
+    "commitMessageExtra": "to {{newDigestShort}}",
+    "commitMessageTopic": "{{{depName}}} commit hash",
+  },
+  "docker": Object {
+    "commitMessageExtra": "to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}",
+    "commitMessageTopic": "{{{depName}}} Docker tag",
+    "digest": Object {
+      "branchTopic": "{{{depNameSanitized}}}-{{{currentValue}}}",
+      "commitMessageExtra": "to {{newDigestShort}}",
+      "commitMessageTopic": "{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest",
+      "group": Object {
+        "commitMessageExtra": "",
+        "commitMessageTopic": "{{{groupName}}}",
+      },
+    },
+    "group": Object {
+      "commitMessageTopic": "{{{groupName}}} Docker tags",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "managerBranchPrefix": "docker-",
+    "pin": Object {
+      "commitMessageExtra": "",
+      "group": Object {
+        "branchTopic": "digests-pin",
+        "commitMessageTopic": "{{{groupName}}}",
+      },
+      "groupName": "Docker digests",
+    },
+    "versionScheme": "docker",
+  },
+  "docker-compose": Object {
+    "fileMatch": Array [
+      "(^|/)docker-compose[^/]*\\\\.ya?ml$",
+    ],
+  },
+  "dockerMapDotfiles": false,
+  "dockerUser": null,
+  "dockerfile": Object {
+    "fileMatch": Array [
+      "(^|/)Dockerfile$",
+      "(^|/)Dockerfile\\\\.[^/]*$",
+    ],
+  },
+  "dotnet": Object {},
+  "droneci": Object {
+    "fileMatch": Array [
+      "(^|/).drone.yml$",
+    ],
+  },
+  "dryRun": false,
+  "enabled": true,
+  "enabledManagers": Array [],
+  "encrypted": null,
+  "endpoint": "https://github.renovatebot.com/api/v3/",
+  "engines": Object {},
+  "excludeCommitPaths": Array [],
+  "fileMatch": Array [],
+  "followTag": null,
+  "force": Object {
+    "endpoint": "https://github.renovatebot.com/api/v3",
+  },
+  "forceCli": true,
+  "forkMode": false,
+  "git-submodules": Object {
+    "enabled": false,
+    "fileMatch": Array [
+      "(^|/).gitmodules$",
+    ],
+    "versionScheme": "git",
+  },
+  "gitAuthor": null,
+  "gitLabAutomerge": false,
+  "gitPrivateKey": null,
+  "github-actions": Object {
+    "fileMatch": Array [
+      "^\\\\.github/main.workflow$",
+      "^\\\\.github/workflows/[^/]+\\\\.ya?ml$",
+    ],
+    "pinDigests": true,
+  },
+  "gitlabci": Object {
+    "fileMatch": Array [
+      "^\\\\.gitlab-ci\\\\.yml$",
+    ],
+  },
+  "gitlabci-include": Object {
+    "fileMatch": Array [
+      "^\\\\.gitlab-ci\\\\.yml$",
+    ],
+  },
+  "golang": Object {
+    "commitMessageTopic": "module {{depNameShort}}",
+  },
+  "gomod": Object {
+    "fileMatch": Array [
+      "(^|/)go.mod$",
+    ],
+  },
+  "gradle": Object {
+    "fileMatch": Array [
+      "\\\\.gradle(\\\\.kts)?$",
+      "(^|/)gradle.properties$",
+    ],
+    "timeout": 600,
+    "versionScheme": "maven",
+  },
+  "gradle-wrapper": Object {
+    "fileMatch": Array [
+      "(^|/)gradle/wrapper/gradle-wrapper.properties$",
+    ],
+  },
+  "group": Object {
+    "branchTopic": "{{{groupSlug}}}",
+    "commitMessageTopic": "{{{groupName}}}",
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "helm-requirements": Object {
+    "aliases": Object {
+      "stable": "https://kubernetes-charts.storage.googleapis.com/",
+    },
+    "commitMessageTopic": "helm chart {{depName}}",
+    "fileMatch": Array [
+      "(^|/)requirements.yaml$",
+    ],
+  },
+  "homebrew": Object {
+    "commitMessageTopic": "Homebrew Formula {{depName}}",
+    "fileMatch": Array [
+      "^Formula/[^/]+[.]rb$",
+    ],
+    "managerBranchPrefix": "homebrew-",
+  },
+  "hostRules": Array [
+    Object {
+      "timeout": 60000,
+    },
+  ],
+  "ignoreDeprecated": true,
+  "ignoreDeps": Array [],
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+    "**/bower_components/**",
+  ],
+  "ignoreScripts": false,
+  "ignoreUnstable": true,
+  "includeForks": true,
+  "includePaths": Array [],
+  "java": Object {},
+  "js": Object {},
+  "kubernetes": Object {
+    "fileMatch": Array [],
+  },
+  "labels": Array [],
+  "lazyGrouping": true,
+  "leiningen": Object {
+    "fileMatch": Array [
+      "(^|/)project\\\\.clj$",
+    ],
+    "versionScheme": "maven",
+  },
+  "lockFileMaintenance": Object {
+    "branchTopic": "lock-file-maintenance",
+    "commitMessageAction": "Lock file maintenance",
+    "commitMessageExtra": null,
+    "commitMessageTopic": null,
+    "enabled": false,
+    "groupName": null,
+    "prBodyDefinitions": Object {
+      "Change": "All locks refreshed",
+    },
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logLevel": "debug",
+  "major": Object {},
+  "managerBranchPrefix": "",
+  "masterIssue": false,
+  "masterIssueApproval": false,
+  "masterIssueAutoclose": false,
+  "masterIssueTitle": "Update Dependencies (Renovate Bot)",
+  "maven": Object {
+    "fileMatch": Array [
+      "\\\\.pom\\\\.xml$",
+      "(^|/)pom\\\\.xml$",
+    ],
+    "versionScheme": "maven",
+  },
+  "meteor": Object {
+    "fileMatch": Array [
+      "(^|/)package.js$",
+    ],
+  },
+  "minor": Object {},
+  "mix": Object {
+    "fileMatch": Array [
+      "(^|/)mix\\\\.exs$",
+    ],
+    "versionScheme": "hex",
+  },
+  "node": Object {
+    "commitMessageTopic": "Node.js",
+    "major": Object {
+      "enabled": false,
+    },
+  },
+  "npm": Object {
+    "fileMatch": Array [
+      "(^|/)package.json$",
+    ],
+    "prBodyDefinitions": Object {
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://renovatebot.com/diffs/npm/{{{depNameEscaped}}}/{{{fromVersion}}}/{{{toVersion}}})",
+    },
+    "rollbackPrs": true,
+    "versionScheme": "npm",
+  },
+  "npmToken": null,
+  "npmrc": null,
+  "nuget": Object {
+    "fileMatch": Array [
+      "\\\\.csproj$",
+    ],
+  },
+  "nvm": Object {
+    "fileMatch": Array [
+      "^.nvmrc$",
+    ],
+    "versionScheme": "node",
+  },
+  "onboarding": true,
+  "onboardingBranch": "renovate/configure",
+  "onboardingConfig": Object {
+    "extends": Array [],
+  },
+  "onboardingPrTitle": "Configure Renovate",
+  "optimizeForDisabled": false,
+  "packageRules": Array [],
+  "password": null,
+  "patch": Object {},
+  "persistRepoData": false,
+  "php": Object {},
+  "pin": Object {
+    "commitMessageAction": "Pin",
+    "group": Object {
+      "commitMessageExtra": "",
+      "commitMessageTopic": "dependencies",
+    },
+    "groupName": "Pin Dependencies",
+    "groupSlug": "pin-dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": false,
+  "pip_requirements": Object {
+    "fileMatch": Array [
+      "(^|/)([\\\\w-]*)requirements.(txt|pip)$",
+    ],
+  },
+  "pip_setup": Object {
+    "fileMatch": Array [
+      "(^|/)setup.py$",
+    ],
+  },
+  "pipenv": Object {
+    "fileMatch": Array [
+      "(^|/)Pipfile$",
+    ],
+  },
+  "platform": "github",
+  "poetry": Object {
+    "fileMatch": Array [
+      "(^|/)pyproject\\\\.toml$",
+    ],
+    "versionScheme": "poetry",
+  },
+  "postUpdateOptions": Array [],
+  "prBodyColumns": Array [
+    "Package",
+    "Type",
+    "Update",
+    "Change",
+  ],
+  "prBodyDefinitions": Object {
+    "Change": "\`{{{displayFrom}}}\` -> \`{{{displayTo}}}\`",
+    "Current value": "{{{currentValue}}}",
+    "New value": "{{{newValue}}}",
+    "Package": "{{{depNameLinked}}}",
+    "Package file": "{{{packageFile}}}",
+    "References": "{{{references}}}",
+    "Type": "{{{depType}}}",
+    "Update": "{{{updateType}}}",
+  },
+  "prBodyNotes": Array [],
+  "prCommitsPerRunLimit": 0,
+  "prConcurrentLimit": 0,
+  "prCreation": "immediate",
+  "prFooter": "This PR has been generated by [Renovate Bot](https://github.com/renovatebot/renovate).",
+  "prHourlyLimit": 20,
+  "prNotPendingHours": 25,
+  "prPriority": 0,
+  "prTitle": null,
+  "printConfig": false,
+  "privateKey": null,
+  "productLinks": Object {
+    "documentation": "https://docs.renovatebot.com/",
+    "help": "https://github.com/renovatebot/config-help/issues",
+    "homepage": "https://github.com/renovatebot/renovate",
+  },
+  "pruneStaleBranches": true,
+  "pub": Object {
+    "fileMatch": Array [
+      "(^|/)pubspec\\\\.ya?ml$",
+    ],
+    "versionScheme": "npm",
+  },
+  "python": Object {
+    "versionScheme": "pep440",
+  },
+  "rangeStrategy": "replace",
+  "rebaseConflictedPrs": true,
+  "rebaseLabel": "rebase",
+  "rebaseStalePrs": null,
+  "recreateClosed": false,
+  "registryUrls": null,
+  "repositories": Array [],
+  "requireConfig": true,
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "reviewersSampleSize": null,
+  "rollbackPrs": false,
+  "ruby": Object {},
+  "ruby-version": Object {
+    "fileMatch": Array [
+      "(^|/)\\\\.ruby-version$",
+    ],
+    "versionScheme": "ruby",
+  },
+  "rust": Object {},
+  "sbt": Object {
+    "fileMatch": Array [
+      "\\\\.sbt$",
+    ],
+    "timeout": 300,
+    "versionScheme": "ivy",
+  },
+  "schedule": "at any time",
+  "semanticCommitScope": "deps",
+  "semanticCommitType": "chore",
+  "semanticCommits": null,
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "separateMultipleMajor": false,
+  "skipInstalls": null,
+  "stabilityDays": 0,
+  "statusCheckVerify": false,
+  "supportPolicy": Array [],
+  "suppressNotifications": Array [
+    "deprecationWarningIssues",
+  ],
+  "swift": Object {
+    "fileMatch": Array [
+      "(^|/)Package\\\\.swift",
+    ],
+    "rangeStrategy": "bump",
+    "versionScheme": "swift",
+  },
+  "terraform": Object {
+    "commitMessageTopic": "Terraform {{managerData.terraformDependencyType}} {{depNameShort}}",
+    "fileMatch": Array [
+      "\\\\.tf$",
+    ],
+    "versionScheme": "hashicorp",
+  },
+  "timezone": null,
+  "token": "d97bcbb367e37d80e941654e1c8bfaf75673d852",
+  "travis": Object {
+    "fileMatch": Array [
+      "^.travis.yml$",
+    ],
+    "versionScheme": "node",
+  },
+  "trustLevel": "low",
+  "unicodeEmoji": false,
+  "unpublishSafe": false,
+  "updateLockFiles": true,
+  "updateNotScheduled": true,
+  "username": null,
+  "versionScheme": "semver",
+  "vulnerabilityAlerts": Object {
+    "commitMessageSuffix": "[SECURITY]",
+    "groupName": null,
+    "masterIssueApproval": false,
+    "rangeStrategy": "update-lockfile",
+    "schedule": Array [],
+  },
+  "yarnrc": null,
+}
+`;
+
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 Object {
   "branchTopic": "lock-file-maintenance",
