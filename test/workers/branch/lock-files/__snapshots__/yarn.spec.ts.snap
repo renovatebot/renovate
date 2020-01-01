@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLockFile catches errors 1`] = `
+Array [
+  "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+]
+`;
+
+exports[`generateLockFile catches errors 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile detects yarnIntegrity 1`] = `
+Array [
+  "node node_modules/yarn/bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+  "node node_modules/yarn/bin/yarn.js upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+]
+`;
+
+exports[`generateLockFile detects yarnIntegrity 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
+`;
+
+exports[`generateLockFile finds yarn embedded in renovate 1`] = `
+Array [
+  "node /node_modules/renovate/node_modules/yarn/bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+]
+`;
+
+exports[`generateLockFile finds yarn embedded in renovate 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile finds yarn globally 1`] = `
+Array [
+  "node /node_modules/yarn/bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+]
+`;
+
+exports[`generateLockFile finds yarn globally 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile generates lock files 1`] = `
+Array [
+  "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+  "npx yarn-deduplicate@1.1.1 --strategy fewer && yarn",
+  "npx yarn-deduplicate@1.1.1 --strategy highest && yarn",
+]
+`;
+
+exports[`generateLockFile generates lock files 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
+`;
+
+exports[`generateLockFile performs lock file updates 1`] = `
+Array [
+  "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+  "node bin/yarn-1.9.4.js upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+]
+`;
+
+exports[`generateLockFile performs lock file updates 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
+`;
+
+exports[`generateLockFile uses fallback yarn 1`] = `
+Array [
+  "yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+]
+`;
+
+exports[`generateLockFile uses fallback yarn 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;

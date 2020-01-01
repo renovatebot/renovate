@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLockFile catches errors 1`] = `
+Array [
+  "node node_modules/pnpm/lib/bin/pnpm.js install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+]
+`;
+
+exports[`generateLockFile catches errors 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile finds pnpm embedded in renovate 1`] = `
+Array [
+  "node /node_modules/renovate/node_modules/pnpm/lib/bin/pnpm.js install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+]
+`;
+
+exports[`generateLockFile finds pnpm embedded in renovate 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile finds pnpm globally 1`] = `
+Array [
+  "node /node_modules/pnpm/lib/bin/pnpm.js install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+]
+`;
+
+exports[`generateLockFile finds pnpm globally 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile generates lock files 1`] = `
+Array [
+  "node node_modules/pnpm/lib/bin/pnpm.js install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+]
+`;
+
+exports[`generateLockFile generates lock files 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile uses docker pnpm 1`] = `
+Array [
+  "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"some-cache-dir\\":\\"some-cache-dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/pnpm pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+]
+`;
+
+exports[`generateLockFile uses docker pnpm 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;
+
+exports[`generateLockFile uses fallback pnpm 1`] = `
+Array [
+  "pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+]
+`;
+
+exports[`generateLockFile uses fallback pnpm 2`] = `
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": undefined,
+  },
+]
+`;

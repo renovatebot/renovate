@@ -1,16 +1,16 @@
 import { getInstalledPath } from 'get-installed-path';
 import _fs from 'fs-extra';
-import * as _exec from '../../../../lib/util/exec';
+import { exec as _exec } from 'child_process';
 import { mocked } from '../../../util';
 import * as _pnpmHelper from '../../../../lib/manager/npm/post-update/pnpm';
 
 jest.mock('fs-extra');
-jest.mock('../../../../lib/util/exec');
+jest.mock('child_process');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 
-const exec = mocked(_exec).exec;
+const exec: jest.Mock<typeof _exec> = _exec as any;
 const fs = mocked(_fs);
 const pnpmHelper = mocked(_pnpmHelper);
 
@@ -22,37 +22,55 @@ describe('generateLockFile', () => {
   });
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\/g, '/'));
+      execOptions.push(options);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('uses docker pnpm', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\/g, '/'));
+      execOptions.push(options);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     config.binarySource = 'docker';
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: 'some-error',
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\/g, '/'));
+      execOptions.push(options);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
     });
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
     }) as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
@@ -65,12 +83,18 @@ describe('generateLockFile', () => {
     getInstalledPath.mockImplementationOnce(
       () => '/node_modules/renovate/node_modules/pnpm'
     );
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\/g, '/'));
+      execOptions.push(options);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
@@ -83,12 +107,18 @@ describe('generateLockFile', () => {
       throw new Error('not found');
     });
     getInstalledPath.mockImplementationOnce(() => '/node_modules/pnpm');
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\/g, '/'));
+      execOptions.push(options);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
@@ -103,13 +133,19 @@ describe('generateLockFile', () => {
     getInstalledPath.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\/g, '/'));
+      execOptions.push(options);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     config.binarySource = 'global';
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
