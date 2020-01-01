@@ -28,7 +28,7 @@ async function get<T = unknown>(
   const options: GotJSONOptions = {
     ...gqlOpts,
     hostType: getHostType(),
-    baseUrl: (getBaseUrl() || '').replace('/v3/', '/'), // GitHub Enterprise uses unversioned graphql path
+    baseUrl: (getBaseUrl() || '').replace('/v3/', '/').replace('/v3', '/'), // GitHub Enterprise uses unversioned graphql path
     body: { query },
   };
 
