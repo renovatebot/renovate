@@ -1,6 +1,5 @@
 import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
-import { file as _file } from 'tmp-promise';
 import { relative } from 'path';
 import * as extract from '../../../lib/manager/pip_setup/extract';
 import { extractPackageFile } from '../../../lib/manager/pip_setup';
