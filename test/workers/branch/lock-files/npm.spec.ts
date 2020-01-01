@@ -14,18 +14,15 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const fs = mocked(_fs);
 
 describe('generateLockFile', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    const execCommands = [];
+    // const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+    exec.mockImplementation((cmd, options, callback) => {
+      // execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -39,7 +36,7 @@ describe('generateLockFile', () => {
       'package-lock.json',
       { skipInstalls, postUpdateOptions }
     );
-    expect(execCommands).toMatchSnapshot();
+    // expect(execCommands).toMatchSnapshot();
     expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
@@ -49,13 +46,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -83,13 +74,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -127,13 +112,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -167,7 +146,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -192,13 +171,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -228,7 +201,7 @@ describe('generateLockFile', () => {
     );
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -256,7 +229,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockImplementationOnce(() => '/node_modules/npm');
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
@@ -286,7 +259,7 @@ describe('generateLockFile', () => {
     });
     const execCommands = [];
     const execOptions = [];
-    exec.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\/g, '/'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
