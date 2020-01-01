@@ -233,6 +233,28 @@ describe('platform/gitlab', () => {
         })
       ).rejects.toThrow(Error('mirror'));
     });
+    it('should throw an error if repository access is disabled', async () => {
+      api.get.mockReturnValue({
+        body: { repository_access_level: 'disabled' },
+      } as any);
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
+      ).rejects.toThrow(Error('disabled'));
+    });
+    it('should throw an error if repository has empty_repo property', async () => {
+      api.get.mockReturnValue({ body: { empty_repo: null } } as any);
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
+      ).rejects.toThrow(Error('empty'));
+    });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
