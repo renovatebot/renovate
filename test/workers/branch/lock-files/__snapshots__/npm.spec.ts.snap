@@ -14,6 +14,12 @@ exports[`generateLockFile finds npm globally 2`] = `Array []`;
 
 exports[`generateLockFile generates lock files 1`] = `
 Array [
+  "node node_modules/npm/bin/npm-cli.js dedupe",
+]
+`;
+
+exports[`generateLockFile generates lock files 2`] = `
+Array [
   Object {
     "cwd": "some-dir",
     "encoding": "utf-8",

@@ -72,7 +72,7 @@ Array [
 
 exports[`generateLockFile generates lock files 1`] = `
 Array [
-  "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+  "node bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
   "npx yarn-deduplicate@1.1.1 --strategy fewer && yarn",
   "npx yarn-deduplicate@1.1.1 --strategy highest && yarn",
 ]
@@ -100,8 +100,8 @@ Array [
 
 exports[`generateLockFile performs lock file updates 1`] = `
 Array [
-  "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
-  "node bin/yarn-1.9.4.js upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+  "node bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+  "node bin/yarn.js upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
 ]
 `;
 

@@ -23,7 +23,11 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(
+        cmd
+          .replace(/\\(\w)/g, '/$1')
+          .replace(/^node .*?bin\/yarn.*?\.js /, 'node bin/yarn.js ')
+      );
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -46,7 +50,11 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(
+        cmd
+          .replace(/\\(\w)/g, '/$1')
+          .replace(/^node .*?bin\/yarn.*?\.js /, 'node bin/yarn.js ')
+      );
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -67,7 +75,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -90,7 +98,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: 'some-error' });
       return undefined;
@@ -109,7 +117,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -132,7 +140,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -156,7 +164,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;

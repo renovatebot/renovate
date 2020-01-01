@@ -19,10 +19,10 @@ describe('generateLockFile', () => {
   });
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
-    // const execCommands = [];
+    const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      // execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -36,7 +36,7 @@ describe('generateLockFile', () => {
       'package-lock.json',
       { skipInstalls, postUpdateOptions }
     );
-    // expect(execCommands).toMatchSnapshot();
+    expect(execCommands).toMatchSnapshot();
     expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
