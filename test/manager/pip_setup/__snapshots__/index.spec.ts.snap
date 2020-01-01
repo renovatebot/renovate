@@ -1,8 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 1`] = `null`;
+exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 1`] = `Array []`;
 
-exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 2`] = `
+exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 2`] = `Array []`;
+
+exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 3`] = `
 Object {
   "deps": Array [
     Object {

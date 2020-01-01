@@ -59,18 +59,21 @@ describe('lib/manager/pip_setup/index', () => {
 
       // docker pull
       exec.mockImplementationOnce((cmd, _options, callback) => {
+        callback(null, { stdout: '', stderr: '' });
+        return undefined;
+      });
+
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\/g, '/'));
+        execOptions.push(cmd.replace(/\\/g, '/'));
         callback(null, { stdout: jsonContent, stderr: '' });
         return undefined;
       });
 
-      let command = null;
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        command = cmd;
-        callback(null, { stdout: jsonContent, stderr: '' });
-        return undefined;
-      });
-
-      expect(command).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
       expect(
         await extractPackageFile(content, packageFile, {
           ...config,
