@@ -245,6 +245,18 @@ describe('platform/gitlab', () => {
         })
       ).rejects.toThrow(Error('disabled'));
     });
+    it('should throw an error if MRs are disabled', async () => {
+      api.get.mockReturnValue({
+        body: { merge_requests_access_level: 'disabled' },
+      } as any);
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
+      ).rejects.toThrow(Error('disabled'));
+    });
     it('should throw an error if repository has empty_repo property', async () => {
       api.get.mockReturnValue({ body: { empty_repo: true } } as any);
       await expect(
