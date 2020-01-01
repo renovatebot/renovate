@@ -1,41 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateLockFiles() defaults to latest 1`] = `"npm i -g -C ~/.npm/lerna@latest lerna@latest && npm install --package-lock-only --no-audit && ~/.npm/lerna@latest/bin/lerna bootstrap --no-ci -- --package-lock-only --no-audit"`;
+exports[`generateLockFiles() defaults to latest 1`] = `
+Array [
+  "npm i -g -C ~/.npm/lerna@latest lerna@latest && npm install --package-lock-only --no-audit && ~/.npm/lerna@latest/bin/lerna bootstrap --no-ci -- --package-lock-only --no-audit",
+]
+`;
 
 exports[`generateLockFiles() defaults to latest 2`] = `
-Object {
-  "cwd": "some-dir",
-  "encoding": "utf-8",
-  "env": Object {},
-}
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
 `;
 
-exports[`generateLockFiles() generates package-lock.json files 1`] = `"npm i -g -C ~/.npm/lerna@2.0.0 lerna@2.0.0 && npm install --package-lock-only --no-audit && ~/.npm/lerna@2.0.0/bin/lerna bootstrap --no-ci -- --package-lock-only --no-audit"`;
+exports[`generateLockFiles() generates package-lock.json files 1`] = `
+Array [
+  "npm i -g -C ~/.npm/lerna@2.0.0 lerna@2.0.0 && npm install --package-lock-only --no-audit && ~/.npm/lerna@2.0.0/bin/lerna bootstrap --no-ci -- --package-lock-only --no-audit",
+]
+`;
 
 exports[`generateLockFiles() generates package-lock.json files 2`] = `
-Object {
-  "cwd": "some-dir",
-  "encoding": "utf-8",
-  "env": Object {},
-}
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
 `;
 
-exports[`generateLockFiles() generates yarn.lock files 1`] = `"npm i -g -C ~/.npm/lerna@2.0.0 lerna@2.0.0 && yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879 && ~/.npm/lerna@2.0.0/bin/lerna bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879"`;
+exports[`generateLockFiles() generates yarn.lock files 1`] = `
+Array [
+  "npm i -g -C ~/.npm/lerna@2.0.0 lerna@2.0.0 && yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879 && ~/.npm/lerna@2.0.0/bin/lerna bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+]
+`;
 
 exports[`generateLockFiles() generates yarn.lock files 2`] = `
-Object {
-  "cwd": "some-dir",
-  "encoding": "utf-8",
-  "env": Object {},
-}
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
 `;
 
-exports[`generateLockFiles() performs full npm install 1`] = `"npm install --ignore-scripts  --no-audit && lerna bootstrap --no-ci -- --ignore-scripts  --no-audit"`;
+exports[`generateLockFiles() performs full npm install 1`] = `
+Array [
+  "npm install --ignore-scripts  --no-audit && lerna bootstrap --no-ci -- --ignore-scripts  --no-audit",
+]
+`;
 
 exports[`generateLockFiles() performs full npm install 2`] = `
-Object {
-  "cwd": "some-dir",
-  "encoding": "utf-8",
-  "env": Object {},
-}
+Array [
+  Object {
+    "cwd": "some-dir",
+    "encoding": "utf-8",
+    "env": Object {},
+  },
+]
 `;

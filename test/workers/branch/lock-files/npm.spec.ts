@@ -13,9 +13,23 @@ getInstalledPath.mockImplementation(() => null);
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const fs = mocked(_fs);
 
+let processEnv;
+
 describe('generateLockFile', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
@@ -36,18 +50,18 @@ describe('generateLockFile', () => {
       'package-lock.json',
       { skipInstalls, postUpdateOptions }
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs lock file updates', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -64,18 +78,18 @@ describe('generateLockFile', () => {
       { skipInstalls },
       updates
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -90,8 +104,6 @@ describe('generateLockFile', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.pathExists).toHaveBeenCalledWith(
       path.join('some-dir', 'package-lock.json')
     );
@@ -107,13 +119,15 @@ describe('generateLockFile', () => {
     );
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -128,8 +142,6 @@ describe('generateLockFile', () => {
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.pathExists).toHaveBeenCalledWith(
       path.join('some-dir', 'package-lock.json')
     );
@@ -141,13 +153,15 @@ describe('generateLockFile', () => {
     );
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs full install', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -161,18 +175,18 @@ describe('generateLockFile', () => {
       'package-lock.json',
       { skipInstalls, binarySource }
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -185,11 +199,11 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('finds npm embedded in renovate', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -202,7 +216,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -213,10 +227,10 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('finds npm globally', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -230,7 +244,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -241,10 +255,10 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('uses fallback npm', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -260,7 +274,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -271,9 +285,9 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
 });

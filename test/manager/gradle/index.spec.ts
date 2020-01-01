@@ -19,6 +19,8 @@ const config = {
   },
 };
 
+let processEnv;
+
 const updatesDependenciesReport = fsReal.readFileSync(
   'test/datasource/gradle/_fixtures/updatesReport.json',
   'utf8'
@@ -32,13 +34,27 @@ describe('manager/gradle', () => {
     fs.exists.mockResolvedValue(true);
     fs.access.mockResolvedValue(undefined);
     platform.getFile.mockResolvedValue('some content');
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
 
   describe('extractPackageFile', () => {
     it('should return gradle dependencies', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -48,13 +64,16 @@ describe('manager/gradle', () => {
         'subproject/build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should return gradle.kts dependencies', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -64,13 +83,16 @@ describe('manager/gradle', () => {
         'subproject/build.gradle.kts',
       ]);
       expect(dependencies).toMatchSnapshot();
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should return empty if there are no dependencies', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -84,25 +106,32 @@ describe('manager/gradle', () => {
       ]);
 
       expect(dependencies).toEqual([]);
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should throw registry failure if gradle execution fails', async () => {
-      const commands = [];
-      exec.mockImplementation((cmd, _options, _callback) => {
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         throw new Error();
       });
 
       await expect(
         manager.extractAllPackageFiles(config, ['build.gradle'])
       ).rejects.toMatchSnapshot();
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should return empty if there is no dependency report', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -113,13 +142,16 @@ describe('manager/gradle', () => {
       ]);
 
       expect(dependencies).toEqual([]);
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should return empty if renovate report is invalid', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -133,13 +165,16 @@ describe('manager/gradle', () => {
         'build.gradle',
       ]);
       expect(dependencies).toEqual([]);
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should use repositories only for current project', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -154,13 +189,16 @@ describe('manager/gradle', () => {
         'build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should execute gradlew when available', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -174,13 +212,16 @@ describe('manager/gradle', () => {
         cwd: 'localDir',
         timeout: 20000,
       });
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should run gradlew through `sh` when available but not executable', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -195,13 +236,16 @@ describe('manager/gradle', () => {
         cwd: 'localDir',
         timeout: 20000,
       });
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -214,13 +258,16 @@ describe('manager/gradle', () => {
       ).toBeNull();
 
       expect(exec).toHaveBeenCalledTimes(0);
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -229,13 +276,16 @@ describe('manager/gradle', () => {
         'foo/build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should configure the renovate report plugin', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -245,13 +295,16 @@ describe('manager/gradle', () => {
       expect(toUnix(fs.writeFile.mock.calls[0][0] as string)).toBe(
         'localDir/renovate-plugin.gradle'
       );
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should use docker if required', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -263,13 +316,16 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should use docker even if gradlew is available', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -282,15 +338,18 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
   });
 
   describe('updateDependency', () => {
     it('should update an existing module dependency', () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -313,13 +372,16 @@ describe('manager/gradle', () => {
       expect(buildGradleContentUpdated).toMatch('cglib:cglib-nodep:3.2.8');
       expect(buildGradleContentUpdated).not.toMatch('cglib:cglib-nodep:3.1');
 
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should update an existing plugin dependency', () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -351,13 +413,16 @@ describe('manager/gradle', () => {
         'id "com.github.ben-manes.versions" version "0.20.0"'
       );
 
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
 
     it('should update an existing plugin dependency with Kotlin DSL', () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: 'gradle output', stderr: '' });
         return undefined;
       });
@@ -389,7 +454,8 @@ describe('manager/gradle', () => {
         'id("com.github.ben-manes.versions") version "0.20.0"'
       );
 
-      expect(commands.map(x => x.replace(/\\(\w)/g, '/$1'))).toMatchSnapshot();
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
   });
 });

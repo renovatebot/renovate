@@ -18,10 +18,23 @@ const config = {
   cacheDir: '/tmp/renovate/cache',
 };
 
+const processEnv = process.env;
+
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
   });
+  afterEach(() => {
+    process.env = processEnv;
+  });
+
   it('returns if no Pipfile.lock found', async () => {
     expect(await pipenv.updateArtifacts('Pipfile', [], '', config)).toBeNull();
   });
@@ -31,10 +44,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -51,10 +61,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -74,10 +81,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });

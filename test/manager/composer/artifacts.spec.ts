@@ -18,12 +18,25 @@ const platform = mocked(_platform);
 const config = {
   localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
-  binarySource: 'auto',
 };
+
+let processEnv;
 
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -36,10 +49,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -57,16 +67,13 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
     const authConfig = {
-      localDir: '/tmp/github/some/repo',
+      ...config,
       registryUrls: ['https://packagist.renovatebot.com'],
     };
     hostRules.find.mockReturnValue({
@@ -86,10 +93,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -109,10 +113,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -136,10 +137,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -161,10 +159,7 @@ describe('.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });

@@ -15,12 +15,13 @@ const config = {
   localDir: '.',
 };
 
+let processEnv;
+
 const exec: jest.Mock<typeof _exec> = _exec as any;
 jest.mock('child_process');
 
-async function tmpFile() {
-  const file = await _file({ postfix: '.py' });
-  return relative('.', file.path);
+function tmpFile() {
+  return relative('.', '/tmp/folders/foobar.py');
 }
 
 describe('lib/manager/pip_setup/index', () => {
@@ -41,9 +42,25 @@ describe('lib/manager/pip_setup/index', () => {
       exec.mockImplementationOnce((_cmd, _options, _callback) => {
         throw new Error();
       });
+
+      processEnv = process.env;
+      process.env = {
+        HTTP_PROXY: 'http://example.com',
+        HTTPS_PROXY: 'https://example.com',
+        NO_PROXY: 'localhost',
+        HOME: '/home/user',
+        PATH: '/tmp/path',
+      };
+    });
+    afterEach(() => {
+      process.env = processEnv;
     });
     it('returns found deps', async () => {
-      exec.mockImplementationOnce((_cmd, _options, callback) => {
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: jsonContent, stderr: '' });
         return undefined;
       });
@@ -51,29 +68,32 @@ describe('lib/manager/pip_setup/index', () => {
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(4);
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
     it('returns found deps (docker)', async () => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
 
+      const execCommands = [];
+      const execOptions = [];
+
       // docker pull
-      exec.mockImplementationOnce((cmd, _options, callback) => {
+      exec.mockImplementationOnce((cmd, options, callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
 
-      const execCommands = [];
-      const execOptions = [];
       exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cmd.replace(/\\/g, '/'));
-        execOptions.push(cmd.replace(/\\/g, '/'));
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         callback(null, { stdout: jsonContent, stderr: '' });
         return undefined;
       });
 
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
       expect(
         await extractPackageFile(content, packageFile, {
           ...config,
@@ -81,28 +101,42 @@ describe('lib/manager/pip_setup/index', () => {
         })
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(2);
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
     it('should return null for invalid file', async () => {
-      exec.mockImplementationOnce((_cmd, _options, _callback) => {
+      const execCommands = [];
+      const execOptions = [];
+      exec.mockImplementationOnce((cmd, options, _callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         throw new Error();
       });
 
       expect(
-        await extractPackageFile('raise Exception()', await tmpFile(), config)
+        await extractPackageFile('raise Exception()', tmpFile(), config)
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
     it('catches error', async () => {
+      const execCommands = [];
+      const execOptions = [];
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
-      exec.mockImplementation((_cmd, _options, _callback) => {
+      exec.mockImplementation((cmd, options, _callback) => {
+        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+        execOptions.push(options);
         throw new Error();
       });
       expect(
-        await extractPackageFile('raise Exception()', await tmpFile(), config)
+        await extractPackageFile('raise Exception()', tmpFile(), config)
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
+      expect(execCommands).toMatchSnapshot();
+      expect(execOptions).toMatchSnapshot();
     });
   });
   /*

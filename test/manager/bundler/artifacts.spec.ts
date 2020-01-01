@@ -17,6 +17,7 @@ jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
 
 let config;
+let processEnv;
 
 describe('bundler.updateArtifacts()', () => {
   beforeEach(() => {
@@ -24,6 +25,18 @@ describe('bundler.updateArtifacts()', () => {
     config = {
       localDir: '/tmp/github/some/repo',
     };
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
   it('returns null by default', async () => {
     expect(await updateArtifacts('', [], '', config)).toBeNull();
@@ -35,10 +48,7 @@ describe('bundler.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -59,11 +69,7 @@ describe('bundler.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
-
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -84,10 +90,7 @@ describe('bundler.updateArtifacts()', () => {
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
       execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push({
-        ...options,
-        env: { ...options.env, PATH: null, HOME: null },
-      });
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -120,10 +123,7 @@ describe('bundler.updateArtifacts()', () => {
       const execOptions = [];
       exec.mockImplementation((cmd, options, callback) => {
         execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-        execOptions.push({
-          ...options,
-          env: { ...options.env, PATH: null, HOME: null },
-        });
+        execOptions.push(options);
         callback(null, { stdout: '', stderr: '' });
         return undefined;
       });
@@ -154,10 +154,7 @@ describe('bundler.updateArtifacts()', () => {
       const execOptions = [];
       exec.mockImplementation((cmd, options, callback) => {
         execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-        execOptions.push({
-          ...options,
-          env: { ...options.env, PATH: null, HOME: null },
-        });
+        execOptions.push(options);
         callback(null, { stdout: '', stderr: '' });
         return undefined;
       });

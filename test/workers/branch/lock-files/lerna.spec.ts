@@ -9,7 +9,24 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const lernaHelper = mocked(_lernaHelper);
 const platform = mocked(_platform);
 
+let processEnv;
+
 describe('generateLockFiles()', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
+  });
   it('returns if no lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});
     expect(res.error).toBe(false);
@@ -18,11 +35,11 @@ describe('generateLockFiles()', () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })
     );
-    let command = null;
-    let commandOptions = null;
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      command = cmd;
-      commandOptions = options;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -33,19 +50,19 @@ describe('generateLockFiles()', () => {
       {},
       skipInstalls
     );
-    expect(command).toMatchSnapshot();
-    expect(commandOptions).toMatchSnapshot();
     expect(res.error).toBe(false);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs full npm install', async () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })
     );
-    let command = null;
-    let commandOptions = null;
-    exec.mockImplementationOnce((cmd, options, callback) => {
-      command = cmd;
-      commandOptions = options;
+    const execCommands = [];
+    const execOptions = [];
+    exec.mockImplementation((cmd, options, callback) => {
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
@@ -58,40 +75,40 @@ describe('generateLockFiles()', () => {
       skipInstalls,
       binarySource
     );
-    expect(command).toMatchSnapshot();
-    expect(commandOptions).toMatchSnapshot();
     expect(res.error).toBe(false);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('generates yarn.lock files', async () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ devDependencies: { lerna: '2.0.0' } })
     );
-    let command = null;
-    let commandOptions = null;
+    const execCommands = [];
+    const execOptions = [];
     exec.mockImplementationOnce((cmd, options, callback) => {
-      command = cmd;
-      commandOptions = options;
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     const res = await lernaHelper.generateLockFiles('yarn', 'some-dir', {});
-    expect(command).toMatchSnapshot();
-    expect(commandOptions).toMatchSnapshot();
     expect(res.error).toBe(false);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('defaults to latest', async () => {
     platform.getFile.mockReturnValueOnce(undefined);
-    let command = null;
-    let commandOptions = null;
+    const execCommands = [];
+    const execOptions = [];
     exec.mockImplementationOnce((cmd, options, callback) => {
-      command = cmd;
-      commandOptions = options;
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
+      execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     const res = await lernaHelper.generateLockFiles('npm', 'some-dir', {});
-    expect(command).toMatchSnapshot();
-    expect(commandOptions).toMatchSnapshot();
     expect(res.error).toBe(false);
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
 });

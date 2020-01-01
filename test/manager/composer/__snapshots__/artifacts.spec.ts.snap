@@ -35,8 +35,11 @@ Array [
     "encoding": "utf-8",
     "env": Object {
       "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
-      "HOME": null,
-      "PATH": null,
+      "HOME": "/home/user",
+      "HTTPS_PROXY": "https://example.com",
+      "HTTP_PROXY": "http://example.com",
+      "NO_PROXY": "localhost",
+      "PATH": "/tmp/path",
     },
   },
 ]
@@ -55,8 +58,11 @@ Array [
     "encoding": "utf-8",
     "env": Object {
       "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
-      "HOME": null,
-      "PATH": null,
+      "HOME": "/home/user",
+      "HTTPS_PROXY": "https://example.com",
+      "HTTP_PROXY": "http://example.com",
+      "NO_PROXY": "localhost",
+      "PATH": "/tmp/path",
     },
   },
 ]
@@ -75,8 +81,11 @@ Array [
     "encoding": "utf-8",
     "env": Object {
       "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
-      "HOME": null,
-      "PATH": null,
+      "HOME": "/home/user",
+      "HTTPS_PROXY": "https://example.com",
+      "HTTP_PROXY": "http://example.com",
+      "NO_PROXY": "localhost",
+      "PATH": "/tmp/path",
     },
   },
 ]
@@ -95,8 +104,11 @@ Array [
     "encoding": "utf-8",
     "env": Object {
       "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
-      "HOME": null,
-      "PATH": null,
+      "HOME": "/home/user",
+      "HTTPS_PROXY": "https://example.com",
+      "HTTP_PROXY": "http://example.com",
+      "NO_PROXY": "localhost",
+      "PATH": "/tmp/path",
     },
   },
 ]
@@ -115,8 +127,11 @@ Array [
     "encoding": "utf-8",
     "env": Object {
       "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
-      "HOME": null,
-      "PATH": null,
+      "HOME": "/home/user",
+      "HTTPS_PROXY": "https://example.com",
+      "HTTP_PROXY": "http://example.com",
+      "NO_PROXY": "localhost",
+      "PATH": "/tmp/path",
     },
   },
 ]
@@ -135,8 +150,11 @@ Array [
     "encoding": "utf-8",
     "env": Object {
       "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
-      "HOME": null,
-      "PATH": null,
+      "HOME": "/home/user",
+      "HTTPS_PROXY": "https://example.com",
+      "HTTP_PROXY": "http://example.com",
+      "NO_PROXY": "localhost",
+      "PATH": "/tmp/path",
     },
   },
 ]

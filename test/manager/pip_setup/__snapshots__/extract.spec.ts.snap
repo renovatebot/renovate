@@ -9,3 +9,17 @@ Array [
   "python3.8 --version",
 ]
 `;
+
+exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 3`] = `
+Array [
+  Object {
+    "encoding": "utf-8",
+  },
+  Object {
+    "encoding": "utf-8",
+  },
+  Object {
+    "encoding": "utf-8",
+  },
+]
+`;

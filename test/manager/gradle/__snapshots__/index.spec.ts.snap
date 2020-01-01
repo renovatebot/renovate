@@ -6,9 +6,29 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should configure the renovate report plugin 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should execute gradlew when available 1`] = `
 Array [
   "./gradlew --init-script renovate-plugin.gradle renovate",
+]
+`;
+
+exports[`manager/gradle extractPackageFile should execute gradlew when available 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
 ]
 `;
 
@@ -18,15 +38,45 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should return empty if renovate report is invalid 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should return empty if there are no dependencies 1`] = `
 Array [
   "./gradlew --init-script renovate-plugin.gradle renovate",
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should return empty if there are no dependencies 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   "gradle --init-script renovate-plugin.gradle renovate",
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
 ]
 `;
 
@@ -159,6 +209,16 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should return gradle dependencies 3`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 1`] = `
 Array [
   Object {
@@ -226,6 +286,16 @@ Array [
 exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
 Array [
   "./gradlew --init-script renovate-plugin.gradle renovate",
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 3`] = `
+Array [
+  Object {
+    "cwd": "localDir/foo",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
 ]
 `;
 
@@ -358,7 +428,19 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should return gradle.kts dependencies 3`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should return null and gradle should not be executed if no root build.gradle 1`] = `Array []`;
+
+exports[`manager/gradle extractPackageFile should return null and gradle should not be executed if no root build.gradle 2`] = `Array []`;
 
 exports[`manager/gradle extractPackageFile should run gradlew through \`sh\` when available but not executable 1`] = `
 Array [
@@ -366,9 +448,33 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should run gradlew through \`sh\` when available but not executable 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 1`] = `[Error: registry-failure]`;
 
-exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 2`] = `Array []`;
+exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 2`] = `
+Array [
+  "./gradlew --init-script renovate-plugin.gradle renovate",
+]
+`;
+
+exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 3`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
 
 exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
@@ -376,9 +482,29 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": undefined,
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should use docker if required 1`] = `
 Array [
   "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle gradle --init-script renovate-plugin.gradle renovate",
+]
+`;
+
+exports[`manager/gradle extractPackageFile should use docker if required 2`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
 ]
 `;
 
@@ -429,8 +555,24 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should use repositories only for current project 3`] = `
+Array [
+  Object {
+    "cwd": "localDir",
+    "encoding": "utf-8",
+    "timeout": 20000,
+  },
+]
+`;
+
 exports[`manager/gradle updateDependency should update an existing module dependency 1`] = `Array []`;
+
+exports[`manager/gradle updateDependency should update an existing module dependency 2`] = `Array []`;
 
 exports[`manager/gradle updateDependency should update an existing plugin dependency 1`] = `Array []`;
 
+exports[`manager/gradle updateDependency should update an existing plugin dependency 2`] = `Array []`;
+
 exports[`manager/gradle updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;
+
+exports[`manager/gradle updateDependency should update an existing plugin dependency with Kotlin DSL 2`] = `Array []`;

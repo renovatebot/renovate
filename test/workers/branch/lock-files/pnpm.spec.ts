@@ -14,35 +14,49 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const fs = mocked(_fs);
 const pnpmHelper = mocked(_pnpmHelper);
 
+let processEnv;
+
 describe('generateLockFile', () => {
   let env;
   let config;
   beforeEach(() => {
     config = { cacheDir: 'some-cache-dir' };
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('uses docker pnpm', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -50,17 +64,17 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     config.binarySource = 'docker';
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -69,11 +83,11 @@ describe('generateLockFile', () => {
       throw new Error('not found');
     }) as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('finds pnpm embedded in renovate', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -86,17 +100,17 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('finds pnpm globally', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -110,17 +124,17 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('uses fallback pnpm', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -136,7 +150,7 @@ describe('generateLockFile', () => {
     const execCommands = [];
     const execOptions = [];
     exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\/g, '/'));
+      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
       execOptions.push(options);
       callback(null, { stdout: '', stderr: '' });
       return undefined;
@@ -144,9 +158,9 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     config.binarySource = 'global';
     const res = await pnpmHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
 });

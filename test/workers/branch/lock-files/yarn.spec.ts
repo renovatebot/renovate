@@ -14,10 +14,24 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const fs = mocked(_fs);
 const yarnHelper = mocked(_yarnHelper);
 
+let processEnv;
+
 describe('generateLockFile', () => {
   beforeEach(() => {
     delete process.env.YARN_MUTEX_FILE;
     jest.resetAllMocks();
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
   it('generates lock files', async () => {
     const execCommands = [];
@@ -41,10 +55,10 @@ describe('generateLockFile', () => {
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
     };
     const res = await yarnHelper.generateLockFile('some-dir', env, config);
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('performs lock file updates', async () => {
     const execCommands = [];
@@ -67,9 +81,9 @@ describe('generateLockFile', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
       { depName: 'some-dep', isLockfileUpdate: true },
     ]);
+    expect(res.lockFile).toEqual('package-lock-contents');
     expect(execCommands).toMatchSnapshot();
     expect(execOptions).toMatchSnapshot();
-    expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('detects yarnIntegrity', async () => {
     const execCommands = [];
@@ -89,9 +103,9 @@ describe('generateLockFile', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
       { depName: 'some-dep', isLockfileUpdate: true },
     ]);
+    expect(res.lockFile).toEqual('package-lock-contents');
     expect(execCommands).toMatchSnapshot();
     expect(execOptions).toMatchSnapshot();
-    expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
@@ -107,11 +121,11 @@ describe('generateLockFile', () => {
       throw new Error('not found');
     }) as never;
     const res = await yarnHelper.generateLockFile('some-dir');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('finds yarn embedded in renovate', async () => {
     const execCommands = [];
@@ -131,10 +145,10 @@ describe('generateLockFile', () => {
     );
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await yarnHelper.generateLockFile('some-dir');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('finds yarn globally', async () => {
     const execCommands = [];
@@ -155,10 +169,10 @@ describe('generateLockFile', () => {
     getInstalledPath.mockImplementationOnce(() => '/node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await yarnHelper.generateLockFile('some-dir');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
   it('uses fallback yarn', async () => {
     const execCommands = [];
@@ -183,9 +197,9 @@ describe('generateLockFile', () => {
     const res = await yarnHelper.generateLockFile('some-dir', undefined, {
       binarySource: 'global',
     });
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execCommands).toMatchSnapshot();
+    expect(execOptions).toMatchSnapshot();
   });
 });
