@@ -118,7 +118,7 @@ export async function updateArtifacts(
       cmd = 'composer';
     } else {
       logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'bundle';
+      cmd = 'composer';
     }
     let args;
     if (config.isLockFileMaintenance) {
