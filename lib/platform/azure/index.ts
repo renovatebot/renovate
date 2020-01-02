@@ -6,7 +6,7 @@ import {
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -341,18 +341,18 @@ export /* istanbul ignore next */ function mergeBranch(
   return config.storage.mergeBranch(branchName);
 }
 
-export /* istanbul ignore next */ function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export /* istanbul ignore next */ function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export /* istanbul ignore next */ function getCommitMessages(): Promise<

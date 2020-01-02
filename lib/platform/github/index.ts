@@ -6,7 +6,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -553,18 +553,18 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 // istanbul ignore next

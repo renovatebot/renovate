@@ -84,7 +84,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getFile.mockReturnValue(pJsonContent);
       await checkOnboardingBranch(config);
       expect(
-        platform.commitFilesToBranch.mock.calls[0][1][0].contents
+        platform.commitFilesToBranch.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
     });
     it('updates onboarding branch', async () => {
