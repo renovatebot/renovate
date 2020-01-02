@@ -5,6 +5,7 @@ import { updateArtifacts } from '../../../lib/manager/bundler';
 import { platform as _platform } from '../../../lib/platform';
 import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
+import { mockExecAll } from '../../execUtil';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -44,14 +45,7 @@ describe('bundler.updateArtifacts()', () => {
   it('returns null if Gemfile.lock was not changed', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as Git.StatusResult);
@@ -59,20 +53,12 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
     ).toMatchSnapshot();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('works for default binarySource', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as Git.StatusResult);
@@ -80,20 +66,12 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
     ).toMatchSnapshot();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.outputFile.mockResolvedValueOnce(null as never);
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as Git.StatusResult);
@@ -104,8 +82,7 @@ describe('bundler.updateArtifacts()', () => {
         binarySource: 'global',
       })
     ).toMatchSnapshot();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   describe('Docker', () => {
     it('.ruby-version', async () => {
@@ -119,14 +96,7 @@ describe('bundler.updateArtifacts()', () => {
           { version: '1.3.0' },
         ],
       });
-      const execCommands = [];
-      const execOptions = [];
-      exec.mockImplementation((cmd, options, callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-        execOptions.push(options);
-        callback(null, { stdout: '', stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecAll(exec);
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as Git.StatusResult);
@@ -137,8 +107,7 @@ describe('bundler.updateArtifacts()', () => {
           binarySource: 'docker',
         })
       ).toMatchSnapshot();
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
     it('compatibility options', async () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -150,14 +119,7 @@ describe('bundler.updateArtifacts()', () => {
           { version: '1.3.0' },
         ],
       });
-      const execCommands = [];
-      const execOptions = [];
-      exec.mockImplementation((cmd, options, callback) => {
-        execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-        execOptions.push(options);
-        callback(null, { stdout: '', stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecAll(exec);
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as Git.StatusResult);
@@ -173,8 +135,7 @@ describe('bundler.updateArtifacts()', () => {
           },
         })
       ).toMatchSnapshot();
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
 });

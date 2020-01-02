@@ -13,22 +13,19 @@ Array [
 
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
-  "pipenv lock",
-]
-`;
-
-exports[`.updateArtifacts() returns null if unchanged 2`] = `
-Array [
   Object {
-    "cwd": "/tmp/github/some/repo",
-    "encoding": "utf-8",
-    "env": Object {
-      "HOME": "/home/user",
-      "HTTPS_PROXY": "https://example.com",
-      "HTTP_PROXY": "http://example.com",
-      "NO_PROXY": "localhost",
-      "PATH": "/tmp/path",
-      "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+    "cmd": "pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
     },
   },
 ]
@@ -36,22 +33,19 @@ Array [
 
 exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
 Array [
-  "pipenv lock",
-]
-`;
-
-exports[`.updateArtifacts() returns updated Pipfile.lock 2`] = `
-Array [
   Object {
-    "cwd": "/tmp/github/some/repo",
-    "encoding": "utf-8",
-    "env": Object {
-      "HOME": "/home/user",
-      "HTTPS_PROXY": "https://example.com",
-      "HTTP_PROXY": "http://example.com",
-      "NO_PROXY": "localhost",
-      "PATH": "/tmp/path",
-      "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+    "cmd": "pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
     },
   },
 ]
@@ -59,22 +53,19 @@ Array [
 
 exports[`.updateArtifacts() supports docker mode 1`] = `
 Array [
-  "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e LC_ALL -e LANG -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv pipenv lock",
-]
-`;
-
-exports[`.updateArtifacts() supports docker mode 2`] = `
-Array [
   Object {
-    "cwd": "/tmp/github/some/repo",
-    "encoding": "utf-8",
-    "env": Object {
-      "HOME": "/home/user",
-      "HTTPS_PROXY": "https://example.com",
-      "HTTP_PROXY": "http://example.com",
-      "NO_PROXY": "localhost",
-      "PATH": "/tmp/path",
-      "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e LC_ALL -e LANG -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
     },
   },
 ]

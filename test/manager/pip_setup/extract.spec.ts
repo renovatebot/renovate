@@ -6,6 +6,7 @@ import {
   getPythonAlias,
   pythonVersions,
 } from '../../../lib/manager/pip_setup/extract';
+import { mockExecSequence } from '../../execUtil';
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 jest.mock('child_process');
@@ -37,30 +38,15 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
-      const execCommands = [];
-      const execOptions = [];
-      exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cmd);
-        execOptions.push(options);
-        callback(null, { stdout: '', stderr: 'Python 2.7.17\\n' });
-        return undefined;
-      });
-      exec.mockImplementationOnce((cmd, options, _callback) => {
-        execCommands.push(cmd);
-        execOptions.push(options);
-        throw new Error();
-      });
-      exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cmd);
-        execOptions.push(options);
-        callback(null, { stdout: 'Python 3.8.0\\n', stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '', stderr: 'Python 2.7.17\\n' },
+        new Error(),
+        { stdout: 'Python 3.8.0\\n', stderr: '' },
+      ]);
       const result = await getPythonAlias();
       expect(pythonVersions.includes(result)).toBe(true);
       expect(result).toMatchSnapshot();
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
   // describe('Test for presence of mock lib', () => {

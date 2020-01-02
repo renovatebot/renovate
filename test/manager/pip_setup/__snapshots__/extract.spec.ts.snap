@@ -4,22 +4,23 @@ exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias t
 
 exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 2`] = `
 Array [
-  "python --version",
-  "python3 --version",
-  "python3.8 --version",
-]
-`;
-
-exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 3`] = `
-Array [
   Object {
-    "encoding": "utf-8",
+    "cmd": "python --version",
+    "options": Object {
+      "encoding": "utf-8",
+    },
   },
   Object {
-    "encoding": "utf-8",
+    "cmd": "python3 --version",
+    "options": Object {
+      "encoding": "utf-8",
+    },
   },
   Object {
-    "encoding": "utf-8",
+    "cmd": "python3.8 --version",
+    "options": Object {
+      "encoding": "utf-8",
+    },
   },
 ]
 `;

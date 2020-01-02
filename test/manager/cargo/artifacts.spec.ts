@@ -3,6 +3,7 @@ import { exec as _exec } from 'child_process';
 import * as cargo from '../../../lib/manager/cargo/artifacts';
 import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
+import { mockExecAll } from '../../execUtil';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -46,50 +47,27 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Cargo.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Cargo.lock with docker', async () => {
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
@@ -99,8 +77,7 @@ describe('.updateArtifacts()', () => {
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockResolvedValueOnce('Current Cargo.lock');

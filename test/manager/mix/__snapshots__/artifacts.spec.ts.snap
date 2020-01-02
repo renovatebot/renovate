@@ -13,15 +13,12 @@ Array [
 
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
-  "mix deps.update plug",
-]
-`;
-
-exports[`.updateArtifacts() returns null if unchanged 2`] = `
-Array [
   Object {
-    "cwd": "/tmp/github/some/repo",
-    "encoding": "utf-8",
+    "cmd": "mix deps.update plug",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+    },
   },
 ]
 `;
@@ -39,15 +36,12 @@ Array [
 
 exports[`.updateArtifacts() returns updated mix.lock 2`] = `
 Array [
-  "docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/mix mix deps.update plug",
-]
-`;
-
-exports[`.updateArtifacts() returns updated mix.lock 3`] = `
-Array [
   Object {
-    "cwd": "/tmp/github/some/repo",
-    "encoding": "utf-8",
+    "cmd": "docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/mix mix deps.update plug",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+    },
   },
 ]
 `;

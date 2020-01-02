@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
 import * as extract from '../../../lib/manager/pip_setup/extract';
 import { extractPackageFile } from '../../../lib/manager/pip_setup';
+import { mockExecAll, mockExecSequence } from '../../execUtil';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = readFileSync(packageFile, 'utf8');
@@ -15,14 +16,14 @@ const config = {
 
 let processEnv;
 
-const cleanCmd = (str: string) =>
-  str
-    .split(process.cwd())
-    .join('/root/project')
-    .replace(/\\(\w)/g, '/$1');
-
 const exec: jest.Mock<typeof _exec> = _exec as any;
 jest.mock('child_process');
+
+const pythonVersionCallResults = [
+  { stdout: '', stderr: 'Python 2.7.17\\n' },
+  { stdout: 'Python 3.7.5\\n', stderr: '' },
+  new Error(),
+];
 
 describe('lib/manager/pip_setup/index', () => {
   describe('extractPackageFile()', () => {
@@ -30,18 +31,6 @@ describe('lib/manager/pip_setup/index', () => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
-
-      exec.mockImplementationOnce((_cmd, _options, callback) => {
-        callback(null, { stdout: '', stderr: 'Python 2.7.17\\n' });
-        return undefined;
-      });
-      exec.mockImplementationOnce((_cmd, _options, callback) => {
-        callback(null, { stdout: 'Python 3.7.5\\n', stderr: '' });
-        return undefined;
-      });
-      exec.mockImplementationOnce((_cmd, _options, _callback) => {
-        throw new Error();
-      });
 
       processEnv = process.env;
       process.env = {
@@ -56,43 +45,21 @@ describe('lib/manager/pip_setup/index', () => {
       process.env = processEnv;
     });
     it('returns found deps', async () => {
-      const execCommands = [];
-      const execOptions = [];
-      exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cleanCmd(cmd));
-        execOptions.push(options);
-        callback(null, { stdout: jsonContent, stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecSequence(exec, [
+        ...pythonVersionCallResults,
+        { stdout: jsonContent, stderr: '' },
+      ]);
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(4);
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
     it('returns found deps (docker)', async () => {
-      jest.resetAllMocks();
-      jest.resetModules();
-      extract.resetModule();
-
-      const execCommands = [];
-      const execOptions = [];
-
-      // docker pull
-      exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cleanCmd(cmd));
-        execOptions.push(options);
-        callback(null, { stdout: '', stderr: '' });
-        return undefined;
-      });
-
-      exec.mockImplementationOnce((cmd, options, callback) => {
-        execCommands.push(cleanCmd(cmd));
-        execOptions.push(options);
-        callback(null, { stdout: jsonContent, stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '', stderr: '' }, // docker pull
+        { stdout: jsonContent, stderr: '' },
+      ]);
 
       expect(
         await extractPackageFile(content, packageFile, {
@@ -101,18 +68,13 @@ describe('lib/manager/pip_setup/index', () => {
         })
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(2);
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
     it('should return null for invalid file', async () => {
-      const execCommands = [];
-      const execOptions = [];
-      exec.mockImplementationOnce((cmd, options, _callback) => {
-        execCommands.push(cleanCmd(cmd));
-        execOptions.push(options);
-        throw new Error();
-      });
-
+      const execSnapshots = mockExecSequence(exec, [
+        ...pythonVersionCallResults,
+        new Error(),
+      ]);
       expect(
         await extractPackageFile(
           'raise Exception()',
@@ -121,20 +83,10 @@ describe('lib/manager/pip_setup/index', () => {
         )
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
     it('catches error', async () => {
-      const execCommands = [];
-      const execOptions = [];
-      jest.resetAllMocks();
-      jest.resetModules();
-      extract.resetModule();
-      exec.mockImplementation((cmd, options, _callback) => {
-        execCommands.push(cleanCmd(cmd));
-        execOptions.push(options);
-        throw new Error();
-      });
+      const execSnapshots = mockExecAll(exec, new Error());
       expect(
         await extractPackageFile(
           'raise Exception()',
@@ -143,8 +95,7 @@ describe('lib/manager/pip_setup/index', () => {
         )
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
-      expect(execCommands).toMatchSnapshot();
-      expect(execOptions).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
   /*

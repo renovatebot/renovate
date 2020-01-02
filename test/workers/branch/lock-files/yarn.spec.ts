@@ -3,6 +3,7 @@ import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as _yarnHelper from '../../../../lib/manager/npm/post-update/yarn';
 import { mocked } from '../../../util';
+import { mockExecAll } from '../../../execUtil';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -34,19 +35,7 @@ describe('generateLockFile', () => {
     process.env = processEnv;
   });
   it('generates lock files', async () => {
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(
-        cmd
-          .replace(/\\(\w)/g, '/$1')
-          .replace(/^node .*?bin\/yarn.*?\.js /, 'node bin/yarn.js ')
-      );
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
-
+    const execSnapshots = mockExecAll(exec);
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     /** @type {NodeJS.ProcessEnv} */
@@ -57,22 +46,18 @@ describe('generateLockFile', () => {
     const res = await yarnHelper.generateLockFile('some-dir', env, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(
+      execSnapshots.map(snapshot => ({
+        ...snapshot,
+        cmd: snapshot.cmd.replace(
+          /^node .*?bin\/yarn.*?\.js /,
+          'node bin/yarn.js '
+        ),
+      }))
+    ).toMatchSnapshot();
   });
   it('performs lock file updates', async () => {
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(
-        cmd
-          .replace(/\\(\w)/g, '/$1')
-          .replace(/^node .*?bin\/yarn.*?\.js /, 'node bin/yarn.js ')
-      );
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
 
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
 
@@ -82,18 +67,18 @@ describe('generateLockFile', () => {
       { depName: 'some-dep', isLockfileUpdate: true },
     ]);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(
+      execSnapshots.map(snapshot => ({
+        ...snapshot,
+        cmd: snapshot.cmd.replace(
+          /^node .*?bin\/yarn.*?\.js /,
+          'node bin/yarn.js '
+        ),
+      }))
+    ).toMatchSnapshot();
   });
   it('detects yarnIntegrity', async () => {
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
 
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -104,18 +89,13 @@ describe('generateLockFile', () => {
       { depName: 'some-dep', isLockfileUpdate: true },
     ]);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: 'some-error' });
-      return undefined;
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '',
+      stderr: 'some-error',
     });
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
@@ -124,18 +104,10 @@ describe('generateLockFile', () => {
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('finds yarn embedded in renovate', async () => {
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     getInstalledPath.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -147,18 +119,10 @@ describe('generateLockFile', () => {
     const res = await yarnHelper.generateLockFile('some-dir');
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('finds yarn globally', async () => {
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     getInstalledPath.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -171,18 +135,10 @@ describe('generateLockFile', () => {
     const res = await yarnHelper.generateLockFile('some-dir');
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('uses fallback yarn', async () => {
-    const execCommands = [];
-    const execOptions = [];
-    exec.mockImplementation((cmd, options, callback) => {
-      execCommands.push(cmd.replace(/\\(\w)/g, '/$1'));
-      execOptions.push(options);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     getInstalledPath.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -199,7 +155,6 @@ describe('generateLockFile', () => {
     });
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execCommands).toMatchSnapshot();
-    expect(execOptions).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });
