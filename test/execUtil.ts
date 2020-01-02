@@ -20,11 +20,12 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 
   const str = JSON.stringify(snapshot, (k, v) => (v === undefined ? null : v));
 
+  const cwd = process.cwd().replace(/\\(\w)/g, '/$1');
   return JSON.parse(
     str
-      .split(process.cwd())
-      .join('/root/project')
       .replace(/\\(\w)/g, '/$1')
+      .split(cwd)
+      .join('/root/project')
   );
 }
 

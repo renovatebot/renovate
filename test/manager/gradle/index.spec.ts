@@ -35,6 +35,8 @@ const gradleOutput = {
 describe('manager/gradle', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+
     fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
     fs.mkdir.mockResolvedValue();
     fs.exists.mockResolvedValue(true);

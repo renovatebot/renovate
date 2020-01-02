@@ -38,6 +38,7 @@ let processEnv;
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
 
     processEnv = process.env;
     process.env = {

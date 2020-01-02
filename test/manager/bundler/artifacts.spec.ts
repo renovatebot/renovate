@@ -23,6 +23,8 @@ let processEnv;
 describe('bundler.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+
     config = {
       localDir: '/tmp/github/some/repo',
     };
