@@ -160,22 +160,32 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
-function qualifierOrder(token: Token): number {
+export enum QualifierTypes {
+  Alpha = 1,
+  Beta,
+  Milestone,
+  RC,
+  Snapshot,
+  Release,
+  SP,
+}
+
+export function qualifierType(token: Token): number {
   const val = token.val;
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
-    return 1;
+    return QualifierTypes.Alpha;
   }
   if (val === 'beta' || (token.isTransition && val === 'b')) {
-    return 2;
+    return QualifierTypes.Beta;
   }
   if (val === 'milestone' || (token.isTransition && val === 'm')) {
-    return 3;
+    return QualifierTypes.Milestone;
   }
   if (val === 'rc' || val === 'cr') {
-    return 4;
+    return QualifierTypes.RC;
   }
   if (val === 'snapshot') {
-    return 5;
+    return QualifierTypes.Snapshot;
   }
   if (
     val === '' ||
@@ -184,65 +194,48 @@ function qualifierOrder(token: Token): number {
     val === 'release' ||
     val === 'latest'
   ) {
-    return 6;
+    return QualifierTypes.Release;
   }
   if (val === 'sp') {
-    return 7;
+    return QualifierTypes.SP;
   }
   return null;
 }
 
 function qualifierCmp(left: Token, right: Token): number {
-  const leftOrder = qualifierOrder(left);
-  const rightOrder = qualifierOrder(right);
+  const leftOrder = qualifierType(left);
+  const rightOrder = qualifierType(right);
   if (leftOrder && rightOrder) {
-    if (leftOrder === rightOrder) {
-      return 0;
-    }
-    if (leftOrder < rightOrder) {
-      return -1;
-    }
-    return 1;
-  }
-  if (left.val === right.val) {
+    if (leftOrder < rightOrder) return -1;
+    if (leftOrder > rightOrder) return 1;
     return 0;
   }
-  if (left.val < right.val) {
-    return -1;
-  }
-  // istanbul ignore next
-  return 1;
+
+  if (leftOrder && leftOrder < QualifierTypes.Release) return -1;
+  if (rightOrder && rightOrder < QualifierTypes.Release) return 1;
+
+  if (left.val < right.val) return -1;
+  if (left.val > right.val) return 1;
+  return 0;
 }
 
 function tokenCmp(left: Token, right: Token): number {
-  if (left.prefix === right.prefix) {
-    if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
-      if (left.val === right.val) {
-        return 0;
-      }
-      if (left.val < right.val) {
-        return -1;
-      }
-      return 1;
-    }
-    if (left.type === TYPE_NUMBER) {
-      return 1;
-    }
-    if (right.type === TYPE_NUMBER) {
-      return -1;
-    }
-    return qualifierCmp(left, right);
-  }
   const leftOrder = commonOrder(left);
   const rightOrder = commonOrder(right);
-  // istanbul ignore if
-  if (leftOrder === rightOrder) {
+
+  if (leftOrder < rightOrder) return -1;
+  if (leftOrder > rightOrder) return 1;
+
+  if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
+    if (left.val < right.val) return -1;
+    if (left.val > right.val) return 1;
     return 0;
   }
-  if (leftOrder < rightOrder) {
-    return -1;
-  }
-  return 1;
+
+  if (right.type === TYPE_NUMBER) return -1;
+  if (left.type === TYPE_NUMBER) return 1;
+
+  return qualifierCmp(left, right);
 }
 
 function compare(left: string, right: string): number {
