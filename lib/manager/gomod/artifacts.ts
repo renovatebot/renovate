@@ -77,7 +77,7 @@ export async function updateArtifacts(
       cmd = 'go';
     } else {
       logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'bundle';
+      cmd = 'go';
     }
     let args = 'get -d ./...';
     if (cmd.includes('.insteadOf')) {

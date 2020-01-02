@@ -3,6 +3,7 @@ import { exec as _exec } from 'child_process';
 import { platform as _platform } from '../../../lib/platform';
 import { updateArtifacts } from '../../../lib/manager/mix';
 import { mocked } from '../../util';
+import { mockExecAll } from '../../execUtil';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -16,9 +17,24 @@ const config = {
   localDir: '/tmp/github/some/repo',
 };
 
+let processEnv;
+
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
   it('returns null if no mix.lock found', async () => {
     expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
@@ -39,21 +55,14 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current mix.lock');
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current mix.lock' as any);
     expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Old mix.lock');
-    let dockerCommand = null;
-    exec.mockImplementationOnce((cmd, _options, callback) => {
-      dockerCommand = cmd;
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New mix.lock' as any);
     expect(
       await updateArtifacts('mix.exs', ['plug'], '{}', {
@@ -61,7 +70,7 @@ describe('.updateArtifacts()', () => {
         binarySource: 'docker',
       })
     ).toMatchSnapshot();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
     platform.getFile.mockResolvedValueOnce('Current mix.lock');
