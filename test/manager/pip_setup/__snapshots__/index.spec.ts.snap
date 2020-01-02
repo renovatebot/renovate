@@ -21,7 +21,7 @@ Array [
     },
   },
   Object {
-    "cmd": "python \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"/tmp/folders/foobar.py\\"",
+    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -157,25 +157,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps (docker) 2`] = `
-Array [
-  Object {
-    "cmd": "docker pull renovate/pip",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run -i --rm -v /tmp/github/some/repo:/tmp/github/some/repo -v /root/project/lib/manager/pip_setup:/root/project/lib/manager/pip_setup -w /tmp/github/some/repo renovate/pip python \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "timeout": 5000,
-    },
-  },
-]
 `;
 
 exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps 1`] = `
@@ -327,7 +308,7 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
+    "cmd": "<extract.py> \\"test/manager/pip_setup/_fixtures/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -358,7 +339,7 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"/tmp/folders/foobar.py\\"",
+    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
