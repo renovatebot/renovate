@@ -1386,17 +1386,20 @@ export async function addReviewers(
   const teamReviewers = reviewers
     .filter(e => e.startsWith('team:'))
     .map(e => e.replace(/^team:/, ''));
-
-  await api.post(
-    `repos/${config.parentRepo ||
-      config.repository}/pulls/${prNo}/requested_reviewers`,
-    {
-      body: {
-        reviewers: userReviewers,
-        team_reviewers: teamReviewers,
-      },
-    }
-  );
+  try {
+    await api.post(
+      `repos/${config.parentRepo ||
+        config.repository}/pulls/${prNo}/requested_reviewers`,
+      {
+        body: {
+          reviewers: userReviewers,
+          team_reviewers: teamReviewers,
+        },
+      }
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Failed to assign reviewer');
+  }
 }
 
 async function addLabels(
