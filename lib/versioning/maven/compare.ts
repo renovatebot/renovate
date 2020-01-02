@@ -232,9 +232,6 @@ function tokenCmp(left: Token, right: Token): number {
     return 0;
   }
 
-  if (right.type === TYPE_NUMBER) return -1;
-  if (left.type === TYPE_NUMBER) return 1;
-
   return qualifierCmp(left, right);
 }
 
