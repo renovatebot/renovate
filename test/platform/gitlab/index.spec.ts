@@ -233,6 +233,40 @@ describe('platform/gitlab', () => {
         })
       ).rejects.toThrow(Error('mirror'));
     });
+    it('should throw an error if repository access is disabled', async () => {
+      api.get.mockReturnValue({
+        body: { repository_access_level: 'disabled' },
+      } as any);
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
+      ).rejects.toThrow(Error('disabled'));
+    });
+    it('should throw an error if MRs are disabled', async () => {
+      api.get.mockReturnValue({
+        body: { merge_requests_access_level: 'disabled' },
+      } as any);
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
+      ).rejects.toThrow(Error('disabled'));
+    });
+    it('should throw an error if repository has empty_repo property', async () => {
+      api.get.mockReturnValue({ body: { empty_repo: true } } as any);
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
+      ).rejects.toThrow(Error('empty'));
+    });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
@@ -931,7 +965,11 @@ These updates have all been created already. Click a checkbox below to force a r
     it('sends to gitFs', async () => {
       expect.assertions(1);
       await initRepo();
-      await gitlab.commitFilesToBranch('some-branch', [{}], '');
+      await gitlab.commitFilesToBranch({
+        branchName: 'some-branch',
+        files: [{ name: 'SomeFile', contents: 'Some Content' }],
+        message: '',
+      });
       expect(api.get.mock.calls).toMatchSnapshot();
     });
   });

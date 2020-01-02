@@ -4,7 +4,7 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { File, StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -409,25 +409,30 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch: string = config.baseBranch
-): Promise<void> {
+export async function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
-      { branchName, filesLength: files.length, message, parentBranch },
+      {
+        branchName,
+        filesLength: files.length,
+        message,
+        parentBranch,
+      },
       null,
       2
     )})`
   );
-  await config.storage.commitFilesToBranch(
+  await config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 
   // wait for pr change propagation
   await delay(1000);
