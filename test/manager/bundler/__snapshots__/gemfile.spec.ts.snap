@@ -1,0 +1,1130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extract lib/manager/bundler/gemfile.rails.lock matches the expected output 1`] = `
+Object {
+  "BUNDLED WITH": Object {
+    "1.17.2": Object {},
+  },
+  "DEPENDENCIES": Object {
+    "activerecord-jdbcmysql-adapter (>= 1.3.0)": Object {
+      "activerecord-jdbcpostgresql-adapter (>= 1.3.0)": Object {
+        "version": ">= 1.3.0",
+      },
+      "activerecord-jdbcsqlite3-adapter (>= 1.3.0)": Object {
+        "version": ">= 1.3.0",
+      },
+      "aws-sdk-s3": Object {},
+      "aws-sdk-sns": Object {},
+      "azure-storage": Object {},
+      "backburner": Object {},
+      "bcrypt (~> 3.1.11)": Object {
+        "version": "~> 3.1.11",
+      },
+      "benchmark-ips": Object {},
+      "blade": Object {},
+      "blade-sauce_labs_plugin": Object {},
+      "bootsnap (>= 1.1.0)": Object {
+        "version": ">= 1.1.0",
+      },
+      "byebug": Object {},
+      "capybara (>= 2.15)": Object {
+        "version": ">= 2.15",
+      },
+      "chromedriver-helper": Object {},
+      "connection_pool": Object {},
+      "dalli": Object {},
+      "delayed_job": Object {},
+      "delayed_job_active_record": Object {},
+      "google-cloud-storage (~> 1.11)": Object {
+        "version": "~> 1.11",
+      },
+      "hiredis": Object {},
+      "image_processing (~> 1.2)": Object {
+        "version": "~> 1.2",
+      },
+      "json (>= 2.0.0)": Object {
+        "version": ">= 2.0.0",
+      },
+      "kindlerb (~> 1.2.0)": Object {
+        "version": "~> 1.2.0",
+      },
+      "libxml-ruby": Object {},
+      "listen (>= 3.0.5, < 3.2)": Object {
+        "version": ">= 3.0.5, < 3.2",
+      },
+      "minitest-bisect": Object {},
+      "minitest-retry": Object {},
+      "mysql2 (>= 0.4.10)": Object {
+        "version": ">= 0.4.10",
+      },
+      "nokogiri (>= 1.8.1)": Object {
+        "version": ">= 1.8.1",
+      },
+      "pg (>= 0.18.0)": Object {
+        "version": ">= 0.18.0",
+      },
+      "psych (~> 3.0)": Object {
+        "version": "~> 3.0",
+      },
+      "puma": Object {},
+      "que": Object {},
+      "queue_classic!": Object {},
+      "qunit-selenium": Object {},
+      "racc (>= 1.4.6)": Object {
+        "version": ">= 1.4.6",
+      },
+      "rack-cache (~> 1.2)": Object {
+        "version": "~> 1.2",
+      },
+      "rails!": Object {},
+      "rake (>= 11.1)": Object {
+        "version": ">= 11.1",
+      },
+      "redcarpet (~> 3.2.3)": Object {
+        "version": "~> 3.2.3",
+      },
+      "redis (~> 4.0)": Object {
+        "version": "~> 4.0",
+      },
+      "redis-namespace": Object {},
+      "resque": Object {},
+      "resque-scheduler": Object {},
+      "rubocop (>= 0.47)": Object {
+        "version": ">= 0.47",
+      },
+      "sass-rails": Object {},
+      "sdoc (~> 1.0)": Object {
+        "version": "~> 1.0",
+      },
+      "sequel": Object {},
+      "sidekiq": Object {},
+      "sneakers": Object {},
+      "sprockets-export": Object {},
+      "sqlite3 (~> 1.3.6)": Object {
+        "version": "~> 1.3.6",
+      },
+      "stackprof": Object {},
+      "sucker_punch": Object {},
+      "turbolinks (~> 5)": Object {
+        "version": "~> 5",
+      },
+      "tzinfo-data": Object {},
+      "uglifier (>= 1.3.0)": Object {
+        "version": ">= 1.3.0",
+      },
+      "version": ">= 1.3.0",
+      "w3c_validators": Object {},
+      "wdm (>= 0.1.0)": Object {
+        "version": ">= 0.1.0",
+      },
+      "webmock": Object {},
+      "webpacker!": Object {},
+      "websocket-client-simple!": Object {},
+    },
+  },
+  "GEM": Object {
+    "remote": "https//rubygems.org/",
+    "specs": Object {
+      "activerecord-jdbc-adapter (52.1-java)": Object {
+        "actionpack (>= 4.0)": Object {
+          "activesupport (>= 4.0)": Object {
+            "version": ">= 4.0",
+          },
+          "sprockets (>= 3.0.0)": Object {
+            "version": ">= 3.0.0",
+          },
+          "version": ">= 4.0",
+        },
+        "activerecord (>= 3.0, < 5.3)": Object {
+          "delayed_job (>= 3.0, < 5)": Object {
+            "version": ">= 3.0, < 5",
+          },
+          "version": ">= 3.0, < 5.3",
+        },
+        "activerecord (~> 5.2.0)": Object {
+          "version": "~> 5.2.0",
+        },
+        "activerecord-jdbc-adapter (= 52.1)": Object {
+          "jdbc-sqlite3 (~> 3.8, < 3.30)": Object {
+            "version": "~> 3.8, < 3.30",
+          },
+          "version": "= 52.1",
+        },
+        "activesupport (>= 3.0, < 5.3)": Object {
+          "version": ">= 3.0, < 5.3",
+        },
+        "activesupport (>= 3.0.0)": Object {
+          "blade-qunit_adapter (~> 2.0.1)": Object {
+            "version": "~> 2.0.1",
+          },
+          "coffee-script": Object {},
+          "coffee-script-source": Object {},
+          "curses (~> 1.0.0)": Object {
+            "version": "~> 1.0.0",
+          },
+          "eventmachine": Object {},
+          "faye": Object {},
+          "sprockets (>= 3.0)": Object {
+            "version": ">= 3.0",
+          },
+          "thin (>= 1.6.0)": Object {
+            "version": ">= 1.6.0",
+          },
+          "thor (>= 0.19.1)": Object {
+            "version": ">= 0.19.1",
+          },
+          "useragent (~> 0.16.7)": Object {
+            "version": "~> 0.16.7",
+          },
+          "version": ">= 3.0.0",
+        },
+        "activesupport (>= 4.2.0)": Object {
+          "nokogiri (>= 1.6)": Object {
+            "version": ">= 1.6",
+          },
+          "version": ">= 4.2.0",
+        },
+        "addressable": Object {
+          "mini_mime (>= 0.1.3)": Object {
+            "version": ">= 0.1.3",
+          },
+          "nokogiri (~> 1.8)": Object {
+            "version": "~> 1.8",
+          },
+          "rack (>= 1.6.0)": Object {
+            "version": ">= 1.6.0",
+          },
+          "rack-test (>= 0.6.3)": Object {
+            "version": ">= 0.6.3",
+          },
+          "regexp_parser (~> 1.2)": Object {
+            "version": "~> 1.2",
+          },
+          "xpath (~> 3.2)": Object {
+            "version": "~> 3.2",
+          },
+        },
+        "addressable (>= 2.3.4)": Object {
+          "cookiejar (!= 0.3.1)": Object {
+            "version": "!= 0.3.1",
+          },
+          "em-socksify (>= 0.3)": Object {
+            "version": ">= 0.3",
+          },
+          "eventmachine (>= 1.0.3)": Object {
+            "version": ">= 1.0.3",
+          },
+          "http_parser.rb (>= 0.6.0)": Object {
+            "version": ">= 0.6.0",
+          },
+          "version": ">= 2.3.4",
+        },
+        "addressable (>= 2.3.6)": Object {
+          "crack (>= 0.3.2)": Object {
+            "version": ">= 0.3.2",
+          },
+          "hashdiff": Object {},
+          "version": ">= 2.3.6",
+        },
+        "addressable (~> 2.3)": Object {
+          "faraday (~> 0.9)": Object {
+            "version": "~> 0.9",
+          },
+          "jwt (>= 1.5, < 3.0)": Object {
+            "version": ">= 1.5, < 3.0",
+          },
+          "multi_json (~> 1.10)": Object {
+            "version": "~> 1.10",
+          },
+          "version": "~> 2.3",
+        },
+        "addressable (~> 2.5, >= 2.5.1)": Object {
+          "googleauth (>= 0.5, < 0.7.0)": Object {
+            "version": ">= 0.5, < 0.7.0",
+          },
+          "httpclient (>= 2.8.1, < 3.0)": Object {
+            "version": ">= 2.8.1, < 3.0",
+          },
+          "mime-types (~> 3.0)": Object {
+            "version": "~> 3.0",
+          },
+          "representable (~> 3.0)": Object {
+            "version": "~> 3.0",
+          },
+          "retriable (>= 2.0, < 4.0)": Object {
+            "version": ">= 2.0, < 4.0",
+          },
+          "signet (~> 0.10)": Object {
+            "version": "~> 0.10",
+          },
+          "version": "~> 2.5, >= 2.5.1",
+        },
+        "amq-protocol (~> 2.3.0)": Object {
+          "version": "~> 2.3.0",
+        },
+        "archive-zip (0.11.0)": Object {
+          "version": "0.11.0",
+        },
+        "archive-zip (~> 0.10)": Object {
+          "nokogiri (~> 1.8)": Object {
+            "version": "~> 1.8",
+          },
+          "version": "~> 0.10",
+        },
+        "ast (~> 2.4.0)": Object {
+          "version": "~> 2.4.0",
+        },
+        "aws-eventstream (1.0.1)": Object {
+          "version": "1.0.1",
+        },
+        "aws-eventstream (~> 1.0)": Object {
+          "aws-partitions (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "aws-sigv4 (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "jmespath (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "version": "~> 1.0",
+        },
+        "aws-partitions (1.111.0)": Object {
+          "version": "1.111.0",
+        },
+        "aws-sdk-core (3.37.0)": Object {
+          "version": "3.37.0",
+        },
+        "aws-sdk-core (~> 3, >= 3.26.0)": Object {
+          "aws-sdk-kms (~> 1)": Object {
+            "version": "~> 1",
+          },
+          "aws-sigv4 (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "version": "~> 3, >= 3.26.0",
+        },
+        "aws-sdk-core (~> 3, >= 3.37.0)": Object {
+          "aws-sigv4 (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "version": "~> 3, >= 3.37.0",
+        },
+        "azure-core (0.1.14)": Object {
+          "version": "0.1.14",
+        },
+        "azure-core (~> 0.1)": Object {
+          "faraday (~> 0.9)": Object {
+            "version": "~> 0.9",
+          },
+          "faraday_middleware (~> 0.10)": Object {
+            "version": "~> 0.10",
+          },
+          "nokogiri (~> 1.6, >= 1.6.8)": Object {
+            "version": "~> 1.6, >= 1.6.8",
+          },
+          "version": "~> 0.1",
+        },
+        "bcrypt (3.1.12-java)": Object {
+          "version": "3.1.12-java",
+        },
+        "bcrypt (3.1.12-x64-mingw32)": Object {
+          "version": "3.1.12-x64-mingw32",
+        },
+        "bcrypt (3.1.12-x86-mingw32)": Object {
+          "version": "3.1.12-x86-mingw32",
+        },
+        "beaneater (1.0.0)": Object {
+          "version": "1.0.0",
+        },
+        "beaneater (~> 1.0)": Object {
+          "concurrent-ruby (~> 1.0, >= 1.0.1)": Object {
+            "version": "~> 1.0, >= 1.0.1",
+          },
+          "dante (> 0.1.5)": Object {
+            "version": "> 0.1.5",
+          },
+          "version": "~> 1.0",
+        },
+        "benchmark-ips (2.7.2)": Object {
+          "version": "2.7.2",
+        },
+        "blade (0.7.1)": Object {
+          "version": "0.7.1",
+        },
+        "blade-sauce_labs_plugin (0.7.3)": Object {
+          "version": "0.7.3",
+        },
+        "bunny (2.9.2)": Object {
+          "version": "2.9.2",
+        },
+        "bunny (~> 2.9.2)": Object {
+          "concurrent-ruby (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "serverengine (~> 2.0.5)": Object {
+            "version": "~> 2.0.5",
+          },
+          "thor": Object {},
+          "version": "~> 2.9.2",
+        },
+        "capybara (3.10.1)": Object {
+          "version": "3.10.1",
+        },
+        "childprocess": Object {
+          "faraday": Object {},
+          "selenium-webdriver": Object {},
+        },
+        "childprocess (~> 0.5)": Object {
+          "rubyzip (~> 1.2, >= 1.2.2)": Object {
+            "version": "~> 1.2, >= 1.2.2",
+          },
+          "version": "~> 0.5",
+        },
+        "coffee-script-source": Object {
+          "execjs": Object {},
+        },
+        "concurrent-ruby (1.1.3)": Object {
+          "version": "1.1.3",
+        },
+        "concurrent-ruby (~> 1.0)": Object {
+          "version": "~> 1.0",
+        },
+        "connection_pool (2.2.2)": Object {
+          "version": "2.2.2",
+        },
+        "connection_pool (~> 2.2, >= 2.2.2)": Object {
+          "rack-protection (>= 1.5.0)": Object {
+            "version": ">= 1.5.0",
+          },
+          "redis (>= 3.3.5, < 5)": Object {
+            "version": ">= 3.3.5, < 5",
+          },
+          "version": "~> 2.2, >= 2.2.2",
+        },
+        "cookiejar (0.3.3)": Object {
+          "version": "0.3.3",
+        },
+        "cookiejar (>= 0.3.0)": Object {
+          "em-http-request (>= 0.3.0)": Object {
+            "version": ">= 0.3.0",
+          },
+          "eventmachine (>= 0.12.0)": Object {
+            "version": ">= 0.12.0",
+          },
+          "faye-websocket (>= 0.9.1)": Object {
+            "version": ">= 0.9.1",
+          },
+          "multi_json (>= 1.0.0)": Object {
+            "version": ">= 1.0.0",
+          },
+          "rack (>= 1.0.0)": Object {
+            "version": ">= 1.0.0",
+          },
+          "version": ">= 0.3.0",
+          "websocket-driver (>= 0.5.1)": Object {
+            "version": ">= 0.5.1",
+          },
+        },
+        "crack (0.4.3)": Object {
+          "version": "0.4.3",
+        },
+        "crass (~> 1.0.2)": Object {
+          "nokogiri (>= 1.5.9)": Object {
+            "version": ">= 1.5.9",
+          },
+          "version": "~> 1.0.2",
+        },
+        "curses (1.0.2)": Object {
+          "version": "1.0.2",
+        },
+        "daemons (1.2.6)": Object {
+          "version": "1.2.6",
+        },
+        "daemons (~> 1.0, >= 1.0.9)": Object {
+          "eventmachine (~> 1.0, >= 1.0.4)": Object {
+            "version": "~> 1.0, >= 1.0.4",
+          },
+          "rack (>= 1, < 3)": Object {
+            "version": ">= 1, < 3",
+          },
+          "version": "~> 1.0, >= 1.0.9",
+        },
+        "dalli (2.7.9)": Object {
+          "version": "2.7.9",
+        },
+        "dante (0.2.0)": Object {
+          "version": "0.2.0",
+        },
+        "declarative (0.0.10)": Object {
+          "version": "0.0.10",
+        },
+        "declarative (< 0.1.0)": Object {
+          "declarative-option (< 0.2.0)": Object {
+            "version": "< 0.2.0",
+          },
+          "uber (< 0.2.0)": Object {
+            "version": "< 0.2.0",
+          },
+          "version": "< 0.1.0",
+        },
+        "declarative-option (0.1.0)": Object {
+          "version": "0.1.0",
+        },
+        "delayed_job (4.1.5)": Object {
+          "version": "4.1.5",
+        },
+        "digest-crc (~> 0.4)": Object {
+          "google-api-client (~> 0.23)": Object {
+            "version": "~> 0.23",
+          },
+          "google-cloud-core (~> 1.2)": Object {
+            "version": "~> 1.2",
+          },
+          "googleauth (~> 0.6.2)": Object {
+            "version": "~> 0.6.2",
+          },
+          "version": "~> 0.4",
+        },
+        "em-http-request (1.1.5)": Object {
+          "version": "1.1.5",
+        },
+        "et-orbi (1.1.6)": Object {
+          "version": "1.1.6",
+        },
+        "et-orbi (~> 1.1, >= 1.1.6)": Object {
+          "raabro (~> 1.1)": Object {
+            "version": "~> 1.1",
+          },
+          "version": "~> 1.1, >= 1.1.6",
+        },
+        "eventmachine (1.2.7)": Object {
+          "version": "1.2.7",
+        },
+        "eventmachine (>= 0.12.0)": Object {
+          "version": ">= 0.12.0",
+          "websocket-driver (>= 0.5.1)": Object {
+            "version": ">= 0.5.1",
+          },
+        },
+        "eventmachine (>= 1.0.0.beta.4)": Object {
+          "version": ">= 1.0.0.beta.4",
+        },
+        "execjs (2.7.0)": Object {
+          "version": "2.7.0",
+        },
+        "execjs (>= 0.3.0, < 3)": Object {
+          "version": ">= 0.3.0, < 3",
+        },
+        "faraday (0.15.3)": Object {
+          "version": "0.15.3",
+        },
+        "faraday (>= 0.7.4, < 1.0)": Object {
+          "version": ">= 0.7.4, < 1.0",
+        },
+        "faraday (~> 0.11)": Object {
+          "version": "~> 0.11",
+        },
+        "faraday (~> 0.12)": Object {
+          "jwt (>= 1.4, < 3.0)": Object {
+            "version": ">= 1.4, < 3.0",
+          },
+          "memoist (~> 0.16)": Object {
+            "version": "~> 0.16",
+          },
+          "multi_json (~> 1.11)": Object {
+            "version": "~> 1.11",
+          },
+          "os (>= 0.9, < 2.0)": Object {
+            "version": ">= 0.9, < 2.0",
+          },
+          "signet (~> 0.7)": Object {
+            "version": "~> 0.7",
+          },
+          "version": "~> 0.12",
+        },
+        "faraday (~> 0.9)": Object {
+          "faraday_middleware (~> 0.10)": Object {
+            "version": "~> 0.10",
+          },
+          "nokogiri (~> 1.6)": Object {
+            "version": "~> 1.6",
+          },
+          "version": "~> 0.9",
+        },
+        "ffi (1.9.25-java)": Object {
+          "version": "1.9.25-java",
+        },
+        "ffi (1.9.25-x64-mingw32)": Object {
+          "version": "1.9.25-x64-mingw32",
+        },
+        "ffi (1.9.25-x86-mingw32)": Object {
+          "version": "1.9.25-x86-mingw32",
+        },
+        "ffi (~> 1.0)": Object {
+          "version": "~> 1.0",
+        },
+        "ffi (~> 1.0, >= 1.0.11)": Object {
+          "version": "~> 1.0, >= 1.0.11",
+        },
+        "ffi (~> 1.9)": Object {
+          "version": "~> 1.9",
+        },
+        "fugit (1.1.6)": Object {
+          "version": "1.1.6",
+        },
+        "fugit (~> 1.1, >= 1.1.5)": Object {
+          "version": "~> 1.1, >= 1.1.5",
+        },
+        "google-cloud-env (~> 1.0)": Object {
+          "version": "~> 1.0",
+        },
+        "hiredis (0.6.3)": Object {
+          "version": "0.6.3",
+        },
+        "hiredis (0.6.3-java)": Object {
+          "version": "0.6.3-java",
+        },
+        "http_parser.rb (0.6.0)": Object {
+          "version": "0.6.0",
+        },
+        "httpclient (2.8.3)": Object {
+          "version": "2.8.3",
+        },
+        "i18n (1.1.1)": Object {
+          "version": "1.1.1",
+        },
+        "io-like (~> 0.3.0)": Object {
+          "version": "~> 0.3.0",
+        },
+        "jaro_winkler (1.5.1)": Object {
+          "version": "1.5.1",
+        },
+        "jaro_winkler (1.5.1-java)": Object {
+          "version": "1.5.1-java",
+        },
+        "jaro_winkler (~> 1.5.1)": Object {
+          "parallel (~> 1.10)": Object {
+            "version": "~> 1.10",
+          },
+          "parser (>= 2.5, != 2.5.1.1)": Object {
+            "version": ">= 2.5, != 2.5.1.1",
+          },
+          "powerpack (~> 0.1)": Object {
+            "version": "~> 0.1",
+          },
+          "rainbow (>= 2.2.2, < 4.0)": Object {
+            "version": ">= 2.2.2, < 4.0",
+          },
+          "ruby-progressbar (~> 1.7)": Object {
+            "version": "~> 1.7",
+          },
+          "unicode-display_width (~> 1.4.0)": Object {
+            "version": "~> 1.4.0",
+          },
+          "version": "~> 1.5.1",
+        },
+        "jdbc-mysql (5.1.46)": Object {
+          "version": "5.1.46",
+        },
+        "jdbc-postgres (42.1.4)": Object {
+          "version": "42.1.4",
+        },
+        "jdbc-sqlite3 (3.20.1)": Object {
+          "version": "3.20.1",
+        },
+        "jmespath (1.4.0)": Object {
+          "version": "1.4.0",
+        },
+        "json (2.1.0)": Object {
+          "version": "2.1.0",
+        },
+        "json (2.1.0-java)": Object {
+          "version": "2.1.0-java",
+        },
+        "json (>= 1.8)": Object {
+          "nokogiri (~> 1.6)": Object {
+            "version": "~> 1.6",
+          },
+          "version": ">= 1.8",
+        },
+        "jwt (2.1.0)": Object {
+          "version": "2.1.0",
+        },
+        "kindlerb (1.2.0)": Object {
+          "version": "1.2.0",
+        },
+        "listen (3.1.5)": Object {
+          "version": "3.1.5",
+        },
+        "loofah (~> 2.2, >= 2.2.2)": Object {
+          "version": "~> 2.2, >= 2.2.2",
+        },
+        "method_source (0.9.2)": Object {
+          "version": "0.9.2",
+        },
+        "mime-types (3.2.2)": Object {
+          "version": "3.2.2",
+        },
+        "mime-types-data (~> 3.2015)": Object {
+          "version": "~> 3.2015",
+        },
+        "mimemagic (0.3.3)": Object {
+          "version": "0.3.3",
+        },
+        "mimemagic (~> 0.3.2)": Object {
+          "version": "~> 0.3.2",
+        },
+        "mini_magick (4.9.2)": Object {
+          "version": "4.9.2",
+        },
+        "mini_magick (~> 4.0)": Object {
+          "ruby-vips (>= 2.0.13, < 3)": Object {
+            "version": ">= 2.0.13, < 3",
+          },
+          "version": "~> 4.0",
+        },
+        "mini_mime (1.0.1)": Object {
+          "version": "1.0.1",
+        },
+        "mini_mime (>= 0.1.1)": Object {
+          "version": ">= 0.1.1",
+        },
+        "mini_portile2 (2.4.0)": Object {
+          "version": "2.4.0",
+        },
+        "mini_portile2 (~> 2.4.0)": Object {
+          "version": "~> 2.4.0",
+        },
+        "minitest (5.11.3)": Object {
+          "version": "5.11.3",
+        },
+        "minitest (>= 5.0)": Object {
+          "version": ">= 5.0",
+        },
+        "minitest (~> 5.0)": Object {
+          "version": "~> 5.0",
+        },
+        "minitest-bisect (1.4.0)": Object {
+          "version": "1.4.0",
+        },
+        "minitest-server (~> 1.0)": Object {
+          "path_expander (~> 1.0)": Object {
+            "version": "~> 1.0",
+          },
+          "version": "~> 1.0",
+        },
+        "mono_logger (~> 1.0)": Object {
+          "redis (>= 3.3, < 5)": Object {
+            "version": ">= 3.3, < 5",
+          },
+          "resque (~> 1.26)": Object {
+            "version": "~> 1.26",
+          },
+          "rufus-scheduler (~> 3.2)": Object {
+            "version": "~> 3.2",
+          },
+          "version": "~> 1.0",
+        },
+        "msgpack (1.2.4)": Object {
+          "version": "1.2.4",
+        },
+        "msgpack (1.2.4-java)": Object {
+          "version": "1.2.4-java",
+        },
+        "msgpack (1.2.4-x64-mingw32)": Object {
+          "version": "1.2.4-x64-mingw32",
+        },
+        "msgpack (1.2.4-x86-mingw32)": Object {
+          "version": "1.2.4-x86-mingw32",
+        },
+        "msgpack (~> 1.0)": Object {
+          "version": "~> 1.0",
+        },
+        "multi_json (1.13.1)": Object {
+          "version": "1.13.1",
+        },
+        "multipart-post (2.0.0)": Object {
+          "version": "2.0.0",
+        },
+        "multipart-post (>= 1.2, < 3)": Object {
+          "version": ">= 1.2, < 3",
+        },
+        "mustache": Object {
+          "nokogiri": Object {},
+        },
+        "mustache (1.1.0)": Object {
+          "version": "1.1.0",
+        },
+        "mustermann (1.0.3)": Object {
+          "version": "1.0.3",
+        },
+        "mustermann (~> 1.0)": Object {
+          "rack (~> 2.0)": Object {
+            "version": "~> 2.0",
+          },
+          "rack-protection (= 2.0.4)": Object {
+            "version": "= 2.0.4",
+          },
+          "tilt (~> 2.0)": Object {
+            "version": "~> 2.0",
+          },
+          "version": "~> 1.0",
+        },
+        "mysql2 (0.5.2)": Object {
+          "version": "0.5.2",
+        },
+        "mysql2 (0.5.2-x64-mingw32)": Object {
+          "version": "0.5.2-x64-mingw32",
+        },
+        "mysql2 (0.5.2-x86-mingw32)": Object {
+          "version": "0.5.2-x86-mingw32",
+        },
+        "nio4r (2.3.1)": Object {
+          "version": "2.3.1",
+        },
+        "nio4r (2.3.1-java)": Object {
+          "version": "2.3.1-java",
+        },
+        "nokogiri (1.9.1)": Object {
+          "version": "1.9.1",
+        },
+        "nokogiri (1.9.1-x64-mingw32)": Object {
+          "version": "1.9.1-x64-mingw32",
+        },
+        "nokogiri (~> 1.8)": Object {
+          "version": "~> 1.8",
+        },
+        "parallel (1.12.1)": Object {
+          "version": "1.12.1",
+        },
+        "parser (2.5.3.0)": Object {
+          "version": "2.5.3.0",
+        },
+        "pg (1.1.3)": Object {
+          "version": "1.1.3",
+        },
+        "pg (1.1.3-x64-mingw32)": Object {
+          "version": "1.1.3-x64-mingw32",
+        },
+        "pg (1.1.3-x86-mingw32)": Object {
+          "version": "1.1.3-x86-mingw32",
+        },
+        "powerpack (0.1.2)": Object {
+          "version": "0.1.2",
+        },
+        "psych (3.0.3)": Object {
+          "version": "3.0.3",
+        },
+        "public_suffix (3.0.3)": Object {
+          "version": "3.0.3",
+        },
+        "public_suffix (>= 2.0.2, < 4.0)": Object {
+          "version": ">= 2.0.2, < 4.0",
+        },
+        "puma (3.12.0)": Object {
+          "version": "3.12.0",
+        },
+        "puma (3.12.0-java)": Object {
+          "version": "3.12.0-java",
+        },
+        "que (0.14.3)": Object {
+          "version": "0.14.3",
+        },
+        "qunit-selenium (0.0.4)": Object {
+          "version": "0.0.4",
+        },
+        "racc (1.4.14)": Object {
+          "version": "1.4.14",
+        },
+        "rack": Object {},
+        "rack (2.0.6)": Object {
+          "version": "2.0.6",
+        },
+        "rack (>= 0.4)": Object {
+          "version": ">= 0.4",
+        },
+        "rack (>= 1.0, < 3)": Object {
+          "version": ">= 1.0, < 3",
+        },
+        "rack (>= 1.0.0)": Object {
+          "version": ">= 1.0.0",
+        },
+        "rack-cache (1.8.0)": Object {
+          "version": "1.8.0",
+        },
+        "railties (>= 4.0.0, < 6)": Object {
+          "sass (~> 3.1)": Object {
+            "version": "~> 3.1",
+          },
+          "sprockets (>= 2.8, < 4.0)": Object {
+            "version": ">= 2.8, < 4.0",
+          },
+          "sprockets-rails (>= 2.0, < 4.0)": Object {
+            "version": ">= 2.0, < 4.0",
+          },
+          "tilt (>= 1.1, < 3)": Object {
+            "version": ">= 1.1, < 3",
+          },
+          "version": ">= 4.0.0, < 6",
+        },
+        "rake (12.3.1)": Object {
+          "version": "12.3.1",
+        },
+        "rb-fsevent (0.10.3)": Object {
+          "version": "0.10.3",
+        },
+        "rb-fsevent (~> 0.9, >= 0.9.4)": Object {
+          "rb-inotify (~> 0.9, >= 0.9.7)": Object {
+            "version": "~> 0.9, >= 0.9.7",
+          },
+          "version": "~> 0.9, >= 0.9.4",
+        },
+        "rb-inotify (0.10.0)": Object {
+          "version": "0.10.0",
+        },
+        "rdoc (>= 5.0)": Object {
+          "version": ">= 5.0",
+        },
+        "redcarpet (3.2.3)": Object {
+          "version": "3.2.3",
+        },
+        "redis (4.0.3)": Object {
+          "version": "4.0.3",
+        },
+        "redis (>= 3.0.4)": Object {
+          "version": ">= 3.0.4",
+        },
+        "redis-namespace (1.6.0)": Object {
+          "version": "1.6.0",
+        },
+        "representable (3.0.4)": Object {
+          "version": "3.0.4",
+        },
+        "rubocop (0.61.1)": Object {
+          "version": "0.61.1",
+        },
+        "ruby-vips (2.0.13)": Object {
+          "version": "2.0.13",
+        },
+        "rubyzip (1.2.2)": Object {
+          "version": "1.2.2",
+        },
+        "rufus-scheduler (3.5.2)": Object {
+          "version": "3.5.2",
+        },
+        "safe_yaml (~> 1.0.0)": Object {
+          "version": "~> 1.0.0",
+        },
+        "sass (3.7.2)": Object {
+          "version": "3.7.2",
+        },
+        "sass-listen (~> 4.0.0)": Object {
+          "version": "~> 4.0.0",
+        },
+        "selenium-webdriver": Object {
+          "thor": Object {},
+        },
+        "serverengine (2.0.7)": Object {
+          "version": "2.0.7",
+        },
+        "sigdump (~> 0.2.2)": Object {
+          "version": "~> 0.2.2",
+        },
+        "signet (0.11.0)": Object {
+          "version": "0.11.0",
+        },
+        "sprockets-rails (3.2.1)": Object {
+          "version": "3.2.1",
+        },
+        "sqlite3 (1.3.13-x64-mingw32)": Object {
+          "version": "1.3.13-x64-mingw32",
+        },
+        "sqlite3 (1.3.13-x86-mingw32)": Object {
+          "version": "1.3.13-x86-mingw32",
+        },
+        "stackprof (0.2.12)": Object {
+          "version": "0.2.12",
+        },
+        "sucker_punch (2.1.1)": Object {
+          "version": "2.1.1",
+        },
+        "thread_safe (0.3.6)": Object {
+          "version": "0.3.6",
+        },
+        "thread_safe (0.3.6-java)": Object {
+          "version": "0.3.6-java",
+        },
+        "thread_safe (~> 0.1)": Object {
+          "version": "~> 0.1",
+        },
+        "tilt (2.0.8)": Object {
+          "version": "2.0.8",
+        },
+        "turbolinks (5.2.0)": Object {
+          "version": "5.2.0",
+        },
+        "turbolinks-source (~> 5.2)": Object {
+          "version": "~> 5.2",
+        },
+        "tzinfo": Object {},
+        "tzinfo (1.2.5)": Object {
+          "version": "1.2.5",
+        },
+        "tzinfo (>= 1.0.0)": Object {
+          "version": ">= 1.0.0",
+        },
+        "uglifier (4.1.19)": Object {
+          "version": "4.1.19",
+        },
+        "useragent (0.16.10)": Object {
+          "version": "0.16.10",
+        },
+        "vegas (0.1.11)": Object {
+          "version": "0.1.11",
+        },
+        "version": "52.1-java",
+        "webmock (3.4.2)": Object {
+          "version": "3.4.2",
+        },
+        "websocket-driver (0.7.0)": Object {
+          "version": "0.7.0",
+        },
+        "websocket-extensions (>= 0.1.0)": Object {
+          "version": ">= 0.1.0",
+        },
+        "xpath (3.2.0)": Object {
+          "version": "3.2.0",
+        },
+      },
+    },
+  },
+  "GIT": Object {
+    "remote": "https//github.com/rails/webpacker.git",
+    "revision": "bb132d591da35095e3246082cba3d693f847e0b5",
+    "specs": Object {
+      "webpacker (4.0.0.pre.3)": Object {
+        "activesupport (>= 4.2)": Object {
+          "rack-proxy (>= 0.6.1)": Object {
+            "version": ">= 0.6.1",
+          },
+          "railties (>= 4.2)": Object {
+            "version": ">= 4.2",
+          },
+          "version": ">= 4.2",
+        },
+        "version": "4.0.0.pre.3",
+      },
+    },
+  },
+  "PATH": Object {
+    "remote": ".",
+    "specs": Object {
+      "actioncable (6.0.0.alpha)": Object {
+        "actioncable (= 6.0.0.alpha)": Object {
+          "actionmailbox (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "actionmailer (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "actionpack (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "actiontext (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "actionview (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "activejob (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "activemodel (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "activerecord (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "activestorage (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "activesupport (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "bundler (>= 1.3.0)": Object {
+            "version": ">= 1.3.0",
+          },
+          "railties (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "sprockets-rails (>= 2.0.0)": Object {
+            "version": ">= 2.0.0",
+          },
+          "version": "= 6.0.0.alpha",
+        },
+        "actionpack (= 6.0.0.alpha)": Object {
+          "activesupport (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "method_source": Object {},
+          "rake (>= 0.8.7)": Object {
+            "version": ">= 0.8.7",
+          },
+          "thor (>= 0.20.3, < 2.0)": Object {
+            "version": ">= 0.20.3, < 2.0",
+          },
+          "version": "= 6.0.0.alpha",
+        },
+        "actionview (= 6.0.0.alpha)": Object {
+          "activesupport (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "rack (~> 2.0)": Object {
+            "version": "~> 2.0",
+          },
+          "rack-test (>= 0.6.3)": Object {
+            "version": ">= 0.6.3",
+          },
+          "rails-dom-testing (~> 2.0)": Object {
+            "version": "~> 2.0",
+          },
+          "rails-html-sanitizer (~> 1.0, >= 1.0.2)": Object {
+            "version": "~> 1.0, >= 1.0.2",
+          },
+          "version": "= 6.0.0.alpha",
+        },
+        "activemodel (= 6.0.0.alpha)": Object {
+          "activesupport (= 6.0.0.alpha)": Object {
+            "version": "= 6.0.0.alpha",
+          },
+          "version": "= 6.0.0.alpha",
+        },
+        "activesupport (= 6.0.0.alpha)": Object {
+          "version": "= 6.0.0.alpha",
+        },
+        "concurrent-ruby (~> 1.0, >= 1.0.2)": Object {
+          "i18n (>= 0.7, < 2)": Object {
+            "version": ">= 0.7, < 2",
+          },
+          "minitest (~> 5.1)": Object {
+            "version": "~> 5.1",
+          },
+          "tzinfo (~> 1.1)": Object {
+            "version": "~> 1.1",
+          },
+          "version": "~> 1.0, >= 1.0.2",
+        },
+        "version": "6.0.0.alpha",
+      },
+    },
+  },
+  "PLATFORMS": Object {
+    "java": Object {
+      "ruby": Object {},
+      "x64-mingw32": Object {},
+      "x86-mingw32": Object {},
+    },
+  },
+}
+`;
