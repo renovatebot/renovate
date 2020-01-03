@@ -1,3 +1,5 @@
+import { defaultEnvVars } from './envVars';
+
 export function getChildProcessEnv(
   customEnvVars: string[] = []
 ): NodeJS.ProcessEnv {
@@ -5,14 +7,7 @@ export function getChildProcessEnv(
   if (global.trustLevel === 'high') {
     return Object.assign(env, process.env);
   }
-  const envVars = [
-    'HTTP_PROXY',
-    'HTTPS_PROXY',
-    'NO_PROXY',
-    'HOME',
-    'PATH',
-    ...customEnvVars,
-  ];
+  const envVars = [...defaultEnvVars, ...customEnvVars];
   envVars.forEach(envVar => {
     if (typeof process.env[envVar] !== 'undefined') {
       env[envVar] = process.env[envVar];

@@ -3,19 +3,20 @@ import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as _yarnHelper from '../../../../lib/manager/npm/post-update/yarn';
 import { mocked } from '../../../util';
-import { ExecSnapshots, mockExecAll } from '../../../execUtil';
+import { ExecSnapshots, envMock, mockExecAll } from '../../../execUtil';
+import * as _env from '../../../../lib/util/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../../lib/util/env');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const fs = mocked(_fs);
 const yarnHelper = mocked(_yarnHelper);
-
-let processEnv;
 
 // TODO: figure out snapshot similarity for each CI platform
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
@@ -28,29 +29,16 @@ describe('generateLockFile', () => {
   beforeEach(() => {
     delete process.env.YARN_MUTEX_FILE;
     jest.resetAllMocks();
-
-    processEnv = process.env;
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    /** @type {NodeJS.ProcessEnv} */
-    const env = {};
     const config = {
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
     };
-    const res = await yarnHelper.generateLockFile('some-dir', env, config);
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();

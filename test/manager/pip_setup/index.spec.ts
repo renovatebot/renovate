@@ -2,7 +2,14 @@ import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
 import * as extract from '../../../lib/manager/pip_setup/extract';
 import { extractPackageFile } from '../../../lib/manager/pip_setup';
-import { ExecSnapshots, mockExecAll, mockExecSequence } from '../../execUtil';
+import {
+  ExecSnapshots,
+  envMock,
+  mockExecAll,
+  mockExecSequence,
+} from '../../execUtil';
+import * as _env from '../../../lib/util/env';
+import { mocked } from '../../util';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = readFileSync(packageFile, 'utf8');
@@ -14,10 +21,11 @@ const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-let processEnv;
-
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
+
 jest.mock('child_process');
+jest.mock('../../../lib/util/env');
 
 const pythonVersionCallResults = [
   { stdout: '', stderr: 'Python 2.7.17\\n' },
@@ -39,17 +47,7 @@ describe('lib/manager/pip_setup/index', () => {
       jest.resetModules();
       extract.resetModule();
 
-      processEnv = process.env;
-      process.env = {
-        HTTP_PROXY: 'http://example.com',
-        HTTPS_PROXY: 'https://example.com',
-        NO_PROXY: 'localhost',
-        HOME: '/home/user',
-        PATH: '/tmp/path',
-      };
-    });
-    afterEach(() => {
-      process.env = processEnv;
+      env.getChildProcessEnv.mockReturnValue(envMock.basic);
     });
     it('returns found deps', async () => {
       const execSnapshots = mockExecSequence(exec, [
