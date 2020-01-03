@@ -76,6 +76,8 @@ describe('versioning/maven/compare', () => {
     expect(compare('1-cr1', '1')).toEqual(-1);
     expect(compare('0.0-1552', '1.10.520')).toEqual(-1);
     expect(compare('0.0.1', '999')).toEqual(-1);
+    expect(compare('1.3-RC1-groovy-2.5', '1.3-groovy-2.5')).toEqual(-1);
+    expect(compare('1-abc', '1-xyz')).toEqual(-1);
   });
   it('returns greater than', () => {
     expect(compare('1.1', '1')).toEqual(1);
@@ -94,6 +96,8 @@ describe('versioning/maven/compare', () => {
     expect(compare('1', '1-cr1')).toEqual(1);
     expect(compare('1.10.520', '0.0-1552')).toEqual(1);
     expect(compare('999', '0.0.1')).toEqual(1);
+    expect(compare('1.3-groovy-2.5', '1.3-RC1-groovy-2.5')).toEqual(1);
+    expect(compare('1-xyz', '1-abc')).toEqual(1);
   });
 
   const invalidRanges = [
@@ -275,7 +279,7 @@ describe('versioning/maven/index', () => {
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toBeNull();
-    expect(isStable('foobar')).toBe(false);
+    expect(isStable('foobar')).toBe(true);
     expect(isStable('final')).toBe(true);
     expect(isStable('1')).toBe(true);
     expect(isStable('1.2')).toBe(true);
@@ -284,13 +288,15 @@ describe('versioning/maven/index', () => {
     expect(isStable('v1.2.3.4')).toBe(true);
     expect(isStable('1-alpha-1')).toBe(false);
     expect(isStable('1-b1')).toBe(false);
-    expect(isStable('1-foo')).toBe(false);
+    expect(isStable('1-foo')).toBe(true);
     expect(isStable('1-final-1.0.0')).toBe(true);
     expect(isStable('1-release')).toBe(true);
     expect(isStable('1.final')).toBe(true);
     expect(isStable('1.0milestone1')).toBe(false);
     expect(isStable('1-sp')).toBe(true);
     expect(isStable('1-ga-1')).toBe(true);
+    expect(isStable('1.3-groovy-2.5')).toBe(true);
+    expect(isStable('1.3-RC1-groovy-2.5')).toBe(false);
   });
   it('returns major version', () => {
     expect(getMajor('')).toBeNull();

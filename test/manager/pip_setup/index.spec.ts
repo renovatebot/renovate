@@ -1,9 +1,8 @@
 import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
-import { file as _file } from 'tmp-promise';
-import { relative } from 'path';
 import * as extract from '../../../lib/manager/pip_setup/extract';
 import { extractPackageFile } from '../../../lib/manager/pip_setup';
+import { ExecSnapshots, mockExecAll, mockExecSequence } from '../../execUtil';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = readFileSync(packageFile, 'utf8');
@@ -12,16 +11,26 @@ const packageFileJson = 'test/manager/pip_setup/_fixtures/setup.py.json';
 const jsonContent = readFileSync(packageFileJson, 'utf8');
 
 const config = {
-  localDir: '.',
+  localDir: '/tmp/github/some/repo',
 };
+
+let processEnv;
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 jest.mock('child_process');
 
-async function tmpFile() {
-  const file = await _file({ postfix: '.py' });
-  return relative('.', file.path);
-}
+const pythonVersionCallResults = [
+  { stdout: '', stderr: 'Python 2.7.17\\n' },
+  { stdout: 'Python 3.7.5\\n', stderr: '' },
+  new Error(),
+];
+
+// TODO: figure out snapshot similarity for each CI platform
+const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
+  snapshots.map(snapshot => ({
+    ...snapshot,
+    cmd: snapshot.cmd.replace(/^.*\/extract\.py"\s+/, '<extract.py> '),
+  }));
 
 describe('lib/manager/pip_setup/index', () => {
   describe('extractPackageFile()', () => {
@@ -30,49 +39,68 @@ describe('lib/manager/pip_setup/index', () => {
       jest.resetModules();
       extract.resetModule();
 
-      exec.mockImplementationOnce((_cmd, _options, callback) => {
-        callback(null, { stdout: '', stderr: 'Python 2.7.17\\n' });
-        return undefined;
-      });
-      exec.mockImplementationOnce((_cmd, _options, callback) => {
-        callback(null, { stdout: 'Python 3.7.5\\n', stderr: '' });
-        return undefined;
-      });
-      exec.mockImplementationOnce((_cmd, _options, _callback) => {
-        throw new Error();
-      });
+      processEnv = process.env;
+      process.env = {
+        HTTP_PROXY: 'http://example.com',
+        HTTPS_PROXY: 'https://example.com',
+        NO_PROXY: 'localhost',
+        HOME: '/home/user',
+        PATH: '/tmp/path',
+      };
+    });
+    afterEach(() => {
+      process.env = processEnv;
     });
     it('returns found deps', async () => {
-      exec.mockImplementationOnce((_cmd, _options, callback) => {
-        callback(null, { stdout: jsonContent, stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecSequence(exec, [
+        ...pythonVersionCallResults,
+        { stdout: jsonContent, stderr: '' },
+      ]);
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(4);
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
-    it('should return null for invalid file', async () => {
-      exec.mockImplementationOnce((_cmd, _options, _callback) => {
-        throw new Error();
-      });
+    it('returns found deps (docker)', async () => {
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '', stderr: '' }, // docker pull
+        { stdout: jsonContent, stderr: '' },
+      ]);
 
       expect(
-        await extractPackageFile('raise Exception()', await tmpFile(), config)
+        await extractPackageFile(content, packageFile, {
+          ...config,
+          binarySource: 'docker',
+        })
+      ).toMatchSnapshot();
+      expect(execSnapshots).toHaveLength(2); // TODO: figure out volume arguments in Windows
+    });
+    it('should return null for invalid file', async () => {
+      const execSnapshots = mockExecSequence(exec, [
+        ...pythonVersionCallResults,
+        new Error(),
+      ]);
+      expect(
+        await extractPackageFile(
+          'raise Exception()',
+          '/tmp/folders/foobar.py',
+          config
+        )
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
     it('catches error', async () => {
-      jest.resetAllMocks();
-      jest.resetModules();
-      extract.resetModule();
-      exec.mockImplementation((_cmd, _options, _callback) => {
-        throw new Error();
-      });
+      const execSnapshots = mockExecAll(exec, new Error());
       expect(
-        await extractPackageFile('raise Exception()', await tmpFile(), config)
+        await extractPackageFile(
+          'raise Exception()',
+          '/tmp/folders/foobar.py',
+          config
+        )
       ).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
   });
   /*

@@ -222,7 +222,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'open',
           } as any)
@@ -254,7 +254,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'closed',
           } as any)
@@ -286,7 +286,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'closed',
           } as any)
@@ -318,7 +318,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'closed',
           } as any)
