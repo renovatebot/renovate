@@ -263,6 +263,21 @@ describe('platform/git/storage', () => {
         message: 'Update something',
       });
     });
+    it('does not push when no diff', async () => {
+      const branchName = 'renovate/something';
+      const local = Git(tmpDir.path);
+      await local.push('origin', `master:${branchName}`);
+      await local.fetch([
+        'origin',
+        `refs/heads/${branchName}:refs/remotes/origin/${branchName}`,
+      ]);
+      const files = [];
+      await git.commitFilesToBranch({
+        branchName,
+        files,
+        message: 'Update something',
+      });
+    });
   });
 
   describe('getCommitMessages()', () => {
