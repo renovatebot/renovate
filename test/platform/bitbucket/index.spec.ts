@@ -1,6 +1,7 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
 import { GotApi, RepoParams } from '../../../lib/platform/common';
+import * as errorTypes from '../../../lib/constants/error-messages';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
@@ -127,7 +128,7 @@ describe('platform/bitbucket', () => {
       expect.assertions(1);
       await expect(
         initRepo({ repository: 'some/empty', optimizeForDisabled: true })
-      ).rejects.toThrow('disabled');
+      ).rejects.toThrow(errorTypes.REPOSITORY_DISABLED);
     });
   });
 

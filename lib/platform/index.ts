@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { Platform } from './common';
 import { RenovateConfig } from '../config/common';
 import { getOptions } from '../config/definitions';
+import * as errorTypes from '../constants/error-messages';
 
 export * from './common';
 
@@ -16,7 +17,7 @@ let _platform: Platform;
 
 const handler: ProxyHandler<Platform> = {
   get(_target: Platform, prop: keyof Platform) {
-    if (!_platform) throw new Error(`platform-not-found`);
+    if (!_platform) throw new Error(errorTypes.PLATFORM_NOT_FOUND);
 
     // TODO: add more validation
 

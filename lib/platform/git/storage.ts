@@ -5,6 +5,7 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 import { logger } from '../../logger';
 import * as limits from '../../workers/global/limits';
+import * as errorTypes from '../../constants/error-messages';
 
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
@@ -66,7 +67,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-failure');
+      throw new Error(errorTypes.PLATFORM_FAILURE);
     }
   }
 }
@@ -145,7 +146,7 @@ export class Storage {
             'fatal: ref refs/remotes/origin/HEAD is not a symbolic ref'
           )
         ) {
-          throw new Error('empty');
+          throw new Error(errorTypes.REPOSITORY_EMPTY);
         }
         throw err;
       }
@@ -180,7 +181,7 @@ export class Storage {
         await this._git.clone(config.url, '.', ['--depth=2']);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
-        throw new Error('platform-failure');
+        throw new Error(errorTypes.PLATFORM_FAILURE);
       }
       const cloneSeconds =
         Math.round(1 + 10 * convertHrtime(process.hrtime(cloneStart)).seconds) /
@@ -202,7 +203,7 @@ export class Storage {
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       if (err.message.includes('does not have any commits yet')) {
-        throw new Error('empty');
+        throw new Error(errorTypes.REPOSITORY_EMPTY);
       }
       logger.warn({ err }, 'Cannot retrieve latest commit date');
     }
@@ -222,7 +223,7 @@ export class Storage {
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
         logger.debug({ err }, 'Error setting git config');
-        throw new Error('temporary-error');
+        throw new Error(errorTypes.REPOSITORY_TEMPORARY_ERROR);
       }
     }
 
@@ -455,7 +456,7 @@ export class Storage {
       const exists = await this.branchExists(branchName);
       if (!exists) {
         logger.info({ branchName }, 'branch no longer exists - aborting');
-        throw new Error('repository-changed');
+        throw new Error(errorTypes.REPOSITORY_CHANGED);
       }
     }
     try {
@@ -525,7 +526,7 @@ export class Storage {
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
   }
 

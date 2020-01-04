@@ -12,6 +12,7 @@ import { flattenPackageRules } from './flatten';
 import * as hostRules from '../../../util/host-rules';
 import { configFileNames } from '../../../config/app-strings';
 import { platform } from '../../../platform';
+import * as errorTypes from '../../../constants/error-messages';
 
 // Check for repository config
 export async function mergeRenovateConfig(
@@ -53,7 +54,7 @@ export async function mergeRenovateConfig(
     // istanbul ignore if
     if (renovateConfig === null) {
       logger.warn('Fetching renovate config returns null');
-      throw new Error('registry-failure');
+      throw new Error(errorTypes.REGISTRY_FAILURE);
     }
     // istanbul ignore if
     if (!renovateConfig.length) {

@@ -18,6 +18,7 @@ import {
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import * as errorTypes from '../../constants/error-messages';
 
 interface Config {
   storage: GitStorage;
@@ -127,7 +128,7 @@ export async function initRepo({
       // Do nothing
     }
     if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
+      throw new Error(errorTypes.REPOSITORY_DISABLED);
     }
   }
 

@@ -1,6 +1,7 @@
 import url from 'url';
 import got from '../../util/got';
 import { logger } from '../../logger';
+import * as errorTypes from '../../constants/error-messages';
 
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
   return (
@@ -70,7 +71,7 @@ export async function downloadHttpProtocol(
     } else if (isTemporalError(err)) {
       logger.info({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
-        throw new Error('registry-failure');
+        throw new Error(errorTypes.REGISTRY_FAILURE);
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next

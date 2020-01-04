@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
+import * as errorTypes from '../../constants/error-messages';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -56,7 +57,7 @@ export async function getUpdatedPackageFiles(
           { existingContent, config: upgrade },
           'Error updating file'
         );
-        throw new Error('update-failure');
+        throw new Error(errorTypes.FILE_UPDATE_FAILED);
       }
       if (newContent !== existingContent) {
         if (config.parentBranch) {

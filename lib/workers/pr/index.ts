@@ -4,6 +4,7 @@ import { getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
 import { platform, BranchStatus, Pr } from '../../platform';
 import { BranchConfig } from '../common';
+import * as errorTypes from '../../constants/error-messages';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -378,10 +379,10 @@ export async function ensurePr(
   } catch (err) {
     // istanbul ignore if
     if (
-      err.message === 'repository-changed' ||
-      err.message === 'rate-limit-exceeded' ||
-      err.message === 'platform-failure' ||
-      err.message === 'integration-unauthorized'
+      err.message === errorTypes.REPOSITORY_CHANGED ||
+      err.message === errorTypes.RATE_LIMIT_EXCEEDED ||
+      err.message === errorTypes.PLATFORM_FAILURE ||
+      err.message === errorTypes.INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('Passing error up');
       throw err;

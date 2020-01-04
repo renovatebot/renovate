@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
+import * as errorTypes from '../../constants/error-messages';
 
 /** TODO: Proper return type */
 export async function prAlreadyExisted(
@@ -20,7 +21,7 @@ export async function prAlreadyExisted(
     // istanbul ignore if
     if (prDetails.state === 'open') {
       logger.debug('PR reopened');
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
     return pr;
   }

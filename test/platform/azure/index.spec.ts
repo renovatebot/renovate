@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import * as _hostRules from '../../../lib/util/host-rules';
 import { RepoParams } from '../../../lib/platform/common';
+import * as errorTypes from '../../../lib/constants/error-messages';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -187,7 +188,7 @@ describe('platform/azure', () => {
       azureHelper.getFile.mockResolvedValueOnce('{ "enabled": false }');
       await expect(
         initRepo({ repository: 'some-repo', optimizeForDisabled: true })
-      ).rejects.toThrow('disabled');
+      ).rejects.toThrow(errorTypes.REPOSITORY_DISABLED);
     });
   });
 

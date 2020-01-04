@@ -17,6 +17,7 @@ import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
 import { BranchConfig } from '../common';
+import * as errorTypes from '../../constants/error-messages';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -151,7 +152,7 @@ export async function processBranch(
           logger.info(
             'PR has been closed or merged since this run started - aborting'
           );
-          throw new Error('repository-changed');
+          throw new Error(errorTypes.REPOSITORY_CHANGED);
         }
         if (
           branchPr.isModified ||
@@ -316,7 +317,7 @@ export async function processBranch(
           );
         } else {
           logger.info('PR is less than a day old - raise error instead of PR');
-          throw new Error('lockfile-error');
+          throw new Error(errorTypes.LOCKFILE_ERROR);
         }
       } else {
         logger.debug('PR has no releaseTimestamp');
@@ -368,13 +369,13 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
-    if (err.message === 'rate-limit-exceeded') {
+    if (err.message === errorTypes.RATE_LIMIT_EXCEEDED) {
       logger.debug('Passing rate-limit-exceeded error up');
       throw err;
     }
-    if (err.message === 'repository-changed') {
+    if (err.message === errorTypes.REPOSITORY_CHANGED) {
       logger.debug('Passing repository-changed error up');
       throw err;
     }
@@ -383,7 +384,7 @@ export async function processBranch(
       err.message.startsWith('remote: Invalid username or password')
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error('bad-credentials');
+      throw new Error(errorTypes.BAD_CREDENTIALS);
     }
     if (
       err.message &&
@@ -392,22 +393,22 @@ export async function processBranch(
       )
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error('bad-credentials');
+      throw new Error(errorTypes.BAD_CREDENTIALS);
     }
-    if (err.message === 'bad-credentials') {
+    if (err.message === errorTypes.BAD_CREDENTIALS) {
       logger.debug('Passing bad-credentials error up');
       throw err;
     }
-    if (err.message === 'integration-unauthorized') {
+    if (err.message === errorTypes.INTEGRATION_UNAUTHORIZED) {
       logger.debug('Passing integration-unauthorized error up');
       throw err;
     }
-    if (err.message === 'lockfile-error') {
+    if (err.message === errorTypes.LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
     }
     if (err.message && err.message.includes('space left on device')) {
-      throw new Error('disk-space');
+      throw new Error(errorTypes.INSUFFICIENT_DISK_SPACE);
     }
     if (err.message.startsWith('disk-space')) {
       logger.debug('Passing disk-space error up');
@@ -426,7 +427,7 @@ export async function processBranch(
       err.messagee &&
       err.message.includes('fatal: Authentication failed')
     ) {
-      throw new Error('authentication-failure');
+      throw new Error(errorTypes.AUTHENTICATION_FAILURE);
     } else if (
       err.message !== 'registry-failure' &&
       err.message !== 'disable-gitfs' &&

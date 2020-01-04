@@ -10,6 +10,7 @@ import * as _prWorker from '../../../lib/workers/pr';
 import * as _getUpdated from '../../../lib/workers/branch/get-updated';
 import { defaultConfig, platform, mocked } from '../../util';
 import { BranchConfig } from '../../../lib/workers/common';
+import * as errorTypes from '../../../lib/constants/error-messages';
 
 jest.mock('../../../lib/workers/branch/get-updated');
 jest.mock('../../../lib/workers/branch/schedule');
@@ -151,7 +152,7 @@ describe('workers/branch', () => {
         isModified: true,
       } as never);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
-        /repository-changed/
+        errorTypes.REPOSITORY_CHANGED
       );
     });
     it('does not skip branch if edited PR found with rebaseLabel', async () => {
@@ -357,7 +358,7 @@ describe('workers/branch', () => {
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
-        Error('lockfile-error')
+        Error(errorTypes.LOCKFILE_ERROR)
       );
     });
     it('ensures PR and adds lock file error comment recreate closed', async () => {

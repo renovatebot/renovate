@@ -19,6 +19,7 @@ import { configFileNames } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { getGraphqlNodes } from './gh-graphql-wrapper';
+import * as errorTypes from '../../constants/error-messages';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -180,10 +181,10 @@ async function getBranchCommit(branchName: string): Promise<string> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error getting branch commit');
     if (err.statusCode === 404) {
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
     if (err.statusCode === 409) {
-      throw new Error('empty');
+      throw new Error(errorTypes.REPOSITORY_EMPTY);
     }
     throw err;
   }
@@ -251,7 +252,7 @@ export async function initRepo({
           throw new Error();
         }
       } catch (err) {
-        throw new Error('fork');
+        throw new Error(errorTypes.REPOSITORY_FORKED);
       }
     }
     if (res.body.full_name && res.body.full_name !== repository) {
@@ -259,13 +260,13 @@ export async function initRepo({
         { repository, this_repository: res.body.full_name },
         'Repository has been renamed'
       );
-      throw new Error('renamed');
+      throw new Error(errorTypes.REPOSITORY_RENAMED);
     }
     if (res.body.archived) {
       logger.info(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error('archived');
+      throw new Error(errorTypes.REPOSITORY_ARCHIVED);
     }
     if (optimizeForDisabled) {
       let renovateConfig;
@@ -282,7 +283,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(errorTypes.REPOSITORY_DISABLED);
       }
     }
     const owner = res.body.owner.login;
@@ -305,26 +306,29 @@ export async function initRepo({
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Caught initRepo error');
-    if (err.message === 'archived' || err.message === 'renamed') {
+    if (
+      err.message === errorTypes.REPOSITORY_ARCHIVED ||
+      err.message === errorTypes.REPOSITORY_RENAMED
+    ) {
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new Error('forbidden');
+      throw new Error(errorTypes.REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(errorTypes.REPOSITORY_NOT_FOUND);
     }
     if (err.message.startsWith('Repository access blocked')) {
-      throw new Error('blocked');
+      throw new Error(errorTypes.REPOSITORY_BLOCKED);
     }
     if (err.message === 'fork') {
       throw err;
     }
-    if (err.message === 'disabled') {
+    if (err.message === errorTypes.REPOSITORY_DISABLED) {
       throw err;
     }
     if (err.message === 'Response code 451 (Unavailable for Legal Reasons)') {
-      throw new Error('forbidden');
+      throw new Error(errorTypes.REPOSITORY_ACCESS_FORBIDDEN);
     }
     logger.info({ err }, 'Unknown GitHub initRepo error');
     throw err;
@@ -357,7 +361,7 @@ export async function initRepo({
       })).body.full_name;
     } catch (err) /* istanbul ignore next */ {
       logger.info({ err }, 'Error forking repository');
-      throw new Error('cannot-fork');
+      throw new Error(errorTypes.REPOSITORY_CANNOT_FORK);
     }
     if (existingRepos.includes(config.repository!)) {
       logger.info(
@@ -383,14 +387,14 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        if (err.message === 'platform-failure') {
+        if (err.message === errorTypes.PLATFORM_FAILURE) {
           throw err;
         }
         if (
           err.statusCode === 422 &&
           err.message.startsWith('Object does not exist')
         ) {
-          throw new Error('repository-changed');
+          throw new Error(errorTypes.REPOSITORY_CHANGED);
         }
       }
     } else {
@@ -1036,7 +1040,7 @@ export async function getBranchStatus(
       logger.info(
         'Received 404 when checking branch status, assuming that branch has been deleted'
       );
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
     logger.info('Unknown error when checking branch status');
     throw err;
@@ -1128,7 +1132,7 @@ export async function getBranchStatusCheck(
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.info('Commit not found when checking statuses');
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
     throw err;
   }
@@ -1169,7 +1173,7 @@ export async function setBranchStatus(
     await getStatusCheck(branchName, false);
   } catch (err) /* istanbul ignore next */ {
     logger.info({ err }, 'Caught error setting branch status - aborting');
-    throw new Error('repository-changed');
+    throw new Error(errorTypes.REPOSITORY_CHANGED);
   }
 }
 
@@ -1477,7 +1481,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 respose when retrieving comments');
-      throw new Error('platform-failure');
+      throw new Error(errorTypes.PLATFORM_FAILURE);
     }
     throw err;
   }

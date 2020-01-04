@@ -5,6 +5,7 @@ import { rebaseOnboardingBranch } from './rebase';
 import { isOnboarded, onboardingPrExists } from './check';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
+import * as errorTypes from '../../../../constants/error-messages';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig
@@ -17,7 +18,7 @@ export async function checkOnboardingBranch(
     return { ...config, repoIsOnboarded };
   }
   if (config.isFork && !config.includeForks) {
-    throw new Error('fork');
+    throw new Error(errorTypes.REPOSITORY_FORKED);
   }
   logger.info('Repo is not onboarded');
   if (await onboardingPrExists(config)) {
@@ -26,7 +27,7 @@ export async function checkOnboardingBranch(
   } else {
     logger.debug('Onboarding PR does not exist');
     if (Object.entries(await extractAllDependencies(config)).length === 0) {
-      throw new Error('no-package-files');
+      throw new Error(errorTypes.NO_PACKAGE_FILES);
     }
     logger.info('Need to create onboarding PR');
     await createOnboardingBranch(config);

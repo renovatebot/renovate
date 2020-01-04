@@ -7,6 +7,7 @@ import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { GotApi, GotResponse } from '../common';
 import { logger } from '../../logger';
+import * as errorTypes from '../../constants/error-messages';
 
 const hostType = 'github';
 export const getHostType = (): string => hostType;
@@ -42,22 +43,22 @@ export function dispatchError(
       err.code === 'EAI_AGAIN')
   ) {
     logger.info({ err }, 'GitHub failure: RequestError');
-    throw new Error('platform-failure');
+    throw new Error(errorTypes.PLATFORM_FAILURE);
   }
   if (err.name === 'ParseError') {
     logger.info({ err }, 'GitHub failure: ParseError');
-    throw new Error('platform-failure');
+    throw new Error(errorTypes.PLATFORM_FAILURE);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.info({ err }, 'GitHub failure: 5xx');
-    throw new Error('platform-failure');
+    throw new Error(errorTypes.PLATFORM_FAILURE);
   }
   if (
     err.statusCode === 403 &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.info({ err }, 'GitHub failure: abuse detection');
-    throw new Error('platform-failure');
+    throw new Error(errorTypes.PLATFORM_FAILURE);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
     logger.debug({ path }, 'Endpoint needs paid GitHub plan');
@@ -65,7 +66,7 @@ export function dispatchError(
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.info({ err }, 'GitHub failure: rate limit');
-    throw new Error('rate-limit-exceeded');
+    throw new Error(errorTypes.RATE_LIMIT_EXCEEDED);
   }
   if (
     err.statusCode === 403 &&
@@ -75,7 +76,7 @@ export function dispatchError(
       { err },
       'GitHub failure: Resource not accessible by integration'
     );
-    throw new Error('integration-unauthorized');
+    throw new Error(errorTypes.INTEGRATION_UNAUTHORIZED);
   }
   if (err.statusCode === 401 && message.includes('Bad credentials')) {
     const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
@@ -87,9 +88,9 @@ export function dispatchError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new Error('platform-failure');
+      throw new Error(errorTypes.PLATFORM_FAILURE);
     }
-    throw new Error('bad-credentials');
+    throw new Error(errorTypes.BAD_CREDENTIALS);
   }
   if (err.statusCode === 422) {
     if (
@@ -101,9 +102,9 @@ export function dispatchError(
       err.body.errors &&
       err.body.errors.find((e: any) => e.code === 'invalid')
     ) {
-      throw new Error('repository-changed');
+      throw new Error(errorTypes.REPOSITORY_CHANGED);
     }
-    throw new Error('platform-failure');
+    throw new Error(errorTypes.PLATFORM_FAILURE);
   }
   throw err;
 }
