@@ -42,6 +42,13 @@ interface LocalConfig extends StorageConfig {
   branchPrefix: string;
 }
 
+export type CommitFilesConfig = {
+  branchName: string;
+  files: File[];
+  message: string;
+  parentBranch?: string;
+};
+
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
@@ -462,12 +469,12 @@ export class Storage {
     }
   }
 
-  async commitFilesToBranch(
-    branchName: string,
-    files: File[],
-    message: string,
-    parentBranch = this._config.baseBranch
-  ): Promise<void> {
+  async commitFilesToBranch({
+    branchName,
+    files,
+    message,
+    parentBranch = this._config.baseBranch,
+  }: CommitFilesConfig): Promise<void> {
     logger.debug(`Committing files to branch ${branchName}`);
     try {
       await this._git!.reset('hard');

@@ -2,6 +2,7 @@ import minimatch from 'minimatch';
 import { logger } from '../logger';
 import * as versioning from '../versioning';
 import { mergeChildConfig, PackageRule, UpdateType } from '../config';
+import { regEx } from './regex';
 
 // TODO: move to `../config`
 export interface Config extends Record<string, any> {
@@ -140,7 +141,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
       for (const packagePattern of packagePatterns) {
-        const packageRegex = new RegExp(
+        const packageRegex = regEx(
           packagePattern === '^*$' || packagePattern === '*'
             ? '.*'
             : packagePattern
@@ -166,7 +167,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   if (excludePackagePatterns.length) {
     let isMatch = false;
     for (const pattern of excludePackagePatterns) {
-      const packageRegex = new RegExp(
+      const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
       );
       if (depName && depName.match(packageRegex)) {

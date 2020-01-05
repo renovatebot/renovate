@@ -50,7 +50,7 @@ const getVarInfo = (
 ): { val: string; fileReplacePosition: number } => {
   const { fileOffset } = ctx;
   const rightPart = str.replace(/^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/, '');
-  const fileReplacePosition = str.search(rightPart) + fileOffset;
+  const fileReplacePosition = str.indexOf(rightPart) + fileOffset;
   const val = rightPart.replace(/"\s*$/, '');
   return { val, fileReplacePosition };
 };
@@ -118,11 +118,13 @@ function parseDepExpr(
     // help us to avoid errors in updating phase.
     fileReplacePosition = 0;
     fileReplacePosition +=
-      expr.slice(fileReplacePosition).search(rawGroupId) + rawGroupId.length;
+      expr.slice(fileReplacePosition).indexOf(rawGroupId) + rawGroupId.length;
     fileReplacePosition +=
-      expr.slice(fileReplacePosition).search(rawArtifactId) +
+      expr.slice(fileReplacePosition).indexOf(rawArtifactId) +
       rawArtifactId.length;
-    fileReplacePosition += expr.slice(fileReplacePosition).search(currentValue);
+    fileReplacePosition += expr
+      .slice(fileReplacePosition)
+      .indexOf(currentValue);
     fileReplacePosition += fileOffset;
   } else {
     fileReplacePosition = variables[rawVersion].fileReplacePosition;

@@ -93,6 +93,13 @@ export async function parseConfigs(
 
   // Print config
   logger.trace({ config }, 'Global config');
+
+  // Massage endpoint to have a trailing slash
+  if (config.endpoint) {
+    logger.debug('Adding trailing slash to endpoint');
+    config.endpoint = config.endpoint.replace(/\/?$/, '/');
+  }
+
   // Remove log file entries
   delete config.logFile;
   delete config.logFileLevel;
