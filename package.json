@@ -213,6 +213,7 @@
     "husky": "3.1.0",
     "jest": "24.9.0",
     "jest-junit": "10.0.0",
+    "jest-mock-extended": "^1.0.7",
     "jest-silent-reporter": "0.1.2",
     "mockdate": "2.0.5",
     "nock": "11.7.1",

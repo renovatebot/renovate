@@ -1,11 +1,12 @@
 import handleError from '../../../lib/workers/repository/error';
+import { RenovateConfig, getConfig } from '../../util';
 
 jest.mock('../../../lib/workers/repository/error-config');
 
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../config/config/_fixtures');
+  config = getConfig;
 });
 
 describe('workers/repository/error', () => {

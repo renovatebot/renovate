@@ -1,14 +1,15 @@
-const fs = require('fs');
-const masterIssue = require('../../../lib/workers/repository/master-issue');
+import fs from 'fs';
+import { mock } from 'jest-mock-extended';
+import * as masterIssue from '../../../lib/workers/repository/master-issue';
 
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import { RenovateConfig, getConfig, platform } from '../../util';
+import { BranchConfig } from '../../../lib/workers/common';
+import { Pr } from '../../../lib/platform';
 
-/** @type any */
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../config/config/_fixtures') };
+  config = getConfig;
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];
@@ -51,9 +52,11 @@ describe('workers/repository/master-issue', () => {
     it('do nothing if it has no masterissueapproval branches', async () => {
       const branches = [
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr1',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           masterIssueApproval: false,
         },
@@ -69,7 +72,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('closes master issue when there is 0 PR opened and masterIssueAutoclose is true', async () => {
-      const branches = [];
+      const branches = [mock<BranchConfig>()];
       config.masterIssue = true;
       config.masterIssueAutoclose = true;
       await masterIssue.ensureMasterIssue(config, branches);
@@ -87,11 +90,9 @@ describe('workers/repository/master-issue', () => {
 
     it('closes master issue when all branches are automerged and masterIssueAutoclose is true', async () => {
       const branches = [
+        { ...mock<BranchConfig>(), prTitle: 'pr1', res: 'automerged' },
         {
-          prTitle: 'pr1',
-          res: 'automerged',
-        },
-        {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           res: 'automerged',
           masterIssueApproval: false,
@@ -113,7 +114,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('open or update master issue when all branches are closed and masterIssueAutoclose is false', async () => {
-      const branches = [];
+      const branches = [mock<BranchConfig>()];
       config.masterIssue = true;
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
@@ -134,48 +135,56 @@ describe('workers/repository/master-issue', () => {
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
       const branches = [
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ depName: 'dep1' }],
           res: 'needs-approval',
           branchName: 'branchName1',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ depName: 'dep2' }],
           res: 'needs-approval',
           branchName: 'branchName2',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ depName: 'dep3' }],
           res: 'not-scheduled',
           branchName: 'branchName3',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ depName: 'dep4' }],
           res: 'not-scheduled',
           branchName: 'branchName4',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ depName: 'dep5' }],
           res: 'pr-hourly-limit-reached',
           branchName: 'branchName5',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ depName: 'dep6' }],
           res: 'pr-hourly-limit-reached',
           branchName: 'branchName6',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr7',
           upgrades: [{ depName: 'dep7' }],
           res: 'error',
           branchName: 'branchName7',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr8',
           upgrades: [{ depName: 'dep8' }],
           res: 'error',
@@ -205,12 +214,14 @@ describe('workers/repository/master-issue', () => {
     it('checks an issue with 2 PR pr-edited', async () => {
       const branches = [
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ depName: 'dep1' }],
           res: 'pr-edited',
           branchName: 'branchName1',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
           res: 'pr-edited',
@@ -244,18 +255,21 @@ describe('workers/repository/master-issue', () => {
     it('checks an issue with 3 PR in progress and rebase all option', async () => {
       const branches = [
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ depName: 'dep1' }],
           res: 'rebase',
           branchName: 'branchName1',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
           res: 'rebase',
           branchName: 'branchName2',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ depName: 'dep3' }],
           res: 'rebase',
@@ -263,9 +277,10 @@ describe('workers/repository/master-issue', () => {
         },
       ];
       config.masterIssue = true;
-      platform.getBranchPr.mockReturnValueOnce({ number: 1 });
-      platform.getBranchPr.mockReturnValueOnce(undefined);
-      platform.getBranchPr.mockReturnValueOnce({ number: 3 });
+      platform.getBranchPr
+        .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ ...mock<Pr>(), number: 3 });
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
@@ -291,12 +306,14 @@ describe('workers/repository/master-issue', () => {
     it('checks an issue with 2 PR closed / ignored', async () => {
       const branches = [
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ depName: 'dep1' }],
           res: 'already-existed',
           branchName: 'branchName1',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
           res: 'already-existed',
@@ -304,9 +321,10 @@ describe('workers/repository/master-issue', () => {
         },
       ];
       config.masterIssue = true;
-      platform.getBranchPr.mockReturnValueOnce({ number: 1 });
-      platform.getBranchPr.mockReturnValueOnce(undefined);
-      platform.getBranchPr.mockReturnValueOnce({ number: 3 });
+      platform.getBranchPr
+        .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ ...mock<Pr>(), number: 3 });
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
@@ -335,24 +353,28 @@ describe('workers/repository/master-issue', () => {
     it('checks an issue with 3 PR in approval', async () => {
       const branches = [
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ depName: 'dep1' }],
           res: 'needs-pr-approval',
           branchName: 'branchName1',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
           res: 'needs-pr-approval',
           branchName: 'branchName2',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ depName: 'dep3' }],
           res: 'needs-pr-approval',
           branchName: 'branchName3',
         },
         {
+          ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ depName: 'dep4' }],
           res: 'pending',

@@ -1,8 +1,6 @@
-module.exports = {
-  checkIfConfigured,
-};
+import { RenovateConfig } from '../../config';
 
-function checkIfConfigured(config) {
+export function checkIfConfigured(config: RenovateConfig): void {
   if (config.enabled === false) {
     throw new Error('disabled');
   }

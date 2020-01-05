@@ -1,8 +1,16 @@
-module.exports = {
-  processResult,
-};
+import { RenovateConfig } from '../../config';
 
-function processResult(config, res) {
+type ProcessStatus = 'disabled' | 'enabled' | 'onboarding' | 'unknown';
+
+export interface ProcessResult {
+  res: string;
+  status: ProcessStatus;
+}
+
+export function processResult(
+  config: RenovateConfig,
+  res: string
+): ProcessResult {
   const disabledStatuses = [
     'archived',
     'blocked',
@@ -16,7 +24,7 @@ function processResult(config, res) {
     'uninitiated',
     'empty',
   ];
-  let status;
+  let status: ProcessStatus;
   // istanbul ignore next
   if (disabledStatuses.includes(res)) {
     status = 'disabled';

@@ -1,11 +1,10 @@
-const {
-  checkIfConfigured,
-} = require('../../../lib/workers/repository/configured');
+import { checkIfConfigured } from '../../../lib/workers/repository/configured';
+import { getConfig, RenovateConfig } from '../../util';
 
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../config/config/_fixtures') };
+  config = getConfig;
 });
 
 describe('workers/repository/configured', () => {
