@@ -14,6 +14,7 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -667,13 +668,13 @@ export function ensureCommentRemoval(
 }
 
 // Creates PR and returns PR number
-export async function createPr(
-  branchName: string,
-  title: string,
-  description: string,
-  _labels?: string[],
-  useDefaultBranch = true
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: description,
+  labels: _labels,
+  useDefaultBranch = true,
+}: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
   const base = useDefaultBranch
