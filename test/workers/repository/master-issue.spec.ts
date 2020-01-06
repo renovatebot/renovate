@@ -1,9 +1,9 @@
 import fs from 'fs';
 import { mock } from 'jest-mock-extended';
-import * as masterIssue from '../../../lib/workers/repository/master-issue';
 
+import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
-import { BranchConfig } from '../../../lib/workers/common';
+import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
 
 let config: RenovateConfig;
@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 async function dryRun(
-  branches,
+  branches: BranchConfig[],
   // eslint-disable-next-line no-shadow
   platform,
   ensureIssueClosingCalls = 0,
@@ -38,7 +38,7 @@ async function dryRun(
 describe('workers/repository/master-issue', () => {
   describe('ensureMasterIssue()', () => {
     it('do nothing if masterissue is disable', async () => {
-      const branches = [];
+      const branches: BranchConfig[] = [];
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
@@ -72,7 +72,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('closes master issue when there is 0 PR opened and masterIssueAutoclose is true', async () => {
-      const branches = [mock<BranchConfig>()];
+      const branches: BranchConfig[] = [];
       config.masterIssue = true;
       config.masterIssueAutoclose = true;
       await masterIssue.ensureMasterIssue(config, branches);
@@ -114,7 +114,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('open or update master issue when all branches are closed and masterIssueAutoclose is false', async () => {
-      const branches = [mock<BranchConfig>()];
+      const branches: BranchConfig[] = [];
       config.masterIssue = true;
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
@@ -137,56 +137,56 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ depName: 'dep1' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
           res: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          upgrades: [{ depName: 'dep2' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
           res: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
-          upgrades: [{ depName: 'dep3' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           res: 'not-scheduled',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
-          upgrades: [{ depName: 'dep4' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
           res: 'not-scheduled',
           branchName: 'branchName4',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
-          upgrades: [{ depName: 'dep5' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
           res: 'pr-hourly-limit-reached',
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
-          upgrades: [{ depName: 'dep6' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
           res: 'pr-hourly-limit-reached',
           branchName: 'branchName6',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr7',
-          upgrades: [{ depName: 'dep7' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
           res: 'error',
           branchName: 'branchName7',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr8',
-          upgrades: [{ depName: 'dep8' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
           res: 'error',
           branchName: 'branchName8',
         },
@@ -216,21 +216,25 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ depName: 'dep1' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
           res: 'pr-edited',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep2' },
+            { ...mock<PrUpgrade>(), depName: 'dep3' },
+          ],
           res: 'pr-edited',
           branchName: 'branchName2',
         },
       ];
       config.masterIssue = true;
-      platform.getBranchPr.mockReturnValueOnce({ number: 1 });
-      platform.getBranchPr.mockReturnValueOnce(undefined);
+      platform.getBranchPr
+        .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
+        .mockResolvedValueOnce(undefined);
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
@@ -257,21 +261,24 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ depName: 'dep1' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
           res: 'rebase',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep2' },
+            { ...mock<PrUpgrade>(), depName: 'dep3' },
+          ],
           res: 'rebase',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
-          upgrades: [{ depName: 'dep3' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           res: 'rebase',
           branchName: 'branchName3',
         },
@@ -308,14 +315,17 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ depName: 'dep1' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
           res: 'already-existed',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep2' },
+            { ...mock<PrUpgrade>(), depName: 'dep3' },
+          ],
           res: 'already-existed',
           branchName: 'branchName2',
         },
@@ -355,28 +365,31 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ depName: 'dep1' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
           res: 'needs-pr-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep2' },
+            { ...mock<PrUpgrade>(), depName: 'dep3' },
+          ],
           res: 'needs-pr-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
-          upgrades: [{ depName: 'dep3' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           res: 'needs-pr-approval',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
-          upgrades: [{ depName: 'dep4' }],
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
           res: 'pending',
           branchName: 'branchName4',
         },

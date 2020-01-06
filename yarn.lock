@@ -5008,7 +5008,7 @@ jest-message-util@^24.9.0:
     slash "^2.0.0"
     stack-utils "^1.0.1"
 
-jest-mock-extended@^1.0.7:
+jest-mock-extended@1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/jest-mock-extended/-/jest-mock-extended-1.0.7.tgz#25da632f569037330260b9c0171b21f42285a86e"
   integrity sha512-2b/6quDLAOOz+WJy9OgV236Fh8Hb4VEta81huQsn+/tslgljeUIOYCWViWDENRHPKiIvuyYlYVG7+dT+SrWR/w==
