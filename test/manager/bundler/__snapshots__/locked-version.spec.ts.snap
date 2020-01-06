@@ -1,0 +1,2230 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`/lib/manager/bundler/locked-version Parse Mastodon Gem Lock File 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "health_check",
+      "lockedVersion": "4.0.0.pre",
+    },
+    Object {
+      "depName": "posix-spawn",
+      "lockedVersion": "0.3.13",
+    },
+    Object {
+      "depName": "json-ld",
+      "lockedVersion": "3.0.2",
+    },
+    Object {
+      "depName": "http_parser.rb",
+      "lockedVersion": "0.6.1",
+    },
+    Object {
+      "depName": "nilsimsa",
+      "lockedVersion": "1.1.2",
+    },
+    Object {
+      "depName": "actioncable",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "actionmailer",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "actionpack",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "actionview",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "active_model_serializers",
+      "lockedVersion": "0.10.10",
+    },
+    Object {
+      "depName": "active_record_query_trace",
+      "lockedVersion": "1.7",
+    },
+    Object {
+      "depName": "activejob",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "activemodel",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "activerecord",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "activestorage",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "activesupport",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "addressable",
+      "lockedVersion": "2.7.0",
+    },
+    Object {
+      "depName": "airbrussh",
+      "lockedVersion": "1.3.4",
+    },
+    Object {
+      "depName": "annotate",
+      "lockedVersion": "3.0.3",
+    },
+    Object {
+      "depName": "arel",
+      "lockedVersion": "9.0.0",
+    },
+    Object {
+      "depName": "ast",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "attr_encrypted",
+      "lockedVersion": "3.1.0",
+    },
+    Object {
+      "depName": "av",
+      "lockedVersion": "0.9.0",
+    },
+    Object {
+      "depName": "aws-eventstream",
+      "lockedVersion": "1.0.3",
+    },
+    Object {
+      "depName": "aws-partitions",
+      "lockedVersion": "1.251.0",
+    },
+    Object {
+      "depName": "aws-sdk-core",
+      "lockedVersion": "3.84.0",
+    },
+    Object {
+      "depName": "aws-sdk-kms",
+      "lockedVersion": "1.26.0",
+    },
+    Object {
+      "depName": "aws-sdk-s3",
+      "lockedVersion": "1.59.0",
+    },
+    Object {
+      "depName": "aws-sigv4",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "bcrypt",
+      "lockedVersion": "3.1.12",
+    },
+    Object {
+      "depName": "benchmark-ips",
+      "lockedVersion": "2.7.2",
+    },
+    Object {
+      "depName": "better_errors",
+      "lockedVersion": "2.5.1",
+    },
+    Object {
+      "depName": "binding_of_caller",
+      "lockedVersion": "0.8.0",
+    },
+    Object {
+      "depName": "blurhash",
+      "lockedVersion": "0.1.3",
+    },
+    Object {
+      "depName": "bootsnap",
+      "lockedVersion": "1.4.5",
+    },
+    Object {
+      "depName": "brakeman",
+      "lockedVersion": "4.7.2",
+    },
+    Object {
+      "depName": "browser",
+      "lockedVersion": "2.7.1",
+    },
+    Object {
+      "depName": "builder",
+      "lockedVersion": "3.2.4",
+    },
+    Object {
+      "depName": "bullet",
+      "lockedVersion": "6.0.2",
+    },
+    Object {
+      "depName": "bundler-audit",
+      "lockedVersion": "0.6.1",
+    },
+    Object {
+      "depName": "byebug",
+      "lockedVersion": "11.0.0",
+    },
+    Object {
+      "depName": "capistrano",
+      "lockedVersion": "3.11.2",
+    },
+    Object {
+      "depName": "capistrano-bundler",
+      "lockedVersion": "1.3.0",
+    },
+    Object {
+      "depName": "capistrano-rails",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "capistrano-rbenv",
+      "lockedVersion": "2.1.4",
+    },
+    Object {
+      "depName": "capistrano-yarn",
+      "lockedVersion": "2.0.2",
+    },
+    Object {
+      "depName": "capybara",
+      "lockedVersion": "3.29.0",
+    },
+    Object {
+      "depName": "case_transform",
+      "lockedVersion": "0.2",
+    },
+    Object {
+      "depName": "charlock_holmes",
+      "lockedVersion": "0.7.7",
+    },
+    Object {
+      "depName": "chewy",
+      "lockedVersion": "5.1.0",
+    },
+    Object {
+      "depName": "chunky_png",
+      "lockedVersion": "1.3.10",
+    },
+    Object {
+      "depName": "cld3",
+      "lockedVersion": "3.2.6",
+    },
+    Object {
+      "depName": "climate_control",
+      "lockedVersion": "0.2.0",
+    },
+    Object {
+      "depName": "cocaine",
+      "lockedVersion": "0.5.8",
+    },
+    Object {
+      "depName": "coderay",
+      "lockedVersion": "1.1.2",
+    },
+    Object {
+      "depName": "concurrent-ruby",
+      "lockedVersion": "1.1.5",
+    },
+    Object {
+      "depName": "connection_pool",
+      "lockedVersion": "2.2.2",
+    },
+    Object {
+      "depName": "crack",
+      "lockedVersion": "0.4.3",
+    },
+    Object {
+      "depName": "crass",
+      "lockedVersion": "1.0.5",
+    },
+    Object {
+      "depName": "css_parser",
+      "lockedVersion": "1.7.1",
+    },
+    Object {
+      "depName": "debug_inspector",
+      "lockedVersion": "0.0.3",
+    },
+    Object {
+      "depName": "derailed_benchmarks",
+      "lockedVersion": "1.4.3",
+    },
+    Object {
+      "depName": "devise",
+      "lockedVersion": "4.7.1",
+    },
+    Object {
+      "depName": "devise-two-factor",
+      "lockedVersion": "3.1.0",
+    },
+    Object {
+      "depName": "devise_pam_authenticatable2",
+      "lockedVersion": "9.2.0",
+    },
+    Object {
+      "depName": "diff-lcs",
+      "lockedVersion": "1.3",
+    },
+    Object {
+      "depName": "discard",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "docile",
+      "lockedVersion": "1.3.2",
+    },
+    Object {
+      "depName": "domain_name",
+      "lockedVersion": "0.5.20180417",
+    },
+    Object {
+      "depName": "doorkeeper",
+      "lockedVersion": "5.2.3",
+    },
+    Object {
+      "depName": "dotenv",
+      "lockedVersion": "2.7.5",
+    },
+    Object {
+      "depName": "dotenv-rails",
+      "lockedVersion": "2.7.5",
+    },
+    Object {
+      "depName": "elasticsearch",
+      "lockedVersion": "7.3.0",
+    },
+    Object {
+      "depName": "elasticsearch-api",
+      "lockedVersion": "7.3.0",
+    },
+    Object {
+      "depName": "elasticsearch-dsl",
+      "lockedVersion": "0.1.8",
+    },
+    Object {
+      "depName": "elasticsearch-transport",
+      "lockedVersion": "7.3.0",
+    },
+    Object {
+      "depName": "encryptor",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "equatable",
+      "lockedVersion": "0.6.1",
+    },
+    Object {
+      "depName": "erubi",
+      "lockedVersion": "1.9.0",
+    },
+    Object {
+      "depName": "et-orbi",
+      "lockedVersion": "1.1.6",
+    },
+    Object {
+      "depName": "excon",
+      "lockedVersion": "0.71.0",
+    },
+    Object {
+      "depName": "fabrication",
+      "lockedVersion": "2.21.0",
+    },
+    Object {
+      "depName": "faker",
+      "lockedVersion": "2.10.0",
+    },
+    Object {
+      "depName": "faraday",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "fast_blank",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "fastimage",
+      "lockedVersion": "2.1.7",
+    },
+    Object {
+      "depName": "ffi",
+      "lockedVersion": "1.10.0",
+    },
+    Object {
+      "depName": "fog-core",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "fog-json",
+      "lockedVersion": "1.2.0",
+    },
+    Object {
+      "depName": "fog-openstack",
+      "lockedVersion": "0.3.7",
+    },
+    Object {
+      "depName": "formatador",
+      "lockedVersion": "0.2.5",
+    },
+    Object {
+      "depName": "fugit",
+      "lockedVersion": "1.1.6",
+    },
+    Object {
+      "depName": "fuubar",
+      "lockedVersion": "2.5.0",
+    },
+    Object {
+      "depName": "get_process_mem",
+      "lockedVersion": "0.2.5",
+    },
+    Object {
+      "depName": "globalid",
+      "lockedVersion": "0.4.2",
+    },
+    Object {
+      "depName": "goldfinger",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "hamlit",
+      "lockedVersion": "2.11.0",
+    },
+    Object {
+      "depName": "hamlit-rails",
+      "lockedVersion": "0.2.3",
+    },
+    Object {
+      "depName": "hamster",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "hashdiff",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "hashie",
+      "lockedVersion": "3.6.0",
+    },
+    Object {
+      "depName": "heapy",
+      "lockedVersion": "0.1.4",
+    },
+    Object {
+      "depName": "highline",
+      "lockedVersion": "2.0.1",
+    },
+    Object {
+      "depName": "hiredis",
+      "lockedVersion": "0.6.3",
+    },
+    Object {
+      "depName": "hkdf",
+      "lockedVersion": "0.3.0",
+    },
+    Object {
+      "depName": "htmlentities",
+      "lockedVersion": "4.3.4",
+    },
+    Object {
+      "depName": "http",
+      "lockedVersion": "3.3.0",
+    },
+    Object {
+      "depName": "http-cookie",
+      "lockedVersion": "1.0.3",
+    },
+    Object {
+      "depName": "http-form_data",
+      "lockedVersion": "2.1.1",
+    },
+    Object {
+      "depName": "http_accept_language",
+      "lockedVersion": "2.1.1",
+    },
+    Object {
+      "depName": "httplog",
+      "lockedVersion": "1.3.3",
+    },
+    Object {
+      "depName": "i18n",
+      "lockedVersion": "1.7.0",
+    },
+    Object {
+      "depName": "i18n-tasks",
+      "lockedVersion": "0.9.29",
+    },
+    Object {
+      "depName": "idn-ruby",
+      "lockedVersion": "0.1.0",
+    },
+    Object {
+      "depName": "ipaddress",
+      "lockedVersion": "0.8.3",
+    },
+    Object {
+      "depName": "iso-639",
+      "lockedVersion": "0.2.8",
+    },
+    Object {
+      "depName": "jaro_winkler",
+      "lockedVersion": "1.5.4",
+    },
+    Object {
+      "depName": "jmespath",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "json",
+      "lockedVersion": "2.2.0",
+    },
+    Object {
+      "depName": "json-canonicalization",
+      "lockedVersion": "0.1.0",
+    },
+    Object {
+      "depName": "json-ld-preloaded",
+      "lockedVersion": "3.0.6",
+    },
+    Object {
+      "depName": "jsonapi-renderer",
+      "lockedVersion": "0.2.2",
+    },
+    Object {
+      "depName": "jwt",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "kaminari",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "kaminari-actionview",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "kaminari-activerecord",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "kaminari-core",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "launchy",
+      "lockedVersion": "2.4.3",
+    },
+    Object {
+      "depName": "letter_opener",
+      "lockedVersion": "1.7.0",
+    },
+    Object {
+      "depName": "letter_opener_web",
+      "lockedVersion": "1.3.4",
+    },
+    Object {
+      "depName": "link_header",
+      "lockedVersion": "0.0.8",
+    },
+    Object {
+      "depName": "lograge",
+      "lockedVersion": "0.11.2",
+    },
+    Object {
+      "depName": "loofah",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "mail",
+      "lockedVersion": "2.7.1",
+    },
+    Object {
+      "depName": "makara",
+      "lockedVersion": "0.4.1",
+    },
+    Object {
+      "depName": "marcel",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "mario-redis-lock",
+      "lockedVersion": "1.2.1",
+    },
+    Object {
+      "depName": "memory_profiler",
+      "lockedVersion": "0.9.14",
+    },
+    Object {
+      "depName": "method_source",
+      "lockedVersion": "0.9.2",
+    },
+    Object {
+      "depName": "microformats",
+      "lockedVersion": "4.2.0",
+    },
+    Object {
+      "depName": "mime-types",
+      "lockedVersion": "3.3.1",
+    },
+    Object {
+      "depName": "mime-types-data",
+      "lockedVersion": "3.2019.1009",
+    },
+    Object {
+      "depName": "mimemagic",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "mini_mime",
+      "lockedVersion": "1.0.2",
+    },
+    Object {
+      "depName": "mini_portile2",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "minitest",
+      "lockedVersion": "5.13.0",
+    },
+    Object {
+      "depName": "msgpack",
+      "lockedVersion": "1.3.1",
+    },
+    Object {
+      "depName": "multi_json",
+      "lockedVersion": "1.14.1",
+    },
+    Object {
+      "depName": "multipart-post",
+      "lockedVersion": "2.1.1",
+    },
+    Object {
+      "depName": "necromancer",
+      "lockedVersion": "0.5.1",
+    },
+    Object {
+      "depName": "net-ldap",
+      "lockedVersion": "0.16.2",
+    },
+    Object {
+      "depName": "net-scp",
+      "lockedVersion": "2.0.0",
+    },
+    Object {
+      "depName": "net-ssh",
+      "lockedVersion": "5.2.0",
+    },
+    Object {
+      "depName": "nio4r",
+      "lockedVersion": "2.5.2",
+    },
+    Object {
+      "depName": "nokogiri",
+      "lockedVersion": "1.10.7",
+    },
+    Object {
+      "depName": "nokogumbo",
+      "lockedVersion": "2.0.1",
+    },
+    Object {
+      "depName": "nsa",
+      "lockedVersion": "0.2.7",
+    },
+    Object {
+      "depName": "oj",
+      "lockedVersion": "3.10.0",
+    },
+    Object {
+      "depName": "omniauth",
+      "lockedVersion": "1.9.0",
+    },
+    Object {
+      "depName": "omniauth-cas",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "omniauth-saml",
+      "lockedVersion": "1.10.1",
+    },
+    Object {
+      "depName": "orm_adapter",
+      "lockedVersion": "0.5.0",
+    },
+    Object {
+      "depName": "ostatus2",
+      "lockedVersion": "2.0.3",
+    },
+    Object {
+      "depName": "ox",
+      "lockedVersion": "2.11.0",
+    },
+    Object {
+      "depName": "paperclip",
+      "lockedVersion": "6.0.0",
+    },
+    Object {
+      "depName": "paperclip-av-transcoder",
+      "lockedVersion": "0.6.4",
+    },
+    Object {
+      "depName": "parallel",
+      "lockedVersion": "1.19.1",
+    },
+    Object {
+      "depName": "parallel_tests",
+      "lockedVersion": "2.30.0",
+    },
+    Object {
+      "depName": "parser",
+      "lockedVersion": "2.6.5.0",
+    },
+    Object {
+      "depName": "parslet",
+      "lockedVersion": "1.8.2",
+    },
+    Object {
+      "depName": "pastel",
+      "lockedVersion": "0.7.3",
+    },
+    Object {
+      "depName": "pg",
+      "lockedVersion": "1.2.0",
+    },
+    Object {
+      "depName": "pghero",
+      "lockedVersion": "2.4.1",
+    },
+    Object {
+      "depName": "pkg-config",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "premailer",
+      "lockedVersion": "1.11.1",
+    },
+    Object {
+      "depName": "premailer-rails",
+      "lockedVersion": "1.10.3",
+    },
+    Object {
+      "depName": "private_address_check",
+      "lockedVersion": "0.5.0",
+    },
+    Object {
+      "depName": "pry",
+      "lockedVersion": "0.12.2",
+    },
+    Object {
+      "depName": "pry-byebug",
+      "lockedVersion": "3.7.0",
+    },
+    Object {
+      "depName": "pry-rails",
+      "lockedVersion": "0.3.9",
+    },
+    Object {
+      "depName": "public_suffix",
+      "lockedVersion": "4.0.2",
+    },
+    Object {
+      "depName": "puma",
+      "lockedVersion": "4.3.1",
+    },
+    Object {
+      "depName": "pundit",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "raabro",
+      "lockedVersion": "1.1.6",
+    },
+    Object {
+      "depName": "rack",
+      "lockedVersion": "2.0.8",
+    },
+    Object {
+      "depName": "rack-attack",
+      "lockedVersion": "6.2.2",
+    },
+    Object {
+      "depName": "rack-cors",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "rack-protection",
+      "lockedVersion": "2.0.7",
+    },
+    Object {
+      "depName": "rack-proxy",
+      "lockedVersion": "0.6.5",
+    },
+    Object {
+      "depName": "rack-test",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "rails",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "rails-controller-testing",
+      "lockedVersion": "1.0.4",
+    },
+    Object {
+      "depName": "rails-dom-testing",
+      "lockedVersion": "2.0.3",
+    },
+    Object {
+      "depName": "rails-html-sanitizer",
+      "lockedVersion": "1.3.0",
+    },
+    Object {
+      "depName": "rails-i18n",
+      "lockedVersion": "5.1.3",
+    },
+    Object {
+      "depName": "rails-settings-cached",
+      "lockedVersion": "0.6.6",
+    },
+    Object {
+      "depName": "railties",
+      "lockedVersion": "5.2.4.1",
+    },
+    Object {
+      "depName": "rainbow",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "rake",
+      "lockedVersion": "13.0.1",
+    },
+    Object {
+      "depName": "rdf",
+      "lockedVersion": "3.0.13",
+    },
+    Object {
+      "depName": "rdf-normalize",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "redis",
+      "lockedVersion": "4.1.3",
+    },
+    Object {
+      "depName": "redis-actionpack",
+      "lockedVersion": "5.0.2",
+    },
+    Object {
+      "depName": "redis-activesupport",
+      "lockedVersion": "5.0.4",
+    },
+    Object {
+      "depName": "redis-namespace",
+      "lockedVersion": "1.7.0",
+    },
+    Object {
+      "depName": "redis-rack",
+      "lockedVersion": "2.0.4",
+    },
+    Object {
+      "depName": "redis-rails",
+      "lockedVersion": "5.0.2",
+    },
+    Object {
+      "depName": "redis-store",
+      "lockedVersion": "1.5.0",
+    },
+    Object {
+      "depName": "regexp_parser",
+      "lockedVersion": "1.6.0",
+    },
+    Object {
+      "depName": "request_store",
+      "lockedVersion": "1.5.0",
+    },
+    Object {
+      "depName": "responders",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "rotp",
+      "lockedVersion": "2.1.2",
+    },
+    Object {
+      "depName": "rpam2",
+      "lockedVersion": "4.0.2",
+    },
+    Object {
+      "depName": "rqrcode",
+      "lockedVersion": "0.10.1",
+    },
+    Object {
+      "depName": "rspec-core",
+      "lockedVersion": "3.9.0",
+    },
+    Object {
+      "depName": "rspec-expectations",
+      "lockedVersion": "3.9.0",
+    },
+    Object {
+      "depName": "rspec-mocks",
+      "lockedVersion": "3.9.0",
+    },
+    Object {
+      "depName": "rspec-rails",
+      "lockedVersion": "3.9.0",
+    },
+    Object {
+      "depName": "rspec-sidekiq",
+      "lockedVersion": "3.0.3",
+    },
+    Object {
+      "depName": "rspec-support",
+      "lockedVersion": "3.9.0",
+    },
+    Object {
+      "depName": "rubocop",
+      "lockedVersion": "0.78.0",
+    },
+    Object {
+      "depName": "rubocop-rails",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "ruby-progressbar",
+      "lockedVersion": "1.10.1",
+    },
+    Object {
+      "depName": "ruby-saml",
+      "lockedVersion": "1.9.0",
+    },
+    Object {
+      "depName": "ruby-statistics",
+      "lockedVersion": "2.1.1",
+    },
+    Object {
+      "depName": "rufus-scheduler",
+      "lockedVersion": "3.5.2",
+    },
+    Object {
+      "depName": "safe_yaml",
+      "lockedVersion": "1.0.5",
+    },
+    Object {
+      "depName": "sanitize",
+      "lockedVersion": "5.1.0",
+    },
+    Object {
+      "depName": "sidekiq",
+      "lockedVersion": "5.2.7",
+    },
+    Object {
+      "depName": "sidekiq-bulk",
+      "lockedVersion": "0.2.0",
+    },
+    Object {
+      "depName": "sidekiq-scheduler",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "sidekiq-unique-jobs",
+      "lockedVersion": "6.0.18",
+    },
+    Object {
+      "depName": "simple-navigation",
+      "lockedVersion": "4.1.0",
+    },
+    Object {
+      "depName": "simple_form",
+      "lockedVersion": "5.0.1",
+    },
+    Object {
+      "depName": "simplecov",
+      "lockedVersion": "0.17.1",
+    },
+    Object {
+      "depName": "simplecov-html",
+      "lockedVersion": "0.10.2",
+    },
+    Object {
+      "depName": "sprockets",
+      "lockedVersion": "3.7.2",
+    },
+    Object {
+      "depName": "sprockets-rails",
+      "lockedVersion": "3.2.1",
+    },
+    Object {
+      "depName": "sshkit",
+      "lockedVersion": "1.20.0",
+    },
+    Object {
+      "depName": "stackprof",
+      "lockedVersion": "0.2.15",
+    },
+    Object {
+      "depName": "statsd-ruby",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "stoplight",
+      "lockedVersion": "2.2.0",
+    },
+    Object {
+      "depName": "streamio-ffmpeg",
+      "lockedVersion": "3.0.2",
+    },
+    Object {
+      "depName": "strong_migrations",
+      "lockedVersion": "0.5.1",
+    },
+    Object {
+      "depName": "temple",
+      "lockedVersion": "0.8.2",
+    },
+    Object {
+      "depName": "terminal-table",
+      "lockedVersion": "1.8.0",
+    },
+    Object {
+      "depName": "terrapin",
+      "lockedVersion": "0.6.0",
+    },
+    Object {
+      "depName": "thor",
+      "lockedVersion": "0.20.3",
+    },
+    Object {
+      "depName": "thread_safe",
+      "lockedVersion": "0.3.6",
+    },
+    Object {
+      "depName": "tilt",
+      "lockedVersion": "2.0.10",
+    },
+    Object {
+      "depName": "tty-color",
+      "lockedVersion": "0.5.0",
+    },
+    Object {
+      "depName": "tty-command",
+      "lockedVersion": "0.9.0",
+    },
+    Object {
+      "depName": "tty-cursor",
+      "lockedVersion": "0.7.0",
+    },
+    Object {
+      "depName": "tty-prompt",
+      "lockedVersion": "0.20.0",
+    },
+    Object {
+      "depName": "tty-reader",
+      "lockedVersion": "0.7.0",
+    },
+    Object {
+      "depName": "tty-screen",
+      "lockedVersion": "0.7.0",
+    },
+    Object {
+      "depName": "twitter-text",
+      "lockedVersion": "1.14.7",
+    },
+    Object {
+      "depName": "tzinfo",
+      "lockedVersion": "1.2.5",
+    },
+    Object {
+      "depName": "tzinfo-data",
+      "lockedVersion": "1.2019.3",
+    },
+    Object {
+      "depName": "unf",
+      "lockedVersion": "0.1.4",
+    },
+    Object {
+      "depName": "unf_ext",
+      "lockedVersion": "0.0.7.6",
+    },
+    Object {
+      "depName": "unicode-display_width",
+      "lockedVersion": "1.6.0",
+    },
+    Object {
+      "depName": "uniform_notifier",
+      "lockedVersion": "1.12.1",
+    },
+    Object {
+      "depName": "warden",
+      "lockedVersion": "1.2.8",
+    },
+    Object {
+      "depName": "webmock",
+      "lockedVersion": "3.7.6",
+    },
+    Object {
+      "depName": "webpacker",
+      "lockedVersion": "4.2.2",
+    },
+    Object {
+      "depName": "webpush",
+      "lockedVersion": "0.3.8",
+    },
+    Object {
+      "depName": "websocket-driver",
+      "lockedVersion": "0.7.1",
+    },
+    Object {
+      "depName": "websocket-extensions",
+      "lockedVersion": "0.1.4",
+    },
+    Object {
+      "depName": "wisper",
+      "lockedVersion": "2.0.1",
+    },
+    Object {
+      "depName": "xpath",
+      "lockedVersion": "3.2.0",
+    },
+  ],
+}
+`;
+
+exports[`/lib/manager/bundler/locked-version Parse Rails Gem Lock File 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "websocket-client-simple",
+      "lockedVersion": "0.3.0",
+    },
+    Object {
+      "depName": "queue_classic",
+      "lockedVersion": "3.2.0.RC1",
+    },
+    Object {
+      "depName": "webpacker",
+      "lockedVersion": "4.0.0.pre.3",
+    },
+    Object {
+      "depName": "actioncable",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "actionmailbox",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "actionmailer",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "actionpack",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "actiontext",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "actionview",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "activejob",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "activemodel",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "activerecord",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "activestorage",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "activesupport",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "rails",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "railties",
+      "lockedVersion": "6.0.0.alpha",
+    },
+    Object {
+      "depName": "activerecord-jdbc-adapter",
+      "lockedVersion": "52.1-java",
+    },
+    Object {
+      "depName": "activerecord-jdbcmysql-adapter",
+      "lockedVersion": "52.1-java",
+    },
+    Object {
+      "depName": "activerecord-jdbcpostgresql-adapter",
+      "lockedVersion": "52.1-java",
+    },
+    Object {
+      "depName": "activerecord-jdbcsqlite3-adapter",
+      "lockedVersion": "52.1-java",
+    },
+    Object {
+      "depName": "addressable",
+      "lockedVersion": "2.5.2",
+    },
+    Object {
+      "depName": "amq-protocol",
+      "lockedVersion": "2.3.0",
+    },
+    Object {
+      "depName": "archive-zip",
+      "lockedVersion": "0.11.0",
+    },
+    Object {
+      "depName": "ast",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "aws-eventstream",
+      "lockedVersion": "1.0.1",
+    },
+    Object {
+      "depName": "aws-partitions",
+      "lockedVersion": "1.111.0",
+    },
+    Object {
+      "depName": "aws-sdk-core",
+      "lockedVersion": "3.37.0",
+    },
+    Object {
+      "depName": "aws-sdk-kms",
+      "lockedVersion": "1.11.0",
+    },
+    Object {
+      "depName": "aws-sdk-s3",
+      "lockedVersion": "1.23.1",
+    },
+    Object {
+      "depName": "aws-sdk-sns",
+      "lockedVersion": "1.8.1",
+    },
+    Object {
+      "depName": "aws-sigv4",
+      "lockedVersion": "1.0.3",
+    },
+    Object {
+      "depName": "azure-core",
+      "lockedVersion": "0.1.14",
+    },
+    Object {
+      "depName": "azure-storage",
+      "lockedVersion": "0.15.0.preview",
+    },
+    Object {
+      "depName": "backburner",
+      "lockedVersion": "1.5.0",
+    },
+    Object {
+      "depName": "bcrypt",
+      "lockedVersion": "3.1.12",
+    },
+    Object {
+      "depName": "bcrypt",
+      "lockedVersion": "3.1.12-java",
+    },
+    Object {
+      "depName": "bcrypt",
+      "lockedVersion": "3.1.12-x64-mingw32",
+    },
+    Object {
+      "depName": "bcrypt",
+      "lockedVersion": "3.1.12-x86-mingw32",
+    },
+    Object {
+      "depName": "beaneater",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "benchmark-ips",
+      "lockedVersion": "2.7.2",
+    },
+    Object {
+      "depName": "blade",
+      "lockedVersion": "0.7.1",
+    },
+    Object {
+      "depName": "blade-qunit_adapter",
+      "lockedVersion": "2.0.1",
+    },
+    Object {
+      "depName": "blade-sauce_labs_plugin",
+      "lockedVersion": "0.7.3",
+    },
+    Object {
+      "depName": "bootsnap",
+      "lockedVersion": "1.3.2",
+    },
+    Object {
+      "depName": "bootsnap",
+      "lockedVersion": "1.3.2-java",
+    },
+    Object {
+      "depName": "builder",
+      "lockedVersion": "3.2.3",
+    },
+    Object {
+      "depName": "bunny",
+      "lockedVersion": "2.9.2",
+    },
+    Object {
+      "depName": "byebug",
+      "lockedVersion": "10.0.2",
+    },
+    Object {
+      "depName": "capybara",
+      "lockedVersion": "3.10.1",
+    },
+    Object {
+      "depName": "childprocess",
+      "lockedVersion": "0.9.0",
+    },
+    Object {
+      "depName": "chromedriver-helper",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "coffee-script",
+      "lockedVersion": "2.4.1",
+    },
+    Object {
+      "depName": "coffee-script-source",
+      "lockedVersion": "1.12.2",
+    },
+    Object {
+      "depName": "concurrent-ruby",
+      "lockedVersion": "1.1.3",
+    },
+    Object {
+      "depName": "connection_pool",
+      "lockedVersion": "2.2.2",
+    },
+    Object {
+      "depName": "cookiejar",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "crack",
+      "lockedVersion": "0.4.3",
+    },
+    Object {
+      "depName": "crass",
+      "lockedVersion": "1.0.4",
+    },
+    Object {
+      "depName": "curses",
+      "lockedVersion": "1.0.2",
+    },
+    Object {
+      "depName": "daemons",
+      "lockedVersion": "1.2.6",
+    },
+    Object {
+      "depName": "dalli",
+      "lockedVersion": "2.7.9",
+    },
+    Object {
+      "depName": "dante",
+      "lockedVersion": "0.2.0",
+    },
+    Object {
+      "depName": "declarative",
+      "lockedVersion": "0.0.10",
+    },
+    Object {
+      "depName": "declarative-option",
+      "lockedVersion": "0.1.0",
+    },
+    Object {
+      "depName": "delayed_job",
+      "lockedVersion": "4.1.5",
+    },
+    Object {
+      "depName": "delayed_job_active_record",
+      "lockedVersion": "4.1.3",
+    },
+    Object {
+      "depName": "digest-crc",
+      "lockedVersion": "0.4.1",
+    },
+    Object {
+      "depName": "em-http-request",
+      "lockedVersion": "1.1.5",
+    },
+    Object {
+      "depName": "em-socksify",
+      "lockedVersion": "0.3.2",
+    },
+    Object {
+      "depName": "erubi",
+      "lockedVersion": "1.7.1",
+    },
+    Object {
+      "depName": "et-orbi",
+      "lockedVersion": "1.1.6",
+    },
+    Object {
+      "depName": "event_emitter",
+      "lockedVersion": "0.2.6",
+    },
+    Object {
+      "depName": "eventmachine",
+      "lockedVersion": "1.2.7",
+    },
+    Object {
+      "depName": "execjs",
+      "lockedVersion": "2.7.0",
+    },
+    Object {
+      "depName": "faraday",
+      "lockedVersion": "0.15.3",
+    },
+    Object {
+      "depName": "faraday_middleware",
+      "lockedVersion": "0.12.2",
+    },
+    Object {
+      "depName": "faye",
+      "lockedVersion": "1.2.4",
+    },
+    Object {
+      "depName": "faye-websocket",
+      "lockedVersion": "0.10.7",
+    },
+    Object {
+      "depName": "ffi",
+      "lockedVersion": "1.9.25",
+    },
+    Object {
+      "depName": "ffi",
+      "lockedVersion": "1.9.25-java",
+    },
+    Object {
+      "depName": "ffi",
+      "lockedVersion": "1.9.25-x64-mingw32",
+    },
+    Object {
+      "depName": "ffi",
+      "lockedVersion": "1.9.25-x86-mingw32",
+    },
+    Object {
+      "depName": "fugit",
+      "lockedVersion": "1.1.6",
+    },
+    Object {
+      "depName": "globalid",
+      "lockedVersion": "0.4.1",
+    },
+    Object {
+      "depName": "google-api-client",
+      "lockedVersion": "0.25.0",
+    },
+    Object {
+      "depName": "google-cloud-core",
+      "lockedVersion": "1.2.7",
+    },
+    Object {
+      "depName": "google-cloud-env",
+      "lockedVersion": "1.0.5",
+    },
+    Object {
+      "depName": "google-cloud-storage",
+      "lockedVersion": "1.15.0",
+    },
+    Object {
+      "depName": "googleauth",
+      "lockedVersion": "0.6.7",
+    },
+    Object {
+      "depName": "hashdiff",
+      "lockedVersion": "0.3.7",
+    },
+    Object {
+      "depName": "hiredis",
+      "lockedVersion": "0.6.3",
+    },
+    Object {
+      "depName": "hiredis",
+      "lockedVersion": "0.6.3-java",
+    },
+    Object {
+      "depName": "http_parser.rb",
+      "lockedVersion": "0.6.0",
+    },
+    Object {
+      "depName": "httpclient",
+      "lockedVersion": "2.8.3",
+    },
+    Object {
+      "depName": "i18n",
+      "lockedVersion": "1.1.1",
+    },
+    Object {
+      "depName": "image_processing",
+      "lockedVersion": "1.7.1",
+    },
+    Object {
+      "depName": "io-like",
+      "lockedVersion": "0.3.0",
+    },
+    Object {
+      "depName": "jaro_winkler",
+      "lockedVersion": "1.5.1",
+    },
+    Object {
+      "depName": "jaro_winkler",
+      "lockedVersion": "1.5.1-java",
+    },
+    Object {
+      "depName": "jdbc-mysql",
+      "lockedVersion": "5.1.46",
+    },
+    Object {
+      "depName": "jdbc-postgres",
+      "lockedVersion": "42.1.4",
+    },
+    Object {
+      "depName": "jdbc-sqlite3",
+      "lockedVersion": "3.20.1",
+    },
+    Object {
+      "depName": "jmespath",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "json",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "json",
+      "lockedVersion": "2.1.0-java",
+    },
+    Object {
+      "depName": "jwt",
+      "lockedVersion": "2.1.0",
+    },
+    Object {
+      "depName": "kindlerb",
+      "lockedVersion": "1.2.0",
+    },
+    Object {
+      "depName": "libxml-ruby",
+      "lockedVersion": "3.1.0",
+    },
+    Object {
+      "depName": "listen",
+      "lockedVersion": "3.1.5",
+    },
+    Object {
+      "depName": "loofah",
+      "lockedVersion": "2.2.3",
+    },
+    Object {
+      "depName": "mail",
+      "lockedVersion": "2.7.1",
+    },
+    Object {
+      "depName": "marcel",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "memoist",
+      "lockedVersion": "0.16.0",
+    },
+    Object {
+      "depName": "method_source",
+      "lockedVersion": "0.9.2",
+    },
+    Object {
+      "depName": "mime-types",
+      "lockedVersion": "3.2.2",
+    },
+    Object {
+      "depName": "mime-types-data",
+      "lockedVersion": "3.2018.0812",
+    },
+    Object {
+      "depName": "mimemagic",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "mini_magick",
+      "lockedVersion": "4.9.2",
+    },
+    Object {
+      "depName": "mini_mime",
+      "lockedVersion": "1.0.1",
+    },
+    Object {
+      "depName": "mini_portile2",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "minitest",
+      "lockedVersion": "5.11.3",
+    },
+    Object {
+      "depName": "minitest-bisect",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "minitest-retry",
+      "lockedVersion": "0.1.9",
+    },
+    Object {
+      "depName": "minitest-server",
+      "lockedVersion": "1.0.5",
+    },
+    Object {
+      "depName": "mono_logger",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "msgpack",
+      "lockedVersion": "1.2.4",
+    },
+    Object {
+      "depName": "msgpack",
+      "lockedVersion": "1.2.4-java",
+    },
+    Object {
+      "depName": "msgpack",
+      "lockedVersion": "1.2.4-x64-mingw32",
+    },
+    Object {
+      "depName": "msgpack",
+      "lockedVersion": "1.2.4-x86-mingw32",
+    },
+    Object {
+      "depName": "multi_json",
+      "lockedVersion": "1.13.1",
+    },
+    Object {
+      "depName": "multipart-post",
+      "lockedVersion": "2.0.0",
+    },
+    Object {
+      "depName": "mustache",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "mustermann",
+      "lockedVersion": "1.0.3",
+    },
+    Object {
+      "depName": "mysql2",
+      "lockedVersion": "0.5.2",
+    },
+    Object {
+      "depName": "mysql2",
+      "lockedVersion": "0.5.2-x64-mingw32",
+    },
+    Object {
+      "depName": "mysql2",
+      "lockedVersion": "0.5.2-x86-mingw32",
+    },
+    Object {
+      "depName": "nio4r",
+      "lockedVersion": "2.3.1",
+    },
+    Object {
+      "depName": "nio4r",
+      "lockedVersion": "2.3.1-java",
+    },
+    Object {
+      "depName": "nokogiri",
+      "lockedVersion": "1.9.1",
+    },
+    Object {
+      "depName": "nokogiri",
+      "lockedVersion": "1.9.1-java",
+    },
+    Object {
+      "depName": "nokogiri",
+      "lockedVersion": "1.9.1-x64-mingw32",
+    },
+    Object {
+      "depName": "nokogiri",
+      "lockedVersion": "1.9.1-x86-mingw32",
+    },
+    Object {
+      "depName": "os",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "parallel",
+      "lockedVersion": "1.12.1",
+    },
+    Object {
+      "depName": "parser",
+      "lockedVersion": "2.5.3.0",
+    },
+    Object {
+      "depName": "path_expander",
+      "lockedVersion": "1.0.3",
+    },
+    Object {
+      "depName": "pg",
+      "lockedVersion": "1.1.3",
+    },
+    Object {
+      "depName": "pg",
+      "lockedVersion": "1.1.3-x64-mingw32",
+    },
+    Object {
+      "depName": "pg",
+      "lockedVersion": "1.1.3-x86-mingw32",
+    },
+    Object {
+      "depName": "powerpack",
+      "lockedVersion": "0.1.2",
+    },
+    Object {
+      "depName": "psych",
+      "lockedVersion": "3.0.3",
+    },
+    Object {
+      "depName": "public_suffix",
+      "lockedVersion": "3.0.3",
+    },
+    Object {
+      "depName": "puma",
+      "lockedVersion": "3.12.0",
+    },
+    Object {
+      "depName": "puma",
+      "lockedVersion": "3.12.0-java",
+    },
+    Object {
+      "depName": "que",
+      "lockedVersion": "0.14.3",
+    },
+    Object {
+      "depName": "qunit-selenium",
+      "lockedVersion": "0.0.4",
+    },
+    Object {
+      "depName": "raabro",
+      "lockedVersion": "1.1.6",
+    },
+    Object {
+      "depName": "racc",
+      "lockedVersion": "1.4.14",
+    },
+    Object {
+      "depName": "rack",
+      "lockedVersion": "2.0.6",
+    },
+    Object {
+      "depName": "rack-cache",
+      "lockedVersion": "1.8.0",
+    },
+    Object {
+      "depName": "rack-protection",
+      "lockedVersion": "2.0.4",
+    },
+    Object {
+      "depName": "rack-proxy",
+      "lockedVersion": "0.6.5",
+    },
+    Object {
+      "depName": "rack-test",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "rails-dom-testing",
+      "lockedVersion": "2.0.3",
+    },
+    Object {
+      "depName": "rails-html-sanitizer",
+      "lockedVersion": "1.0.4",
+    },
+    Object {
+      "depName": "rainbow",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "rake",
+      "lockedVersion": "12.3.1",
+    },
+    Object {
+      "depName": "rb-fsevent",
+      "lockedVersion": "0.10.3",
+    },
+    Object {
+      "depName": "rb-inotify",
+      "lockedVersion": "0.10.0",
+    },
+    Object {
+      "depName": "rdoc",
+      "lockedVersion": "6.0.4",
+    },
+    Object {
+      "depName": "redcarpet",
+      "lockedVersion": "3.2.3",
+    },
+    Object {
+      "depName": "redis",
+      "lockedVersion": "4.0.3",
+    },
+    Object {
+      "depName": "redis-namespace",
+      "lockedVersion": "1.6.0",
+    },
+    Object {
+      "depName": "regexp_parser",
+      "lockedVersion": "1.3.0",
+    },
+    Object {
+      "depName": "representable",
+      "lockedVersion": "3.0.4",
+    },
+    Object {
+      "depName": "resque",
+      "lockedVersion": "1.27.4",
+    },
+    Object {
+      "depName": "resque-scheduler",
+      "lockedVersion": "4.3.1",
+    },
+    Object {
+      "depName": "retriable",
+      "lockedVersion": "3.1.2",
+    },
+    Object {
+      "depName": "rubocop",
+      "lockedVersion": "0.61.1",
+    },
+    Object {
+      "depName": "ruby-progressbar",
+      "lockedVersion": "1.10.0",
+    },
+    Object {
+      "depName": "ruby-vips",
+      "lockedVersion": "2.0.13",
+    },
+    Object {
+      "depName": "ruby_dep",
+      "lockedVersion": "1.5.0",
+    },
+    Object {
+      "depName": "rubyzip",
+      "lockedVersion": "1.2.2",
+    },
+    Object {
+      "depName": "rufus-scheduler",
+      "lockedVersion": "3.5.2",
+    },
+    Object {
+      "depName": "safe_yaml",
+      "lockedVersion": "1.0.4",
+    },
+    Object {
+      "depName": "sass",
+      "lockedVersion": "3.7.2",
+    },
+    Object {
+      "depName": "sass-listen",
+      "lockedVersion": "4.0.0",
+    },
+    Object {
+      "depName": "sass-rails",
+      "lockedVersion": "5.0.7",
+    },
+    Object {
+      "depName": "sdoc",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "selenium-webdriver",
+      "lockedVersion": "3.141.0",
+    },
+    Object {
+      "depName": "sequel",
+      "lockedVersion": "5.14.0",
+    },
+    Object {
+      "depName": "serverengine",
+      "lockedVersion": "2.0.7",
+    },
+    Object {
+      "depName": "sidekiq",
+      "lockedVersion": "5.2.3",
+    },
+    Object {
+      "depName": "sigdump",
+      "lockedVersion": "0.2.4",
+    },
+    Object {
+      "depName": "signet",
+      "lockedVersion": "0.11.0",
+    },
+    Object {
+      "depName": "sinatra",
+      "lockedVersion": "2.0.4",
+    },
+    Object {
+      "depName": "sneakers",
+      "lockedVersion": "2.7.0",
+    },
+    Object {
+      "depName": "sprockets",
+      "lockedVersion": "3.7.2",
+    },
+    Object {
+      "depName": "sprockets-export",
+      "lockedVersion": "1.0.0",
+    },
+    Object {
+      "depName": "sprockets-rails",
+      "lockedVersion": "3.2.1",
+    },
+    Object {
+      "depName": "sqlite3",
+      "lockedVersion": "1.3.13",
+    },
+    Object {
+      "depName": "sqlite3",
+      "lockedVersion": "1.3.13-x64-mingw32",
+    },
+    Object {
+      "depName": "sqlite3",
+      "lockedVersion": "1.3.13-x86-mingw32",
+    },
+    Object {
+      "depName": "stackprof",
+      "lockedVersion": "0.2.12",
+    },
+    Object {
+      "depName": "sucker_punch",
+      "lockedVersion": "2.1.1",
+    },
+    Object {
+      "depName": "thin",
+      "lockedVersion": "1.7.2",
+    },
+    Object {
+      "depName": "thor",
+      "lockedVersion": "0.20.3",
+    },
+    Object {
+      "depName": "thread_safe",
+      "lockedVersion": "0.3.6",
+    },
+    Object {
+      "depName": "thread_safe",
+      "lockedVersion": "0.3.6-java",
+    },
+    Object {
+      "depName": "tilt",
+      "lockedVersion": "2.0.8",
+    },
+    Object {
+      "depName": "turbolinks",
+      "lockedVersion": "5.2.0",
+    },
+    Object {
+      "depName": "turbolinks-source",
+      "lockedVersion": "5.2.0",
+    },
+    Object {
+      "depName": "tzinfo",
+      "lockedVersion": "1.2.5",
+    },
+    Object {
+      "depName": "tzinfo-data",
+      "lockedVersion": "1.2018.7",
+    },
+    Object {
+      "depName": "uber",
+      "lockedVersion": "0.1.0",
+    },
+    Object {
+      "depName": "uglifier",
+      "lockedVersion": "4.1.19",
+    },
+    Object {
+      "depName": "unicode-display_width",
+      "lockedVersion": "1.4.0",
+    },
+    Object {
+      "depName": "useragent",
+      "lockedVersion": "0.16.10",
+    },
+    Object {
+      "depName": "vegas",
+      "lockedVersion": "0.1.11",
+    },
+    Object {
+      "depName": "w3c_validators",
+      "lockedVersion": "1.3.4",
+    },
+    Object {
+      "depName": "wdm",
+      "lockedVersion": "0.1.1",
+    },
+    Object {
+      "depName": "webmock",
+      "lockedVersion": "3.4.2",
+    },
+    Object {
+      "depName": "websocket",
+      "lockedVersion": "1.2.8",
+    },
+    Object {
+      "depName": "websocket-driver",
+      "lockedVersion": "0.7.0",
+    },
+    Object {
+      "depName": "websocket-driver",
+      "lockedVersion": "0.7.0-java",
+    },
+    Object {
+      "depName": "websocket-extensions",
+      "lockedVersion": "0.1.3",
+    },
+    Object {
+      "depName": "xpath",
+      "lockedVersion": "3.2.0",
+    },
+  ],
+}
+`;
+
+exports[`/lib/manager/bundler/locked-version Parse WebPacker Gem Lock File 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "webpacker",
+      "lockedVersion": "4.2.2",
+    },
+    Object {
+      "depName": "actioncable",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "actionmailbox",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "actionmailer",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "actionpack",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "actiontext",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "actionview",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "activejob",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "activemodel",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "activerecord",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "activestorage",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "activesupport",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "ast",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "builder",
+      "lockedVersion": "3.2.3",
+    },
+    Object {
+      "depName": "byebug",
+      "lockedVersion": "11.0.1",
+    },
+    Object {
+      "depName": "concurrent-ruby",
+      "lockedVersion": "1.1.5",
+    },
+    Object {
+      "depName": "crass",
+      "lockedVersion": "1.0.5",
+    },
+    Object {
+      "depName": "erubi",
+      "lockedVersion": "1.9.0",
+    },
+    Object {
+      "depName": "globalid",
+      "lockedVersion": "0.4.2",
+    },
+    Object {
+      "depName": "i18n",
+      "lockedVersion": "1.7.0",
+    },
+    Object {
+      "depName": "jaro_winkler",
+      "lockedVersion": "1.5.4",
+    },
+    Object {
+      "depName": "loofah",
+      "lockedVersion": "2.3.1",
+    },
+    Object {
+      "depName": "mail",
+      "lockedVersion": "2.7.1",
+    },
+    Object {
+      "depName": "marcel",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "method_source",
+      "lockedVersion": "0.9.2",
+    },
+    Object {
+      "depName": "mimemagic",
+      "lockedVersion": "0.3.3",
+    },
+    Object {
+      "depName": "mini_mime",
+      "lockedVersion": "1.0.2",
+    },
+    Object {
+      "depName": "mini_portile2",
+      "lockedVersion": "2.4.0",
+    },
+    Object {
+      "depName": "minitest",
+      "lockedVersion": "5.13.0",
+    },
+    Object {
+      "depName": "nio4r",
+      "lockedVersion": "2.5.2",
+    },
+    Object {
+      "depName": "nokogiri",
+      "lockedVersion": "1.10.5",
+    },
+    Object {
+      "depName": "parallel",
+      "lockedVersion": "1.18.0",
+    },
+    Object {
+      "depName": "parser",
+      "lockedVersion": "2.6.5.0",
+    },
+    Object {
+      "depName": "rack",
+      "lockedVersion": "2.0.8",
+    },
+    Object {
+      "depName": "rack-proxy",
+      "lockedVersion": "0.6.5",
+    },
+    Object {
+      "depName": "rack-test",
+      "lockedVersion": "1.1.0",
+    },
+    Object {
+      "depName": "rails",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "rails-dom-testing",
+      "lockedVersion": "2.0.3",
+    },
+    Object {
+      "depName": "rails-html-sanitizer",
+      "lockedVersion": "1.3.0",
+    },
+    Object {
+      "depName": "railties",
+      "lockedVersion": "6.0.1",
+    },
+    Object {
+      "depName": "rainbow",
+      "lockedVersion": "3.0.0",
+    },
+    Object {
+      "depName": "rake",
+      "lockedVersion": "13.0.0",
+    },
+    Object {
+      "depName": "rubocop",
+      "lockedVersion": "0.68.1",
+    },
+    Object {
+      "depName": "rubocop-performance",
+      "lockedVersion": "1.3.0",
+    },
+    Object {
+      "depName": "ruby-progressbar",
+      "lockedVersion": "1.10.1",
+    },
+    Object {
+      "depName": "sprockets",
+      "lockedVersion": "4.0.0",
+    },
+    Object {
+      "depName": "sprockets-rails",
+      "lockedVersion": "3.2.1",
+    },
+    Object {
+      "depName": "thor",
+      "lockedVersion": "0.20.3",
+    },
+    Object {
+      "depName": "thread_safe",
+      "lockedVersion": "0.3.6",
+    },
+    Object {
+      "depName": "tzinfo",
+      "lockedVersion": "1.2.5",
+    },
+    Object {
+      "depName": "unicode-display_width",
+      "lockedVersion": "1.5.0",
+    },
+    Object {
+      "depName": "websocket-driver",
+      "lockedVersion": "0.7.1",
+    },
+    Object {
+      "depName": "websocket-extensions",
+      "lockedVersion": "0.1.4",
+    },
+    Object {
+      "depName": "zeitwerk",
+      "lockedVersion": "2.2.1",
+    },
+  ],
+}
+`;
