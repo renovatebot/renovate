@@ -7,7 +7,10 @@ import { PoetryFile } from './types';
 // TODO: Maybe factor out common code from pipenv.updateDependency and poetry.updateDependency
 // Return true if the match string is found at index in content
 function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
+  return (
+    content.substring(index, index + match.length + 2) === `"${match}"` ||
+    content.substring(index, index + match.length + 2) === `'${match}'`
+  );
 }
 
 // Replace oldString with newString at location index of content
@@ -17,11 +20,13 @@ function replaceAt(
   oldString: string,
   newString: string
 ): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
+  logger.debug(
+    `Replacing \`${oldString}\` with ${newString} at index ${index}`
+  );
   return (
     content.substr(0, index) +
     newString +
-    content.substr(index + oldString.length)
+    content.substr(index + oldString.length + 2)
   );
 }
 
@@ -73,7 +78,7 @@ export function updateDependency(
   } else {
     parsedContents.tool.poetry[depType][depName] = newValue;
   }
-  const searchString = `"${oldVersion}"`;
+  const searchString = `${oldVersion}`;
   const newString = `"${newValue}"`;
   let newFileContent = null;
   let searchIndex = fileContent.indexOf(`[${depType}]`) + depType.length;
