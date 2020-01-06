@@ -3,6 +3,7 @@ import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
+import { extractLockFileEntries } from './locked-version';
 
 export async function extractPackageFile(
   content: string,
@@ -184,11 +185,21 @@ export async function extractPackageFile(
   if (!res.deps.length && !res.registryUrls.length) {
     return null;
   }
+
   if (fileName) {
     const gemfileLock = fileName + '.lock';
     const lockContent = await platform.getFile(gemfileLock);
     if (lockContent) {
       logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
+      const lockedEntries = extractLockFileEntries(lockContent);
+      res.deps.forEach((dep, index) => {
+        const foundLockedDep = lockedEntries.deps.find(
+          entry => dep.depName === entry.depName
+        );
+        if (foundLockedDep) {
+          res.deps[index].lockedVersion = foundLockedDep.lockedVersion;
+        }
+      });
       const bundledWith = lockContent.match(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/);
       if (bundledWith) {
         res.compatibility = res.compatibility || {};

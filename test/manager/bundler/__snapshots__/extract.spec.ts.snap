@@ -1,5 +1,1307 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
+Object {
+  "compatibility": Object {
+    "ruby": ">= 2.4.0",
+  },
+  "deps": Array [
+    Object {
+      "currentValue": "~> 1.4",
+      "datasource": "rubygems",
+      "depName": "pkg-config",
+      "lockedVersion": "1.4.0",
+      "managerData": Object {
+        "lineNumber": 5,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.3",
+      "datasource": "rubygems",
+      "depName": "puma",
+      "lockedVersion": "4.3.1",
+      "managerData": Object {
+        "lineNumber": 7,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.2.4",
+      "datasource": "rubygems",
+      "depName": "rails",
+      "lockedVersion": "5.2.4.1",
+      "managerData": Object {
+        "lineNumber": 8,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.7.2",
+      "datasource": "rubygems",
+      "depName": "sprockets",
+      "lockedVersion": "3.7.2",
+      "managerData": Object {
+        "lineNumber": 9,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.20",
+      "datasource": "rubygems",
+      "depName": "thor",
+      "lockedVersion": "0.20.3",
+      "managerData": Object {
+        "lineNumber": 10,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.2",
+      "datasource": "rubygems",
+      "depName": "hamlit-rails",
+      "lockedVersion": "0.2.3",
+      "managerData": Object {
+        "lineNumber": 12,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.2",
+      "datasource": "rubygems",
+      "depName": "pg",
+      "lockedVersion": "1.2.0",
+      "managerData": Object {
+        "lineNumber": 13,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.4",
+      "datasource": "rubygems",
+      "depName": "makara",
+      "lockedVersion": "0.4.1",
+      "managerData": Object {
+        "lineNumber": 14,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.4",
+      "datasource": "rubygems",
+      "depName": "pghero",
+      "lockedVersion": "2.4.1",
+      "managerData": Object {
+        "lineNumber": 15,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.7",
+      "datasource": "rubygems",
+      "depName": "dotenv-rails",
+      "lockedVersion": "2.7.5",
+      "managerData": Object {
+        "lineNumber": 16,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.59",
+      "datasource": "rubygems",
+      "depName": "aws-sdk-s3",
+      "lockedVersion": "1.59.0",
+      "managerData": Object {
+        "lineNumber": 18,
+      },
+    },
+    Object {
+      "currentValue": "<= 2.1.0",
+      "datasource": "rubygems",
+      "depName": "fog-core",
+      "lockedVersion": "2.1.0",
+      "managerData": Object {
+        "lineNumber": 19,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.3",
+      "datasource": "rubygems",
+      "depName": "fog-openstack",
+      "lockedVersion": "0.3.7",
+      "managerData": Object {
+        "lineNumber": 20,
+      },
+    },
+    Object {
+      "currentValue": "~> 6.0",
+      "datasource": "rubygems",
+      "depName": "paperclip",
+      "lockedVersion": "6.0.0",
+      "managerData": Object {
+        "lineNumber": 21,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.6",
+      "datasource": "rubygems",
+      "depName": "paperclip-av-transcoder",
+      "lockedVersion": "0.6.4",
+      "managerData": Object {
+        "lineNumber": 22,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "rubygems",
+      "depName": "streamio-ffmpeg",
+      "lockedVersion": "3.0.2",
+      "managerData": Object {
+        "lineNumber": 23,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.1",
+      "datasource": "rubygems",
+      "depName": "blurhash",
+      "lockedVersion": "0.1.3",
+      "managerData": Object {
+        "lineNumber": 24,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.10",
+      "datasource": "rubygems",
+      "depName": "active_model_serializers",
+      "lockedVersion": "0.10.10",
+      "managerData": Object {
+        "lineNumber": 26,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.7",
+      "datasource": "rubygems",
+      "depName": "addressable",
+      "lockedVersion": "2.7.0",
+      "managerData": Object {
+        "lineNumber": 27,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.4",
+      "datasource": "rubygems",
+      "depName": "bootsnap",
+      "lockedVersion": "1.4.5",
+      "managerData": Object {
+        "lineNumber": 28,
+      },
+    },
+    Object {
+      "depName": "browser",
+      "lockedVersion": "2.7.1",
+      "managerData": Object {
+        "lineNumber": 29,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 0.7.7",
+      "datasource": "rubygems",
+      "depName": "charlock_holmes",
+      "lockedVersion": "0.7.7",
+      "managerData": Object {
+        "lineNumber": 30,
+      },
+    },
+    Object {
+      "depName": "iso-639",
+      "lockedVersion": "0.2.8",
+      "managerData": Object {
+        "lineNumber": 31,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 5.1",
+      "datasource": "rubygems",
+      "depName": "chewy",
+      "lockedVersion": "5.1.0",
+      "managerData": Object {
+        "lineNumber": 32,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.2.6",
+      "datasource": "rubygems",
+      "depName": "cld3",
+      "lockedVersion": "3.2.6",
+      "managerData": Object {
+        "lineNumber": 33,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.7",
+      "datasource": "rubygems",
+      "depName": "devise",
+      "lockedVersion": "4.7.1",
+      "managerData": Object {
+        "lineNumber": 34,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.1",
+      "datasource": "rubygems",
+      "depName": "devise-two-factor",
+      "lockedVersion": "3.1.0",
+      "managerData": Object {
+        "lineNumber": 35,
+      },
+    },
+    Object {
+      "currentValue": "~> 9.2",
+      "datasource": "rubygems",
+      "depName": "devise_pam_authenticatable2",
+      "depTypes": Array [
+        "pam_authentication",
+        "optional: true",
+      ],
+      "lockedVersion": "9.2.0",
+      "managerData": Object {
+        "lineNumber": 38,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.16",
+      "datasource": "rubygems",
+      "depName": "net-ldap",
+      "lockedVersion": "0.16.2",
+      "managerData": Object {
+        "lineNumber": 41,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.1",
+      "datasource": "rubygems",
+      "depName": "omniauth-cas",
+      "lockedVersion": "1.1.1",
+      "managerData": Object {
+        "lineNumber": 42,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.10",
+      "datasource": "rubygems",
+      "depName": "omniauth-saml",
+      "lockedVersion": "1.10.1",
+      "managerData": Object {
+        "lineNumber": 43,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.9",
+      "datasource": "rubygems",
+      "depName": "omniauth",
+      "lockedVersion": "1.9.0",
+      "managerData": Object {
+        "lineNumber": 44,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.1",
+      "datasource": "rubygems",
+      "depName": "discard",
+      "lockedVersion": "1.1.0",
+      "managerData": Object {
+        "lineNumber": 46,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.2",
+      "datasource": "rubygems",
+      "depName": "doorkeeper",
+      "lockedVersion": "5.2.3",
+      "managerData": Object {
+        "lineNumber": 47,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.0",
+      "datasource": "rubygems",
+      "depName": "fast_blank",
+      "lockedVersion": "1.0.0",
+      "managerData": Object {
+        "lineNumber": 48,
+      },
+    },
+    Object {
+      "depName": "fastimage",
+      "lockedVersion": "2.1.7",
+      "managerData": Object {
+        "lineNumber": 49,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 2.1",
+      "datasource": "rubygems",
+      "depName": "goldfinger",
+      "lockedVersion": "2.1.0",
+      "managerData": Object {
+        "lineNumber": 50,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.6",
+      "datasource": "rubygems",
+      "depName": "hiredis",
+      "lockedVersion": "0.6.3",
+      "managerData": Object {
+        "lineNumber": 51,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.7",
+      "datasource": "rubygems",
+      "depName": "redis-namespace",
+      "lockedVersion": "1.7.0",
+      "managerData": Object {
+        "lineNumber": 52,
+      },
+    },
+    Object {
+      "depName": "health_check",
+      "lockedVersion": "4.0.0.pre",
+      "managerData": Object {
+        "lineNumber": 53,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 4.3",
+      "datasource": "rubygems",
+      "depName": "htmlentities",
+      "lockedVersion": "4.3.4",
+      "managerData": Object {
+        "lineNumber": 54,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.3",
+      "datasource": "rubygems",
+      "depName": "http",
+      "lockedVersion": "3.3.0",
+      "managerData": Object {
+        "lineNumber": 55,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.1",
+      "datasource": "rubygems",
+      "depName": "http_accept_language",
+      "lockedVersion": "2.1.1",
+      "managerData": Object {
+        "lineNumber": 56,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.6",
+      "datasource": "rubygems",
+      "depName": "http_parser.rb",
+      "lockedVersion": "0.6.1",
+      "managerData": Object {
+        "lineNumber": 57,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.3",
+      "datasource": "rubygems",
+      "depName": "httplog",
+      "lockedVersion": "1.3.3",
+      "managerData": Object {
+        "lineNumber": 58,
+      },
+    },
+    Object {
+      "depName": "idn-ruby",
+      "lockedVersion": "0.1.0",
+      "managerData": Object {
+        "lineNumber": 59,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 1.1",
+      "datasource": "rubygems",
+      "depName": "kaminari",
+      "lockedVersion": "1.1.1",
+      "managerData": Object {
+        "lineNumber": 60,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.0",
+      "datasource": "rubygems",
+      "depName": "link_header",
+      "lockedVersion": "0.0.8",
+      "managerData": Object {
+        "lineNumber": 61,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.3.1",
+      "datasource": "rubygems",
+      "depName": "mime-types",
+      "lockedVersion": "3.3.1",
+      "managerData": Object {
+        "lineNumber": 62,
+      },
+    },
+    Object {
+      "depName": "nilsimsa",
+      "lockedVersion": "1.1.2",
+      "managerData": Object {
+        "lineNumber": 63,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 1.10",
+      "datasource": "rubygems",
+      "depName": "nokogiri",
+      "lockedVersion": "1.10.7",
+      "managerData": Object {
+        "lineNumber": 64,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.2",
+      "datasource": "rubygems",
+      "depName": "nsa",
+      "lockedVersion": "0.2.7",
+      "managerData": Object {
+        "lineNumber": 65,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.10",
+      "datasource": "rubygems",
+      "depName": "oj",
+      "lockedVersion": "3.10.0",
+      "managerData": Object {
+        "lineNumber": 66,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.0",
+      "datasource": "rubygems",
+      "depName": "ostatus2",
+      "lockedVersion": "2.0.3",
+      "managerData": Object {
+        "lineNumber": 67,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.11",
+      "datasource": "rubygems",
+      "depName": "ox",
+      "lockedVersion": "2.11.0",
+      "managerData": Object {
+        "lineNumber": 68,
+      },
+    },
+    Object {
+      "depName": "parslet",
+      "lockedVersion": "1.8.2",
+      "managerData": Object {
+        "lineNumber": 69,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 1.19",
+      "datasource": "rubygems",
+      "depName": "parallel",
+      "lockedVersion": "1.19.1",
+      "managerData": Object {
+        "lineNumber": 70,
+      },
+    },
+    Object {
+      "depName": "posix-spawn",
+      "lockedVersion": "0.3.13",
+      "managerData": Object {
+        "lineNumber": 71,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 2.1",
+      "datasource": "rubygems",
+      "depName": "pundit",
+      "lockedVersion": "2.1.0",
+      "managerData": Object {
+        "lineNumber": 72,
+      },
+    },
+    Object {
+      "depName": "premailer-rails",
+      "lockedVersion": "1.10.3",
+      "managerData": Object {
+        "lineNumber": 73,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 6.2",
+      "datasource": "rubygems",
+      "depName": "rack-attack",
+      "lockedVersion": "6.2.2",
+      "managerData": Object {
+        "lineNumber": 74,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.1",
+      "datasource": "rubygems",
+      "depName": "rack-cors",
+      "lockedVersion": "1.1.1",
+      "managerData": Object {
+        "lineNumber": 75,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.1",
+      "datasource": "rubygems",
+      "depName": "rails-i18n",
+      "lockedVersion": "5.1.3",
+      "managerData": Object {
+        "lineNumber": 76,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.6",
+      "datasource": "rubygems",
+      "depName": "rails-settings-cached",
+      "lockedVersion": "0.6.6",
+      "managerData": Object {
+        "lineNumber": 77,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.1",
+      "datasource": "rubygems",
+      "depName": "redis",
+      "lockedVersion": "4.1.3",
+      "managerData": Object {
+        "lineNumber": 78,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.2",
+      "datasource": "rubygems",
+      "depName": "mario-redis-lock",
+      "lockedVersion": "1.2.1",
+      "managerData": Object {
+        "lineNumber": 79,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.10",
+      "datasource": "rubygems",
+      "depName": "rqrcode",
+      "lockedVersion": "0.10.1",
+      "managerData": Object {
+        "lineNumber": 80,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.10",
+      "datasource": "rubygems",
+      "depName": "ruby-progressbar",
+      "lockedVersion": "1.10.1",
+      "managerData": Object {
+        "lineNumber": 81,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.1",
+      "datasource": "rubygems",
+      "depName": "sanitize",
+      "lockedVersion": "5.1.0",
+      "managerData": Object {
+        "lineNumber": 82,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.2",
+      "datasource": "rubygems",
+      "depName": "sidekiq",
+      "lockedVersion": "5.2.7",
+      "managerData": Object {
+        "lineNumber": 83,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "rubygems",
+      "depName": "sidekiq-scheduler",
+      "lockedVersion": "3.0.0",
+      "managerData": Object {
+        "lineNumber": 84,
+      },
+    },
+    Object {
+      "currentValue": "~> 6.0",
+      "datasource": "rubygems",
+      "depName": "sidekiq-unique-jobs",
+      "lockedVersion": "6.0.18",
+      "managerData": Object {
+        "lineNumber": 85,
+      },
+    },
+    Object {
+      "currentValue": "~>0.2.0",
+      "datasource": "rubygems",
+      "depName": "sidekiq-bulk",
+      "lockedVersion": "0.2.0",
+      "managerData": Object {
+        "lineNumber": 86,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.1",
+      "datasource": "rubygems",
+      "depName": "simple-navigation",
+      "lockedVersion": "4.1.0",
+      "managerData": Object {
+        "lineNumber": 87,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.0",
+      "datasource": "rubygems",
+      "depName": "simple_form",
+      "lockedVersion": "5.0.1",
+      "managerData": Object {
+        "lineNumber": 88,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.2",
+      "datasource": "rubygems",
+      "depName": "sprockets-rails",
+      "lockedVersion": "3.2.1",
+      "managerData": Object {
+        "lineNumber": 89,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.2.0",
+      "datasource": "rubygems",
+      "depName": "stoplight",
+      "lockedVersion": "2.2.0",
+      "managerData": Object {
+        "lineNumber": 90,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.5",
+      "datasource": "rubygems",
+      "depName": "strong_migrations",
+      "lockedVersion": "0.5.1",
+      "managerData": Object {
+        "lineNumber": 91,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.9",
+      "datasource": "rubygems",
+      "depName": "tty-command",
+      "lockedVersion": "0.9.0",
+      "managerData": Object {
+        "lineNumber": 92,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.20",
+      "datasource": "rubygems",
+      "depName": "tty-prompt",
+      "lockedVersion": "0.20.0",
+      "managerData": Object {
+        "lineNumber": 93,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.14",
+      "datasource": "rubygems",
+      "depName": "twitter-text",
+      "lockedVersion": "1.14.7",
+      "managerData": Object {
+        "lineNumber": 94,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.2019",
+      "datasource": "rubygems",
+      "depName": "tzinfo-data",
+      "lockedVersion": "1.2019.3",
+      "managerData": Object {
+        "lineNumber": 95,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.2",
+      "datasource": "rubygems",
+      "depName": "webpacker",
+      "lockedVersion": "4.2.2",
+      "managerData": Object {
+        "lineNumber": 96,
+      },
+    },
+    Object {
+      "depName": "webpush",
+      "lockedVersion": "0.3.8",
+      "managerData": Object {
+        "lineNumber": 97,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "json-ld",
+      "lockedVersion": "3.0.2",
+      "managerData": Object {
+        "lineNumber": 99,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "rubygems",
+      "depName": "json-ld-preloaded",
+      "lockedVersion": "3.0.6",
+      "managerData": Object {
+        "lineNumber": 100,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.3",
+      "datasource": "rubygems",
+      "depName": "rdf-normalize",
+      "lockedVersion": "0.3.3",
+      "managerData": Object {
+        "lineNumber": 101,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.21",
+      "datasource": "rubygems",
+      "depName": "fabrication",
+      "depTypes": Array [
+        "development",
+        "test",
+      ],
+      "lockedVersion": "2.21.0",
+      "managerData": Object {
+        "lineNumber": 104,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.5",
+      "datasource": "rubygems",
+      "depName": "fuubar",
+      "depTypes": Array [
+        "development",
+        "test",
+      ],
+      "lockedVersion": "2.5.0",
+      "managerData": Object {
+        "lineNumber": 105,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.9",
+      "datasource": "rubygems",
+      "depName": "i18n-tasks",
+      "depTypes": Array [
+        "development",
+        "test",
+      ],
+      "lockedVersion": "0.9.29",
+      "managerData": Object {
+        "lineNumber": 106,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.7",
+      "datasource": "rubygems",
+      "depName": "pry-byebug",
+      "depTypes": Array [
+        "development",
+        "test",
+      ],
+      "lockedVersion": "3.7.0",
+      "managerData": Object {
+        "lineNumber": 107,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.3",
+      "datasource": "rubygems",
+      "depName": "pry-rails",
+      "depTypes": Array [
+        "development",
+        "test",
+      ],
+      "lockedVersion": "0.3.9",
+      "managerData": Object {
+        "lineNumber": 108,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.9",
+      "datasource": "rubygems",
+      "depName": "rspec-rails",
+      "depTypes": Array [
+        "development",
+        "test",
+      ],
+      "lockedVersion": "3.9.0",
+      "managerData": Object {
+        "lineNumber": 109,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.5",
+      "datasource": "rubygems",
+      "depName": "private_address_check",
+      "depTypes": Array [
+        "production",
+        "test",
+      ],
+      "lockedVersion": "0.5.0",
+      "managerData": Object {
+        "lineNumber": 113,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.29",
+      "datasource": "rubygems",
+      "depName": "capybara",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "3.29.0",
+      "managerData": Object {
+        "lineNumber": 117,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.2",
+      "datasource": "rubygems",
+      "depName": "climate_control",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "0.2.0",
+      "managerData": Object {
+        "lineNumber": 118,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.10",
+      "datasource": "rubygems",
+      "depName": "faker",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "2.10.0",
+      "managerData": Object {
+        "lineNumber": 119,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.2",
+      "datasource": "rubygems",
+      "depName": "microformats",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "4.2.0",
+      "managerData": Object {
+        "lineNumber": 120,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.0",
+      "datasource": "rubygems",
+      "depName": "rails-controller-testing",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "1.0.4",
+      "managerData": Object {
+        "lineNumber": 121,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "rubygems",
+      "depName": "rspec-sidekiq",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "3.0.3",
+      "managerData": Object {
+        "lineNumber": 122,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.17",
+      "datasource": "rubygems",
+      "depName": "simplecov",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "0.17.1",
+      "managerData": Object {
+        "lineNumber": 123,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.7",
+      "datasource": "rubygems",
+      "depName": "webmock",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "3.7.6",
+      "managerData": Object {
+        "lineNumber": 124,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.30",
+      "datasource": "rubygems",
+      "depName": "parallel_tests",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "2.30.0",
+      "managerData": Object {
+        "lineNumber": 125,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.7",
+      "datasource": "rubygems",
+      "depName": "active_record_query_trace",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "1.7",
+      "managerData": Object {
+        "lineNumber": 129,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "rubygems",
+      "depName": "annotate",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "3.0.3",
+      "managerData": Object {
+        "lineNumber": 130,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.5",
+      "datasource": "rubygems",
+      "depName": "better_errors",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "2.5.1",
+      "managerData": Object {
+        "lineNumber": 131,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.7",
+      "datasource": "rubygems",
+      "depName": "binding_of_caller",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "0.8.0",
+      "managerData": Object {
+        "lineNumber": 132,
+      },
+    },
+    Object {
+      "currentValue": "~> 6.0",
+      "datasource": "rubygems",
+      "depName": "bullet",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "6.0.2",
+      "managerData": Object {
+        "lineNumber": 133,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.7",
+      "datasource": "rubygems",
+      "depName": "letter_opener",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "1.7.0",
+      "managerData": Object {
+        "lineNumber": 134,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.3",
+      "datasource": "rubygems",
+      "depName": "letter_opener_web",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "1.3.4",
+      "managerData": Object {
+        "lineNumber": 135,
+      },
+    },
+    Object {
+      "depName": "memory_profiler",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "0.9.14",
+      "managerData": Object {
+        "lineNumber": 136,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 0.78",
+      "datasource": "rubygems",
+      "depName": "rubocop",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "0.78.0",
+      "managerData": Object {
+        "lineNumber": 137,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.4",
+      "datasource": "rubygems",
+      "depName": "rubocop-rails",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "2.4.0",
+      "managerData": Object {
+        "lineNumber": 138,
+      },
+    },
+    Object {
+      "currentValue": "~> 4.7",
+      "datasource": "rubygems",
+      "depName": "brakeman",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "4.7.2",
+      "managerData": Object {
+        "lineNumber": 139,
+      },
+    },
+    Object {
+      "currentValue": "~> 0.6",
+      "datasource": "rubygems",
+      "depName": "bundler-audit",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "0.6.1",
+      "managerData": Object {
+        "lineNumber": 140,
+      },
+    },
+    Object {
+      "currentValue": "~> 3.11",
+      "datasource": "rubygems",
+      "depName": "capistrano",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "3.11.2",
+      "managerData": Object {
+        "lineNumber": 142,
+      },
+    },
+    Object {
+      "currentValue": "~> 1.4",
+      "datasource": "rubygems",
+      "depName": "capistrano-rails",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "1.4.0",
+      "managerData": Object {
+        "lineNumber": 143,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.1",
+      "datasource": "rubygems",
+      "depName": "capistrano-rbenv",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "2.1.4",
+      "managerData": Object {
+        "lineNumber": 144,
+      },
+    },
+    Object {
+      "currentValue": "~> 2.0",
+      "datasource": "rubygems",
+      "depName": "capistrano-yarn",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "2.0.2",
+      "managerData": Object {
+        "lineNumber": 145,
+      },
+    },
+    Object {
+      "depName": "derailed_benchmarks",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "1.4.3",
+      "managerData": Object {
+        "lineNumber": 147,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "stackprof",
+      "depTypes": Array [
+        "development",
+      ],
+      "lockedVersion": "0.2.15",
+      "managerData": Object {
+        "lineNumber": 148,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 0.11",
+      "datasource": "rubygems",
+      "depName": "lograge",
+      "depTypes": Array [
+        "production",
+      ],
+      "lockedVersion": "0.11.2",
+      "managerData": Object {
+        "lineNumber": 152,
+      },
+    },
+    Object {
+      "currentValue": "~> 5.0",
+      "datasource": "rubygems",
+      "depName": "redis-rails",
+      "depTypes": Array [
+        "production",
+      ],
+      "lockedVersion": "5.0.2",
+      "managerData": Object {
+        "lineNumber": 153,
+      },
+    },
+    Object {
+      "depName": "concurrent-ruby",
+      "lockedVersion": "1.1.5",
+      "managerData": Object {
+        "lineNumber": 156,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "connection_pool",
+      "lockedVersion": "2.2.2",
+      "managerData": Object {
+        "lineNumber": 157,
+      },
+      "skipReason": "no-version",
+    },
+  ],
+  "registryUrls": Array [
+    "https://rubygems.org",
+  ],
+}
+`;
+
+exports[`lib/manager/bundler/extract extractPackageFile() parse webpacker Gemfile 1`] = `
+Object {
+  "compatibility": Object {
+    "bundler": "1.17.3",
+  },
+  "deps": Array [
+    Object {
+      "depName": "rails",
+      "lockedVersion": "6.0.1",
+      "managerData": Object {
+        "lineNumber": 4,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 11.1",
+      "datasource": "rubygems",
+      "depName": "rake",
+      "lockedVersion": "13.0.0",
+      "managerData": Object {
+        "lineNumber": 5,
+      },
+    },
+    Object {
+      "depName": "rack-proxy",
+      "lockedVersion": "0.6.5",
+      "managerData": Object {
+        "lineNumber": 6,
+      },
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 5.0",
+      "datasource": "rubygems",
+      "depName": "minitest",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "5.13.0",
+      "managerData": Object {
+        "lineNumber": 9,
+      },
+    },
+    Object {
+      "depName": "byebug",
+      "depTypes": Array [
+        "test",
+      ],
+      "lockedVersion": "11.0.1",
+      "managerData": Object {
+        "lineNumber": 10,
+      },
+      "skipReason": "no-version",
+    },
+  ],
+  "registryUrls": Array [
+    "https://rubygems.org",
+  ],
+}
+`;
+
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
   "compatibility": Object {
@@ -10,6 +1312,7 @@ Object {
       "currentValue": ">= 11.1",
       "datasource": "rubygems",
       "depName": "rake",
+      "lockedVersion": "12.3.1",
       "managerData": Object {
         "lineNumber": 9,
       },
@@ -18,6 +1321,7 @@ Object {
       "currentValue": ">= 2.15",
       "datasource": "rubygems",
       "depName": "capybara",
+      "lockedVersion": "3.10.1",
       "managerData": Object {
         "lineNumber": 11,
       },
@@ -26,12 +1330,14 @@ Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "rack-cache",
+      "lockedVersion": "1.8.0",
       "managerData": Object {
         "lineNumber": 13,
       },
     },
     Object {
       "depName": "sass-rails",
+      "lockedVersion": "5.0.7",
       "managerData": Object {
         "lineNumber": 14,
       },
@@ -41,12 +1347,14 @@ Object {
       "currentValue": "~> 5",
       "datasource": "rubygems",
       "depName": "turbolinks",
+      "lockedVersion": "5.2.0",
       "managerData": Object {
         "lineNumber": 15,
       },
     },
     Object {
       "depName": "webpacker",
+      "lockedVersion": "4.0.0.pre.3",
       "managerData": Object {
         "lineNumber": 16,
       },
@@ -56,6 +1364,7 @@ Object {
       "currentValue": "~> 3.1.11",
       "datasource": "rubygems",
       "depName": "bcrypt",
+      "lockedVersion": "3.1.12",
       "managerData": Object {
         "lineNumber": 20,
       },
@@ -64,6 +1373,7 @@ Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "uglifier",
+      "lockedVersion": "4.1.19",
       "managerData": Object {
         "lineNumber": 24,
       },
@@ -72,6 +1382,7 @@ Object {
       "currentValue": ">= 2.0.0",
       "datasource": "rubygems",
       "depName": "json",
+      "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 27,
       },
@@ -80,6 +1391,7 @@ Object {
       "currentValue": ">= 0.47",
       "datasource": "rubygems",
       "depName": "rubocop",
+      "lockedVersion": "0.61.1",
       "managerData": Object {
         "lineNumber": 29,
       },
@@ -91,6 +1403,7 @@ Object {
       "depTypes": Array [
         "doc",
       ],
+      "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 32,
       },
@@ -102,6 +1415,7 @@ Object {
       "depTypes": Array [
         "doc",
       ],
+      "lockedVersion": "3.2.3",
       "managerData": Object {
         "lineNumber": 33,
       },
@@ -111,6 +1425,7 @@ Object {
       "depTypes": Array [
         "doc",
       ],
+      "lockedVersion": "1.3.4",
       "managerData": Object {
         "lineNumber": 34,
       },
@@ -123,12 +1438,14 @@ Object {
       "depTypes": Array [
         "doc",
       ],
+      "lockedVersion": "1.2.0",
       "managerData": Object {
         "lineNumber": 35,
       },
     },
     Object {
       "depName": "dalli",
+      "lockedVersion": "2.7.9",
       "managerData": Object {
         "lineNumber": 39,
       },
@@ -138,12 +1455,14 @@ Object {
       "currentValue": ">= 3.0.5, < 3.2",
       "datasource": "rubygems",
       "depName": "listen",
+      "lockedVersion": "3.1.5",
       "managerData": Object {
         "lineNumber": 40,
       },
     },
     Object {
       "depName": "libxml-ruby",
+      "lockedVersion": "3.1.0",
       "managerData": Object {
         "lineNumber": 41,
       },
@@ -151,6 +1470,7 @@ Object {
     },
     Object {
       "depName": "connection_pool",
+      "lockedVersion": "2.2.2",
       "managerData": Object {
         "lineNumber": 42,
       },
@@ -160,6 +1480,7 @@ Object {
       "currentValue": ">= 1.1.0",
       "datasource": "rubygems",
       "depName": "bootsnap",
+      "lockedVersion": "1.3.2",
       "managerData": Object {
         "lineNumber": 45,
       },
@@ -169,6 +1490,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "1.27.4",
       "managerData": Object {
         "lineNumber": 49,
       },
@@ -179,6 +1501,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "4.3.1",
       "managerData": Object {
         "lineNumber": 50,
       },
@@ -189,6 +1512,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "5.2.3",
       "managerData": Object {
         "lineNumber": 51,
       },
@@ -199,6 +1523,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "2.1.1",
       "managerData": Object {
         "lineNumber": 52,
       },
@@ -209,6 +1534,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "4.1.5",
       "managerData": Object {
         "lineNumber": 53,
       },
@@ -219,6 +1545,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "3.2.0.RC1",
       "managerData": Object {
         "lineNumber": 54,
       },
@@ -229,6 +1556,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "2.7.0",
       "managerData": Object {
         "lineNumber": 55,
       },
@@ -239,6 +1567,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "0.14.3",
       "managerData": Object {
         "lineNumber": 56,
       },
@@ -249,6 +1578,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "1.5.0",
       "managerData": Object {
         "lineNumber": 57,
       },
@@ -259,6 +1589,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "4.1.3",
       "managerData": Object {
         "lineNumber": 58,
       },
@@ -269,6 +1600,7 @@ Object {
       "depTypes": Array [
         "job",
       ],
+      "lockedVersion": "5.14.0",
       "managerData": Object {
         "lineNumber": 59,
       },
@@ -279,6 +1611,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "3.12.0",
       "managerData": Object {
         "lineNumber": 64,
       },
@@ -289,6 +1622,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "0.6.3",
       "managerData": Object {
         "lineNumber": 66,
       },
@@ -301,6 +1635,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "4.0.3",
       "managerData": Object {
         "lineNumber": 67,
       },
@@ -310,6 +1645,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "1.6.0",
       "managerData": Object {
         "lineNumber": 69,
       },
@@ -320,6 +1656,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "0.3.0",
       "managerData": Object {
         "lineNumber": 71,
       },
@@ -330,6 +1667,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "0.7.1",
       "managerData": Object {
         "lineNumber": 73,
       },
@@ -340,6 +1678,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "0.7.3",
       "managerData": Object {
         "lineNumber": 74,
       },
@@ -350,6 +1689,7 @@ Object {
       "depTypes": Array [
         "cable",
       ],
+      "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 75,
       },
@@ -360,6 +1700,7 @@ Object {
       "depTypes": Array [
         "storage",
       ],
+      "lockedVersion": "1.23.1",
       "managerData": Object {
         "lineNumber": 80,
       },
@@ -372,6 +1713,7 @@ Object {
       "depTypes": Array [
         "storage",
       ],
+      "lockedVersion": "1.15.0",
       "managerData": Object {
         "lineNumber": 81,
       },
@@ -381,6 +1723,7 @@ Object {
       "depTypes": Array [
         "storage",
       ],
+      "lockedVersion": "0.15.0.preview",
       "managerData": Object {
         "lineNumber": 82,
       },
@@ -393,12 +1736,14 @@ Object {
       "depTypes": Array [
         "storage",
       ],
+      "lockedVersion": "1.7.1",
       "managerData": Object {
         "lineNumber": 84,
       },
     },
     Object {
       "depName": "aws-sdk-sns",
+      "lockedVersion": "1.8.1",
       "managerData": Object {
         "lineNumber": 88,
       },
@@ -406,6 +1751,7 @@ Object {
     },
     Object {
       "depName": "webmock",
+      "lockedVersion": "3.4.2",
       "managerData": Object {
         "lineNumber": 89,
       },
@@ -416,6 +1762,7 @@ Object {
       "depTypes": Array [
         "ujs",
       ],
+      "lockedVersion": "0.0.4",
       "managerData": Object {
         "lineNumber": 92,
       },
@@ -426,6 +1773,7 @@ Object {
       "depTypes": Array [
         "ujs",
       ],
+      "lockedVersion": "2.1.0",
       "managerData": Object {
         "lineNumber": 93,
       },
@@ -436,6 +1784,7 @@ Object {
       "depTypes": Array [
         "test",
       ],
+      "lockedVersion": "1.4.0",
       "managerData": Object {
         "lineNumber": 101,
       },
@@ -446,6 +1795,7 @@ Object {
       "depTypes": Array [
         "test",
       ],
+      "lockedVersion": "0.1.9",
       "managerData": Object {
         "lineNumber": 102,
       },
@@ -456,6 +1806,7 @@ Object {
       "depTypes": Array [
         "test",
       ],
+      "lockedVersion": "0.2.12",
       "managerData": Object {
         "lineNumber": 105,
       },
@@ -466,6 +1817,7 @@ Object {
       "depTypes": Array [
         "test",
       ],
+      "lockedVersion": "10.0.2",
       "managerData": Object {
         "lineNumber": 106,
       },
@@ -476,6 +1828,7 @@ Object {
       "depTypes": Array [
         "test",
       ],
+      "lockedVersion": "2.7.2",
       "managerData": Object {
         "lineNumber": 109,
       },
@@ -485,6 +1838,7 @@ Object {
       "currentValue": ">= 1.8.1",
       "datasource": "rubygems",
       "depName": "nokogiri",
+      "lockedVersion": "1.9.1",
       "managerData": Object {
         "lineNumber": 113,
       },
@@ -493,6 +1847,7 @@ Object {
       "currentValue": ">=1.4.6",
       "datasource": "rubygems",
       "depName": "racc",
+      "lockedVersion": "1.4.14",
       "managerData": Object {
         "lineNumber": 116,
       },
@@ -501,6 +1856,7 @@ Object {
       "currentValue": "~> 1.3.6",
       "datasource": "rubygems",
       "depName": "sqlite3",
+      "lockedVersion": "1.3.13",
       "managerData": Object {
         "lineNumber": 119,
       },
@@ -512,6 +1868,7 @@ Object {
       "depTypes": Array [
         "db",
       ],
+      "lockedVersion": "1.1.3",
       "managerData": Object {
         "lineNumber": 122,
       },
@@ -523,12 +1880,14 @@ Object {
       "depTypes": Array [
         "db",
       ],
+      "lockedVersion": "0.5.2",
       "managerData": Object {
         "lineNumber": 123,
       },
     },
     Object {
       "depName": "activerecord-jdbcsqlite3-adapter",
+      "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 129,
       },
@@ -539,6 +1898,7 @@ Object {
       "depTypes": Array [
         "db",
       ],
+      "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 131,
       },
@@ -549,6 +1909,7 @@ Object {
       "depTypes": Array [
         "db",
       ],
+      "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 132,
       },
@@ -558,6 +1919,7 @@ Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
+      "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 135,
       },
@@ -569,6 +1931,7 @@ Object {
       "depTypes": Array [
         "db",
       ],
+      "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 137,
       },
@@ -580,6 +1943,7 @@ Object {
       "depTypes": Array [
         "db",
       ],
+      "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 138,
       },
@@ -588,6 +1952,7 @@ Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "psych",
+      "lockedVersion": "3.0.3",
       "managerData": Object {
         "lineNumber": 146,
       },
@@ -616,6 +1981,7 @@ Object {
     },
     Object {
       "depName": "tzinfo-data",
+      "lockedVersion": "1.2018.7",
       "managerData": Object {
         "lineNumber": 159,
       },
@@ -625,6 +1991,7 @@ Object {
       "currentValue": ">= 0.1.0",
       "datasource": "rubygems",
       "depName": "wdm",
+      "lockedVersion": "0.1.1",
       "managerData": Object {
         "lineNumber": 160,
       },

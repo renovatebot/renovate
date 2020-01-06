@@ -17,6 +17,22 @@ const sourceGroupGemfile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.sourceGroup',
   'utf8'
 );
+const webPackerGemfile = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.webpacker',
+  'utf8'
+);
+const webPackerGemfileLock = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.webpacker.lock',
+  'utf8'
+);
+const mastodonGemfile = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.mastodon',
+  'utf8'
+);
+const mastodonGemfileLock = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.mastodon.lock',
+  'utf8'
+);
 
 function validateGems(raw, parsed) {
   const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
@@ -39,6 +55,18 @@ describe('lib/manager/bundler/extract', () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       validateGems(sourceGroupGemfile, res);
+    });
+    it('parse webpacker Gemfile', async () => {
+      platform.getFile.mockReturnValueOnce(webPackerGemfileLock);
+      const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
+      expect(res).toMatchSnapshot();
+      validateGems(webPackerGemfile, res);
+    });
+    it('parse mastodon Gemfile', async () => {
+      platform.getFile.mockReturnValueOnce(mastodonGemfileLock);
+      const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
+      expect(res).toMatchSnapshot();
+      validateGems(mastodonGemfile, res);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { extractLockFileEntries } from '../../../lib/manager/bundler/gemfile';
+import { extractLockFileEntries } from '../../../lib/manager/bundler/locked-version';
 
 const gemLockFile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.rails.lock',
