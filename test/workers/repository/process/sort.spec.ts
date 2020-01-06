@@ -1,6 +1,4 @@
-const {
-  sortBranches,
-} = require('../../../../lib/workers/repository/process/sort');
+import { sortBranches } from '../../../../lib/workers/repository/process/sort';
 
 describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {

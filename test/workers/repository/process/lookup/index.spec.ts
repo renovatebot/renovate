@@ -1,29 +1,29 @@
-const nock = require('nock');
-const lookup = require('../../../../../lib/workers/repository/process/lookup');
-const qJson = require('../../../../config/npm/_fixtures/01.json');
-const helmetJson = require('../../../../config/npm/_fixtures/02.json');
-const coffeelintJson = require('../../../../config/npm/_fixtures/coffeelint.json');
-const webpackJson = require('../../../../config/npm/_fixtures/webpack.json');
-const nextJson = require('../../../../config/npm/_fixtures/next.json');
-const vueJson = require('../../../../config/npm/_fixtures/vue.json');
-const typescriptJson = require('../../../../config/npm/_fixtures/typescript.json');
-/** @type any */
-const docker = require('../../../../../lib/datasource/docker');
-/** @type any */
-const gitSubmodules = require('../../../../../lib/datasource/git-submodules');
-const defaults = require('../../../../../lib/config/defaults');
+import nock from 'nock';
+import * as lookup from '../../../../../lib/workers/repository/process/lookup';
+import qJson from '../../../../config/npm/_fixtures/01.json';
+import helmetJson from '../../../../config/npm/_fixtures/02.json';
+import coffeelintJson from '../../../../config/npm/_fixtures/coffeelint.json';
+import webpackJson from '../../../../config/npm/_fixtures/webpack.json';
+import nextJson from '../../../../config/npm/_fixtures/next.json';
+import vueJson from '../../../../config/npm/_fixtures/vue.json';
+import typescriptJson from '../../../../config/npm/_fixtures/typescript.json';
+import * as _docker from '../../../../../lib/datasource/docker';
+import * as _gitSubmodules from '../../../../../lib/datasource/git-submodules';
+import { mocked, getConfig } from '../../../../util';
 
 jest.mock('../../../../../lib/datasource/docker');
 jest.mock('../../../../../lib/datasource/git-submodules');
 
 qJson.latestVersion = '1.4.1';
 
-/** @type any */
+const docker = mocked(_docker);
+const gitSubmodules = mocked(_gitSubmodules);
+
 let config;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
-    config = { ...defaults.getConfig() };
+    config = getConfig();
     config.manager = 'npm';
     config.versionScheme = 'npm';
     config.rangeStrategy = 'replace';
@@ -1087,7 +1087,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = 'docker';
       config.pinDigests = true;
-      docker.getPkgReleases.mockReturnValueOnce({
+      docker.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1097,8 +1097,8 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockReturnValueOnce('sha256:0123456789abcdef');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -1108,7 +1108,7 @@ describe('workers/repository/process/lookup', () => {
         config.depName = 'node';
         config.datasource = 'docker';
         config.versionScheme = 'docker';
-        docker.getPkgReleases.mockReturnValueOnce({
+        docker.getPkgReleases.mockResolvedValueOnce({
           releases: [
             { version: '8.1.0' },
             { version: '8.1.5' },
@@ -1130,7 +1130,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = 'docker';
       config.pinDigests = true;
-      docker.getPkgReleases.mockReturnValueOnce({
+      docker.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1140,7 +1140,7 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -1149,7 +1149,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = 'docker';
       config.pinDigests = true;
-      docker.getPkgReleases.mockReturnValueOnce({
+      docker.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1162,7 +1162,7 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -1171,7 +1171,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = 'docker';
       config.pinDigests = true;
-      docker.getPkgReleases.mockReturnValueOnce({
+      docker.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1184,7 +1184,7 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce(null);
+      docker.getDigest.mockResolvedValueOnce(null);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
@@ -1194,7 +1194,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = 'docker';
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getPkgReleases.mockReturnValueOnce({
+      docker.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1204,8 +1204,8 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockReturnValueOnce('sha256:0123456789abcdef');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -1215,7 +1215,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = 'docker';
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getPkgReleases.mockReturnValueOnce({
+      docker.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: 'alpine',
@@ -1228,14 +1228,14 @@ describe('workers/repository/process/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
     it('handles git submodule update', async () => {
       config.datasource = 'gitSubmodules';
       config.versionScheme = 'git';
-      gitSubmodules.getPkgReleases.mockReturnValueOnce({
+      gitSubmodules.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',

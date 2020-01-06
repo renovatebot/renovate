@@ -1,15 +1,19 @@
-import * as _exec from '../../../../lib/util/exec';
+import { exec as _exec } from 'child_process';
 import * as _lernaHelper from '../../../../lib/manager/npm/post-update/lerna';
 import { platform as _platform } from '../../../../lib/platform';
 import { mocked } from '../../../util';
+import { mockExecAll } from '../../../execUtil';
 
-jest.mock('../../../../lib/util/exec');
+jest.mock('child_process');
 
-const exec = mocked(_exec).exec;
+const exec: jest.Mock<typeof _exec> = _exec as any;
 const lernaHelper = mocked(_lernaHelper);
 const platform = mocked(_platform);
 
 describe('generateLockFiles()', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   it('returns if no lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});
     expect(res.error).toBe(false);
@@ -18,7 +22,7 @@ describe('generateLockFiles()', () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })
     );
-    exec.mockResolvedValueOnce({} as never);
+    const execSnapshots = mockExecAll(exec);
     const skipInstalls = true;
     const res = await lernaHelper.generateLockFiles(
       'npm',
@@ -27,12 +31,13 @@ describe('generateLockFiles()', () => {
       skipInstalls
     );
     expect(res.error).toBe(false);
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('performs full npm install', async () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })
     );
-    exec.mockResolvedValueOnce({} as never);
+    const execSnapshots = mockExecAll(exec);
     const skipInstalls = false;
     const binarySource = 'global';
     const res = await lernaHelper.generateLockFiles(
@@ -43,19 +48,22 @@ describe('generateLockFiles()', () => {
       binarySource
     );
     expect(res.error).toBe(false);
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('generates yarn.lock files', async () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ devDependencies: { lerna: '2.0.0' } })
     );
-    exec.mockResolvedValueOnce({} as never);
+    const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles('yarn', 'some-dir', {});
     expect(res.error).toBe(false);
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('defaults to latest', async () => {
     platform.getFile.mockReturnValueOnce(undefined);
-    exec.mockResolvedValueOnce({} as never);
+    const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles('npm', 'some-dir', {});
     expect(res.error).toBe(false);
+    expect(execSnapshots).toMatchSnapshot();
   });
 });

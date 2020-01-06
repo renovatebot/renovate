@@ -221,29 +221,6 @@ async function abandonPr(prNo: number): Promise<void> {
   );
 }
 
-export async function getPr(pullRequestId: number): Promise<Pr | null> {
-  logger.debug(`getPr(${pullRequestId})`);
-  if (!pullRequestId) {
-    return null;
-  }
-  const azureApiGit = await azureApi.gitApi();
-  const prs = await azureApiGit.getPullRequests(config.repoId, { status: 4 });
-  const azurePr: any = prs.find(item => item.pullRequestId === pullRequestId);
-  if (!azurePr) {
-    return null;
-  }
-  const labels = await azureApiGit.getPullRequestLabels(
-    config.repoId,
-    pullRequestId
-  );
-  azurePr.labels = labels
-    .filter(label => label.active)
-    .map(label => label.name);
-  logger.debug(`pr: (${azurePr})`);
-  const pr = azureHelper.getRenovatePRFormat(azurePr);
-  return pr;
-}
-
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
@@ -269,6 +246,31 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+export async function getPr(pullRequestId: number): Promise<Pr | null> {
+  logger.debug(`getPr(${pullRequestId})`);
+  if (!pullRequestId) {
+    return null;
+  }
+  const azurePr = (await getPrList()).find(
+    item => item.pullRequestId === pullRequestId
+  );
+
+  if (!azurePr) {
+    return null;
+  }
+
+  const azureApiGit = await azureApi.gitApi();
+  const labels = await azureApiGit.getPullRequestLabels(
+    config.repoId,
+    pullRequestId
+  );
+
+  azurePr.labels = labels
+    .filter(label => label.active)
+    .map(label => label.name);
+  return azurePr;
+}
+
 export async function findPr(
   branchName: string,
   prTitle: string | null,
@@ -280,7 +282,9 @@ export async function findPr(
   try {
     const prs = await getPrList();
 
-    prsFiltered = prs.filter(item => item.head.ref === branchName);
+    prsFiltered = prs.filter(
+      item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
+    );
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter(item => item.title === prTitle);
