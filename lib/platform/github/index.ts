@@ -13,6 +13,7 @@ import {
   RepoConfig,
   Issue,
   VulnerabilityAlert,
+  EnsureIssueConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -1276,14 +1277,14 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
-export async function ensureIssue(
-  title: string,
-  rawbody: string,
+export async function ensureIssue({
+  title,
+  body: rawBody,
   once = false,
-  reopen = true
-): Promise<string | null> {
+  shouldReOpen = true,
+}: EnsureIssueConfig): Promise<string | null> {
   logger.debug(`ensureIssue(${title})`);
-  const body = sanitize(rawbody);
+  const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -1294,7 +1295,7 @@ export async function ensureIssue(
           logger.debug('Issue already closed - skipping recreation');
           return null;
         }
-        if (reopen) {
+        if (shouldReOpen) {
           logger.info('Reopening previously closed issue');
         }
         issue = issues[issues.length - 1];
@@ -1312,7 +1313,7 @@ export async function ensureIssue(
         logger.info('Issue is open and up to date - nothing to do');
         return null;
       }
-      if (reopen) {
+      if (shouldReOpen) {
         logger.info('Patching issue');
         await api.patch(
           `repos/${config.parentRepo || config.repository}/issues/${
