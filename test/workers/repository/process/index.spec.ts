@@ -1,10 +1,10 @@
-const {
-  processRepo,
-} = require('../../../../lib/workers/repository/process/index');
-/** @type any */
-const extractUpdate = require('../../../../lib/workers/repository/process/extract-update');
+import { processRepo } from '../../../../lib/workers/repository/process/index';
+import * as _extractUpdate from '../../../../lib/workers/repository/process/extract-update';
+import { mocked } from '../../../util';
 
 jest.mock('../../../../lib/workers/repository/process/extract-update');
+
+const extractAndUpdate = mocked(_extractUpdate).extractAndUpdate;
 
 let config;
 beforeEach(() => {
@@ -19,7 +19,7 @@ describe('workers/repository/process/index', () => {
       expect(res).toMatchSnapshot();
     });
     it('processes baseBranches', async () => {
-      extractUpdate.extractAndUpdate.mockReturnValue({});
+      extractAndUpdate.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
       const res = await processRepo(config);
       expect(res).toMatchSnapshot();

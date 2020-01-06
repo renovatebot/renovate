@@ -9,7 +9,7 @@ export async function getPrConfigDescription(
   prBody += emojify(`:date: **Schedule**: `);
   if (
     config.schedule &&
-    config.schedule !== 'at any time' &&
+    (config.schedule as never) !== 'at any time' &&
     config.schedule[0] !== 'at any time'
   ) {
     prBody += `"${config.schedule}"`;

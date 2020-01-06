@@ -20,6 +20,7 @@ export type PrBodyConfig<T extends PrBodyUpgrade = PrBodyUpgrade> = {
   prBodyTemplate: string;
   prBodyColumns: string[];
   prBodyDefinitions: Record<string, string>;
+  prTitle?: string;
   updateType: string;
   isGroup?: boolean;
   isPin?: boolean;
