@@ -142,7 +142,7 @@
     "parse-link-header": "1.0.1",
     "pnpm": "3.8.1",
     "registry-auth-token": "4.0.0",
-    "semver": "6.3.0",
+    "semver": "7.1.1",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "simple-git": "1.129.0",
