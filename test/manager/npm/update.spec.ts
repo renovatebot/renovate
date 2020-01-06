@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import * as npmUpdater from '../../../lib/manager/npm/update';
-import { mocked } from '../../util';
 
 function readFixture(fixture) {
   return fs.readFileSync(
