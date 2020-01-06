@@ -1,11 +1,12 @@
-const { logger } = require('../../../logger');
-const { platform } = require('../../../platform');
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { PackageFile } from '../../../manager/common';
+import { RenovateConfig } from '../../../config';
 
-module.exports = {
-  raiseDeprecationWarnings,
-};
-
-async function raiseDeprecationWarnings(config, packageFiles) {
+export async function raiseDeprecationWarnings(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>
+): Promise<void> {
   if (!config.repoIsOnboarded) {
     return;
   }
@@ -16,7 +17,10 @@ async function raiseDeprecationWarnings(config, packageFiles) {
     return;
   }
   for (const [manager, files] of Object.entries(packageFiles)) {
-    const deprecatedPackages = {};
+    const deprecatedPackages: Record<
+      string,
+      { deprecationMessage?: string; depPackageFiles: string[] }
+    > = {};
     for (const packageFile of files) {
       for (const dep of packageFile.deps) {
         const { deprecationMessage } = dep;
@@ -33,7 +37,7 @@ async function raiseDeprecationWarnings(config, packageFiles) {
     }
 
     logger.debug({ deprecatedPackages });
-    const issueTitleList = [];
+    const issueTitleList: string[] = [];
     const issueTitlePrefix = 'Dependency deprecation warning:';
     for (const [depName, val] of Object.entries(deprecatedPackages)) {
       const { deprecationMessage, depPackageFiles } = val;

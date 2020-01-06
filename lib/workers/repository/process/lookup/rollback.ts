@@ -5,7 +5,7 @@ import { LookupUpdate } from './common';
 export interface RollbackConfig {
   currentValue?: string;
   depName?: string;
-  packageFile: Record<string, any>;
+  packageFile: string;
   versionScheme: string;
 }
 

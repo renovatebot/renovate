@@ -22,6 +22,7 @@ function cleanBranchName(branchName: string): string {
     .replace(/\s/g, ''); // whitespace
 }
 
+// TODO: fix return type
 export function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
