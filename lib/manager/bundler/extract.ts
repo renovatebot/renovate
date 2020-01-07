@@ -193,11 +193,9 @@ export async function extractPackageFile(
       logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
       const lockedEntries = extractLockFileEntries(lockContent);
       res.deps.forEach((dep, index) => {
-        const foundLockedDep = lockedEntries.deps.find(
-          entry => dep.depName === entry.depName
-        );
-        if (foundLockedDep) {
-          res.deps[index].lockedVersion = foundLockedDep.lockedVersion;
+        const lockedDepValue = lockedEntries.get(dep.depName);
+        if (lockedDepValue) {
+          res.deps[index].lockedVersion = lockedDepValue;
         }
       });
       const bundledWith = lockContent.match(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/);
