@@ -9,7 +9,7 @@ import { Pr } from '../../../lib/platform';
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig;
+  config = getConfig();
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];

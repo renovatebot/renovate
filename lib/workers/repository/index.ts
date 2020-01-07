@@ -9,7 +9,7 @@ import { processResult, ProcessResult } from './result';
 import { processRepo } from './process';
 import { finaliseRepo } from './finalise';
 import { ensureMasterIssue } from './master-issue';
-import { RenovateConfig } from '../../../test/util';
+import { RenovateConfig } from '../../config';
 
 // istanbul ignore next
 export async function renovateRepository(
