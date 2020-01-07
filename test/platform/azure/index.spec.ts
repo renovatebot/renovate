@@ -702,7 +702,13 @@ describe('platform/azure', () => {
 
   describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', () => {
-      const res = azure.setBranchStatus('test', 'test', 'test', 'test', 'test');
+      const res = azure.setBranchStatus({
+        branchName: 'test',
+        context: 'test',
+        description: 'test',
+        state: 'test',
+        url: 'test',
+      });
       expect(res).toBeUndefined();
     });
 

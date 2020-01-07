@@ -498,13 +498,13 @@ describe('platform/gitlab', () => {
   describe('setBranchStatus', () => {
     it('sets branch status', async () => {
       await initRepo();
-      await gitlab.setBranchStatus(
-        'some-branch',
-        'some-context',
-        'some-description',
-        'some-state',
-        'some-url'
-      );
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'some-state',
+        url: 'some-url',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
     });
   });
