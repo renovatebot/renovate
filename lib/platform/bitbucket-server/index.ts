@@ -864,7 +864,6 @@ export async function createPr({
   branchName,
   prTitle: title,
   prBody: rawDescription,
-  labels: _labels,
   useDefaultBranch,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
