@@ -7,71 +7,113 @@ import { exec, ExecOptions } from '../../lib/util/exec';
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 jest.mock('child_process');
 
-describe('exec()', () => {
-  it('wraps original exec() from "child_process" module', async () => {
-    const cases = [
-      ['foo', {}, 'foo', { encoding: 'utf-8' }],
-      [
-        'foo',
-        { docker: { image: 'bar' } },
-        'docker run --rm bar foo',
-        { encoding: 'utf-8' },
-      ],
-      [
-        'foo',
-        { docker: { image: 'bar', cmdWrap: 'su user -c {{ cmd }}' } },
-        'docker run --rm bar su user -c foo',
-        { encoding: 'utf-8' },
-      ],
-      [
-        'foo',
-        { docker: { image: 'bar', tag: 'latest' } },
-        'docker run --rm bar:latest foo',
-        { encoding: 'utf-8' },
-      ],
-      [
-        'foo',
-        { docker: { image: 'bar' }, cwd: '/current/working/directory' },
-        'docker run --rm -w "/current/working/directory" bar foo',
-        { encoding: 'utf-8', cwd: '/current/working/directory' },
-      ],
-      [
-        'foo',
-        {
-          docker: { image: 'bar', dockerUser: 'baz' },
+const image = 'example/image';
+
+const tag = '1.2.3';
+
+const cmd = 'echo hello';
+
+const cwd = '/current/working/directory';
+
+const volume_1 = '/path/to/volume-1';
+const volume_2 = '/path/to/volume-2';
+const volumes = [volume_1, volume_2];
+
+const dockerUser = 'ubuntu';
+
+const encoding = 'utf-8';
+
+const docker = { image };
+
+describe(`Child process execution wrapper`, () => {
+  // prettier-ignore
+  test.each([
+    // Transits env option
+    [
+      cmd,
+      { env: { FOO: 'BAR' } },
+      cmd,
+      { encoding, env: { FOO: 'BAR' } }
+    ],
+
+    // Recognizes docker options
+    [
+      cmd,
+      {},
+      cmd,
+      { encoding }
+    ],
+    [
+      cmd,
+      { docker },
+      `docker run --rm ${image} ${cmd}`,
+      { encoding },
+    ],
+
+    // Pre- and post-commands for Docker
+    [
+      cmd,
+      {
+        docker: {
+          image,
+          preCommands: ['echo "begin"'],
+          postCommands: ['echo \'end\''],
         },
-        'docker run --rm --user=baz bar foo',
-        { encoding: 'utf-8' },
-      ],
-      [
-        'foo',
-        {
-          docker: { image: 'bar', volumes: ['/path/to/volume'] },
-        },
-        'docker run --rm -v "/path/to/volume":"/path/to/volume" bar foo',
-        { encoding: 'utf-8' },
-      ],
-      [
-        'foo',
-        {
-          docker: { image: 'bar', envVars: ['SOMETHING_SENSIBLE'] },
-        },
-        'docker run --rm -e SOMETHING_SENSIBLE bar foo',
-        { encoding: 'utf-8' },
-      ],
-    ];
-    for (const [cmd, opts, expectedCmd, expectedOpts] of cases) {
-      let actualCmd: string | null = null;
-      let actualOpts: ChildProcessExecOptions | null = null;
-      cpExec.mockImplementationOnce((execCmd, execOpts, callback) => {
-        actualCmd = execCmd;
-        actualOpts = execOpts;
-        callback(null, { stdout: '', stderr: '' });
-        return undefined;
-      });
-      await exec(cmd as string, opts as ExecOptions);
-      expect(actualCmd).toEqual(expectedCmd);
-      expect(actualOpts).toEqual(expectedOpts);
-    }
+      },
+      `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd} && echo 'end'"`,
+      { encoding },
+    ],
+
+    // Docker tags
+    [
+      cmd,
+      { docker: { image, tag } },
+      `docker run --rm ${image}:${tag} ${cmd}`,
+      { encoding },
+    ],
+
+    // CWD mounting
+    [
+      cmd,
+      { docker: { image }, cwd },
+      `docker run --rm -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+      { encoding, cwd },
+    ],
+
+    // Docker user
+    [
+      cmd,
+      { docker: { image, dockerUser } },
+      `docker run --rm --user=${dockerUser} ${image} ${cmd}`,
+      { encoding },
+    ],
+
+    // Docker env vars
+    [
+      cmd,
+      { docker: { image, envVars: ['FOO', 'BAR', 'FOO'] } },
+      `docker run --rm -e FOO -e BAR ${image} ${cmd}`,
+      { encoding },
+    ],
+
+    // Volumes mounting
+    [
+      cmd,
+      { cwd, docker: { image, volumes } },
+      `docker run --rm -v "${volume_1}":"${volume_1}" -v "${volume_2}":"${volume_2}" -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+      { encoding, cwd },
+    ],
+  ])("%#: exec('%s', %j)", async (command, opts, expectedCmd, expectedOpts) => {
+    let actualCmd: string | null = null;
+    let actualOpts: ChildProcessExecOptions | null = null;
+    cpExec.mockImplementationOnce((execCmd, execOpts, callback) => {
+      actualCmd = execCmd;
+      actualOpts = execOpts;
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
+    });
+    await exec(command as string, opts as ExecOptions);
+    expect(actualCmd).toEqual(expectedCmd);
+    expect(actualOpts).toEqual(expectedOpts);
   });
 });

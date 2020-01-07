@@ -118,10 +118,10 @@ describe('workers/repository/master-issue', () => {
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.masterIssueTitle
       );
-      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         'This repository is up-to-date and has no outstanding updates open or pending.'
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -186,10 +186,10 @@ describe('workers/repository/master-issue', () => {
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.masterIssueTitle
       );
-      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
           'test/workers/repository/_fixtures/master-issue_with_8_PR.txt',
           'utf8'
@@ -223,10 +223,10 @@ describe('workers/repository/master-issue', () => {
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.masterIssueTitle
       );
-      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
           'test/workers/repository/_fixtures/master-issue_with_2_PR_edited.txt',
           'utf8'
@@ -269,10 +269,10 @@ describe('workers/repository/master-issue', () => {
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.masterIssueTitle
       );
-      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
           'test/workers/repository/_fixtures/master-issue_with_3_PR_in_progress.txt',
           'utf8'
@@ -310,10 +310,10 @@ describe('workers/repository/master-issue', () => {
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.masterIssueTitle
       );
-      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
           'test/workers/repository/_fixtures/master-issue_with_2_PR_closed_ignored.txt',
           'utf8'
@@ -364,10 +364,10 @@ describe('workers/repository/master-issue', () => {
       await masterIssue.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.masterIssueTitle
       );
-      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
           'test/workers/repository/_fixtures/master-issue_with_3_PR_in_approval.txt',
           'utf8'

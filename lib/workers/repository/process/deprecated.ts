@@ -61,7 +61,11 @@ export async function raiseDeprecationWarnings(
         logger.info('DRY-RUN: Ensure deprecation warning issue for ' + depName);
       } else {
         const ensureOnce = true;
-        await platform.ensureIssue(issueTitle, issueBody, ensureOnce);
+        await platform.ensureIssue({
+          title: issueTitle,
+          body: issueBody,
+          once: ensureOnce,
+        });
       }
     }
     logger.debug(
