@@ -473,7 +473,11 @@ describe('platform/bitbucket-server', () => {
         it('posts PR', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr('branch', 'title', 'body');
+          const { id } = await bitbucket.createPr({
+            branchName: 'branch',
+            prTitle: 'title',
+            prBody: 'body',
+          });
           expect(id).toBe(5);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
@@ -482,13 +486,13 @@ describe('platform/bitbucket-server', () => {
         it('posts PR default branch', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr(
-            'branch',
-            'title',
-            'body',
-            null,
-            true
-          );
+          const { id } = await bitbucket.createPr({
+            branchName: 'branch',
+            prTitle: 'title',
+            prBody: 'body',
+            labels: null,
+            useDefaultBranch: true,
+          });
           expect(id).toBe(5);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
@@ -919,51 +923,51 @@ Followed by some information.
           await initRepo();
           api.get.mockClear();
 
-          await bitbucket.setBranchStatus(
-            'somebranch',
-            'context-2',
-            null as any,
-            'success'
-          );
+          await bitbucket.setBranchStatus({
+            branchName: 'somebranch',
+            context: 'context-2',
+            description: null as any,
+            state: 'success',
+          });
 
-          await bitbucket.setBranchStatus(
-            'somebranch',
-            'context-2',
-            null as any,
-            'failed'
-          );
+          await bitbucket.setBranchStatus({
+            branchName: 'somebranch',
+            context: 'context-2',
+            description: null as any,
+            state: 'failed',
+          });
 
-          await bitbucket.setBranchStatus(
-            'somebranch',
-            'context-2',
-            null as any,
-            'failure'
-          );
+          await bitbucket.setBranchStatus({
+            branchName: 'somebranch',
+            context: 'context-2',
+            description: null as any,
+            state: 'failure',
+          });
 
-          await bitbucket.setBranchStatus(
-            'somebranch',
-            'context-2',
-            null as any,
-            'pending'
-          );
+          await bitbucket.setBranchStatus({
+            branchName: 'somebranch',
+            context: 'context-2',
+            description: null as any,
+            state: 'pending',
+          });
 
           api.post.mockImplementationOnce(() => {
             throw new Error('requst-failed');
           });
 
-          await bitbucket.setBranchStatus(
-            'somebranch',
-            'context-2',
-            null as any,
-            'success'
-          );
+          await bitbucket.setBranchStatus({
+            branchName: 'somebranch',
+            context: 'context-2',
+            description: null as any,
+            state: 'success',
+          });
 
-          await bitbucket.setBranchStatus(
-            'somebranch',
-            'context-1',
-            null as any,
-            'success'
-          );
+          await bitbucket.setBranchStatus({
+            branchName: 'somebranch',
+            context: 'context-1',
+            description: null as any,
+            state: 'success',
+          });
 
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();

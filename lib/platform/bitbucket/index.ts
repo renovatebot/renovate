@@ -14,6 +14,9 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
+  EnsureIssueConfig,
+  BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -433,13 +436,13 @@ export async function getBranchStatusCheck(
   );
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
@@ -520,10 +523,10 @@ export function getPrBody(input: string): string {
     .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
 }
 
-export async function ensureIssue(
-  title: string,
-  body: string
-): Promise<string | null> {
+export async function ensureIssue({
+  title,
+  body,
+}: EnsureIssueConfig): Promise<string | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
 
@@ -667,13 +670,12 @@ export function ensureCommentRemoval(
 }
 
 // Creates PR and returns PR number
-export async function createPr(
-  branchName: string,
-  title: string,
-  description: string,
-  _labels?: string[],
-  useDefaultBranch = true
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: description,
+  useDefaultBranch = true,
+}: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
   const base = useDefaultBranch
