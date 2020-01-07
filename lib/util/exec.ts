@@ -21,7 +21,7 @@ export interface ExecResult {
 
 export function exec(
   cmd: string,
-  options?: ExecOptions & { docker?: DockerOptions }
+  options?: ExecOptions
 ): Promise<ExecResult> {
   let pExecCommand = cmd;
   const pExecOptions = { ...options, encoding: 'utf-8' };
