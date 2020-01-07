@@ -1,6 +1,6 @@
 import { isVersion } from '../../versioning/ruby';
 
-const DEP_REGEX = '(?<=\\().*(?=\\))';
+const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))');
 export function extractLockFileEntries(
   lockFileContent: string
 ): Map<string, string> {
@@ -22,7 +22,7 @@ export function extractLockFileEntries(
     // as per original ruby lockfile parser,a line whitespace 2,4,6 contains dependencies.
     if (whitespace === 4 && parsingGemSection) {
       // checking if the dependency string has version or not
-      const depString = eachLine.match(DEP_REGEX);
+      const depString = DEP_REGEX.exec(eachLine);
 
       if (depString) {
         const depValue = depString[0];
