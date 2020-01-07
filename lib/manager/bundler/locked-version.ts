@@ -1,4 +1,4 @@
-import { isValid } from '../../versioning/ruby';
+import { isVersion } from '../../versioning/ruby';
 
 const DEP_REGEX = '(?<=\\().*(?=\\))';
 export function extractLockFileEntries(
@@ -31,7 +31,7 @@ export function extractLockFileEntries(
           .replace('()', '')
           .trim();
 
-        const isValidVersion = isValid(depValue);
+        const isValidVersion = isVersion(depValue);
 
         if (!gemLock.get(depName) && isValidVersion) {
           gemLock.set(depName, depValue);

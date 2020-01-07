@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from '../../../lib/manager/bundler/extract';
 import { platform as _platform } from '../../../lib/platform';
-import { isValid } from '../../../lib/versioning/ruby/index';
+import { isValid } from '../../../lib/versioning/ruby';
 
 const platform: any = _platform;
 

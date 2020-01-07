@@ -28,7 +28,6 @@ describe('/lib/manager/bundler/locked-version', () => {
   });
   test('Parse WebPacker Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(webPackerGemfileLock);
-    console.log(parsedLockEntries);
     expect(parsedLockEntries).toMatchSnapshot();
   });
   test('Parse Mastodon Gem Lock File', () => {
