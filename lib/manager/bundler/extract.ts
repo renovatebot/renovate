@@ -12,7 +12,7 @@ function parseHashArgs(str: string): Partial<PackageDependency> {
     tag: null,
   };
 
-  for (const [key] of Object.entries(parsed)) {
+  for (const key of Object.keys(parsed)) {
     const regex = new RegExp(
       `,\\s*(:${key}\\s*=>|${key}\\s*:)\\s*(['"])(?<value>[^'"]+)\\2`
     );
