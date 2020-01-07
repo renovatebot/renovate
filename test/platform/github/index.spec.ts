@@ -1460,14 +1460,14 @@ describe('platform/github', () => {
       api.get.mockResolvedValueOnce({
         body: [],
       } as any);
-      const pr = await github.createPr(
-        'some-branch',
-        'The Title',
-        'Hello world',
-        ['deps', 'renovate'],
-        false,
-        { statusCheckVerify: true }
-      );
+      const pr = await github.createPr({
+        branchName: 'some-branch',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        useDefaultBranch: false,
+        platformOptions: { statusCheckVerify: true },
+      });
       expect(pr).toMatchSnapshot();
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -1481,13 +1481,13 @@ describe('platform/github', () => {
             },
           } as any)
       );
-      const pr = await github.createPr(
-        'some-branch',
-        'The Title',
-        'Hello world',
-        null,
-        true
-      );
+      const pr = await github.createPr({
+        branchName: 'some-branch',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: null,
+        useDefaultBranch: true,
+      });
       expect(pr).toMatchSnapshot();
       expect(api.post.mock.calls).toMatchSnapshot();
     });

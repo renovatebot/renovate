@@ -13,13 +13,13 @@ export async function updateArtifacts(
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
-  const env = {
-    ...getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']),
-  };
+
+  const env = getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']);
   env.PIPENV_CACHE_DIR =
     env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
   await ensureDir(env.PIPENV_CACHE_DIR);
   logger.debug('Using pipenv cache ' + env.PIPENV_CACHE_DIR);
+
   const lockFileName = pipfileName + '.lock';
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
