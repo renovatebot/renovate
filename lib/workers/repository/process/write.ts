@@ -1,13 +1,19 @@
-const { logger } = require('../../../logger');
-const branchWorker = require('../../branch');
-const { getPrsRemaining } = require('./limits');
-const limits = require('../../global/limits');
+import { logger } from '../../../logger';
+import { processBranch } from '../../branch';
+import { getPrsRemaining } from './limits';
+import { getLimitRemaining } from '../../global/limits';
+import { RenovateConfig } from '../../../config';
+import { PackageFile } from '../../../manager/common';
+import { AdditionalPackageFiles } from '../../../manager/npm/post-update';
+import { BranchConfig } from '../../common';
 
-module.exports = {
-  writeUpdates,
-};
+export type WriteUpdateResult = 'done' | 'automerged';
 
-async function writeUpdates(config, packageFiles, allBranches) {
+export async function writeUpdates(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]> | AdditionalPackageFiles,
+  allBranches: BranchConfig[]
+): Promise<WriteUpdateResult> {
   let branches = allBranches;
   logger.info(
     `Processing ${branches.length} branch${
@@ -26,10 +32,9 @@ async function writeUpdates(config, packageFiles, allBranches) {
   });
   let prsRemaining = await getPrsRemaining(config, branches);
   for (const branch of branches) {
-    const res = await branchWorker.processBranch(
+    const res = await processBranch(
       branch,
-      prsRemaining <= 0 ||
-        limits.getLimitRemaining('prCommitsPerRunLimit') <= 0,
+      prsRemaining <= 0 || getLimitRemaining('prCommitsPerRunLimit') <= 0,
       packageFiles
     );
     branch.res = res;

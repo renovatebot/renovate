@@ -6,4 +6,4 @@ authors = ["John Doe <john.doe@gmail.com>"]
 source = []
 
 [tool.poetry.dependencies]
-dep0 = "0.0.0"
+dep0 = '0.0.0'

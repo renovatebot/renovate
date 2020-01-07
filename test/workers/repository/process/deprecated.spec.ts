@@ -1,9 +1,5 @@
-const {
-  raiseDeprecationWarnings,
-} = require('../../../../lib/workers/repository/process/deprecated');
-
-/** @type any */
-const { platform } = require('../../../../lib/platform');
+import { raiseDeprecationWarnings } from '../../../../lib/workers/repository/process/deprecated';
+import { platform } from '../../../util';
 
 describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {
@@ -61,7 +57,7 @@ describe('workers/repository/process/deprecated', () => {
           state: 'open',
         },
       ];
-      platform.getIssueList = jest.fn(() => mockIssue);
+      platform.getIssueList.mockResolvedValue(mockIssue);
       await raiseDeprecationWarnings(config, packageFiles);
       expect(platform.ensureIssue.mock.calls).toMatchSnapshot();
       expect(platform.getIssueList).toHaveBeenCalledTimes(1);
