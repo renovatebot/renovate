@@ -803,13 +803,13 @@ describe('platform/github', () => {
             ],
           } as any)
       );
-      await github.setBranchStatus(
-        'some-branch',
-        'some-context',
-        'some-description',
-        'some-state',
-        'some-url'
-      );
+      await github.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'some-state',
+        url: 'some-url',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
     });
     it('sets branch status', async () => {
@@ -852,13 +852,13 @@ describe('platform/github', () => {
       api.get.mockResolvedValueOnce({
         body: {},
       } as any);
-      await github.setBranchStatus(
-        'some-branch',
-        'some-context',
-        'some-description',
-        'some-state',
-        'some-url'
-      );
+      await github.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'some-state',
+        url: 'some-url',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
     });
   });
