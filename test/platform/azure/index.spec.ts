@@ -492,12 +492,12 @@ describe('platform/azure', () => {
             pullRequestId: 456,
           } as any)
       );
-      const pr = await azure.createPr(
-        'some-branch',
-        'The Title',
-        'Hello world',
-        ['deps', 'renovate']
-      );
+      const pr = await azure.createPr({
+        branchName: 'some-branch',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+      });
       expect(pr).toMatchSnapshot();
     });
     it('should create and return a PR object from base branch', async () => {
@@ -520,13 +520,13 @@ describe('platform/azure', () => {
             pullRequestId: 456,
           } as any)
       );
-      const pr = await azure.createPr(
-        'some-branch',
-        'The Title',
-        'Hello world',
-        ['deps', 'renovate'],
-        true
-      );
+      const pr = await azure.createPr({
+        branchName: 'some-branch',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        useDefaultBranch: true,
+      });
       expect(pr).toMatchSnapshot();
     });
     it('should create and return a PR object with auto-complete set', async () => {
@@ -560,14 +560,14 @@ describe('platform/azure', () => {
           } as any)
       );
       azureHelper.getRenovatePRFormat.mockImplementation(x => x as any);
-      const pr = await azure.createPr(
-        'some-branch',
-        'The Title',
-        'Hello world',
-        ['deps', 'renovate'],
-        false,
-        { azureAutoComplete: true }
-      );
+      const pr = await azure.createPr({
+        branchName: 'some-branch',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        useDefaultBranch: false,
+        platformOptions: { azureAutoComplete: true },
+      });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
