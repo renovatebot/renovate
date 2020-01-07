@@ -105,12 +105,12 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       if (pr.sourceRepo === config.repository) {
         logger.info({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
-        await platform.setBranchStatus(
-          pr.branchName,
+        await platform.setBranchStatus({
+          branchName: pr.branchName,
           context,
           description,
-          status
-        );
+          state: status,
+        });
       } else {
         logger.debug('Skipping branch status for forked PR');
       }
