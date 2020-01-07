@@ -93,6 +93,10 @@ export function dispatchError(
   }
   if (err.statusCode === 422) {
     if (
+      message.includes('Review cannot be requested from pull request author')
+    ) {
+      throw err;
+    } else if (
       err.body &&
       err.body.errors &&
       err.body.errors.find((e: any) => e.code === 'invalid')

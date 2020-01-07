@@ -59,7 +59,7 @@ async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
-): Promise<Pr | 'needs-pr-approval'> {
+): Promise<Pr | 'needs-pr-approval' | 'pending'> {
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
@@ -127,7 +127,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return null;
+      return 'pending';
     }
     logger.debug('Branch status success');
   } else if (
@@ -155,11 +155,11 @@ export async function ensurePr(
       const elapsedHours = Math.round(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
-      if (elapsedHours < config.prNotPendingHours) {
+      if (!masterIssueCheck && elapsedHours < config.prNotPendingHours) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return null;
+        return 'pending';
       }
       logger.debug(
         `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`

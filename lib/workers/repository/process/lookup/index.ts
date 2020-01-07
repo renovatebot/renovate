@@ -158,7 +158,7 @@ export async function lookupUpdates(
     res.sourceUrl =
       dependency.sourceUrl && dependency.sourceUrl.length
         ? dependency.sourceUrl
-        : null;
+        : /* istanbul ignore next */ null;
     if (dependency.sourceDirectory) {
       res.sourceDirectory = dependency.sourceDirectory;
     }

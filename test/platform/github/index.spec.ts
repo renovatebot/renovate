@@ -803,13 +803,13 @@ describe('platform/github', () => {
             ],
           } as any)
       );
-      await github.setBranchStatus(
-        'some-branch',
-        'some-context',
-        'some-description',
-        'some-state',
-        'some-url'
-      );
+      await github.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'some-state',
+        url: 'some-url',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
     });
     it('sets branch status', async () => {
@@ -852,13 +852,13 @@ describe('platform/github', () => {
       api.get.mockResolvedValueOnce({
         body: {},
       } as any);
-      await github.setBranchStatus(
-        'some-branch',
-        'some-context',
-        'some-description',
-        'some-state',
-        'some-url'
-      );
+      await github.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'some-state',
+        url: 'some-url',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
     });
   });
@@ -958,7 +958,10 @@ describe('platform/github', () => {
           },
         },
       });
-      const res = await github.ensureIssue('new-title', 'new-content');
+      const res = await github.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+      });
       expect(res).toEqual('created');
     });
     it('creates issue if not ensuring only once', async () => {
@@ -989,7 +992,10 @@ describe('platform/github', () => {
           },
         },
       });
-      const res = await github.ensureIssue('title-1', 'new-content');
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+      });
       expect(res).toBeNull();
     });
     it('does not create issue if ensuring only once', async () => {
@@ -1021,7 +1027,11 @@ describe('platform/github', () => {
         },
       });
       const once = true;
-      const res = await github.ensureIssue('title-1', 'new-content', once);
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+        once,
+      });
       expect(res).toBeNull();
     });
     it('closes others if ensuring only once', async () => {
@@ -1058,7 +1068,11 @@ describe('platform/github', () => {
         },
       });
       const once = true;
-      const res = await github.ensureIssue('title-1', 'new-content', once);
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+        once,
+      });
       expect(res).toBeNull();
     });
     it('updates issue', async () => {
@@ -1090,7 +1104,10 @@ describe('platform/github', () => {
         },
       });
       api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
-      const res = await github.ensureIssue('title-2', 'newer-content');
+      const res = await github.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+      });
       expect(res).toEqual('updated');
     });
     it('skips update if unchanged', async () => {
@@ -1122,7 +1139,10 @@ describe('platform/github', () => {
         },
       });
       api.get.mockReturnValueOnce({ body: { body: 'newer-content' } } as any);
-      const res = await github.ensureIssue('title-2', 'newer-content');
+      const res = await github.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+      });
       expect(res).toBeNull();
     });
     it('deletes if duplicate', async () => {
@@ -1154,7 +1174,10 @@ describe('platform/github', () => {
         },
       });
       api.get.mockReturnValueOnce({ body: { body: 'newer-content' } } as any);
-      const res = await github.ensureIssue('title-1', 'newer-content');
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'newer-content',
+      });
       expect(res).toBeNull();
     });
     it('creates issue if reopen flag false and issue is not open', async () => {
@@ -1181,12 +1204,12 @@ describe('platform/github', () => {
         },
       });
       api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
-      const res = await github.ensureIssue(
-        'title-2',
-        'new-content',
-        false,
-        false
-      );
+      const res = await github.ensureIssue({
+        title: 'title-2',
+        body: 'new-content',
+        once: false,
+        shouldReOpen: false,
+      });
       expect(res).toEqual('created');
     });
     it('does not create issue if reopen flag false and issue is already open', async () => {
@@ -1213,12 +1236,12 @@ describe('platform/github', () => {
         },
       });
       api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
-      const res = await github.ensureIssue(
-        'title-2',
-        'new-content',
-        false,
-        false
-      );
+      const res = await github.ensureIssue({
+        title: 'title-2',
+        body: 'new-content',
+        once: false,
+        shouldReOpen: false,
+      });
       expect(res).toEqual(null);
     });
   });

@@ -202,14 +202,17 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest.fn(() => [
-              {
-                pullRequestId: 1,
-                sourceRefName: 'refs/heads/branch-a',
-                title: 'branch a pr',
-                state: 'open',
-              },
-            ]),
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  title: 'branch a pr',
+                  state: 'open',
+                },
+              ]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -219,7 +222,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'open',
           } as any)
@@ -231,14 +234,17 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest.fn(() => [
-              {
-                pullRequestId: 1,
-                sourceRefName: 'refs/heads/branch-a',
-                title: 'branch a pr',
-                state: 'closed',
-              },
-            ]),
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  title: 'branch a pr',
+                  state: 'closed',
+                },
+              ]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -248,7 +254,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'closed',
           } as any)
@@ -260,14 +266,17 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest.fn(() => [
-              {
-                pullRequestId: 1,
-                sourceRefName: 'refs/heads/branch-a',
-                title: 'branch a pr',
-                state: 'closed',
-              },
-            ]),
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  title: 'branch a pr',
+                  state: 'closed',
+                },
+              ]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -277,7 +286,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'closed',
           } as any)
@@ -289,14 +298,17 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest.fn(() => [
-              {
-                pullRequestId: 1,
-                sourceRefName: 'refs/heads/branch-a',
-                title: 'branch a pr',
-                state: 'closed',
-              },
-            ]),
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  title: 'branch a pr',
+                  state: 'closed',
+                },
+              ]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -306,7 +318,7 @@ describe('platform/azure', () => {
         () =>
           ({
             number: 1,
-            head: { ref: 'branch-a' },
+            sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
             state: 'closed',
           } as any)
@@ -316,8 +328,14 @@ describe('platform/azure', () => {
     });
   });
   describe('getPrList()', () => {
-    it('returns empty array', () => {
-      expect(azure.getPrList()).toEqual([]);
+    it('returns empty array', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequests: jest.fn(() => []),
+          } as any)
+      );
+      expect(await azure.getPrList()).toEqual([]);
     });
   });
 
@@ -341,14 +359,17 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getPullRequests: jest.fn(() => [
-              {
-                pullRequestId: 1,
-                sourceRefName: 'refs/heads/branch-a',
-                title: 'branch a pr',
-                status: 2,
-              },
-            ]),
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  title: 'branch a pr',
+                  status: 2,
+                },
+              ]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementation(
@@ -422,13 +443,20 @@ describe('platform/azure', () => {
     });
     it('should return a pr in the right format', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getPullRequests: jest.fn(() => [{ pullRequestId: 1234 }]),
-            getPullRequestLabels: jest.fn(() => [
-              { active: true, name: 'renovate' },
-            ]),
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1234,
+                },
+              ]),
+            getPullRequestLabels: jest
+              .fn()
+              .mockReturnValue([{ active: true, name: 'renovate' }]),
           } as any)
       );
       azureHelper.getRenovatePRFormat.mockImplementation(
@@ -674,7 +702,13 @@ describe('platform/azure', () => {
 
   describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', () => {
-      const res = azure.setBranchStatus('test', 'test', 'test', 'test', 'test');
+      const res = azure.setBranchStatus({
+        branchName: 'test',
+        context: 'test',
+        description: 'test',
+        state: 'test',
+        url: 'test',
+      });
       expect(res).toBeUndefined();
     });
 

@@ -73,9 +73,9 @@
       "default": false
     },
     "binarySource": {
-      "description": "Where to source binaries like `npm` and `yarn` from, choices are `bundled`, `global` and `docker`",
+      "description": "Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`",
       "type": "string",
-      "default": "bundled"
+      "default": "auto"
     },
     "baseDir": {
       "description": "The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.",
@@ -856,7 +856,7 @@
       "default": null
     },
     "fileMatch": {
-      "description": "JS RegExp pattern for matching manager files",
+      "description": "RegEx (re2) pattern for matching manager files",
       "type": "array",
       "items": {
         "type": "string",
@@ -955,10 +955,10 @@
       "$ref": "#"
     },
     "terraform": {
-      "description": "Configuration object for Terraform module renovation",
+      "description": "Configuration object for Terraform dependencies renovation",
       "type": "object",
       "default": {
-        "commitMessageTopic": "Terraform module {{depNameShort}}",
+        "commitMessageTopic": "Terraform {{managerData.terraformDependencyType}} {{depNameShort}}",
         "fileMatch": ["\\.tf$"],
         "versionScheme": "hashicorp"
       },

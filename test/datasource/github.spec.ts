@@ -18,6 +18,7 @@ describe('datasource/github', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      hostRules.hosts = jest.fn(() => []);
       global.repoCache = {};
       return global.renovateCache.rmAll();
     });

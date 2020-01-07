@@ -1,12 +1,13 @@
 import { toUnix } from 'upath';
 import _fs from 'fs-extra';
 import fsReal from 'fs';
-import { exec as _exec } from '../../../lib/util/exec';
+import { exec as _exec } from 'child_process';
 import * as manager from '../../../lib/manager/gradle';
 import { platform as _platform, Platform } from '../../../lib/platform';
+import { mockExecAll } from '../../execUtil';
 
 jest.mock('fs-extra');
-jest.mock('../../../lib/util/exec');
+jest.mock('child_process');
 
 const platform: jest.Mocked<Platform> = _platform as any;
 const fs: jest.Mocked<typeof _fs> = _fs as any;
@@ -19,40 +20,68 @@ const config = {
   },
 };
 
+let processEnv;
+
 const updatesDependenciesReport = fsReal.readFileSync(
   'test/datasource/gradle/_fixtures/updatesReport.json',
   'utf8'
 );
 
+const gradleOutput = {
+  stdout: 'gradle output',
+  stderr: '',
+};
+
 describe('manager/gradle', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+
     fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
     fs.mkdir.mockResolvedValue();
     fs.exists.mockResolvedValue(true);
     fs.access.mockResolvedValue(undefined);
-    exec.mockResolvedValue({ stdout: 'gradle output', stderr: '' } as never);
     platform.getFile.mockResolvedValue('some content');
+
+    processEnv = process.env;
+    process.env = {
+      HTTP_PROXY: 'http://example.com',
+      HTTPS_PROXY: 'https://example.com',
+      NO_PROXY: 'localhost',
+      HOME: '/home/user',
+      PATH: '/tmp/path',
+    };
+  });
+  afterEach(() => {
+    process.env = processEnv;
   });
 
   describe('extractPackageFile', () => {
     it('should return gradle dependencies', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
         'subproject/build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return gradle.kts dependencies', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle.kts',
         'subproject/build.gradle.kts',
       ]);
       expect(dependencies).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return empty if there are no dependencies', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       fs.readFile.mockResolvedValue(fsReal.readFileSync(
         'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
         'utf8'
@@ -62,27 +91,33 @@ describe('manager/gradle', () => {
       ]);
 
       expect(dependencies).toEqual([]);
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should throw registry failure if gradle execution fails', async () => {
-      exec.mockImplementation(() => {
-        throw new Error();
-      });
+      const execSnapshots = mockExecAll(exec, new Error());
+
       await expect(
         manager.extractAllPackageFiles(config, ['build.gradle'])
       ).rejects.toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return empty if there is no dependency report', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       fs.exists.mockResolvedValue(false);
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
 
       expect(dependencies).toEqual([]);
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return empty if renovate report is invalid', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const renovateReport = `
         Invalid JSON]
       `;
@@ -92,9 +127,12 @@ describe('manager/gradle', () => {
         'build.gradle',
       ]);
       expect(dependencies).toEqual([]);
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use repositories only for current project', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const multiProjectUpdatesReport = fsReal.readFileSync(
         'test/datasource/gradle/_fixtures/MultiProjectUpdatesReport.json',
         'utf8'
@@ -105,9 +143,12 @@ describe('manager/gradle', () => {
         'build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should execute gradlew when available', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
@@ -117,9 +158,12 @@ describe('manager/gradle', () => {
         cwd: 'localDir',
         timeout: 20000,
       });
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should run gradlew through `sh` when available but not executable', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       fs.access.mockRejectedValue(undefined);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
@@ -130,9 +174,12 @@ describe('manager/gradle', () => {
         cwd: 'localDir',
         timeout: 20000,
       });
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       fs.exists.mockResolvedValue(false);
 
       const packageFiles = ['foo/build.gradle'];
@@ -141,24 +188,33 @@ describe('manager/gradle', () => {
       ).toBeNull();
 
       expect(exec).toHaveBeenCalledTimes(0);
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const dependencies = await manager.extractAllPackageFiles(config, [
         'foo/build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should configure the renovate report plugin', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(toUnix(fs.writeFile.mock.calls[0][0] as string)).toBe(
         'localDir/renovate-plugin.gradle'
       );
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use docker if required', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const configWithDocker = {
         binarySource: 'docker',
         ...config,
@@ -166,9 +222,12 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use docker even if gradlew is available', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const configWithDocker = {
         binarySource: 'docker',
         ...config,
@@ -177,11 +236,14 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
 
   describe('updateDependency', () => {
     it('should update an existing module dependency', () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const buildGradleContent = fsReal.readFileSync(
         'test/datasource/gradle/_fixtures/build.gradle.example1',
         'utf8'
@@ -199,9 +261,13 @@ describe('manager/gradle', () => {
 
       expect(buildGradleContentUpdated).toMatch('cglib:cglib-nodep:3.2.8');
       expect(buildGradleContentUpdated).not.toMatch('cglib:cglib-nodep:3.1');
+
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should update an existing plugin dependency', () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const buildGradleContent = `
         plugins {
             id "com.github.ben-manes.versions" version "0.20.0"
@@ -228,9 +294,13 @@ describe('manager/gradle', () => {
       expect(buildGradleContentUpdated).not.toMatch(
         'id "com.github.ben-manes.versions" version "0.20.0"'
       );
+
+      expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should update an existing plugin dependency with Kotlin DSL', () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
       const buildGradleContent = `
         plugins {
             id("com.github.ben-manes.versions") version "0.20.0"
@@ -257,6 +327,8 @@ describe('manager/gradle', () => {
       expect(buildGradleContentUpdated).not.toMatch(
         'id("com.github.ben-manes.versions") version "0.20.0"'
       );
+
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
 });

@@ -239,7 +239,7 @@ export async function processBranch(
               new Date(upgrade.releaseTimestamp).getTime()) /
               oneDay
           );
-          if (daysElapsed < upgrade.stabilityDays) {
+          if (!masterIssueCheck && daysElapsed < upgrade.stabilityDays) {
             logger.debug(
               {
                 depName: upgrade.depName,
@@ -254,6 +254,7 @@ export async function processBranch(
       }
       // Don't create a branch if we know it will be status 'pending'
       if (
+        !masterIssueCheck &&
         !branchExists &&
         config.stabilityStatus === 'pending' &&
         ['not-pending', 'status-success'].includes(config.prCreation)
@@ -418,12 +419,8 @@ export async function processBranch(
     }
     if (err.message === 'update-failure') {
       logger.warn('Error updating branch: update failure');
-    } else if (
-      err.message === 'bundler-fs' ||
-      err.message === 'bundler-credentials' ||
-      err.message === 'bundler-unknown'
-    ) {
-      // we have already warned, so just return
+    } else if (err.message.startsWith('bundler-')) {
+      // we have already warned inside the bundler artifacts error handling, so just return
       return 'error';
     } else if (
       err.messagee &&
@@ -449,6 +446,9 @@ export async function processBranch(
     // TODO: ensurePr should check for automerge itself
     if (pr === 'needs-pr-approval') {
       return 'needs-pr-approval';
+    }
+    if (pr === 'pending') {
+      return 'pending';
     }
     if (pr) {
       const topic = emojify(':warning: Artifact update problem');
@@ -512,12 +512,12 @@ export async function processBranch(
               'DRY-RUN: Would set branch status in ' + config.branchName
             );
           } else {
-            await platform.setBranchStatus(
-              config.branchName,
+            await platform.setBranchStatus({
+              branchName: config.branchName,
               context,
               description,
-              state
-            );
+              state,
+            });
           }
         }
       } else {

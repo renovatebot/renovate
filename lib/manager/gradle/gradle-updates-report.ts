@@ -145,7 +145,23 @@ async function extractDependenciesFromUpdatesReport(
     .reduce(flatternDependencies, [])
     .reduce(combineReposOnDuplicatedDependencies, []);
 
-  return dependencies.map(gradleModule => buildDependency(gradleModule));
+  return dependencies
+    .map(gradleModule => buildDependency(gradleModule))
+    .map(dep => {
+      /* https://github.com/renovatebot/renovate/issues/4627 */
+      const { depName, currentValue } = dep;
+      if (depName.endsWith('_%%')) {
+        return {
+          ...dep,
+          depName: depName.replace(/_%%/, ''),
+          datasource: 'sbt',
+        };
+      }
+      if (/^%.*%$/.test(currentValue)) {
+        return { ...dep, skipReason: 'version-placeholder' };
+      }
+      return dep;
+    });
 }
 
 export {

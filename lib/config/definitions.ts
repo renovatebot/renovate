@@ -185,10 +185,10 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Where to source binaries like `npm` and `yarn` from, choices are `bundled`, `global` and `docker`',
+      'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`',
     admin: true,
     type: 'string',
-    default: 'bundled',
+    default: 'auto',
   },
   {
     name: 'baseDir',
@@ -1337,7 +1337,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fileMatch',
-    description: 'JS RegExp pattern for matching manager files',
+    description: 'RegEx (re2) pattern for matching manager files',
     type: 'array',
     subType: 'string',
     format: 'regex',
@@ -1476,11 +1476,12 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'terraform',
-    description: 'Configuration object for Terraform module renovation',
+    description: 'Configuration object for Terraform dependencies renovation',
     stage: 'repository',
     type: 'object',
     default: {
-      commitMessageTopic: 'Terraform module {{depNameShort}}',
+      commitMessageTopic:
+        'Terraform {{managerData.terraformDependencyType}} {{depNameShort}}',
       fileMatch: ['\\.tf$'],
       versionScheme: 'hashicorp',
     },

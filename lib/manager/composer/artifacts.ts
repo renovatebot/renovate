@@ -101,7 +101,6 @@ export async function updateArtifacts(
     if (config.binarySource === 'docker') {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
@@ -111,8 +110,14 @@ export async function updateArtifacts(
       cmd += envVars.map(e => `-e ${e} `);
       cmd += `-w "${cwd}" `;
       cmd += `renovate/composer composer`;
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running composer via global composer');
+      cmd = 'composer';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
       cmd = 'composer';
     }
     let args;

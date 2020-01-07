@@ -1,7 +1,7 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
-import { File } from './git/storage';
+import { CommitFilesConfig } from './git/storage';
 
 export interface FileData {
   name: string;
@@ -109,6 +109,19 @@ export type PlatformPrOptions = {
   gitLabAutomerge: boolean;
 };
 
+export interface EnsureIssueConfig {
+  title: string;
+  body: string;
+  once?: boolean;
+  shouldReOpen?: boolean;
+}
+export interface BranchStatusConfig {
+  branchName: string;
+  context: string;
+  description: string;
+  state: string | null;
+  url?: string;
+}
 /**
  * TODO: Proper typing
  */
@@ -128,10 +141,7 @@ export interface Platform {
   ensureIssueClosing(title: string): Promise<void>;
   getFileList(): Promise<string[]>;
   ensureIssue(
-    title: string,
-    body: string,
-    once?: boolean,
-    shouldReopen?: boolean
+    issueConfig: EnsureIssueConfig
   ): Promise<'updated' | 'created' | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
@@ -151,13 +161,7 @@ export interface Platform {
   isBranchStale(branchName: string): Promise<boolean>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  setBranchStatus(
-    branchName: string,
-    context: string,
-    description: string,
-    state: string | null,
-    url?: string
-  ): Promise<void>;
+  setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(branchName: string, context: string): Promise<string>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
@@ -168,12 +172,7 @@ export interface Platform {
   ): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   setBaseBranch(baseBranch: string): Promise<void>;
-  commitFilesToBranch(
-    branchName: string,
-    updatedFiles: File[],
-    commitMessage: string,
-    parentBranch?: string
-  ): Promise<void>;
+  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
   getPr(number: number): Promise<Pr>;
   findPr(
     branchName: string,

@@ -11,17 +11,57 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 - Docker Compose files
 - CircleCI config files
 - Kubernetes manifests
-- Ansible configuration iles
+- Ansible configuration files
 
 ## How It Works
 
 1.  Renovate will search each repository for any files matching each manager's configured `fileMatch` pattern(s)
-2.  Files are downloaded and then checked to see if they contain any Docker image references (e.g. `FROM` lines in `Dockerfile`s)
-3.  If the image tag in use "looks" like a semver (e.g. `node:8`, `node:8.9`, `node:8.9.0`, `node:8-onbuild`) then Renovate will look up the Docker registry to determine if any upgrades are available (e.g. `node:8.9.1`).
+2.  Files that match the pattern(s) are parsed and checked to see if they contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+3.  If the image tag in use "looks" like a semver (e.g. `node:12`, `node:12.1`, `node:12.1.0`, `node:12-onbuild`) then Renovate will look up the Docker registry to determine if any upgrades are available (e.g. `node:12.2.0`).
+
+## Preservation of Version Precision
+
+Renovate by default will preserve the precision of Docker images. For example if the existing image is `node:12.1` then Renovate would only propose upgrades to `node:12.2` or `node:12.3` and not to more specified versions like `node:12.2.0` or `node:12.3.0`. Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `node:12.2` to `node:12.2.0`, however it's a feature we'd like to implement one day.
+
+## Version compatibility
+
+Although suffixes in semver indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `12.2.0-alpine`. Renovate defaults to assuming suffixes indicate compatibility so will never _change_ it. e.g. `12.1.0-alpine` might get updated to `12.1.1-alpine` but never `12.1.1` or `12.1.1-stretch`.
+
+If this behaviour does not suit a particular package you have, Renovate allows you to customize the `versionScheme` in use. For example, if you have a Docker image `foo/bar` that sticks to semver versioning and you need Renovate to understand that suffixes indicate pre-releases versions and not compatibility, then you could configure this package rule:
+
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["docker"],
+      "packageNames": ["foo/bar"],
+      "versionScheme": "semver"
+    }
+  ]
+}
+```
+
+Another example is the official `python` image, which follows `pep440` versioning. You can configure that with another package rule:
+
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["docker"],
+      "packageNames": ["python"],
+      "versionScheme": "pep440"
+    }
+  ]
+}
+```
+
+If traditional versioning doesn't work, consider using Renovate's built-in `loose` `versionScheme`. It essentially just does a best effort sort of versions, regardless of whether they contain letters or digits.
+
+Finally, if you use a Docker image that follows a versioning approach not captured by one of our existing version schemes, and which `loose` sorts incorrectly, you could see if the `regex` `versionScheme` can work. It uses regex capture group syntax to let you specify which part of the version string is major, minor, patch, pre-release, or compatibility. See the docs for `versionScheme` for documentation/examples of `regex` versioning in action.
 
 ## Digest Pinning
 
-Pinning your docker images to an exact digest is recommended for reasons of **immutability**. In short: so every time you `pull`, you get the same content.
+Pinning your docker images to an exact digest is recommended for reasons of **immutability**. In short: pin to digests so every time you `pull`, you get the same content.
 
 If your experience with dependency versioning comes from a place like javascript/npm, you might be used to exact versions being immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
@@ -47,12 +87,11 @@ Currently, Renovate will upgrade minor/patch versions (e.g. from `8.9.0` to `8.9
 
 Renovate has a some docker-specific intelligence when it comes to versions. For example:
 
-- It understands that tag suffixes are frequently used, such as `node:8.9-onbuild`. Renovate will only upgrade from/to the same suffix.
-- It understands that some dependencies (e.g. `node` and `ubuntu`) use even numbers for stable and odd for unstable. Renovate won't upgrade from stable to unstable
-
 ## Configuring/Disabling
 
-If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object. If you wish to override Docker settings for one particular type of manager, use that manager's config object instead. For example. to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
+If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object. Note though that this is not foolproof, because some managers like `circleci` and `ansible` support multiple datasources so do not inherit from the `docker` config object.
+
+If you wish to override Docker settings for one particular type of manager, use that manager's config object instead. For example. to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
 
 ```json
   "docker-compose": {
@@ -107,21 +146,11 @@ module.exports = {
 };
 ```
 
-Alternatively, configure `DOCKER_USERNAME` and `DOCKER_PASSWORD` in env to achieve the same.
-
-The above two approaches create an identical host rule in renovatebot. It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules)
-
-For example if you have some images you host yourself and some images you pull from docker hub without logging in you can configure that like this:
+It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules). For example if you have some images you host yourself that are password protected and also some images you pull from docker hub without authentication then you can configure for a specific Docker host like this:
 
 ```js
 module.exports = {
   hostRules: [
-    {
-      hostType: 'docker',
-      hostName: 'index.docker.io',
-      username: '',
-      password: '',
-    },
     {
       hostType: 'docker',
       hostName: 'your.host.io',
@@ -131,3 +160,5 @@ module.exports = {
   ],
 };
 ```
+
+If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`);

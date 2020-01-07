@@ -6,13 +6,15 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
   RepoConfig,
   Issue,
   VulnerabilityAlert,
+  EnsureIssueConfig,
+  BranchStatusConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -553,18 +555,18 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 // istanbul ignore next
@@ -1134,13 +1136,13 @@ export async function getBranchStatusCheck(
   }
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   // istanbul ignore if
   if (config.parentRepo) {
     logger.info('Cannot set branch status when in forking mode');
@@ -1276,14 +1278,14 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
-export async function ensureIssue(
-  title: string,
-  rawbody: string,
+export async function ensureIssue({
+  title,
+  body: rawBody,
   once = false,
-  reopen = true
-): Promise<string | null> {
+  shouldReOpen = true,
+}: EnsureIssueConfig): Promise<string | null> {
   logger.debug(`ensureIssue(${title})`);
-  const body = sanitize(rawbody);
+  const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -1294,7 +1296,7 @@ export async function ensureIssue(
           logger.debug('Issue already closed - skipping recreation');
           return null;
         }
-        if (reopen) {
+        if (shouldReOpen) {
           logger.info('Reopening previously closed issue');
         }
         issue = issues[issues.length - 1];
@@ -1312,7 +1314,7 @@ export async function ensureIssue(
         logger.info('Issue is open and up to date - nothing to do');
         return null;
       }
-      if (reopen) {
+      if (shouldReOpen) {
         logger.info('Patching issue');
         await api.patch(
           `repos/${config.parentRepo || config.repository}/issues/${
@@ -1386,17 +1388,20 @@ export async function addReviewers(
   const teamReviewers = reviewers
     .filter(e => e.startsWith('team:'))
     .map(e => e.replace(/^team:/, ''));
-
-  await api.post(
-    `repos/${config.parentRepo ||
-      config.repository}/pulls/${prNo}/requested_reviewers`,
-    {
-      body: {
-        reviewers: userReviewers,
-        team_reviewers: teamReviewers,
-      },
-    }
-  );
+  try {
+    await api.post(
+      `repos/${config.parentRepo ||
+        config.repository}/pulls/${prNo}/requested_reviewers`,
+      {
+        body: {
+          reviewers: userReviewers,
+          team_reviewers: teamReviewers,
+        },
+      }
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Failed to assign reviewer');
+  }
 }
 
 async function addLabels(
@@ -1605,13 +1610,13 @@ export async function createPr(
   await addLabels(pr.number, labels);
   if (platformOptions.statusCheckVerify) {
     logger.debug('Setting statusCheckVerify');
-    await setBranchStatus(
+    await setBranchStatus({
       branchName,
-      `renovate/verify`,
-      `Renovate verified pull request`,
-      'success',
-      'https://github.com/renovatebot/renovate'
-    );
+      context: `renovate/verify`,
+      description: `Renovate verified pull request`,
+      state: 'success',
+      url: 'https://github.com/renovatebot/renovate',
+    });
   }
   pr.isModified = false;
   return pr;

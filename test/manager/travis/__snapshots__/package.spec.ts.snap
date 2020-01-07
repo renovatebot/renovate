@@ -6,7 +6,6 @@ Array [
     "isRange": true,
     "newMajor": 12,
     "newValue": Array [
-      "8.9.4",
       "10.0.1",
       "12.3.0",
     ],
@@ -21,7 +20,6 @@ Array [
     "isRange": true,
     "newMajor": 12,
     "newValue": Array [
-      "8",
       "10",
       "12",
     ],

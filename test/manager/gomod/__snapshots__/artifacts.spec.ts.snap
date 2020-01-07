@@ -10,3 +10,142 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() catches errors 2`] = `Array []`;
+
+exports[`.updateArtifacts() returns if no go.sum found 1`] = `Array []`;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated go.sum 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode with credentials 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode with credentials and appMode enabled 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go bash -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go mod tidy\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode without credentials 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED=0 -w \\"/tmp/github/some/repo\\" renovate/go go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports global mode 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
