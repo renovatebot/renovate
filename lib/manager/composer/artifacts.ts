@@ -16,11 +16,11 @@ export async function updateArtifacts(
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
-  process.env.COMPOSER_CACHE_DIR =
-    process.env.COMPOSER_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/composer');
-  await fs.ensureDir(process.env.COMPOSER_CACHE_DIR);
-  logger.debug('Using composer cache ' + process.env.COMPOSER_CACHE_DIR);
+  const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
+  env.COMPOSER_CACHE_DIR =
+    env.COMPOSER_CACHE_DIR || upath.join(config.cacheDir, './others/composer');
+  await fs.ensureDir(env.COMPOSER_CACHE_DIR);
+  logger.debug('Using composer cache ' + env.COMPOSER_CACHE_DIR);
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
@@ -95,7 +95,6 @@ export async function updateArtifacts(
       const localAuthFileName = upath.join(cwd, 'auth.json');
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
-    const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
     const startTime = process.hrtime();
     let cmd: string;
     if (config.binarySource === 'docker') {
@@ -104,7 +103,7 @@ export async function updateArtifacts(
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
-      const volumes = [config.localDir, process.env.COMPOSER_CACHE_DIR];
+      const volumes = [config.localDir, env.COMPOSER_CACHE_DIR];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = ['COMPOSER_CACHE_DIR'];
       cmd += envVars.map(e => `-e ${e} `);
