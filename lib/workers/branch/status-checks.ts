@@ -18,13 +18,13 @@ async function setStatusCheck(
     logger.debug(`Status check ${context} is already up-to-date`);
   } else {
     logger.debug(`Updating ${context} status check state to ${state}`);
-    await platform.setBranchStatus(
+    await platform.setBranchStatus({
       branchName,
       context,
       description,
       state,
-      url
-    );
+      url,
+    });
   }
 }
 

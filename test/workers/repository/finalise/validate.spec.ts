@@ -1,7 +1,5 @@
-const validate = require('../../../../lib/workers/repository/finalise/validate');
-
-/** @type any */
-const { platform } = require('../../../../lib/platform');
+import * as validate from '../../../../lib/workers/repository/finalise/validate';
+import { platform } from '../../../util';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -13,7 +11,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({ suppressNotifications: ['prValidation'] });
     });
     it('catches error', async () => {
-      platform.getPrList.mockReturnValueOnce([
+      platform.getPrList.mockResolvedValueOnce([
         {
           state: 'open',
           branchName: 'some/branch',
@@ -26,64 +24,70 @@ describe('workers/repository/validate', () => {
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
     it('returns if no matching files', async () => {
-      platform.getPrList.mockReturnValueOnce([
+      platform.getPrList.mockResolvedValueOnce([
         {
           state: 'open',
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
       ]);
-      platform.getPrFiles.mockReturnValueOnce(['readme.md']);
+      platform.getPrFiles.mockResolvedValueOnce(['readme.md']);
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
     it('validates failures if cannot parse', async () => {
-      platform.getPrList.mockReturnValueOnce([
+      platform.getPrList.mockResolvedValueOnce([
         {
           state: 'open',
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
       ]);
-      platform.getPrFiles.mockReturnValueOnce(['renovate.json']);
-      platform.getFile.mockReturnValue('not JSON');
+      platform.getPrFiles.mockResolvedValueOnce(['renovate.json']);
+      platform.getFile.mockResolvedValue('not JSON');
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus.mock.calls[0][3]).toEqual('failure');
+      expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
+        'failure'
+      );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
     it('validates failures if config validation fails', async () => {
-      platform.getPrList.mockReturnValueOnce([
+      platform.getPrList.mockResolvedValueOnce([
         {
           state: 'open',
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
       ]);
-      platform.getPrFiles.mockReturnValueOnce(['renovate.json']);
-      platform.getFile.mockReturnValue('{"foo":1}');
+      platform.getPrFiles.mockResolvedValueOnce(['renovate.json']);
+      platform.getFile.mockResolvedValue('{"foo":1}');
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus.mock.calls[0][3]).toEqual('failure');
+      expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
+        'failure'
+      );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
     it('validates successfully', async () => {
-      platform.getPrList.mockReturnValueOnce([
+      platform.getPrList.mockResolvedValueOnce([
         {
           state: 'open',
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
       ]);
-      platform.getPrFiles.mockReturnValueOnce(['renovate.json']);
-      platform.getFile.mockReturnValue('{}');
+      platform.getPrFiles.mockResolvedValueOnce(['renovate.json']);
+      platform.getFile.mockResolvedValue('{}');
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus.mock.calls[0][3]).toEqual('success');
+      expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
+        'success'
+      );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
     });

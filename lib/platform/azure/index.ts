@@ -1,9 +1,12 @@
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import {
+  GitPullRequestMergeStrategy,
+  GitPullRequest,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -12,6 +15,7 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -25,8 +29,9 @@ interface Config {
   defaultBranch: string;
   owner: string;
   repoId: string;
+  project: string;
   azureWorkItemId: any;
-  prList: null;
+  prList: Pr[];
   fileList: null;
   repository: string;
 }
@@ -96,6 +101,7 @@ export async function initRepo({
   )[0];
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   config.repoId = repo.id!;
+  config.project = repo.project!.name;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
@@ -216,27 +222,54 @@ async function abandonPr(prNo: number): Promise<void> {
   );
 }
 
+export async function getPrList(): Promise<Pr[]> {
+  logger.debug('getPrList()');
+  if (!config.prList) {
+    const azureApiGit = await azureApi.gitApi();
+    let prs: GitPullRequest[] = [];
+    let fetchedPrs: GitPullRequest[];
+    let skip = 0;
+    do {
+      fetchedPrs = await azureApiGit.getPullRequests(
+        config.repoId,
+        { status: 4 },
+        config.project,
+        0,
+        skip,
+        100
+      );
+      prs = prs.concat(fetchedPrs);
+      skip += 100;
+    } while (fetchedPrs.length > 0);
+    config.prList = prs.map(azureHelper.getRenovatePRFormat);
+    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+  }
+  return config.prList;
+}
+
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   if (!pullRequestId) {
     return null;
   }
-  const azureApiGit = await azureApi.gitApi();
-  const prs = await azureApiGit.getPullRequests(config.repoId, { status: 4 });
-  const azurePr: any = prs.find(item => item.pullRequestId === pullRequestId);
+  const azurePr = (await getPrList()).find(
+    item => item.pullRequestId === pullRequestId
+  );
+
   if (!azurePr) {
     return null;
   }
+
+  const azureApiGit = await azureApi.gitApi();
   const labels = await azureApiGit.getPullRequestLabels(
     config.repoId,
     pullRequestId
   );
+
   azurePr.labels = labels
     .filter(label => label.active)
     .map(label => label.name);
-  logger.debug(`pr: (${azurePr})`);
-  const pr = azureHelper.getRenovatePRFormat(azurePr);
-  return pr;
+  return azurePr;
 }
 
 export async function findPr(
@@ -248,8 +281,7 @@ export async function findPr(
   // TODO: fix typing
   let prsFiltered: any[] = [];
   try {
-    const azureApiGit = await azureApi.gitApi();
-    const prs = await azureApiGit.getPullRequests(config.repoId, { status: 4 });
+    const prs = await getPrList();
 
     prsFiltered = prs.filter(
       item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
@@ -258,11 +290,6 @@ export async function findPr(
     if (prTitle) {
       prsFiltered = prsFiltered.filter(item => item.title === prTitle);
     }
-
-    // update format
-    prsFiltered = prsFiltered.map(item =>
-      azureHelper.getRenovatePRFormat(item)
-    );
 
     switch (state) {
       case 'all':
@@ -319,28 +346,24 @@ export /* istanbul ignore next */ function mergeBranch(
   return config.storage.mergeBranch(branchName);
 }
 
-export /* istanbul ignore next */ function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export /* istanbul ignore next */ function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export /* istanbul ignore next */ function getCommitMessages(): Promise<
   string[]
 > {
   return config.storage.getCommitMessages();
-}
-
-export function getPrList(): Pr[] {
-  return [];
 }
 
 export async function getBranchStatusCheck(
@@ -498,13 +521,13 @@ export async function ensureCommentRemoval(
   }
 }
 
-export function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl: string
-): void {
+export function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): void {
   logger.debug(
     `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
   );

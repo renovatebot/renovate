@@ -1,23 +1,24 @@
-const JSON5 = require('json5');
-const { logger, setMeta } = require('../../../logger');
-const { migrateAndValidate } = require('../../../config/migrate-validate');
-const { configFileNames } = require('../../../config/app-strings');
-const { platform } = require('../../../platform');
+import JSON5 from 'json5';
+import { logger, setMeta } from '../../../logger';
+import { migrateAndValidate } from '../../../config/migrate-validate';
+import { configFileNames } from '../../../config/app-strings';
+import { platform, Pr } from '../../../platform';
+import { RenovateConfig } from '../../../config';
 
-async function getRenovatePrs(branchPrefix) {
+async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
     .filter(pr => pr.state === 'open')
     .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
     .filter(pr => pr.title && pr.title.match(new RegExp('renovate', 'i')));
 }
 
-async function getRenovateFiles(prNo) {
+async function getRenovateFiles(prNo: number): Promise<string[]> {
   return (await platform.getPrFiles(prNo)).filter(file =>
     configFileNames.includes(file)
   );
 }
 
-async function validatePrs(config) {
+export async function validatePrs(config: RenovateConfig): Promise<void> {
   if (
     config.suppressNotifications &&
     config.suppressNotifications.includes('prValidation')
@@ -40,13 +41,17 @@ async function validatePrs(config) {
         'PR has renovate files'
       );
       for (const file of renovateFiles) {
-        let content;
+        let content: string;
         try {
           content = await platform.getFile(file, pr.sha || pr.branchName);
         } catch (err) /* istanbul ignore next */ {
           content = await platform.getFile(file, pr.branchName);
         }
-        let parsed;
+        // TODO: proper typing
+        let parsed: {
+          renovate?: RenovateConfig;
+          'renovate-config'?: RenovateConfig;
+        } & RenovateConfig;
         try {
           // istanbul ignore if
           if (file.endsWith('.json5')) {
@@ -81,8 +86,8 @@ async function validatePrs(config) {
         }
       }
       // if the PR has renovate files then we set a status no matter what
-      let status;
-      let description;
+      let status: 'failure' | 'success';
+      let description: string;
       const subject = `Renovate Configuration Errors`;
       if (validations.length) {
         const content = validations
@@ -100,12 +105,12 @@ async function validatePrs(config) {
       if (pr.sourceRepo === config.repository) {
         logger.info({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
-        await platform.setBranchStatus(
-          pr.branchName,
+        await platform.setBranchStatus({
+          branchName: pr.branchName,
           context,
           description,
-          status
-        );
+          state: status,
+        });
       } else {
         logger.debug('Skipping branch status for forked PR');
       }
@@ -126,7 +131,3 @@ async function validatePrs(config) {
     }
   }
 }
-
-module.exports = {
-  validatePrs,
-};

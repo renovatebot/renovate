@@ -3,15 +3,17 @@
 exports[`workers/branch/automerge commitFilesToBranch commits files 1`] = `
 Array [
   Array [
-    "renovate/some-branch",
-    Array [
-      Object {
-        "contents": "some contents",
-        "name": "package.json",
-      },
-    ],
-    "some commit message",
-    undefined,
+    Object {
+      "branchName": "renovate/some-branch",
+      "files": Array [
+        Object {
+          "contents": "some contents",
+          "name": "package.json",
+        },
+      ],
+      "message": "some commit message",
+      "parentBranch": undefined,
+    },
   ],
 ]
 `;
