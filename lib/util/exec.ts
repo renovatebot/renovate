@@ -19,10 +19,7 @@ export interface ExecResult {
   stderr: string;
 }
 
-export function exec(
-  cmd: string,
-  options?: ExecOptions
-): Promise<ExecResult> {
+export function exec(cmd: string, options?: ExecOptions): Promise<ExecResult> {
   let pExecCommand = cmd;
   const pExecOptions = { ...options, encoding: 'utf-8' };
 
