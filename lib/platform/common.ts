@@ -116,6 +116,13 @@ export interface CreatePRConfig {
   useDefaultBranch?: boolean;
   platformOptions?: PlatformPrOptions;
 }
+export interface BranchStatusConfig {
+  branchName: string;
+  context: string;
+  description: string;
+  state: string | null;
+  url?: string;
+}
 /**
  * TODO: Proper typing
  */
@@ -151,13 +158,7 @@ export interface Platform {
   isBranchStale(branchName: string): Promise<boolean>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  setBranchStatus(
-    branchName: string,
-    context: string,
-    description: string,
-    state: string | null,
-    url?: string
-  ): Promise<void>;
+  setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(branchName: string, context: string): Promise<string>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;

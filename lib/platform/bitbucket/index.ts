@@ -15,6 +15,7 @@ import {
   Issue,
   VulnerabilityAlert,
   CreatePRConfig,
+  BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -434,13 +435,13 @@ export async function getBranchStatusCheck(
   );
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket

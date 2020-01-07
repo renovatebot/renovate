@@ -219,13 +219,13 @@ describe('platform/bitbucket', () => {
     it('posts status', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.setBranchStatus(
-          'branch',
-          'context',
-          'description',
-          'failed',
-          'targetUrl'
-        );
+        await bitbucket.setBranchStatus({
+          branchName: 'branch',
+          context: 'context',
+          description: 'description',
+          state: 'failed',
+          url: 'targetUrl',
+        });
         expect(api.post.mock.calls).toMatchSnapshot();
       });
     });

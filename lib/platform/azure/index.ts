@@ -16,6 +16,7 @@ import {
   Issue,
   VulnerabilityAlert,
   CreatePRConfig,
+  BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -521,13 +522,13 @@ export async function ensureCommentRemoval(
   }
 }
 
-export function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl: string
-): void {
+export function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): void {
   logger.debug(
     `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
   );
