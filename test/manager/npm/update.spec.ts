@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import semver from 'semver';
 import * as npmUpdater from '../../../lib/manager/npm/update';
 
 function readFixture(fixture) {
@@ -188,11 +187,14 @@ describe('workers/branch/package-json', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
     });
-    it('returns content if bumping errors', () => {
-      semver.inc = jest.fn(() => {
-        throw new Error('semver inc');
-      });
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', true as any);
+    it('returns content if bumping errors', async () => {
+      jest.mock('semver', () => ({
+        inc: () => {
+          throw new Error('semver inc');
+        },
+      }));
+      const npmUpdater1 = await import('../../../lib/manager/npm/update');
+      const res = npmUpdater1.bumpPackageVersion(content, '0.0.2', true as any);
       expect(res).toEqual(content);
     });
   });
