@@ -3,8 +3,8 @@
 exports[`workers/repository/process/deprecated raiseDeprecationWarnings() raises deprecation warnings 1`] = `
 Array [
   Array [
-    "Dependency deprecation warning: foo (npm)",
-    "foo is deprecated
+    Object {
+      "body": "foo is deprecated
 
 Affected package file(s): \`package.json\`, \`frontend/package.json\`
 
@@ -15,7 +15,9 @@ If you don't care about this, you can close this issue and not be warned about \
 \`\`\`
 
 ",
-    true,
+      "once": true,
+      "title": "Dependency deprecation warning: foo (npm)",
+    },
   ],
 ]
 `;

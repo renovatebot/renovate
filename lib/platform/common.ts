@@ -108,6 +108,13 @@ export type PlatformPrOptions = {
   statusCheckVerify: boolean;
   gitLabAutomerge: boolean;
 };
+
+export interface EnsureIssueConfig {
+  title: string;
+  body: string;
+  once?: boolean;
+  shouldReOpen?: boolean;
+}
 export interface BranchStatusConfig {
   branchName: string;
   context: string;
@@ -134,10 +141,7 @@ export interface Platform {
   ensureIssueClosing(title: string): Promise<void>;
   getFileList(): Promise<string[]>;
   ensureIssue(
-    title: string,
-    body: string,
-    once?: boolean,
-    shouldReopen?: boolean
+    issueConfig: EnsureIssueConfig
   ): Promise<'updated' | 'created' | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;

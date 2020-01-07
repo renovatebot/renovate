@@ -13,6 +13,7 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  EnsureIssueConfig,
   BranchStatusConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
@@ -685,10 +686,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
   }
 }
 
-export async function ensureIssue(
-  title: string,
-  body: string
-): Promise<'updated' | 'created' | null> {
+export async function ensureIssue({
+  title,
+  body,
+}: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
