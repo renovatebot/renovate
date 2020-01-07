@@ -36,6 +36,16 @@ Array [
         ],
       },
       Object {
+        "currentValue": "2.4.2",
+        "datasource": "maven",
+        "depName": "org.apache.maven.plugins:maven-release-plugin",
+        "fileReplacePosition": 1287,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+        ],
+      },
+      Object {
         "currentValue": "1.8.1",
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
