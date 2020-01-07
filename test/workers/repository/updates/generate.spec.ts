@@ -1,12 +1,9 @@
-const defaultConfig = require('../../../../lib/config/defaults').getConfig();
+import { defaultConfig } from '../../../util';
+import { generateBranchConfig } from '../../../../lib/workers/repository/updates/generate';
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
-
-const {
-  generateBranchConfig,
-} = require('../../../../lib/workers/repository/updates/generate');
 
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {

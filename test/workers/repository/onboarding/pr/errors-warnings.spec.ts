@@ -1,4 +1,4 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
+import { RenovateConfig, defaultConfig } from '../../../../util';
 
 const {
   getWarnings,
@@ -8,12 +8,10 @@ const {
 
 describe('workers/repository/onboarding/pr/errors-warnings', () => {
   describe('getWarnings()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = {
-        ...defaultConfig,
-      };
+      config = defaultConfig;
     });
     it('returns warning text', () => {
       config.warnings = [

@@ -1,12 +1,11 @@
-const {
-  flattenUpdates,
-} = require('../../../../lib/workers/repository/updates/flatten');
+import { RenovateConfig, defaultConfig } from '../../../util';
 
-/** @type any */
-let config;
+import { flattenUpdates } from '../../../../lib/workers/repository/updates/flatten';
+
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../../config/config/_fixtures') };
+  config = defaultConfig;
   config.errors = [];
   config.warnings = [];
 });

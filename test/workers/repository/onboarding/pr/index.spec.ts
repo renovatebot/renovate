@@ -1,4 +1,5 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
+import { RenovateConfig, defaultConfig } from '../../../../util';
+import { BranchConfig } from '../../../../../lib/workers/common';
 
 const {
   ensureOnboardingPr,
@@ -9,9 +10,9 @@ const { platform } = require('../../../../../lib/platform');
 
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
-    let config;
+    let config: RenovateConfig;
     let packageFiles;
-    let branches;
+    let branches: BranchConfig[];
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
@@ -25,7 +26,7 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getPrBody = jest.fn(input => input);
       platform.createPr.mockReturnValue({});
     });
-    let createPrBody;
+    let createPrBody: string;
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
       await ensureOnboardingPr(config, packageFiles, branches);

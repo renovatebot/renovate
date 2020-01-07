@@ -1,14 +1,11 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
-const {
-  rebaseOnboardingBranch,
-} = require('../../../../../lib/workers/repository/onboarding/branch/rebase');
-
-/** @type any */
-const { platform } = require('../../../../../lib/platform');
+import { mock } from 'jest-mock-extended';
+import { RenovateConfig, defaultConfig, platform } from '../../../../util';
+import { rebaseOnboardingBranch } from '../../../../../lib/workers/repository/onboarding/branch/rebase';
+import { Pr } from '../../../../../lib/platform';
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
@@ -16,7 +13,8 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       };
     });
     it('does not rebase modified branch', async () => {
-      platform.getBranchPr.mockReturnValueOnce({
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...mock<Pr>(),
         isModified: true,
       });
       await rebaseOnboardingBranch(config);
@@ -25,9 +23,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('does nothing if branch is up to date', async () => {
       const contents =
         JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
-      platform.getFile.mockReturnValueOnce(contents); // package.json
-      platform.getFile.mockReturnValueOnce(contents); // renovate.json
-      platform.getBranchPr.mockReturnValueOnce({
+      platform.getFile
+        .mockResolvedValueOnce(contents) // package.json
+        .mockResolvedValueOnce(contents); // renovate.json
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...mock<Pr>(),
         isModified: false,
         isStale: false,
       });
@@ -35,7 +35,8 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
-      platform.getBranchPr.mockReturnValueOnce({
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...mock<Pr>(),
         isStale: true,
         isModified: false,
       });
