@@ -1,19 +1,16 @@
 import { emojify } from '../../../../util/emoji';
 import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
-import { Upgrade } from '../../../../manager/common';
+import { BranchConfig } from '../../../common';
 
-export interface BranchConfig {
-  upgrades: Upgrade[];
-  baseBranch?: string;
-  branchName: string;
-  schedule?: string[];
-  prTitle: string;
-}
+export type PrBranchConfig = Pick<
+  BranchConfig,
+  'upgrades' | 'baseBranch' | 'branchName' | 'schedule' | 'prTitle'
+>;
 
 export function getPrList(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: PrBranchConfig[]
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
