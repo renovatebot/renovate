@@ -14,6 +14,7 @@ import {
   Issue,
   VulnerabilityAlert,
   GotResponse,
+  CreatePRConfig,
   BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
@@ -860,13 +861,12 @@ export async function ensureCommentRemoval(
 const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  _labels?: string[] | null,
-  useDefaultBranch?: boolean
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  useDefaultBranch,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
