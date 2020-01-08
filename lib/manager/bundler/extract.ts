@@ -192,12 +192,12 @@ export async function extractPackageFile(
     if (lockContent) {
       logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
       const lockedEntries = extractLockFileEntries(lockContent);
-      res.deps.forEach((dep, index) => {
+      for (const dep of res.deps) {
         const lockedDepValue = lockedEntries.get(dep.depName);
         if (lockedDepValue) {
-          res.deps[index].lockedVersion = lockedDepValue;
+          dep.lockedVersion = lockedDepValue;
         }
-      });
+      }
       const bundledWith = lockContent.match(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/);
       if (bundledWith) {
         res.compatibility = res.compatibility || {};
