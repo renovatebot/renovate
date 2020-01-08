@@ -27,7 +27,7 @@ export const REPOSITORY_UNINITIATED = 'uninitiated';
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
-export const MANAGER_MANAGER_NO_PACKAGE_FILES = 'no-package-files';
+export const MANAGER_NO_PACKAGE_FILES = 'no-package-files';
 
 // Datasource error
 export const DATASOURCE_FAILURE = 'registry-failure';

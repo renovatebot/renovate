@@ -6,7 +6,7 @@ import { isOnboarded, onboardingPrExists } from './check';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
 import {
-  MANAGER_MANAGER_NO_PACKAGE_FILES,
+  MANAGER_NO_PACKAGE_FILES,
   REPOSITORY_FORKED,
 } from '../../../../constants/error-messages';
 
@@ -30,7 +30,7 @@ export async function checkOnboardingBranch(
   } else {
     logger.debug('Onboarding PR does not exist');
     if (Object.entries(await extractAllDependencies(config)).length === 0) {
-      throw new Error(MANAGER_MANAGER_NO_PACKAGE_FILES);
+      throw new Error(MANAGER_NO_PACKAGE_FILES);
     }
     logger.info('Need to create onboarding PR');
     await createOnboardingBranch(config);
