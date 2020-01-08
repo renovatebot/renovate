@@ -4,8 +4,8 @@ import * as _flatten from '../../../../lib/workers/repository/updates/flatten';
 import { BranchConfig } from '../../../../lib/workers/common';
 import { getConfig } from '../../../../lib/config/defaults';
 
-const flatten = mocked(_flatten);
-flatten.flattenUpdates = jest.fn();
+const flattenUpdates = mocked(_flatten).flattenUpdates;
+jest.mock('../../../../lib/workers/repository/updates/flatten');
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -18,12 +18,12 @@ beforeEach(() => {
 describe('workers/repository/updates/branchify', () => {
   describe('branchifyUpgrades()', () => {
     it('returns empty', () => {
-      flatten.flattenUpdates.mockReturnValueOnce([]);
+      flattenUpdates.mockReturnValueOnce([]);
       const res = branchifyUpgrades(config, {});
       expect(res.branches).toEqual([]);
     });
     it('returns one branch if one input', () => {
-      flatten.flattenUpdates.mockReturnValueOnce([
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
@@ -39,7 +39,7 @@ describe('workers/repository/updates/branchify', () => {
       expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
     it('uses major/minor/patch slugs', () => {
-      flatten.flattenUpdates.mockReturnValueOnce([
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
@@ -98,7 +98,7 @@ describe('workers/repository/updates/branchify', () => {
       expect(res.branches[3].groupSlug).toBe(`major-2-other-packages`);
     });
     it('does not group if different compiled branch names', () => {
-      flatten.flattenUpdates.mockReturnValueOnce([
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
@@ -122,7 +122,7 @@ describe('workers/repository/updates/branchify', () => {
       expect(Object.keys(res.branches)).toHaveLength(3);
     });
     it('groups if same compiled branch names', () => {
-      flatten.flattenUpdates.mockReturnValueOnce([
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo',
@@ -146,7 +146,7 @@ describe('workers/repository/updates/branchify', () => {
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
     it('groups if same compiled group name', () => {
-      flatten.flattenUpdates.mockReturnValueOnce([
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo',
@@ -233,7 +233,7 @@ describe('workers/repository/updates/branchify', () => {
           expectedBranchName: 'renovate/bad-branch-name9',
         },
       ];
-      flatten.flattenUpdates.mockReturnValueOnce(
+      flattenUpdates.mockReturnValueOnce(
         fixtures.map(({ upgrade }) => upgrade)
       );
 

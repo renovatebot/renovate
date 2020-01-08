@@ -85,7 +85,7 @@ describe('workers/repository/onboarding/branch', () => {
     });
     it('updates onboarding branch', async () => {
       platform.getFileList.mockResolvedValue(['package.json']);
-      platform.findPr.mockReturnValueOnce(null);
+      platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);

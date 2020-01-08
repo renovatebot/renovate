@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../../../util';
+import { RenovateConfig, getConfig } from '../../../../util';
 
 import { getConfigDesc } from '../../../../../lib/workers/repository/onboarding/pr/config-description';
 
