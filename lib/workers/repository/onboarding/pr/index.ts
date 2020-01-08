@@ -120,13 +120,13 @@ If you need any further assistance then you can also [request help here](${confi
     if (config.dryRun) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
-      const pr = await platform.createPr(
-        config.onboardingBranch,
-        config.onboardingPrTitle,
+      const pr = await platform.createPr({
+        branchName: config.onboardingBranch,
+        prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        useDefaultBranch
-      );
+        useDefaultBranch,
+      });
       logger.info({ pr: pr.displayNumber }, 'Created onboarding PR');
     }
   } catch (err) /* istanbul ignore next */ {

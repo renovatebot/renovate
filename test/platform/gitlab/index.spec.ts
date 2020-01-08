@@ -811,12 +811,12 @@ describe('platform/gitlab', () => {
           iid: 12345,
         },
       } as any);
-      const pr = await gitlab.createPr(
-        'some-branch',
-        'some-title',
-        'the-body',
-        null
-      );
+      const pr = await gitlab.createPr({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: null,
+      });
       expect(pr).toMatchSnapshot();
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -827,13 +827,13 @@ describe('platform/gitlab', () => {
           iid: 12345,
         },
       } as any);
-      const pr = await gitlab.createPr(
-        'some-branch',
-        'some-title',
-        'the-body',
-        [],
-        true
-      );
+      const pr = await gitlab.createPr({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: [],
+        useDefaultBranch: true,
+      });
       expect(pr).toMatchSnapshot();
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -844,10 +844,17 @@ describe('platform/gitlab', () => {
           iid: 12345,
         },
       } as any);
-      await gitlab.createPr('some-branch', 'some-title', 'the-body', [], true, {
-        azureAutoComplete: false,
-        statusCheckVerify: false,
-        gitLabAutomerge: true,
+      await gitlab.createPr({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: [],
+        useDefaultBranch: true,
+        platformOptions: {
+          azureAutoComplete: false,
+          statusCheckVerify: false,
+          gitLabAutomerge: true,
+        },
       });
       // expect(api.post.mock.calls).toMatchSnapshot();
       expect(api.put.mock.calls).toMatchSnapshot();

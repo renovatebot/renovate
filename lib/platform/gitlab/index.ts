@@ -8,11 +8,11 @@ import {
   PlatformConfig,
   RepoParams,
   RepoConfig,
-  PlatformPrOptions,
   GotResponse,
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
 } from '../common';
@@ -328,14 +328,14 @@ export async function getBranchStatus(
 
 // Pull Request
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  labels?: string[] | null,
-  useDefaultBranch?: boolean,
-  platformOptions?: PlatformPrOptions
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  labels,
+  useDefaultBranch,
+  platformOptions,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch

@@ -13,6 +13,7 @@ import {
   RepoConfig,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
 } from '../common';
@@ -1570,14 +1571,14 @@ export async function ensureCommentRemoval(
 // Pull Request
 
 // Creates PR and returns PR number
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawBody: string,
-  labels: string[] | null,
-  useDefaultBranch: boolean,
-  platformOptions: { statusCheckVerify?: boolean } = {}
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawBody,
+  labels,
+  useDefaultBranch,
+  platformOptions = {},
+}: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode

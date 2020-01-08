@@ -473,7 +473,11 @@ describe('platform/bitbucket-server', () => {
         it('posts PR', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr('branch', 'title', 'body');
+          const { id } = await bitbucket.createPr({
+            branchName: 'branch',
+            prTitle: 'title',
+            prBody: 'body',
+          });
           expect(id).toBe(5);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
@@ -482,13 +486,13 @@ describe('platform/bitbucket-server', () => {
         it('posts PR default branch', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr(
-            'branch',
-            'title',
-            'body',
-            null,
-            true
-          );
+          const { id } = await bitbucket.createPr({
+            branchName: 'branch',
+            prTitle: 'title',
+            prBody: 'body',
+            labels: null,
+            useDefaultBranch: true,
+          });
           expect(id).toBe(5);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
