@@ -5,7 +5,7 @@ description = ""
 authors = ["John Doe <john.doe@gmail.com>"]
 
 [tool.poetry.dependencies]
-dep0 = "0.0.0"
+dep0 = '0.0.0'
 
 [[tool.poetry.source]]
 name = "foo"

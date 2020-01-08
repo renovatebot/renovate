@@ -37,7 +37,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1' }],
+                warnings: [{ message: 'Warning 1', depName: undefined }],
               },
               {},
             ],
@@ -46,7 +46,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'backend/package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1' }],
+                warnings: [{ message: 'Warning 1', depName: undefined }],
               },
             ],
           },
@@ -56,7 +56,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'Dockerfile',
             deps: [
               {
-                warnings: [{ message: 'Warning 2' }],
+                warnings: [{ message: 'Warning 2', depName: undefined }],
               },
             ],
           },

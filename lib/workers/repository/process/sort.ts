@@ -1,8 +1,13 @@
-const { logger } = require('../../../logger');
+import { logger } from '../../../logger';
+import { BranchConfig } from '../../common';
 
-module.exports = { sortBranches };
+export type SortBranchConfig = Pick<
+  BranchConfig,
+  'prPriority' | 'updateType' | 'prTitle'
+> &
+  Partial<BranchConfig>;
 
-function sortBranches(branches) {
+export function sortBranches(branches: SortBranchConfig[]): void {
   // Sort branches
   const sortOrder = [
     'pin',

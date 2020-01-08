@@ -499,13 +499,13 @@ describe('platform/gitlab', () => {
   describe('setBranchStatus', () => {
     it('sets branch status', async () => {
       await initRepo();
-      await gitlab.setBranchStatus(
-        'some-branch',
-        'some-context',
-        'some-description',
-        'some-state',
-        'some-url'
-      );
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'some-state',
+        url: 'some-url',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
     });
   });
@@ -590,7 +590,10 @@ describe('platform/gitlab', () => {
             ],
           } as any)
       );
-      const res = await gitlab.ensureIssue('new-title', 'new-content');
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+      });
       expect(res).toEqual('created');
     });
     it('updates issue', async () => {
@@ -609,7 +612,10 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: { description: 'new-content' },
       } as any);
-      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      const res = await gitlab.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+      });
       expect(res).toEqual('updated');
     });
     it('skips update if unchanged', async () => {
@@ -628,7 +634,10 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: { description: 'newer-content' },
       } as any);
-      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      const res = await gitlab.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+      });
       expect(res).toBeNull();
     });
   });

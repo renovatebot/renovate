@@ -444,7 +444,7 @@ describe('platform/azure', () => {
     });
     it('should return a pr in the right format', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             getPullRequests: jest
@@ -455,9 +455,9 @@ describe('platform/azure', () => {
                   pullRequestId: 1234,
                 },
               ]),
-            getPullRequestLabels: jest.fn(() => [
-              { active: true, name: 'renovate' },
-            ]),
+            getPullRequestLabels: jest
+              .fn()
+              .mockReturnValue([{ active: true, name: 'renovate' }]),
           } as any)
       );
       azureHelper.getRenovatePRFormat.mockImplementation(
@@ -703,7 +703,13 @@ describe('platform/azure', () => {
 
   describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', () => {
-      const res = azure.setBranchStatus('test', 'test', 'test', 'test', 'test');
+      const res = azure.setBranchStatus({
+        branchName: 'test',
+        context: 'test',
+        description: 'test',
+        state: 'test',
+        url: 'test',
+      });
       expect(res).toBeUndefined();
     });
 

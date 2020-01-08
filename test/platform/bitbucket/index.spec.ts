@@ -220,13 +220,13 @@ describe('platform/bitbucket', () => {
     it('posts status', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.setBranchStatus(
-          'branch',
-          'context',
-          'description',
-          'failed',
-          'targetUrl'
-        );
+        await bitbucket.setBranchStatus({
+          branchName: 'branch',
+          context: 'context',
+          description: 'description',
+          state: 'failed',
+          url: 'targetUrl',
+        });
         expect(api.post.mock.calls).toMatchSnapshot();
       });
     });
@@ -305,7 +305,7 @@ describe('platform/bitbucket', () => {
     it('updates existing issues', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.ensureIssue('title', 'body');
+        await bitbucket.ensureIssue({ title: 'title', body: 'body' });
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post.mock.calls).toMatchSnapshot();
       });
@@ -317,7 +317,7 @@ describe('platform/bitbucket', () => {
           localDir: '',
           optimizeForDisabled: false,
         });
-        await bitbucket.ensureIssue('title', 'body');
+        await bitbucket.ensureIssue({ title: 'title', body: 'body' });
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post.mock.calls).toMatchSnapshot();
       });
@@ -325,7 +325,7 @@ describe('platform/bitbucket', () => {
     it('noop for existing issue', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.ensureIssue('title', 'content\n');
+        await bitbucket.ensureIssue({ title: 'title', body: 'content\n' });
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post).toHaveBeenCalledTimes(0);
       });

@@ -1,17 +1,12 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
-
-const {
-  getPrList,
-} = require('../../../../../lib/workers/repository/onboarding/pr/pr-list');
+import { getConfig, RenovateConfig } from '../../../../util';
+import { getPrList } from '../../../../../lib/workers/repository/onboarding/pr/pr-list';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = {
-        ...defaultConfig,
-      };
+      config = getConfig();
     });
     it('handles emptyu', () => {
       const branches = [];
@@ -27,7 +22,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           upgrades: [
             {
               updateType: 'lockFileMaintenance',
-            },
+            } as never,
           ],
         },
       ];
@@ -53,7 +48,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               depName: 'b',
               newValue: '1.5.3',
             },
-          ],
+          ] as never,
         },
         {
           prTitle: 'Update a to v2',
@@ -66,7 +61,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               depType: 'devDependencies',
               newValue: '2.0.1',
               isLockfileUpdate: true,
-            },
+            } as never,
           ],
         },
       ];
