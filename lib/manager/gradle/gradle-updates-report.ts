@@ -46,7 +46,7 @@ allprojects {
            .unique()
         project.repositories = repos
         def deps = (buildscript.configurations + configurations)
-          .collect { it.dependencies }
+          .collect { it.dependencies + it.dependencyConstraints }
           .flatten()
           .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
           .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
