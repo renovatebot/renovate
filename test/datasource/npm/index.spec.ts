@@ -2,7 +2,7 @@ import _registryAuthToken from 'registry-auth-token';
 import nock from 'nock';
 import moment from 'moment';
 import * as npm from '../../../lib/datasource/npm';
-import * as errorTypes from '../../../lib/constants/error-messages';
+import { REGISTRY_FAILURE } from '../../../lib/constants/error-messages';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
@@ -329,7 +329,7 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(503);
     await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
-      Error(errorTypes.REGISTRY_FAILURE)
+      Error(REGISTRY_FAILURE)
     );
   });
   it('should throw error for 408', async () => {
@@ -337,7 +337,7 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(408);
     await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
-      Error(errorTypes.REGISTRY_FAILURE)
+      Error(REGISTRY_FAILURE)
     );
   });
   it('should throw error for others', async () => {

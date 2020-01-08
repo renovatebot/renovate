@@ -11,7 +11,10 @@ import * as hostRules from '../../../util/host-rules';
 import { getChildProcessEnv } from '../../../util/env';
 import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
 import { platform } from '../../../platform';
-import * as errorTypes from '../../../constants/error-messages';
+import {
+  INSUFFICIENT_DISK_SPACE,
+  REGISTRY_FAILURE,
+} from '../../../constants/error-messages';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
@@ -384,7 +387,7 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'npm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(errorTypes.REGISTRY_FAILURE);
+            throw new Error(REGISTRY_FAILURE);
           }
         }
       }
@@ -436,7 +439,7 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'yarn' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(errorTypes.REGISTRY_FAILURE);
+            throw new Error(REGISTRY_FAILURE);
           }
           /* eslint-enable no-useless-escape */
         }
@@ -522,7 +525,7 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'pnpm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(errorTypes.REGISTRY_FAILURE);
+            throw new Error(REGISTRY_FAILURE);
           }
         }
       }
@@ -578,7 +581,7 @@ export async function getAdditionalFiles(
         res.stderr &&
         res.stderr.includes('ENOSPC: no space left on device')
       ) {
-        throw new Error(errorTypes.INSUFFICIENT_DISK_SPACE);
+        throw new Error(INSUFFICIENT_DISK_SPACE);
       }
       for (const upgrade of config.upgrades) {
         /* eslint-disable no-useless-escape */
@@ -591,7 +594,7 @@ export async function getAdditionalFiles(
             { dependency: upgrade.depName, type: 'yarn' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
-          throw new Error(errorTypes.REGISTRY_FAILURE);
+          throw new Error(REGISTRY_FAILURE);
         }
         /* eslint-enable no-useless-escape */
         if (
@@ -603,7 +606,7 @@ export async function getAdditionalFiles(
             { dependency: upgrade.depName, type: 'npm' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
-          throw new Error(errorTypes.REGISTRY_FAILURE);
+          throw new Error(REGISTRY_FAILURE);
         }
       }
       artifactErrors.push({

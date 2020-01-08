@@ -12,7 +12,11 @@ import {
 } from '../../versioning/ruby';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
-import * as errorTypes from '../../constants/error-messages';
+import {
+  BUNDLER_COULD_NOT_RESOLVE,
+  BUNDLER_INVALID_CREDENTIALS,
+  BUNDLER_UNKNOWN_ERROR,
+} from '../../constants/error-messages';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -151,7 +155,7 @@ export async function updateArtifacts(
         'Gemfile.lock update failed due to missing credentials'
       );
       global.repoCache.bundlerArtifactsError = 'bundler-credentials';
-      throw new Error(errorTypes.BUNDLER_INVALID_CREDENTIALS);
+      throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
     if (err.stderr && err.stderr.match(resolveMatchRe)) {
@@ -181,10 +185,10 @@ export async function updateArtifacts(
       }
       logger.warn({ err }, 'Cannot resolve bundler lock update error');
       // Do not set global.repoCache because we don't want to stop trying other branches
-      throw new Error(errorTypes.BUNDLER_COULD_NOT_RESOLVE);
+      throw new Error(BUNDLER_COULD_NOT_RESOLVE);
     }
     logger.warn({ err }, 'Unknown bundler lock file update error');
     global.repoCache.bundlerArtifactsError = 'bundler-unknown';
-    throw new Error(errorTypes.BUNDLER_UNKNOWN_ERROR);
+    throw new Error(BUNDLER_UNKNOWN_ERROR);
   }
 }

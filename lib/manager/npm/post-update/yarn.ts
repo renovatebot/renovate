@@ -4,7 +4,10 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
-import * as errorTypes from '../../../constants/error-messages';
+import {
+  INSUFFICIENT_DISK_SPACE,
+  REGISTRY_FAILURE,
+} from '../../../constants/error-messages';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -177,14 +180,14 @@ export async function generateLockFile(
     );
     if (err.stderr) {
       if (err.stderr.includes('ENOSPC: no space left on device')) {
-        throw new Error(errorTypes.INSUFFICIENT_DISK_SPACE);
+        throw new Error(INSUFFICIENT_DISK_SPACE);
       }
       if (
         err.stderr.includes('The registry may be down.') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new Error(errorTypes.REGISTRY_FAILURE);
+        throw new Error(REGISTRY_FAILURE);
       }
     }
     return { error: true, stderr: err.stderr };

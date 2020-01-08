@@ -4,7 +4,7 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
-import * as errorTypes from '../../../constants/error-messages';
+import { INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -136,7 +136,7 @@ export async function generateLockFile(
     }
     // istanbul ignore if
     if (stderr && stderr.includes('ENOSPC: no space left on device')) {
-      throw new Error(errorTypes.INSUFFICIENT_DISK_SPACE);
+      throw new Error(INSUFFICIENT_DISK_SPACE);
     }
     const duration = process.hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
