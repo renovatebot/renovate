@@ -1,4 +1,4 @@
-import url, { URLSearchParams } from 'url';
+import url from 'url';
 import delay from 'delay';
 
 import { api } from './bb-got-wrapper';
