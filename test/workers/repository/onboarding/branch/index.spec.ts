@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { RenovateConfig, defaultConfig, platform } from '../../../../util';
+import { RenovateConfig, platform, getConfig } from '../../../../util';
 import { checkOnboardingBranch } from '../../../../../lib/workers/repository/onboarding/branch';
 import { Pr } from '../../../../../lib/platform';
 
@@ -10,7 +10,7 @@ describe('workers/repository/onboarding/branch', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = defaultConfig;
+      config = getConfig();
       platform.getFileList.mockResolvedValue([]);
     });
     it('throws if no package files', async () => {

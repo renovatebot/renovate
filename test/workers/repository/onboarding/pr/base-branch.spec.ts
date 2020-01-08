@@ -1,4 +1,4 @@
-import { RenovateConfig, defaultConfig } from '../../../../util';
+import { RenovateConfig, getConfig } from '../../../../util';
 
 import { getBaseBranchDesc } from '../../../../../lib/workers/repository/onboarding/pr/base-branch';
 
@@ -7,7 +7,7 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = defaultConfig;
+      config = getConfig();
     });
     it('returns empty if no baseBranch', () => {
       const res = getBaseBranchDesc(config);

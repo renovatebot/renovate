@@ -1,4 +1,4 @@
-import { RenovateConfig, defaultConfig } from '../../../../util';
+import { RenovateConfig } from '../../../../util';
 
 import { getConfigDesc } from '../../../../../lib/workers/repository/onboarding/pr/config-description';
 
@@ -7,7 +7,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = defaultConfig;
+      config = getConfig();
     });
     it('returns empty', () => {
       delete config.description;

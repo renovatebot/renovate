@@ -1,7 +1,8 @@
-import { RenovateConfig, defaultConfig, mocked } from '../../../util';
+import { RenovateConfig, mocked } from '../../../util';
 import { branchifyUpgrades } from '../../../../lib/workers/repository/updates/branchify';
 import * as _flatten from '../../../../lib/workers/repository/updates/flatten';
 import { BranchConfig } from '../../../../lib/workers/common';
+import { getConfig } from '../../../../lib/config/defaults';
 
 const flatten = mocked(_flatten);
 flatten.flattenUpdates = jest.fn();
@@ -9,7 +10,7 @@ flatten.flattenUpdates = jest.fn();
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = defaultConfig;
+  config = getConfig();
   config.errors = [];
   config.warnings = [];
 });

@@ -1,11 +1,11 @@
-import { RenovateConfig, defaultConfig } from '../../../util';
+import { RenovateConfig, getConfig } from '../../../util';
 
 import { flattenUpdates } from '../../../../lib/workers/repository/updates/flatten';
 
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = defaultConfig;
+  config = getConfig();
   config.errors = [];
   config.warnings = [];
 });
