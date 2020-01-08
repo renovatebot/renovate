@@ -22,7 +22,7 @@ import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { RenovateConfig } from '../../config';
 import {
-  AUTHENTICATION_ERROR,
+  PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -929,7 +929,7 @@ async function fetchPrList(): Promise<Pr[]> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
-      throw new Error(AUTHENTICATION_ERROR);
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
   }

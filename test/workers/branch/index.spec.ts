@@ -11,7 +11,7 @@ import * as _getUpdated from '../../../lib/workers/branch/get-updated';
 import { defaultConfig, platform, mocked } from '../../util';
 import { BranchConfig } from '../../../lib/workers/common';
 import {
-  LOCKFILE_ERROR,
+  MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
 } from '../../../lib/constants/error-messages';
 
@@ -361,7 +361,7 @@ describe('workers/branch', () => {
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
-        Error(LOCKFILE_ERROR)
+        Error(MANAGER_LOCKFILE_ERROR)
       );
     });
     it('ensures PR and adds lock file error comment recreate closed', async () => {

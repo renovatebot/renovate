@@ -10,7 +10,7 @@ import got from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 let memcache = {};
 
@@ -235,7 +235,7 @@ export async function getDependency(
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
       logger.warn({ err, regUrl, depName: name }, 'npm registry failure');
-      throw new Error(REGISTRY_FAILURE);
+      throw new Error(DATASOURCE_FAILURE);
     }
     // istanbul ignore next
     return null;

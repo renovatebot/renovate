@@ -8,7 +8,7 @@ import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
@@ -288,7 +288,7 @@ async function packageLookup(
       err.host === 'packagist.org'
     ) {
       logger.info('Packagist.org timeout');
-      throw new Error(REGISTRY_FAILURE);
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');
     return null;

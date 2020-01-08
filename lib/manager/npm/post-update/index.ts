@@ -12,8 +12,8 @@ import { getChildProcessEnv } from '../../../util/env';
 import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
 import { platform } from '../../../platform';
 import {
-  INSUFFICIENT_DISK_SPACE,
-  REGISTRY_FAILURE,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  DATASOURCE_FAILURE,
 } from '../../../constants/error-messages';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
@@ -385,7 +385,7 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'npm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(REGISTRY_FAILURE);
+            throw new Error(DATASOURCE_FAILURE);
           }
         }
       }
@@ -437,7 +437,7 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'yarn' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(REGISTRY_FAILURE);
+            throw new Error(DATASOURCE_FAILURE);
           }
           /* eslint-enable no-useless-escape */
         }
@@ -523,7 +523,7 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'pnpm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(REGISTRY_FAILURE);
+            throw new Error(DATASOURCE_FAILURE);
           }
         }
       }
@@ -579,7 +579,7 @@ export async function getAdditionalFiles(
         res.stderr &&
         res.stderr.includes('ENOSPC: no space left on device')
       ) {
-        throw new Error(INSUFFICIENT_DISK_SPACE);
+        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       for (const upgrade of config.upgrades) {
         /* eslint-disable no-useless-escape */
@@ -592,7 +592,7 @@ export async function getAdditionalFiles(
             { dependency: upgrade.depName, type: 'yarn' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
-          throw new Error(REGISTRY_FAILURE);
+          throw new Error(DATASOURCE_FAILURE);
         }
         /* eslint-enable no-useless-escape */
         if (
@@ -604,7 +604,7 @@ export async function getAdditionalFiles(
             { dependency: upgrade.depName, type: 'npm' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
-          throw new Error(REGISTRY_FAILURE);
+          throw new Error(DATASOURCE_FAILURE);
         }
       }
       artifactErrors.push({

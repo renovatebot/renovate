@@ -3,7 +3,7 @@ import upath from 'upath';
 
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 import {
   init,
@@ -88,7 +88,7 @@ async function executeGradle(
     }
     logger.warn({ err, cmd }, 'Gradle run failed');
     logger.info('Aborting Renovate due to Gradle lookup errors');
-    throw new Error(REGISTRY_FAILURE);
+    throw new Error(DATASOURCE_FAILURE);
   }
   logger.debug(stdout + stderr);
   logger.info('Gradle report complete');

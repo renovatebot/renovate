@@ -5,7 +5,7 @@ import { maskToken } from '../../util/mask';
 import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
 import { ReleaseResult } from '../common';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
@@ -30,7 +30,7 @@ const processError = ({ err, ...rest }): null => {
       break;
     default:
       logger.debug(data, 'RubyGems lookup failure');
-      throw new Error(REGISTRY_FAILURE);
+      throw new Error(DATASOURCE_FAILURE);
   }
   return null;
 };

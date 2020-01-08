@@ -18,12 +18,12 @@ import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
 import { BranchConfig } from '../common';
 import {
-  AUTHENTICATION_FAILURE,
-  BAD_CREDENTIALS,
-  INSUFFICIENT_DISK_SPACE,
-  INTEGRATION_UNAUTHORIZED,
-  LOCKFILE_ERROR,
-  RATE_LIMIT_EXCEEDED,
+  PLATFORM_AUTHENTICATION_ERROR,
+  PLATFORM_BAD_CREDENTIALS,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  MANAGER_LOCKFILE_ERROR,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 
@@ -325,7 +325,7 @@ export async function processBranch(
           );
         } else {
           logger.info('PR is less than a day old - raise error instead of PR');
-          throw new Error(LOCKFILE_ERROR);
+          throw new Error(MANAGER_LOCKFILE_ERROR);
         }
       } else {
         logger.debug('PR has no releaseTimestamp');
@@ -379,7 +379,7 @@ export async function processBranch(
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
-    if (err.message === RATE_LIMIT_EXCEEDED) {
+    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       logger.debug('Passing rate-limit-exceeded error up');
       throw err;
     }
@@ -392,7 +392,7 @@ export async function processBranch(
       err.message.startsWith('remote: Invalid username or password')
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error(BAD_CREDENTIALS);
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
     if (
       err.message &&
@@ -401,22 +401,22 @@ export async function processBranch(
       )
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error(BAD_CREDENTIALS);
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
-    if (err.message === BAD_CREDENTIALS) {
+    if (err.message === PLATFORM_BAD_CREDENTIALS) {
       logger.debug('Passing bad-credentials error up');
       throw err;
     }
-    if (err.message === INTEGRATION_UNAUTHORIZED) {
+    if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('Passing integration-unauthorized error up');
       throw err;
     }
-    if (err.message === LOCKFILE_ERROR) {
+    if (err.message === MANAGER_LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
     }
     if (err.message && err.message.includes('space left on device')) {
-      throw new Error(INSUFFICIENT_DISK_SPACE);
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
     if (err.message.startsWith('disk-space')) {
       logger.debug('Passing disk-space error up');
@@ -435,7 +435,7 @@ export async function processBranch(
       err.messagee &&
       err.message.includes('fatal: Authentication failed')
     ) {
-      throw new Error(AUTHENTICATION_FAILURE);
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     } else if (
       err.message !== 'registry-failure' &&
       err.message !== 'disable-gitfs' &&

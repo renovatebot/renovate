@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import got from '../../util/got';
@@ -36,7 +36,7 @@ export async function getRepositoryData(
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       logger.warn({ err }, `${repository} server error`);
-      throw new Error(REGISTRY_FAILURE);
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn({ err }, `${repository} lookup failure: Unknown error`);
     return null;

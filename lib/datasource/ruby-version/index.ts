@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { isVersion } from '../../versioning/ruby';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 
@@ -49,9 +49,9 @@ export async function getPkgReleases(
     return res;
   } catch (err) {
     if (err && (err.statusCode === 404 || err.code === 'ENOTFOUND')) {
-      throw new Error(REGISTRY_FAILURE);
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn({ err }, 'Ruby release lookup failure: Unknown error');
-    throw new Error(REGISTRY_FAILURE);
+    throw new Error(DATASOURCE_FAILURE);
   }
 }

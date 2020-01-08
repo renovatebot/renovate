@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
-import { REGISTRY_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 export async function getPkgReleases({
   lookupName,
@@ -102,7 +102,7 @@ export async function getPkgReleases({
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       logger.warn({ lookupName, err }, `cargo crates.io registry failure`);
-      throw new Error(REGISTRY_FAILURE);
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn(
       { err, lookupName },

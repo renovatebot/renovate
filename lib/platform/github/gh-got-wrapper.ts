@@ -8,10 +8,10 @@ import { maskToken } from '../../util/mask';
 import { GotApi, GotResponse } from '../common';
 import { logger } from '../../logger';
 import {
-  BAD_CREDENTIALS,
-  INTEGRATION_UNAUTHORIZED,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_FAILURE,
-  RATE_LIMIT_EXCEEDED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 
@@ -72,7 +72,7 @@ export function dispatchError(
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.info({ err }, 'GitHub failure: rate limit');
-    throw new Error(RATE_LIMIT_EXCEEDED);
+    throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
     err.statusCode === 403 &&
@@ -82,7 +82,7 @@ export function dispatchError(
       { err },
       'GitHub failure: Resource not accessible by integration'
     );
-    throw new Error(INTEGRATION_UNAUTHORIZED);
+    throw new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
   if (err.statusCode === 401 && message.includes('Bad credentials')) {
     const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
@@ -96,7 +96,7 @@ export function dispatchError(
     if (rateLimit === '60') {
       throw new Error(PLATFORM_FAILURE);
     }
-    throw new Error(BAD_CREDENTIALS);
+    throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
   if (err.statusCode === 422) {
     if (

@@ -5,8 +5,8 @@ import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import {
-  INSUFFICIENT_DISK_SPACE,
-  REGISTRY_FAILURE,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  DATASOURCE_FAILURE,
 } from '../../../constants/error-messages';
 
 export interface GenerateLockFileResult {
@@ -180,14 +180,14 @@ export async function generateLockFile(
     );
     if (err.stderr) {
       if (err.stderr.includes('ENOSPC: no space left on device')) {
-        throw new Error(INSUFFICIENT_DISK_SPACE);
+        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       if (
         err.stderr.includes('The registry may be down.') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new Error(REGISTRY_FAILURE);
+        throw new Error(DATASOURCE_FAILURE);
       }
     }
     return { error: true, stderr: err.stderr };

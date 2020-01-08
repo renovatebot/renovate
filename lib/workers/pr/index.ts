@@ -5,9 +5,9 @@ import { getPrBody } from './body';
 import { platform, BranchStatus, Pr } from '../../platform';
 import { BranchConfig } from '../common';
 import {
-  INTEGRATION_UNAUTHORIZED,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_FAILURE,
-  RATE_LIMIT_EXCEEDED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 
@@ -385,9 +385,9 @@ export async function ensurePr(
     // istanbul ignore if
     if (
       err.message === REPOSITORY_CHANGED ||
-      err.message === RATE_LIMIT_EXCEEDED ||
+      err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
       err.message === PLATFORM_FAILURE ||
-      err.message === INTEGRATION_UNAUTHORIZED
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('Passing error up');
       throw err;
