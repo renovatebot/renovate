@@ -1,4 +1,4 @@
-import { defaultEnvVars } from './envVars';
+import { basicEnvVars } from './basicVars';
 
 export function getChildProcessEnv(
   customEnvVars: string[] = []
@@ -7,7 +7,7 @@ export function getChildProcessEnv(
   if (global.trustLevel === 'high') {
     return Object.assign(env, process.env);
   }
-  const envVars = [...defaultEnvVars, ...customEnvVars];
+  const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach(envVar => {
     if (typeof process.env[envVar] !== 'undefined') {
       env[envVar] = process.env[envVar];

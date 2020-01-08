@@ -97,7 +97,7 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { envVars: ['SELECTED_ENV_VAR'] },
+        inOpts: { inheritEnvVars: ['SELECTED_ENV_VAR'] },
         outCmd: cmd,
         outOpts: { encoding, env: envMock.filtered },
       },
@@ -108,7 +108,7 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { docker, envVars: ['SELECTED_ENV_VAR'] },
+        inOpts: { docker, inheritEnvVars: ['SELECTED_ENV_VAR'] },
         outCmd: `docker run --rm -e SELECTED_ENV_VAR ${image} ${cmd}`,
         outOpts: { encoding, env: envMock.filtered },
       },
@@ -119,7 +119,7 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { envVars: ['NONSENSE'] },
+        inOpts: { inheritEnvVars: ['NONSENSE'] },
         outCmd: cmd,
         outOpts: { encoding, env: envMock.basic },
       },
@@ -130,7 +130,7 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { docker, envVars: ['NONSENSE'] },
+        inOpts: { docker, inheritEnvVars: ['NONSENSE'] },
         outCmd: `docker run --rm ${image} ${cmd}`,
         outOpts: { encoding, env: envMock.basic },
       },
