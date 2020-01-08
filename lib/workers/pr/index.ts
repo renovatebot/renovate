@@ -310,14 +310,14 @@ export async function ensurePr(
             config.automergeType === 'pr' &&
             config.gitLabAutomerge,
         };
-        pr = await platform.createPr(
+        pr = await platform.createPr({
           branchName,
           prTitle,
           prBody,
-          config.labels,
-          false,
-          platformOptions
-        );
+          labels: config.labels,
+          useDefaultBranch: false,
+          platformOptions,
+        });
         logger.info({ branch: branchName, pr: pr.number }, 'PR created');
       }
     } catch (err) /* istanbul ignore next */ {

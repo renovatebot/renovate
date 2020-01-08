@@ -401,7 +401,11 @@ describe('platform/bitbucket', () => {
       api.post.mockReturnValueOnce({
         body: { id: 5 },
       } as any);
-      const { number } = await bitbucket.createPr('branch', 'title', 'body');
+      const { number } = await bitbucket.createPr({
+        branchName: 'branch',
+        prTitle: 'title',
+        prBody: 'body',
+      });
       expect(number).toBe(5);
       expect(api.post.mock.calls).toMatchSnapshot();
     });

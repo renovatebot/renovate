@@ -332,22 +332,20 @@ export async function getAdditionalFiles(
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 
-  process.env.NPM_CONFIG_CACHE =
-    process.env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
-  await fs.ensureDir(process.env.NPM_CONFIG_CACHE);
-  process.env.YARN_CACHE_FOLDER =
-    process.env.YARN_CACHE_FOLDER ||
-    upath.join(config.cacheDir, './others/yarn');
-  await fs.ensureDir(process.env.YARN_CACHE_FOLDER);
-  process.env.npm_config_store =
-    process.env.npm_config_store ||
-    upath.join(config.cacheDir, './others/pnpm');
-  await fs.ensureDir(process.env.npm_config_store);
   const env = getChildProcessEnv([
     'NPM_CONFIG_CACHE',
     'YARN_CACHE_FOLDER',
     'npm_config_store',
   ]);
+  env.NPM_CONFIG_CACHE =
+    env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
+  await fs.ensureDir(env.NPM_CONFIG_CACHE);
+  env.YARN_CACHE_FOLDER =
+    env.YARN_CACHE_FOLDER || upath.join(config.cacheDir, './others/yarn');
+  await fs.ensureDir(env.YARN_CACHE_FOLDER);
+  env.npm_config_store =
+    env.npm_config_store || upath.join(config.cacheDir, './others/pnpm');
+  await fs.ensureDir(env.npm_config_store);
   env.NODE_ENV = 'dev';
 
   let token = '';

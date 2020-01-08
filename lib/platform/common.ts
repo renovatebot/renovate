@@ -104,11 +104,18 @@ export type BranchStatus =
   | 'failure';
 
 export type PlatformPrOptions = {
-  azureAutoComplete: boolean;
-  statusCheckVerify: boolean;
-  gitLabAutomerge: boolean;
+  azureAutoComplete?: boolean;
+  statusCheckVerify?: boolean;
+  gitLabAutomerge?: boolean;
 };
-
+export interface CreatePRConfig {
+  branchName: string;
+  prTitle: string;
+  prBody: string;
+  labels?: string[] | null;
+  useDefaultBranch?: boolean;
+  platformOptions?: PlatformPrOptions;
+}
 export interface EnsureIssueConfig {
   title: string;
   body: string;
@@ -148,14 +155,7 @@ export interface Platform {
   mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
-  createPr(
-    branchName: string,
-    prTitle: string,
-    prBody: string,
-    labels?: string[] | null,
-    useDefaultBranch?: boolean,
-    platformOptions?: PlatformPrOptions
-  ): Promise<Pr>;
+  createPr(prConfig: CreatePRConfig): Promise<Pr>;
   getBranchLastCommitTime(branchName: string): Promise<Date>;
   getRepos(): Promise<string[]>;
   isBranchStale(branchName: string): Promise<boolean>;

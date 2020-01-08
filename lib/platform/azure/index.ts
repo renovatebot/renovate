@@ -15,6 +15,7 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
   BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
@@ -401,14 +402,14 @@ export async function getBranchStatus(
   return branchStatusCheck;
 }
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  body: string,
-  labels: string[],
-  useDefaultBranch?: boolean,
-  platformOptions: any = {}
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: body,
+  labels,
+  useDefaultBranch,
+  platformOptions = {},
+}: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
