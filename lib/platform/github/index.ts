@@ -6,23 +6,22 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
   RepoConfig,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
+  EnsureIssueConfig,
+  BranchStatusConfig,
 } from '../common';
 
-import {
-  appName,
-  appSlug,
-  configFileNames,
-  urls,
-} from '../../config/app-strings';
+import { configFileNames } from '../../config/app-strings';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import { getGraphqlNodes } from './gh-graphql-wrapper';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -70,6 +69,7 @@ interface LocalRepoConfig {
   localDir: string;
   isGhe: boolean;
   renovateUsername: string;
+  productLinks: any;
 }
 
 type BranchProtection = any;
@@ -556,18 +556,18 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 // istanbul ignore next
@@ -992,6 +992,29 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+type BranchState = 'failure' | 'pending' | 'success';
+
+interface BranchStatus {
+  context: string;
+  state: BranchState;
+}
+
+interface CombinedBranchStatus {
+  state: BranchState;
+  statuses: BranchStatus[];
+}
+
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<CombinedBranchStatus> {
+  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
+    branchName
+  )}/status`;
+
+  return (await api.get(commitStatusUrl, { useCache })).body;
+}
+
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -1008,12 +1031,9 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return 'failed';
   }
-  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
-    branchName
-  )}/status`;
   let commitStatus;
   try {
-    commitStatus = (await api.get(commitStatusUrl)).body;
+    commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.info(
@@ -1085,15 +1105,24 @@ export async function getBranchStatus(
   return 'pending';
 }
 
+async function getStatusCheck(
+  branchName: string,
+  useCache = true
+): Promise<BranchStatus[]> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
+
+  return (await api.get(url, { useCache })).body;
+}
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<string> {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-  const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
   try {
-    const res = await api.get(url);
-    for (const check of res.body) {
+    const res = await getStatusCheck(branchName);
+    for (const check of res) {
       if (check.context === context) {
         return check.state;
       }
@@ -1108,13 +1137,13 @@ export async function getBranchStatusCheck(
   }
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   // istanbul ignore if
   if (config.parentRepo) {
     logger.info('Cannot set branch status when in forking mode');
@@ -1125,72 +1154,59 @@ export async function setBranchStatus(
     return;
   }
   logger.info({ branch: branchName, context, state }, 'Setting branch status');
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-  const url = `repos/${config.repository}/statuses/${branchCommit}`;
-  const options: any = {
-    state,
-    description,
-    context,
-  };
-  if (targetUrl) {
-    options.target_url = targetUrl;
+  try {
+    const branchCommit = await config.storage.getBranchCommit(branchName);
+    const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    const options: any = {
+      state,
+      description,
+      context,
+    };
+    if (targetUrl) {
+      options.target_url = targetUrl;
+    }
+    await api.post(url, { body: options });
+
+    // update status cache
+    await getStatus(branchName, false);
+    await getStatusCheck(branchName, false);
+  } catch (err) /* istanbul ignore next */ {
+    logger.info({ err }, 'Caught error setting branch status - aborting');
+    throw new Error('repository-changed');
   }
-  await api.post(url, { body: options });
 }
 
 // Issue
 
 /* istanbul ignore next */
-async function getGraphqlIssues(
-  afterCursor: string | null = null
-): Promise<[boolean, Issue[], string | null]> {
-  const url = 'graphql';
-  const headers = {
-    accept: 'application/vnd.github.merge-info-preview+json',
-  };
+async function getGraphqlIssues(): Promise<Issue[]> {
   // prettier-ignore
   const query = `
-  query {
-    repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-      issues(first: 100, after:${afterCursor}, orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
-        pageInfo {
-          startCursor
-          hasNextPage
-        }
-        nodes {
-          number
-          state
-          title
-          body
+    query {
+      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
+        issues(orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
         }
       }
     }
-  }
   `;
 
-  const options = {
-    headers,
-    body: JSON.stringify({ query }),
-    json: false,
-  };
+  const result = await getGraphqlNodes<Issue>(query, 'issues');
 
-  try {
-    const res = JSON.parse((await api.post(url, options)).body);
-
-    if (!res.data) {
-      logger.info({ query, res }, 'No graphql res.data');
-      return [false, [], null];
-    }
-
-    const cursor = res.data.repository.issues.pageInfo.hasNextPage
-      ? res.data.repository.issues.pageInfo.startCursor
-      : null;
-
-    return [true, res.data.repository.issues.nodes, cursor];
-  } catch (err) {
-    logger.warn({ query, err }, 'getGraphqlIssues error');
-    throw new Error('platform-failure');
-  }
+  logger.debug(`Retrieved ${result.length} issues`);
+  return result.map(issue => ({
+    ...issue,
+    state: issue.state.toLowerCase(),
+  }));
 }
 
 // istanbul ignore next
@@ -1226,28 +1242,11 @@ export async function getIssueList(): Promise<Issue[]> {
     logger.debug('Retrieving issueList');
     const filterBySupportMinimumGheVersion = '2.17.0';
     // istanbul ignore next
-    if (
+    config.issueList =
       config.enterpriseVersion &&
       semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
-    ) {
-      config.issueList = await getRestIssues();
-      return config.issueList;
-    }
-    let [success, issues, cursor] = await getGraphqlIssues();
-    config.issueList = [];
-    while (success) {
-      for (const issue of issues) {
-        issue.state = issue.state.toLowerCase();
-        config.issueList.push(issue);
-      }
-
-      if (!cursor) {
-        break;
-      }
-      // istanbul ignore next
-      [success, issues, cursor] = await getGraphqlIssues(cursor);
-    }
-    logger.debug('Retrieved ' + config.issueList.length + ' issues');
+        ? await getRestIssues()
+        : await getGraphqlIssues();
   }
   return config.issueList;
 }
@@ -1280,14 +1279,14 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
-export async function ensureIssue(
-  title: string,
-  rawbody: string,
+export async function ensureIssue({
+  title,
+  body: rawBody,
   once = false,
-  reopen = true
-): Promise<string | null> {
+  shouldReOpen = true,
+}: EnsureIssueConfig): Promise<string | null> {
   logger.debug(`ensureIssue(${title})`);
-  const body = sanitize(rawbody);
+  const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
     const issues = issueList.filter(i => i.title === title);
@@ -1298,7 +1297,7 @@ export async function ensureIssue(
           logger.debug('Issue already closed - skipping recreation');
           return null;
         }
-        if (reopen) {
+        if (shouldReOpen) {
           logger.info('Reopening previously closed issue');
         }
         issue = issues[issues.length - 1];
@@ -1316,7 +1315,7 @@ export async function ensureIssue(
         logger.info('Issue is open and up to date - nothing to do');
         return null;
       }
-      if (reopen) {
+      if (shouldReOpen) {
         logger.info('Patching issue');
         await api.patch(
           `repos/${config.parentRepo || config.repository}/issues/${
@@ -1390,17 +1389,20 @@ export async function addReviewers(
   const teamReviewers = reviewers
     .filter(e => e.startsWith('team:'))
     .map(e => e.replace(/^team:/, ''));
-
-  await api.post(
-    `repos/${config.parentRepo ||
-      config.repository}/pulls/${prNo}/requested_reviewers`,
-    {
-      body: {
-        reviewers: userReviewers,
-        team_reviewers: teamReviewers,
-      },
-    }
-  );
+  try {
+    await api.post(
+      `repos/${config.parentRepo ||
+        config.repository}/pulls/${prNo}/requested_reviewers`,
+      {
+        body: {
+          reviewers: userReviewers,
+          team_reviewers: teamReviewers,
+        },
+      }
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Failed to assign reviewer');
+  }
 }
 
 async function addLabels(
@@ -1569,14 +1571,14 @@ export async function ensureCommentRemoval(
 // Pull Request
 
 // Creates PR and returns PR number
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawBody: string,
-  labels: string[] | null,
-  useDefaultBranch: boolean,
-  platformOptions: { statusCheckVerify?: boolean } = {}
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawBody,
+  labels,
+  useDefaultBranch,
+  platformOptions = {},
+}: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
@@ -1609,13 +1611,13 @@ export async function createPr(
   await addLabels(pr.number, labels);
   if (platformOptions.statusCheckVerify) {
     logger.debug('Setting statusCheckVerify');
-    await setBranchStatus(
+    await setBranchStatus({
       branchName,
-      `${appSlug}/verify`,
-      `${appName} verified pull request`,
-      'success',
-      urls.homepage
-    );
+      context: `renovate/verify`,
+      description: `Renovate verified pull request`,
+      state: 'success',
+      url: 'https://github.com/renovatebot/renovate',
+    });
   }
   pr.isModified = false;
   return pr;

@@ -6,6 +6,11 @@ const yamlFile = readFileSync(
   'utf8'
 );
 
+const yamlFile1 = readFileSync(
+  'test/manager/gitlabci/_fixtures/gitlab-ci.1.yaml',
+  'utf8'
+);
+
 describe('lib/manager/gitlabci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
@@ -15,6 +20,12 @@ describe('lib/manager/gitlabci/extract', () => {
       const res = extractPackageFile(yamlFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
+    });
+
+    it('extracts multiple image lines with comments', () => {
+      const res = extractPackageFile(yamlFile1);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(3);
     });
   });
 });

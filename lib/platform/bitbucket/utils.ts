@@ -34,6 +34,12 @@ export interface RepoInfo {
   has_issues: boolean;
 }
 
+export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+export interface BitbucketStatus {
+  key: string;
+  state: BitbucketBranchState;
+}
+
 export function repoInfoTransformer(repoInfoBody: any): RepoInfo {
   return {
     isFork: !!repoInfoBody.parent,
@@ -53,10 +59,10 @@ export const prStates = {
 };
 
 export const buildStates: {
-  [key: string]: string;
-  success: string;
-  failed: string;
-  pending: string;
+  [key: string]: BitbucketBranchState;
+  success: BitbucketBranchState;
+  failed: BitbucketBranchState;
+  pending: BitbucketBranchState;
 } = {
   success: 'SUCCESSFUL',
   failed: 'FAILED',

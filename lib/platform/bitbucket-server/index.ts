@@ -4,7 +4,7 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { File, StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -14,6 +14,8 @@ import {
   Issue,
   VulnerabilityAlert,
   GotResponse,
+  CreatePRConfig,
+  BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -409,25 +411,30 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch: string = config.baseBranch
-): Promise<void> {
+export async function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
-      { branchName, filesLength: files.length, message, parentBranch },
+      {
+        branchName,
+        filesLength: files.length,
+        message,
+        parentBranch,
+      },
       null,
       2
     )})`
   );
-  await config.storage.commitFilesToBranch(
+  await config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 
   // wait for pr change propagation
   await delay(1000);
@@ -477,6 +484,18 @@ export /* istanbul ignore next */ function getRepoStatus(): Promise<
   return config.storage.getRepoStatus();
 }
 
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketCommitStatus> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  return (await api.get(
+    `./rest/build-status/1.0/commits/stats/${branchCommit}`,
+    { useCache }
+  )).body;
+}
+
 // Returns the combined status for a branch.
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
@@ -498,12 +517,8 @@ export async function getBranchStatus(
     throw new Error('repository-changed');
   }
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-
   try {
-    const commitStatus = (await api.get(
-      `./rest/build-status/1.0/commits/stats/${branchCommit}`
-    )).body;
+    const commitStatus = await getStatus(branchName);
 
     logger.debug({ commitStatus }, 'branch status check result');
 
@@ -516,6 +531,19 @@ export async function getBranchStatus(
   }
 }
 
+async function getStatusCheck(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketStatus[]> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  return utils.accumulateValues(
+    `./rest/build-status/1.0/commits/${branchCommit}`,
+    'get',
+    { useCache }
+  );
+}
+
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatusCheck(
   branchName: string,
@@ -523,12 +551,8 @@ export async function getBranchStatusCheck(
 ): Promise<string | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-
   try {
-    const states = await utils.accumulateValues(
-      `./rest/build-status/1.0/commits/${branchCommit}`
-    );
+    const states = await getStatusCheck(branchName);
 
     for (const state of states) {
       if (state.key === context) {
@@ -549,13 +573,13 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string | null,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   logger.debug(`setBranchStatus(${branchName})`);
 
   const existingStatus = await getBranchStatusCheck(branchName, context);
@@ -587,6 +611,10 @@ export async function setBranchStatus(
     }
 
     await api.post(`./rest/build-status/1.0/commits/${branchCommit}`, { body });
+
+    // update status cache
+    await getStatus(branchName, false);
+    await getStatusCheck(branchName, false);
   } catch (err) {
     logger.warn({ err }, `Failed to set branch status`);
   }
@@ -833,13 +861,12 @@ export async function ensureCommentRemoval(
 const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  _labels?: string[] | null,
-  useDefaultBranch?: boolean
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  useDefaultBranch,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -1010,7 +1037,7 @@ export function getPrBody(input: string): string {
   return smartTruncate(input, 30000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
+    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 

@@ -64,3 +64,38 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/gitlabci/extract extractPackageFile() extracts multiple image lines with comments 1`] = `
+Array [
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "19.70.8-slim",
+    "datasource": "docker",
+    "depName": "renovate/renovate",
+    "depType": "image-name",
+    "managerData": Object {
+      "lineNumber": 2,
+    },
+  },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "10.4.11",
+    "datasource": "docker",
+    "depName": "mariadb",
+    "depType": "service-image",
+    "managerData": Object {
+      "lineNumber": 6,
+    },
+  },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "1.0.0",
+    "datasource": "docker",
+    "depName": "other/image",
+    "depType": "service-image",
+    "managerData": Object {
+      "lineNumber": 8,
+    },
+  },
+]
+`;

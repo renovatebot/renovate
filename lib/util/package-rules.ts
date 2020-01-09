@@ -2,6 +2,7 @@ import minimatch from 'minimatch';
 import { logger } from '../logger';
 import * as versioning from '../versioning';
 import { mergeChildConfig, PackageRule, UpdateType } from '../config';
+import { regEx } from './regex';
 
 // TODO: move to `../config`
 export interface Config extends Record<string, any> {
@@ -140,7 +141,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
       for (const packagePattern of packagePatterns) {
-        const packageRegex = new RegExp(
+        const packageRegex = regEx(
           packagePattern === '^*$' || packagePattern === '*'
             ? '.*'
             : packagePattern
@@ -166,7 +167,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   if (excludePackagePatterns.length) {
     let isMatch = false;
     for (const pattern of excludePackagePatterns) {
-      const packageRegex = new RegExp(
+      const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
       );
       if (depName && depName.match(packageRegex)) {
@@ -190,19 +191,42 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   }
   if (matchCurrentVersion) {
     const version = versioning.get(versionScheme);
-    const compareVersion =
-      currentValue && version.isVersion(currentValue)
-        ? currentValue // it's a version so we can match against it
-        : lockedVersion || fromVersion; // need to match against this fromVersion, if available
-    if (compareVersion && version.isVersion(compareVersion)) {
-      const isMatch = version.matches(compareVersion, matchCurrentVersion);
-      // istanbul ignore if
+    const matchCurrentVersionStr = matchCurrentVersion.toString();
+    if (version.isVersion(matchCurrentVersionStr)) {
+      let isMatch = false;
+      try {
+        isMatch = version.matches(matchCurrentVersionStr, currentValue);
+      } catch (err) {
+        // Do nothing
+      }
       if (!isMatch) {
         return false;
       }
       positiveMatch = true;
     } else {
-      return false;
+      const compareVersion =
+        currentValue && version.isVersion(currentValue)
+          ? currentValue // it's a version so we can match against it
+          : lockedVersion || fromVersion; // need to match against this fromVersion, if available
+      if (compareVersion) {
+        // istanbul ignore next
+        if (version.isVersion(compareVersion)) {
+          const isMatch = version.matches(compareVersion, matchCurrentVersion);
+          // istanbul ignore if
+          if (!isMatch) {
+            return false;
+          }
+          positiveMatch = true;
+        } else {
+          return false;
+        }
+      } else {
+        logger.info(
+          { matchCurrentVersionStr, currentValue },
+          'Could not find a version to compare'
+        );
+        return false;
+      }
     }
   }
   return positiveMatch;

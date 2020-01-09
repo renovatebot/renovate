@@ -10,3 +10,63 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
+Array [
+  Object {
+    "cmd": "pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports docker mode 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e LC_ALL -e LANG -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+    },
+  },
+]
+`;

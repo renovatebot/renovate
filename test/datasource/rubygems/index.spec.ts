@@ -69,6 +69,24 @@ describe('datasource/rubygems', () => {
       ).toBeUndefined();
     });
 
+    it('uses rubygems.org if no registry urls were provided', async () => {
+      got.mockReturnValue({ body: rubygemsOrgVersions });
+
+      expect(
+        await rubygems.getPkgReleases({
+          ...params,
+          registryUrls: [],
+        })
+      ).toBeNull();
+
+      const res = await rubygems.getPkgReleases({
+        lookupName: '1pass',
+        registryUrls: [],
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+
     it('works with real data', async () => {
       got
         .mockReturnValueOnce({ body: railsInfo })

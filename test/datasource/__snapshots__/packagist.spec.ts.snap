@@ -2,7 +2,6 @@
 
 exports[`datasource/packagist getPkgReleases adds packagist source implicitly 1`] = `
 Object {
-  "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
   "releases": Array [
     Object {
@@ -87,7 +86,6 @@ Object {
 
 exports[`datasource/packagist getPkgReleases processes real versioned data 1`] = `
 Object {
-  "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
   "releases": Array [
     Object {

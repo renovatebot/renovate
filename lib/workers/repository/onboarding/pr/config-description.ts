@@ -1,10 +1,6 @@
 import { emojify } from '../../../../util/emoji';
 import { logger } from '../../../../logger';
-import {
-  appName,
-  configFileNames,
-  onboardingPrTitle,
-} from '../../../../config/app-strings';
+import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
 
@@ -15,13 +11,13 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.trace({ config });
   if (
     !config.schedule ||
-    config.schedule === 'at any time' ||
+    (config.schedule as never) === 'at any time' ||
     config.schedule[0] === 'at any time'
   ) {
     logger.debug('No schedule');
     return [];
   }
-  const desc = `Run ${appName} on following schedule: ${config.schedule}`;
+  const desc = `Run Renovate on following schedule: ${config.schedule}`;
   return [desc];
 }
 
@@ -53,16 +49,16 @@ export function getConfigDesc(
   ) {
     descriptionArr = descriptionArr.filter(val => !val.includes('Docker-only'));
   }
-  let desc = `\n### Configuration Summary\n\nBased on the default config's presets, ${appName} will:\n\n`;
-  desc += `  - Start dependency updates only once this ${onboardingPrTitle} PR is merged\n`;
+  let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
+  desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
   descriptionArr.forEach(d => {
     desc += `  - ${d}\n`;
   });
   desc += '\n';
   desc += emojify(
-    `:abcd: Would you like to change the way ${appName} is upgrading your dependencies?`
+    `:abcd: Would you like to change the way Renovate is upgrading your dependencies?`
   );
-  desc += ` Simply edit the \`${defaultConfigFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time ${appName} runs.`;
+  desc += ` Simply edit the \`${defaultConfigFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.`;
   desc += '\n\n---\n';
   return desc;
 }

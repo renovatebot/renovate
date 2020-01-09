@@ -3,9 +3,66 @@
 exports[`.updateArtifacts() catches errors 1`] = `
 Array [
   Object {
-    "lockFileError": Object {
+    "artifactError": Object {
       "lockFile": "poetry.lock",
       "stderr": "not found",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "poetry update --lock --no-interaction dep1",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated poetry.lock 1`] = `
+Array [
+  Object {
+    "cmd": "poetry update --lock --no-interaction dep1",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated poetry.lock using docker 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/poetry poetry update --lock --no-interaction dep1",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]

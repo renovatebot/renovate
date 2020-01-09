@@ -8,12 +8,18 @@ import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
 
+// istanbul ignore next
+export function resetModule(): void {
+  pythonAlias = null;
+}
+
 export function parsePythonVersion(str: string): number[] {
   const arr = str.split(' ')[1].split('.');
   return [parseInt(arr[0], 10), parseInt(arr[1], 10)];
 }
 
 export async function getPythonAlias(): Promise<string> {
+  // istanbul ignore if
   if (pythonAlias) {
     return pythonAlias;
   }
@@ -43,7 +49,6 @@ export async function extractSetupFile(
   const cwd = config.localDir;
   let cmd: string;
   const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
-  // istanbul ignore if
   if (config.binarySource === 'docker') {
     logger.info('Running python via docker');
     await exec(`docker pull renovate/pip`);
