@@ -300,7 +300,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables`] = `
+exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
 Object {
   "deps": Array [
     Object {

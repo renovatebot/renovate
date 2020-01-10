@@ -53,7 +53,7 @@ async function resolvePluginReleases(
   const searchRoot = `${rootUrl}/${artifact}`;
   const parse = (content: string): string[] =>
     parseIndexDir(content, x => !/^\.+$/.test(x));
-  const indexContent = await downloadHttpProtocol(searchRoot, 'sbt');
+  const indexContent = await downloadHttpProtocol(searchRoot + '/', 'sbt');
   if (indexContent) {
     const releases: string[] = [];
     const scalaVersionItems = parse(indexContent);
@@ -64,13 +64,16 @@ async function resolvePluginReleases(
         : [scalaVersion];
     for (const searchVersion of searchVersions) {
       const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
-      const subRootContent = await downloadHttpProtocol(searchSubRoot, 'sbt');
+      const subRootContent = await downloadHttpProtocol(
+        searchSubRoot + '/',
+        'sbt'
+      );
       if (subRootContent) {
         const sbtVersionItems = parse(subRootContent);
         for (const sbtItem of sbtVersionItems) {
           const releasesRoot = `${searchSubRoot}/${sbtItem}`;
           const releasesIndexContent = await downloadHttpProtocol(
-            releasesRoot,
+            releasesRoot + '/',
             'sbt'
           );
           if (releasesIndexContent) {
