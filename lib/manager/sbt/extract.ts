@@ -20,6 +20,11 @@ const isScalaVersion = (str: string): boolean =>
 const getScalaVersion = (str: string): string =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
 
+const normalizeScalaVersion = (str: string): string =>
+  /^\d+\.\d+\.\d+$/.test(str)
+    ? str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2')
+    : str;
+
 const isScalaVersionVariable = (str: string): boolean =>
   /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
 
@@ -173,7 +178,7 @@ function parseSbtLine(
   if (!isComment(line)) {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
-      scalaVersion = getScalaVersion(line);
+      scalaVersion = normalizeScalaVersion(getScalaVersion(line));
     } else if (isScalaVersionVariable(line)) {
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
@@ -241,7 +246,7 @@ function parseSbtLine(
         scalaVersion ||
         (scalaVersionVariable &&
           variables[scalaVersionVariable] &&
-          variables[scalaVersionVariable].val),
+          normalizeScalaVersion(variables[scalaVersionVariable].val)),
     };
   if (deps.length) return { deps };
   return null;
