@@ -1,9 +1,10 @@
-const { processResult } = require('../../../lib/workers/repository/result');
+import { processResult } from '../../../lib/workers/repository/result';
+import { RenovateConfig, getConfig } from '../../util';
 
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../config/config/_fixtures');
+  config = getConfig;
 });
 
 describe('workers/repository/result', () => {

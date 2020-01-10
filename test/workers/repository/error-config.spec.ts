@@ -1,14 +1,15 @@
-const {
-  raiseConfigWarningIssue,
-} = require('../../../lib/workers/repository/error-config');
+import { mock } from 'jest-mock-extended';
 
-/** @type any */
-const { platform } = require('../../../lib/platform');
+import { raiseConfigWarningIssue } from '../../../lib/workers/repository/error-config';
+import { RenovateConfig, getConfig, platform } from '../../util';
+import { Pr } from '../../../lib/platform';
 
-let config;
+jest.mock('../../../lib/platform');
+
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../config/config/_fixtures');
+  config = getConfig;
 });
 
 describe('workers/repository/error-config', () => {
@@ -17,7 +18,7 @@ describe('workers/repository/error-config', () => {
       const error = new Error('config-validation');
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
-      platform.ensureIssue.mockReturnValue('created');
+      platform.ensureIssue.mockResolvedValueOnce('created');
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
@@ -25,7 +26,7 @@ describe('workers/repository/error-config', () => {
       const error = new Error('config-validation');
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
-      platform.ensureIssue.mockReturnValue('created');
+      platform.ensureIssue.mockResolvedValueOnce('created');
       const res = await raiseConfigWarningIssue(
         { ...config, dryRun: true },
         error
@@ -36,7 +37,11 @@ describe('workers/repository/error-config', () => {
       const error = new Error('config-validation');
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
-      platform.getBranchPr.mockReturnValueOnce({ number: 1, state: 'open' });
+      platform.getBranchPr.mockResolvedValue({
+        ...mock<Pr>(),
+        number: 1,
+        state: 'open',
+      });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
@@ -44,7 +49,11 @@ describe('workers/repository/error-config', () => {
       const error = new Error('config-validation');
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
-      platform.getBranchPr.mockReturnValueOnce({ number: 1, state: 'open' });
+      platform.getBranchPr.mockResolvedValue({
+        ...mock<Pr>(),
+        number: 1,
+        state: 'open',
+      });
       const res = await raiseConfigWarningIssue(
         { ...config, dryRun: true },
         error

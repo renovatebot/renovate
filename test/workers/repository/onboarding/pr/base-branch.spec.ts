@@ -1,17 +1,13 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
+import { RenovateConfig, getConfig } from '../../../../util';
 
-const {
-  getBaseBranchDesc,
-} = require('../../../../../lib/workers/repository/onboarding/pr/base-branch');
+import { getBaseBranchDesc } from '../../../../../lib/workers/repository/onboarding/pr/base-branch';
 
 describe('workers/repository/onboarding/pr/base-branch', () => {
   describe('getBaseBranchDesc()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = {
-        ...defaultConfig,
-      };
+      config = getConfig();
     });
     it('returns empty if no baseBranch', () => {
       const res = getBaseBranchDesc(config);

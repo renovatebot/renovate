@@ -1,17 +1,13 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
+import { RenovateConfig, getConfig } from '../../../../util';
 
-const {
-  getConfigDesc,
-} = require('../../../../../lib/workers/repository/onboarding/pr/config-description');
+import { getConfigDesc } from '../../../../../lib/workers/repository/onboarding/pr/config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = {
-        ...defaultConfig,
-      };
+      config = getConfig();
     });
     it('returns empty', () => {
       delete config.description;
@@ -48,6 +44,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res.indexOf('Docker-only')).toBe(-1);
     });
     it('assignees, labels and schedule', () => {
+      delete config.description;
       config.packageFiles = [];
       config.assignees = ['someone', '@someone-else'];
       config.labels = ['renovate', 'deps'];

@@ -1,11 +1,9 @@
-const { logger } = require('../../logger');
-const { platform } = require('../../platform');
+import { logger } from '../../logger';
+import { platform, Pr } from '../../platform';
+import { BranchConfig } from '../common';
+import { RenovateConfig } from '../../config';
 
-module.exports = {
-  ensureMasterIssue,
-};
-
-function getListItem(branch, type, pr) {
+function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (pr) {
@@ -22,7 +20,10 @@ function getListItem(branch, type, pr) {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
-async function ensureMasterIssue(config, branches) {
+export async function ensureMasterIssue(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): Promise<void> {
   if (
     !(
       config.masterIssue ||

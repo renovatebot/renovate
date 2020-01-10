@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
-const { platform } = require('../../platform');
+import { logger } from '../../logger';
+import { platform } from '../../platform';
+import { RenovateConfig } from '../../config';
 
-module.exports = {
-  raiseConfigWarningIssue,
-};
-
-async function raiseConfigWarningIssue(config, error) {
+export async function raiseConfigWarningIssue(
+  config: RenovateConfig,
+  error: Error
+): Promise<void> {
   logger.debug('raiseConfigWarningIssue()');
   let body = `There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.\n\n`;
   if (error.configFile) {

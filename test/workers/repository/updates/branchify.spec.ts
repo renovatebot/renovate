@@ -1,31 +1,28 @@
-/** @type any */
-let config;
+import { RenovateConfig, mocked } from '../../../util';
+import { branchifyUpgrades } from '../../../../lib/workers/repository/updates/branchify';
+import * as _flatten from '../../../../lib/workers/repository/updates/flatten';
+import { BranchConfig } from '../../../../lib/workers/common';
+import { getConfig } from '../../../../lib/config/defaults';
+
+const flattenUpdates = mocked(_flatten).flattenUpdates;
+jest.mock('../../../../lib/workers/repository/updates/flatten');
+
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../../config/config/_fixtures') };
+  config = getConfig();
   config.errors = [];
   config.warnings = [];
 });
 
-const {
-  branchifyUpgrades,
-} = require('../../../../lib/workers/repository/updates/branchify');
-
-/** @type any */
-const {
-  flattenUpdates,
-} = require('../../../../lib/workers/repository/updates/flatten');
-
-jest.mock('../../../../lib/workers/repository/updates/flatten');
-
 describe('workers/repository/updates/branchify', () => {
   describe('branchifyUpgrades()', () => {
-    it('returns empty', async () => {
+    it('returns empty', () => {
       flattenUpdates.mockReturnValueOnce([]);
-      const res = await branchifyUpgrades(config, {});
+      const res = branchifyUpgrades(config, {});
       expect(res.branches).toEqual([]);
     });
-    it('returns one branch if one input', async () => {
+    it('returns one branch if one input', () => {
       flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
@@ -36,12 +33,12 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       config.repoIsOnboarded = true;
-      const res = await branchifyUpgrades(config, {});
+      const res = branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(1);
       expect(res.branches[0].isMinor).toBe(true);
       expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
-    it('uses major/minor/patch slugs', async () => {
+    it('uses major/minor/patch slugs', () => {
       flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
@@ -89,7 +86,7 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       config.repoIsOnboarded = true;
-      const res = await branchifyUpgrades(config, {});
+      const res = branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(4);
       expect(res.branches[0].isMajor).toBe(true);
       expect(res.branches[0].groupSlug).toBe(`major-some-packages`);
@@ -100,7 +97,7 @@ describe('workers/repository/updates/branchify', () => {
       expect(res.branches[3].isMajor).toBe(true);
       expect(res.branches[3].groupSlug).toBe(`major-2-other-packages`);
     });
-    it('does not group if different compiled branch names', async () => {
+    it('does not group if different compiled branch names', () => {
       flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
@@ -121,10 +118,10 @@ describe('workers/repository/updates/branchify', () => {
           prTitle: 'some-title',
         },
       ]);
-      const res = await branchifyUpgrades(config, {});
+      const res = branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(3);
     });
-    it('groups if same compiled branch names', async () => {
+    it('groups if same compiled branch names', () => {
       flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
@@ -145,10 +142,10 @@ describe('workers/repository/updates/branchify', () => {
           prTitle: 'some-title',
         },
       ]);
-      const res = await branchifyUpgrades(config, {});
+      const res = branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
-    it('groups if same compiled group name', async () => {
+    it('groups if same compiled group name', () => {
       flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
@@ -173,10 +170,10 @@ describe('workers/repository/updates/branchify', () => {
           group: { branchName: 'renovate/my-group' },
         },
       ]);
-      const res = await branchifyUpgrades(config, {});
+      const res = branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
-    it('enforces valid git branch name', async () => {
+    it('enforces valid git branch name', () => {
       const fixtures = [
         {
           upgrade: {
@@ -240,8 +237,8 @@ describe('workers/repository/updates/branchify', () => {
         fixtures.map(({ upgrade }) => upgrade)
       );
 
-      (await branchifyUpgrades(config, {})).branches.forEach(
-        ({ branchName }, index) => {
+      branchifyUpgrades(config, {}).branches.forEach(
+        ({ branchName }: BranchConfig, index: number) => {
           expect(branchName).toBe(fixtures[index].expectedBranchName);
         }
       );

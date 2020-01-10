@@ -1,19 +1,17 @@
-const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
+import { RenovateConfig, getConfig } from '../../../../util';
 
-const {
+import {
   getWarnings,
   getErrors,
   getDepWarnings,
-} = require('../../../../../lib/workers/repository/onboarding/pr/errors-warnings');
+} from '../../../../../lib/workers/repository/onboarding/pr/errors-warnings';
 
 describe('workers/repository/onboarding/pr/errors-warnings', () => {
   describe('getWarnings()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = {
-        ...defaultConfig,
-      };
+      config = getConfig();
     });
     it('returns warning text', () => {
       config.warnings = [
@@ -67,12 +65,10 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
     });
   });
   describe('getErrors()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = {
-        ...defaultConfig,
-      };
+      config = getConfig();
     });
     it('returns error text', () => {
       config.errors = [

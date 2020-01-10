@@ -1,7 +1,11 @@
 import { logger, setMeta } from '../../logger';
 import { raiseConfigWarningIssue } from './error-config';
+import { RenovateConfig } from '../../config';
 
-export default async function handleError(config, err) {
+export default async function handleError(
+  config: RenovateConfig,
+  err: Error
+): Promise<string> {
   setMeta({
     repository: config.repository,
   });

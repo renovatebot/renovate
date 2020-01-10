@@ -1,24 +1,25 @@
+import fs from 'fs-extra';
+
 import handleError from './error';
 import { platform } from '../../platform';
-
-const fs = require('fs-extra');
-const { logger, setMeta } = require('../../logger');
-const { initRepo } = require('./init');
-const { ensureOnboardingPr } = require('./onboarding/pr');
-const { processResult } = require('./result');
-const { processRepo } = require('./process');
-const { finaliseRepo } = require('./finalise');
-const { ensureMasterIssue } = require('./master-issue');
-
-export { renovateRepository };
+import { logger, setMeta } from '../../logger';
+import { initRepo } from './init';
+import { ensureOnboardingPr } from './onboarding/pr';
+import { processResult, ProcessResult } from './result';
+import { processRepo } from './process';
+import { finaliseRepo } from './finalise';
+import { ensureMasterIssue } from './master-issue';
+import { RenovateConfig } from '../../config';
 
 // istanbul ignore next
-async function renovateRepository(repoConfig) {
+export async function renovateRepository(
+  repoConfig: RenovateConfig
+): Promise<ProcessResult> {
   let config = { ...repoConfig };
   setMeta({ repository: config.repository });
   logger.info('Renovating repository');
   logger.trace({ config });
-  let repoResult;
+  let repoResult: ProcessResult;
   try {
     await fs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);
