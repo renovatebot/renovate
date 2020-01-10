@@ -5,7 +5,7 @@ import {
 } from 'child_process';
 import { dockerCmd, DockerOptions } from './docker';
 import { getChildProcessEnv } from './env';
-import { basicEnvVars } from './env/basicVars';
+import { basicEnvVars } from './env/basic-vars';
 
 const pExec: (
   cmd: string,

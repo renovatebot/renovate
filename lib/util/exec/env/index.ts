@@ -1,4 +1,4 @@
-import { basicEnvVars } from './basicVars';
+import { basicEnvVars } from './basic-vars';
 
 export function getChildProcessEnv(
   customEnvVars: string[] = []
