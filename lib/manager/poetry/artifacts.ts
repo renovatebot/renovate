@@ -50,7 +50,6 @@ export async function updateArtifacts(
       execOptions.docker = {
         image: 'renovate/poetry',
         dockerUser: config.dockerUser,
-        cwd,
       };
     } else {
       logger.info('Running poetry via global poetry');
