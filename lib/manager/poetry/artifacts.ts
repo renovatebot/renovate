@@ -2,7 +2,6 @@ import { parse, join } from 'upath';
 import { hrtime } from 'process';
 import { outputFile, readFile } from 'fs-extra';
 import { exec, ExecOptions } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
@@ -41,10 +40,9 @@ export async function updateArtifacts(
   try {
     await outputFile(localPackageFileName, newPackageFileContent);
     logger.debug(`Updating ${lockFileName}`);
-    const cwd = join(config.localDir, subDirectory);
-    const env = getChildProcessEnv();
     let cmd = 'poetry';
-    const execOptions: ExecOptions = { cwd, env };
+    const cwd = join(config.localDir, subDirectory);
+    const execOptions: ExecOptions = { cwd };
     if (config.binarySource === 'docker') {
       logger.info('Running poetry via docker');
       execOptions.docker = {
