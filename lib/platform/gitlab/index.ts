@@ -3,16 +3,18 @@ import is from '@sindresorhus/is';
 
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
   RepoConfig,
-  PlatformPrOptions,
   GotResponse,
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
+  EnsureIssueConfig,
+  BranchStatusConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
@@ -120,8 +122,11 @@ export async function initRepo({
     archived: boolean;
     mirror: boolean;
     default_branch: string;
+    empty_repo: boolean;
     http_url_to_repo: string;
     forked_from_project: boolean;
+    repository_access_level: 'disabled' | 'private' | 'enabled';
+    merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   }>;
   try {
     res = await api.get(`projects/${config.repository}`);
@@ -137,7 +142,19 @@ export async function initRepo({
       );
       throw new Error('mirror');
     }
-    if (res.body.default_branch === null) {
+    if (res.body.repository_access_level === 'disabled') {
+      logger.info(
+        'Repository portion of project is disabled - throwing error to abort renovation'
+      );
+      throw new Error('disabled');
+    }
+    if (res.body.merge_requests_access_level === 'disabled') {
+      logger.info(
+        'MRs are disabled for the project - throwing error to abort renovation'
+      );
+      throw new Error('disabled');
+    }
+    if (res.body.default_branch === null || res.body.empty_repo) {
       throw new Error('empty');
     }
     if (optimizeForDisabled) {
@@ -311,14 +328,14 @@ export async function getBranchStatus(
 
 // Pull Request
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  labels?: string[] | null,
-  useDefaultBranch?: boolean,
-  platformOptions?: PlatformPrOptions
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  labels,
+  useDefaultBranch,
+  platformOptions,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch
@@ -520,18 +537,18 @@ export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
-export function commitFilesToBranch(
-  branchName: string,
-  files: any[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export function getFile(
@@ -584,13 +601,13 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
@@ -669,10 +686,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
   }
 }
 
-export async function ensureIssue(
-  title: string,
-  body: string
-): Promise<'updated' | 'created' | null> {
+export async function ensureIssue({
+  title,
+  body,
+}: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {

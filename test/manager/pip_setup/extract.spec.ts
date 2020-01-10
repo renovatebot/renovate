@@ -6,15 +6,23 @@ import {
   getPythonAlias,
   pythonVersions,
 } from '../../../lib/manager/pip_setup/extract';
+import { envMock, mockExecSequence } from '../../execUtil';
+import * as _env from '../../../lib/util/env';
+import { mocked } from '../../util';
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
+
 jest.mock('child_process');
+jest.mock('../../../lib/util/env');
 
 describe('lib/manager/pip_setup/extract', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     resetModule();
+
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   describe('parsePythonVersion', () => {
     it('returns major and minor version numbers', () => {
@@ -23,25 +31,15 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
-      const commands = [];
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
-        callback(null, { stdout: '', stderr: 'Python 2.7.17\\n' });
-        return undefined;
-      });
-      exec.mockImplementationOnce((cmd, _options, _callback) => {
-        commands.push(cmd);
-        throw new Error();
-      });
-      exec.mockImplementationOnce((cmd, _options, callback) => {
-        commands.push(cmd);
-        callback(null, { stdout: 'Python 3.8.0\\n', stderr: '' });
-        return undefined;
-      });
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '', stderr: 'Python 2.7.17\\n' },
+        new Error(),
+        { stdout: 'Python 3.8.0\\n', stderr: '' },
+      ]);
       const result = await getPythonAlias();
       expect(pythonVersions.includes(result)).toBe(true);
       expect(result).toMatchSnapshot();
-      expect(commands).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
   // describe('Test for presence of mock lib', () => {

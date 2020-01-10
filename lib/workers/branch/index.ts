@@ -512,12 +512,12 @@ export async function processBranch(
               'DRY-RUN: Would set branch status in ' + config.branchName
             );
           } else {
-            await platform.setBranchStatus(
-              config.branchName,
+            await platform.setBranchStatus({
+              branchName: config.branchName,
               context,
               description,
-              state
-            );
+              state,
+            });
           }
         }
       } else {

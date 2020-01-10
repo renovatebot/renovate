@@ -1,0 +1,190 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLockFile catches errors 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFile detects yarnIntegrity 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFile finds yarn embedded in renovate 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFile finds yarn globally 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFile generates lock files 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "npx yarn-deduplicate@1.1.1 --strategy fewer && yarn",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "npx yarn-deduplicate@1.1.1 --strategy highest && yarn",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFile performs lock file updates 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFile uses fallback yarn 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;

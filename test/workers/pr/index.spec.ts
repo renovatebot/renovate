@@ -171,7 +171,7 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      existingPr.body = platform.createPr.mock.calls[0][2];
+      existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
     it('should create group PR', async () => {
       config.upgrades = config.upgrades.concat([
@@ -215,9 +215,9 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(platform.createPr.mock.calls[0][2].includes('this Pin PR')).toBe(
-        true
-      );
+      expect(
+        platform.createPr.mock.calls[0][0].prBody.includes('this Pin PR')
+      ).toBe(true);
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockResolvedValueOnce('success');
@@ -412,7 +412,7 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      existingPr.body = platform.createPr.mock.calls[0][2];
+      existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
     it('should create PR if waiting for not pending but artifactErrors', async () => {
       platform.getBranchStatus.mockResolvedValueOnce('pending');
@@ -429,7 +429,7 @@ describe('workers/pr', () => {
       config.automerge = true;
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
-      expect(args[5]).toMatchObject({
+      expect(args[0].platformOptions).toMatchObject({
         gitLabAutomerge: true,
       });
     });

@@ -210,6 +210,16 @@ describe('platform/gh-got-wrapper', () => {
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
   });
+  it('should throw original error when failed to add reviewers', async () => {
+    const gotErr = {
+      statusCode: 422,
+      message: 'Review cannot be requested from pull request author.',
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBeDefined();
+    expect(e).toStrictEqual(gotErr);
+  });
   it('should throw original error of unknown type', async () => {
     const gotErr = {
       statusCode: 418,

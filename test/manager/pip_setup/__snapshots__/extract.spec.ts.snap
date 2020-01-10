@@ -4,8 +4,44 @@ exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias t
 
 exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 2`] = `
 Array [
-  "python --version",
-  "python3 --version",
-  "python3.8 --version",
+  Object {
+    "cmd": "python --version",
+    "options": Object {
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "python3 --version",
+    "options": Object {
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
+    "cmd": "python3.8 --version",
+    "options": Object {
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
 ]
 `;
