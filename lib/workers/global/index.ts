@@ -12,6 +12,7 @@ import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
 import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
+import { setDockerUser } from '../../util/exec/docker';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -87,6 +88,7 @@ export async function start(): Promise<0 | 1> {
     detectRenovateVersion();
     limits.init(config);
     setEmojiConfig(config);
+    setDockerUser(config.dockerUser);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
