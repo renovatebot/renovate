@@ -49,7 +49,6 @@ export async function updateArtifacts(
       logger.info('Running poetry via docker');
       execOptions.docker = {
         image: 'renovate/poetry',
-        tag: null,
         dockerUser: config.dockerUser,
         volumes: [cwd],
         cwd,
