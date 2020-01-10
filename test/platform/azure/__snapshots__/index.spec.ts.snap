@@ -52,10 +52,8 @@ Array [
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
 Object {
-  "head": Object {
-    "ref": "branch-a",
-  },
   "number": 1,
+  "sourceRefName": "refs/heads/branch-a",
   "state": "closed",
   "title": "branch a pr",
 }
@@ -63,10 +61,8 @@ Object {
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
 Object {
-  "head": Object {
-    "ref": "branch-a",
-  },
   "number": 1,
+  "sourceRefName": "refs/heads/branch-a",
   "state": "closed",
   "title": "branch a pr",
 }
@@ -74,10 +70,8 @@ Object {
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
 Object {
-  "head": Object {
-    "ref": "branch-a",
-  },
   "number": 1,
+  "sourceRefName": "refs/heads/branch-a",
   "state": "open",
   "title": "branch a pr",
 }
@@ -85,10 +79,8 @@ Object {
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
 Object {
-  "head": Object {
-    "ref": "branch-a",
-  },
   "number": 1,
+  "sourceRefName": "refs/heads/branch-a",
   "state": "closed",
   "title": "branch a pr",
 }

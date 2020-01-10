@@ -17,15 +17,17 @@ export interface RenovateSharedConfig {
   managers?: string | string[];
   platform?: string;
   productLinks?: Record<string, string>;
+  prPriority?: number;
   rebaseStalePrs?: boolean;
   recreateClosed?: boolean;
   requiredStatusChecks?: string[];
-  schedule?: string | string[];
+  schedule?: string[];
 
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
   statusCheckVerify?: boolean;
+  suppressNotifications?: string[];
   timezone?: string;
 }
 
@@ -61,6 +63,8 @@ export interface RenovateConfig
   onboarding?: boolean;
   onboardingConfig?: RenovateSharedConfig;
   packageRules?: PackageRule[];
+  prConcurrentLimit?: number;
+  prHourlyLimit?: number;
   privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
   repositories?: RenovateRepository[];

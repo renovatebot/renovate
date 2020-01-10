@@ -28,15 +28,15 @@ export async function createOnboardingBranch(
   if (config.dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
   } else {
-    await platform.commitFilesToBranch(
-      config.onboardingBranch,
-      [
+    await platform.commitFilesToBranch({
+      branchName: config.onboardingBranch,
+      files: [
         {
           name: defaultConfigFile,
           contents,
         },
       ],
-      commitMessage
-    );
+      message: commitMessage,
+    });
   }
 }

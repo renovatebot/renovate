@@ -33,7 +33,7 @@ describe('workers/repository/onboarding/pr', () => {
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      createPrBody = platform.createPr.mock.calls[0][2];
+      createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
     it('returns if PR does not need updating', async () => {
       platform.getBranchPr.mockReturnValue({

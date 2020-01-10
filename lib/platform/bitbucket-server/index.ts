@@ -4,7 +4,7 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { File, StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -14,6 +14,8 @@ import {
   Issue,
   VulnerabilityAlert,
   GotResponse,
+  CreatePRConfig,
+  BranchStatusConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -409,25 +411,30 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch: string = config.baseBranch
-): Promise<void> {
+export async function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
-      { branchName, filesLength: files.length, message, parentBranch },
+      {
+        branchName,
+        filesLength: files.length,
+        message,
+        parentBranch,
+      },
       null,
       2
     )})`
   );
-  await config.storage.commitFilesToBranch(
+  await config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 
   // wait for pr change propagation
   await delay(1000);
@@ -566,13 +573,13 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string | null,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   logger.debug(`setBranchStatus(${branchName})`);
 
   const existingStatus = await getBranchStatusCheck(branchName, context);
@@ -854,13 +861,12 @@ export async function ensureCommentRemoval(
 const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  _labels?: string[] | null,
-  useDefaultBranch?: boolean
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  useDefaultBranch,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;

@@ -1,13 +1,13 @@
-const { logger, setMeta } = require('../../../logger');
-const { mergeChildConfig } = require('../../../config');
-const { extractAndUpdate } = require('./extract-update');
-const { platform } = require('../../../platform');
+import { logger, setMeta } from '../../../logger';
+import { mergeChildConfig, RenovateConfig } from '../../../config';
+import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
+import { platform } from '../../../platform';
+import { WriteUpdateResult } from './write';
+import { BranchConfig } from '../../common';
 
-module.exports = {
-  processRepo,
-};
-
-async function processRepo(config) {
+export async function processRepo(
+  config: RenovateConfig
+): Promise<ExtractAndUpdateResult> {
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.masterIssueChecks = {};
@@ -43,9 +43,9 @@ async function processRepo(config) {
   }
   if (config.baseBranches && config.baseBranches.length) {
     logger.info({ baseBranches: config.baseBranches }, 'baseBranches');
-    let res;
-    let branches = [];
-    let branchList = [];
+    let res: WriteUpdateResult | undefined;
+    let branches: BranchConfig[] = [];
+    let branchList: string[] = [];
     for (const baseBranch of config.baseBranches) {
       setMeta({
         repository: config.repository,

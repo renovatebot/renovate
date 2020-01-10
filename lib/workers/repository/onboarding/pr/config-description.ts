@@ -11,7 +11,7 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.trace({ config });
   if (
     !config.schedule ||
-    config.schedule === 'at any time' ||
+    (config.schedule as never) === 'at any time' ||
     config.schedule[0] === 'at any time'
   ) {
     logger.debug('No schedule');

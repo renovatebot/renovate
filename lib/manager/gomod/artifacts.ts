@@ -14,10 +14,11 @@ export async function updateArtifacts(
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
-  process.env.GOPATH =
-    process.env.GOPATH || join(config.cacheDir, './others/go');
-  await ensureDir(process.env.GOPATH);
-  logger.debug('Using GOPATH: ' + process.env.GOPATH);
+  const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
+  const env = getChildProcessEnv(customEnv);
+  env.GOPATH = env.GOPATH || join(config.cacheDir, './others/go');
+  await ensureDir(env.GOPATH);
+  logger.debug('Using GOPATH: ' + env.GOPATH);
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await platform.getFile(sumFileName);
   if (!existingGoSumContent) {
@@ -38,8 +39,6 @@ export async function updateArtifacts(
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
-    const env = getChildProcessEnv(customEnv);
     const startTime = process.hrtime();
     let cmd: string;
     if (config.binarySource === 'docker') {
@@ -48,7 +47,7 @@ export async function updateArtifacts(
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
-      const volumes = [config.localDir, process.env.GOPATH];
+      const volumes = [config.localDir, env.GOPATH];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = customEnv;
       cmd += envVars.map(e => `-e ${e} `).join('');
@@ -77,7 +76,7 @@ export async function updateArtifacts(
       cmd = 'go';
     } else {
       logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'bundle';
+      cmd = 'go';
     }
     let args = 'get -d ./...';
     if (cmd.includes('.insteadOf')) {

@@ -54,6 +54,14 @@ describe('config/index', () => {
       const env: NodeJS.ProcessEnv = {};
       await configParser.parseConfigs(env, defaultArgv);
     });
+    it('massages trailing slash into endpoint', async () => {
+      defaultArgv = defaultArgv.concat([
+        '--endpoint=https://github.renovatebot.com/api/v3',
+      ]);
+      const env: NodeJS.ProcessEnv = {};
+      const parsed = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+    });
   });
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
     it('merges', () => {

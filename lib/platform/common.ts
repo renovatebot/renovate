@@ -1,7 +1,7 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
-import { File } from './git/storage';
+import { CommitFilesConfig } from './git/storage';
 
 export interface FileData {
   name: string;
@@ -104,11 +104,31 @@ export type BranchStatus =
   | 'failure';
 
 export type PlatformPrOptions = {
-  azureAutoComplete: boolean;
-  statusCheckVerify: boolean;
-  gitLabAutomerge: boolean;
+  azureAutoComplete?: boolean;
+  statusCheckVerify?: boolean;
+  gitLabAutomerge?: boolean;
 };
-
+export interface CreatePRConfig {
+  branchName: string;
+  prTitle: string;
+  prBody: string;
+  labels?: string[] | null;
+  useDefaultBranch?: boolean;
+  platformOptions?: PlatformPrOptions;
+}
+export interface EnsureIssueConfig {
+  title: string;
+  body: string;
+  once?: boolean;
+  shouldReOpen?: boolean;
+}
+export interface BranchStatusConfig {
+  branchName: string;
+  context: string;
+  description: string;
+  state: string | null;
+  url?: string;
+}
 /**
  * TODO: Proper typing
  */
@@ -128,36 +148,20 @@ export interface Platform {
   ensureIssueClosing(title: string): Promise<void>;
   getFileList(): Promise<string[]>;
   ensureIssue(
-    title: string,
-    body: string,
-    once?: boolean,
-    shouldReopen?: boolean
+    issueConfig: EnsureIssueConfig
   ): Promise<'updated' | 'created' | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
-  createPr(
-    branchName: string,
-    prTitle: string,
-    prBody: string,
-    labels?: string[] | null,
-    useDefaultBranch?: boolean,
-    platformOptions?: PlatformPrOptions
-  ): Promise<Pr>;
+  createPr(prConfig: CreatePRConfig): Promise<Pr>;
   getBranchLastCommitTime(branchName: string): Promise<Date>;
   getRepos(): Promise<string[]>;
   isBranchStale(branchName: string): Promise<boolean>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  setBranchStatus(
-    branchName: string,
-    context: string,
-    description: string,
-    state: string | null,
-    url?: string
-  ): Promise<void>;
+  setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(branchName: string, context: string): Promise<string>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
@@ -168,12 +172,7 @@ export interface Platform {
   ): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   setBaseBranch(baseBranch: string): Promise<void>;
-  commitFilesToBranch(
-    branchName: string,
-    updatedFiles: File[],
-    commitMessage: string,
-    parentBranch?: string
-  ): Promise<void>;
+  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
   getPr(number: number): Promise<Pr>;
   findPr(
     branchName: string,

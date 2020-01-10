@@ -3,13 +3,13 @@ import { logger } from '../logger';
 import { clone } from '../util/clone';
 import * as definitions from './definitions';
 
-export function mergeChildConfig<T extends RenovateConfig = RenovateConfig>(
-  parent: T,
-  child: RenovateConfig
-): T {
+export function mergeChildConfig<
+  T extends RenovateConfig = RenovateConfig,
+  TChild extends RenovateConfig = RenovateConfig
+>(parent: T, child: TChild): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
-    return parent;
+    return parent as never;
   }
   const parentConfig = clone(parent);
   const childConfig = clone(child);
