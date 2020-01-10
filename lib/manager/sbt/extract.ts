@@ -41,13 +41,13 @@ const getResolverUrl = (str: string): string =>
     .replace(/"[\s,)]*$/, '');
 
 const isVarDependency = (str: string): boolean =>
-  /^\s*val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(str);
+  /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(str);
 
 const isVarDef = (str: string): boolean =>
-  /^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
+  /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
 
 const getVarName = (str: string): string =>
-  str.replace(/^\s*val\s+/, '').replace(/\s*=\s*"[^"]*"\s*$/, '');
+  str.replace(/^\s*(lazy\s*)?val\s+/, '').replace(/\s*=\s*"[^"]*"\s*$/, '');
 
 const isVarName = (str: string): boolean =>
   /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
@@ -57,7 +57,10 @@ const getVarInfo = (
   ctx: ParseContext
 ): { val: string; fileReplacePosition: number } => {
   const { fileOffset } = ctx;
-  const rightPart = str.replace(/^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/, '');
+  const rightPart = str.replace(
+    /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
+    ''
+  );
   const fileReplacePosition = str.indexOf(rightPart) + fileOffset;
   const val = rightPart.replace(/"\s*$/, '');
   return { val, fileReplacePosition };
@@ -191,7 +194,7 @@ function parseSbtLine(
     } else if (isVarDependency(line)) {
       isMultiDeps = false;
       const depExpr = line.replace(
-        /^\s*val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
+        /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
         ''
       );
       const expOffset = line.length - depExpr.length;
