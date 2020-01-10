@@ -5,11 +5,11 @@ import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
-import * as _env from '../../../lib/util/env';
+import * as _env from '../../../lib/util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../lib/util/env');
+jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;

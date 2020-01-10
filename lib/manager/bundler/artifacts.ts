@@ -1,7 +1,7 @@
 import { outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource/docker';
 import {

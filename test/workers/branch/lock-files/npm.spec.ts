@@ -5,11 +5,11 @@ import { exec as _exec } from 'child_process';
 import * as npmHelper from '../../../../lib/manager/npm/post-update/npm';
 import { mocked } from '../../../util';
 import { envMock, mockExecAll } from '../../../execUtil';
-import * as _env from '../../../../lib/util/env';
+import * as _env from '../../../../lib/util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../../lib/util/env');
+jest.mock('../../../../lib/util/exec/env');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);

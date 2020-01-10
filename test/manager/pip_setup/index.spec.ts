@@ -8,7 +8,7 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../execUtil';
-import * as _env from '../../../lib/util/env';
+import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
@@ -25,7 +25,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
 jest.mock('child_process');
-jest.mock('../../../lib/util/env');
+jest.mock('../../../lib/util/exec/env');
 
 const pythonVersionCallResults = [
   { stdout: '', stderr: 'Python 2.7.17\\n' },

@@ -5,12 +5,12 @@ import { exec as _exec } from 'child_process';
 import * as manager from '../../../lib/manager/gradle';
 import { platform as _platform, Platform } from '../../../lib/platform';
 import { envMock, mockExecAll } from '../../execUtil';
-import * as _env from '../../../lib/util/env';
+import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../lib/util/env');
+jest.mock('../../../lib/util/exec/env');
 
 const platform: jest.Mocked<Platform> = _platform as any;
 const fs: jest.Mocked<typeof _fs> = _fs as any;

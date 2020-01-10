@@ -6,7 +6,7 @@ import { exec } from '../../util/exec';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { platform } from '../../platform';
 
 export async function updateArtifacts(

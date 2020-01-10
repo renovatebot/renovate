@@ -2,7 +2,7 @@ import { join } from 'upath';
 import { hrtime } from 'process';
 import { outputFile, readFile } from 'fs-extra';
 import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
