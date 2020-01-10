@@ -1,6 +1,9 @@
 import sbt._
 
 object Dependencies {
+  val moreSettings = Seq(
+    scalaVersion := "2.13.0-RC5"
+  )
 
   val abcVersion = "1.2.3"
 

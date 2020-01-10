@@ -306,8 +306,8 @@ Object {
     Object {
       "currentValue": "0.7.1",
       "datasource": "sbt",
-      "depName": "com.example:foo",
-      "fileReplacePosition": 105,
+      "depName": "com.example:foo_2.13.0-RC5",
+      "fileReplacePosition": 168,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
@@ -316,7 +316,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt",
       "depName": "com.abc:abc",
-      "fileReplacePosition": 57,
+      "fileReplacePosition": 120,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
