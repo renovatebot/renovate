@@ -973,7 +973,7 @@ export async function updatePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw new Error(REPOSITORY_NOT_FOUND);
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
     const { body } = await api.put<{ version: number }>(
@@ -1011,7 +1011,7 @@ export async function mergePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw new Error(REPOSITORY_NOT_FOUND);
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await api.post<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
