@@ -1011,9 +1011,7 @@ export async function mergePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), {
-        statusCode: 404,
-      });
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     const { body } = await api.post<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
