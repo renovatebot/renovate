@@ -50,7 +50,6 @@ export async function updateArtifacts(
       execOptions.docker = {
         image: 'renovate/poetry',
         dockerUser: config.dockerUser,
-        volumes: [cwd],
         cwd,
       };
     } else {
