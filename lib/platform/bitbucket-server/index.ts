@@ -687,9 +687,7 @@ export async function addReviewers(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), {
-        statusCode: 404,
-      });
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
 
     const reviewersSet = new Set([...pr.reviewers, ...reviewers]);
@@ -975,9 +973,7 @@ export async function updatePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), {
-        statusCode: 404,
-      });
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
 
     const { body } = await api.put<{ version: number }>(

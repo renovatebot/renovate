@@ -154,7 +154,7 @@ export async function updateArtifacts(
         { err },
         'Gemfile.lock update failed due to missing credentials'
       );
-      global.repoCache.bundlerArtifactsError = 'bundler-credentials';
+      global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
@@ -188,7 +188,7 @@ export async function updateArtifacts(
       throw new Error(BUNDLER_COULD_NOT_RESOLVE);
     }
     logger.warn({ err }, 'Unknown bundler lock file update error');
-    global.repoCache.bundlerArtifactsError = 'bundler-unknown';
+    global.repoCache.bundlerArtifactsError = BUNDLER_UNKNOWN_ERROR;
     throw new Error(BUNDLER_UNKNOWN_ERROR);
   }
 }

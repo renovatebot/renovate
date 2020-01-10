@@ -211,7 +211,7 @@ async function getManifestResponse(
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     if (err.statusCode === 401) {
@@ -312,7 +312,7 @@ export async function getDigest(
     await renovateCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     logger.info(
@@ -367,7 +367,7 @@ async function getTags(
     await renovateCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     logger.debug(
@@ -525,7 +525,7 @@ async function getLabels(
     await renovateCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     if (err.statusCode === 401) {

@@ -6,6 +6,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import * as limits from '../../workers/global/limits';
 import {
+  CONFIG_VALIDATION,
   PLATFORM_FAILURE,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -82,7 +83,7 @@ function localName(branchName: string): string {
 }
 
 function throwBaseBranchValidationError(branchName: string): never {
-  const error = new Error('config-validation');
+  const error = new Error(CONFIG_VALIDATION);
   error.validationError = 'baseBranch not found';
   error.validationMessage =
     'The following configured baseBranch could not be found: ' + branchName;

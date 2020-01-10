@@ -1,4 +1,31 @@
 import handleError from '../../../lib/workers/repository/error';
+import {
+  CONFIG_VALIDATION,
+  DATASOURCE_FAILURE,
+  MANAGER_LOCKFILE_ERROR,
+  MANAGER_NO_PACKAGE_FILES,
+  PLATFORM_AUTHENTICATION_ERROR,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_BLOCKED,
+  REPOSITORY_CANNOT_FORK,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_FORKED,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NO_VULNERABILITY,
+  REPOSITORY_NOT_FOUND,
+  REPOSITORY_RENAMED,
+  REPOSITORY_TEMPORARY_ERROR,
+  REPOSITORY_UNINITIATED,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  UNKNOWN_ERROR,
+} from '../../../lib/constants/error-messages';
 
 jest.mock('../../../lib/workers/repository/error-config');
 
@@ -11,30 +38,30 @@ beforeEach(() => {
 describe('workers/repository/error', () => {
   describe('handleError()', () => {
     const errors = [
-      'uninitiated',
-      'empty',
-      'disabled',
-      'repository-changed',
-      'fork',
-      'no-package-files',
-      'config-validation',
-      'registry-failure',
-      'archived',
-      'mirror',
-      'renamed',
-      'blocked',
-      'not-found',
-      'forbidden',
-      'bad-credentials',
-      'rate-limit-exceeded',
-      'lockfile-error',
-      'disk-space',
-      'platform-failure',
-      'no-vulnerability-alerts',
-      'cannot-fork',
-      'integration-unauthorized',
-      'authentication-error',
-      'temporary-error',
+      REPOSITORY_UNINITIATED,
+      REPOSITORY_EMPTY,
+      REPOSITORY_DISABLED,
+      REPOSITORY_CHANGED,
+      REPOSITORY_FORKED,
+      MANAGER_NO_PACKAGE_FILES,
+      CONFIG_VALIDATION,
+      DATASOURCE_FAILURE,
+      REPOSITORY_ARCHIVED,
+      REPOSITORY_MIRRORED,
+      REPOSITORY_RENAMED,
+      REPOSITORY_BLOCKED,
+      REPOSITORY_NOT_FOUND,
+      REPOSITORY_ACCESS_FORBIDDEN,
+      PLATFORM_BAD_CREDENTIALS,
+      PLATFORM_RATE_LIMIT_EXCEEDED,
+      MANAGER_LOCKFILE_ERROR,
+      SYSTEM_INSUFFICIENT_DISK_SPACE,
+      PLATFORM_FAILURE,
+      REPOSITORY_NO_VULNERABILITY,
+      REPOSITORY_CANNOT_FORK,
+      PLATFORM_INTEGRATION_UNAUTHORIZED,
+      PLATFORM_AUTHENTICATION_ERROR,
+      REPOSITORY_TEMPORARY_ERROR,
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
@@ -47,18 +74,18 @@ describe('workers/repository/error', () => {
         "fatal: unable to access 'https://**redacted**@gitlab.com/learnox/learnox.git/': The requested URL returned error: 500\n"
       );
       const res = await handleError(config, gitError);
-      expect(res).toEqual('platform-failure');
+      expect(res).toEqual(PLATFORM_FAILURE);
     });
     it('rewrites git remote error', async () => {
       const gitError = new Error(
         'fatal: remote error: access denied or repository not exported: /b/nw/bd/27/47/159945428/108610112.git\n'
       );
       const res = await handleError(config, gitError);
-      expect(res).toEqual('platform-failure');
+      expect(res).toEqual(PLATFORM_FAILURE);
     });
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));
-      expect(res).toEqual('unknown-error');
+      expect(res).toEqual(UNKNOWN_ERROR);
     });
   });
 });

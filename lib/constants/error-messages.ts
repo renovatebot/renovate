@@ -9,6 +9,9 @@ export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 
+// Config Error
+export const CONFIG_VALIDATION = 'config-validation';
+
 // Repository Error
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
 export const REPOSITORY_ARCHIVED = 'archived';

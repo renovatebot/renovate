@@ -10,6 +10,7 @@ import typescriptJson from '../../../../config/npm/_fixtures/typescript.json';
 import * as _docker from '../../../../../lib/datasource/docker';
 import * as _gitSubmodules from '../../../../../lib/datasource/git-submodules';
 import { mocked, getConfig } from '../../../../util';
+import { CONFIG_VALIDATION } from '../../../../../lib/constants/error-messages';
 
 jest.mock('../../../../../lib/datasource/docker');
 jest.mock('../../../../../lib/datasource/git-submodules');
@@ -179,7 +180,7 @@ describe('workers/repository/process/lookup', () => {
         .get('/q')
         .reply(200, qJson);
       await expect(lookup.lookupUpdates(config)).rejects.toThrow(
-        Error('config-validation')
+        Error(CONFIG_VALIDATION)
       );
     });
     it('returns minor update if separate patches not configured', async () => {

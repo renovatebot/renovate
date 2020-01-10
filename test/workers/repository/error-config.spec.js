@@ -1,3 +1,5 @@
+import { CONFIG_VALIDATION } from '../../../lib/constants/error-messages';
+
 const {
   raiseConfigWarningIssue,
 } = require('../../../lib/workers/repository/error-config');
@@ -14,7 +16,7 @@ beforeEach(() => {
 describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
     it('creates issues', async () => {
-      const error = new Error('config-validation');
+      const error = new Error(CONFIG_VALIDATION);
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockReturnValue('created');
@@ -22,7 +24,7 @@ describe('workers/repository/error-config', () => {
       expect(res).toBeUndefined();
     });
     it('creates issues (dryRun)', async () => {
-      const error = new Error('config-validation');
+      const error = new Error(CONFIG_VALIDATION);
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockReturnValue('created');
@@ -33,7 +35,7 @@ describe('workers/repository/error-config', () => {
       expect(res).toBeUndefined();
     });
     it('handles onboarding', async () => {
-      const error = new Error('config-validation');
+      const error = new Error(CONFIG_VALIDATION);
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockReturnValueOnce({ number: 1, state: 'open' });
@@ -41,7 +43,7 @@ describe('workers/repository/error-config', () => {
       expect(res).toBeUndefined();
     });
     it('handles onboarding (dryRun)', async () => {
-      const error = new Error('config-validation');
+      const error = new Error(CONFIG_VALIDATION);
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockReturnValueOnce({ number: 1, state: 'open' });

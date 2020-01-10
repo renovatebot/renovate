@@ -25,6 +25,9 @@ import {
   MANAGER_LOCKFILE_ERROR,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
+  WORKER_FILE_UPDATE_FAILED,
+  DATASOURCE_FAILURE,
+  PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 
 export type ProcessBranchResult =
@@ -418,7 +421,7 @@ export async function processBranch(
     if (err.message && err.message.includes('space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
-    if (err.message.startsWith('disk-space')) {
+    if (err.message.startsWith(SYSTEM_INSUFFICIENT_DISK_SPACE)) {
       logger.debug('Passing disk-space error up');
       throw err;
     }
@@ -426,7 +429,7 @@ export async function processBranch(
       logger.debug('Passing 403 error up');
       throw err;
     }
-    if (err.message === 'update-failure') {
+    if (err.message === WORKER_FILE_UPDATE_FAILED) {
       logger.warn('Error updating branch: update failure');
     } else if (err.message.startsWith('bundler-')) {
       // we have already warned inside the bundler artifacts error handling, so just return
@@ -437,9 +440,9 @@ export async function processBranch(
     ) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     } else if (
-      err.message !== 'registry-failure' &&
+      err.message !== DATASOURCE_FAILURE &&
       err.message !== 'disable-gitfs' &&
-      err.message !== 'platform-failure'
+      err.message !== DATASOURCE_FAILURE
     ) {
       logger.error({ err }, `Error updating branch: ${err.message}`);
     }
@@ -549,9 +552,9 @@ export async function processBranch(
   } catch (err) /* istanbul ignore next */ {
     if (
       [
-        'rate-limit-exceeded',
-        'platform-failure',
-        'repository-changed',
+        PLATFORM_RATE_LIMIT_EXCEEDED,
+        PLATFORM_FAILURE,
+        REPOSITORY_CHANGED,
       ].includes(err.message)
     ) {
       logger.debug('Passing PR error up');

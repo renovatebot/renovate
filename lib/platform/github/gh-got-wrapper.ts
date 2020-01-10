@@ -64,7 +64,7 @@ export function dispatchError(
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.info({ err }, 'GitHub failure: abuse detection');
-    throw new Error(PLATFORM_FAILURE);
+    throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
     logger.debug({ path }, 'Endpoint needs paid GitHub plan');

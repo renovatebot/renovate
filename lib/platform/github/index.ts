@@ -336,7 +336,7 @@ export async function initRepo({
     if (err.message.startsWith('Repository access blocked')) {
       throw new Error(REPOSITORY_BLOCKED);
     }
-    if (err.message === 'fork') {
+    if (err.message === REPOSITORY_FORKED) {
       throw err;
     }
     if (err.message === REPOSITORY_DISABLED) {

@@ -12,7 +12,10 @@ import { flattenPackageRules } from './flatten';
 import * as hostRules from '../../../util/host-rules';
 import { configFileNames } from '../../../config/app-strings';
 import { platform } from '../../../platform';
-import { DATASOURCE_FAILURE } from '../../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  DATASOURCE_FAILURE,
+} from '../../../constants/error-messages';
 
 // Check for repository config
 export async function mergeRenovateConfig(
@@ -71,7 +74,7 @@ export async function mergeRenovateConfig(
           { renovateConfig },
           'Error parsing renovate config renovate.json5'
         );
-        const error = new Error('config-validation');
+        const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON5 (parsing failed)';
         error.validationMessage = 'JSON5.parse error: ' + err.message;
@@ -84,7 +87,7 @@ export async function mergeRenovateConfig(
         allowDuplicateKeys
       );
       if (jsonValidationError) {
-        const error = new Error('config-validation');
+        const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON (parsing failed)';
         error.validationMessage = jsonValidationError;
@@ -96,7 +99,7 @@ export async function mergeRenovateConfig(
         allowDuplicateKeys
       );
       if (jsonValidationError) {
-        const error = new Error('config-validation');
+        const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Duplicate keys in JSON';
         error.validationMessage = JSON.stringify(jsonValidationError);
@@ -106,7 +109,7 @@ export async function mergeRenovateConfig(
         renovateJson = JSON.parse(renovateConfig);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ renovateConfig }, 'Error parsing renovate config');
-        const error = new Error('config-validation');
+        const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON (parsing failed)';
         error.validationMessage = 'JSON.parse error: ' + err.message;
@@ -117,7 +120,7 @@ export async function mergeRenovateConfig(
   }
   const migratedConfig = await migrateAndValidate(config, renovateJson);
   if (migratedConfig.errors.length) {
-    const error = new Error('config-validation');
+    const error = new Error(CONFIG_VALIDATION);
     error.configFile = configFile;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
