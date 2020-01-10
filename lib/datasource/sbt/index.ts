@@ -9,7 +9,7 @@ async function resolvePackageReleases(
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
-  const indexContent = await downloadHttpProtocol(searchRoot, 'sbt');
+  const indexContent = await downloadHttpProtocol(searchRoot + '/', 'sbt');
   if (indexContent) {
     const releases: string[] = [];
     const parseSubdirs = (content: string): string[] =>
@@ -31,7 +31,7 @@ async function resolvePackageReleases(
       parseIndexDir(content, x => !/^\.+$/.test(x));
     for (const searchSubdir of searchSubdirs) {
       const content = await downloadHttpProtocol(
-        `${searchRoot}/${searchSubdir}`,
+        `${searchRoot}/${searchSubdir}/`,
         'sbt'
       );
       if (content) {

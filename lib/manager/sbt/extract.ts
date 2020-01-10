@@ -35,6 +35,9 @@ const getResolverUrl = (str: string): string =>
     .replace(/^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"/, '')
     .replace(/"[\s,)]*$/, '');
 
+const isVarDependency = (str: string): boolean =>
+  /^\s*val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(str);
+
 const isVarDef = (str: string): boolean =>
   /^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
 
@@ -180,6 +183,17 @@ function parseSbtLine(
       registryUrls.push(url);
     } else if (isVarDef(line)) {
       variables[getVarName(line)] = getVarInfo(line, ctx);
+    } else if (isVarDependency(line)) {
+      isMultiDeps = false;
+      const depExpr = line.replace(
+        /^\s*val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
+        ''
+      );
+      const expOffset = line.length - depExpr.length;
+      dep = parseDepExpr(depExpr, {
+        ...ctx,
+        fileOffset: fileOffset + expOffset,
+      });
     } else if (isSingleLineDep(line)) {
       isMultiDeps = false;
       const depExpr = line.replace(/^.*\+=\s*/, '');
