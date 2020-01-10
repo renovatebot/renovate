@@ -7,7 +7,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": null,
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -20,7 +26,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
   Object {
@@ -28,7 +40,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -41,7 +59,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": null,
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -54,7 +78,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": null,
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -67,7 +97,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
   Object {
@@ -75,7 +111,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
   Object {
@@ -83,7 +125,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -96,7 +144,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
   Object {
@@ -104,7 +158,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {},
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -117,7 +177,13 @@ Array [
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": null,
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]

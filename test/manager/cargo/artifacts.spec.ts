@@ -3,37 +3,28 @@ import { exec as _exec } from 'child_process';
 import * as cargo from '../../../lib/manager/cargo/artifacts';
 import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
-import { mockExecAll } from '../../execUtil';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../lib/util/env');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-let processEnv;
-
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
-    processEnv = process.env;
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns null if no Cargo.lock found', async () => {
     const updatedDeps = ['dep1'];

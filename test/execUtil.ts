@@ -64,3 +64,28 @@ export function mockExecSequence(
   });
   return snapshots;
 }
+
+const basicEnvMock = {
+  HTTP_PROXY: 'http://example.com',
+  HTTPS_PROXY: 'https://example.com',
+  NO_PROXY: 'localhost',
+  HOME: '/home/user',
+  PATH: '/tmp/path',
+};
+
+const fullEnvMock = {
+  ...basicEnvMock,
+  SELECTED_ENV_VAR: 'Can be selected',
+  FILTERED_ENV_VAR: 'Should be filtered',
+};
+
+const filteredEnvMock = {
+  ...basicEnvMock,
+  SELECTED_ENV_VAR: fullEnvMock.SELECTED_ENV_VAR,
+};
+
+export const envMock = {
+  basic: basicEnvMock,
+  full: fullEnvMock,
+  filtered: filteredEnvMock,
+};
