@@ -34,9 +34,8 @@ export function extractLockFileEntries(
         }
       }
     });
-    return gemLock;
   } catch (e) /* istanbul ignore next */ {
     logger.error({ error: e }, `Failed to parse the lockfile`);
-    return gemLock;
   }
+  return gemLock;
 }
