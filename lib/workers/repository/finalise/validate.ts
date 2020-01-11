@@ -1,5 +1,5 @@
 import JSON5 from 'json5';
-import { logger, setMeta } from '../../../logger';
+import { logger } from '../../../logger';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
@@ -25,7 +25,6 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
   ) {
     return;
   }
-  setMeta({ repository: config.repository });
   logger.debug('branchPrefix: ' + config.branchPrefix);
   const renovatePrs = await getRenovatePrs(config.branchPrefix);
   logger.debug({ renovatePrs }, `Found ${renovatePrs.length} Renovate PRs`);

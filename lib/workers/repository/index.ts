@@ -41,6 +41,7 @@ export async function renovateRepository(
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
   } catch (err) /* istanbul ignore next */ {
+    setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }

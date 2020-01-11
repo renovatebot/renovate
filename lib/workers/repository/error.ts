@@ -1,4 +1,4 @@
-import { logger, setMeta } from '../../logger';
+import { logger } from '../../logger';
 import { raiseConfigWarningIssue } from './error-config';
 import { RenovateConfig } from '../../config';
 
@@ -6,10 +6,6 @@ export default async function handleError(
   config: RenovateConfig,
   err: Error
 ): Promise<string> {
-  setMeta({
-    repository: config.repository,
-  });
-
   if (err.message === 'uninitiated') {
     logger.info('Repository is uninitiated - skipping');
     delete config.branchList; // eslint-disable-line no-param-reassign
