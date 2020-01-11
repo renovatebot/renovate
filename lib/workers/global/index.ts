@@ -43,6 +43,7 @@ async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);
+  cache.init(config.cacheDir);
   return config;
 }
 
@@ -70,7 +71,6 @@ export async function start(): Promise<0 | 1> {
     config = await initPlatform(config);
     config = await setDirectories(config);
     config = await autodiscoverRepositories(config);
-    cache.init(config.cacheDir);
     // Move global variables that we need to use later
     const importGlobals = ['prBanner', 'prFooter'];
     config.global = {};
