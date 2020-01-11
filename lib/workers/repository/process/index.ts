@@ -1,4 +1,4 @@
-import { logger, setMeta } from '../../../logger';
+import { logger } from '../../../logger';
 import { mergeChildConfig, RenovateConfig } from '../../../config';
 import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
 import { platform } from '../../../platform';
@@ -47,9 +47,6 @@ export async function processRepo(
     let branches: BranchConfig[] = [];
     let branchList: string[] = [];
     for (const baseBranch of config.baseBranches) {
-      setMeta({
-        repository: config.repository,
-      });
       logger.debug(`baseBranch: ${baseBranch}`);
       const baseBranchConfig = mergeChildConfig(config, { baseBranch });
       if (config.baseBranches.length > 1) {

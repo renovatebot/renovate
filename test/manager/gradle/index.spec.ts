@@ -4,14 +4,18 @@ import fsReal from 'fs';
 import { exec as _exec } from 'child_process';
 import * as manager from '../../../lib/manager/gradle';
 import { platform as _platform, Platform } from '../../../lib/platform';
-import { mockExecAll } from '../../execUtil';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { mocked } from '../../util';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 
 const platform: jest.Mocked<Platform> = _platform as any;
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 
 const config = {
   localDir: 'localDir',
@@ -19,8 +23,6 @@ const config = {
     timeout: 20,
   },
 };
-
-let processEnv;
 
 const updatesDependenciesReport = fsReal.readFileSync(
   'test/datasource/gradle/_fixtures/updatesReport.json',
@@ -43,17 +45,7 @@ describe('manager/gradle', () => {
     fs.access.mockResolvedValue(undefined);
     platform.getFile.mockResolvedValue('some content');
 
-    processEnv = process.env;
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
 
   describe('extractPackageFile', () => {

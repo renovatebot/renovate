@@ -3,38 +3,29 @@ import { exec as _exec } from 'child_process';
 import { platform as _platform } from '../../../lib/platform';
 import { updateArtifacts } from '../../../lib/manager/mix';
 import { mocked } from '../../util';
-import { mockExecAll } from '../../execUtil';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const platform = mocked(_platform);
+const env = mocked(_env);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../lib/platform');
+jest.mock('../../../lib/util/exec/env');
 
 const config = {
   localDir: '/tmp/github/some/repo',
 };
-
-let processEnv;
 
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
-    processEnv = process.env;
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns null if no mix.lock found', async () => {
     expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();

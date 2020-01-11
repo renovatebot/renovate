@@ -213,8 +213,6 @@ export async function initRepo({
   optimizeForDisabled,
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
-  logger.info('Authenticated as user: ' + renovateUsername);
-  logger.info('Using renovate version: ' + global.renovateVersion);
   // config is used by the platform api itself, not necessary for the app layer to know
   cleanRepo();
   // istanbul ignore if

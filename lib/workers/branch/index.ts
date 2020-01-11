@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 
-import { logger, setMeta } from '../../logger';
+import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
 import {
@@ -53,11 +53,6 @@ export async function processBranch(
     .map(upgrade => upgrade.depName)
     .filter(v => v) // remove nulls (happens for lock file maintenance)
     .filter((value, i, list) => list.indexOf(value) === i); // remove duplicates
-  setMeta({
-    repository: config.repository,
-    branch: config.branchName,
-    dependencies,
-  });
   logger.debug(
     { dependencies },
     `processBranch with ${branchConfig.upgrades.length} upgrades`
