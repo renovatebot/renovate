@@ -55,9 +55,13 @@ export async function getRepositoryConfig(
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
+function getGlobalConfig(): Promise<RenovateConfig> {
+  return configParser.parseConfigs(process.env, process.argv);
+}
+
 export async function start(): Promise<0 | 1> {
   try {
-    let config = await configParser.parseConfigs(process.env, process.argv);
+    let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
     config = await autodiscoverRepositories(config);
