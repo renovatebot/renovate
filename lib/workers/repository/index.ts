@@ -14,7 +14,7 @@ import { RenovateConfig } from '../../config';
 let renovateVersion = 'unknown';
 try {
   renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-} catch (err) {
+} catch (err) /* istanbul ignore next */ {
   logger.debug({ err }, 'Error getting renovate version');
 }
 
