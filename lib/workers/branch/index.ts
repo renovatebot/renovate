@@ -416,7 +416,7 @@ export async function processBranch(
     if (err.message && err.message.includes('space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
-    if (err.message.startsWith(SYSTEM_INSUFFICIENT_DISK_SPACE)) {
+    if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
       logger.debug('Passing disk-space error up');
       throw err;
     }
