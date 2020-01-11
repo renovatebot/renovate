@@ -78,7 +78,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     // ensure PR comment
     await platform.ensureComment({
       number: pr.number,
-      subject: `Renovate is disabled`,
+      topic: `Renovate is disabled`,
       content: `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
     });
   }

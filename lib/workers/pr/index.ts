@@ -347,7 +347,7 @@ export async function ensurePr(
       config.branchAutomergeFailureMessage &&
       !config.suppressNotifications.includes('branchAutomergeFailure')
     ) {
-      const subject = 'Branch automerge failure';
+      const topic = 'Branch automerge failure';
       let content =
         'This PR was configured for branch automerge, however this is not possible so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
@@ -358,7 +358,11 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info('Would add comment to PR #' + pr.number);
       } else {
-        await platform.ensureComment({ number: pr.number, subject, content });
+        await platform.ensureComment({
+          number: pr.number,
+          topic,
+          content,
+        });
       }
     }
     // Skip assign and review if automerging PR
@@ -442,7 +446,7 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
       }
       return platform.ensureComment({
         number: pr.number,
-        subject: null,
+        topic: null,
         content: automergeComment,
       });
     }
