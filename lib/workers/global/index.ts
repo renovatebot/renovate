@@ -71,11 +71,6 @@ export async function start(): Promise<0 | 1> {
     config = await setDirectories(config);
     config = await autodiscoverRepositories(config);
     cache.init(config.cacheDir);
-    if (config.repositories.length === 0) {
-      logger.warn(
-        'No repositories found - did you want to run with flag --autodiscover?'
-      );
-    }
     // Move global variables that we need to use later
     const importGlobals = ['prBanner', 'prFooter'];
     config.global = {};
