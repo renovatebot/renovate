@@ -444,7 +444,7 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.findPr('userName1/pullRequest1')
+            await bitbucket.findPr({ branchName: 'userName1/pullRequest1' })
           ).toBeUndefined();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -455,7 +455,11 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.findPr('userName1/pullRequest5', 'title', 'open')
+            await bitbucket.findPr({
+              branchName: 'userName1/pullRequest5',
+              prTitle: 'title',
+              state: 'open',
+            })
           ).toMatchSnapshot();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -463,7 +467,11 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.findPr('userName1/pullRequest5', 'title', 'closed')
+            await bitbucket.findPr({
+              branchName: 'userName1/pullRequest5',
+              prTitle: 'title',
+              state: 'closed',
+            })
           ).toBeUndefined();
           expect(api.get.mock.calls).toMatchSnapshot();
         });

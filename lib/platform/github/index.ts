@@ -16,6 +16,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  FindPRConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -964,11 +965,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList!;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -986,7 +987,7 @@ export async function findPr(
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, prTitle: null, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
