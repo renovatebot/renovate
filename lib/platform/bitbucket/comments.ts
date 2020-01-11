@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { Config, accumulateValues } from './utils';
 import { api } from './bb-got-wrapper';
+import { EnsureCommentConfig } from '../common';
 
 interface Comment {
   content: { raw: string };
@@ -8,6 +9,10 @@ interface Comment {
 }
 
 export type CommentsConfig = Pick<Config, 'repository'>;
+
+interface EnsureBitBucketCommentConfig extends EnsureCommentConfig {
+  config: CommentsConfig;
+}
 
 async function getComments(
   config: CommentsConfig,
@@ -58,12 +63,12 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment(
-  config: CommentsConfig,
-  prNo: number,
-  topic: string | null,
-  content: string
-): Promise<boolean> {
+export async function ensureComment({
+  config,
+  number: prNo,
+  subject: topic,
+  content,
+}: EnsureBitBucketCommentConfig): Promise<boolean> {
   try {
     const comments = await getComments(config, prNo);
     let body: string;

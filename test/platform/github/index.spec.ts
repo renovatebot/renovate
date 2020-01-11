@@ -1315,7 +1315,11 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       api.get.mockReturnValueOnce({ body: [] } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.post.mock.calls[1]).toMatchSnapshot();
     });
@@ -1329,7 +1333,11 @@ describe('platform/github', () => {
             body: graphqlClosedPullrequests,
           } as any)
       );
-      await github.ensureComment(2499, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 2499,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1340,7 +1348,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(1);
       expect(api.patch.mock.calls).toMatchSnapshot();
@@ -1352,7 +1364,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1363,7 +1379,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '!merge' }],
       } as any);
-      await github.ensureComment(42, null, '!merge');
+      await github.ensureComment({
+        number: 42,
+        subject: null,
+        content: '!merge',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });

@@ -700,7 +700,11 @@ describe('platform/gitlab', () => {
     it('add comment if not found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       api.get.mockReturnValueOnce({ body: [] } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -709,7 +713,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(1);
       expect(api.put.mock.calls).toMatchSnapshot();
@@ -719,7 +727,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(0);
     });
@@ -728,7 +740,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '!merge' }],
       } as any);
-      await gitlab.ensureComment(42, null, '!merge');
+      await gitlab.ensureComment({
+        number: 42,
+        subject: null,
+        content: '!merge',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(0);
     });

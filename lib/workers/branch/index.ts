@@ -105,7 +105,11 @@ export async function processBranch(
                 existingPr.number
             );
           } else {
-            await platform.ensureComment(existingPr.number, subject, content);
+            await platform.ensureComment({
+              number: existingPr.number,
+              subject,
+              content,
+            });
           }
         }
         if (branchExists) {
@@ -179,7 +183,11 @@ export async function processBranch(
                   'DRY-RUN: ensure comment in PR #' + branchPr.number
                 );
               } else {
-                await platform.ensureComment(branchPr.number, subject, content);
+                await platform.ensureComment({
+                  number: branchPr.number,
+                  subject,
+                  content,
+                });
               }
             }
             return 'pr-edited';
@@ -489,7 +497,11 @@ export async function processBranch(
                 pr.number
             );
           } else {
-            await platform.ensureComment(pr.number, topic, content);
+            await platform.ensureComment({
+              number: pr.number,
+              subject: topic,
+              content,
+            });
             // TODO: remoe this soon once they're all cleared out
             await platform.ensureCommentRemoval(
               pr.number,

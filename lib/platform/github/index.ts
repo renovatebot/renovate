@@ -16,6 +16,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -1486,11 +1487,11 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
+export async function ensureComment({
+  number: issueNo,
+  subject: topic,
+  content: rawContent,
+}: EnsureCommentConfig): Promise<boolean> {
   const content = sanitize(rawContent);
   try {
     const comments = await getComments(issueNo);

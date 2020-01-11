@@ -16,6 +16,7 @@ import {
   GotResponse,
   CreatePRConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -786,11 +787,11 @@ async function deleteComment(prNo: number, commentId: number): Promise<void> {
   );
 }
 
-export async function ensureComment(
-  prNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
+export async function ensureComment({
+  number: prNo,
+  subject: topic,
+  content: rawContent,
+}: EnsureCommentConfig): Promise<boolean> {
   const content = sanitize(rawContent);
   try {
     const comments = await getComments(prNo);

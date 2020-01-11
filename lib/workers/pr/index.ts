@@ -358,7 +358,7 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info('Would add comment to PR #' + pr.number);
       } else {
-        await platform.ensureComment(pr.number, subject, content);
+        await platform.ensureComment({ number: pr.number, subject, content });
       }
     }
     // Skip assign and review if automerging PR
@@ -440,7 +440,11 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
         );
         return false;
       }
-      return platform.ensureComment(pr.number, null, automergeComment);
+      return platform.ensureComment({
+        number: pr.number,
+        subject: null,
+        content: automergeComment,
+      });
     }
     // Let's merge this
     logger.debug(`Automerging #${pr.number}`);

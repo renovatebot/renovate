@@ -93,7 +93,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
         const content = validations
           .map(v => `\`${v.file}\`: ${v.message}`)
           .join('\n\n');
-        await platform.ensureComment(pr.number, subject, content);
+        await platform.ensureComment({ number: pr.number, subject, content });
         status = 'failure';
         description = `Renovate config validation failed`; // GitHub limit
       } else {

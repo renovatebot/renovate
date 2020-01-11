@@ -15,6 +15,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
@@ -832,11 +833,11 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null | undefined,
-  rawContent: string
-): Promise<void> {
+export async function ensureComment({
+  number: issueNo,
+  subject: topic,
+  content: rawContent,
+}: EnsureCommentConfig): Promise<void> {
   const content = sanitize(rawContent);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')

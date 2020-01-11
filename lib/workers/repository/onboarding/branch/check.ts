@@ -76,11 +76,11 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.info('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications.includes('onboardingClose')) {
     // ensure PR comment
-    await platform.ensureComment(
-      pr.number,
-      `Renovate is disabled`,
-      `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
-    );
+    await platform.ensureComment({
+      number: pr.number,
+      subject: `Renovate is disabled`,
+      content: `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
+    });
   }
   throw new Error('disabled');
 };

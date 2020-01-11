@@ -17,6 +17,7 @@ import {
   VulnerabilityAlert,
   CreatePRConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -475,11 +476,11 @@ export async function updatePr(
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  content: string
-): Promise<void> {
+export async function ensureComment({
+  number: issueNo,
+  subject: topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
   logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
   const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
@@ -577,11 +578,11 @@ export async function addAssignees(
   assignees: string[]
 ): Promise<void> {
   logger.trace(`addAssignees(${issueNo}, ${assignees})`);
-  await ensureComment(
-    issueNo,
-    'Add Assignees',
-    assignees.map(a => `@<${a}>`).join(', ')
-  );
+  await ensureComment({
+    number: issueNo,
+    subject: 'Add Assignees',
+    content: assignees.map(a => `@<${a}>`).join(', '),
+  });
 }
 
 /**

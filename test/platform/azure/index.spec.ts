@@ -608,7 +608,11 @@ describe('platform/azure', () => {
             createThread: jest.fn(() => [{ id: 123 }]),
           } as any)
       );
-      await azure.ensureComment(42, 'some-subject', 'some\ncontent');
+      await azure.ensureComment({
+        number: 42,
+        subject: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
