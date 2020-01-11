@@ -1,7 +1,7 @@
 import { getManagerPackageFiles } from '../../../../lib/workers/repository/extract/manager-files';
 import * as _fileMatch from '../../../../lib/workers/repository/extract/file-match';
 import * as _dockerfile from '../../../../lib/manager/dockerfile';
-import { mocked, platform } from '../../../util';
+import { mocked, platform, getConfig } from '../../../util';
 import { RenovateConfig } from '../../../../lib/config';
 
 jest.mock('../../../../lib/workers/repository/extract/file-match');
@@ -15,7 +15,7 @@ describe('workers/repository/extract/manager-files', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = { ...require('../../../config/config/_fixtures') };
+      config = getConfig;
     });
     it('returns empty of manager is disabled', async () => {
       const managerConfig = { manager: 'travis', enabled: false };

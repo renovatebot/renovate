@@ -4,19 +4,24 @@ import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as npmHelper from '../../../../lib/manager/npm/post-update/npm';
 import { mocked } from '../../../util';
-import { mockExecAll } from '../../../execUtil';
+import { envMock, mockExecAll } from '../../../execUtil';
+import * as _env from '../../../../lib/util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../../lib/util/exec/env');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const fs = mocked(_fs);
 
 describe('generateLockFile', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');

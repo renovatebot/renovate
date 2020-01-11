@@ -3,107 +3,219 @@ import {
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
 import { exec, ExecOptions } from '../../lib/util/exec';
+import { setDockerUser } from '../../lib/util/exec/docker';
+import { envMock } from '../execUtil';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
+
 jest.mock('child_process');
 
-const image = 'example/image';
-
-const tag = '1.2.3';
-
-const cmd = 'echo hello';
-
-const cwd = '/current/working/directory';
-
-const volume_1 = '/path/to/volume-1';
-const volume_2 = '/path/to/volume-2';
-const volumes = [volume_1, volume_2];
-
-const dockerUser = 'ubuntu';
-
-const encoding = 'utf-8';
-
-const docker = { image };
+interface TestInput {
+  dockerUser?: string;
+  processEnv: Record<string, string>;
+  inCmd: string;
+  inOpts: ExecOptions;
+  outCmd: string;
+  outOpts: ChildProcessExecOptions & { encoding: string };
+  trustLevel?: 'high' | 'low' | unknown;
+}
 
 describe(`Child process execution wrapper`, () => {
-  // prettier-ignore
-  test.each([
-    // Transits env option
-    [
-      cmd,
-      { env: { FOO: 'BAR' } },
-      cmd,
-      { encoding, env: { FOO: 'BAR' } }
-    ],
+  let processEnvOrig;
+  let trustLevelOrig;
 
-    // Recognizes docker options
-    [
-      cmd,
-      {},
-      cmd,
-      { encoding }
-    ],
-    [
-      cmd,
-      { docker },
-      `docker run --rm ${image} ${cmd}`,
-      { encoding },
-    ],
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+    processEnvOrig = process.env;
+    trustLevelOrig = global.trustLevel;
+    setDockerUser(undefined);
+  });
 
-    // Pre- and post-commands for Docker
+  afterEach(() => {
+    process.env = processEnvOrig;
+    global.trustLevel = trustLevelOrig;
+  });
+
+  const image = 'example/image';
+  const tag = '1.2.3';
+  const cmd = 'echo hello';
+  const cwd = '/current/working/directory';
+  const volume_1 = '/path/to/volume-1';
+  const volume_2 = '/path/to/volume-2';
+  const volumes = [volume_1, volume_2];
+  const encoding = 'utf-8';
+  const docker = { image };
+  const processEnv = envMock.full;
+
+  const testInputs: [string, TestInput][] = [
     [
-      cmd,
+      'Explicit env option',
       {
-        docker: {
-          image,
-          preCommands: ['echo "begin"'],
-          postCommands: ['echo \'end\''],
-        },
+        processEnv,
+        inCmd: cmd,
+        inOpts: { env: { FOO: 'BAR' } },
+        outCmd: cmd,
+        outOpts: { encoding, env: { ...envMock.basic, FOO: 'BAR' } },
       },
-      `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd} && echo 'end'"`,
-      { encoding },
     ],
 
-    // Docker tags
     [
-      cmd,
-      { docker: { image, tag } },
-      `docker run --rm ${image}:${tag} ${cmd}`,
-      { encoding },
+      'Low trust level',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: {},
+        outCmd: cmd,
+        outOpts: { encoding, env: envMock.basic },
+      },
     ],
 
-    // CWD mounting
     [
-      cmd,
-      { docker: { image }, cwd },
-      `docker run --rm -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
-      { encoding, cwd },
+      'High trust level',
+      {
+        processEnv: envMock.full,
+        inCmd: cmd,
+        inOpts: {},
+        outCmd: cmd,
+        outOpts: { encoding, env: envMock.full },
+        trustLevel: 'high',
+      },
     ],
 
-    // Docker user
     [
-      cmd,
-      { docker: { image, dockerUser } },
-      `docker run --rm --user=${dockerUser} ${image} ${cmd}`,
-      { encoding },
+      'Docker',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker },
+        outCmd: `docker run --rm ${image} ${cmd}`,
+        outOpts: { encoding, env: envMock.basic },
+      },
     ],
 
-    // Docker env vars
     [
-      cmd,
-      { docker: { image, envVars: ['FOO', 'BAR', 'FOO'] } },
-      `docker run --rm -e FOO -e BAR ${image} ${cmd}`,
-      { encoding },
+      'Extra env vars',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { inheritEnvVars: ['SELECTED_ENV_VAR'] },
+        outCmd: cmd,
+        outOpts: { encoding, env: envMock.filtered },
+      },
     ],
 
-    // Volumes mounting
     [
-      cmd,
-      { cwd, docker: { image, volumes } },
-      `docker run --rm -v "${volume_1}":"${volume_1}" -v "${volume_2}":"${volume_2}" -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
-      { encoding, cwd },
+      'Extra env vars with Docker',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker, inheritEnvVars: ['SELECTED_ENV_VAR'] },
+        outCmd: `docker run --rm -e SELECTED_ENV_VAR ${image} ${cmd}`,
+        outOpts: { encoding, env: envMock.filtered },
+      },
     ],
-  ])("%#: exec('%s', %j)", async (command, opts, expectedCmd, expectedOpts) => {
+
+    [
+      'Missing vars',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { inheritEnvVars: ['NONSENSE'] },
+        outCmd: cmd,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Missing vars with Docker',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker, inheritEnvVars: ['NONSENSE'] },
+        outCmd: `docker run --rm ${image} ${cmd}`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker pre/post commands',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: {
+          docker: {
+            image,
+            preCommands: ['echo "begin"'],
+            postCommands: ["echo 'end'"],
+          },
+        },
+        outCmd: `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd} && echo 'end'"`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker tags',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker: { image, tag } },
+        outCmd: `docker run --rm ${image}:${tag} ${cmd}`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker explicit CWD',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker: { image }, cwd },
+        outCmd: `docker run --rm -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+        outOpts: { cwd, encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker volumes',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: { cwd, docker: { image, volumes } },
+        outCmd: `docker run --rm -v "${volume_1}":"${volume_1}" -v "${volume_2}":"${volume_2}" -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+        outOpts: { cwd, encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker user',
+      {
+        dockerUser: 'ubuntu',
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker: { image } },
+        outCmd: `docker run --rm --user=ubuntu ${image} ${cmd}`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+  ];
+
+  test.each(testInputs)('%s', async (_msg, testOpts) => {
+    const {
+      dockerUser,
+      procEnv = processEnv,
+      inCmd,
+      inOpts,
+      outCmd,
+      outOpts,
+      trustLevel,
+    } = testOpts as any;
+
+    process.env = procEnv;
+    if (trustLevel) global.trustLevel = trustLevel;
+    if (dockerUser) setDockerUser(dockerUser);
+
     let actualCmd: string | null = null;
     let actualOpts: ChildProcessExecOptions | null = null;
     cpExec.mockImplementationOnce((execCmd, execOpts, callback) => {
@@ -112,8 +224,10 @@ describe(`Child process execution wrapper`, () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-    await exec(command as string, opts as ExecOptions);
-    expect(actualCmd).toEqual(expectedCmd);
-    expect(actualOpts).toEqual(expectedOpts);
+
+    await exec(inCmd as string, inOpts as ExecOptions);
+
+    expect(actualCmd).toEqual(outCmd);
+    expect(actualOpts).toEqual(outOpts);
   });
 });

@@ -4,14 +4,17 @@ import * as pipenv from '../../../lib/manager/pipenv/artifacts';
 import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
-import { mockExecAll } from '../../execUtil';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
@@ -19,21 +22,10 @@ const config = {
   cacheDir: '/tmp/renovate/cache',
 };
 
-const processEnv = process.env;
-
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
 
   it('returns if no Pipfile.lock found', async () => {

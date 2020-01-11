@@ -6,12 +6,15 @@ import {
   getPythonAlias,
   pythonVersions,
 } from '../../../lib/manager/pip_setup/extract';
-import { mockExecSequence } from '../../execUtil';
+import { envMock, mockExecSequence } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { mocked } from '../../util';
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
-jest.mock('child_process');
+const env = mocked(_env);
 
-let processEnv;
+jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 
 describe('lib/manager/pip_setup/extract', () => {
   beforeEach(() => {
@@ -19,17 +22,7 @@ describe('lib/manager/pip_setup/extract', () => {
     jest.resetModules();
     resetModule();
 
-    processEnv = process.env;
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   describe('parsePythonVersion', () => {
     it('returns major and minor version numbers', () => {
