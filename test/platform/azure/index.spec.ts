@@ -610,7 +610,7 @@ describe('platform/azure', () => {
       );
       await azure.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();

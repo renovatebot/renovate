@@ -655,15 +655,15 @@ export /* istanbul ignore next */ function deleteLabel(): never {
 }
 
 export function ensureComment({
-  number: prNo,
-  subject: topic,
+  number,
+  topic,
   content,
 }: EnsureCommentConfig): Promise<boolean> {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
   return comments.ensureComment({
     config,
-    number: prNo,
-    subject: topic,
+    number,
+    topic,
     content: sanitize(content),
   });
 }

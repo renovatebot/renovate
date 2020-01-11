@@ -362,7 +362,7 @@ describe('platform/bitbucket', () => {
     it('does not throw', async () => {
       await bitbucket.ensureComment({
         number: 3,
-        subject: 'topic',
+        topic: 'topic',
         content: 'content',
       });
     });

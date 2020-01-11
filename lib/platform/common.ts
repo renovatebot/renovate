@@ -131,7 +131,7 @@ export interface BranchStatusConfig {
 }
 export interface EnsureCommentConfig {
   number: number;
-  subject: string;
+  topic: string;
   content: string;
 }
 /**

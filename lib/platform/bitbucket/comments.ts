@@ -66,7 +66,7 @@ async function deleteComment(
 export async function ensureComment({
   config,
   number: prNo,
-  subject: topic,
+  topic,
   content,
 }: EnsureBitBucketCommentConfig): Promise<boolean> {
   try {

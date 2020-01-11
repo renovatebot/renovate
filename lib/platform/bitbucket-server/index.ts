@@ -788,19 +788,19 @@ async function deleteComment(prNo: number, commentId: number): Promise<void> {
 }
 
 export async function ensureComment({
-  number: prNo,
-  subject: topic,
-  content: rawContent,
+  number,
+  topic,
+  content,
 }: EnsureCommentConfig): Promise<boolean> {
-  const content = sanitize(rawContent);
+  const sanitizedContent = sanitize(content);
   try {
-    const comments = await getComments(prNo);
+    const comments = await getComments(number);
     let body: string;
     let commentId: number | undefined;
     let commentNeedsUpdating: boolean | undefined;
     if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
-      body = `### ${topic}\n\n${content}`;
+      logger.debug(`Ensuring comment "${topic}" in #${number}`);
+      body = `### ${topic}\n\n${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -808,8 +808,8 @@ export async function ensureComment({
         }
       });
     } else {
-      logger.debug(`Ensuring content-only comment in #${prNo}`);
-      body = `${content}`;
+      logger.debug(`Ensuring content-only comment in #${number}`);
+      body = `${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text === body) {
           commentId = comment.id;
@@ -818,14 +818,17 @@ export async function ensureComment({
       });
     }
     if (!commentId) {
-      await addComment(prNo, body);
+      await addComment(number, body);
       logger.info(
-        { repository: config.repository, prNo, topic },
+        { repository: config.repository, prNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
-      await editComment(prNo, commentId, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment updated');
+      await editComment(number, commentId, body);
+      logger.info(
+        { repository: config.repository, prNo: number },
+        'Comment updated'
+      );
     } else {
       logger.debug('Comment is already update-to-date');
     }

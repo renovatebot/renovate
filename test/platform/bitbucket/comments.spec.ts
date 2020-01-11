@@ -40,7 +40,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 3,
-          subject: 'topic',
+          topic: 'topic',
           content: 'content',
         })
       ).toBe(false);
@@ -55,7 +55,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 5,
-          subject: 'topic',
+          topic: 'topic',
           content: 'content',
         })
       ).toBe(true);
@@ -69,7 +69,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 5,
-          subject: null,
+          topic: null,
           content: 'content',
         })
       ).toBe(true);
@@ -85,7 +85,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 5,
-          subject: 'some-subject',
+          topic: 'some-subject',
           content: 'some\ncontent',
         })
       ).toBe(true);
@@ -100,7 +100,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 5,
-          subject: null,
+          topic: null,
           content: 'some\ncontent',
         })
       ).toBe(true);
@@ -117,7 +117,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 5,
-          subject: 'some-subject',
+          topic: 'some-subject',
           content: 'blablabla',
         })
       ).toBe(true);
@@ -131,7 +131,7 @@ describe('platform/comments', () => {
         await comments.ensureComment({
           config,
           number: 5,
-          subject: null,
+          topic: null,
           content: '!merge',
         })
       ).toBe(true);

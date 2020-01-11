@@ -702,7 +702,7 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({ body: [] } as any);
       await gitlab.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(1);
@@ -715,7 +715,7 @@ describe('platform/gitlab', () => {
       } as any);
       await gitlab.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(0);
@@ -729,7 +729,7 @@ describe('platform/gitlab', () => {
       } as any);
       await gitlab.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(0);
@@ -742,7 +742,7 @@ describe('platform/gitlab', () => {
       } as any);
       await gitlab.ensureComment({
         number: 42,
-        subject: null,
+        topic: null,
         content: '!merge',
       });
       expect(api.post).toHaveBeenCalledTimes(0);

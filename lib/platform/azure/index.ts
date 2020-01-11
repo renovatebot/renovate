@@ -477,11 +477,11 @@ export async function updatePr(
 }
 
 export async function ensureComment({
-  number: issueNo,
-  subject: topic,
+  number,
+  topic,
   content,
 }: EnsureCommentConfig): Promise<void> {
-  logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
+  logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
@@ -490,7 +490,7 @@ export async function ensureComment({
       status: 1,
     },
     config.repoId,
-    issueNo
+    number
   );
 }
 
@@ -580,7 +580,7 @@ export async function addAssignees(
   logger.trace(`addAssignees(${issueNo}, ${assignees})`);
   await ensureComment({
     number: issueNo,
-    subject: 'Add Assignees',
+    topic: 'Add Assignees',
     content: assignees.map(a => `@<${a}>`).join(', '),
   });
 }

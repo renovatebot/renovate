@@ -1317,7 +1317,7 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({ body: [] } as any);
       await github.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(2);
@@ -1335,7 +1335,7 @@ describe('platform/github', () => {
       );
       await github.ensureComment({
         number: 2499,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(2);
@@ -1350,7 +1350,7 @@ describe('platform/github', () => {
       } as any);
       await github.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(1);
@@ -1366,7 +1366,7 @@ describe('platform/github', () => {
       } as any);
       await github.ensureComment({
         number: 42,
-        subject: 'some-subject',
+        topic: 'some-subject',
         content: 'some\ncontent',
       });
       expect(api.post).toHaveBeenCalledTimes(1);
@@ -1381,7 +1381,7 @@ describe('platform/github', () => {
       } as any);
       await github.ensureComment({
         number: 42,
-        subject: null,
+        topic: null,
         content: '!merge',
       });
       expect(api.post).toHaveBeenCalledTimes(1);
