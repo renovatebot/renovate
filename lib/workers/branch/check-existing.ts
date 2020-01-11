@@ -13,7 +13,11 @@ export async function prAlreadyExisted(
   }
   logger.debug('recreateClosed is false');
   // Return if same PR already existed
-  const pr = await platform.findPr(config.branchName, config.prTitle, '!open');
+  const pr = await platform.findPr({
+    branchName: config.branchName,
+    prTitle: config.prTitle,
+    state: '!open',
+  });
   if (pr) {
     logger.debug('Found closed PR with current title');
     const prDetails = await platform.getPr(pr.number);
