@@ -65,15 +65,7 @@ export async function start(): Promise<0 | 1> {
     config = await initPlatform(config);
     config = await setDirectories(config);
     config = await autodiscoverRepositories(config);
-    // Move global variables that we need to use later
-    const importGlobals = ['prBanner', 'prFooter'];
-    config.global = {};
-    importGlobals.forEach(key => {
-      config.global[key] = config[key];
-      delete config[key];
-    });
-    global.trustLevel = config.trustLevel || 'low';
-    delete config.trustLevel;
+
     limits.init(config);
     setEmojiConfig(config);
     setDockerUser(config.dockerUser);
