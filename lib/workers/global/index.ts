@@ -17,15 +17,6 @@ import { setDockerUser } from '../../util/exec/docker';
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
 
-// istanbul ignore next
-function detectRenovateVersion(): void {
-  try {
-    global.renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-  } catch (err) {
-    logger.debug({ err }, 'Error getting renovate version');
-  }
-}
-
 async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
   const config: RenovateConfig = { ...input };
   process.env.TMPDIR = process.env.RENOVATE_TMPDIR || os.tmpdir();
@@ -80,7 +71,6 @@ export async function start(): Promise<0 | 1> {
     });
     global.trustLevel = config.trustLevel || 'low';
     delete config.trustLevel;
-    detectRenovateVersion();
     limits.init(config);
     setEmojiConfig(config);
     setDockerUser(config.dockerUser);
