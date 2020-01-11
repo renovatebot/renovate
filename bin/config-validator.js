@@ -8,10 +8,6 @@ const { getConfig } = require('../dist/config/file');
 const cache = require('../dist/workers/global/cache');
 const { configFileNames } = require('../dist/config/app-strings');
 
-// istanbul ignore if
-if (!global.renovateCache) {
-  cache.init(os.tmpdir());
-}
 /* eslint-disable no-console */
 
 let returnVal = 0;
