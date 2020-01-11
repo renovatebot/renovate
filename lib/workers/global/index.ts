@@ -57,7 +57,6 @@ export async function getRepositoryConfig(
 
 export async function start(): Promise<0 | 1> {
   try {
-    cache.init(os.tmpdir());
     let config = await configParser.parseConfigs(process.env, process.argv);
     config = await initPlatform(config);
     config = await setDirectories(config);
