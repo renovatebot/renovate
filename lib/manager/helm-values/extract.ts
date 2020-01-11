@@ -3,48 +3,43 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 
 import { PackageFile, PackageDependency } from '../common';
+import { matchesHelmValuesDockerHeuristic } from './util';
 
 /**
- * Recursively find all container image dependencies in the yaml content
+ * Recursively find all supported dependencies in the yaml object.
  *
  * @param parsedContent
  */
-function findImageDependencies(
+function findDependencies(
   parsedContent: object,
   packageDependencies: Array<PackageDependency>
 ): Array<PackageDependency> {
-  if (parsedContent && typeof parsedContent === 'object') {
-    Object.keys(parsedContent).forEach(key => {
-      if (parsedContent[key] && typeof parsedContent[key] === 'object') {
-        if (key === 'image') {
-          const currentItem = parsedContent[key];
-          // TODO ensure we can really put together a correct FROM string here, include registry if present
-          packageDependencies.push(
-            getDep(`${currentItem.repository}:${currentItem.tag}`)
-          );
-        } else {
-          findImageDependencies(parsedContent[key], packageDependencies);
-        }
-      }
-    });
-  }
+  Object.keys(parsedContent).forEach(key => {
+    if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
+      const currentItem = parsedContent[key];
+      // TODO include registry if present
+      packageDependencies.push(
+        getDep(`${currentItem.repository}:${currentItem.tag}`)
+      );
+    } else {
+      findDependencies(parsedContent[key], packageDependencies);
+    }
+  });
   return packageDependencies;
 }
 
 export function extractPackageFile(content: string): PackageFile {
+  // a parser that allows extracting line numbers would be preferable, with
+  // the current approach we need to match anything we find again during the update
   const parsedContent = yaml.safeLoad(content);
 
-  logger.info(
-    { parsedContent },
-    'Trying to find Docker dependencies in helm-values'
-  );
-  const deps = findImageDependencies(parsedContent, []);
+  logger.debug({ parsedContent }, 'Trying to find dependencies in helm-values');
+  const deps = findDependencies(parsedContent, []);
 
   if (!deps.length) {
     return null;
   }
 
-  return {
-    deps,
-  };
+  logger.debug({ deps }, 'Found dependencies in helm-values');
+  return { deps };
 }
