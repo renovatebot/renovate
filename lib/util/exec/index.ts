@@ -11,8 +11,10 @@ const pExec: (
   opts: ChildProcessExecOptions & { encoding: string }
 ) => Promise<ExecResult> = promisify(cpExec);
 
+type ExtraEnv<T = unknown> = Record<string, T>;
+
 export interface ExecOptions extends ChildProcessExecOptions {
-  extraEnv?: Record<string, string>;
+  extraEnv?: ExtraEnv;
   docker?: DockerOptions;
 }
 
@@ -21,18 +23,13 @@ export interface ExecResult {
   stderr: string;
 }
 
-export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwd } = opts;
-
-  const pExecOptions = {
-    encoding: 'utf-8',
-    ...opts,
-  };
-  delete pExecOptions.extraEnv;
-  delete pExecOptions.docker;
-
+function createChildEnv(
+  env: NodeJS.ProcessEnv,
+  extraEnv: ExtraEnv
+): ExtraEnv<string> {
   const extraEnvKeys = Object.keys(extraEnv || {});
-  pExecOptions.env =
+
+  const childEnv =
     env || extraEnv
       ? {
           ...extraEnv,
@@ -41,14 +38,40 @@ export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
         }
       : getChildProcessEnv();
 
+  const result: ExtraEnv<string> = {};
+  Object.entries(childEnv).forEach(([key, val]) => {
+    if (val === null) return;
+    if (val === undefined) return;
+    result[key] = val.toString();
+  });
+  return result;
+}
+
+function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv<string>) {
+  const extraEnvKeys = Object.keys(extraEnv || {});
+  return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
+}
+
+export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+  const { env, extraEnv, docker, cwd } = opts;
+  const childEnv = createChildEnv(env, extraEnv);
+
+  const execOptions: ExecOptions = { ...opts };
+  delete execOptions.extraEnv;
+  delete execOptions.docker;
+
+  const pExecOptions: ChildProcessExecOptions & { encoding: string } = {
+    encoding: 'utf-8',
+    ...execOptions,
+    env: childEnv,
+  };
+
   let pExecCommand = cmd;
   if (docker) {
     const dockerOptions = {
       ...docker,
       cwd,
-      envVars: extraEnvKeys.filter(
-        key => typeof pExecOptions.env[key] !== 'undefined'
-      ),
+      envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
     pExecCommand = dockerCmd(cmd, dockerOptions);

@@ -152,11 +152,45 @@ describe(`Child process execution wrapper`, () => {
         inOpts: {
           docker: {
             image,
-            preCommands: ['echo "begin"'],
-            postCommands: ["echo 'end'"],
+            preCommands: ['echo "begin"', null],
+            postCommands: [undefined, "echo 'end'"],
           },
         },
         outCmd: `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd} && echo 'end'"`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker empty pre-commands',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: {
+          docker: {
+            image,
+            preCommands: null,
+            postCommands: ["echo 'end'"],
+          },
+        },
+        outCmd: `docker run --rm ${image} bash -l -c "${cmd} && echo 'end'"`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
+
+    [
+      'Docker empty post-commands',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: {
+          docker: {
+            image,
+            preCommands: ['echo "begin"'],
+            postCommands: undefined,
+          },
+        },
+        outCmd: `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd}"`,
         outOpts: { encoding, env: envMock.basic },
       },
     ],

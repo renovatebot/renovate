@@ -9,8 +9,8 @@ export interface DockerOptions {
   volumes?: Opt<Opt<string>[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
-  preCommands?: Opt<string[]>;
-  postCommands?: Opt<string[]>;
+  preCommands?: Opt<Opt<string>[]>;
+  postCommands?: Opt<Opt<string>[]>;
 }
 
 let globalDockerUser;
@@ -19,16 +19,13 @@ export function setDockerUser(_dockerUser: string): void {
   globalDockerUser = _dockerUser;
 }
 
+function filterCommands(commands: Opt<Opt<string>[]>): string[] {
+  const pred = cmd => typeof cmd === 'string';
+  return commands ? commands.filter(pred) : [];
+}
+
 export function dockerCmd(cmd: string, options: DockerOptions): string {
-  const {
-    image,
-    tag,
-    dockerUser = globalDockerUser,
-    envVars,
-    cwd,
-    preCommands = [],
-    postCommands = [],
-  } = options;
+  const { image, tag, dockerUser = globalDockerUser, envVars, cwd } = options;
 
   const result = ['docker run --rm'];
   if (dockerUser) result.push(`--user=${dockerUser}`);
@@ -56,6 +53,8 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
   result.push(taggedImage);
 
+  const preCommands = filterCommands(options.preCommands);
+  const postCommands = filterCommands(options.postCommands);
   const commands = [...preCommands, cmd, ...postCommands];
   const command =
     commands.length === 1
