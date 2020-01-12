@@ -1118,7 +1118,7 @@
       "type": "object",
       "default": {
         "commitMessageTopic": "helm values {{depName}}",
-        "fileMatch": ["(^|/)default-chart-init-values.yaml$"]
+        "fileMatch": ["(^|/)values.yaml$"]
       },
       "$ref": "#"
     },
