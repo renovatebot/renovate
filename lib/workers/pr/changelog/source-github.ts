@@ -29,7 +29,7 @@ async function getTags(
       logger.debug({ repository }, 'repository has no Github tags');
     }
 
-    return tags.map(tag => tag.name);
+    return tags.map(tag => tag.name).filter(Boolean);
   } catch (err) {
     logger.info({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });

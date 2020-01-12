@@ -3,10 +3,10 @@ import * as _lernaHelper from '../../../../lib/manager/npm/post-update/lerna';
 import { platform as _platform } from '../../../../lib/platform';
 import { mocked } from '../../../util';
 import { envMock, mockExecAll } from '../../../execUtil';
-import * as _env from '../../../../lib/util/env';
+import * as _env from '../../../../lib/util/exec/env';
 
 jest.mock('child_process');
-jest.mock('../../../../lib/util/env');
+jest.mock('../../../../lib/util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);

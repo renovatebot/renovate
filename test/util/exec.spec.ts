@@ -3,6 +3,7 @@ import {
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
 import { exec, ExecOptions } from '../../lib/util/exec';
+import { setDockerUser } from '../../lib/util/exec/docker';
 import { envMock } from '../execUtil';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
@@ -10,6 +11,7 @@ const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 jest.mock('child_process');
 
 interface TestInput {
+  dockerUser?: string;
   processEnv: Record<string, string>;
   inCmd: string;
   inOpts: ExecOptions;
@@ -27,6 +29,7 @@ describe(`Child process execution wrapper`, () => {
     jest.resetModules();
     processEnvOrig = process.env;
     trustLevelOrig = global.trustLevel;
+    setDockerUser(undefined);
   });
 
   afterEach(() => {
@@ -41,7 +44,6 @@ describe(`Child process execution wrapper`, () => {
   const volume_1 = '/path/to/volume-1';
   const volume_2 = '/path/to/volume-2';
   const volumes = [volume_1, volume_2];
-  const dockerUser = 'ubuntu';
   const encoding = 'utf-8';
   const docker = { image };
   const processEnv = envMock.full;
@@ -189,10 +191,11 @@ describe(`Child process execution wrapper`, () => {
     [
       'Docker user',
       {
+        dockerUser: 'ubuntu',
         processEnv,
         inCmd: cmd,
-        inOpts: { docker: { image, dockerUser } },
-        outCmd: `docker run --rm --user=${dockerUser} ${image} ${cmd}`,
+        inOpts: { docker: { image } },
+        outCmd: `docker run --rm --user=ubuntu ${image} ${cmd}`,
         outOpts: { encoding, env: envMock.basic },
       },
     ],
@@ -200,6 +203,7 @@ describe(`Child process execution wrapper`, () => {
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
     const {
+      dockerUser,
       procEnv = processEnv,
       inCmd,
       inOpts,
@@ -210,6 +214,7 @@ describe(`Child process execution wrapper`, () => {
 
     process.env = procEnv;
     if (trustLevel) global.trustLevel = trustLevel;
+    if (dockerUser) setDockerUser(dockerUser);
 
     let actualCmd: string | null = null;
     let actualOpts: ChildProcessExecOptions | null = null;

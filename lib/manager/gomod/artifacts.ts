@@ -2,7 +2,7 @@ import { ensureDir, outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';

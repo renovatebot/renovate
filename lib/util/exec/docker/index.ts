@@ -13,9 +13,14 @@ export interface DockerOptions {
   postCommands?: Opt<string[]>;
 }
 
+let dockerUser;
+
+export function setDockerUser(_dockerUser: string): void {
+  dockerUser = _dockerUser;
+}
+
 export function dockerCmd(cmd: string, options: DockerOptions): string {
   const {
-    dockerUser,
     envVars,
     cwd,
     image,

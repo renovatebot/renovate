@@ -4,11 +4,11 @@ import { exec as _exec } from 'child_process';
 import { mocked } from '../../../util';
 import * as _pnpmHelper from '../../../../lib/manager/npm/post-update/pnpm';
 import { envMock, mockExecAll } from '../../../execUtil';
-import * as _env from '../../../../lib/util/env';
+import * as _env from '../../../../lib/util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../../lib/util/env');
+jest.mock('../../../../lib/util/exec/env');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
