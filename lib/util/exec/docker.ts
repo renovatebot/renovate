@@ -13,14 +13,14 @@ export interface DockerOptions {
   postCommands?: Opt<Opt<string>[]>;
 }
 
-let globalDockerUser;
+let globalDockerUser: string | null = null;
 
-export function setDockerUser(_dockerUser: string): void {
+export function setDockerUser(_dockerUser: string | null): void {
   globalDockerUser = _dockerUser;
 }
 
 function filterCommands(commands: Opt<Opt<string>[]>): string[] {
-  const pred = cmd => typeof cmd === 'string';
+  const pred = (cmd): boolean => typeof cmd === 'string';
   return commands ? commands.filter(pred) : [];
 }
 

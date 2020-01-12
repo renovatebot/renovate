@@ -47,7 +47,10 @@ function createChildEnv(
   return result;
 }
 
-function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv<string>) {
+function dockerEnvVars(
+  extraEnv: ExtraEnv,
+  childEnv: ExtraEnv<string>
+): string[] {
   const extraEnvKeys = Object.keys(extraEnv || {});
   return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
 }

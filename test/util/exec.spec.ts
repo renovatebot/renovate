@@ -117,6 +117,23 @@ describe(`Child process execution wrapper`, () => {
     ],
 
     [
+      'Extra env vars with empty values',
+      {
+        processEnv,
+        inCmd: cmd,
+        inOpts: {
+          extraEnv: {
+            SELECTED_ENV_VAR: null, // pick from process.env
+            FOO: null,
+            BAR: undefined,
+          },
+        },
+        outCmd: cmd,
+        outOpts: { encoding, env: envMock.filtered },
+      },
+    ],
+
+    [
       'Extra env vars defaults',
       {
         processEnv: envMock.basic,
