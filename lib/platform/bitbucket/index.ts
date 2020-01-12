@@ -21,6 +21,10 @@ import {
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 
 let config: utils.Config = {} as any;
 
@@ -101,7 +105,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(REPOSITORY_DISABLED);
       }
     }
 
@@ -116,7 +120,7 @@ export async function initRepo({
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;

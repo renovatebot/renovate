@@ -1,7 +1,19 @@
 import { RenovateConfig } from '../../config';
+import {
+  MANAGER_NO_PACKAGE_FILES,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_BLOCKED,
+  REPOSITORY_CANNOT_FORK,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_FORKED,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_RENAMED,
+  REPOSITORY_UNINITIATED,
+} from '../../constants/error-messages';
 
 type ProcessStatus = 'disabled' | 'enabled' | 'onboarding' | 'unknown';
-
 export interface ProcessResult {
   res: string;
   status: ProcessStatus;
@@ -12,17 +24,17 @@ export function processResult(
   res: string
 ): ProcessResult {
   const disabledStatuses = [
-    'archived',
-    'blocked',
-    'cannot-fork',
-    'disabled',
-    'forbidden',
-    'fork',
-    'mirror',
-    'no-package-files',
-    'renamed',
-    'uninitiated',
-    'empty',
+    REPOSITORY_ARCHIVED,
+    REPOSITORY_BLOCKED,
+    REPOSITORY_CANNOT_FORK,
+    REPOSITORY_DISABLED,
+    REPOSITORY_ACCESS_FORBIDDEN,
+    REPOSITORY_FORKED,
+    REPOSITORY_MIRRORED,
+    MANAGER_NO_PACKAGE_FILES,
+    REPOSITORY_RENAMED,
+    REPOSITORY_UNINITIATED,
+    REPOSITORY_EMPTY,
   ];
   let status: ProcessStatus;
   // istanbul ignore next

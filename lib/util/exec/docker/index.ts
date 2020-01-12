@@ -13,10 +13,14 @@ export interface DockerOptions {
   postCommands?: Opt<string[]>;
 }
 
-let dockerUser;
+let dockerUser: string; // Set globally, not configurable per-command
+let localDir: string; // Always used as a mapped volume, also is default working directory if none provided per-command
+let cacheDir: string; // Always used as a mapped volume
 
-export function setDockerUser(_dockerUser: string): void {
-  dockerUser = _dockerUser;
+export function setDockerConfig(config): void {
+  dockerUser = config.dockerUser;
+  localDir = config.localDir;
+  cacheDir = config.cacheDir;
 }
 
 export function dockerCmd(cmd: string, options: DockerOptions): string {
@@ -28,12 +32,11 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
     preCommands = [],
     postCommands = [],
   } = options;
-
   const result = ['docker run --rm'];
   if (dockerUser) result.push(`--user=${dockerUser}`);
 
   let volumes = options.volumes || [];
-  volumes = cwd ? [...volumes, options.cwd] : volumes;
+  volumes = [cacheDir, localDir, ...volumes];
   if (volumes) {
     result.push(
       ...uniq(volumes)
@@ -50,7 +53,7 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
     );
   }
 
-  if (cwd) result.push(`-w "${cwd}"`);
+  result.push(`-w "${cwd}"`);
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
   result.push(taggedImage);

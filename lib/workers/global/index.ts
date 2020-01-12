@@ -12,7 +12,7 @@ import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
 import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
-import { setDockerUser } from '../../util/exec/docker';
+import { setExecConfig } from '../../util/exec';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -64,11 +64,11 @@ export async function start(): Promise<0 | 1> {
     let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
+    setExecConfig(config);
     config = await autodiscoverRepositories(config);
 
     limits.init(config);
     setEmojiConfig(config);
-    setDockerUser(config.dockerUser);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
