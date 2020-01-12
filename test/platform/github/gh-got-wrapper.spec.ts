@@ -2,6 +2,10 @@ import delay from 'delay';
 import { Response } from 'got';
 import _got from '../../../lib/util/got';
 import { api } from '../../../lib/platform/github/gh-got-wrapper';
+import {
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../../lib/constants/error-messages';
 
 jest.mock('../../../lib/util/got');
 jest.mock('delay');
@@ -104,7 +108,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('bad-credentials');
+    expect(e.message).toEqual(PLATFORM_BAD_CREDENTIALS);
   });
   it('should throw platform failure', async () => {
     got.mockImplementationOnce(() =>
@@ -185,7 +189,7 @@ describe('platform/gh-got-wrapper', () => {
     got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('platform-failure');
+    expect(e.message).toEqual(PLATFORM_RATE_LIMIT_EXCEEDED);
   });
   it('should throw on repository change', async () => {
     const gotErr = {

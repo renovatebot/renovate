@@ -19,7 +19,11 @@ import {
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
-
+import {
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -156,7 +160,7 @@ export async function initRepo({
       // Do nothing
     }
     if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
   }
 
@@ -211,7 +215,7 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug(err);
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
@@ -514,7 +518,7 @@ export async function getBranchStatus(
   }
 
   if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+    throw new Error(REPOSITORY_CHANGED);
   }
 
   try {
@@ -683,7 +687,7 @@ export async function addReviewers(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
 
     const reviewersSet = new Set([...pr.reviewers, ...reviewers]);
@@ -702,9 +706,9 @@ export async function addReviewers(
     await getPr(prNo, true);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     } else {
       logger.fatal({ err }, `Failed to add reviewers ${reviewers} to #${prNo}`);
       throw err;
@@ -921,7 +925,7 @@ export async function createPr({
         'Empty pull request - deleting branch so it can be recreated next run'
       );
       await deleteBranch(branchName);
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
   }
@@ -969,7 +973,7 @@ export async function updatePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
     const { body } = await api.put<{ version: number }>(
@@ -987,9 +991,9 @@ export async function updatePr(
     updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     } else {
       logger.fatal({ err }, `Failed to update PR`);
       throw err;
@@ -1007,7 +1011,7 @@ export async function mergePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await api.post<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
@@ -1015,7 +1019,7 @@ export async function mergePr(
     updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
       logger.warn({ err }, `Failed to merge PR`);
       return false;

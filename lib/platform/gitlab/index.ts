@@ -21,6 +21,16 @@ import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { RenovateConfig } from '../../config';
+import {
+  PLATFORM_AUTHENTICATION_ERROR,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -134,28 +144,28 @@ export async function initRepo({
       logger.info(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error('archived');
+      throw new Error(REPOSITORY_ARCHIVED);
     }
     if (res.body.mirror) {
       logger.info(
         'Repository is a mirror - throwing error to abort renovation'
       );
-      throw new Error('mirror');
+      throw new Error(REPOSITORY_MIRRORED);
     }
     if (res.body.repository_access_level === 'disabled') {
       logger.info(
         'Repository portion of project is disabled - throwing error to abort renovation'
       );
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.merge_requests_access_level === 'disabled') {
       logger.info(
         'MRs are disabled for the project - throwing error to abort renovation'
       );
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.default_branch === null || res.body.empty_repo) {
-      throw new Error('empty');
+      throw new Error(REPOSITORY_EMPTY);
     }
     if (optimizeForDisabled) {
       let renovateConfig: RenovateConfig;
@@ -172,7 +182,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(REPOSITORY_DISABLED);
       }
     }
     config.defaultBranch = res.body.default_branch;
@@ -211,18 +221,18 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
-      throw new Error('empty');
+      throw new Error(REPOSITORY_EMPTY);
     }
     if (['archived', 'empty'].includes(err.message)) {
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new Error('forbidden');
+      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
-    if (err.message === 'disabled') {
+    if (err.message === REPOSITORY_DISABLED) {
       throw err;
     }
     logger.info({ err }, 'Unknown GitLab initRepo error');
@@ -300,7 +310,7 @@ export async function getBranchStatus(
   }
 
   if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+    throw new Error(REPOSITORY_CHANGED);
   }
 
   const res = await getStatus(branchName);
@@ -919,7 +929,7 @@ async function fetchPrList(): Promise<Pr[]> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
-      throw new Error('authentication-error');
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
   }

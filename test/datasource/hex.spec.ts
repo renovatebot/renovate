@@ -2,6 +2,7 @@ import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as _hostRules from '../../lib/util/host-rules';
 import { getPkgReleases } from '../../lib/datasource/hex';
+import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
@@ -61,7 +62,7 @@ describe('datasource/hex', () => {
       );
       await expect(
         getPkgReleases({ lookupName: 'some_crate' })
-      ).rejects.toThrowError('registry-failure');
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('throws for 5xx', async () => {
       got.mockImplementationOnce(() =>
@@ -71,7 +72,7 @@ describe('datasource/hex', () => {
       );
       await expect(
         getPkgReleases({ lookupName: 'some_crate' })
-      ).rejects.toThrowError('registry-failure');
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
