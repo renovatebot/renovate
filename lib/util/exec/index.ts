@@ -5,7 +5,6 @@ import {
 } from 'child_process';
 import { dockerCmd, DockerOptions } from './docker';
 import { getChildProcessEnv } from './env';
-import { basicEnvVars } from './env/basic-vars';
 
 const pExec: (
   cmd: string,
@@ -13,7 +12,7 @@ const pExec: (
 ) => Promise<ExecResult> = promisify(cpExec);
 
 export interface ExecOptions extends ChildProcessExecOptions {
-  inheritEnvVars?: string[];
+  extraEnv?: Record<string, string>;
   docker?: DockerOptions;
 }
 
@@ -23,35 +22,31 @@ export interface ExecResult {
 }
 
 export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-  const { env: customEnv = {}, inheritEnvVars = [], docker, cwd } = opts;
+  const { env, extraEnv, docker, cwd } = opts;
 
-  let pExecCommand = cmd;
   const pExecOptions = {
     encoding: 'utf-8',
     ...opts,
   };
-  delete pExecOptions.inheritEnvVars;
+  delete pExecOptions.extraEnv;
   delete pExecOptions.docker;
 
-  const processEnv = getChildProcessEnv(inheritEnvVars);
-  const isCustomEnv = opts.env || opts.inheritEnvVars;
-  if (isCustomEnv) {
-    [...basicEnvVars, ...inheritEnvVars].forEach(key => {
-      if (
-        typeof customEnv[key] === 'undefined' &&
-        typeof processEnv[key] !== 'undefined'
-      ) {
-        customEnv[key] = processEnv[key];
-      }
-    });
-  }
-  pExecOptions.env = isCustomEnv ? customEnv : processEnv;
+  const extraEnvKeys = Object.keys(extraEnv || {});
+  pExecOptions.env =
+    env || extraEnv
+      ? {
+          ...extraEnv,
+          ...getChildProcessEnv(extraEnvKeys),
+          ...env,
+        }
+      : getChildProcessEnv();
 
+  let pExecCommand = cmd;
   if (docker) {
     const dockerOptions = {
       ...docker,
       cwd,
-      envVars: inheritEnvVars.filter(
+      envVars: extraEnvKeys.filter(
         key => typeof pExecOptions.env[key] !== 'undefined'
       ),
     };

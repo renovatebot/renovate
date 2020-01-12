@@ -99,42 +99,48 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { inheritEnvVars: ['SELECTED_ENV_VAR'] },
+        inOpts: { extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
         outCmd: cmd,
         outOpts: { encoding, env: envMock.filtered },
       },
     ],
 
     [
-      'Extra env vars with Docker',
+      'Extra env vars with (Docker)',
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { docker, inheritEnvVars: ['SELECTED_ENV_VAR'] },
+        inOpts: { docker, extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
         outCmd: `docker run --rm -e SELECTED_ENV_VAR ${image} ${cmd}`,
         outOpts: { encoding, env: envMock.filtered },
       },
     ],
 
     [
-      'Missing vars',
+      'Extra env vars defaults',
       {
-        processEnv,
+        processEnv: envMock.basic,
         inCmd: cmd,
-        inOpts: { inheritEnvVars: ['NONSENSE'] },
+        inOpts: { extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
         outCmd: cmd,
-        outOpts: { encoding, env: envMock.basic },
+        outOpts: {
+          encoding,
+          env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
+        },
       },
     ],
 
     [
-      'Missing vars with Docker',
+      'Extra env vars defaults (Docker)',
       {
-        processEnv,
+        processEnv: envMock.basic,
         inCmd: cmd,
-        inOpts: { docker, inheritEnvVars: ['NONSENSE'] },
-        outCmd: `docker run --rm ${image} ${cmd}`,
-        outOpts: { encoding, env: envMock.basic },
+        inOpts: { docker, extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
+        outCmd: `docker run --rm -e SELECTED_ENV_VAR ${image} ${cmd}`,
+        outOpts: {
+          encoding,
+          env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
+        },
       },
     ],
 
@@ -199,12 +205,24 @@ describe(`Child process execution wrapper`, () => {
         outOpts: { encoding, env: envMock.basic },
       },
     ],
+
+    [
+      'Docker custom user',
+      {
+        dockerUser: 'foo',
+        processEnv,
+        inCmd: cmd,
+        inOpts: { docker: { image, dockerUser: 'bar' } },
+        outCmd: `docker run --rm --user=bar ${image} ${cmd}`,
+        outOpts: { encoding, env: envMock.basic },
+      },
+    ],
   ];
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
     const {
       dockerUser,
-      procEnv = processEnv,
+      processEnv: procEnv,
       inCmd,
       inOpts,
       outCmd,

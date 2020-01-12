@@ -4,27 +4,28 @@ type Opt<T> = T | null | undefined;
 
 export interface DockerOptions {
   image: string;
+  tag?: Opt<string>;
   dockerUser?: Opt<string>;
   volumes?: Opt<Opt<string>[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
-  tag?: Opt<string>;
   preCommands?: Opt<string[]>;
   postCommands?: Opt<string[]>;
 }
 
-let dockerUser;
+let globalDockerUser;
 
 export function setDockerUser(_dockerUser: string): void {
-  dockerUser = _dockerUser;
+  globalDockerUser = _dockerUser;
 }
 
 export function dockerCmd(cmd: string, options: DockerOptions): string {
   const {
-    envVars,
-    cwd,
     image,
     tag,
+    dockerUser = globalDockerUser,
+    envVars,
+    cwd,
     preCommands = [],
     postCommands = [],
   } = options;
