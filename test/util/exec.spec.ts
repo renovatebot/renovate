@@ -3,7 +3,7 @@ import {
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
 import { exec, ExecOptions } from '../../lib/util/exec';
-import { setDockerUser } from '../../lib/util/exec/docker';
+import { setDockerUser, VolumeOption } from '../../lib/util/exec/docker';
 import { envMock } from '../execUtil';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
@@ -42,8 +42,14 @@ describe(`Child process execution wrapper`, () => {
   const cmd = 'echo hello';
   const cwd = '/current/working/directory';
   const volume_1 = '/path/to/volume-1';
-  const volume_2 = '/path/to/volume-2';
-  const volumes = [volume_1, volume_2];
+  const volume_2_from = '/path/to/volume-2';
+  const volume_2_to = '/path/to/volume-3';
+  const volumes: VolumeOption[] = [
+    volume_1,
+    null,
+    undefined,
+    [volume_2_from, volume_2_to],
+  ];
   const encoding = 'utf-8';
   const docker = { image };
   const processEnv = envMock.full;
@@ -240,7 +246,7 @@ describe(`Child process execution wrapper`, () => {
         processEnv,
         inCmd: cmd,
         inOpts: { cwd, docker: { image, volumes } },
-        outCmd: `docker run --rm -v "${volume_1}":"${volume_1}" -v "${volume_2}":"${volume_2}" -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+        outCmd: `docker run --rm -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
         outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
