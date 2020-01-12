@@ -14,8 +14,8 @@ const pExec: (
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
-  extraEnv?: ExtraEnv;
-  docker?: DockerOptions;
+  extraEnv?: ExtraEnv | null | undefined;
+  docker?: DockerOptions | null | undefined;
 }
 
 export interface ExecResult {
