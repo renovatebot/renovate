@@ -16,6 +16,7 @@ import {
 } from '../../common';
 import { NpmPackage } from './common';
 import { platform } from '../../../platform';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 
 export async function extractPackageFile(
   content: string,
@@ -38,7 +39,7 @@ export async function extractPackageFile(
     return null;
   }
   if (fileName !== 'package.json' && packageJson.renovate) {
-    const error = new Error('config-validation');
+    const error = new Error(CONFIG_VALIDATION);
     error.configFile = fileName;
     error.validationError =
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `paths` in your main config instead.';

@@ -3,6 +3,7 @@ import * as gitlab from '../../lib/platform/gitlab';
 import * as azure from '../../lib/platform/azure';
 import * as bitbucket from '../../lib/platform/bitbucket';
 import * as bitbucketServer from '../../lib/platform/bitbucket-server';
+import { PLATFORM_NOT_FOUND } from '../../lib/constants/error-messages';
 
 import * as platform from '../../lib/platform';
 
@@ -14,7 +15,7 @@ describe('platform', () => {
   });
   it('throws if no platform', () => {
     expect(() => platform.platform.initPlatform({})).toThrow(
-      'platform-not-found'
+      PLATFORM_NOT_FOUND
     );
   });
   it('throws if wrong platform', async () => {
