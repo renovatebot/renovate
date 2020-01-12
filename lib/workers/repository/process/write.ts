@@ -1,4 +1,4 @@
-import { logger } from '../../../logger';
+import { logger, addMeta, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
 import { getPrsRemaining } from './limits';
 import { getLimitRemaining } from '../../global/limits';
@@ -32,6 +32,7 @@ export async function writeUpdates(
   });
   let prsRemaining = await getPrsRemaining(config, branches);
   for (const branch of branches) {
+    addMeta({ branch: branch.branchName });
     const res = await processBranch(
       branch,
       prsRemaining <= 0 || getLimitRemaining('prCommitsPerRunLimit') <= 0,
@@ -44,5 +45,6 @@ export async function writeUpdates(
     }
     prsRemaining -= res === 'pr-created' ? 1 : 0;
   }
+  removeMeta(['branch']);
   return 'done';
 }

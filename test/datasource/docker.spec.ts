@@ -4,6 +4,7 @@ import _got from '../../lib/util/got';
 import * as docker from '../../lib/datasource/docker';
 import { getPkgReleases } from '../../lib/datasource';
 import * as _hostRules from '../../lib/util/host-rules';
+import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
@@ -259,13 +260,13 @@ describe('api/docker', () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
       await expect(
         docker.getDigest({ lookupName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error('registry-failure'));
+      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
     it('should throw error for 5xx', async () => {
       got.mockRejectedValueOnce({ statusCode: 503 });
       await expect(
         docker.getDigest({ lookupName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error('registry-failure'));
+      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
   });
   describe('getPkgReleases', () => {

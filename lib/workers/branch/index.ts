@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 
-import { logger, setMeta } from '../../logger';
+import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
 import {
@@ -17,6 +17,18 @@ import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
 import { BranchConfig } from '../common';
+import {
+  PLATFORM_AUTHENTICATION_ERROR,
+  PLATFORM_BAD_CREDENTIALS,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  MANAGER_LOCKFILE_ERROR,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+  WORKER_FILE_UPDATE_FAILED,
+  DATASOURCE_FAILURE,
+  PLATFORM_FAILURE,
+} from '../../constants/error-messages';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -53,11 +65,6 @@ export async function processBranch(
     .map(upgrade => upgrade.depName)
     .filter(v => v) // remove nulls (happens for lock file maintenance)
     .filter((value, i, list) => list.indexOf(value) === i); // remove duplicates
-  setMeta({
-    repository: config.repository,
-    branch: config.branchName,
-    dependencies,
-  });
   logger.debug(
     { dependencies },
     `processBranch with ${branchConfig.upgrades.length} upgrades`
@@ -151,7 +158,7 @@ export async function processBranch(
           logger.info(
             'PR has been closed or merged since this run started - aborting'
           );
-          throw new Error('repository-changed');
+          throw new Error(REPOSITORY_CHANGED);
         }
         if (
           branchPr.isModified ||
@@ -316,7 +323,7 @@ export async function processBranch(
           );
         } else {
           logger.info('PR is less than a day old - raise error instead of PR');
-          throw new Error('lockfile-error');
+          throw new Error(MANAGER_LOCKFILE_ERROR);
         }
       } else {
         logger.debug('PR has no releaseTimestamp');
@@ -368,13 +375,13 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
-    if (err.message === 'rate-limit-exceeded') {
+    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       logger.debug('Passing rate-limit-exceeded error up');
       throw err;
     }
-    if (err.message === 'repository-changed') {
+    if (err.message === REPOSITORY_CHANGED) {
       logger.debug('Passing repository-changed error up');
       throw err;
     }
@@ -383,7 +390,7 @@ export async function processBranch(
       err.message.startsWith('remote: Invalid username or password')
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error('bad-credentials');
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
     if (
       err.message &&
@@ -392,24 +399,24 @@ export async function processBranch(
       )
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error('bad-credentials');
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
-    if (err.message === 'bad-credentials') {
+    if (err.message === PLATFORM_BAD_CREDENTIALS) {
       logger.debug('Passing bad-credentials error up');
       throw err;
     }
-    if (err.message === 'integration-unauthorized') {
+    if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('Passing integration-unauthorized error up');
       throw err;
     }
-    if (err.message === 'lockfile-error') {
+    if (err.message === MANAGER_LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
     }
     if (err.message && err.message.includes('space left on device')) {
-      throw new Error('disk-space');
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
-    if (err.message.startsWith('disk-space')) {
+    if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
       logger.debug('Passing disk-space error up');
       throw err;
     }
@@ -417,7 +424,7 @@ export async function processBranch(
       logger.debug('Passing 403 error up');
       throw err;
     }
-    if (err.message === 'update-failure') {
+    if (err.message === WORKER_FILE_UPDATE_FAILED) {
       logger.warn('Error updating branch: update failure');
     } else if (err.message.startsWith('bundler-')) {
       // we have already warned inside the bundler artifacts error handling, so just return
@@ -426,11 +433,11 @@ export async function processBranch(
       err.messagee &&
       err.message.includes('fatal: Authentication failed')
     ) {
-      throw new Error('authentication-failure');
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     } else if (
-      err.message !== 'registry-failure' &&
+      err.message !== DATASOURCE_FAILURE &&
       err.message !== 'disable-gitfs' &&
-      err.message !== 'platform-failure'
+      err.message !== DATASOURCE_FAILURE
     ) {
       logger.error({ err }, `Error updating branch: ${err.message}`);
     }
@@ -540,9 +547,9 @@ export async function processBranch(
   } catch (err) /* istanbul ignore next */ {
     if (
       [
-        'rate-limit-exceeded',
-        'platform-failure',
-        'repository-changed',
+        PLATFORM_RATE_LIMIT_EXCEEDED,
+        PLATFORM_FAILURE,
+        REPOSITORY_CHANGED,
       ].includes(err.message)
     ) {
       logger.debug('Passing PR error up');
