@@ -16,6 +16,7 @@ export function matchesHelmValuesDockerHeuristic(
 ): boolean {
   return (
     parentKey === 'image' &&
+    data &&
     typeof data === 'object' &&
     data.repository &&
     data.tag

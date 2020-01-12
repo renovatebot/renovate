@@ -1,6 +1,6 @@
 import { updateDependency } from '../../../lib/manager/helm-requirements/update';
 
-describe('lib/manager/helm-requirements/extract', () => {
+describe('lib/manager/helm-requirements/update', () => {
   describe('updateDependency()', () => {
     it('returns the same fileContent for undefined upgrade', () => {
       const content = `

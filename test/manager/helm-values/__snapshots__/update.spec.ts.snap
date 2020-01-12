@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/helm-values/update updateDependency() upgrades dependency if newValue version value is repeated 1`] = `
+"
+      db:
+        image:
+          image:
+            registry: docker.io
+            repository: bitnami/postgresql
+            tag: 12.5.0
+            some-non-image-related-key: 'with-some-value'
+      warehouse:
+        image:
+          registry: docker.io
+          repository: bitnami/postgresql
+          tag: 11.6.0-debian-9-r0
+          some-non-image-related-key: 'with-some-value'
+"
+`;
+
+exports[`lib/manager/helm-values/update updateDependency() upgrades dependency if valid upgrade 1`] = `
+"
+      image:
+        repository: bitnami/postgres-exporter
+        tag: 0.8.0
+"
+`;

@@ -72,17 +72,11 @@ export function updateDependency(
     return fileContent;
   }
 
-  try {
-    const yawn = new YAWN(fileContent);
+  const yawn = new YAWN(fileContent);
+  const doc = yawn.json;
 
-    const doc = yawn.json;
+  updateDoc(doc, upgrade.depName, upgrade.currentValue, upgrade.newValue);
+  yawn.json = doc;
 
-    updateDoc(doc, upgrade.depName, upgrade.currentValue, upgrade.newValue);
-    yawn.json = doc;
-
-    return yawn.yaml;
-  } catch (err) {
-    logger.info({ err }, 'Error updating dependencies in helm values file');
-    return null;
-  }
+  return yawn.yaml;
 }
