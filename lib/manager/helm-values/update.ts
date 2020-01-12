@@ -3,36 +3,59 @@ import { logger } from '../../logger';
 import { Upgrade } from '../common';
 import { matchesHelmValuesDockerHeuristic } from './util';
 
+function shouldUpdate(
+  parentKey: string,
+  data: any,
+  depName: string,
+  currentValue: string
+): boolean {
+  return (
+    matchesHelmValuesDockerHeuristic(parentKey, data) &&
+    data.repository === depName &&
+    data.tag === currentValue
+  );
+}
+
 /**
- * Recursive function that walks the yaml strucuture depth-first
+ * Recursive function that walks the yaml strucuture
  * and updates the first match of an 'image' key it finds,
  * if it adheres to the supported structure.
  *
  * @param parsedContent The part of the yaml tree we should look at.
- * @param depName The
- * @param currentValue
- * @param newValue
+ * @param depName The name of the dependency that should be updated.
+ * @param currentValue The current version that should be updated.
+ * @param newValue The update version that should be set instead of currentValue.
  */
 function updateDoc(
   parsedContent: object,
   depName: string,
   currentValue: string,
   newValue: string
-): void {
-  Object.keys(parsedContent).forEach(key => {
-    logger.warn(key);
-    logger.warn(parsedContent[key]);
-    if (
-      matchesHelmValuesDockerHeuristic(key, parsedContent[key]) &&
-      parsedContent[key].repository === depName &&
-      parsedContent[key].tag === currentValue
-    ) {
-      logger.warn('updating');
-      parsedContent[key].tag = newValue;
-    } else if (typeof parsedContent[key] === 'object') {
-      updateDoc(parsedContent[key], depName, currentValue, newValue);
+): boolean {
+  for (const key in parsedContent) {
+    if (Object.prototype.hasOwnProperty.call(parsedContent, key)) {
+      if (shouldUpdate(key, parsedContent[key], depName, currentValue)) {
+        // the next statement intentionally updates the passed in parameter
+        // with the updated dependency value
+        // eslint-disable-next-line no-param-reassign
+        parsedContent[key].tag = newValue;
+        return true;
+      }
+
+      if (typeof parsedContent[key] === 'object') {
+        const foundMatch = updateDoc(
+          parsedContent[key],
+          depName,
+          currentValue,
+          newValue
+        );
+        if (foundMatch) {
+          return true;
+        }
+      }
     }
-  });
+  }
+  return false;
 }
 
 export function updateDependency(
@@ -53,17 +76,13 @@ export function updateDependency(
     const yawn = new YAWN(fileContent);
 
     const doc = yawn.json;
-    logger.warn({ fileContent });
-    logger.warn({ upgrade }, 'updateDependency()');
-    logger.warn({ doc }, 'updateDependency()');
 
     updateDoc(doc, upgrade.depName, upgrade.currentValue, upgrade.newValue);
     yawn.json = doc;
-    logger.warn({ doc: yawn.yaml }, 'updateDependency()');
 
     return yawn.yaml;
   } catch (err) {
-    logger.info({ err }, 'Error setting new helm values file docker tag');
+    logger.info({ err }, 'Error updating dependencies in helm values file');
     return null;
   }
 }

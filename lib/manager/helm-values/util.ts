@@ -1,6 +1,6 @@
 /**
- * Determine whether a given Helm values.yaml object potentially defines a Docker
- * dependency.
+ * Determine whether a given partial Helm values.yaml object potentially defines
+ * a Docker dependency.
  *
  * There is no exact standard of how Docker dependencies are defined in Helm
  * values.yaml files (as of January 1st 2020), this function defines a
@@ -11,13 +11,13 @@
  *   tag: v1.0.0
  */
 export function matchesHelmValuesDockerHeuristic(
-  parentKey: str,
-  value: any
-): bool {
+  parentKey: string,
+  data: any
+): boolean {
   return (
     parentKey === 'image' &&
-    typeof value === 'object' &&
-    value.repository &&
-    value.tag
+    typeof data === 'object' &&
+    data.repository &&
+    data.tag
   );
 }
