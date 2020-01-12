@@ -3,9 +3,16 @@ import {
   exec as cpExec,
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
-import { dockerCmd, DockerOptions } from './docker';
+import { dockerCmd, DockerOptions, setDockerConfig } from './docker';
 import { getChildProcessEnv } from './env';
 import { basicEnvVars } from './env/basic-vars';
+
+let localDir;
+
+export function setExecConfig(config): void {
+  localDir = config.localDir;
+  setDockerConfig(config);
+}
 
 const pExec: (
   cmd: string,
@@ -23,12 +30,14 @@ export interface ExecResult {
 }
 
 export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-  const { env: customEnv = {}, inheritEnvVars = [], docker, cwd } = opts;
+  const { env: customEnv = {}, inheritEnvVars = [], docker } = opts;
+  const cwd = opts.cwd || localDir;
 
   let pExecCommand = cmd;
   const pExecOptions = {
     encoding: 'utf-8',
     ...opts,
+    cwd,
   };
   delete pExecOptions.inheritEnvVars;
   delete pExecOptions.docker;

@@ -4,6 +4,12 @@ import { getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
 import { platform, BranchStatus, Pr } from '../../platform';
 import { BranchConfig } from '../common';
+import {
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_FAILURE,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+} from '../../constants/error-messages';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -378,10 +384,10 @@ export async function ensurePr(
   } catch (err) {
     // istanbul ignore if
     if (
-      err.message === 'repository-changed' ||
-      err.message === 'rate-limit-exceeded' ||
-      err.message === 'platform-failure' ||
-      err.message === 'integration-unauthorized'
+      err.message === REPOSITORY_CHANGED ||
+      err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
+      err.message === PLATFORM_FAILURE ||
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('Passing error up');
       throw err;

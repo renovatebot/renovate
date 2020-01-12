@@ -12,7 +12,7 @@ import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
 import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
-import { setDockerUser } from '../../util/exec/docker';
+import { setExecConfig } from '../../util/exec';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -55,25 +55,20 @@ export async function getRepositoryConfig(
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
+function getGlobalConfig(): Promise<RenovateConfig> {
+  return configParser.parseConfigs(process.env, process.argv);
+}
+
 export async function start(): Promise<0 | 1> {
   try {
-    cache.init(os.tmpdir());
-    let config = await configParser.parseConfigs(process.env, process.argv);
+    let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
+    setExecConfig(config);
     config = await autodiscoverRepositories(config);
-    // Move global variables that we need to use later
-    const importGlobals = ['prBanner', 'prFooter'];
-    config.global = {};
-    importGlobals.forEach(key => {
-      config.global[key] = config[key];
-      delete config[key];
-    });
-    global.trustLevel = config.trustLevel || 'low';
-    delete config.trustLevel;
+
     limits.init(config);
     setEmojiConfig(config);
-    setDockerUser(config.dockerUser);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {

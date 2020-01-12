@@ -1,6 +1,7 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 export async function getPkgReleases({
   lookupName,
@@ -34,7 +35,7 @@ export async function getPkgReleases({
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       logger.warn({ lookupName, err }, `pub.dartlang.org registry failure`);
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn(
       { err, lookupName },

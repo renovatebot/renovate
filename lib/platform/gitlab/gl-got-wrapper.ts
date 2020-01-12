@@ -3,6 +3,7 @@ import parseLinkHeader from 'parse-link-header';
 import { GotApi, GotResponse } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
+import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
 const hostType = 'gitlab';
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -32,7 +33,7 @@ async function get(path: string, options: any): Promise<GotResponse> {
     return res;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new Error('platform-failure');
+      throw new Error(PLATFORM_FAILURE);
     }
     const platformFailureCodes = [
       'EAI_AGAIN',
@@ -41,7 +42,7 @@ async function get(path: string, options: any): Promise<GotResponse> {
       'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
     ];
     if (platformFailureCodes.includes(err.code)) {
-      throw new Error('platform-failure');
+      throw new Error(PLATFORM_FAILURE);
     }
     throw err;
   }

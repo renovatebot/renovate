@@ -1,5 +1,10 @@
 import fs from 'fs-extra';
 import { GotApi, GotResponse } from '../../../lib/platform/common';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+  REPOSITORY_RENAMED,
+} from '../../../lib/constants/error-messages';
 
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
@@ -220,7 +225,7 @@ describe('platform/github', () => {
           repository: 'some/repo',
           optimizeForDisabled: true,
         } as any)
-      ).rejects.toThrow('disabled');
+      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
     it('should rebase', async () => {
       function squashInitRepo(args: any) {
@@ -443,7 +448,7 @@ describe('platform/github', () => {
         github.initRepo({
           repository: 'some/repo',
         } as any)
-      ).rejects.toThrow('not-found');
+      ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
     it('should throw error if renamed', async () => {
       api.get.mockReturnValueOnce({
@@ -458,7 +463,7 @@ describe('platform/github', () => {
           includeForks: true,
           repository: 'some/repo',
         } as any)
-      ).rejects.toThrow('renamed');
+      ).rejects.toThrow(REPOSITORY_RENAMED);
     });
   });
   describe('getRepoForceRebase', () => {
