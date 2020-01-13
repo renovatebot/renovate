@@ -4,12 +4,17 @@ import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
 import { logger } from '../../logger';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 
+const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
+
 async function resolvePackageReleases(
   searchRoot: string,
   artifact: string,
   scalaVersion: string
 ): Promise<string[]> {
-  const indexContent = await downloadHttpProtocol(searchRoot + '/', 'sbt');
+  const indexContent = await downloadHttpProtocol(
+    ensureTrailingSlash(searchRoot),
+    'sbt'
+  );
   if (indexContent) {
     const releases: string[] = [];
     const parseSubdirs = (content: string): string[] =>
@@ -31,7 +36,7 @@ async function resolvePackageReleases(
       parseIndexDir(content, x => !/^\.+$/.test(x));
     for (const searchSubdir of searchSubdirs) {
       const content = await downloadHttpProtocol(
-        `${searchRoot}/${searchSubdir}/`,
+        ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
         'sbt'
       );
       if (content) {
@@ -53,7 +58,10 @@ async function resolvePluginReleases(
   const searchRoot = `${rootUrl}/${artifact}`;
   const parse = (content: string): string[] =>
     parseIndexDir(content, x => !/^\.+$/.test(x));
-  const indexContent = await downloadHttpProtocol(searchRoot + '/', 'sbt');
+  const indexContent = await downloadHttpProtocol(
+    ensureTrailingSlash(searchRoot),
+    'sbt'
+  );
   if (indexContent) {
     const releases: string[] = [];
     const scalaVersionItems = parse(indexContent);
@@ -65,7 +73,7 @@ async function resolvePluginReleases(
     for (const searchVersion of searchVersions) {
       const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
       const subRootContent = await downloadHttpProtocol(
-        searchSubRoot + '/',
+        ensureTrailingSlash(searchSubRoot),
         'sbt'
       );
       if (subRootContent) {
@@ -73,7 +81,7 @@ async function resolvePluginReleases(
         for (const sbtItem of sbtVersionItems) {
           const releasesRoot = `${searchSubRoot}/${sbtItem}`;
           const releasesIndexContent = await downloadHttpProtocol(
-            releasesRoot + '/',
+            ensureTrailingSlash(releasesRoot),
             'sbt'
           );
           if (releasesIndexContent) {
