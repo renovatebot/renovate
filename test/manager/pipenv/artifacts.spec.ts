@@ -29,14 +29,26 @@ describe('.updateArtifacts()', () => {
   });
 
   it('returns if no Pipfile.lock found', async () => {
-    expect(await pipenv.updateArtifacts('Pipfile', [], '', config)).toBeNull();
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current Pipfile.lock' as any);
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -48,7 +60,12 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -60,10 +77,15 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', {
-        ...config,
-        binarySource: 'docker',
-        dockerUser: 'foobar',
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          binarySource: 'docker',
+          dockerUser: 'foobar',
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -74,7 +96,12 @@ describe('.updateArtifacts()', () => {
       throw new Error('not found');
     });
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toMatchSnapshot();
   });
 });

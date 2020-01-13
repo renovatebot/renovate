@@ -10,7 +10,7 @@ import {
   matches,
   sortVersions,
 } from '../../versioning/ruby';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import {
   BUNDLER_COULD_NOT_RESOLVE,
@@ -18,12 +18,12 @@ import {
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {
@@ -176,12 +176,12 @@ export async function updateArtifacts(
         const newUpdatedDeps = [
           ...new Set([...updatedDeps, ...resolveMatches]),
         ];
-        return updateArtifacts(
+        return updateArtifacts({
           packageFileName,
-          newUpdatedDeps,
+          updatedDeps: newUpdatedDeps,
           newPackageFileContent,
-          config
-        );
+          config,
+        });
       }
       logger.warn({ err }, 'Cannot resolve bundler lock update error');
       // Do not set global.repoCache because we don't want to stop trying other branches

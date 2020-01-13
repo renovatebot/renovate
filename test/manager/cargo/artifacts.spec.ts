@@ -29,12 +29,22 @@ describe('.updateArtifacts()', () => {
   it('returns null if no Cargo.lock found', async () => {
     const updatedDeps = ['dep1'];
     expect(
-      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '',
+        config,
+      })
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
     expect(
-      await cargo.updateArtifacts('Cargo.toml', [], '', config)
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
@@ -43,7 +53,12 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('Current Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
-      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '',
+        config,
+      })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -53,7 +68,12 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
-      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -63,10 +83,15 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
-      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', {
-        ...config,
-        binarySource: 'docker',
-        dockerUser: 'foobar',
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          binarySource: 'docker',
+          dockerUser: 'foobar',
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -78,7 +103,12 @@ describe('.updateArtifacts()', () => {
     });
     const updatedDeps = ['dep1'];
     expect(
-      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toMatchSnapshot();
   });
 });
