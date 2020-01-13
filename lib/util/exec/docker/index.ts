@@ -6,7 +6,6 @@ export type VolumeOption = Opt<string> | Opt<VolumesPair>;
 export interface DockerOptions {
   image: string;
   tag?: Opt<string>;
-  dockerUser?: Opt<string>;
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
@@ -56,7 +55,7 @@ function uniq<T = unknown>(
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
-  const allVolumes: VolumeOption[] = [cacheDir, localDir, ...volumes];
+  const allVolumes: VolumeOption[] = [localDir, cacheDir, ...volumes];
   const expanded: Opt<VolumesPair>[] = allVolumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter(vol => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
