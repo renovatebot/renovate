@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
-import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import {
+  PackageDependency,
+  PackageFile,
+  ExtractPackageFileConfig,
+} from '../common';
 
 function extractDepFromInclude(includeObj: {
   file: any;
@@ -24,11 +28,10 @@ function extractDepFromInclude(includeObj: {
   return dep;
 }
 
-export function extractPackageFile(
-  content: string,
-  _packageFile: string,
-  config: ExtractConfig
-): PackageFile | null {
+export function extractPackageFile({
+  content,
+  config,
+}: ExtractPackageFileConfig): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const doc = yaml.safeLoad(content, { json: true });

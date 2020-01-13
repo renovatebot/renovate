@@ -1,8 +1,14 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('kubernetes.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;

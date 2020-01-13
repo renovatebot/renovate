@@ -1,5 +1,9 @@
 import { isValid } from '../../versioning/swift';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
 const regExps = {
   wildcard: /^.*?/,
@@ -133,9 +137,9 @@ function getDepName(url: string): string | null {
 }
 
 export function extractPackageFile(
-  content: string,
-  packageFile: string = null
+  extractPackageFileConfig: ExtractPackageFileConfig
 ): PackageFile | null {
+  const { content, packageFile } = extractPackageFileConfig || {};
   if (!content) return null;
 
   const result: PackageFile = {

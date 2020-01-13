@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 import { platform } from '../../platform';
 
 interface Repo {
@@ -78,16 +82,16 @@ function parseRepositories(
   }
 }
 
-export async function extractPackageFile(
-  content: string,
-  fileName: string
-): Promise<PackageFile | null> {
-  logger.trace(`composer.extractPackageFile(${fileName})`);
+export async function extractPackageFile({
+  content,
+  packageFile,
+}: ExtractPackageFileConfig): Promise<PackageFile | null> {
+  logger.trace(`composer.extractPackageFile(${packageFile})`);
   let composerJson: ComposerConfig;
   try {
     composerJson = JSON.parse(content);
   } catch (err) {
-    logger.info({ fileName }, 'Invalid JSON');
+    logger.info({ packageFile }, 'Invalid JSON');
     return null;
   }
   const repositories: Record<string, Repo> = {};
@@ -95,11 +99,11 @@ export async function extractPackageFile(
   const res: PackageFile = { deps: [] };
 
   // handle lockfile
-  const lockfilePath = fileName.replace(/\.json$/, '.lock');
+  const lockfilePath = packageFile.replace(/\.json$/, '.lock');
   const lockContents = await platform.getFile(lockfilePath);
   let lockParsed;
   if (lockContents) {
-    logger.debug({ packageFile: fileName }, 'Found composer lock file');
+    logger.debug({ packageFile }, 'Found composer lock file');
     try {
       lockParsed = JSON.parse(lockContents);
     } catch (err) /* istanbul ignore next */ {
@@ -167,7 +171,10 @@ export async function extractPackageFile(
           deps.push(dep);
         }
       } catch (err) /* istanbul ignore next */ {
-        logger.info({ fileName, depType, err }, 'Error parsing composer.json');
+        logger.info(
+          { packageFile, depType, err },
+          'Error parsing composer.json'
+        );
         return null;
       }
     }

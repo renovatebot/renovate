@@ -1,12 +1,16 @@
 import { logger } from '../../logger';
 import { get } from '../../versioning';
-import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import {
+  PackageDependency,
+  PackageFile,
+  ExtractPackageFileConfig,
+} from '../common';
 
-export function extractPackageFile(
-  content: string,
-  packageFile: string,
-  config: ExtractConfig = {}
-): PackageFile {
+export function extractPackageFile({
+  content,
+  packageFile,
+  config = {},
+}: ExtractPackageFileConfig): PackageFile {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
   const { isVersion } = get(config.versionScheme || 'semver');
   const deps: PackageDependency[] = [];

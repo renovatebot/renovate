@@ -3,7 +3,12 @@ import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
-import { ExtractConfig, PackageFile, PackageDependency } from '../common';
+import {
+  ExtractConfig,
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
@@ -91,11 +96,11 @@ export async function extractSetupFile(
   return JSON.parse(res.stdout);
 }
 
-export async function extractPackageFile(
-  content: string,
-  packageFile: string,
-  config: ExtractConfig
-): Promise<PackageFile | null> {
+export async function extractPackageFile({
+  content,
+  packageFile,
+  config,
+}: ExtractPackageFileConfig): Promise<PackageFile | null> {
   logger.debug('pip_setup.extractPackageFile()');
   let setup: PythonSetup;
   try {

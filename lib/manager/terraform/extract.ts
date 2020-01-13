@@ -1,6 +1,10 @@
 import { logger } from '../../logger';
 import { isValid, isVersion } from '../../versioning/hashicorp';
-import { PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
@@ -24,7 +28,9 @@ export function getTerraformDependencyType(
   }
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (!content.includes('module "') && !content.includes('provider "')) {
     return null;

@@ -39,7 +39,7 @@ Object {
       "lookupName": "https://github.com/weichsel/ZIPFoundation/",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;
 
@@ -54,7 +54,7 @@ Object {
       "lookupName": "https://github.com/vapor/vapor.git",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;
 
@@ -69,7 +69,7 @@ Object {
       "lookupName": "https://github.com/vapor/vapor.git",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;
 
@@ -84,7 +84,7 @@ Object {
       "lookupName": "https://github.com/vapor/vapor.git",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;
 
@@ -99,7 +99,7 @@ Object {
       "lookupName": "https://github.com/vapor/vapor.git",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;
 
@@ -114,7 +114,7 @@ Object {
       "lookupName": "https://github.com/vapor/vapor.git",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;
 
@@ -129,6 +129,6 @@ Object {
       "lookupName": "https://github.com/vapor/vapor.git",
     },
   ],
-  "packageFile": null,
+  "packageFile": undefined,
 }
 `;

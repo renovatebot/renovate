@@ -9,13 +9,15 @@ const yamlFile = readFileSync(
 describe('lib/manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
     });
     it('returns null for malformed YAML', () => {
-      expect(extractPackageFile('nothing here\n:::::::')).toBeNull();
+      expect(
+        extractPackageFile({ content: 'nothing here\n:::::::' })
+      ).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(yamlFile);
+      const res = extractPackageFile({ content: yamlFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(8);
     });

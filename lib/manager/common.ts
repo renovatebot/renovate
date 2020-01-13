@@ -173,6 +173,12 @@ export interface UpdateArtifactsResult {
   file?: { name: string; contents: string };
 }
 
+export interface ExtractPackageFileConfig {
+  content: string;
+  packageFile?: string;
+  config?: ExtractConfig;
+}
+
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
@@ -183,9 +189,7 @@ export interface ManagerApi {
   ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
-    content: string,
-    packageFile?: string,
-    config?: ExtractConfig
+    extractPackageFileConfig: ExtractPackageFileConfig
   ): Result<PackageFile | null>;
 
   getPackageUpdates?(

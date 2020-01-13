@@ -3,32 +3,36 @@ import upath from 'upath';
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency, ExtractConfig } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 import { platform } from '../../platform';
 
-export async function extractPackageFile(
-  content: string,
-  fileName: string,
-  config: ExtractConfig
-): Promise<PackageFile> {
+export async function extractPackageFile({
+  content,
+  packageFile,
+  config,
+}: ExtractPackageFileConfig): Promise<PackageFile> {
   try {
-    const baseDir = upath.parse(fileName).dir;
+    const baseDir = upath.parse(packageFile).dir;
     const chartFileName = upath.join(baseDir, 'Chart.yaml');
     const chartContents = await platform.getFile(chartFileName);
     if (!chartContents) {
-      logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
+      logger.debug({ packageFile }, 'Failed to find helm Chart.yaml');
       return null;
     }
     const chart = yaml.safeLoad(chartContents, { json: true });
     if (!(chart && chart.apiVersion && chart.name && chart.version)) {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Failed to find required fields in Chart.yaml'
       );
       return null;
     }
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
+    logger.debug({ packageFile }, 'Failed to parse helm Chart.yaml');
     return null;
   }
   let deps = [];
@@ -36,11 +40,11 @@ export async function extractPackageFile(
   try {
     doc = yaml.safeLoad(content, { json: true });
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
+    logger.debug({ packageFile }, 'Failed to parse helm requirements.yaml');
     return null;
   }
   if (!(doc && is.array(doc.dependencies))) {
-    logger.debug({ fileName }, 'requirements.yaml has no dependencies');
+    logger.debug({ packageFile }, 'requirements.yaml has no dependencies');
     return null;
   }
   deps = doc.dependencies.map(dep => {

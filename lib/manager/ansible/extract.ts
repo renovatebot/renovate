@@ -1,10 +1,14 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
-export default function extractPackageFile(
-  content: string
-): PackageFile | null {
+export default function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;

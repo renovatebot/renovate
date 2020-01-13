@@ -1,8 +1,14 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { expandDepName, DEFAULT_CLOJARS_REPO } from '../leiningen/extract';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile {
   const deps: PackageDependency[] = [];
 
   const regex = /([^{\s,]*)[\s,]*{[\s,]*:mvn\/version[\s,]+"([^"]+)"[\s,]*}/;

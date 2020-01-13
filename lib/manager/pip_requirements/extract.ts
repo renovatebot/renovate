@@ -3,7 +3,11 @@ import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { isValid, isSingleVersion } from '../../versioning/pep440';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -13,11 +17,10 @@ const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
-export function extractPackageFile(
-  content: string,
-  _: string,
-  config: ExtractConfig
-): PackageFile | null {
+export function extractPackageFile({
+  content,
+  config,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
   let indexUrl: string;

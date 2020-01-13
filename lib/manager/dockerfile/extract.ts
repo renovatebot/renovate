@@ -1,5 +1,9 @@
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -41,7 +45,9 @@ export function getDep(currentFrom: string): PackageDependency {
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   let lineNumber = 0;

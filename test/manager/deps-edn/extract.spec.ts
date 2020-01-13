@@ -10,6 +10,6 @@ const depsEdn = readFileSync(
 
 describe('manager/deps-edn/extract', () => {
   it('extractPackageFile', () => {
-    expect(extractPackageFile(depsEdn)).toMatchSnapshot();
+    expect(extractPackageFile({ content: depsEdn })).toMatchSnapshot();
   });
 });

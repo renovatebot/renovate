@@ -102,7 +102,11 @@ export function extractPackageFile(
   config?: ExtractConfig
 ): Result<PackageFile | null> {
   return managers[manager] && managers[manager].extractPackageFile
-    ? managers[manager].extractPackageFile(content, fileName, config)
+    ? managers[manager].extractPackageFile({
+        content,
+        packageFile: fileName,
+        config,
+      })
     : null;
 }
 

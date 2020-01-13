@@ -2,7 +2,11 @@ import is from '@sindresorhus/is';
 import toml from 'toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -110,7 +114,9 @@ function extractFromSection(
   return deps;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.debug('pipenv.extractPackageFile()');
 
   let pipfile: PipFile;

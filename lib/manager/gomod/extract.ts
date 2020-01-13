@@ -1,6 +1,10 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
-import { PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
 function getDep(
   lineNumber: number,
@@ -39,7 +43,9 @@ function getDep(
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {

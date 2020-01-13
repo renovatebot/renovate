@@ -60,11 +60,19 @@ function validateGems(raw, parsed) {
 describe('lib/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
+      expect(
+        await extractPackageFile({
+          content: 'nothing here',
+          packageFile: 'Gemfile',
+        })
+      ).toBeNull();
     });
     it('parses rails Gemfile', async () => {
       platform.getFile.mockReturnValueOnce(railsGemfileLock);
-      const res = await extractPackageFile(railsGemfile, 'Gemfile');
+      const res = await extractPackageFile({
+        content: railsGemfile,
+        packageFile: 'Gemfile',
+      });
       expect(res).toMatchSnapshot();
       // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
       expect(
@@ -82,13 +90,19 @@ describe('lib/manager/bundler/extract', () => {
       validateGems(railsGemfile, res);
     });
     it('parses sourceGroups', async () => {
-      const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
+      const res = await extractPackageFile({
+        content: sourceGroupGemfile,
+        packageFile: 'Gemfile',
+      });
       expect(res).toMatchSnapshot();
       validateGems(sourceGroupGemfile, res);
     });
     it('parse webpacker Gemfile', async () => {
       platform.getFile.mockReturnValueOnce(webPackerGemfileLock);
-      const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
+      const res = await extractPackageFile({
+        content: webPackerGemfile,
+        packageFile: 'Gemfile',
+      });
       expect(res).toMatchSnapshot();
       expect(
         res.deps.every(dep => {
@@ -102,7 +116,10 @@ describe('lib/manager/bundler/extract', () => {
     });
     it('parse mastodon Gemfile', async () => {
       platform.getFile.mockReturnValueOnce(mastodonGemfileLock);
-      const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
+      const res = await extractPackageFile({
+        content: mastodonGemfile,
+        packageFile: 'Gemfile',
+      });
       expect(res).toMatchSnapshot();
       expect(
         res.deps
@@ -120,7 +137,10 @@ describe('lib/manager/bundler/extract', () => {
     });
     it('parse Ruby CI Gemfile', async () => {
       platform.getFile.mockReturnValueOnce(rubyCIGemfileLock);
-      const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
+      const res = await extractPackageFile({
+        content: rubyCIGemfile,
+        packageFile: 'Gemfile',
+      });
       expect(res).toMatchSnapshot();
       expect(
         res.deps.every(dep => {
@@ -135,7 +155,10 @@ describe('lib/manager/bundler/extract', () => {
   });
   it('parse Gitlab Foss Gemfile', async () => {
     platform.getFile.mockReturnValueOnce(gitlabFossGemfileLock);
-    const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
+    const res = await extractPackageFile({
+      content: gitlabFossGemfile,
+      packageFile: 'Gemfile',
+    });
     expect(res).toMatchSnapshot();
     expect(
       res.deps.every(dep => {

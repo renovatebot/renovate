@@ -36,39 +36,61 @@ describe('lib/manager/composer/extract', () => {
       packageFile = 'composer.json';
     });
     it('returns null for invalid json', async () => {
-      expect(await extractPackageFile('nothing here', packageFile)).toBeNull();
+      expect(
+        await extractPackageFile({ content: 'nothing here', packageFile })
+      ).toBeNull();
     });
     it('returns null for empty deps', async () => {
-      expect(await extractPackageFile('{}', packageFile)).toBeNull();
+      expect(
+        await extractPackageFile({ content: '{}', packageFile })
+      ).toBeNull();
     });
     it('extracts dependencies with no lock file', async () => {
-      const res = await extractPackageFile(requirements1, packageFile);
+      const res = await extractPackageFile({
+        content: requirements1,
+        packageFile,
+      });
       expect(res).toMatchSnapshot();
     });
     it('extracts registryUrls', async () => {
-      const res = await extractPackageFile(requirements2, packageFile);
+      const res = await extractPackageFile({
+        content: requirements2,
+        packageFile,
+      });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts object registryUrls', async () => {
-      const res = await extractPackageFile(requirements3, packageFile);
+      const res = await extractPackageFile({
+        content: requirements3,
+        packageFile,
+      });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts repositories and registryUrls', async () => {
-      const res = await extractPackageFile(requirements4, packageFile);
+      const res = await extractPackageFile({
+        content: requirements4,
+        packageFile,
+      });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts object repositories and registryUrls with lock file', async () => {
       platform.getFile.mockResolvedValue(requirements5Lock);
-      const res = await extractPackageFile(requirements5, packageFile);
+      const res = await extractPackageFile({
+        content: requirements5,
+        packageFile,
+      });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts dependencies with lock file', async () => {
       platform.getFile.mockResolvedValue('some content');
-      const res = await extractPackageFile(requirements1, packageFile);
+      const res = await extractPackageFile({
+        content: requirements1,
+        packageFile,
+      });
       expect(res).toMatchSnapshot();
     });
   });

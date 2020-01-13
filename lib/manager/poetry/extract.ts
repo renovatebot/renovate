@@ -1,7 +1,11 @@
 import { parse } from 'toml';
 import { isValid } from '../../versioning/poetry';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 import { PoetryFile, PoetrySection } from './types';
 
 function extractFromSection(
@@ -79,11 +83,11 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
   return Array.from(registryUrls);
 }
 
-export function extractPackageFile(
-  content: string,
-  fileName: string
-): PackageFile | null {
-  logger.trace(`poetry.extractPackageFile(${fileName})`);
+export function extractPackageFile({
+  content,
+  packageFile,
+}: ExtractPackageFileConfig): PackageFile | null {
+  logger.trace(`poetry.extractPackageFile(${packageFile})`);
   let pyprojectfile: PoetryFile;
   try {
     pyprojectfile = parse(content);
@@ -92,7 +96,7 @@ export function extractPackageFile(
     return null;
   }
   if (!(pyprojectfile.tool && pyprojectfile.tool.poetry)) {
-    logger.debug(`${fileName} contains no poetry section`);
+    logger.debug(`${packageFile} contains no poetry section`);
     return null;
   }
   const deps = [

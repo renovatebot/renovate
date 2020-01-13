@@ -24,20 +24,22 @@ const otherYamlFile = readFileSync(
 describe('lib/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();
+      expect(
+        extractPackageFile({ content: kubernetesConfigMapFile })
+      ).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(kubernetesImagesFile);
+      const res = extractPackageFile({ content: kubernetesImagesFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
     it('extracts image line in a YAML array', () => {
-      const res = extractPackageFile(kubernetesArraySyntaxFile);
+      const res = extractPackageFile({ content: kubernetesArraySyntaxFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('ignores non-Kubernetes YAML files', () => {
-      expect(extractPackageFile(otherYamlFile)).toBeNull();
+      expect(extractPackageFile({ content: otherYamlFile })).toBeNull();
     });
   });
 });

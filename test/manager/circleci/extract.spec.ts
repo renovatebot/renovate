@@ -13,15 +13,15 @@ const file2 = readFileSync(
 describe('lib/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(file1);
+      const res = extractPackageFile({ content: file1 });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
     });
     it('extracts orbs too', () => {
-      const res = extractPackageFile(file2);
+      const res = extractPackageFile({ content: file2 });
       expect(res.deps).toMatchSnapshot();
       // expect(res.deps).toHaveLength(4);
     });

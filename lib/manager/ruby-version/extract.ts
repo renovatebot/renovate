@@ -1,8 +1,14 @@
 import { isValid } from '../../versioning/ruby';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile {
   logger.trace('ruby-version.extractPackageFile()');
   const dep: PackageDependency = {
     depName: 'ruby',

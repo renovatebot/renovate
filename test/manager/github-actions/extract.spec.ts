@@ -14,15 +14,15 @@ const workflow2 = readFileSync(
 describe('lib/manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
     });
     it('extracts multiple image lines from docker_container', () => {
-      const res = extractPackageFile(workflow1);
+      const res = extractPackageFile({ content: workflow1 });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
     it('extracts multiple image lines from yaml configuration file', () => {
-      const res = extractPackageFile(workflow2);
+      const res = extractPackageFile({ content: workflow2 });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });

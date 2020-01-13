@@ -24,21 +24,37 @@ describe('lib/manager/gitsubmodules/extract', () => {
   describe('extractPackageFile()', () => {
     it('handles empty gitmodules file', async () => {
       expect(
-        await extractPackageFile('', '.gitmodules.1', { localDir })
+        await extractPackageFile({
+          content: '',
+          packageFile: '.gitmodules.1',
+          config: { localDir },
+        })
       ).toBeNull();
     });
     it('default to master branch', async () => {
-      const res = await extractPackageFile('', '.gitmodules.2', { localDir });
+      const res = await extractPackageFile({
+        content: '',
+        packageFile: '.gitmodules.2',
+        config: { localDir },
+      });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('extract branch', async () => {
-      const res = await extractPackageFile('', '.gitmodules.3', { localDir });
+      const res = await extractPackageFile({
+        content: '',
+        packageFile: '.gitmodules.3',
+        config: { localDir },
+      });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('extract relative URL', async () => {
-      const res = await extractPackageFile('', '.gitmodules.4', { localDir });
+      const res = await extractPackageFile({
+        content: '',
+        packageFile: '.gitmodules.4',
+        config: { localDir },
+      });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });

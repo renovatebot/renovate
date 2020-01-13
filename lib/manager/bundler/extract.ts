@@ -1,14 +1,18 @@
 import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
 
-export async function extractPackageFile(
-  content: string,
-  fileName?: string
-): Promise<PackageFile | null> {
+export async function extractPackageFile({
+  content,
+  packageFile,
+}: ExtractPackageFileConfig): Promise<PackageFile | null> {
   const res: PackageFile = {
     registryUrls: [],
     deps: [],
@@ -83,7 +87,7 @@ export async function extractPackageFile(
           groupContent += (groupLine || '').replace(/^ {2}/, '') + '\n';
         }
       }
-      const groupRes = await extractPackageFile(groupContent);
+      const groupRes = await extractPackageFile({ content: groupContent });
       if (groupRes) {
         res.deps = res.deps.concat(
           groupRes.deps.map(dep => ({
@@ -110,14 +114,14 @@ export async function extractPackageFile(
           sourceLine = lines[lineNumber];
           // istanbul ignore if
           if (!sourceLine) {
-            logger.error({ content, fileName }, 'Undefined sourceLine');
+            logger.error({ content, packageFile }, 'Undefined sourceLine');
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {
             sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
           }
         }
-        const sourceRes = await extractPackageFile(sourceContent);
+        const sourceRes = await extractPackageFile({ content: sourceContent });
         if (sourceRes) {
           res.deps = res.deps.concat(
             sourceRes.deps.map(dep => ({
@@ -143,7 +147,9 @@ export async function extractPackageFile(
           platformsContent += platformsLine.replace(/^ {2}/, '') + '\n';
         }
       }
-      const platformsRes = await extractPackageFile(platformsContent);
+      const platformsRes = await extractPackageFile({
+        content: platformsContent,
+      });
       if (platformsRes) {
         res.deps = res.deps.concat(
           // eslint-disable-next-line no-loop-func
@@ -168,7 +174,7 @@ export async function extractPackageFile(
           ifContent += ifLine.replace(/^ {2}/, '') + '\n';
         }
       }
-      const ifRes = await extractPackageFile(ifContent);
+      const ifRes = await extractPackageFile({ content: ifContent });
       if (ifRes) {
         res.deps = res.deps.concat(
           // eslint-disable-next-line no-loop-func
@@ -186,11 +192,11 @@ export async function extractPackageFile(
     return null;
   }
 
-  if (fileName) {
-    const gemfileLock = fileName + '.lock';
+  if (packageFile) {
+    const gemfileLock = packageFile + '.lock';
     const lockContent = await platform.getFile(gemfileLock);
     if (lockContent) {
-      logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
+      logger.debug({ packageFile }, 'Found Gemfile.lock file');
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
         const lockedDepValue = lockedEntries.get(dep.depName);

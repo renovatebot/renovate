@@ -1,9 +1,15 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 import { logger } from '../../logger';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   let doc;
   try {
     doc = yaml.safeLoad(content, { json: true });

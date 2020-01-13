@@ -29,42 +29,44 @@ describe('lib/manager/cargo/extract', () => {
       config = {};
     });
     it('returns null for invalid toml', () => {
-      expect(extractPackageFile('invalid toml', config)).toBeNull();
+      expect(
+        extractPackageFile({ content: 'invalid toml', config })
+      ).toBeNull();
     });
     it('returns null for empty', () => {
       const cargotoml = '[dependencies]\n';
-      expect(extractPackageFile(cargotoml, config)).toBeNull();
+      expect(extractPackageFile({ content: cargotoml, config })).toBeNull();
     });
     it('returns null for empty', () => {
       const cargotoml = '[dev-dependencies]\n';
-      expect(extractPackageFile(cargotoml, config)).toBeNull();
+      expect(extractPackageFile({ content: cargotoml, config })).toBeNull();
     });
     it('returns null for empty', () => {
       const cargotoml = '[target."foo".dependencies]\n';
-      expect(extractPackageFile(cargotoml, config)).toBeNull();
+      expect(extractPackageFile({ content: cargotoml, config })).toBeNull();
     });
     it('extracts multiple dependencies', () => {
-      const res = extractPackageFile(cargo1toml, config);
+      const res = extractPackageFile({ content: cargo1toml, config });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(15);
     });
     it('extracts multiple dependencies', () => {
-      const res = extractPackageFile(cargo2toml, config);
+      const res = extractPackageFile({ content: cargo2toml, config });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(18 + 6 + 1);
     });
     it('handles inline tables', () => {
-      const res = extractPackageFile(cargo3toml, config);
+      const res = extractPackageFile({ content: cargo3toml, config });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(8);
     });
     it('handles standard tables', () => {
-      const res = extractPackageFile(cargo4toml, config);
+      const res = extractPackageFile({ content: cargo4toml, config });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });
     it('extracts platform specific dependencies', () => {
-      const res = extractPackageFile(cargo5toml, config);
+      const res = extractPackageFile({ content: cargo5toml, config });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
     });

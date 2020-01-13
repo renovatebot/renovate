@@ -55,7 +55,7 @@ describe('lib/manager/pip_setup/index', () => {
         { stdout: jsonContent, stderr: '' },
       ]);
       expect(
-        await extractPackageFile(content, packageFile, config)
+        await extractPackageFile({ content, packageFile, config })
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(4);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -67,9 +67,13 @@ describe('lib/manager/pip_setup/index', () => {
       ]);
 
       expect(
-        await extractPackageFile(content, packageFile, {
-          ...config,
-          binarySource: 'docker',
+        await extractPackageFile({
+          content,
+          packageFile,
+          config: {
+            ...config,
+            binarySource: 'docker',
+          },
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toHaveLength(2); // TODO: figure out volume arguments in Windows
@@ -80,11 +84,11 @@ describe('lib/manager/pip_setup/index', () => {
         new Error(),
       ]);
       expect(
-        await extractPackageFile(
-          'raise Exception()',
-          '/tmp/folders/foobar.py',
-          config
-        )
+        await extractPackageFile({
+          content: 'raise Exception()',
+          packageFile: '/tmp/folders/foobar.py',
+          config,
+        })
       ).toBeNull();
       expect(exec).toHaveBeenCalledTimes(4);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -92,11 +96,11 @@ describe('lib/manager/pip_setup/index', () => {
     it('catches error', async () => {
       const execSnapshots = mockExecAll(exec, new Error());
       expect(
-        await extractPackageFile(
-          'raise Exception()',
-          '/tmp/folders/foobar.py',
-          config
-        )
+        await extractPackageFile({
+          content: 'raise Exception()',
+          packageFile: '/tmp/folders/foobar.py',
+          config,
+        })
       ).toBeNull();
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });

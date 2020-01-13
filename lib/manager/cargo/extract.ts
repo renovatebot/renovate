@@ -1,7 +1,11 @@
 import { parse } from 'toml';
 import { logger } from '../../logger';
 import { isValid } from '../../versioning/cargo';
-import { PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 import { CargoConfig, CargoSection } from './types';
 
 function extractFromSection(
@@ -62,11 +66,11 @@ function extractFromSection(
   return deps;
 }
 
-export function extractPackageFile(
-  content: string,
-  fileName: string
-): PackageFile | null {
-  logger.trace(`cargo.extractPackageFile(${fileName})`);
+export function extractPackageFile({
+  content,
+  packageFile,
+}: ExtractPackageFileConfig): PackageFile | null {
+  logger.trace(`cargo.extractPackageFile(${packageFile})`);
   let parsedContent: CargoConfig;
   try {
     parsedContent = parse(content);

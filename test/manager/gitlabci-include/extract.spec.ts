@@ -10,11 +10,19 @@ describe('lib/manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
-        extractPackageFile('nothing here', '.gitlab-ci.yml', {})
+        extractPackageFile({
+          content: 'nothing here',
+          packageFile: '.gitlab-ci.yml',
+          config: {},
+        })
       ).toBeNull();
     });
     it('extracts multiple include blocks', () => {
-      const res = extractPackageFile(yamlFile, '.gitlab-ci.yml', {});
+      const res = extractPackageFile({
+        content: yamlFile,
+        packageFile: '.gitlab-ci.yml',
+        config: {},
+      });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
@@ -24,8 +32,12 @@ describe('lib/manager/gitlabci-include/extract', () => {
         'http://gitlab.test/api/v4/',
       ];
       endpoints.forEach(endpoint => {
-        const res = extractPackageFile(yamlFile, '.gitlab-ci.yml', {
-          endpoint,
+        const res = extractPackageFile({
+          content: yamlFile,
+          packageFile: '.gitlab-ci.yml',
+          config: {
+            endpoint,
+          },
         });
         expect(res.deps[0].registryUrls[0]).toEqual('http://gitlab.test');
       });

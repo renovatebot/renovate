@@ -19,31 +19,31 @@ const ibazel = fs.readFileSync(
 describe('lib/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency', () => {
-      const res = extractPackageFile(aalib);
+      const res = extractPackageFile({ content: aalib });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips sourceforge dependency', () => {
-      const res = extractPackageFile(aap);
+      const res = extractPackageFile({ content: aap });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips github dependency with wrong format', () => {
-      const res = extractPackageFile(acmetool);
+      const res = extractPackageFile({ content: acmetool });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('extracts "releases" github dependency', () => {
-      const res = extractPackageFile(aide);
+      const res = extractPackageFile({ content: aide });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
     it('extracts "archive" github dependency', () => {
-      const res = extractPackageFile(ibazel);
+      const res = extractPackageFile({ content: ibazel });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
@@ -56,7 +56,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
@@ -70,7 +70,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      expect(extractPackageFile(content)).toBeNull();
+      expect(extractPackageFile({ content })).toBeNull();
     });
     it('returns null for invalid class header', () => {
       const content = `
@@ -81,7 +81,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      expect(extractPackageFile(content)).toBeNull();
+      expect(extractPackageFile({ content })).toBeNull();
     });
     it('skips if there is no url field', () => {
       const content = `
@@ -92,7 +92,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
@@ -106,7 +106,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
@@ -120,7 +120,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
@@ -134,7 +134,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
@@ -148,7 +148,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
@@ -162,7 +162,7 @@ describe('lib/manager/homebrew/extract', () => {
           not_sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('invalid-sha256');
       expect(res).toMatchSnapshot();
@@ -176,7 +176,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b0229'
           end
       `;
-      const res = extractPackageFile(content);
+      const res = extractPackageFile({ content });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('invalid-sha256');
       expect(res).toMatchSnapshot();

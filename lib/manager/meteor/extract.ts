@@ -1,7 +1,13 @@
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   let deps: PackageDependency[] = [];
   const npmDepends = content.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
   if (!npmDepends) {

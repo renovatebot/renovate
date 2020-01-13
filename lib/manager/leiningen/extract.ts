@@ -1,5 +1,9 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
-import { PackageDependency, PackageFile } from '../common';
+import {
+  ExtractPackageFileConfig,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
 export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
 
@@ -122,7 +126,9 @@ function extractLeinRepos(content: string): string[] {
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile {
   const collect = (key: string, ctx: ExtractContext): PackageDependency[] => {
     let result: PackageDependency[] = [];
     let restContent = trimAtKey(content, key);

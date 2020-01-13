@@ -2,7 +2,7 @@ import { safeLoad } from 'js-yaml';
 
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile } from '../common';
+import { ExtractPackageFileConfig, PackageFile } from '../common';
 
 interface DockerComposeConfig {
   version?: string;
@@ -39,10 +39,10 @@ class LineMapper {
   }
 }
 
-export function extractPackageFile(
-  content: string,
-  fileName?: string
-): PackageFile | null {
+export function extractPackageFile({
+  content,
+  packageFile,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {
@@ -50,14 +50,14 @@ export function extractPackageFile(
     // istanbul ignore if
     if (!config) {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Null config when parsing Docker Compose content'
       );
       return null;
     }
   } catch (err) {
     logger.debug({ err }, 'err');
-    logger.info({ fileName }, 'Parsing Docker Compose config YAML');
+    logger.info({ packageFile }, 'Parsing Docker Compose config YAML');
     return null;
   }
   try {
@@ -86,7 +86,7 @@ export function extractPackageFile(
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     logger.warn(
-      { fileName, content, err },
+      { packageFile, content, err },
       'Error extracting Docker Compose file'
     );
     return null;

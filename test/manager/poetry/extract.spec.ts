@@ -43,56 +43,60 @@ const pyproject8toml = readFileSync(
 
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
-    let filename: string;
+    let packageFile: string;
     beforeEach(() => {
-      filename = '';
+      packageFile = '';
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', filename)).toBeNull();
+      expect(
+        extractPackageFile({ content: 'nothing here', packageFile })
+      ).toBeNull();
     });
     it('returns null for parsed file without poetry section', () => {
-      expect(extractPackageFile(pyproject5toml, filename)).toBeNull();
+      expect(
+        extractPackageFile({ content: pyproject5toml, packageFile })
+      ).toBeNull();
     });
     it('extracts multiple dependencies', () => {
-      const res = extractPackageFile(pyproject1toml, filename);
+      const res = extractPackageFile({ content: pyproject1toml, packageFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(9);
     });
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', () => {
-      const res = extractPackageFile(pyproject2toml, filename);
+      const res = extractPackageFile({ content: pyproject2toml, packageFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(7);
     });
     it('handles case with no dependencies', () => {
-      const res = extractPackageFile(pyproject3toml, filename);
+      const res = extractPackageFile({ content: pyproject3toml, packageFile });
       expect(res).toBeNull();
     });
     it('handles multiple constraint dependencies', () => {
-      const res = extractPackageFile(pyproject4toml, filename);
+      const res = extractPackageFile({ content: pyproject4toml, packageFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('extracts registries', () => {
-      const res = extractPackageFile(pyproject6toml, filename);
+      const res = extractPackageFile({ content: pyproject6toml, packageFile });
       expect(res.registryUrls).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(3);
     });
     it('can parse empty registries', () => {
-      const res = extractPackageFile(pyproject7toml, filename);
+      const res = extractPackageFile({ content: pyproject7toml, packageFile });
       expect(res.registryUrls).toBeNull();
     });
     it('can parse missing registries', () => {
-      const res = extractPackageFile(pyproject1toml, filename);
+      const res = extractPackageFile({ content: pyproject1toml, packageFile });
       expect(res.registryUrls).toBeNull();
     });
     it('dedupes registries', () => {
-      const res = extractPackageFile(pyproject8toml, filename);
+      const res = extractPackageFile({ content: pyproject8toml, packageFile });
       expect(res.registryUrls).toMatchSnapshot();
     });
     it('skips git dependencies', () => {
       const content =
         '[tool.poetry.dependencies]\r\nflask = {git = "https://github.com/pallets/flask.git"}\r\nwerkzeug = ">=0.14"';
-      const res = extractPackageFile(content, filename).deps;
+      const res = extractPackageFile({ content, packageFile }).deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('');
       expect(res[0].skipReason).toBe('git-dependency');
@@ -101,7 +105,7 @@ describe('lib/manager/poetry/extract', () => {
     it('skips git dependencies', () => {
       const content =
         '[tool.poetry.dependencies]\r\nflask = {git = "https://github.com/pallets/flask.git", version="1.2.3"}\r\nwerkzeug = ">=0.14"';
-      const res = extractPackageFile(content, filename).deps;
+      const res = extractPackageFile({ content, packageFile }).deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
@@ -110,7 +114,7 @@ describe('lib/manager/poetry/extract', () => {
     it('skips path dependencies', () => {
       const content =
         '[tool.poetry.dependencies]\r\nflask = {path = "/some/path/"}\r\nwerkzeug = ">=0.14"';
-      const res = extractPackageFile(content, filename).deps;
+      const res = extractPackageFile({ content, packageFile }).deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('');
       expect(res[0].skipReason).toBe('path-dependency');
@@ -119,7 +123,7 @@ describe('lib/manager/poetry/extract', () => {
     it('skips path dependencies', () => {
       const content =
         '[tool.poetry.dependencies]\r\nflask = {path = "/some/path/", version = "1.2.3"}\r\nwerkzeug = ">=0.14"';
-      const res = extractPackageFile(content, filename).deps;
+      const res = extractPackageFile({ content, packageFile }).deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('path-dependency');

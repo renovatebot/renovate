@@ -2,7 +2,7 @@ import Git from 'simple-git/promise';
 import upath from 'upath';
 import URL from 'url';
 
-import { ManagerConfig, PackageFile } from '../common';
+import { ExtractPackageFileConfig, PackageFile } from '../common';
 
 async function getUrl(
   git: Git.SimpleGit,
@@ -42,13 +42,12 @@ async function getBranch(
   ).trim();
 }
 
-export default async function extractPackageFile(
-  content: string,
-  fileName: string,
-  config: ManagerConfig
-): Promise<PackageFile | null> {
+export default async function extractPackageFile({
+  packageFile,
+  config,
+}: ExtractPackageFileConfig): Promise<PackageFile | null> {
   const git = Git(config.localDir);
-  const gitModulesPath = upath.join(config.localDir, fileName);
+  const gitModulesPath = upath.join(config.localDir, packageFile);
 
   const depNames = (
     (await git.raw([

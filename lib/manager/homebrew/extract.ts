@@ -1,7 +1,11 @@
 import { isValid } from '../../versioning/semver';
 import { skip, isSpace, removeComments } from './util';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import {
+  PackageFile,
+  PackageDependency,
+  ExtractPackageFileConfig,
+} from '../common';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
@@ -153,7 +157,9 @@ function extractClassName(content: string): string | null {
 }
 
 // TODO: Maybe check if quotes/double-quotes are balanced
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile({
+  content,
+}: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('extractPackageFile()');
   /*
     1. match "class className < Formula"

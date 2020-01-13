@@ -13,16 +13,16 @@ const propertiesFile2 = readFileSync(
 describe('lib/manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
     });
 
     it('extracts bin version line', () => {
-      const res = extractPackageFile(propertiesFile1);
+      const res = extractPackageFile({ content: propertiesFile1 });
       expect(res.deps).toMatchSnapshot();
     });
 
     it('extracts all version line', () => {
-      const res = extractPackageFile(propertiesFile2);
+      const res = extractPackageFile({ content: propertiesFile2 });
       expect(res.deps).toMatchSnapshot();
     });
   });
