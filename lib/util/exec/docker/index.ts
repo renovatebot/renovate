@@ -14,10 +14,14 @@ export interface DockerOptions {
   postCommands?: Opt<Opt<string>[]>;
 }
 
-let globalDockerUser: string | null = null;
+let dockerUser: string | null = null; // Set globally, not configurable per-command
+let localDir: string | null = null; // Always used as a mapped volume, also is default working directory if none provided per-command
+let cacheDir: string | null = null; // Always used as a mapped volume
 
-export function setDockerUser(_dockerUser: string | null): void {
-  globalDockerUser = _dockerUser;
+export function setDockerConfig(config): void {
+  dockerUser = config.dockerUser;
+  localDir = config.localDir;
+  cacheDir = config.cacheDir;
 }
 
 function prepareCommands(commands: Opt<Opt<string>[]>): string[] {
@@ -51,12 +55,9 @@ function uniq<T = unknown>(
   });
 }
 
-function prepareVolumes(
-  cwd: Opt<string>,
-  volumes: VolumeOption[] = []
-): string[] {
-  const volumesWithCwd: VolumeOption[] = cwd ? [...volumes, cwd] : volumes;
-  const expanded: Opt<VolumesPair>[] = volumesWithCwd.map(expandVolumeOption);
+function prepareVolumes(volumes: VolumeOption[] = []): string[] {
+  const allVolumes: VolumeOption[] = [cacheDir, localDir, ...volumes];
+  const expanded: Opt<VolumesPair>[] = allVolumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter(vol => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => {
@@ -65,12 +66,20 @@ function prepareVolumes(
 }
 
 export function dockerCmd(cmd: string, options: DockerOptions): string {
-  const { image, tag, dockerUser = globalDockerUser, envVars, cwd } = options;
+  const {
+    image,
+    tag,
+    envVars,
+    cwd,
+    volumes,
+    preCommands,
+    postCommands,
+  } = options;
 
   const result = ['docker run --rm'];
   if (dockerUser) result.push(`--user=${dockerUser}`);
 
-  result.push(...prepareVolumes(cwd, options.volumes));
+  result.push(...prepareVolumes(volumes));
 
   if (envVars) {
     result.push(
@@ -85,9 +94,11 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
   result.push(taggedImage);
 
-  const preCommands = prepareCommands(options.preCommands);
-  const postCommands = prepareCommands(options.postCommands);
-  const commands = [...preCommands, cmd, ...postCommands];
+  const commands = [
+    ...prepareCommands(preCommands),
+    cmd,
+    ...prepareCommands(postCommands),
+  ];
   const command =
     commands.length === 1
       ? cmd

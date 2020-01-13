@@ -3,7 +3,7 @@ import {
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
 import { exec, ExecOptions } from '../../lib/util/exec';
-import { setDockerUser, VolumeOption } from '../../lib/util/exec/docker';
+import { setDockerConfig, VolumeOption } from '../../lib/util/exec/docker';
 import { envMock } from '../execUtil';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
@@ -24,12 +24,21 @@ describe(`Child process execution wrapper`, () => {
   let processEnvOrig;
   let trustLevelOrig;
 
+  const cacheDir = '/tmp/renovate/cache/';
+  const cwd = '/tmp/renovate/github/some/repo/';
+
+  const defaultCwd = `-w "${cwd}"`;
+  const defaultVolumes = `-v "${cacheDir}":"${cacheDir}" -v "${cwd}":"${cwd}"`;
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
     trustLevelOrig = global.trustLevel;
-    setDockerUser(undefined);
+    setDockerConfig({
+      cacheDir,
+      localDir: cwd,
+    });
   });
 
   afterEach(() => {
@@ -40,7 +49,6 @@ describe(`Child process execution wrapper`, () => {
   const image = 'example/image';
   const tag = '1.2.3';
   const cmd = 'echo hello';
-  const cwd = '/current/working/directory';
   const volume_1 = '/path/to/volume-1';
   const volume_2_from = '/path/to/volume-2';
   const volume_2_to = '/path/to/volume-3';
@@ -94,9 +102,9 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { docker },
-        outCmd: `docker run --rm ${image} ${cmd}`,
-        outOpts: { encoding, env: envMock.basic },
+        inOpts: { docker, cwd },
+        outCmd: `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} ${cmd}`,
+        outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
 
@@ -112,13 +120,17 @@ describe(`Child process execution wrapper`, () => {
     ],
 
     [
-      'Extra env vars with (Docker)',
+      'Extra env vars (Docker)',
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { docker, extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
-        outCmd: `docker run --rm -e SELECTED_ENV_VAR ${image} ${cmd}`,
-        outOpts: { encoding, env: envMock.filtered },
+        inOpts: {
+          docker,
+          extraEnv: { SELECTED_ENV_VAR: 'Default value' },
+          cwd,
+        },
+        outCmd: `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} ${cmd}`,
+        outOpts: { cwd, encoding, env: envMock.filtered },
       },
     ],
 
@@ -144,9 +156,10 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv: envMock.basic,
         inCmd: cmd,
-        inOpts: { extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
+        inOpts: { cwd, extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
         outCmd: cmd,
         outOpts: {
+          cwd,
           encoding,
           env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
         },
@@ -158,9 +171,14 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv: envMock.basic,
         inCmd: cmd,
-        inOpts: { docker, extraEnv: { SELECTED_ENV_VAR: 'Default value' } },
-        outCmd: `docker run --rm -e SELECTED_ENV_VAR ${image} ${cmd}`,
+        inOpts: {
+          docker,
+          extraEnv: { SELECTED_ENV_VAR: 'Default value' },
+          cwd,
+        },
+        outCmd: `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} ${cmd}`,
         outOpts: {
+          cwd,
           encoding,
           env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
         },
@@ -178,9 +196,10 @@ describe(`Child process execution wrapper`, () => {
             preCommands: ['echo "begin"', null],
             postCommands: [undefined, "echo 'end'"],
           },
+          cwd,
         },
-        outCmd: `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd} && echo 'end'"`,
-        outOpts: { encoding, env: envMock.basic },
+        outCmd: `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "echo \\"begin\\" && ${cmd} && echo 'end'"`,
+        outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
 
@@ -195,9 +214,10 @@ describe(`Child process execution wrapper`, () => {
             preCommands: null,
             postCommands: ["echo 'end'"],
           },
+          cwd,
         },
-        outCmd: `docker run --rm ${image} bash -l -c "${cmd} && echo 'end'"`,
-        outOpts: { encoding, env: envMock.basic },
+        outCmd: `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "${cmd} && echo 'end'"`,
+        outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
 
@@ -212,9 +232,10 @@ describe(`Child process execution wrapper`, () => {
             preCommands: ['echo "begin"'],
             postCommands: undefined,
           },
+          cwd,
         },
-        outCmd: `docker run --rm ${image} bash -l -c "echo \\"begin\\" && ${cmd}"`,
-        outOpts: { encoding, env: envMock.basic },
+        outCmd: `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "echo \\"begin\\" && ${cmd}"`,
+        outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
 
@@ -223,19 +244,8 @@ describe(`Child process execution wrapper`, () => {
       {
         processEnv,
         inCmd: cmd,
-        inOpts: { docker: { image, tag } },
-        outCmd: `docker run --rm ${image}:${tag} ${cmd}`,
-        outOpts: { encoding, env: envMock.basic },
-      },
-    ],
-
-    [
-      'Docker explicit CWD',
-      {
-        processEnv,
-        inCmd: cmd,
-        inOpts: { docker: { image }, cwd },
-        outCmd: `docker run --rm -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+        inOpts: { docker: { image, tag }, cwd },
+        outCmd: `docker run --rm ${defaultVolumes} ${defaultCwd} ${image}:${tag} ${cmd}`,
         outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
@@ -246,7 +256,7 @@ describe(`Child process execution wrapper`, () => {
         processEnv,
         inCmd: cmd,
         inOpts: { cwd, docker: { image, volumes } },
-        outCmd: `docker run --rm -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -v "${cwd}":"${cwd}" -w "${cwd}" ${image} ${cmd}`,
+        outCmd: `docker run --rm ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${image} ${cmd}`,
         outOpts: { cwd, encoding, env: envMock.basic },
       },
     ],
@@ -254,23 +264,11 @@ describe(`Child process execution wrapper`, () => {
     [
       'Docker user',
       {
-        dockerUser: 'ubuntu',
+        dockerUser: 'foobar',
         processEnv,
         inCmd: cmd,
         inOpts: { docker: { image } },
-        outCmd: `docker run --rm --user=ubuntu ${image} ${cmd}`,
-        outOpts: { encoding, env: envMock.basic },
-      },
-    ],
-
-    [
-      'Docker custom user',
-      {
-        dockerUser: 'foo',
-        processEnv,
-        inCmd: cmd,
-        inOpts: { docker: { image, dockerUser: 'bar' } },
-        outCmd: `docker run --rm --user=bar ${image} ${cmd}`,
+        outCmd: `docker run --rm --user=foobar ${defaultVolumes} ${image} ${cmd}`,
         outOpts: { encoding, env: envMock.basic },
       },
     ],
@@ -289,7 +287,7 @@ describe(`Child process execution wrapper`, () => {
 
     process.env = procEnv;
     if (trustLevel) global.trustLevel = trustLevel;
-    if (dockerUser) setDockerUser(dockerUser);
+    if (dockerUser) setDockerConfig({ cacheDir, localDir: cwd, dockerUser });
 
     let actualCmd: string | null = null;
     let actualOpts: ChildProcessExecOptions | null = null;

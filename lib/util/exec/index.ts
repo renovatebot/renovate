@@ -3,8 +3,15 @@ import {
   exec as cpExec,
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
-import { dockerCmd, DockerOptions } from './docker';
+import { dockerCmd, DockerOptions, setDockerConfig } from './docker';
 import { getChildProcessEnv } from './env';
+
+let localDir;
+
+export function setExecConfig(config): void {
+  localDir = config.localDir;
+  setDockerConfig(config);
+}
 
 const pExec: (
   cmd: string,
@@ -56,7 +63,8 @@ function dockerEnvVars(
 }
 
 export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-  const { env, extraEnv, docker, cwd } = opts;
+  const { env, extraEnv, docker } = opts;
+  const cwd = opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
@@ -67,6 +75,7 @@ export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     encoding: 'utf-8',
     ...execOptions,
     env: childEnv,
+    cwd,
   };
 
   let pExecCommand = cmd;
