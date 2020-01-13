@@ -20,6 +20,9 @@ const isScalaVersion = (str: string): boolean =>
 const getScalaVersion = (str: string): string =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
 
+/*
+  https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
+ */
 const normalizeScalaVersion = (str: string): string =>
   /^\d+\.\d+\.\d+$/.test(str)
     ? str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2')
