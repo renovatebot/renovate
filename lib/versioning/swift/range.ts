@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { RangeStrategy } from '../common';
+import { NewValueConfig } from '../common';
 
 const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 const fromRange = /^\s*"([^"]+)"\s*\.\.\.\s*$/;
@@ -34,12 +34,7 @@ function toSemverRange(range: string): string {
   return null;
 }
 
-function getNewValue(
-  currentValue: string,
-  _rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({ currentValue, toVersion }: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
     return toVersion;
   }

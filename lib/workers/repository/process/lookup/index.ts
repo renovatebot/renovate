@@ -238,12 +238,12 @@ export async function lookupUpdates(
       res.updates.push({
         updateType: 'pin',
         isPin: true,
-        newValue: version.getNewValue(
+        newValue: version.getNewValue({
           currentValue,
           rangeStrategy,
           fromVersion,
-          fromVersion
-        ),
+          toVersion: fromVersion,
+        }),
         newMajor: version.getMajor(fromVersion),
       });
     }
@@ -270,12 +270,12 @@ export async function lookupUpdates(
     for (const toVersion of filteredVersions) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
-        update.newValue = version.getNewValue(
+        update.newValue = version.getNewValue({
           currentValue,
           rangeStrategy,
           fromVersion,
-          toVersion
-        );
+          toVersion,
+        });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
           { err, currentValue, rangeStrategy, fromVersion, toVersion },

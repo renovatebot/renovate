@@ -1,5 +1,5 @@
 import { api as npm } from '../npm';
-import { VersioningApi, RangeStrategy } from '../common';
+import { VersioningApi, NewValueConfig } from '../common';
 
 function hashicorp2npm(input: string): string {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2
@@ -21,12 +21,12 @@ const maxSatisfyingVersion = (versions: string[], range: string): string =>
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   // handle specia. ~> 1.2 case
   if (currentValue.match(/(~>\s*)\d+\.\d+$/)) {
     return currentValue.replace(
@@ -34,7 +34,12 @@ function getNewValue(
       `$1${npm.getMajor(toVersion)}.0`
     );
   }
-  return npm.getNewValue(currentValue, rangeStrategy, fromVersion, toVersion);
+  return npm.getNewValue({
+    currentValue,
+    rangeStrategy,
+    fromVersion,
+    toVersion,
+  });
 }
 
 export const api: VersioningApi = {

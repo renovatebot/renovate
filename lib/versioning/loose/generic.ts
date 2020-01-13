@@ -1,4 +1,4 @@
-import { VersioningApi, RangeStrategy } from '../common';
+import { VersioningApi, NewValueConfig } from '../common';
 
 export interface GenericVersion {
   release: number[];
@@ -81,10 +81,11 @@ export const comparer = (
     return versions.find(v => equals(v, range)) || null;
   }
   function getNewValue(
-    _currentValue: string,
-    _rangeStrategy: RangeStrategy,
-    _fromVersion: string,
-    toVersion: string
+    { toVersion }: NewValueConfig = {
+      currentValue: null,
+      rangeStrategy: null,
+      toVersion: arguments[0],
+    }
   ): string {
     return toVersion;
   }
@@ -191,10 +192,11 @@ export abstract class GenericVersioningApi<
 
   // eslint-disable-next-line class-methods-use-this
   getNewValue(
-    _currentValue: string,
-    _rangeStrategy: RangeStrategy,
-    _fromVersion: string,
-    toVersion: string
+    { toVersion }: NewValueConfig = {
+      currentValue: null,
+      rangeStrategy: null,
+      toVersion: arguments[0],
+    }
   ): string {
     return toVersion;
   }

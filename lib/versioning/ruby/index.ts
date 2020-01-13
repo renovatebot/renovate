@@ -6,7 +6,7 @@ import {
   maxSatisfying,
   minSatisfying,
 } from '@snyk/ruby-semver';
-import { VersioningApi, RangeStrategy } from '../common';
+import { VersioningApi, NewValueConfig } from '../common';
 import { logger } from '../../logger';
 import { parse as parseVersion } from './version';
 import { parse as parseRange, ltr } from './range';
@@ -66,12 +66,11 @@ const maxSatisfyingVersion = (versions: string[], range: string): string =>
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(versions.map(vtrim), vtrim(range));
 
-const getNewValue = (
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string => {
+const getNewValue = ({
+  currentValue,
+  rangeStrategy,
+  toVersion,
+}: NewValueConfig): string => {
   let result = null;
   switch (rangeStrategy) {
     case 'pin':

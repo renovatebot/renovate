@@ -118,7 +118,14 @@ describe('docker.', () => {
   });
   describe('getNewValue(', () => {
     it('returns toVersion', () => {
-      expect(docker.getNewValue(null, null, null, '1.2.3')).toBe('1.2.3');
+      expect(
+        docker.getNewValue({
+          currentValue: null,
+          rangeStrategy: null,
+          fromVersion: null,
+          toVersion: '1.2.3',
+        })
+      ).toBe('1.2.3');
     });
   });
 });
