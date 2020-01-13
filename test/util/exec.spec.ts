@@ -28,7 +28,7 @@ describe(`Child process execution wrapper`, () => {
   const cwd = '/tmp/renovate/github/some/repo/';
 
   const defaultCwd = `-w "${cwd}"`;
-  const defaultVolumes = `-v "${cacheDir}":"${cacheDir}" -v "${cwd}":"${cwd}"`;
+  const defaultVolumes = `-v "${cwd}":"${cwd}" -v "${cacheDir}":"${cacheDir}"`;
 
   beforeEach(() => {
     jest.resetAllMocks();
