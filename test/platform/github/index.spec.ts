@@ -1415,7 +1415,9 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null);
+      const res = await github.findPr({
+        branchName: 'branch-a',
+      });
       expect(res).toBeDefined();
     });
     it('returns true if not open', async () => {
@@ -1429,7 +1431,10 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null, '!open');
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: '!open',
+      });
       expect(res).toBeDefined();
     });
     it('caches pr list', async () => {
@@ -1443,13 +1448,20 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      let res = await github.findPr('branch-a', null);
+      let res = await github.findPr({ branchName: 'branch-a' });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr');
+      res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr', 'open');
+      res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+      });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-b');
+      res = await github.findPr({ branchName: 'branch-b' });
       expect(res).not.toBeDefined();
     });
   });
