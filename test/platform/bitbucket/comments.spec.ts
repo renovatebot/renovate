@@ -36,9 +36,14 @@ describe('platform/comments', () => {
   describe('ensureComment()', () => {
     it('does not throw', async () => {
       expect.assertions(2);
-      expect(await comments.ensureComment(config, 3, 'topic', 'content')).toBe(
-        false
-      );
+      expect(
+        await comments.ensureComment({
+          config,
+          number: 3,
+          topic: 'topic',
+          content: 'content',
+        })
+      ).toBe(false);
       expect(api.get.mock.calls).toMatchSnapshot();
     });
 
@@ -46,18 +51,28 @@ describe('platform/comments', () => {
       expect.assertions(6);
       api.get.mockClear();
 
-      expect(await comments.ensureComment(config, 5, 'topic', 'content')).toBe(
-        true
-      );
+      expect(
+        await comments.ensureComment({
+          config,
+          number: 5,
+          topic: 'topic',
+          content: 'content',
+        })
+      ).toBe(true);
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.post).toHaveBeenCalledTimes(1);
 
       api.get.mockClear();
       api.post.mockClear();
 
-      expect(await comments.ensureComment(config, 5, null, 'content')).toBe(
-        true
-      );
+      expect(
+        await comments.ensureComment({
+          config,
+          number: 5,
+          topic: null,
+          content: 'content',
+        })
+      ).toBe(true);
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.post).toHaveBeenCalledTimes(1);
     });
@@ -67,7 +82,12 @@ describe('platform/comments', () => {
       api.get.mockClear();
 
       expect(
-        await comments.ensureComment(config, 5, 'some-subject', 'some\ncontent')
+        await comments.ensureComment({
+          config,
+          number: 5,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        })
       ).toBe(true);
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.post).toHaveBeenCalledTimes(0);
@@ -77,7 +97,12 @@ describe('platform/comments', () => {
       api.put.mockClear();
 
       expect(
-        await comments.ensureComment(config, 5, null, 'some\ncontent')
+        await comments.ensureComment({
+          config,
+          number: 5,
+          topic: null,
+          content: 'some\ncontent',
+        })
       ).toBe(true);
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.post).toHaveBeenCalledTimes(1);
@@ -89,7 +114,12 @@ describe('platform/comments', () => {
       api.get.mockClear();
 
       expect(
-        await comments.ensureComment(config, 5, 'some-subject', 'blablabla')
+        await comments.ensureComment({
+          config,
+          number: 5,
+          topic: 'some-subject',
+          content: 'blablabla',
+        })
       ).toBe(true);
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.put).toHaveBeenCalledTimes(0);
@@ -97,9 +127,14 @@ describe('platform/comments', () => {
       api.get.mockClear();
       api.put.mockClear();
 
-      expect(await comments.ensureComment(config, 5, null, '!merge')).toBe(
-        true
-      );
+      expect(
+        await comments.ensureComment({
+          config,
+          number: 5,
+          topic: null,
+          content: '!merge',
+        })
+      ).toBe(true);
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.put).toHaveBeenCalledTimes(0);
     });

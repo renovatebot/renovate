@@ -16,6 +16,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -1500,20 +1501,20 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  const sanitizedContent = sanitize(content);
   try {
-    const comments = await getComments(issueNo);
+    const comments = await getComments(number);
     let body: string;
     let commentId: number | null = null;
     let commentNeedsUpdating = false;
     if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${issueNo}`);
-      body = `### ${topic}\n\n${content}`;
+      logger.debug(`Ensuring comment "${topic}" in #${number}`);
+      body = `### ${topic}\n\n${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.body.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -1521,8 +1522,8 @@ export async function ensureComment(
         }
       });
     } else {
-      logger.debug(`Ensuring content-only comment in #${issueNo}`);
-      body = `${content}`;
+      logger.debug(`Ensuring content-only comment in #${number}`);
+      body = `${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.body === body) {
           commentId = comment.id;
@@ -1531,15 +1532,15 @@ export async function ensureComment(
       });
     }
     if (!commentId) {
-      await addComment(issueNo, body);
+      await addComment(number, body);
       logger.info(
-        { repository: config.repository, issueNo, topic },
+        { repository: config.repository, issueNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
       await editComment(commentId, body);
       logger.info(
-        { repository: config.repository, issueNo },
+        { repository: config.repository, issueNo: number },
         'Comment updated'
       );
     } else {
