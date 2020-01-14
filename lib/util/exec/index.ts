@@ -82,7 +82,9 @@ export function exec(
   };
 
   const singleCommand = typeof cmd === 'string' ? cmd : cmd.join(' && ');
-  let pExecCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
+  let pExecCommand = singleCommand.startsWith('docker run')
+    ? singleCommand
+    : `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
 
   if (docker) {
     const dockerOptions = {

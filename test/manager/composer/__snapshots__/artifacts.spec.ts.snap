@@ -85,7 +85,7 @@ Array [
 exports[`.updateArtifacts() supports docker mode 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/composer\\":\\"/tmp/renovate/cache/others/composer\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/composer\\":\\"/tmp/renovate/cache/others/composer\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

@@ -517,7 +517,7 @@ Array [
 exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle gradle --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -537,7 +537,7 @@ Array [
 exports[`manager/gradle extractPackageFile should use docker if required 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle gradle --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
