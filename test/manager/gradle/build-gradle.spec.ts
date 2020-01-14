@@ -333,4 +333,14 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
     expect(updatedGradleFile).toEqual('val mysqlVersion by extra { "7.0.0" }');
   });
+  
+   it('returns no file updated if qualifier with ommitted version is defined - falsely replaces qualifier with new version', () => {
+    const gradleFile = "runtime (  'mysql:mysql-connector-java::mockServer'  )";
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(gradleFile);
+  });
 });
