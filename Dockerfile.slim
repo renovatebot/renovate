@@ -15,8 +15,6 @@ USER ubuntu
 #============
 FROM base as tsbuild
 
-USER root
-
 # Python 3 and make are required to build node-re2
 RUN apt-get update && apt-get install -y python3-minimal build-essential
 
@@ -40,9 +38,6 @@ RUN yarn install --production --frozen-lockfile
 #============
 FROM base as final
 
-
-# required for install
-USER root
 
 # The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
 RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
