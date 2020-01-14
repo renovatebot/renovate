@@ -81,9 +81,8 @@ export function exec(
     cwd,
   };
 
-  let pExecCommand = `bash -l -c "${
-    typeof cmd === 'string' ? cmd : cmd.join(' && ').replace(/"/g, '\\"')
-  }"`;
+  const singleCommand = typeof cmd === 'string' ? cmd : cmd.join(' && ');
+  let pExecCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
 
   if (docker) {
     const dockerOptions = {
