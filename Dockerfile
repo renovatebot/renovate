@@ -147,6 +147,9 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
 
 USER ubuntu
 
+# HOME does not get passed after user switch :-(
+ENV HOME=/home/ubuntu
+
 # Cargo
 
 ENV RUST_BACKTRACE=1 \
