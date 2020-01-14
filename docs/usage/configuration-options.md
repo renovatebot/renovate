@@ -21,6 +21,10 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## additionalReviewers
+
+In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it. This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
+
 ## aliases
 
 The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requiremenets` manager only.
@@ -1283,10 +1287,6 @@ Must be valid usernames. If on GitHub and assigning a team to review, use the pr
 ## reviewersSampleSize
 
 Take a random sample of given size from reviewers.
-
-## additionalReviewers
-
-In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it. This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
 
 ## rollbackPrs
 
