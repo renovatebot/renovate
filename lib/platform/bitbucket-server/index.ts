@@ -408,7 +408,6 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    prTitle: undefined,
     state: 'open',
   });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;

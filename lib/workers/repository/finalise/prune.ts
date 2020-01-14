@@ -10,7 +10,6 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        prTitle: null,
         state: 'open',
       });
       const branchPr = await platform.getBranchPr(branchName);

@@ -1004,7 +1004,7 @@ export async function findPr({
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, prTitle: null, state: 'open' });
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 

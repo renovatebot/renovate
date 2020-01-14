@@ -780,7 +780,6 @@ describe('platform/gitlab', () => {
       } as any);
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        prTitle: null,
       });
       expect(res).toBeDefined();
     });
@@ -797,7 +796,6 @@ describe('platform/gitlab', () => {
       } as any);
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        prTitle: null,
         state: '!open',
       });
       expect(res).toBeDefined();

@@ -1417,7 +1417,6 @@ describe('platform/github', () => {
       } as any);
       const res = await github.findPr({
         branchName: 'branch-a',
-        prTitle: null,
       });
       expect(res).toBeDefined();
     });
@@ -1434,7 +1433,6 @@ describe('platform/github', () => {
       } as any);
       const res = await github.findPr({
         branchName: 'branch-a',
-        prTitle: null,
         state: '!open',
       });
       expect(res).toBeDefined();
@@ -1450,7 +1448,7 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      let res = await github.findPr({ branchName: 'branch-a', prTitle: null });
+      let res = await github.findPr({ branchName: 'branch-a' });
       expect(res).toBeDefined();
       res = await github.findPr({
         branchName: 'branch-a',

@@ -317,7 +317,7 @@ export async function findPr({
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, prTitle: null, state: 'open' });
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 
