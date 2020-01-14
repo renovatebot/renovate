@@ -422,25 +422,40 @@ describe('semverRuby', () => {
     });
     it('handles updates to bundler common complex ranges major', () => {
       expect(
-        semverRuby.getNewValue('~> 5.2, >= 5.2.5', 'replace', '5.3.0', '6.0.1')
+        semverRuby.getNewValue({
+          currentValue: '~> 5.2, >= 5.2.5',
+          rangeStrategy: 'replace',
+          fromVersion: '5.3.0',
+          toVersion: '6.0.1',
+        })
       ).toEqual('~> 6.0, >= 6.0.1');
     });
     it('handles updates to bundler common complex ranges minor', () => {
       expect(
-        semverRuby.getNewValue(
-          '~> 5.2.0, >= 5.2.5',
-          'replace',
-          '5.2.5',
-          '5.3.1'
-        )
+        semverRuby.getNewValue({
+          currentValue: '~> 5.2.0, >= 5.2.5',
+          rangeStrategy: 'replace',
+          fromVersion: '5.2.5',
+          toVersion: '5.3.1',
+        })
       ).toEqual('~> 5.3.0, >= 5.3.1');
     });
     it('handles change in precision', () => {
       expect(
-        semverRuby.getNewValue('4.2.0', 'replace', '4.2.0', '4.2.5.1')
+        semverRuby.getNewValue({
+          currentValue: '4.2.0',
+          rangeStrategy: 'replace',
+          fromVersion: '4.2.0',
+          toVersion: '4.2.5.1',
+        })
       ).toEqual('4.2.5.1');
       expect(
-        semverRuby.getNewValue('4.2.5.1', 'replace', '4.2.5.1', '4.3.0')
+        semverRuby.getNewValue({
+          currentValue: '4.2.5.1',
+          rangeStrategy: 'replace',
+          fromVersion: '4.2.5.1',
+          toVersion: '4.3.0',
+        })
       ).toEqual('4.3.0');
     });
 
