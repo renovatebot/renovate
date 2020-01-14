@@ -45,7 +45,10 @@ export async function getUpdatedPackageFiles(
       }
       let newContent = existingContent;
       const updateDependency = get(manager, 'updateDependency');
-      newContent = await updateDependency(existingContent, upgrade);
+      newContent = await updateDependency({
+        fileContent: existingContent,
+        updateOptions: upgrade,
+      });
       if (!newContent) {
         if (config.parentBranch) {
           logger.info('Rebasing branch after error updating content');

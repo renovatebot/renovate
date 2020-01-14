@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { inc, ReleaseType } from 'semver';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 // Return true if the match string is found at index in content
 function matchAt(content: string, index: number, match: string): boolean {
@@ -76,29 +76,29 @@ export function bumpPackageVersion(
   }
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
-  const { depType, depName } = upgrade;
-  let { newValue } = upgrade;
-  if (upgrade.currentRawValue) {
-    if (upgrade.currentDigest) {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
+  const { depType, depName } = updateOptions;
+  let { newValue } = updateOptions;
+  if (updateOptions.currentRawValue) {
+    if (updateOptions.currentDigest) {
       logger.info('Updating package.json git digest');
-      newValue = upgrade.currentRawValue.replace(
-        upgrade.currentDigest,
-        upgrade.newDigest.substring(0, upgrade.currentDigest.length)
+      newValue = updateOptions.currentRawValue.replace(
+        updateOptions.currentDigest,
+        updateOptions.newDigest.substring(0, updateOptions.currentDigest.length)
       );
     } else {
       logger.info('Updating package.json git version tag');
-      newValue = upgrade.currentRawValue.replace(
-        upgrade.currentValue,
-        upgrade.newValue
+      newValue = updateOptions.currentRawValue.replace(
+        updateOptions.currentValue,
+        updateOptions.newValue
       );
     }
   }
-  if (upgrade.npmPackageAlias) {
-    newValue = `npm:${upgrade.lookupName}@${newValue}`;
+  if (updateOptions.npmPackageAlias) {
+    newValue = `npm:${updateOptions.lookupName}@${newValue}`;
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
@@ -109,8 +109,8 @@ export function updateDependency(
       logger.trace('Version is already updated');
       return bumpPackageVersion(
         fileContent,
-        upgrade.packageJsonVersion,
-        upgrade.bumpVersion
+        updateOptions.packageJsonVersion,
+        updateOptions.bumpVersion
       );
     }
     // Update the file = this is what we want
@@ -200,8 +200,8 @@ export function updateDependency(
     }
     return bumpPackageVersion(
       newFileContent,
-      upgrade.packageJsonVersion,
-      upgrade.bumpVersion
+      updateOptions.packageJsonVersion,
+      updateOptions.bumpVersion
     );
   } catch (err) {
     logger.info({ err }, 'updateDependency error');

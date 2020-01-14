@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig, Upgrade } from '../common';
 
 export function getNewFrom(upgrade: Upgrade): string {
   const { depName, newValue, newDigest } = upgrade;
@@ -13,14 +13,14 @@ export function getNewFrom(upgrade: Upgrade): string {
   return newFrom;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
-    const { lineNumber, fromSuffix } = upgrade.managerData;
-    let { fromPrefix } = upgrade.managerData;
-    const newFrom = getNewFrom(upgrade);
+    const { lineNumber, fromSuffix } = updateOptions.managerData;
+    let { fromPrefix } = updateOptions.managerData;
+    const newFrom = getNewFrom(updateOptions);
     logger.debug(`docker.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[lineNumber];

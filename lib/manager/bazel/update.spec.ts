@@ -37,7 +37,7 @@ describe('manager/bazel/update', () => {
       jest.resetAllMocks();
     });
     it('updates tag', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'build_bazel_rules_nodejs',
         depType: 'git_repository',
         managerData: {
@@ -46,12 +46,15 @@ describe('manager/bazel/update', () => {
         currentValue: '0.1.8',
         newValue: '0.2.0',
       };
-      const res = await updateDependency(content, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).not.toEqual(content);
     });
 
     it('updates container_pull deptype and prserves comment', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'hasura',
         depType: 'container_pull',
         managerData: {
@@ -71,14 +74,17 @@ describe('manager/bazel/update', () => {
           'sha256:2c29ba015faef92a3f55b37632fc373a7fbc2c9fddd31e317bf07113391c640b',
         newValue: 'v1.0.0-alpha42.cli-migrations',
       };
-      const res = await updateDependency(contentContainerPull, upgrade);
+      const res = await updateDependency({
+        fileContent: contentContainerPull,
+        updateOptions,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(contentContainerPull);
       expect(res.includes('# v1.0.0-alpha31.cli-migrations 11/28')).toBe(true);
     });
 
     it('updates commit to tag', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'com_github_google_uuid',
         depType: 'go_repository',
         managerData: {
@@ -95,7 +101,10 @@ describe('manager/bazel/update', () => {
         newValue: 'v1.0.3',
         updateType: 'major',
       };
-      const res = await updateDependency(content, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
       expect(
@@ -103,7 +112,7 @@ describe('manager/bazel/update', () => {
       ).toBe(true);
     });
     it('updates commit-based http archive', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'distroless',
         depType: 'http_archive',
         repo: 'GoogleContainerTools/distroless',
@@ -113,11 +122,14 @@ describe('manager/bazel/update', () => {
         newDigest: '033387ac8853e6cc1cd47df6c346bc53cbc490d8',
       };
       fromStream.mockResolvedValueOnce('abc123');
-      const res = await updateDependency(content, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).not.toEqual(content);
     });
     it('updates http archive with content other then WORKSPACE', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'bazel_skylib',
         depType: 'http_archive',
         repo: 'bazelbuild/bazel-skylib',
@@ -133,12 +145,15 @@ describe('manager/bazel/update', () => {
         newValue: '0.8.0',
       };
       fromStream.mockResolvedValueOnce('abc123');
-      const res = await updateDependency(fileWithBzlExtension, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
     it('updates finds url instead of urls', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'bazel_skylib',
         depType: 'http_archive',
         repo: 'bazelbuild/bazel-skylib',
@@ -154,12 +169,15 @@ describe('manager/bazel/update', () => {
         newValue: '0.8.0',
       };
       fromStream.mockResolvedValueOnce('abc123');
-      const res = await updateDependency(fileWithBzlExtension, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
     it('returns null if no urls resolve hashes', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'bazel_skylib',
         depType: 'http_archive',
         repo: 'bazelbuild/bazel-skyfoo',
@@ -174,11 +192,14 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      const res = await updateDependency(fileWithBzlExtension, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).toBeNull();
     });
     it('errors for http_archive without urls', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'bazel_skylib',
         depType: 'http_archive',
         repo: 'bazelbuild/bazel-skylib',
@@ -196,11 +217,14 @@ http_archive(
         newValue: '0.6.2',
       };
       fromStream.mockResolvedValueOnce('abc123');
-      const res = await updateDependency(content, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).toBeNull();
     });
     it('updates http_archive with urls array', async () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'bazel_skylib',
         depType: 'http_archive',
         repo: 'bazelbuild/bazel-skylib',
@@ -222,7 +246,10 @@ http_archive(
         newValue: '0.6.2',
       };
       fromStream.mockResolvedValueOnce('abc123');
-      const res = await updateDependency(content, upgrade);
+      const res = await updateDependency({
+        fileContent: content,
+        updateOptions,
+      });
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.5.0')).toBe(-1);
       expect(res.indexOf('0.6.2')).not.toBe(-1);

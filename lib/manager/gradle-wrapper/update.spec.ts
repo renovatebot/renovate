@@ -18,7 +18,7 @@ describe('manager/gradle-wrapper/update', () => {
     });
 
     it('replaces existing value', async () => {
-      const upgrade = {
+      const updateOptions = {
         toVersion: '5.0.0',
         version: '5.0.0',
         managerData: {
@@ -36,7 +36,10 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockReturnValueOnce({
         body: checksum,
       });
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        updateOptions,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).not.toEqual(propertiesFile2);
@@ -49,7 +52,7 @@ describe('manager/gradle-wrapper/update', () => {
     });
 
     it('returns same', async () => {
-      const upgrade = {
+      const updateOptions = {
         toVersion: '4.10.3',
         version: '4.10.3',
         managerData: {
@@ -66,12 +69,15 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockReturnValueOnce({
         body: checksum,
       });
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        updateOptions,
+      });
       expect(res).toEqual(propertiesFile2);
     });
 
     it('returns null for 404 on checksum', async () => {
-      const upgrade = {
+      const updateOptions = {
         toVersion: '4.10.3',
         version: '4.10.3',
         managerData: {
@@ -86,12 +92,15 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockRejectedValueOnce({
         statusCode: 404,
       });
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        updateOptions,
+      });
       expect(res).toBeNull();
     });
 
     it('returns null for unknown error on checksum', async () => {
-      const upgrade = {
+      const updateOptions = {
         toVersion: '4.10.3',
         version: '4.10.3',
         managerData: {
@@ -104,12 +113,18 @@ describe('manager/gradle-wrapper/update', () => {
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip.sha256',
       };
       got.mockRejectedValueOnce(new Error());
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        updateOptions,
+      });
       expect(res).toBeNull();
     });
 
     it('returns null if error', async () => {
-      const res = await dcUpdate.updateDependency(null, null);
+      const res = await dcUpdate.updateDependency({
+        fileContent: null,
+        updateOptions: null,
+      });
       expect(res).toBeNull();
     });
   });

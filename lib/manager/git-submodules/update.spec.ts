@@ -14,7 +14,10 @@ describe('manager/git-submodules/update', () => {
           throw new Error();
         },
       });
-      const update = await updateDependency('', {});
+      const update = await updateDependency({
+        fileContent: '',
+        updateOptions: {},
+      });
       expect(update).toBeNull();
     });
     it('returns content on update', async () => {
@@ -24,7 +27,10 @@ describe('manager/git-submodules/update', () => {
           return Promise.resolve();
         },
       });
-      const update = await updateDependency('', { localDir: tmpDir.path });
+      const update = await updateDependency({
+        fileContent: '',
+        updateOptions: { localDir: tmpDir.path },
+      });
       expect(update).toEqual('');
     });
   });

@@ -1,24 +1,27 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
-  logger.debug(`mix.updateDependency: ${upgrade.newValue}`);
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
+  logger.debug(`mix.updateDependency: ${updateOptions.newValue}`);
 
   const lines = fileContent.split('\n');
-  const lineToChange = lines[upgrade.managerData.lineNumber];
+  const lineToChange = lines[updateOptions.managerData.lineNumber];
 
-  if (!lineToChange.includes(upgrade.depName)) return null;
+  if (!lineToChange.includes(updateOptions.depName)) return null;
 
-  const newLine = lineToChange.replace(/"(.*?)"/, `"${upgrade.newValue}"`);
+  const newLine = lineToChange.replace(
+    /"(.*?)"/,
+    `"${updateOptions.newValue}"`
+  );
 
   if (newLine === lineToChange) {
     logger.debug('No changes necessary');
     return fileContent;
   }
 
-  lines[upgrade.managerData.lineNumber] = newLine;
+  lines[updateOptions.managerData.lineNumber] = newLine;
   return lines.join('\n');
 }

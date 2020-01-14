@@ -1,17 +1,17 @@
 import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { logger } from '../../logger';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(`travis.updateDependency(): ${upgrade.newValue}`);
+    logger.debug(`travis.updateDependency(): ${updateOptions.newValue}`);
     const indent = detectIndent(fileContent).indent || '  ';
     let quote: string;
-    if (is.string(upgrade.currentValue[0])) {
+    if (is.string(updateOptions.currentValue[0])) {
       quote =
         fileContent.split(`'`).length > fileContent.split(`"`).length
           ? `'`
@@ -21,7 +21,7 @@ export function updateDependency(
     }
     let newString = `node_js:\n`;
     // TODO: `newValue` is a string!
-    (upgrade.newValue as any).forEach(version => {
+    (updateOptions.newValue as any).forEach(version => {
       newString += `${indent}- ${quote}${version}${quote}\n`;
     });
     return fileContent.replace(/node_js:(\n\s+-[^\n]+)+\n/, newString);

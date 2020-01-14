@@ -14,44 +14,47 @@ const arraySyntaxFile = readFileSync(
 describe('manager/kubernetes/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
-      const upgrade = {
+      const updateOptions = {
         managerData: { lineNumber: 18 },
         depName: 'nginx',
         newValue: '1.15.1',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, updateOptions });
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(updateOptions.newDigest)).toBe(true);
     });
     it('returns same', () => {
-      const upgrade = {
+      const updateOptions = {
         managerData: { lineNumber: 46 },
         depName: 'k8s.gcr.io/kube-proxy-amd64',
         newValue: 'v1.11.1',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, updateOptions });
       expect(res).toEqual(yamlFile);
     });
     it('returns null if mismatch', () => {
-      const upgrade = {
+      const updateOptions = {
         managerData: { lineNumber: 1 },
         newFrom: 'k8s.gcr.io/kube-proxy-amd64:v1.11.1',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, updateOptions });
       expect(res).toBeNull();
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, updateOptions: null });
       expect(res).toBeNull();
     });
     it('replaces image inside YAML array', () => {
-      const upgrade = {
+      const updateOptions = {
         managerData: { lineNumber: 14 },
         depName: 'quay.io/external_storage/local-volume-provisioner',
         newValue: 'v2.2.0',
       };
-      const res = updateDependency(arraySyntaxFile, upgrade);
+      const res = updateDependency({
+        fileContent: arraySyntaxFile,
+        updateOptions,
+      });
       expect(res).not.toEqual(arraySyntaxFile);
       expect(res).toMatchSnapshot();
     });

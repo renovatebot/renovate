@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 /*
  * The updateDependency() function is mandatory, and is used for updating one dependency at a time.
@@ -7,23 +7,20 @@ import { Upgrade } from '../common';
  * or with new content if changes are necessary.
  */
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
     const delimiter =
-      currentFileContent.split('"').length >
-      currentFileContent.split("'").length
-        ? '"'
-        : "'";
-    const lines = currentFileContent.split('\n');
-    const lineToChange = lines[upgrade.managerData.lineNumber];
-    if (!lineToChange.includes(upgrade.depName)) {
+      fileContent.split('"').length > fileContent.split("'").length ? '"' : "'";
+    const lines = fileContent.split('\n');
+    const lineToChange = lines[updateOptions.managerData.lineNumber];
+    if (!lineToChange.includes(updateOptions.depName)) {
       logger.debug('No gem match on line');
       return null;
     }
-    const newValue = upgrade.newValue
+    const newValue = updateOptions.newValue
       .split(',')
       .map(part => `, ${delimiter}${part.trim()}${delimiter}`)
       .join('');
@@ -35,9 +32,9 @@ export function updateDependency(
     );
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
-    lines[upgrade.managerData.lineNumber] = newLine;
+    lines[updateOptions.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new Gemfile value');

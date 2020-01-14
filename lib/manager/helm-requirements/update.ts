@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import is from '@sindresorhus/is';
 
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 // Return true if the match string is found at index in content
 function matchAt(content: string, index: number, match: string): boolean {
@@ -25,12 +25,12 @@ function replaceAt(
   );
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
-  logger.trace({ config: upgrade }, 'updateDependency()');
-  if (!upgrade || !upgrade.depName || !upgrade.newValue) {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
+  logger.trace({ config: updateOptions }, 'updateDependency()');
+  if (!updateOptions || !updateOptions.depName || !updateOptions.newValue) {
     logger.debug('Failed to update dependency, invalid upgrade');
     return fileContent;
   }
@@ -39,7 +39,7 @@ export function updateDependency(
     logger.debug('Failed to update dependency, invalid requirements.yaml file');
     return fileContent;
   }
-  const { depName, newValue } = upgrade;
+  const { depName, newValue } = updateOptions;
   const oldVersion = doc.dependencies.filter(dep => dep.name === depName)[0]
     .version;
   doc.dependencies = doc.dependencies.map(dep =>

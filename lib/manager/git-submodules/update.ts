@@ -1,12 +1,12 @@
 import Git from 'simple-git/promise';
 
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export default async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
-  const git = Git(upgrade.localDir);
+export default async function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): Promise<string | null> {
+  const git = Git(updateOptions.localDir);
 
   try {
     await git.raw([
@@ -14,7 +14,7 @@ export default async function updateDependency(
       'update',
       '--init',
       '--remote',
-      upgrade.depName,
+      updateOptions.depName,
     ]);
     return fileContent;
   } catch (err) {

@@ -1,17 +1,19 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
-    const newFrom = getNewFrom(upgrade);
-    const lines = currentFileContent.split('\n');
-    const lineToChange = lines[upgrade.managerData.lineNumber];
-    if (['image', 'image-name'].includes(upgrade.depType)) {
-      const imageLine = /^(\s*(?:image|name):\s*'?"?)[^\s'"]+('?"?\s*)$/;
+    const newFrom = getNewFrom(updateOptions);
+    const lines = fileContent.split('\n');
+    const lineToChange = lines[updateOptions.managerData.lineNumber];
+    if (['image', 'image-name'].includes(updateOptions.depType)) {
+      const imageLine = new RegExp(
+        /^(\s*(?:image|name):\s*'?"?)[^\s'"]+('?"?\s*)$/
+      );
       if (!imageLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
@@ -19,9 +21,9 @@ export function updateDependency(
       const newLine = lineToChange.replace(imageLine, `$1${newFrom}$2`);
       if (newLine === lineToChange) {
         logger.debug('No changes necessary');
-        return currentFileContent;
+        return fileContent;
       }
-      lines[upgrade.managerData.lineNumber] = newLine;
+      lines[updateOptions.managerData.lineNumber] = newLine;
       return lines.join('\n');
     }
     const serviceLine = /^(\s*-\s*'?"?)[^\s'"]+('?"?\s*)$/;
@@ -32,9 +34,9 @@ export function updateDependency(
     const newLine = lineToChange.replace(serviceLine, `$1${newFrom}$2`);
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
-    lines[upgrade.managerData.lineNumber] = newLine;
+    lines[updateOptions.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new Dockerfile value');

@@ -9,55 +9,61 @@ const fileContent = readFileSync(
 describe('manager/pub/update', () => {
   describe('updateDependency', () => {
     it('returns content untouched if versions are same', () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'foo',
         currentValue: '1',
         newValue: '1',
         depType: 'dependencies',
       };
-      const res = updateDependency(fileContent, upgrade);
+      const res = updateDependency({ fileContent, updateOptions });
       expect(res).toEqual(fileContent);
     });
     it('returns null if content was updated', () => {
       expect(
-        updateDependency(fileContent, {
-          depName: 'test',
-          currentValue: '0.0.1',
-          newValue: '1',
-          depType: 'dev_dependencies',
+        updateDependency({
+          fileContent,
+          updateOptions: {
+            depName: 'test',
+            currentValue: '0.0.1',
+            newValue: '1',
+            depType: 'dev_dependencies',
+          },
         })
       ).toBe(null);
       expect(
-        updateDependency(fileContent, {
-          depName: 'build',
-          currentValue: '0.0.1',
-          newValue: '1',
-          depType: 'dev_dependencies',
+        updateDependency({
+          fileContent,
+          updateOptions: {
+            depName: 'build',
+            currentValue: '0.0.1',
+            newValue: '1',
+            depType: 'dev_dependencies',
+          },
         })
       ).toBe(null);
     });
     it('replaces one-line value', () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'foo',
         currentValue: '1',
         newValue: '1.2.3',
         depType: 'dependencies',
       };
-      const res = updateDependency(fileContent, upgrade);
+      const res = updateDependency({ fileContent, updateOptions });
       expect(res).not.toEqual(fileContent);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(updateOptions.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
     it('replaces nested value', () => {
-      const upgrade = {
+      const updateOptions = {
         depName: 'bar',
         currentValue: '1',
         newValue: '1.2.3',
         depType: 'dependencies',
       };
-      const res = updateDependency(fileContent, upgrade);
+      const res = updateDependency({ fileContent, updateOptions });
       expect(res).not.toEqual(fileContent);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(updateOptions.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
   });

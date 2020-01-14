@@ -1,6 +1,6 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
@@ -21,16 +21,16 @@ async function getChecksum(url: string): Promise<string> {
   }
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): Promise<string | null> {
   try {
-    logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
+    logger.debug(updateOptions, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');
-    let { downloadUrl, checksumUrl } = upgrade;
+    let { downloadUrl, checksumUrl } = updateOptions;
 
-    if (upgrade.managerData.gradleWrapperType === 'all') {
+    if (updateOptions.managerData.gradleWrapperType === 'all') {
       downloadUrl = replaceType(downloadUrl);
       checksumUrl = replaceType(checksumUrl);
     }
@@ -38,11 +38,13 @@ export async function updateDependency(
     downloadUrl = downloadUrl.replace(':', '\\:');
     const checksum = await getChecksum(checksumUrl);
 
-    lines[upgrade.managerData.lineNumber] = `distributionUrl=${downloadUrl}`;
+    lines[
+      updateOptions.managerData.lineNumber
+    ] = `distributionUrl=${downloadUrl}`;
 
-    if (upgrade.managerData.checksumLineNumber) {
+    if (updateOptions.managerData.checksumLineNumber) {
       lines[
-        upgrade.managerData.checksumLineNumber
+        updateOptions.managerData.checksumLineNumber
       ] = `distributionSha256Sum=${checksum}`;
     }
     // TODO: insert if not present

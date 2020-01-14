@@ -1,15 +1,15 @@
 import YAWN from 'yawn-yaml/cjs';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
-    const { depName, newValue } = upgrade;
+    const { depName, newValue } = updateOptions;
 
-    const yawn = new YAWN(currentFileContent);
+    const yawn = new YAWN(fileContent);
 
     const doc = yawn.json;
 

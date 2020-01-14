@@ -21,7 +21,7 @@ describe('manager/homebrew/update', () => {
     jest.resetAllMocks();
   });
   it('updates "releases" github dependency', async () => {
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.16.1',
       depName: 'Aide',
       managerData: {
@@ -35,13 +35,16 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.17.7',
     };
     fromStream.mockResolvedValueOnce('new_hash_value');
-    const newContent = await updateDependency(aide, upgrade);
+    const newContent = await updateDependency({
+      fileContent: aide,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(aide);
     expect(newContent).toMatchSnapshot();
   });
   it('updates "archive" github dependency', async () => {
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -55,13 +58,16 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('new_hash_value');
-    const newContent = await updateDependency(ibazel, upgrade);
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
   });
   it('returns unchanged content if fromStream promise rejects', async () => {
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -75,13 +81,16 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockRejectedValueOnce('Request failed');
-    const newContent = await updateDependency(ibazel, upgrade);
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(ibazel);
   });
-  it('returns unchanged content if url field in upgrade object is invalid', async () => {
+  it('returns unchanged content if url field in updateOptions object is invalid', async () => {
     const content = ibazel;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -94,13 +103,16 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
-  it('returns unchanged content if repoName in upgrade object is invalid', async () => {
+  it('returns unchanged content if repoName in updateOptions object is invalid', async () => {
     const content = ibazel;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -116,13 +128,16 @@ describe('manager/homebrew/update', () => {
     fromStream
       .mockRejectedValueOnce('Request failed')
       .mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
-  it('returns unchanged content if repoName in upgrade object is wrong', async () => {
+  it('returns unchanged content if repoName in updateOptions object is wrong', async () => {
     const content = ibazel;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -138,7 +153,10 @@ describe('manager/homebrew/update', () => {
     fromStream
       .mockRejectedValueOnce('Request failed')
       .mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -151,7 +169,7 @@ describe('manager/homebrew/update', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -165,7 +183,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -177,7 +198,7 @@ describe('manager/homebrew/update', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -191,7 +212,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -204,7 +228,7 @@ describe('manager/homebrew/update', () => {
           sha256 ???26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -218,7 +242,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -230,7 +257,7 @@ describe('manager/homebrew/update', () => {
           url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
           end
       `;
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
@@ -244,12 +271,15 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
   it('returns unchanged content if both got requests fail', async () => {
-    const upgrade = {
+    const updateOptions = {
       currentValue: 'v0.16.1',
       depName: 'Aide',
       managerData: {
@@ -265,7 +295,10 @@ describe('manager/homebrew/update', () => {
     fromStream
       .mockRejectedValueOnce('Request failed.')
       .mockRejectedValueOnce('Request failed.');
-    const newContent = await updateDependency(aide, upgrade);
+    const newContent = await updateDependency({
+      fileContent: aide,
+      updateOptions,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(aide);
     expect(newContent).toMatchSnapshot();

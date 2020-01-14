@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { CargoConfig, CargoSection } from './types';
 
 // Return true if the match string is found at index in content
@@ -24,15 +24,15 @@ function replaceAt(
   );
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade<{ nestedVersion?: boolean }>
-): string {
-  logger.trace({ config: upgrade }, 'poetry.updateDependency()');
-  if (!upgrade) {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string {
+  logger.trace({ config: updateOptions }, 'poetry.updateDependency()');
+  if (!updateOptions) {
     return fileContent;
   }
-  const { target, depType, depName, newValue, managerData } = upgrade;
+  const { target, depType, depName, newValue, managerData } = updateOptions;
   const { nestedVersion } = managerData;
   let parsedContent: CargoConfig;
   try {
@@ -53,12 +53,12 @@ export function updateDependency(
   if (!section) {
     if (target) {
       logger.info(
-        { config: upgrade },
+        { config: updateOptions },
         `Error: Section [target.${target}.${depType}] doesn't exist in Cargo.toml file, update failed`
       );
     } else {
       logger.info(
-        { config: upgrade },
+        { config: updateOptions },
         `Error: Section [${depType}] doesn't exist in Cargo.toml file, update failed`
       );
     }
@@ -68,7 +68,7 @@ export function updateDependency(
   const oldDep = section[depName];
   if (!oldDep) {
     logger.info(
-      { config: upgrade },
+      { config: updateOptions },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
     return fileContent;
@@ -86,7 +86,7 @@ export function updateDependency(
   }
   if (!oldVersion) {
     logger.info(
-      { config: upgrade },
+      { config: updateOptions },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
     return fileContent;

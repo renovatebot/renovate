@@ -1,16 +1,16 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
     const lines = fileContent.split('\n');
-    const lineToChange = lines[upgrade.managerData.lineNumber];
-    if (upgrade.depType === 'docker') {
-      const newFrom = getNewFrom(upgrade);
+    const lineToChange = lines[updateOptions.managerData.lineNumber];
+    if (updateOptions.depType === 'docker') {
+      const newFrom = getNewFrom(updateOptions);
       logger.debug(`circleci.updateDependency(): ${newFrom}`);
       const imageLine = new RegExp(/^(\s*- image:\s*'?"?)[^\s'"]+('?"?\s*)$/);
       if (!imageLine.test(lineToChange)) {
@@ -22,21 +22,24 @@ export function updateDependency(
         logger.debug('No changes necessary');
         return fileContent;
       }
-      lines[upgrade.managerData.lineNumber] = newLine;
+      lines[updateOptions.managerData.lineNumber] = newLine;
       return lines.join('\n');
     }
-    if (upgrade.depType === 'orb') {
-      const orbLine = new RegExp(`^(\\s+${upgrade.depName}:\\s[^@]+@).+$`);
+    if (updateOptions.depType === 'orb') {
+      const orbLine = new RegExp(`^(\\s+${updateOptions.depName}:\\s[^@]+@).+$`);
       if (!orbLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }
-      const newLine = lineToChange.replace(orbLine, `$1${upgrade.newValue}`);
+      const newLine = lineToChange.replace(
+        orbLine,
+        `$1${updateOptions.newValue}`
+      );
       if (newLine === lineToChange) {
         logger.debug('No changes necessary');
         return fileContent;
       }
-      lines[upgrade.managerData.lineNumber] = newLine;
+      lines[updateOptions.managerData.lineNumber] = newLine;
       return lines.join('\n');
     }
     logger.error('Unknown circleci depType');

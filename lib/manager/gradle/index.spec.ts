@@ -228,13 +228,13 @@ describe('manager/gradle', () => {
         'utf8'
       );
       // prettier-ignore
-      const upgrade = {
+      const updateOptions = {
         depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8'
       };
-      const buildGradleContentUpdated = manager.updateDependency(
-        buildGradleContent,
-        upgrade
-      );
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        updateOptions,
+      });
 
       expect(buildGradleContent).not.toMatch('cglib:cglib-nodep:3.2.8');
 
@@ -252,16 +252,16 @@ describe('manager/gradle', () => {
             id "com.github.ben-manes.versions" version "0.20.0"
         }
         `;
-      const upgrade = {
+      const updateOptions = {
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
         newValue: '0.21.0',
       };
-      const buildGradleContentUpdated = manager.updateDependency(
-        buildGradleContent,
-        upgrade
-      );
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        updateOptions,
+      });
 
       expect(buildGradleContent).not.toMatch(
         'id "com.github.ben-manes.versions" version "0.21.0"'
@@ -285,16 +285,16 @@ describe('manager/gradle', () => {
             id("com.github.ben-manes.versions") version "0.20.0"
         }
         `;
-      const upgrade = {
+      const updateOptions = {
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
         newValue: '0.21.0',
       };
-      const buildGradleContentUpdated = manager.updateDependency(
-        buildGradleContent,
-        upgrade
-      );
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        updateOptions,
+      });
 
       expect(buildGradleContent).not.toMatch(
         'id("com.github.ben-manes.versions") version "0.21.0"'

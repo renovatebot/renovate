@@ -1,34 +1,37 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(`terraform.updateDependency: ${upgrade.newValue}`);
-    const lines = currentFileContent.split('\n');
-    const lineToChange = lines[upgrade.managerData.lineNumber];
+    logger.debug(`terraform.updateDependency: ${updateOptions.newValue}`);
+    const lines = fileContent.split('\n');
+    const lineToChange = lines[updateOptions.managerData.lineNumber];
     let newLine = lineToChange;
-    if (upgrade.depType === 'github') {
-      if (!lineToChange.includes(upgrade.depNameShort)) {
+    if (updateOptions.depType === 'github') {
+      if (!lineToChange.includes(updateOptions.depNameShort)) {
         return null;
       }
-      newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
-    } else if (upgrade.depType === 'terraform') {
+      newLine = lineToChange.replace(
+        /\?ref=.*"/,
+        `?ref=${updateOptions.newValue}"`
+      );
+    } else if (updateOptions.depType === 'terraform') {
       if (!/version\s*=\s*"/.test(lineToChange)) {
         return null;
       }
       newLine = lineToChange.replace(
         /(version\s*=\s*)"[^"]*"/,
-        `$1"${upgrade.newValue}"`
+        `$1"${updateOptions.newValue}"`
       );
     }
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
-    lines[upgrade.managerData.lineNumber] = newLine;
+    lines[updateOptions.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) /* istanbul ignore next */ {
     logger.info({ err }, 'Error setting new terraform module version');

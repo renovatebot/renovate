@@ -60,8 +60,11 @@ describe('manager/maven', () => {
 
       const { deps } = extractPackage(pomContent);
       const dep = selectDep(deps);
-      const upgrade = { ...dep, newValue };
-      const updatedContent = updateDependency(pomContent, upgrade);
+      const updateOptions = { ...dep, newValue };
+      const updatedContent = updateDependency({
+        fileContent: pomContent,
+        updateOptions,
+      });
       const updatedDep = selectDep(extractPackage(updatedContent).deps);
 
       expect(updatedDep.currentValue).toEqual(newValue);
@@ -78,8 +81,11 @@ describe('manager/maven', () => {
       ]);
       const [{ deps }] = packages;
       const dep = deps.find(finder);
-      const upgrade = { ...dep, newValue };
-      const updatedContent = updateDependency(pomParent, upgrade);
+      const updateOptions = { ...dep, newValue };
+      const updatedContent = updateDependency({
+        fileContent: pomParent,
+        updateOptions,
+      });
       const [updatedPkg] = resolveParents([
         extractPackage(updatedContent, 'parent.pom.xml'),
         extractPackage(pomChild, 'child.pom.xml'),
@@ -116,8 +122,11 @@ describe('manager/maven', () => {
 
       const { deps } = extractPackage(pomContent);
       const dep = selectDep(deps);
-      const upgrade = { ...dep, newValue };
-      const updatedContent = updateDependency(pomContent, upgrade);
+      const updateOptions = { ...dep, newValue };
+      const updatedContent = updateDependency({
+        fileContent: pomContent,
+        updateOptions,
+      });
 
       expect(pomContent).toBe(updatedContent);
     });
@@ -134,34 +143,48 @@ describe('manager/maven', () => {
 
       const updatedOutside = origContent.replace('1.0.0', '1.0.1');
 
-      expect(updateDependency(origContent, upgrade1)).toEqual(
-        origContent.replace('1.0.0', '1.0.2')
-      );
-      expect(updateDependency(updatedOutside, upgrade1)).toEqual(
-        origContent.replace('1.0.0', '1.0.2')
-      );
+      expect(
+        updateDependency({ fileContent: origContent, updateOptions: upgrade1 })
+      ).toEqual(origContent.replace('1.0.0', '1.0.2'));
+      expect(
+        updateDependency({
+          fileContent: updatedOutside,
+          updateOptions: upgrade1,
+        })
+      ).toEqual(origContent.replace('1.0.0', '1.0.2'));
 
-      const updatedByPrevious = updateDependency(origContent, upgrade1);
+      const updatedByPrevious = updateDependency({
+        fileContent: origContent,
+        updateOptions: upgrade1,
+      });
 
-      expect(updateDependency(updatedByPrevious, upgrade2)).toEqual(
-        origContent.replace('1.0.0', '1.0.3')
-      );
-      expect(updateDependency(updatedOutside, upgrade2)).toEqual(
-        origContent.replace('1.0.0', '1.0.3')
-      );
+      expect(
+        updateDependency({
+          fileContent: updatedByPrevious,
+          updateOptions: upgrade2,
+        })
+      ).toEqual(origContent.replace('1.0.0', '1.0.3'));
+      expect(
+        updateDependency({
+          fileContent: updatedOutside,
+          updateOptions: upgrade2,
+        })
+      ).toEqual(origContent.replace('1.0.0', '1.0.3'));
 
-      expect(updateDependency(origContent, upgrade2)).toEqual(
-        origContent.replace('1.0.0', '1.0.3')
-      );
+      expect(
+        updateDependency({ fileContent: origContent, updateOptions: upgrade2 })
+      ).toEqual(origContent.replace('1.0.0', '1.0.3'));
     });
 
     it('should return null for ungrouped deps if content was updated outside', async () => {
       platform.getFile.mockReturnValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
       const dep = selectDep(deps, 'org.example:bar');
-      const upgrade = { ...dep, newValue: '2.0.2' };
+      const updateOptions = { ...dep, newValue: '2.0.2' };
       const updatedOutside = origContent.replace('2.0.0', '2.0.1');
-      expect(updateDependency(updatedOutside, upgrade)).toBeNull();
+      expect(
+        updateDependency({ fileContent: updatedOutside, updateOptions })
+      ).toBeNull();
     });
 
     it('should return null if current versions in content and upgrade are not same', () => {
@@ -170,8 +193,11 @@ describe('manager/maven', () => {
 
       const { deps } = extractPackage(pomContent);
       const dep = selectDep(deps);
-      const upgrade = { ...dep, currentValue, newValue };
-      const updatedContent = updateDependency(pomContent, upgrade);
+      const updateOptions = { ...dep, currentValue, newValue };
+      const updatedContent = updateDependency({
+        fileContent: pomContent,
+        updateOptions,
+      });
 
       expect(updatedContent).toBeNull();
     });
@@ -181,8 +207,10 @@ describe('manager/maven', () => {
         selectDep(depSet.deps, 'org.example:hard-range');
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
-      const upgrade = { ...dep, newValue };
-      const newContent = extractPackage(updateDependency(pomContent, upgrade));
+      const updateOptions = { ...dep, newValue };
+      const newContent = extractPackage(
+        updateDependency({ fileContent: pomContent, updateOptions })
+      );
       const newDep = select(newContent);
       expect(newDep.currentValue).toEqual(newValue);
     });
@@ -195,8 +223,10 @@ describe('manager/maven', () => {
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
       expect(dep).not.toEqual(null);
-      const upgrade = { ...dep, newValue };
-      expect(updateDependency(pomContent, upgrade)).toEqual(pomContent);
+      const updateOptions = { ...dep, newValue };
+      expect(
+        updateDependency({ fileContent: pomContent, updateOptions })
+      ).toEqual(pomContent);
     });
   });
 });

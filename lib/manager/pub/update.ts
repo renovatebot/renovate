@@ -1,11 +1,11 @@
 import { load } from 'js-yaml';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string {
-  const { depName, depType, currentValue, newValue } = upgrade;
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string {
+  const { depName, depType, currentValue, newValue } = updateOptions;
 
   if (currentValue === newValue) return fileContent;
 

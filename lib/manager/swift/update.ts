@@ -1,13 +1,13 @@
 import { isVersion } from '../../versioning/swift';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
-  const { currentValue, newValue, fileReplacePosition } = upgrade;
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
+  const { currentValue, newValue, fileReplacePosition } = updateOptions;
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
   const oldVal = isVersion(currentValue) ? `"${currentValue}"` : currentValue;

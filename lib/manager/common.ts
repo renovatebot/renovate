@@ -162,6 +162,7 @@ export interface Upgrade<T = Record<string, any>>
   toVersion?: string;
   updateType?: string;
   version?: string;
+  nestedVersion?: boolean;
 }
 
 export interface ArtifactError {
@@ -180,6 +181,7 @@ export interface UpdateArtifact {
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
+
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
@@ -206,8 +208,7 @@ export interface ManagerApi {
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency(
-    fileContent: string,
-    upgrade: Upgrade
+    updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
 

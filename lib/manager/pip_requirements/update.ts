@@ -1,18 +1,20 @@
 import { logger } from '../../logger';
 import { dependencyPattern } from './extract';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  updateOptions,
+}: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(`pip_requirements.updateDependency(): ${upgrade.newValue}`);
+    logger.debug(
+      `pip_requirements.updateDependency(): ${updateOptions.newValue}`
+    );
     const lines = fileContent.split('\n');
-    const oldValue = lines[upgrade.managerData.lineNumber];
+    const oldValue = lines[updateOptions.managerData.lineNumber];
     let newValue;
     const multiDependencyRegex = new RegExp(
-      `(install_requires\\s*[=]\\s*\\[.*)(${upgrade.depName}.+?(?='))(.*])`,
+      `(install_requires\\s*[=]\\s*\\[.*)(${updateOptions.depName}.+?(?='))(.*])`,
       'g'
     );
     const multipleDependencyMatch = multiDependencyRegex.exec(oldValue);
@@ -20,7 +22,7 @@ export function updateDependency(
       const dependency = multipleDependencyMatch[2];
       const updatedDependency = dependency.replace(
         new RegExp(dependencyPattern),
-        `$1$2${upgrade.newValue}`
+        `$1$2${updateOptions.newValue}`
       );
       newValue = oldValue.replace(
         multiDependencyRegex,
@@ -29,10 +31,10 @@ export function updateDependency(
     } else {
       newValue = oldValue.replace(
         new RegExp(dependencyPattern),
-        `$1$2${upgrade.newValue}`
+        `$1$2${updateOptions.newValue}`
       );
     }
-    lines[upgrade.managerData.lineNumber] = newValue;
+    lines[updateOptions.managerData.lineNumber] = newValue;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new package version');
