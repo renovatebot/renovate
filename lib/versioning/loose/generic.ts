@@ -191,13 +191,8 @@ export abstract class GenericVersioningApi<
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getNewValue(
-    { toVersion }: NewValueConfig = {
-      currentValue: null,
-      rangeStrategy: null,
-      toVersion: arguments[0],
-    }
-  ): string {
+  getNewValue(newValueConfig: NewValueConfig): string {
+    const { toVersion } = newValueConfig || {};
     return toVersion;
   }
 
