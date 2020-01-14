@@ -1284,6 +1284,10 @@ Must be valid usernames. If on GitHub and assigning a team to review, use the pr
 
 Take a random sample of given size from reviewers.
 
+## additionalReviewers
+
+In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it. This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
+
 ## rollbackPrs
 
 Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
