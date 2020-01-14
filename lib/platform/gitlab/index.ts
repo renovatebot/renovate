@@ -15,6 +15,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
@@ -842,22 +843,22 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null | undefined,
-  rawContent: string
-): Promise<void> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
+  const sanitizedContent = sanitize(content);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
-  const comments = await getComments(issueNo);
+  const comments = await getComments(number);
   let body: string;
   let commentId;
   let commentNeedsUpdating;
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${issueNo}`);
-    body = `### ${topic}\n\n${content}`;
+    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    body = `### ${topic}\n\n${sanitizedContent}`;
     body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
@@ -866,8 +867,8 @@ export async function ensureComment(
       }
     });
   } else {
-    logger.debug(`Ensuring content-only comment in #${issueNo}`);
-    body = `${content}`;
+    logger.debug(`Ensuring content-only comment in #${number}`);
+    body = `${sanitizedContent}`;
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;
@@ -876,11 +877,17 @@ export async function ensureComment(
     });
   }
   if (!commentId) {
-    await addComment(issueNo, body);
-    logger.info({ repository: config.repository, issueNo }, 'Added comment');
+    await addComment(number, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Added comment'
+    );
   } else if (commentNeedsUpdating) {
-    await editComment(issueNo, commentId, body);
-    logger.info({ repository: config.repository, issueNo }, 'Updated comment');
+    await editComment(number, commentId, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Updated comment'
+    );
   } else {
     logger.debug('Comment is already update-to-date');
   }

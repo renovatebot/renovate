@@ -403,6 +403,21 @@ describe('semverRuby', () => {
         semverRuby.getNewValue('>= 3.2, < 5.0', 'replace', '4.0.2', '6.0.1')
       ).toMatchSnapshot();
     });
+    it('handles updates to bundler common complex ranges major', () => {
+      expect(
+        semverRuby.getNewValue('~> 5.2, >= 5.2.5', 'replace', '5.3.0', '6.0.1')
+      ).toEqual('~> 6.0, >= 6.0.1');
+    });
+    it('handles updates to bundler common complex ranges minor', () => {
+      expect(
+        semverRuby.getNewValue(
+          '~> 5.2.0, >= 5.2.5',
+          'replace',
+          '5.2.5',
+          '5.3.1'
+        )
+      ).toEqual('~> 5.3.0, >= 5.3.1');
+    });
 
     it('returns correct version for replace strategy', () => {
       [

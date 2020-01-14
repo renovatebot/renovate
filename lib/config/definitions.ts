@@ -1814,7 +1814,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['\\.sbt$'],
+      fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
       timeout: 300,
       versionScheme: 'ivy',
     },

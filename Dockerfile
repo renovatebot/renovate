@@ -1,4 +1,4 @@
-FROM amd64/node:10.18.0@sha256:d76cca8f184c003dc5f50d2327615a5ff1dcd3ccb253ed7c78b4a835b3292ed9 AS tsbuild
+FROM amd64/node:10.18.1@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openss
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jre-headless gradle && \
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-headless gradle && \
     rm -rf /var/lib/apt/lists/*
 
 ## Node.js

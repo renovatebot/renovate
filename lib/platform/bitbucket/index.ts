@@ -17,6 +17,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -657,13 +658,18 @@ export /* istanbul ignore next */ function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
 
-export function ensureComment(
-  prNo: number,
-  topic: string | null,
-  content: string
-): Promise<boolean> {
+export function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  return comments.ensureComment(config, prNo, topic, sanitize(content));
+  return comments.ensureComment({
+    config,
+    number,
+    topic,
+    content: sanitize(content),
+  });
 }
 
 export function ensureCommentRemoval(
