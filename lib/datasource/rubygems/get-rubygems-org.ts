@@ -1,6 +1,7 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { ReleaseResult } from '../common';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
@@ -26,7 +27,7 @@ async function updateRubyGemsVersions(): Promise<void> {
       logger.warn({ err }, 'Rubygems error - resetting cache');
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.debug('Rubygems: No update');
     lastSync = new Date();

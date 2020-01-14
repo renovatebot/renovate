@@ -39,11 +39,12 @@ async function cleanUpBranches(
           if (dryRun) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
-            await platform.ensureComment(
-              pr.number,
-              'Autoclosing Skipped',
-              'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.'
-            );
+            await platform.ensureComment({
+              number: pr.number,
+              topic: 'Autoclosing Skipped',
+              content:
+                'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+            });
           }
         }
       } else if (dryRun) {

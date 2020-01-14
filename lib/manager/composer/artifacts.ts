@@ -8,6 +8,7 @@ import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { platform } from '../../platform';
+import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -166,7 +167,7 @@ export async function updateArtifacts(
       err.message &&
       err.message.includes('write error (disk full?)')
     ) {
-      throw new Error('disk-space');
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }

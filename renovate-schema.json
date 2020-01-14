@@ -1212,7 +1212,7 @@
       "description": "Configuration object for *.sbt files",
       "type": "object",
       "default": {
-        "fileMatch": ["\\.sbt$"],
+        "fileMatch": ["\\.sbt$", "project/[^/]*.scala$"],
         "timeout": 300,
         "versionScheme": "ivy"
       },

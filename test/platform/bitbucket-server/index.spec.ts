@@ -1,6 +1,11 @@
 import responses from './_fixtures/responses';
 import { GotApi, RepoParams } from '../../../lib/platform/common';
 import { Storage } from '../../../lib/platform/git/storage';
+import {
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../../lib/constants/error-messages';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
@@ -147,7 +152,7 @@ describe('platform/bitbucket-server', () => {
             body: { isLastPage: true, lines: ['{ "enabled": false }'] },
           } as any);
           await expect(initRepo({ optimizeForDisabled: true })).rejects.toThrow(
-            'disabled'
+            REPOSITORY_DISABLED
           );
         });
       });
@@ -268,10 +273,10 @@ describe('platform/bitbucket-server', () => {
 
           await expect(
             bitbucket.addReviewers(null as any, ['name'])
-          ).rejects.toThrow('not-found');
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           await expect(bitbucket.addReviewers(4, ['name'])).rejects.toThrow(
-            'not-found'
+            REPOSITORY_NOT_FOUND
           );
           api.put.mockReturnValueOnce(
             Promise.reject({
@@ -279,7 +284,7 @@ describe('platform/bitbucket-server', () => {
             })
           );
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
-            'not-found'
+            REPOSITORY_NOT_FOUND
           );
 
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -295,7 +300,7 @@ describe('platform/bitbucket-server', () => {
             })
           );
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
-            'repository-changed'
+            REPOSITORY_CHANGED
           );
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.put.mock.calls).toMatchSnapshot();
@@ -326,9 +331,13 @@ describe('platform/bitbucket-server', () => {
       describe('ensureComment()', () => {
         it('does not throw', async () => {
           expect.assertions(2);
-          expect(await bitbucket.ensureComment(3, 'topic', 'content')).toBe(
-            false
-          );
+          expect(
+            await bitbucket.ensureComment({
+              number: 3,
+              topic: 'topic',
+              content: 'content',
+            })
+          ).toBe(false);
           expect(api.get.mock.calls).toMatchSnapshot();
         });
 
@@ -337,16 +346,26 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
           api.get.mockClear();
 
-          expect(await bitbucket.ensureComment(5, 'topic', 'content')).toBe(
-            true
-          );
+          expect(
+            await bitbucket.ensureComment({
+              number: 5,
+              topic: 'topic',
+              content: 'content',
+            })
+          ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post).toHaveBeenCalledTimes(1);
 
           api.get.mockClear();
           api.post.mockClear();
 
-          expect(await bitbucket.ensureComment(5, null, 'content')).toBe(true);
+          expect(
+            await bitbucket.ensureComment({
+              number: 5,
+              topic: null,
+              content: 'content',
+            })
+          ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post).toHaveBeenCalledTimes(1);
         });
@@ -357,7 +376,11 @@ describe('platform/bitbucket-server', () => {
           api.get.mockClear();
 
           expect(
-            await bitbucket.ensureComment(5, 'some-subject', 'some\ncontent')
+            await bitbucket.ensureComment({
+              number: 5,
+              topic: 'some-subject',
+              content: 'some\ncontent',
+            })
           ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post).toHaveBeenCalledTimes(0);
@@ -366,9 +389,13 @@ describe('platform/bitbucket-server', () => {
           api.get.mockClear();
           api.put.mockClear();
 
-          expect(await bitbucket.ensureComment(5, null, 'some\ncontent')).toBe(
-            true
-          );
+          expect(
+            await bitbucket.ensureComment({
+              number: 5,
+              topic: null,
+              content: 'some\ncontent',
+            })
+          ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post).toHaveBeenCalledTimes(1);
           expect(api.put).toHaveBeenCalledTimes(0);
@@ -380,7 +407,11 @@ describe('platform/bitbucket-server', () => {
           api.get.mockClear();
 
           expect(
-            await bitbucket.ensureComment(5, 'some-subject', 'blablabla')
+            await bitbucket.ensureComment({
+              number: 5,
+              topic: 'some-subject',
+              content: 'blablabla',
+            })
           ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.put).toHaveBeenCalledTimes(0);
@@ -388,7 +419,13 @@ describe('platform/bitbucket-server', () => {
           api.get.mockClear();
           api.put.mockClear();
 
-          expect(await bitbucket.ensureComment(5, null, '!merge')).toBe(true);
+          expect(
+            await bitbucket.ensureComment({
+              number: 5,
+              topic: null,
+              content: '!merge',
+            })
+          ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.put).toHaveBeenCalledTimes(0);
         });
@@ -586,10 +623,10 @@ describe('platform/bitbucket-server', () => {
 
           await expect(
             bitbucket.updatePr(null as any, 'title', 'body')
-          ).rejects.toThrow('not-found');
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           await expect(bitbucket.updatePr(4, 'title', 'body')).rejects.toThrow(
-            'not-found'
+            REPOSITORY_NOT_FOUND
           );
           api.put.mockReturnValueOnce(
             Promise.reject({
@@ -597,7 +634,7 @@ describe('platform/bitbucket-server', () => {
             })
           );
           await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            'not-found'
+            REPOSITORY_NOT_FOUND
           );
 
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -613,7 +650,7 @@ describe('platform/bitbucket-server', () => {
             })
           );
           await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            'repository-changed'
+            REPOSITORY_CHANGED
           );
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.put.mock.calls).toMatchSnapshot();
@@ -650,9 +687,9 @@ describe('platform/bitbucket-server', () => {
 
           await expect(
             bitbucket.mergePr(null as any, 'branch')
-          ).rejects.toThrow('not-found');
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           await expect(bitbucket.mergePr(4, 'branch')).rejects.toThrow(
-            'not-found'
+            REPOSITORY_NOT_FOUND
           );
 
           api.post.mockReturnValueOnce(
@@ -662,7 +699,7 @@ describe('platform/bitbucket-server', () => {
           );
 
           await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
-            'not-found'
+            REPOSITORY_NOT_FOUND
           );
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
@@ -825,7 +862,7 @@ Followed by some information.
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
-          ).rejects.toThrow('repository-changed');
+          ).rejects.toThrow(REPOSITORY_CHANGED);
         });
       });
 

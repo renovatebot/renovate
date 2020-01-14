@@ -18,9 +18,14 @@ import {
   EnsureIssueConfig,
   BranchStatusConfig,
   FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 
 let config: utils.Config = {} as any;
 
@@ -101,7 +106,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(REPOSITORY_DISABLED);
       }
     }
 
@@ -116,7 +121,7 @@ export async function initRepo({
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
@@ -654,13 +659,18 @@ export /* istanbul ignore next */ function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
 
-export function ensureComment(
-  prNo: number,
-  topic: string | null,
-  content: string
-): Promise<boolean> {
+export function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  return comments.ensureComment(config, prNo, topic, sanitize(content));
+  return comments.ensureComment({
+    config,
+    number,
+    topic,
+    content: sanitize(content),
+  });
 }
 
 export function ensureCommentRemoval(
