@@ -9,8 +9,6 @@ export interface DockerOptions {
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
-  preCommands?: Opt<Opt<string>[]>;
-  postCommands?: Opt<Opt<string>[]>;
 }
 
 let dockerUser: string | null = null; // Set globally, not configurable per-command
@@ -21,11 +19,6 @@ export function setDockerConfig(config): void {
   dockerUser = config.dockerUser;
   localDir = config.localDir;
   cacheDir = config.cacheDir;
-}
-
-function prepareCommands(commands: Opt<Opt<string>[]>): string[] {
-  const pred = (cmd): boolean => typeof cmd === 'string';
-  return commands ? commands.filter(pred) : [];
 }
 
 function expandVolumeOption(x: Opt<VolumeOption>): VolumesPair | null {
@@ -65,15 +58,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
 }
 
 export function dockerCmd(cmd: string, options: DockerOptions): string {
-  const {
-    image,
-    tag,
-    envVars,
-    cwd,
-    volumes,
-    preCommands,
-    postCommands,
-  } = options;
+  const { image, tag, envVars, cwd, volumes } = options;
 
   const result = ['docker run --rm'];
   if (dockerUser) result.push(`--user=${dockerUser}`);
@@ -93,16 +78,7 @@ export function dockerCmd(cmd: string, options: DockerOptions): string {
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
   result.push(taggedImage);
 
-  const commands = [
-    ...prepareCommands(preCommands),
-    cmd,
-    ...prepareCommands(postCommands),
-  ];
-  const command =
-    commands.length === 1
-      ? cmd
-      : `bash -l -c "${commands.join(' && ').replace(/"/g, '\\"')}"`;
-  result.push(command);
+  result.push(cmd);
 
   return result.join(' ');
 }

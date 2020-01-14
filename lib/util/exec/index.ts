@@ -62,7 +62,10 @@ function dockerEnvVars(
   return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
 }
 
-export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+export function exec(
+  cmd: string | string[],
+  opts: ExecOptions = {}
+): Promise<ExecResult> {
   const { env, extraEnv, docker } = opts;
   const cwd = opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
@@ -78,7 +81,10 @@ export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     cwd,
   };
 
-  let pExecCommand = cmd;
+  let pExecCommand = `bash -l -c "${
+    typeof cmd === 'string' ? cmd : cmd.join(' && ').replace(/"/g, '\\"')
+  }"`;
+
   if (docker) {
     const dockerOptions = {
       ...docker,
@@ -86,7 +92,7 @@ export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    pExecCommand = dockerCmd(cmd, dockerOptions);
+    pExecCommand = dockerCmd(pExecCommand, dockerOptions);
   }
 
   return pExec(pExecCommand, pExecOptions);
