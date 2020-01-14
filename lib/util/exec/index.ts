@@ -81,6 +81,7 @@ export function exec(
     cwd,
   };
 
+  // TODO: simplify after callers' refactoring
   const singleCommand = typeof cmd === 'string' ? cmd : cmd.join(' && ');
   let pExecCommand = singleCommand.startsWith('docker run')
     ? singleCommand
