@@ -17,9 +17,8 @@ FROM base as tsbuild
 
 USER root
 
-# Python 2 and make are required to build node-re2
-
-RUN apt-get update && apt-get install -y python-minimal build-essential
+# Python 3 and make are required to build node-re2
+RUN apt-get update && apt-get install -y python3-minimal build-essential
 
 USER ubuntu
 

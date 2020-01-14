@@ -15,14 +15,8 @@ USER ubuntu
 #============
 FROM base as tsbuild
 
-USER root
-
 # Python 3 and make are required to build node-re2
-
-RUN apt-get update && apt-get install -y python3-minimal build-essential && \
-    rm -rf /var/lib/apt/lists/*
-
-USER ubuntu
+RUN apt-get update && apt-get install -y python3-minimal build-essential
 
 COPY package.json .
 COPY yarn.lock .
