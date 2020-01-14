@@ -5,8 +5,9 @@ exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias t
 exports[`lib/manager/pip_setup/extract getPythonAlias returns the python alias to use 2`] = `
 Array [
   Object {
-    "cmd": "python --version",
+    "cmd": "bash -l -c \\"python --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -18,8 +19,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 --version",
+    "cmd": "bash -l -c \\"python3 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -31,8 +33,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3.8 --version",
+    "cmd": "bash -l -c \\"python3.8 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",

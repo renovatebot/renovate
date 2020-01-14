@@ -12,19 +12,10 @@ import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
 import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
-import { setDockerUser } from '../../util/exec/docker';
+import { setExecConfig } from '../../util/exec';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
-
-// istanbul ignore next
-function detectRenovateVersion(): void {
-  try {
-    global.renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-  } catch (err) {
-    logger.debug({ err }, 'Error getting renovate version');
-  }
-}
 
 async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
   const config: RenovateConfig = { ...input };
@@ -43,6 +34,7 @@ async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);
+  cache.init(config.cacheDir);
   return config;
 }
 
@@ -63,32 +55,20 @@ export async function getRepositoryConfig(
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
+function getGlobalConfig(): Promise<RenovateConfig> {
+  return configParser.parseConfigs(process.env, process.argv);
+}
+
 export async function start(): Promise<0 | 1> {
   try {
-    cache.init(os.tmpdir());
-    let config = await configParser.parseConfigs(process.env, process.argv);
+    let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
+    setExecConfig(config);
     config = await autodiscoverRepositories(config);
-    cache.init(config.cacheDir);
-    if (config.repositories.length === 0) {
-      logger.warn(
-        'No repositories found - did you want to run with flag --autodiscover?'
-      );
-    }
-    // Move global variables that we need to use later
-    const importGlobals = ['prBanner', 'prFooter'];
-    config.global = {};
-    importGlobals.forEach(key => {
-      config.global[key] = config[key];
-      delete config[key];
-    });
-    global.trustLevel = config.trustLevel || 'low';
-    delete config.trustLevel;
-    detectRenovateVersion();
+
     limits.init(config);
     setEmojiConfig(config);
-    setDockerUser(config.dockerUser);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {

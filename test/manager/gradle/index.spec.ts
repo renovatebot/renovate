@@ -142,14 +142,6 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       await manager.extractAllPackageFiles(config, ['build.gradle']);
-
-      expect(exec.mock.calls[0][0]).toBe(
-        './gradlew --init-script renovate-plugin.gradle renovate'
-      );
-      expect(exec.mock.calls[0][1]).toMatchObject({
-        cwd: 'localDir',
-        timeout: 20000,
-      });
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -158,14 +150,6 @@ describe('manager/gradle', () => {
 
       fs.access.mockRejectedValue(undefined);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
-
-      expect(exec.mock.calls[0][0]).toBe(
-        'sh gradlew --init-script renovate-plugin.gradle renovate'
-      );
-      expect(exec.mock.calls[0][1]).toMatchObject({
-        cwd: 'localDir',
-        timeout: 20000,
-      });
       expect(execSnapshots).toMatchSnapshot();
     });
 

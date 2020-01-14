@@ -2,6 +2,7 @@ import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
+import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
@@ -60,7 +61,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
   if (config.requireConfig && config.onboarding === false) {
-    throw new Error('disabled');
+    throw new Error(REPOSITORY_DISABLED);
   }
 
   const pr = await closedPrExists(config);
@@ -76,13 +77,13 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.info('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications.includes('onboardingClose')) {
     // ensure PR comment
-    await platform.ensureComment(
-      pr.number,
-      `Renovate is disabled`,
-      `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
-    );
+    await platform.ensureComment({
+      number: pr.number,
+      topic: `Renovate is disabled`,
+      content: `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
+    });
   }
-  throw new Error('disabled');
+  throw new Error(REPOSITORY_DISABLED);
 };
 
 export const onboardingPrExists = async (

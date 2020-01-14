@@ -1,4 +1,11 @@
 import * as _hostRules from '../../../lib/util/host-rules';
+import {
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+} from '../../../lib/constants/error-messages';
 
 describe('platform/gitlab', () => {
   let gitlab: typeof import('../../../lib/platform/gitlab');
@@ -194,7 +201,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: true,
         })
-      ).rejects.toThrow(Error('disabled'));
+      ).rejects.toThrow(Error(REPOSITORY_DISABLED));
     });
     it(`should escape all forward slashes in project names`, async () => {
       api.get.mockReturnValue({ body: [] } as any);
@@ -221,7 +228,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: false,
         })
-      ).rejects.toThrow(Error('archived'));
+      ).rejects.toThrow(Error(REPOSITORY_ARCHIVED));
     });
     it('should throw an error if repository is a mirror', async () => {
       api.get.mockReturnValue({ body: { mirror: true } } as any);
@@ -231,7 +238,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: false,
         })
-      ).rejects.toThrow(Error('mirror'));
+      ).rejects.toThrow(Error(REPOSITORY_MIRRORED));
     });
     it('should throw an error if repository access is disabled', async () => {
       api.get.mockReturnValue({
@@ -243,7 +250,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: false,
         })
-      ).rejects.toThrow(Error('disabled'));
+      ).rejects.toThrow(Error(REPOSITORY_DISABLED));
     });
     it('should throw an error if MRs are disabled', async () => {
       api.get.mockReturnValue({
@@ -255,7 +262,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: false,
         })
-      ).rejects.toThrow(Error('disabled'));
+      ).rejects.toThrow(Error(REPOSITORY_DISABLED));
     });
     it('should throw an error if repository has empty_repo property', async () => {
       api.get.mockReturnValue({ body: { empty_repo: true } } as any);
@@ -265,7 +272,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: false,
         })
-      ).rejects.toThrow(Error('empty'));
+      ).rejects.toThrow(Error(REPOSITORY_EMPTY));
     });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
@@ -275,7 +282,7 @@ describe('platform/gitlab', () => {
           localDir: '',
           optimizeForDisabled: false,
         })
-      ).rejects.toThrow(Error('empty'));
+      ).rejects.toThrow(Error(REPOSITORY_EMPTY));
     });
     it('should fall back if http_url_to_repo is empty', async () => {
       api.get.mockReturnValue({
@@ -454,7 +461,7 @@ describe('platform/gitlab', () => {
       }));
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
-        'repository-changed'
+        REPOSITORY_CHANGED
       );
     });
   });
@@ -700,7 +707,11 @@ describe('platform/gitlab', () => {
     it('add comment if not found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       api.get.mockReturnValueOnce({ body: [] } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -709,7 +720,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(1);
       expect(api.put.mock.calls).toMatchSnapshot();
@@ -719,7 +734,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(0);
     });
@@ -728,7 +747,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '!merge' }],
       } as any);
-      await gitlab.ensureComment(42, null, '!merge');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: null,
+        content: '!merge',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(0);
     });

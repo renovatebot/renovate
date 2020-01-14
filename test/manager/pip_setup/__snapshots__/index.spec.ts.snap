@@ -3,8 +3,9 @@
 exports[`lib/manager/pip_setup/index extractPackageFile() catches error 1`] = `
 Array [
   Object {
-    "cmd": "python --version",
+    "cmd": "bash -l -c \\"python --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -16,8 +17,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 --version",
+    "cmd": "bash -l -c \\"python3 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -29,8 +31,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3.8 --version",
+    "cmd": "bash -l -c \\"python3.8 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -42,7 +45,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
+    "cmd": "bash -l -c \\"<extract.py> \\\\\\"/tmp/folders/foobar.py\\\\\\"\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -318,8 +321,9 @@ Object {
 exports[`lib/manager/pip_setup/index extractPackageFile() returns found deps 2`] = `
 Array [
   Object {
-    "cmd": "python --version",
+    "cmd": "bash -l -c \\"python --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -331,8 +335,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 --version",
+    "cmd": "bash -l -c \\"python3 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -344,8 +349,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3.8 --version",
+    "cmd": "bash -l -c \\"python3.8 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -357,7 +363,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"test/manager/pip_setup/_fixtures/setup.py\\"",
+    "cmd": "bash -l -c \\"<extract.py> \\\\\\"test/manager/pip_setup/_fixtures/setup.py\\\\\\"\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -377,8 +383,9 @@ Array [
 exports[`lib/manager/pip_setup/index extractPackageFile() should return null for invalid file 1`] = `
 Array [
   Object {
-    "cmd": "python --version",
+    "cmd": "bash -l -c \\"python --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -390,8 +397,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 --version",
+    "cmd": "bash -l -c \\"python3 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -403,8 +411,9 @@ Array [
     },
   },
   Object {
-    "cmd": "python3.8 --version",
+    "cmd": "bash -l -c \\"python3.8 --version\\"",
     "options": Object {
+      "cwd": null,
       "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
@@ -416,7 +425,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
+    "cmd": "bash -l -c \\"<extract.py> \\\\\\"/tmp/folders/foobar.py\\\\\\"\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

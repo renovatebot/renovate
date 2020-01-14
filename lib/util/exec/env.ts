@@ -1,4 +1,4 @@
-import { basicEnvVars } from './basic-vars';
+const basicEnvVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'HOME', 'PATH'];
 
 export function getChildProcessEnv(
   customEnvVars: string[] = []

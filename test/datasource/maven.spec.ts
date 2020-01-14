@@ -1,6 +1,7 @@
 import nock from 'nock';
 import fs from 'fs';
 import * as datasource from '../../lib/datasource';
+import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
 
 const hostRules = require('../../lib/util/host-rules');
 
@@ -176,7 +177,7 @@ describe('datasource/maven', () => {
           lookupName: 'org:artifact',
           registryUrls: ['http://central.maven.org/maven2/'],
         })
-      ).rejects.toThrow(Error('registry-failure'));
+      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {

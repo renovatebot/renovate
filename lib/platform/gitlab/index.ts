@@ -15,12 +15,23 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { RenovateConfig } from '../../config';
+import {
+  PLATFORM_AUTHENTICATION_ERROR,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -134,28 +145,28 @@ export async function initRepo({
       logger.info(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error('archived');
+      throw new Error(REPOSITORY_ARCHIVED);
     }
     if (res.body.mirror) {
       logger.info(
         'Repository is a mirror - throwing error to abort renovation'
       );
-      throw new Error('mirror');
+      throw new Error(REPOSITORY_MIRRORED);
     }
     if (res.body.repository_access_level === 'disabled') {
       logger.info(
         'Repository portion of project is disabled - throwing error to abort renovation'
       );
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.merge_requests_access_level === 'disabled') {
       logger.info(
         'MRs are disabled for the project - throwing error to abort renovation'
       );
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.default_branch === null || res.body.empty_repo) {
-      throw new Error('empty');
+      throw new Error(REPOSITORY_EMPTY);
     }
     if (optimizeForDisabled) {
       let renovateConfig: RenovateConfig;
@@ -172,7 +183,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(REPOSITORY_DISABLED);
       }
     }
     config.defaultBranch = res.body.default_branch;
@@ -211,18 +222,18 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
-      throw new Error('empty');
+      throw new Error(REPOSITORY_EMPTY);
     }
     if (['archived', 'empty'].includes(err.message)) {
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new Error('forbidden');
+      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
-    if (err.message === 'disabled') {
+    if (err.message === REPOSITORY_DISABLED) {
       throw err;
     }
     logger.info({ err }, 'Unknown GitLab initRepo error');
@@ -300,7 +311,7 @@ export async function getBranchStatus(
   }
 
   if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+    throw new Error(REPOSITORY_CHANGED);
   }
 
   const res = await getStatus(branchName);
@@ -832,22 +843,22 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null | undefined,
-  rawContent: string
-): Promise<void> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
+  const sanitizedContent = sanitize(content);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
-  const comments = await getComments(issueNo);
+  const comments = await getComments(number);
   let body: string;
   let commentId;
   let commentNeedsUpdating;
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${issueNo}`);
-    body = `### ${topic}\n\n${content}`;
+    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    body = `### ${topic}\n\n${sanitizedContent}`;
     body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
@@ -856,8 +867,8 @@ export async function ensureComment(
       }
     });
   } else {
-    logger.debug(`Ensuring content-only comment in #${issueNo}`);
-    body = `${content}`;
+    logger.debug(`Ensuring content-only comment in #${number}`);
+    body = `${sanitizedContent}`;
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;
@@ -866,11 +877,17 @@ export async function ensureComment(
     });
   }
   if (!commentId) {
-    await addComment(issueNo, body);
-    logger.info({ repository: config.repository, issueNo }, 'Added comment');
+    await addComment(number, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Added comment'
+    );
   } else if (commentNeedsUpdating) {
-    await editComment(issueNo, commentId, body);
-    logger.info({ repository: config.repository, issueNo }, 'Updated comment');
+    await editComment(number, commentId, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Updated comment'
+    );
   } else {
     logger.debug('Comment is already update-to-date');
   }
@@ -919,7 +936,7 @@ async function fetchPrList(): Promise<Pr[]> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
-      throw new Error('authentication-error');
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
   }

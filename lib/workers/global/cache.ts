@@ -1,3 +1,4 @@
+import os from 'os';
 import * as cacache from 'cacache';
 import path from 'path';
 import { DateTime } from 'luxon';
@@ -58,3 +59,5 @@ export function init(cacheDir: string): void {
   logger.debug('Initializing Renovate internal cache into ' + renovateCache);
   global.renovateCache = global.renovateCache || { get, set, rm, rmAll };
 }
+
+init(os.tmpdir()); // Use default temporary dir to begin with
