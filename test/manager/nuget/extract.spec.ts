@@ -21,5 +21,9 @@ describe('lib/manager/nuget/extract', () => {
       const res = extractPackageFile({ content: sample, config }).deps;
       expect(res).toMatchSnapshot();
     });
+    it('extracts all dependencies when config is undefined', () => {
+      const res = extractPackageFile({ content: sample }).deps;
+      expect(res).toMatchSnapshot();
+    });
   });
 });
