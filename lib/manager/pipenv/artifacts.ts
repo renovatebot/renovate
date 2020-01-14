@@ -1,7 +1,7 @@
 import { ensureDir, outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsResult, UpdateArtifactsConfig } from '../common';
 import { platform } from '../../platform';
@@ -13,10 +13,13 @@ export async function updateArtifacts(
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
-  process.env.PIPENV_CACHE_DIR =
-    process.env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
-  await ensureDir(process.env.PIPENV_CACHE_DIR);
-  logger.debug('Using pipenv cache ' + process.env.PIPENV_CACHE_DIR);
+
+  const env = getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']);
+  env.PIPENV_CACHE_DIR =
+    env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
+  await ensureDir(env.PIPENV_CACHE_DIR);
+  logger.debug('Using pipenv cache ' + env.PIPENV_CACHE_DIR);
+
   const lockFileName = pipfileName + '.lock';
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
@@ -30,17 +33,15 @@ export async function updateArtifacts(
     const localPipfileFileName = join(config.localDir, pipfileName);
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
-    const env = getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']);
     const startTime = process.hrtime();
     let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running pipenv via docker');
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
-      const volumes = [config.localDir, process.env.PIPENV_CACHE_DIR];
+      const volumes = [config.localDir, env.PIPENV_CACHE_DIR];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = ['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR'];
       cmd += envVars.map(e => `-e ${e} `).join('');

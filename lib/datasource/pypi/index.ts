@@ -87,10 +87,23 @@ function extractVersionFromLinkText(
 ): string | null {
   const prefix = `${depName}-`;
   const suffix = '.tar.gz';
-  if (!(text.startsWith(prefix) && text.endsWith(suffix))) {
-    return null;
+  if (text.startsWith(prefix) && text.endsWith(suffix)) {
+    return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
   }
-  return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+
+  // pep-0427 wheel packages
+  //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+  const wheelPrefix = depName.replace(/[^\w\d.]+/g, '_') + '-';
+  const wheelSuffix = '.whl';
+  if (
+    text.startsWith(wheelPrefix) &&
+    text.endsWith(wheelSuffix) &&
+    text.split('-').length > 2
+  ) {
+    return text.split('-')[1];
+  }
+
+  return null;
 }
 
 async function getSimpleDependency(
@@ -108,7 +121,7 @@ async function getSimpleDependency(
       logger.debug({ dependency: depName }, 'pip package not found');
       return null;
     }
-    const root: HTMLElement = parse(dep) as any;
+    const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
     const links = root.querySelectorAll('a');
     const versions = new Set<string>();
     for (const link of Array.from(links)) {

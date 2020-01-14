@@ -2,16 +2,15 @@ import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import parse from 'github-url-from-git';
-import { isBase64 } from 'validator';
+import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
-import * as hostRules from '../../util/host-rules';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 let memcache = {};
 
@@ -146,36 +145,12 @@ export async function getDependency(
     // Determine repository URL
     let sourceUrl: string;
 
-    if (is.string(res.repository)) {
-      res.repository = { url: res.repository };
-    }
-
-    if (res.repository && res.repository.url) {
-      const extraBaseUrls = [];
-      // istanbul ignore next
-      hostRules.hosts({ hostType: 'github' }).forEach(host => {
-        extraBaseUrls.push(host, `gist.${host}`);
-      });
-      // Massage www out of github URL
-      res.repository.url = res.repository.url.replace(
-        'www.github.com',
-        'github.com'
-      );
-      if (res.repository.url.startsWith('https://github.com/')) {
-        res.repository.url = res.repository.url
-          .split('/')
-          .slice(0, 5)
-          .join('/');
+    if (res.repository) {
+      if (is.string(res.repository)) {
+        sourceUrl = res.repository;
+      } else if (res.repository.url) {
+        sourceUrl = res.repository.url;
       }
-      if (res.repository.url.startsWith('git:github.com/')) {
-        res.repository.url = 'https://' + res.repository.url.substr(4);
-      }
-      sourceUrl = parse(res.repository.url, {
-        extraBaseUrls,
-      });
-    }
-    if (res.homepage && res.homepage.includes('://github.com')) {
-      delete res.homepage;
     }
     // Simplify response before caching and returning
     const dep: NpmDependency = {
@@ -260,7 +235,7 @@ export async function getDependency(
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
       logger.warn({ err, regUrl, depName: name }, 'npm registry failure');
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     // istanbul ignore next
     return null;

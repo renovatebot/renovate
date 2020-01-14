@@ -32,9 +32,14 @@ interface MavenProp {
 
 function depFromNode(node: XmlElement): PackageDependency | null {
   if (!node.valueWithPath) return null;
-  const groupId = node.valueWithPath('groupId');
+  let groupId = node.valueWithPath('groupId');
   const artifactId = node.valueWithPath('artifactId');
   const currentValue = node.valueWithPath('version');
+
+  if (!groupId && node.name === 'plugin') {
+    groupId = 'org.apache.maven.plugins';
+  }
+
   if (groupId && artifactId && currentValue) {
     const depName = `${groupId}:${artifactId}`;
     const versionNode = node.descendantWithPath('version');

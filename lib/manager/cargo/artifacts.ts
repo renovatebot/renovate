@@ -2,7 +2,7 @@ import { join } from 'upath';
 import { hrtime } from 'process';
 import { outputFile, readFile } from 'fs-extra';
 import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
@@ -38,18 +38,14 @@ export async function updateArtifacts(
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
       let cmd: string;
-      // istanbul ignore if
       if (config.binarySource === 'docker') {
         logger.info('Running cargo via docker');
         cmd = `docker run --rm `;
-        // istanbul ignore if
         if (config.dockerUser) {
           cmd += `--user=${config.dockerUser} `;
         }
         const volumes = [cwd];
         cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-        const envVars = [];
-        cmd += envVars.map(e => `-e ${e} `).join('');
         cmd += `-w "${cwd}" `;
         cmd += `renovate/rust cargo`;
       } else {
@@ -111,7 +107,7 @@ export async function updateArtifacts(
     logger.warn({ err }, 'Failed to update Cargo lock file');
     return [
       {
-        lockFileError: {
+        artifactError: {
           lockFile: lockFileName,
           stderr: err.message,
         },

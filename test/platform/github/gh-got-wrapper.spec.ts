@@ -2,6 +2,10 @@ import delay from 'delay';
 import { Response } from 'got';
 import _got from '../../../lib/util/got';
 import { api } from '../../../lib/platform/github/gh-got-wrapper';
+import {
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../../lib/constants/error-messages';
 
 jest.mock('../../../lib/util/got');
 jest.mock('delay');
@@ -13,6 +17,15 @@ const get: <T extends object = any>(
   options?: any,
   okToRetry?: boolean
 ) => Promise<Response<T>> = api as any;
+
+async function getError(): Promise<Error> {
+  try {
+    await get('some-url', {}, false);
+  } catch (err) {
+    return err;
+  }
+  return null;
+}
 
 describe('platform/gh-got-wrapper', () => {
   beforeEach(() => {
@@ -93,14 +106,9 @@ describe('platform/gh-got-wrapper', () => {
         message: 'Bad credentials. (401)',
       })
     );
-    let e;
-    try {
-      await api.get('some-url');
-    } catch (err) {
-      e = err;
-    }
+    const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('bad-credentials');
+    expect(e.message).toEqual(PLATFORM_BAD_CREDENTIALS);
   });
   it('should throw platform failure', async () => {
     got.mockImplementationOnce(() =>
@@ -112,30 +120,24 @@ describe('platform/gh-got-wrapper', () => {
         },
       })
     );
-    let e;
-    try {
-      await api.get('some-url');
-    } catch (err) {
-      e = err;
-    }
+    const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
   });
-  it('should throw platform failure ENOTFOUND', async () => {
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        name: 'RequestError',
-        code: 'ENOTFOUND',
-      })
-    );
-    let e;
-    try {
-      await get('some-url', {}, false);
-    } catch (err) {
-      e = err;
+  it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', async () => {
+    const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
+    for (let idx = 0; idx < codes.length; idx += 1) {
+      const code = codes[idx];
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          name: 'RequestError',
+          code,
+        })
+      );
+      const e = await getError();
+      expect(e).toBeDefined();
+      expect(e.message).toEqual('platform-failure');
     }
-    expect(e).toBeDefined();
-    expect(e.message).toEqual('platform-failure');
   });
   it('should throw platform failure for 500', async () => {
     got.mockImplementationOnce(() =>
@@ -144,12 +146,7 @@ describe('platform/gh-got-wrapper', () => {
         message: 'Internal Server Error',
       })
     );
-    let e;
-    try {
-      await get('some-url', {}, false);
-    } catch (err) {
-      e = err;
-    }
+    const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
   });
@@ -159,12 +156,7 @@ describe('platform/gh-got-wrapper', () => {
         name: 'ParseError',
       })
     );
-    let e;
-    try {
-      await get('some-url', {}, false);
-    } catch (err) {
-      e = err;
-    }
+    const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
   });
@@ -175,13 +167,70 @@ describe('platform/gh-got-wrapper', () => {
         message: 'Resource not accessible by integration (403)',
       })
     );
-    let e;
-    try {
-      await get('some-url', {}, false);
-    } catch (err) {
-      e = err;
-    }
+    const e = await getError();
     expect(e).toBeDefined();
     expect(e.message).toEqual('integration-unauthorized');
+  });
+  it('should throw for unauthorized integration', async () => {
+    const gotErr = {
+      statusCode: 403,
+      body: { message: 'Upgrade to GitHub Pro' },
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBeDefined();
+    expect(e).toBe(gotErr);
+  });
+  it('should throw on abuse', async () => {
+    const gotErr = {
+      statusCode: 403,
+      message: 'You have triggered an abuse detection mechanism',
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBeDefined();
+    expect(e.message).toEqual(PLATFORM_RATE_LIMIT_EXCEEDED);
+  });
+  it('should throw on repository change', async () => {
+    const gotErr = {
+      statusCode: 422,
+      body: {
+        message: 'foobar',
+        errors: [{ code: 'invalid' }],
+      },
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('repository-changed');
+  });
+  it('should throw platform failure on 422 response', async () => {
+    const gotErr = {
+      statusCode: 422,
+      message: 'foobar',
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('platform-failure');
+  });
+  it('should throw original error when failed to add reviewers', async () => {
+    const gotErr = {
+      statusCode: 422,
+      message: 'Review cannot be requested from pull request author.',
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBeDefined();
+    expect(e).toStrictEqual(gotErr);
+  });
+  it('should throw original error of unknown type', async () => {
+    const gotErr = {
+      statusCode: 418,
+      message: 'Sorry, this is a teapot',
+    };
+    got.mockRejectedValueOnce(gotErr);
+    const e = await getError();
+    expect(e).toBe(gotErr);
   });
 });

@@ -1,20 +1,16 @@
 import { emojify } from '../../../../util/emoji';
 import { logger } from '../../../../logger';
-import { appName } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
-import { Upgrade } from '../../../../manager/common';
+import { BranchConfig } from '../../../common';
 
-export interface BranchConfig {
-  upgrades: Upgrade[];
-  baseBranch?: string;
-  branchName: string;
-  schedule?: string[];
-  prTitle: string;
-}
+export type PrBranchConfig = Pick<
+  BranchConfig,
+  'upgrades' | 'baseBranch' | 'branchName' | 'schedule' | 'prTitle'
+>;
 
 export function getPrList(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: PrBranchConfig[]
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
@@ -22,7 +18,7 @@ export function getPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  prDesc += `With your current configuration, ${appName} will create ${branches.length} Pull Request`;
+  prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {

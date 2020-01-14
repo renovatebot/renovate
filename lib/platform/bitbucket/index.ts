@@ -4,9 +4,8 @@ import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import { logger } from '../../logger';
-import GitStorage, { StatusResult, File } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
 import {
   PlatformConfig,
@@ -15,9 +14,18 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
+  EnsureIssueConfig,
+  BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 
 let config: utils.Config = {} as any;
 
@@ -98,7 +106,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(REPOSITORY_DISABLED);
       }
     }
 
@@ -113,7 +121,7 @@ export async function initRepo({
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
@@ -217,11 +225,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -241,7 +249,7 @@ export async function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   if (closePr) {
-    const pr = await findPr(branchName, null, 'open');
+    const pr = await findPr({ branchName, state: 'open' });
     if (pr) {
       await api.post(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
@@ -264,18 +272,18 @@ export function mergeBranch(branchName: string): Promise<void> {
   return config.storage.mergeBranch(branchName);
 }
 
-export function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export function getCommitMessages(): Promise<string[]> {
@@ -368,10 +376,21 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketStatus[]> {
+  const sha = await getBranchCommit(branchName);
+  return utils.accumulateValues<utils.BitbucketStatus>(
+    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
+    'get',
+    { useCache }
+  );
+}
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -388,14 +407,8 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return 'failed';
   }
-  const sha = await getBranchCommit(branchName);
-  const statuses = await utils.accumulateValues(
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
-  );
-  logger.debug(
-    { branch: branchName, sha, statuses },
-    'branch status check result'
-  );
+  const statuses = await getStatus(branchName);
+  logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
     return 'pending';
@@ -419,13 +432,8 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<string | null> {
-  const sha = await getBranchCommit(branchName);
-  const statuses = await utils.accumulateValues(
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
-  );
-  const bbState = (
-    statuses.find((status: { key: string }) => status.key === context) || {}
-  ).state;
+  const statuses = await getStatus(branchName);
+  const bbState = (statuses.find(status => status.key === context) || {}).state;
 
   return (
     Object.keys(utils.buildStates).find(
@@ -434,13 +442,13 @@ export async function getBranchStatusCheck(
   );
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
@@ -458,6 +466,8 @@ export async function setBranchStatus(
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
+  // update status cache
+  await getStatus(branchName, false);
 }
 
 type BbIssue = { id: number; content?: { raw: string } };
@@ -515,14 +525,14 @@ export function getPrBody(input: string): string {
   return smartTruncate(input, 50000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
+    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
 }
 
-export async function ensureIssue(
-  title: string,
-  body: string
-): Promise<string | null> {
+export async function ensureIssue({
+  title,
+  body,
+}: EnsureIssueConfig): Promise<string | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
 
@@ -649,13 +659,18 @@ export /* istanbul ignore next */ function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
 
-export function ensureComment(
-  prNo: number,
-  topic: string | null,
-  content: string
-): Promise<boolean> {
+export function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  return comments.ensureComment(config, prNo, topic, sanitize(content));
+  return comments.ensureComment({
+    config,
+    number,
+    topic,
+    content: sanitize(content),
+  });
 }
 
 export function ensureCommentRemoval(
@@ -666,13 +681,12 @@ export function ensureCommentRemoval(
 }
 
 // Creates PR and returns PR number
-export async function createPr(
-  branchName: string,
-  title: string,
-  description: string,
-  _labels?: string[],
-  useDefaultBranch = true
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: description,
+  useDefaultBranch = true,
+}: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
   const base = useDefaultBranch

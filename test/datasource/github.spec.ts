@@ -4,6 +4,7 @@ import * as datasource from '../../lib/datasource';
 import * as github from '../../lib/datasource/github';
 import _got from '../../lib/util/got';
 import * as _hostRules from '../../lib/util/host-rules';
+import { PLATFORM_FAILURE } from '../../lib/constants/error-messages';
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
@@ -18,6 +19,7 @@ describe('datasource/github', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      hostRules.hosts = jest.fn(() => []);
       global.repoCache = {};
       return global.renovateCache.rmAll();
     });
@@ -64,10 +66,10 @@ describe('datasource/github', () => {
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
-        throw new Error('platform-failure');
+        throw new Error(PLATFORM_FAILURE);
       });
       await expect(github.getPreset('some/repo')).rejects.toThrow(
-        'platform-failure'
+        PLATFORM_FAILURE
       );
     });
     it('tries default then renovate', async () => {

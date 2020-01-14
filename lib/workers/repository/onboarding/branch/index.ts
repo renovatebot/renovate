@@ -3,9 +3,12 @@ import { extractAllDependencies } from '../../extract';
 import { createOnboardingBranch } from './create';
 import { rebaseOnboardingBranch } from './rebase';
 import { isOnboarded, onboardingPrExists } from './check';
-import { onboardingBranch } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { platform } from '../../../../platform';
+import {
+  MANAGER_NO_PACKAGE_FILES,
+  REPOSITORY_FORKED,
+} from '../../../../constants/error-messages';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig
@@ -18,23 +21,23 @@ export async function checkOnboardingBranch(
     return { ...config, repoIsOnboarded };
   }
   if (config.isFork && !config.includeForks) {
-    throw new Error('fork');
+    throw new Error(REPOSITORY_FORKED);
   }
   logger.info('Repo is not onboarded');
-  if (await onboardingPrExists()) {
+  if (await onboardingPrExists(config)) {
     logger.debug('Onboarding PR already exists');
     await rebaseOnboardingBranch(config);
   } else {
     logger.debug('Onboarding PR does not exist');
     if (Object.entries(await extractAllDependencies(config)).length === 0) {
-      throw new Error('no-package-files');
+      throw new Error(MANAGER_NO_PACKAGE_FILES);
     }
     logger.info('Need to create onboarding PR');
     await createOnboardingBranch(config);
   }
   if (!config.dryRun) {
-    await platform.setBaseBranch(onboardingBranch);
+    await platform.setBaseBranch(config.onboardingBranch);
   }
-  const branchList = [onboardingBranch];
+  const branchList = [config.onboardingBranch];
   return { ...config, repoIsOnboarded, branchList };
 }

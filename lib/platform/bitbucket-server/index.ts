@@ -4,7 +4,7 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { File, StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -14,10 +14,18 @@ import {
   Issue,
   VulnerabilityAlert,
   GotResponse,
+  CreatePRConfig,
+  BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
-
+import {
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -154,7 +162,7 @@ export async function initRepo({
       // Do nothing
     }
     if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
   }
 
@@ -209,7 +217,7 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug(err);
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
@@ -375,12 +383,12 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 
 // TODO: coverage
 // istanbul ignore next
-export async function findPr(
-  branchName: string,
-  prTitle?: string,
+export async function findPr({
+  branchName,
+  prTitle,
   state = 'all',
-  refreshCache?: boolean
-): Promise<Pr | null> {
+  refreshCache,
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
   const prList = await getPrList({ refreshCache });
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
@@ -398,7 +406,10 @@ export async function getBranchPr(
   refreshCache?: boolean
 ): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, undefined, 'open');
+  const existingPr = await findPr({
+    branchName,
+    state: 'open',
+  });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 
@@ -409,25 +420,30 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFilesToBranch(
-  branchName: string,
-  files: File[],
-  message: string,
-  parentBranch: string = config.baseBranch
-): Promise<void> {
+export async function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
-      { branchName, filesLength: files.length, message, parentBranch },
+      {
+        branchName,
+        filesLength: files.length,
+        message,
+        parentBranch,
+      },
       null,
       2
     )})`
   );
-  await config.storage.commitFilesToBranch(
+  await config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 
   // wait for pr change propagation
   await delay(1000);
@@ -477,6 +493,18 @@ export /* istanbul ignore next */ function getRepoStatus(): Promise<
   return config.storage.getRepoStatus();
 }
 
+async function getStatus(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketCommitStatus> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  return (await api.get(
+    `./rest/build-status/1.0/commits/stats/${branchCommit}`,
+    { useCache }
+  )).body;
+}
+
 // Returns the combined status for a branch.
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
@@ -495,15 +523,11 @@ export async function getBranchStatus(
   }
 
   if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+    throw new Error(REPOSITORY_CHANGED);
   }
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-
   try {
-    const commitStatus = (await api.get(
-      `./rest/build-status/1.0/commits/stats/${branchCommit}`
-    )).body;
+    const commitStatus = await getStatus(branchName);
 
     logger.debug({ commitStatus }, 'branch status check result');
 
@@ -516,6 +540,19 @@ export async function getBranchStatus(
   }
 }
 
+async function getStatusCheck(
+  branchName: string,
+  useCache = true
+): Promise<utils.BitbucketStatus[]> {
+  const branchCommit = await config.storage.getBranchCommit(branchName);
+
+  return utils.accumulateValues(
+    `./rest/build-status/1.0/commits/${branchCommit}`,
+    'get',
+    { useCache }
+  );
+}
+
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatusCheck(
   branchName: string,
@@ -523,12 +560,8 @@ export async function getBranchStatusCheck(
 ): Promise<string | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
-
   try {
-    const states = await utils.accumulateValues(
-      `./rest/build-status/1.0/commits/${branchCommit}`
-    );
+    const states = await getStatusCheck(branchName);
 
     for (const state of states) {
       if (state.key === context) {
@@ -549,13 +582,13 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string | null,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   logger.debug(`setBranchStatus(${branchName})`);
 
   const existingStatus = await getBranchStatusCheck(branchName, context);
@@ -587,6 +620,10 @@ export async function setBranchStatus(
     }
 
     await api.post(`./rest/build-status/1.0/commits/${branchCommit}`, { body });
+
+    // update status cache
+    await getStatus(branchName, false);
+    await getStatusCheck(branchName, false);
   } catch (err) {
     logger.warn({ err }, `Failed to set branch status`);
   }
@@ -655,7 +692,7 @@ export async function addReviewers(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
 
     const reviewersSet = new Set([...pr.reviewers, ...reviewers]);
@@ -674,9 +711,9 @@ export async function addReviewers(
     await getPr(prNo, true);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     } else {
       logger.fatal({ err }, `Failed to add reviewers ${reviewers} to #${prNo}`);
       throw err;
@@ -758,20 +795,20 @@ async function deleteComment(prNo: number, commentId: number): Promise<void> {
   );
 }
 
-export async function ensureComment(
-  prNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  const sanitizedContent = sanitize(content);
   try {
-    const comments = await getComments(prNo);
+    const comments = await getComments(number);
     let body: string;
     let commentId: number | undefined;
     let commentNeedsUpdating: boolean | undefined;
     if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
-      body = `### ${topic}\n\n${content}`;
+      logger.debug(`Ensuring comment "${topic}" in #${number}`);
+      body = `### ${topic}\n\n${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -779,8 +816,8 @@ export async function ensureComment(
         }
       });
     } else {
-      logger.debug(`Ensuring content-only comment in #${prNo}`);
-      body = `${content}`;
+      logger.debug(`Ensuring content-only comment in #${number}`);
+      body = `${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text === body) {
           commentId = comment.id;
@@ -789,14 +826,17 @@ export async function ensureComment(
       });
     }
     if (!commentId) {
-      await addComment(prNo, body);
+      await addComment(number, body);
       logger.info(
-        { repository: config.repository, prNo, topic },
+        { repository: config.repository, prNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
-      await editComment(prNo, commentId, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment updated');
+      await editComment(number, commentId, body);
+      logger.info(
+        { repository: config.repository, prNo: number },
+        'Comment updated'
+      );
     } else {
       logger.debug('Comment is already update-to-date');
     }
@@ -833,13 +873,12 @@ export async function ensureCommentRemoval(
 const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  _labels?: string[] | null,
-  useDefaultBranch?: boolean
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  useDefaultBranch,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -894,7 +933,7 @@ export async function createPr(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
       await deleteBranch(branchName);
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
   }
@@ -942,7 +981,7 @@ export async function updatePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
     const { body } = await api.put<{ version: number }>(
@@ -960,9 +999,9 @@ export async function updatePr(
     updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     } else {
       logger.fatal({ err }, `Failed to update PR`);
       throw err;
@@ -980,7 +1019,7 @@ export async function mergePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await api.post<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
@@ -988,7 +1027,7 @@ export async function mergePr(
     updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
       logger.warn({ err }, `Failed to merge PR`);
       return false;
@@ -1010,7 +1049,7 @@ export function getPrBody(input: string): string {
   return smartTruncate(input, 30000)
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- .*?-rebase -->.*?(\n|$)`), '')
+    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 

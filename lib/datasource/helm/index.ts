@@ -1,4 +1,5 @@
 import yaml from 'js-yaml';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import got from '../../util/got';
@@ -21,6 +22,11 @@ export async function getRepositoryData(
       return null;
     }
   } catch (err) {
+    // istanbul ignore if
+    if (err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN') {
+      logger.info({ err }, 'Could not connect to helm repository');
+      return null;
+    }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.warn({ err }, 'index.yaml lookup error');
       return null;
@@ -30,7 +36,7 @@ export async function getRepositoryData(
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       logger.warn({ err }, `${repository} server error`);
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn({ err }, `${repository} lookup failure: Unknown error`);
     return null;
@@ -76,7 +82,7 @@ export async function getPkgReleases({
   }
   const repositoryData = await getRepositoryData(helmRepository);
   if (!repositoryData) {
-    logger.warn(`Couldn't get index.yaml file from ${helmRepository}`);
+    logger.info(`Couldn't get index.yaml file from ${helmRepository}`);
     return null;
   }
   const releases = repositoryData.find(chart => chart.name === lookupName);

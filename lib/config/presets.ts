@@ -8,6 +8,11 @@ import * as gitlab from '../datasource/gitlab';
 import { RenovateConfig } from './common';
 import { mergeChildConfig } from './utils';
 import { regEx } from '../util/regex';
+import {
+  CONFIG_VALIDATION,
+  DATASOURCE_FAILURE,
+  PLATFORM_FAILURE,
+} from '../constants/error-messages';
 
 const datasources = {
   github,
@@ -166,12 +171,12 @@ export async function resolveConfigPresets(
           logger.debug({ err }, 'Preset fetch error');
           // istanbul ignore if
           if (
-            err.message === 'platform-failure' ||
-            err.message === 'registry-failure'
+            err.message === PLATFORM_FAILURE ||
+            err.message === DATASOURCE_FAILURE
           ) {
             throw err;
           }
-          const error = new Error('config-validation');
+          const error = new Error(CONFIG_VALIDATION);
           if (err.message === 'dep not found') {
             error.validationError = `Cannot find preset's package (${preset})`;
           } else if (err.message === 'preset renovate-config not found') {

@@ -606,9 +606,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -623,9 +629,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -640,6 +652,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -654,7 +669,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -669,11 +686,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -688,7 +709,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -703,7 +726,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1187,27 +1212,87 @@ exports[`platform/bitbucket-server endpoint with no path setBranchStatus() shoul
 Array [
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2088,9 +2173,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2105,9 +2196,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2122,6 +2219,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2136,7 +2236,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2151,11 +2253,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2170,7 +2276,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2185,7 +2293,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2669,27 +2779,87 @@ exports[`platform/bitbucket-server endpoint with path setBranchStatus() should b
 Array [
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-    undefined,
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;

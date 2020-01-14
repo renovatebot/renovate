@@ -4,13 +4,7 @@ import { logger } from '../../../../logger';
 import { getConfigDesc } from './config-description';
 import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
 import { getBaseBranchDesc } from './base-branch';
-import { getPrList, BranchConfig } from './pr-list';
-import {
-  appName,
-  onboardingBranch,
-  onboardingPrTitle,
-  urls,
-} from '../../../../config/app-strings';
+import { getPrList, PrBranchConfig } from './pr-list';
 import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
@@ -18,22 +12,22 @@ import { PackageFile } from '../../../../manager/common';
 export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
-  branches: BranchConfig[]
+  branches: PrBranchConfig[]
 ): Promise<void> {
   if (config.repoIsOnboarded) {
     return;
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
-  const existingPr = await platform.getBranchPr(onboardingBranch);
+  const existingPr = await platform.getBranchPr(config.onboardingBranch);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [${appName}](${urls.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  let prTemplate = `Welcome to [Renovate](${config.productLinks.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate += config.requireConfig
     ? emojify(
-        `:vertical_traffic_light: To activate ${appName}, merge this Pull Request. To disable ${appName}, simply close this Pull Request unmerged.\n\n`
+        `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
       )
     : emojify(
-        `:vertical_traffic_light: ${appName} will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+        `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
       );
   prTemplate += emojify(
     `
@@ -48,8 +42,8 @@ export async function ensureOnboardingPr(
 
 ---
 
-:question: Got questions? Check out ${appName}'s [Docs](${urls.documentation}), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${urls.help}).
+:question: Got questions? Check out Renovate's [Docs](${config.productLinks.documentation}), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${config.productLinks.help}).
 `
   );
   let prBody = prTemplate;
@@ -73,14 +67,14 @@ If you need any further assistance then you can also [request help here](${urls.
     configDesc = getConfigDesc(config, packageFiles);
   } else {
     configDesc = emojify(
-      `### Configuration\n\n:abcd: ${appName} has detected a custom config for this PR. Feel free to ask for [help](${urls.help}) if you have any doubts and would like it reviewed.\n\n`
+      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
     if (existingPr.isConflicted) {
       configDesc += emojify(
-        `:warning: This PR has a merge conflict, however ${appName} is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );
     } else {
-      configDesc += `Important: Now that this branch is edited, ${appName} can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
+      configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
     }
   }
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
@@ -126,13 +120,13 @@ If you need any further assistance then you can also [request help here](${urls.
     if (config.dryRun) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
-      const pr = await platform.createPr(
-        onboardingBranch,
-        onboardingPrTitle,
+      const pr = await platform.createPr({
+        branchName: config.onboardingBranch,
+        prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        useDefaultBranch
-      );
+        useDefaultBranch,
+      });
       logger.info({ pr: pr.displayNumber }, 'Created onboarding PR');
     }
   } catch (err) /* istanbul ignore next */ {
@@ -147,7 +141,7 @@ If you need any further assistance then you can also [request help here](${urls.
       )
     ) {
       logger.info('Onboarding PR already exists but cannot find it');
-      await platform.deleteBranch(onboardingBranch);
+      await platform.deleteBranch(config.onboardingBranch);
       return;
     }
     throw err;

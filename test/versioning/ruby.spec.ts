@@ -52,18 +52,25 @@ describe('semverRuby', () => {
 
   describe('.isVersion', () => {
     it('returns true when version is valid', () => {
+      expect(semverRuby.isVersion('0')).toBe(true);
+      expect(semverRuby.isVersion('v0')).toBe(true);
+      expect(semverRuby.isVersion('v1')).toBe(true);
+      expect(semverRuby.isVersion('v1.2')).toBe(true);
+      expect(semverRuby.isVersion('v1.2.3')).toBe(true);
       expect(semverRuby.isVersion('1')).toBe(true);
       expect(semverRuby.isVersion('1.1')).toBe(true);
       expect(semverRuby.isVersion('1.1.2')).toBe(true);
       expect(semverRuby.isVersion('1.1.2.3')).toBe(true);
       expect(semverRuby.isVersion('1.1.2-4')).toBe(true);
       expect(semverRuby.isVersion('1.1.2.pre.4')).toBe(true);
+      expect(semverRuby.isVersion('v1.1.2.pre.4')).toBe(true);
     });
 
     it('returns false when version is invalid', () => {
       expect(semverRuby.isVersion(undefined)).toBe(false);
       expect(semverRuby.isVersion('')).toBe(false);
       expect(semverRuby.isVersion(null)).toBe(false);
+      expect(semverRuby.isVersion('v')).toBe(false);
       expect(semverRuby.isVersion('tottally-not-a-version')).toBe(false);
     });
   });
@@ -349,6 +356,7 @@ describe('semverRuby', () => {
     it('returns correct version for pin strategy', () => {
       [
         ['1.2.3', '1.0.3', 'pin', '1.0.3', '1.2.3'],
+        ['v1.2.3', 'v1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '= 1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '!= 1.0.3', 'pin', '1.0.4', '1.2.3'],
         ['1.2.3', '> 1.0.3', 'pin', '1.0.4', '1.2.3'],
@@ -367,10 +375,13 @@ describe('semverRuby', () => {
     it('returns correct version for bump strategy', () => {
       [
         ['1.2.3', '1.0.3', 'bump', '1.0.3', '1.2.3'],
+        ['v1.2.3', 'v1.0.3', 'bump', '1.0.3', '1.2.3'],
         ['= 1.2.3', '= 1.0.3', 'bump', '1.0.3', '1.2.3'],
         ['!= 1.0.3', '!= 1.0.3', 'bump', '1.0.0', '1.2.3'],
         ['> 1.2.2', '> 1.0.3', 'bump', '1.0.4', '1.2.3'],
+        ['> 1.2.3', '> 1.2.3', 'bump', '1.0.0', '1.0.3'],
         ['< 1.2.4', '< 1.0.3', 'bump', '1.0.0', '1.2.3'],
+        ['< 1.2.3', '< 1.2.3', 'bump', '1.0.0', '1.0.3'],
         ['< 1.2.4', '< 1.2.2', 'bump', '1.0.0', '1.2.3'],
         ['< 1.2.4', '< 1.2.3', 'bump', '1.0.0', '1.2.3'],
         ['< 1.3', '< 1.2', 'bump', '1.0.0', '1.2.3'],
@@ -392,10 +403,39 @@ describe('semverRuby', () => {
         semverRuby.getNewValue('>= 3.2, < 5.0', 'replace', '4.0.2', '6.0.1')
       ).toMatchSnapshot();
     });
+    it('handles updates to bundler common complex ranges major', () => {
+      expect(
+        semverRuby.getNewValue('~> 5.2, >= 5.2.5', 'replace', '5.3.0', '6.0.1')
+      ).toEqual('~> 6.0, >= 6.0.1');
+    });
+    it('handles updates to bundler common complex ranges minor', () => {
+      expect(
+        semverRuby.getNewValue(
+          '~> 5.2.0, >= 5.2.5',
+          'replace',
+          '5.2.5',
+          '5.3.1'
+        )
+      ).toEqual('~> 5.3.0, >= 5.3.1');
+    });
+    it('handles change in precision', () => {
+      expect(
+        semverRuby.getNewValue('4.2.0', 'replace', '4.2.0', '4.2.5.1')
+      ).toEqual('4.2.5.1');
+      expect(
+        semverRuby.getNewValue('4.2.5.1', 'replace', '4.2.5.1', '4.3.0')
+      ).toEqual('4.3.0');
+    });
+    it('handles major ranges', () => {
+      expect(
+        semverRuby.getNewValue('~> 1', 'replace', '1.2.0', '2.0.3')
+      ).toEqual('~> 2');
+    });
 
     it('returns correct version for replace strategy', () => {
       [
         ['1.2.3', '1.0.3', 'replace', '1.0.3', '1.2.3'],
+        ['v1.2.3', 'v1.0.3', 'replace', '1.0.3', '1.2.3'],
         ['= 1.2.3', '= 1.0.3', 'replace', '1.0.3', '1.2.3'],
         ['!= 1.0.3', '!= 1.0.3', 'replace', '1.0.0', '1.2.3'],
         ['< 1.2.4', '< 1.0.3', 'replace', '1.0.0', '1.2.3'],
@@ -411,12 +451,13 @@ describe('semverRuby', () => {
         ['~> 1.0.3', '~> 1.0.3', 'replace', '1.0.0', '1.0.4'],
         ['~> 4.7, >= 4.7.4', '~> 4.7, >= 4.7.4', 'replace', '1.0.0', '4.7.9'],
         [
-          '>= 2.0.0, <= 2.20.0',
+          '>= 2.0.0, <= 2.20.1',
           '>= 2.0.0, <= 2.15',
           'replace',
           '2.15.0',
-          '2.20.0',
+          '2.20.1',
         ],
+        ['~> 6.0.0', '~> 5.2.0', 'replace', '5.2.4.1', '6.0.2.1'],
       ].forEach(([expected, current, range, from, to]) => {
         expect(semverRuby.getNewValue(current, range as any, from, to)).toEqual(
           expected

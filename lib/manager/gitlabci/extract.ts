@@ -2,6 +2,17 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
 
+function skipCommentLines(
+  lines: string[],
+  lineNumber: number
+): { lineNumber: number; line: string } {
+  let ln = lineNumber;
+  while (ln < lines.length - 1 && lines[ln].match(/^\s*#/)) {
+    ln += 1;
+  }
+  return { line: lines[ln], lineNumber: ln };
+}
+
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
@@ -12,13 +23,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (imageMatch) {
         switch (imageMatch[1]) {
           case '': {
-            const imageNameLine = lines[lineNumber + 1];
-            const imageNameMatch = imageNameLine.match(
+            const imageNameLine = skipCommentLines(lines, lineNumber + 1);
+            const imageNameMatch = imageNameLine.line.match(
               /^\s*name:\s*'?"?([^\s]+|)'?"?\s*$/
             );
 
             if (imageNameMatch) {
-              lineNumber += 1;
+              lineNumber = imageNameLine.lineNumber;
               logger.trace(`Matched image name on line ${lineNumber}`);
               const currentFrom = imageNameMatch[1];
               const dep = getDep(currentFrom);
@@ -41,19 +52,19 @@ export function extractPackageFile(content: string): PackageFile | null {
       const services = line.match(/^\s*services:\s*$/);
       if (services) {
         logger.trace(`Matched services on line ${lineNumber}`);
-        let foundImage;
+        let foundImage: boolean;
         do {
           foundImage = false;
-          const serviceImageLine = lines[lineNumber + 1];
-          logger.trace(`serviceImageLine: "${serviceImageLine}"`);
-          const serviceImageMatch = serviceImageLine.match(
+          const serviceImageLine = skipCommentLines(lines, lineNumber + 1);
+          logger.trace(`serviceImageLine: "${serviceImageLine.line}"`);
+          const serviceImageMatch = serviceImageLine.line.match(
             /^\s*-\s*'?"?([^\s'"]+)'?"?\s*$/
           );
           if (serviceImageMatch) {
             logger.trace('serviceImageMatch');
             foundImage = true;
             const currentFrom = serviceImageMatch[1];
-            lineNumber += 1;
+            lineNumber = serviceImageLine.lineNumber;
             const dep = getDep(currentFrom);
             dep.managerData = { lineNumber };
             dep.depType = 'service-image';

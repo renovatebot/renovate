@@ -3,6 +3,7 @@ import upath from 'upath';
 
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 import {
   init,
@@ -77,7 +78,7 @@ async function executeGradle(
   } catch (err) {
     // istanbul ignore if
     if (err.code === TIMEOUT_CODE) {
-      logger.error(' Process killed. Possibly gradle timed out.');
+      logger.warn({ err }, ' Process killed. Possibly gradle timed out.');
     }
     // istanbul ignore if
     if (err.message.includes('Could not resolve all files for configuration')) {
@@ -87,7 +88,7 @@ async function executeGradle(
     }
     logger.warn({ err, cmd }, 'Gradle run failed');
     logger.info('Aborting Renovate due to Gradle lookup errors');
-    throw new Error('registry-failure');
+    throw new Error(DATASOURCE_FAILURE);
   }
   logger.debug(stdout + stderr);
   logger.info('Gradle report complete');

@@ -2,7 +2,7 @@ import { ensureDir, outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
@@ -14,10 +14,11 @@ export async function updateArtifacts(
   config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
-  process.env.GOPATH =
-    process.env.GOPATH || join(config.cacheDir, './others/go');
-  await ensureDir(process.env.GOPATH);
-  logger.debug('Using GOPATH: ' + process.env.GOPATH);
+  const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
+  const env = getChildProcessEnv(customEnv);
+  env.GOPATH = env.GOPATH || join(config.cacheDir, './others/go');
+  await ensureDir(env.GOPATH);
+  logger.debug('Using GOPATH: ' + env.GOPATH);
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await platform.getFile(sumFileName);
   if (!existingGoSumContent) {
@@ -38,18 +39,15 @@ export async function updateArtifacts(
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    const customEnv = ['GOPATH', 'GOPROXY'];
-    const env = getChildProcessEnv(customEnv);
     const startTime = process.hrtime();
     let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
-      const volumes = [config.localDir, process.env.GOPATH];
+      const volumes = [config.localDir, env.GOPATH];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = customEnv;
       cmd += envVars.map(e => `-e ${e} `).join('');
@@ -70,8 +68,14 @@ export async function updateArtifacts(
       } else {
         cmd += 'go';
       }
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running go via global command');
+      cmd = 'go';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
       cmd = 'go';
     }
     let args = 'get -d ./...';

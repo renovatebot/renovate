@@ -1,6 +1,7 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
 import { GotApi, RepoParams } from '../../../lib/platform/common';
+import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
@@ -127,7 +128,7 @@ describe('platform/bitbucket', () => {
       expect.assertions(1);
       await expect(
         initRepo({ repository: 'some/empty', optimizeForDisabled: true })
-      ).rejects.toThrow('disabled');
+      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
   });
 
@@ -219,13 +220,13 @@ describe('platform/bitbucket', () => {
     it('posts status', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.setBranchStatus(
-          'branch',
-          'context',
-          'description',
-          'failed',
-          'targetUrl'
-        );
+        await bitbucket.setBranchStatus({
+          branchName: 'branch',
+          context: 'context',
+          description: 'description',
+          state: 'failed',
+          url: 'targetUrl',
+        });
         expect(api.post.mock.calls).toMatchSnapshot();
       });
     });
@@ -304,7 +305,7 @@ describe('platform/bitbucket', () => {
     it('updates existing issues', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.ensureIssue('title', 'body');
+        await bitbucket.ensureIssue({ title: 'title', body: 'body' });
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post.mock.calls).toMatchSnapshot();
       });
@@ -316,7 +317,7 @@ describe('platform/bitbucket', () => {
           localDir: '',
           optimizeForDisabled: false,
         });
-        await bitbucket.ensureIssue('title', 'body');
+        await bitbucket.ensureIssue({ title: 'title', body: 'body' });
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post.mock.calls).toMatchSnapshot();
       });
@@ -324,7 +325,7 @@ describe('platform/bitbucket', () => {
     it('noop for existing issue', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.ensureIssue('title', 'content\n');
+        await bitbucket.ensureIssue({ title: 'title', body: 'content\n' });
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post).toHaveBeenCalledTimes(0);
       });
@@ -360,7 +361,11 @@ describe('platform/bitbucket', () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureComment(3, 'topic', 'content');
+      await bitbucket.ensureComment({
+        number: 3,
+        topic: 'topic',
+        content: 'content',
+      });
     });
   });
 
@@ -384,7 +389,9 @@ describe('platform/bitbucket', () => {
     it('finds pr', async () => {
       await initRepo();
       await mocked(async () => {
-        expect(await bitbucket.findPr('branch', 'title')).toMatchSnapshot();
+        expect(
+          await bitbucket.findPr({ branchName: 'branch', prTitle: 'title' })
+        ).toMatchSnapshot();
       });
     });
   });
@@ -400,7 +407,11 @@ describe('platform/bitbucket', () => {
       api.post.mockReturnValueOnce({
         body: { id: 5 },
       } as any);
-      const { number } = await bitbucket.createPr('branch', 'title', 'body');
+      const { number } = await bitbucket.createPr({
+        branchName: 'branch',
+        prTitle: 'title',
+        prBody: 'body',
+      });
       expect(number).toBe(5);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -473,7 +484,11 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.commitFilesToBranch('test', [], 'message');
+        await bitbucket.commitFilesToBranch({
+          branchName: 'test',
+          files: [],
+          message: 'message',
+        });
       });
     });
   });

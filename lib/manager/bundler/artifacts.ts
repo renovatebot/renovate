@@ -1,7 +1,7 @@
 import { outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource/docker';
 import {
@@ -12,8 +12,12 @@ import {
 } from '../../versioning/ruby';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import {
+  BUNDLER_COULD_NOT_RESOLVE,
+  BUNDLER_INVALID_CREDENTIALS,
+  BUNDLER_UNKNOWN_ERROR,
+} from '../../constants/error-messages';
 
-// istanbul ignore next
 export async function updateArtifacts(
   packageFileName: string,
   updatedDeps: string[],
@@ -93,20 +97,23 @@ export async function updateArtifacts(
         bundlerVersion = ' -v ' + bundlerConstraint;
       }
       cmd = `docker run --rm `;
-      // istanbul ignore if
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
       const volumes = [config.localDir];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      const envVars = [];
-      cmd += envVars.map(e => `-e ${e} `);
       cmd += `-w "${cwd}" `;
       cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';
-    } else {
+    } else if (
+      config.binarySource === 'auto' ||
+      config.binarySource === 'global'
+    ) {
       logger.info('Running bundler via global bundler');
+      cmd = 'bundle';
+    } else {
+      logger.warn({ config }, 'Unsupported binarySource');
       cmd = 'bundle';
     }
     cmd += ` lock --update ${updatedDeps.join(' ')}`;
@@ -137,7 +144,7 @@ export async function updateArtifacts(
         },
       },
     ];
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     if (
       (err.stdout &&
         err.stdout.includes('Please supply credentials for this source')) ||
@@ -147,20 +154,41 @@ export async function updateArtifacts(
         { err },
         'Gemfile.lock update failed due to missing credentials'
       );
-      global.repoCache.bundlerArtifactsError = 'bundler-credentials';
-      throw new Error('bundler-credentials');
+      global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
+      throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    if (err.stderr && err.stderr.includes('incompatible marshal file format')) {
-      const gemrcFile = await platform.getFile(join(cwd, '.gemrc'));
-      logger.debug(
-        { err, gemfile: newPackageFileContent, gemrcFile },
-        'Gemfile marshalling error'
-      );
-      logger.warn('Gemfile.lock update failed due to marshalling error');
-    } else {
-      logger.warn({ err }, 'Failed to generate Gemfile.lock (unknown error)');
+    const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
+    if (err.stderr && err.stderr.match(resolveMatchRe)) {
+      logger.debug({ err }, 'Bundler has a resolve error');
+      const resolveMatches = [];
+      let resolveMatch;
+      do {
+        resolveMatch = resolveMatchRe.exec(err.stderr);
+        if (resolveMatch) {
+          resolveMatches.push(resolveMatch[1].split(' ').shift());
+        }
+      } while (resolveMatch);
+      if (resolveMatches.some(match => !updatedDeps.includes(match))) {
+        logger.debug(
+          { resolveMatches, updatedDeps },
+          'Found new resolve matches - reattempting recursively'
+        );
+        const newUpdatedDeps = [
+          ...new Set([...updatedDeps, ...resolveMatches]),
+        ];
+        return updateArtifacts(
+          packageFileName,
+          newUpdatedDeps,
+          newPackageFileContent,
+          config
+        );
+      }
+      logger.warn({ err }, 'Cannot resolve bundler lock update error');
+      // Do not set global.repoCache because we don't want to stop trying other branches
+      throw new Error(BUNDLER_COULD_NOT_RESOLVE);
     }
-    global.repoCache.bundlerArtifactsError = 'bundler-unknown';
-    throw new Error('bundler-unknown');
+    logger.warn({ err }, 'Unknown bundler lock file update error');
+    global.repoCache.bundlerArtifactsError = BUNDLER_UNKNOWN_ERROR;
+    throw new Error(BUNDLER_UNKNOWN_ERROR);
   }
 }

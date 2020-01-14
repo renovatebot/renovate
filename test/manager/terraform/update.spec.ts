@@ -84,5 +84,42 @@ describe('manager/terraform/update', () => {
       expect(res).not.toEqual(tf1);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
+    it('updates terraform versions with terraformDependencyType `module` ', () => {
+      const upgrade = {
+        currentValue: '0.1.0',
+        depName: 'hashicorp/consul/aws',
+        depNameShort: 'hashicorp/consul/aws',
+        depType: 'terraform',
+        managerData: {
+          lineNumber: 10,
+          terraformDependencyType: 'module',
+        },
+        moduleName: 'consul',
+        source: 'hashicorp/consul/aws',
+        newValue: '0.4.0',
+      };
+      const res = updateDependency(tf1, upgrade);
+      expect(res).not.toEqual(tf1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+    it('updates terraform versions with terraformDependencyType `provider` ', () => {
+      const upgrade = {
+        currentValue: '1.36.1',
+        depName: 'azurerm',
+        depNameShort: 'azurerm',
+        depType: 'terraform',
+        managerData: {
+          lineNumber: 99,
+          terraformDependencyType: 'provider',
+        },
+        moduleName: 'azurerm',
+        source:
+          'https://github.com/terraform-providers/terraform-provider-azurerm',
+        newValue: '1.38.0',
+      };
+      const res = updateDependency(tf1, upgrade);
+      expect(res).not.toEqual(tf1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
   });
 });

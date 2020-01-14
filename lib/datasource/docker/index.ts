@@ -10,6 +10,7 @@ import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -41,7 +42,7 @@ export function getRegistryRepository(
   if (!registry.match('^https?://')) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ url: registry });
+  const opts = hostRules.find({ hostType: 'docker', url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
@@ -162,15 +163,15 @@ async function getAuthHeaders(
     if (err.name === 'RequestError' && registry.endsWith('docker.io')) {
       logger.debug({ err }, 'err');
       logger.info('Docker registry error: RequestError');
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     if (err.statusCode === 429 && registry.endsWith('docker.io')) {
       logger.warn({ err }, 'docker registry failure: too many requests');
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn({ err }, 'docker registry failure: internal error');
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -210,7 +211,7 @@ async function getManifestResponse(
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     if (err.statusCode === 401) {
@@ -235,7 +236,7 @@ async function getManifestResponse(
     }
     if (err.statusCode === 429 && registry.endsWith('docker.io')) {
       logger.warn({ err }, 'docker registry failure: too many requests');
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.info(
@@ -247,7 +248,7 @@ async function getManifestResponse(
         },
         'docker registry failure: internal error'
       );
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.info(
@@ -311,7 +312,7 @@ export async function getDigest(
     await renovateCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     logger.info(
@@ -366,7 +367,7 @@ async function getTags(
     await renovateCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     logger.debug(
@@ -393,14 +394,14 @@ async function getTags(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
       );
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: internal error'
       );
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.info(
@@ -524,7 +525,7 @@ async function getLabels(
     await renovateCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
-    if (err.message === 'registry-failure') {
+    if (err.message === DATASOURCE_FAILURE) {
       throw err;
     }
     if (err.statusCode === 401) {

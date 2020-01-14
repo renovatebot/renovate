@@ -1,0 +1,102 @@
+name: Test CI
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+
+env:
+  CI: true
+
+jobs:
+  test:
+    name: test
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [10.x, 12.x]
+        python-version: [3.8]
+
+    steps:
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Init platform
+        id: init
+        shell: bash
+        run: |
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
+          python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=pip_cache::' + USER_CACHE_DIR)"
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name  'Renovate Bot'
+          node --version
+          python --version
+          yarn --version
+          pip --version
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Cache Yarn packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: ${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn_cache-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ matrix.node-version }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-yarn-
+
+      - name: Cache pip packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.pip_cache }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.python-version }}-pip-
+
+      - name: Installing dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          yarn install --frozen-lockfile --link-duplicates
+          pip install --user -r requirements.txt
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test schema
+        run: yarn test-schema
+
+      - name: Type check
+        run: yarn type-check
+
+      - name: Build
+        run: yarn build
+
+      - name: Unit tests
+        run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
+
+      - name: E2E Test
+        run: yarn test-e2e

@@ -1,64 +1,29 @@
-import { readFileSync } from 'fs';
-import { file as _file } from 'tmp-promise';
-import { relative } from 'path';
-import { exec } from '../../../lib/util/exec';
+import { exec as _exec } from 'child_process';
+
 import {
-  extractPackageFile,
+  resetModule,
   parsePythonVersion,
   getPythonAlias,
   pythonVersions,
 } from '../../../lib/manager/pip_setup/extract';
+import { envMock, mockExecSequence } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { mocked } from '../../util';
 
-const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
-const content = readFileSync(packageFile, 'utf8');
-const config = {
-  localDir: '.',
-};
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 
-async function tmpFile() {
-  const file = await _file({ postfix: '.py' });
-  return relative('.', file.path);
-}
+jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 
 describe('lib/manager/pip_setup/extract', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
     jest.resetModules();
-  });
-  describe('extractPackageFile()', () => {
-    it('returns found deps', async () => {
-      expect(
-        await extractPackageFile(content, packageFile, config)
-      ).toMatchSnapshot();
-    });
-    it('should return null for invalid file', async () => {
-      expect(
-        await extractPackageFile('raise Exception()', await tmpFile(), config)
-      ).toBeNull();
-    });
-    it('should return null for no deps file', async () => {
-      expect(
-        await extractPackageFile(
-          'from setuptools import setup\nsetup()',
-          await tmpFile(),
-          config
-        )
-      ).toBeNull();
-    });
-    it('catches error', async () => {
-      const fExec = jest.fn(() => {
-        throw new Error('No such file or directory');
-      });
-      jest.doMock('../../../lib/util/exec', () => {
-        return {
-          exec: fExec,
-        };
-      });
-      const m = require('../../../lib/manager/pip_setup/extract');
-      await m.extractPackageFile(content, packageFile, config);
-      expect(fExec).toHaveBeenCalledTimes(4);
-    });
-  });
+    resetModule();
 
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+  });
   describe('parsePythonVersion', () => {
     it('returns major and minor version numbers', () => {
       expect(parsePythonVersion('Python 2.7.15rc1')).toEqual([2, 7]);
@@ -66,69 +31,37 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
-      expect(pythonVersions.includes(await getPythonAlias())).toBe(true);
-    });
-    it('finds python', async () => {
-      const fExec = jest.fn(() =>
-        Promise.resolve({ stderr: 'Python 3.7.15rc1' })
-      );
-      jest.doMock('../../../lib/util/exec', () => {
-        return {
-          exec: fExec,
-        };
-      });
-      const m = require('../../../lib/manager/pip_setup/extract');
-      expect(pythonVersions.includes(await m.getPythonAlias())).toBe(true);
-      expect(fExec).toMatchSnapshot();
+      const execSnapshots = mockExecSequence(exec, [
+        { stdout: '', stderr: 'Python 2.7.17\\n' },
+        new Error(),
+        { stdout: 'Python 3.8.0\\n', stderr: '' },
+      ]);
+      const result = await getPythonAlias();
+      expect(pythonVersions.includes(result)).toBe(true);
+      expect(result).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
     });
   });
-  describe('Test for presence of mock lib', () => {
-    it('should test if python mock lib is installed', async () => {
-      const cp = jest.requireActual('../../../lib/util/exec');
-      let isMockInstalled = true;
-      // when binarysource === docker
-      try {
-        await cp.exec(`python -c "import mock"`);
-      } catch (err) {
-        isMockInstalled = false;
-      }
-      if (!isMockInstalled) {
-        try {
-          const pythonAlias = await getPythonAlias();
-          await exec(`${pythonAlias} -c "from unittest import mock"`);
-          isMockInstalled = true;
-        } catch (err) {
-          isMockInstalled = false;
-        }
-      }
-      expect(isMockInstalled).toBe(true);
-    });
-  });
-  /*
-  describe('extractSetupFile()', () => {
-    it('should return parsed setup() call', async () => {
-      expect(
-        await extractSetupFile(content, packageFile, config)
-      ).toMatchSnapshot();
-    });
-    it('should support setuptools', async () => {
-      expect(
-        await extractSetupFile(
-          'from setuptools import setup\nsetup(name="talisker")\n',
-          await tmpFile(),
-          config
-        )
-      ).toEqual({ name: 'talisker' });
-    });
-    it('should support distutils.core', async () => {
-      expect(
-        await extractSetupFile(
-          'from distutils.core import setup\nsetup(name="talisker")\n',
-          await tmpFile(),
-          config
-        )
-      ).toEqual({ name: 'talisker' });
-    });
-  });
-  */
+  // describe('Test for presence of mock lib', () => {
+  //   it('should test if python mock lib is installed', async () => {
+  //     const cp = jest.requireActual('../../../lib/util/exec');
+  //     let isMockInstalled = true;
+  //     // when binarysource === docker
+  //     try {
+  //       await cp.exec(`python -c "import mock"`);
+  //     } catch (err) {
+  //       isMockInstalled = false;
+  //     }
+  //     if (!isMockInstalled) {
+  //       try {
+  //         const pythonAlias = await getPythonAlias();
+  //         await exec(`${pythonAlias} -c "from unittest import mock"`);
+  //         isMockInstalled = true;
+  //       } catch (err) {
+  //         isMockInstalled = false;
+  //       }
+  //     }
+  //     expect(isMockInstalled).toBe(true);
+  //   });
+  // });
 });

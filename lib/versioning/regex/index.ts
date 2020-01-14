@@ -2,6 +2,7 @@ import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { regEx } from '../../util/regex';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
 export interface RegExpVersion extends GenericVersion {
   /** prereleases are treated in the standard semver manner, if present */
@@ -47,7 +48,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       !new_config.includes('<minor>') &&
       !new_config.includes('<patch>')
     ) {
-      const error = new Error('config-validation');
+      const error = new Error(CONFIG_VALIDATION);
       error.configFile = new_config;
       error.validationError =
         'regex versionScheme needs at least one major, minor or patch group defined';
@@ -68,7 +69,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   // convenience method for passing a string into a Version given current config.
   protected _parse(version: string): RegExpVersion | null {
-    const match = version.match(this._config);
+    const match = version ? version.match(this._config) : null;
     if (match === null) {
       return null;
     }

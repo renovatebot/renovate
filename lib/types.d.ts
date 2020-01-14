@@ -26,7 +26,6 @@ declare namespace NodeJS {
   interface Global {
     appMode?: boolean;
     gitAuthor?: { name: string; email: string };
-    renovateVersion: string;
 
     renovateCache: Renovate.Cache;
 

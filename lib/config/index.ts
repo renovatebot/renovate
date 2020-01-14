@@ -93,9 +93,27 @@ export async function parseConfigs(
 
   // Print config
   logger.trace({ config }, 'Global config');
+
+  // Massage endpoint to have a trailing slash
+  if (config.endpoint) {
+    logger.debug('Adding trailing slash to endpoint');
+    config.endpoint = config.endpoint.replace(/\/?$/, '/');
+  }
+
   // Remove log file entries
   delete config.logFile;
   delete config.logFileLevel;
+
+  // Move global variables that we need to use later
+  const importGlobals = ['prBanner', 'prFooter'];
+  config.global = {};
+  importGlobals.forEach(key => {
+    config.global[key] = config[key];
+    delete config[key];
+  });
+  global.trustLevel = config.trustLevel || 'low';
+  delete config.trustLevel;
+
   return config;
 }
 

@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
+import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 
 /** TODO: Proper return type */
 export async function prAlreadyExisted(
@@ -13,14 +14,18 @@ export async function prAlreadyExisted(
   }
   logger.debug('recreateClosed is false');
   // Return if same PR already existed
-  const pr = await platform.findPr(config.branchName, config.prTitle, '!open');
+  const pr = await platform.findPr({
+    branchName: config.branchName,
+    prTitle: config.prTitle,
+    state: '!open',
+  });
   if (pr) {
     logger.debug('Found closed PR with current title');
     const prDetails = await platform.getPr(pr.number);
     // istanbul ignore if
     if (prDetails.state === 'open') {
       logger.debug('PR reopened');
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
     return pr;
   }

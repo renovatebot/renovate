@@ -12,7 +12,7 @@ describe('lib/manager/gomod/extract', () => {
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(7);
+      expect(res).toHaveLength(8);
       expect(res.filter(e => e.skipReason)).toHaveLength(1);
       expect(res.filter(e => e.depType === 'replace')).toHaveLength(1);
     });

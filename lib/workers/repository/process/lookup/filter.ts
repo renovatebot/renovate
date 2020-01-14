@@ -2,6 +2,7 @@ import * as semver from 'semver';
 import { logger } from '../../../../logger';
 import * as versioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -66,10 +67,13 @@ export function filterVersions(
         semver.satisfies(semver.coerce(v), allowedVersions)
       );
     } else {
-      logger.warn(
-        { depName: config.depName },
-        `Invalid allowedVersions: "${allowedVersions}"`
-      );
+      const error = new Error(CONFIG_VALIDATION);
+      error.configFile = 'config';
+      error.validationError = 'Invalid `allowedVersions`';
+      error.validationMessage =
+        'The following allowedVersions does not parse as a valid version or range: ' +
+        JSON.stringify(allowedVersions);
+      throw error;
     }
   }
 

@@ -1,32 +1,34 @@
 import { DateTime } from 'luxon';
 
-import { logger, setMeta } from '../../logger';
+import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
 import {
   getAdditionalFiles,
   AdditionalPackageFiles,
 } from '../../manager/npm/post-update';
-import { commitFilesToBranch, CommitConfig } from './commit';
+import { commitFilesToBranch } from './commit';
 import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
-import {
-  setStability,
-  setUnpublishable,
-  StabilityConfig,
-  UnpublishableConfig,
-} from './status-checks';
+import { setStability, setUnpublishable } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
 import { ensurePr, checkAutoMerge } from '../pr';
-import { appName, appSlug } from '../../config/app-strings';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
-
-export type BranchConfig = RenovateConfig &
-  StabilityConfig &
-  UnpublishableConfig &
-  CommitConfig;
+import { BranchConfig } from '../common';
+import {
+  PLATFORM_AUTHENTICATION_ERROR,
+  PLATFORM_BAD_CREDENTIALS,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  MANAGER_LOCKFILE_ERROR,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+  WORKER_FILE_UPDATE_FAILED,
+  DATASOURCE_FAILURE,
+  PLATFORM_FAILURE,
+} from '../../constants/error-messages';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -48,7 +50,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
   const labelRebase =
     branchPr.labels && branchPr.labels.includes(config.rebaseLabel);
   const prRebaseChecked =
-    branchPr.body && branchPr.body.includes(`- [x] <!-- ${appSlug}-rebase -->`);
+    branchPr.body && branchPr.body.includes(`- [x] <!-- rebase-check -->`);
 
   return titleRebase || labelRebase || prRebaseChecked;
 }
@@ -58,16 +60,11 @@ export async function processBranch(
   prHourlyLimitReached?: boolean,
   packageFiles?: AdditionalPackageFiles
 ): Promise<ProcessBranchResult> {
-  const config = { ...branchConfig };
+  const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
     .map(upgrade => upgrade.depName)
     .filter(v => v) // remove nulls (happens for lock file maintenance)
     .filter((value, i, list) => list.indexOf(value) === i); // remove duplicates
-  setMeta({
-    repository: config.repository,
-    branch: config.branchName,
-    dependencies,
-  });
   logger.debug(
     { dependencies },
     `processBranch with ${branchConfig.upgrades.length} upgrades`
@@ -97,14 +94,14 @@ export async function processBranch(
         'Closed PR already exists. Skipping branch.'
       );
       if (existingPr.state === 'closed') {
-        const subject = `${appName} Ignore Notification`;
+        const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
-          content = `As this PR has been closed unmerged, ${appName} will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then ${appName} will then reenable updates for minor and patch updates automatically.`;
+          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
         } else if (config.updateType === 'digest') {
-          content = `As this PR has been closed unmerged, ${appName} will ignore this upgrade updateType and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
+          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade updateType and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
         } else {
-          content = `As this PR has been closed unmerged, ${appName} will now ignore this update (${config.newValue}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the \`ignoreDeps\` array of your renovate config.`;
+          content = `As this PR has been closed unmerged, Renovate will now ignore this update (${config.newValue}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the \`ignoreDeps\` array of your renovate config.`;
         }
         content +=
           '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
@@ -115,7 +112,11 @@ export async function processBranch(
                 existingPr.number
             );
           } else {
-            await platform.ensureComment(existingPr.number, subject, content);
+            await platform.ensureComment({
+              number: existingPr.number,
+              topic,
+              content,
+            });
           }
         }
         if (branchExists) {
@@ -161,14 +162,14 @@ export async function processBranch(
           logger.info(
             'PR has been closed or merged since this run started - aborting'
           );
-          throw new Error('repository-changed');
+          throw new Error(REPOSITORY_CHANGED);
         }
         if (
           branchPr.isModified ||
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          const subject = 'PR has been edited';
+          const topic = 'PR has been edited';
           if (masterIssueCheck || config.rebaseRequested) {
             if (config.dryRun) {
               logger.info(
@@ -176,20 +177,24 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
-              await platform.ensureCommentRemoval(branchPr.number, subject);
+              await platform.ensureCommentRemoval(branchPr.number, topic);
             }
           } else {
             let content = emojify(
-              `:construction_worker: This PR has received other commits, so ${appName} will stop updating it to avoid conflicts or other problems.`
+              `:construction_worker: This PR has received other commits, so Renovate will stop updating it to avoid conflicts or other problems.`
             );
-            content += ` If you wish to abandon your changes and have ${appName} start over you may click the "rebase" checkbox in the PR body/description.`;
+            content += ` If you wish to abandon your changes and have Renovate start over you may click the "rebase" checkbox in the PR body/description.`;
             if (!config.suppressNotifications.includes('prEditNotification')) {
               if (config.dryRun) {
                 logger.info(
                   'DRY-RUN: ensure comment in PR #' + branchPr.number
                 );
               } else {
-                await platform.ensureComment(branchPr.number, subject, content);
+                await platform.ensureComment({
+                  number: branchPr.number,
+                  topic,
+                  content,
+                });
               }
             }
             return 'pr-edited';
@@ -249,7 +254,7 @@ export async function processBranch(
               new Date(upgrade.releaseTimestamp).getTime()) /
               oneDay
           );
-          if (daysElapsed < upgrade.stabilityDays) {
+          if (!masterIssueCheck && daysElapsed < upgrade.stabilityDays) {
             logger.debug(
               {
                 depName: upgrade.depName,
@@ -264,6 +269,7 @@ export async function processBranch(
       }
       // Don't create a branch if we know it will be status 'pending'
       if (
+        !masterIssueCheck &&
         !branchExists &&
         config.stabilityStatus === 'pending' &&
         ['not-pending', 'status-success'].includes(config.prCreation)
@@ -325,7 +331,7 @@ export async function processBranch(
           );
         } else {
           logger.info('PR is less than a day old - raise error instead of PR');
-          throw new Error('lockfile-error');
+          throw new Error(MANAGER_LOCKFILE_ERROR);
         }
       } else {
         logger.debug('PR has no releaseTimestamp');
@@ -377,13 +383,13 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
-    if (err.message === 'rate-limit-exceeded') {
+    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       logger.debug('Passing rate-limit-exceeded error up');
       throw err;
     }
-    if (err.message === 'repository-changed') {
+    if (err.message === REPOSITORY_CHANGED) {
       logger.debug('Passing repository-changed error up');
       throw err;
     }
@@ -392,7 +398,7 @@ export async function processBranch(
       err.message.startsWith('remote: Invalid username or password')
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error('bad-credentials');
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
     if (
       err.message &&
@@ -401,24 +407,24 @@ export async function processBranch(
       )
     ) {
       logger.debug('Throwing bad credentials');
-      throw new Error('bad-credentials');
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
-    if (err.message === 'bad-credentials') {
+    if (err.message === PLATFORM_BAD_CREDENTIALS) {
       logger.debug('Passing bad-credentials error up');
       throw err;
     }
-    if (err.message === 'integration-unauthorized') {
+    if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('Passing integration-unauthorized error up');
       throw err;
     }
-    if (err.message === 'lockfile-error') {
+    if (err.message === MANAGER_LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
     }
     if (err.message && err.message.includes('space left on device')) {
-      throw new Error('disk-space');
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
-    if (err.message.startsWith('disk-space')) {
+    if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
       logger.debug('Passing disk-space error up');
       throw err;
     }
@@ -426,24 +432,20 @@ export async function processBranch(
       logger.debug('Passing 403 error up');
       throw err;
     }
-    if (err.message === 'update-failure') {
+    if (err.message === WORKER_FILE_UPDATE_FAILED) {
       logger.warn('Error updating branch: update failure');
-    } else if (
-      err.message === 'bundler-fs' ||
-      err.message === 'bundler-credentials' ||
-      err.message === 'bundler-unknown'
-    ) {
-      // we have already warned, so just return
+    } else if (err.message.startsWith('bundler-')) {
+      // we have already warned inside the bundler artifacts error handling, so just return
       return 'error';
     } else if (
       err.messagee &&
       err.message.includes('fatal: Authentication failed')
     ) {
-      throw new Error('authentication-failure');
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     } else if (
-      err.message !== 'registry-failure' &&
+      err.message !== DATASOURCE_FAILURE &&
       err.message !== 'disable-gitfs' &&
-      err.message !== 'platform-failure'
+      err.message !== DATASOURCE_FAILURE
     ) {
       logger.error({ err }, `Error updating branch: ${err.message}`);
     }
@@ -460,6 +462,9 @@ export async function processBranch(
     if (pr === 'needs-pr-approval') {
       return 'needs-pr-approval';
     }
+    if (pr === 'pending') {
+      return 'pending';
+    }
     if (pr) {
       const topic = emojify(':warning: Artifact update problem');
       if (config.artifactErrors && config.artifactErrors.length) {
@@ -467,13 +472,13 @@ export async function processBranch(
           { artifactErrors: config.artifactErrors },
           'artifactErrors'
         );
-        let content = `${appName} failed to update `;
+        let content = `Renovate failed to update `;
         content +=
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
         content +=
           ' related to this branch. You probably do not want to merge this PR as-is.';
         content += emojify(
-          `\n\n:recycle: ${appName} will retry this branch, including artifacts, only when one of the following happens:\n\n`
+          `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`
         );
         content +=
           ' - any of the package files in this branch needs updating, or \n';
@@ -499,7 +504,11 @@ export async function processBranch(
                 pr.number
             );
           } else {
-            await platform.ensureComment(pr.number, topic, content);
+            await platform.ensureComment({
+              number: pr.number,
+              topic,
+              content,
+            });
             // TODO: remoe this soon once they're all cleared out
             await platform.ensureCommentRemoval(
               pr.number,
@@ -507,7 +516,7 @@ export async function processBranch(
             );
           }
         }
-        const context = `${appSlug}/artifacts`;
+        const context = `renovate/artifacts`;
         const description = 'Artifact file update failure';
         const state = 'failure';
         const existingState = await platform.getBranchStatusCheck(
@@ -522,12 +531,12 @@ export async function processBranch(
               'DRY-RUN: Would set branch status in ' + config.branchName
             );
           } else {
-            await platform.setBranchStatus(
-              config.branchName,
+            await platform.setBranchStatus({
+              branchName: config.branchName,
               context,
               description,
-              state
-            );
+              state,
+            });
           }
         }
       } else {
@@ -550,9 +559,9 @@ export async function processBranch(
   } catch (err) /* istanbul ignore next */ {
     if (
       [
-        'rate-limit-exceeded',
-        'platform-failure',
-        'repository-changed',
+        PLATFORM_RATE_LIMIT_EXCEEDED,
+        PLATFORM_FAILURE,
+        REPOSITORY_CHANGED,
       ].includes(err.message)
     ) {
       logger.debug('Passing PR error up');
