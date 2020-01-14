@@ -361,7 +361,11 @@ describe('platform/bitbucket', () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureComment(3, 'topic', 'content');
+      await bitbucket.ensureComment({
+        number: 3,
+        topic: 'topic',
+        content: 'content',
+      });
     });
   });
 
@@ -385,7 +389,9 @@ describe('platform/bitbucket', () => {
     it('finds pr', async () => {
       await initRepo();
       await mocked(async () => {
-        expect(await bitbucket.findPr('branch', 'title')).toMatchSnapshot();
+        expect(
+          await bitbucket.findPr({ branchName: 'branch', prTitle: 'title' })
+        ).toMatchSnapshot();
       });
     });
   });

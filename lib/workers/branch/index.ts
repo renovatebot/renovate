@@ -94,7 +94,7 @@ export async function processBranch(
         'Closed PR already exists. Skipping branch.'
       );
       if (existingPr.state === 'closed') {
-        const subject = `Renovate Ignore Notification`;
+        const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
           content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
@@ -112,7 +112,11 @@ export async function processBranch(
                 existingPr.number
             );
           } else {
-            await platform.ensureComment(existingPr.number, subject, content);
+            await platform.ensureComment({
+              number: existingPr.number,
+              topic,
+              content,
+            });
           }
         }
         if (branchExists) {
@@ -165,7 +169,7 @@ export async function processBranch(
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          const subject = 'PR has been edited';
+          const topic = 'PR has been edited';
           if (masterIssueCheck || config.rebaseRequested) {
             if (config.dryRun) {
               logger.info(
@@ -173,7 +177,7 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
-              await platform.ensureCommentRemoval(branchPr.number, subject);
+              await platform.ensureCommentRemoval(branchPr.number, topic);
             }
           } else {
             let content = emojify(
@@ -186,7 +190,11 @@ export async function processBranch(
                   'DRY-RUN: ensure comment in PR #' + branchPr.number
                 );
               } else {
-                await platform.ensureComment(branchPr.number, subject, content);
+                await platform.ensureComment({
+                  number: branchPr.number,
+                  topic,
+                  content,
+                });
               }
             }
             return 'pr-edited';
@@ -496,7 +504,11 @@ export async function processBranch(
                 pr.number
             );
           } else {
-            await platform.ensureComment(pr.number, topic, content);
+            await platform.ensureComment({
+              number: pr.number,
+              topic,
+              content,
+            });
             // TODO: remoe this soon once they're all cleared out
             await platform.ensureCommentRemoval(
               pr.number,

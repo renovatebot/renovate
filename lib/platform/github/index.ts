@@ -16,6 +16,8 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -980,11 +982,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList!;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -1002,7 +1004,7 @@ export async function findPr(
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
@@ -1500,20 +1502,20 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  const sanitizedContent = sanitize(content);
   try {
-    const comments = await getComments(issueNo);
+    const comments = await getComments(number);
     let body: string;
     let commentId: number | null = null;
     let commentNeedsUpdating = false;
     if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${issueNo}`);
-      body = `### ${topic}\n\n${content}`;
+      logger.debug(`Ensuring comment "${topic}" in #${number}`);
+      body = `### ${topic}\n\n${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.body.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -1521,8 +1523,8 @@ export async function ensureComment(
         }
       });
     } else {
-      logger.debug(`Ensuring content-only comment in #${issueNo}`);
-      body = `${content}`;
+      logger.debug(`Ensuring content-only comment in #${number}`);
+      body = `${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.body === body) {
           commentId = comment.id;
@@ -1531,15 +1533,15 @@ export async function ensureComment(
       });
     }
     if (!commentId) {
-      await addComment(issueNo, body);
+      await addComment(number, body);
       logger.info(
-        { repository: config.repository, issueNo, topic },
+        { repository: config.repository, issueNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
       await editComment(commentId, body);
       logger.info(
-        { repository: config.repository, issueNo },
+        { repository: config.repository, issueNo: number },
         'Comment updated'
       );
     } else {

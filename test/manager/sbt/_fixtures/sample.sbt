@@ -1,4 +1,4 @@
-scalaVersion := "2.12"
+scalaVersion := "2.12.10"
 
 // libraryDependencies += "org.example" % "foo" % "0.0.0"
 libraryDependencies += "org.example" % "foo" % "0.0.1"
@@ -12,7 +12,7 @@ dependencyOverrides += "org.example" % "quux" % "0.0.5"
 dependencyOverrides ++= {
   val groupIdExample = "org.example"
   val artifactIdExample = "corge"
-  val versionExample = "0.0.8"
+  lazy val versionExample = "0.0.8"
 
   Seq(
     groupIdExample %% "quuz" % "0.0.6" % "test",

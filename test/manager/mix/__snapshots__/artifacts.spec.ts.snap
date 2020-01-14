@@ -14,7 +14,7 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "mix deps.update plug",
+    "cmd": "bash -l -c \\"mix deps.update plug\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
