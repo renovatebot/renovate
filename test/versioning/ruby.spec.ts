@@ -426,6 +426,11 @@ describe('semverRuby', () => {
         semverRuby.getNewValue('4.2.5.1', 'replace', '4.2.5.1', '4.3.0')
       ).toEqual('4.3.0');
     });
+    it('handles major ranges', () => {
+      expect(
+        semverRuby.getNewValue('~> 1', 'replace', '1.2.0', '2.0.3')
+      ).toEqual('~> 2');
+    });
 
     it('returns correct version for replace strategy', () => {
       [
