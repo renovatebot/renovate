@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from '../../../lib/manager/gitlabci-include/update';
+import { DEP_TYPE_REPOSITORY } from '../../../lib/constants/dependency';
 
 const yamlFile = readFileSync(
   'test/manager/gitlabci-include/_fixtures/gitlab-ci.yaml',
@@ -10,7 +11,7 @@ describe('manager/gitlabci-include/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        depType: 'repository',
+        depType: DEP_TYPE_REPOSITORY,
         depName: 'mikebryant/include-source-example',
         newValue: '1.0.1',
       };
@@ -20,7 +21,7 @@ describe('manager/gitlabci-include/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        depType: 'repository',
+        depType: DEP_TYPE_REPOSITORY,
         depName: 'mikebryant/include-source-example',
         newValue: '1.0.0',
       };

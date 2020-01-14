@@ -1,5 +1,9 @@
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
+import {
+  DEP_ACTION_TERRAFORM,
+  DEP_TYPE_REQUIRE,
+} from '../../constants/dependency';
 
 export function updateDependency(
   currentFileContent: string,
@@ -28,11 +32,11 @@ export function updateDependency(
       return null;
     }
     let updateLineExp: RegExp;
-    if (depType === 'replace') {
+    if (depType === DEP_ACTION_TERRAFORM) {
       updateLineExp = new RegExp(
         /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
       );
-    } else if (depType === 'require') {
+    } else if (depType === DEP_TYPE_REQUIRE) {
       if (upgrade.managerData.multiLine) {
         updateLineExp = new RegExp(/^(\s+[^\s]+)(\s+)([^\s]+)/);
       } else {

@@ -1,5 +1,9 @@
 import { readFileSync } from 'fs';
 import * as dcUpdate from '../../../lib/manager/circleci/update';
+import {
+  DEP_TYPE_DOCKER,
+  DEP_TYPE_ORB,
+} from '../../../lib/constants/dependency';
 
 const yamlFile = readFileSync(
   'test/manager/circleci/_fixtures/config.yml',
@@ -15,7 +19,7 @@ describe('manager/circleci/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         managerData: { lineNumber: 65 },
-        depType: 'docker',
+        depType: DEP_TYPE_DOCKER,
         depName: 'node',
         newValue: '8.10.0',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -27,7 +31,7 @@ describe('manager/circleci/update', () => {
     it('returns same', () => {
       const upgrade = {
         managerData: { lineNumber: 12 },
-        depType: 'docker',
+        depType: DEP_TYPE_DOCKER,
         depName: 'node',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
@@ -36,7 +40,7 @@ describe('manager/circleci/update', () => {
     it('returns null if mismatch', () => {
       const upgrade = {
         managerData: { lineNumber: 17 },
-        depType: 'docker',
+        depType: DEP_TYPE_DOCKER,
         depName: 'postgres',
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -52,7 +56,7 @@ describe('manager/circleci/update', () => {
       const upgrade = {
         currentValue: '4.1.0',
         depName: 'release-workflows',
-        depType: 'orb',
+        depType: DEP_TYPE_ORB,
         managerData: { lineNumber: 3 },
         newValue: '4.2.0',
       };
@@ -64,7 +68,7 @@ describe('manager/circleci/update', () => {
       const upgrade = {
         currentValue: '4.0.0',
         depName: 'release-workflows',
-        depType: 'orb',
+        depType: DEP_TYPE_ORB,
         managerData: { lineNumber: 3 },
         newValue: '4.1.0',
       };
@@ -75,7 +79,7 @@ describe('manager/circleci/update', () => {
       const upgrade = {
         currentValue: '4.1.0',
         depName: 'release-workflows',
-        depType: 'orb',
+        depType: DEP_TYPE_ORB,
         managerData: { lineNumber: 2 },
         newValue: '4.2.0',
       };

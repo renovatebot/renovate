@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { DEP_TYPE_DOCKER } from '../../../lib/constants/dependency';
 
 const { updateDependency } = require('../../../lib/manager/droneci/update');
 
@@ -13,7 +14,7 @@ describe('manager/droneci/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         managerData: { lineNumber: 16 },
-        depType: 'docker',
+        depType: DEP_TYPE_DOCKER,
         depName: 'node',
         newValue: '10.16.0',
         newDigest: 'sha256:new-node-hash',
@@ -26,7 +27,7 @@ describe('manager/droneci/update', () => {
     it('returns same', () => {
       const upgrade = {
         managerData: { lineNumber: 28 },
-        depType: 'docker',
+        depType: DEP_TYPE_DOCKER,
         depName: 'redis:alpine',
       };
       const res = updateDependency(droneYAML, upgrade);
@@ -36,7 +37,7 @@ describe('manager/droneci/update', () => {
     it('returns null if mismatch', () => {
       const upgrade = {
         managerData: { lineNumber: 17 },
-        depType: 'docker',
+        depType: DEP_TYPE_DOCKER,
         depName: 'postgres',
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',

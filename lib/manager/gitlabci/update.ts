@@ -1,6 +1,10 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
 import { Upgrade } from '../common';
+import {
+  DEP_TYPE_IMAGE,
+  DEP_TYPE_IMAGE_NAME,
+} from '../../constants/dependency';
 
 export function updateDependency(
   currentFileContent: string,
@@ -10,7 +14,7 @@ export function updateDependency(
     const newFrom = getNewFrom(upgrade);
     const lines = currentFileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    if (['image', 'image-name'].includes(upgrade.depType)) {
+    if ([DEP_TYPE_IMAGE, DEP_TYPE_IMAGE_NAME].includes(upgrade.depType)) {
       const imageLine = new RegExp(
         /^(\s*(?:image|name):\s*'?"?)[^\s'"]+('?"?\s*)$/
       );

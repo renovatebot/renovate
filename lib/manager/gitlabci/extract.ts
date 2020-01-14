@@ -1,6 +1,11 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
+import {
+  DEP_TYPE_IMAGE,
+  DEP_TYPE_IMAGE_NAME,
+  DEP_TYPE_SERVICE_IMAGE,
+} from '../../constants/dependency';
 
 function skipCommentLines(
   lines: string[],
@@ -34,7 +39,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               const currentFrom = imageNameMatch[1];
               const dep = getDep(currentFrom);
               dep.managerData = { lineNumber };
-              dep.depType = 'image-name';
+              dep.depType = DEP_TYPE_IMAGE_NAME;
               deps.push(dep);
             }
             break;
@@ -44,7 +49,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             const currentFrom = imageMatch[1];
             const dep = getDep(currentFrom);
             dep.managerData = { lineNumber };
-            dep.depType = 'image';
+            dep.depType = DEP_TYPE_IMAGE;
             deps.push(dep);
           }
         }
@@ -67,7 +72,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             lineNumber = serviceImageLine.lineNumber;
             const dep = getDep(currentFrom);
             dep.managerData = { lineNumber };
-            dep.depType = 'service-image';
+            dep.depType = DEP_TYPE_SERVICE_IMAGE;
             deps.push(dep);
           }
         } while (foundImage);

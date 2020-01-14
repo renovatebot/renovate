@@ -2,6 +2,11 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { RangeConfig } from '../common';
 import { RangeStrategy } from '../../versioning';
+import {
+  DEP_TYPE_DEPENDENCY,
+  DEP_TYPE_DEV,
+  DEP_TYPE_PEER,
+} from '../../constants/dependency';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const {
@@ -22,17 +27,17 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
-  if (depType === 'devDependencies') {
+  if (depType === DEP_TYPE_DEV) {
     // Always pin devDependencies
     logger.trace({ dependency: depName }, 'Pinning devDependency');
     return 'pin';
   }
-  if (depType === 'dependencies' && packageJsonType === 'app') {
+  if (depType === DEP_TYPE_DEPENDENCY && packageJsonType === 'app') {
     // Pin dependencies if we're pretty sure it's not a browser library
     logger.trace({ dependency: depName }, 'Pinning app dependency');
     return 'pin';
   }
-  if (depType === 'peerDependencies') {
+  if (depType === DEP_TYPE_PEER) {
     // Widen peer dependencies
     logger.debug('Widening peer dependencies');
     return 'widen';

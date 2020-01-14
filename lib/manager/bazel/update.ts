@@ -3,6 +3,12 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 import { regEx } from '../../util/regex';
+import {
+  DEP_TYPE_CONTAINER_PULL,
+  DEP_TYPE_GIT_REPOSITORY,
+  DEP_TYPE_GO_REPOSITORY,
+  DEP_TYPE_HTTP_ARCHIVE,
+} from '../../constants/dependency';
 
 function updateWithNewVersion(
   content: string,
@@ -90,14 +96,14 @@ export async function updateDependency(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
     );
     let newDef: string;
-    if (upgrade.depType === 'container_pull') {
+    if (upgrade.depType === DEP_TYPE_CONTAINER_PULL) {
       newDef = upgrade.managerData.def
         .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
         .replace(/(digest\s*=\s*)"[^"]+"/, `$1"${upgrade.newDigest}"`);
     }
     if (
-      upgrade.depType === 'git_repository' ||
-      upgrade.depType === 'go_repository'
+      upgrade.depType === DEP_TYPE_GIT_REPOSITORY ||
+      upgrade.depType === DEP_TYPE_GO_REPOSITORY
     ) {
       newDef = upgrade.managerData.def
         .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
@@ -108,7 +114,7 @@ export async function updateDependency(
           `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
         );
       }
-    } else if (upgrade.depType === 'http_archive' && upgrade.newValue) {
+    } else if (upgrade.depType === DEP_TYPE_HTTP_ARCHIVE && upgrade.newValue) {
       newDef = updateWithNewVersion(
         upgrade.managerData.def,
         upgrade.currentValue,
@@ -132,7 +138,7 @@ export async function updateDependency(
       }
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
-    } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
+    } else if (upgrade.depType === DEP_TYPE_HTTP_ARCHIVE && upgrade.newDigest) {
       const [, shortRepo] = upgrade.repo.split('/');
       const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
       const hash = await getHashFromUrl(url);

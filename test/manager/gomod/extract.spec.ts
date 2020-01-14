@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from '../../../lib/manager/gomod/extract';
+import { DEP_ACTION_TERRAFORM } from '../../../lib/constants/dependency';
 
 const gomod1 = readFileSync('test/manager/gomod/_fixtures/1/go.mod', 'utf8');
 const gomod2 = readFileSync('test/manager/gomod/_fixtures/2/go.mod', 'utf8');
@@ -14,7 +15,9 @@ describe('lib/manager/gomod/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(8);
       expect(res.filter(e => e.skipReason)).toHaveLength(1);
-      expect(res.filter(e => e.depType === 'replace')).toHaveLength(1);
+      expect(res.filter(e => e.depType === DEP_ACTION_TERRAFORM)).toHaveLength(
+        1
+      );
     });
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2).deps;

@@ -1,5 +1,9 @@
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
+import {
+  DEP_TYPE_GITHUB,
+  DEP_TYPE_TERRAFORM,
+} from '../../constants/dependency';
 
 export function updateDependency(
   currentFileContent: string,
@@ -10,12 +14,12 @@ export function updateDependency(
     const lines = currentFileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     let newLine = lineToChange;
-    if (upgrade.depType === 'github') {
+    if (upgrade.depType === DEP_TYPE_GITHUB) {
       if (!lineToChange.includes(upgrade.depNameShort)) {
         return null;
       }
       newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
-    } else if (upgrade.depType === 'terraform') {
+    } else if (upgrade.depType === DEP_TYPE_TERRAFORM) {
       if (!lineToChange.match(/version\s*=\s*"/)) {
         return null;
       }

@@ -17,6 +17,7 @@ import {
 import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { DEP_TYPE_ENGINE, DEP_TYPE_VOLTA } from '../../../constants/dependency';
 
 export async function extractPackageFile(
   content: string,
@@ -144,7 +145,7 @@ export async function extractPackageFile(
       return dep;
     }
     dep.currentValue = input.trim();
-    if (depType === 'engines') {
+    if (depType === DEP_TYPE_ENGINE) {
       if (depName === 'node') {
         dep.datasource = 'github';
         dep.lookupName = 'nodejs/node';
@@ -165,7 +166,7 @@ export async function extractPackageFile(
     }
 
     // support for volta
-    if (depType === 'volta') {
+    if (depType === DEP_TYPE_VOLTA) {
       if (depName === 'node') {
         dep.datasource = 'github';
         dep.lookupName = 'nodejs/node';

@@ -1,5 +1,6 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
+import { DEP_TYPE_PLUGIN } from '../../constants/dependency';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -195,7 +196,7 @@ function parseSbtLine(
       const depExpr = rightPart.replace(/\)\s*$/, '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        depType: 'plugin',
+        depType: DEP_TYPE_PLUGIN,
         fileOffset: fileOffset + expOffset,
       });
     } else if (isDepsBegin(line)) {

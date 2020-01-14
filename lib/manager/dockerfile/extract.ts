@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
+import { DEP_STAGE_FINAL, DEP_STAGE_STAGED } from '../../constants/dependency';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -109,7 +110,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  for (const d of deps) d.depType = 'stage';
-  deps[deps.length - 1].depType = 'final';
+  for (const d of deps) d.depType = DEP_STAGE_STAGED;
+  deps[deps.length - 1].depType = DEP_STAGE_FINAL;
   return { deps };
 }

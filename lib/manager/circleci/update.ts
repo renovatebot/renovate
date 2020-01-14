@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
 import { Upgrade } from '../common';
+import { DEP_TYPE_DOCKER, DEP_TYPE_ORB } from '../../constants/dependency';
 
 export function updateDependency(
   fileContent: string,
@@ -9,7 +10,7 @@ export function updateDependency(
   try {
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    if (upgrade.depType === 'docker') {
+    if (upgrade.depType === DEP_TYPE_DOCKER) {
       const newFrom = getNewFrom(upgrade);
       logger.debug(`circleci.updateDependency(): ${newFrom}`);
       const imageLine = new RegExp(/^(\s*- image:\s*'?"?)[^\s'"]+('?"?\s*)$/);
@@ -25,7 +26,7 @@ export function updateDependency(
       lines[upgrade.managerData.lineNumber] = newLine;
       return lines.join('\n');
     }
-    if (upgrade.depType === 'orb') {
+    if (upgrade.depType === DEP_TYPE_ORB) {
       const orbLine = new RegExp(`^(\\s+${upgrade.depName}:\\s[^@]+@).+$`);
       if (!lineToChange.match(orbLine)) {
         logger.debug('No image line found');

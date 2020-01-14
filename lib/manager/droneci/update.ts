@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
 import { Upgrade } from '../common';
+import { DEP_TYPE_DOCKER } from '../../constants/dependency';
 
 export function updateDependency(
   fileContent: string,
@@ -9,7 +10,7 @@ export function updateDependency(
   try {
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    if (upgrade.depType === 'docker') {
+    if (upgrade.depType === DEP_TYPE_DOCKER) {
       const newFrom = getNewFrom(upgrade);
       logger.debug(`droneci.updateDependency(): ${newFrom}`);
       const imageLine = new RegExp(/^(\s* image:\s*'?"?)[^\s'"]+('?"?\s*)$/);

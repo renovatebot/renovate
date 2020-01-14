@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import { DEP_TYPE_REPOSITORY } from '../../constants/dependency';
 
 function extractDepFromInclude(includeObj: {
   file: any;
@@ -14,7 +15,7 @@ function extractDepFromInclude(includeObj: {
   const dep: PackageDependency = {
     datasource: 'gitlab',
     depName: includeObj.project,
-    depType: 'repository',
+    depType: DEP_TYPE_REPOSITORY,
   };
   if (!includeObj.ref) {
     dep.skipReason = 'unknown-version';

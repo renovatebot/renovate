@@ -4,6 +4,12 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
+import {
+  DEP_TYPE_CONTAINER_PULL,
+  DEP_TYPE_GIT_REPOSITORY,
+  DEP_TYPE_GO_REPOSITORY,
+  DEP_TYPE_HTTP_ARCHIVE,
+} from '../../constants/dependency';
 
 interface UrlParsedResult {
   repo: string;
@@ -161,7 +167,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     }
     logger.debug({ dependency: depName, remote, currentValue });
     if (
-      depType === 'git_repository' &&
+      depType === DEP_TYPE_GIT_REPOSITORY &&
       depName &&
       remote &&
       (currentValue || commit)
@@ -182,7 +188,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
     } else if (
-      depType === 'go_repository' &&
+      depType === DEP_TYPE_GO_REPOSITORY &&
       depName &&
       importpath &&
       (currentValue || commit)
@@ -209,7 +215,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
       deps.push(dep);
     } else if (
-      depType === 'http_archive' &&
+      depType === DEP_TYPE_HTTP_ARCHIVE &&
       depName &&
       parseUrl(url) &&
       sha256
@@ -227,7 +233,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.lookupType = 'releases';
       deps.push(dep);
     } else if (
-      depType === 'container_pull' &&
+      depType === DEP_TYPE_CONTAINER_PULL &&
       currentValue &&
       digest &&
       repository &&

@@ -1,6 +1,7 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
+import { DEP_TYPE_GRADLE_WRAPPER } from '../../constants/dependency';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
@@ -14,7 +15,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     if (match) {
       const dependency: PackageDependency = {
         datasource: 'gradleVersion',
-        depType: 'gradle-wrapper',
+        depType: DEP_TYPE_GRADLE_WRAPPER,
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),
         managerData: { lineNumber, gradleWrapperType: match[3] },

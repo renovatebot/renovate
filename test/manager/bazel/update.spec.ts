@@ -2,6 +2,12 @@ import { readFileSync } from 'fs';
 import { fromStream as _fromStream } from 'hasha';
 import { resolve } from 'path';
 import { updateDependency } from '../../../lib/manager/bazel/update';
+import {
+  DEP_TYPE_CONTAINER_PULL,
+  DEP_TYPE_GIT_REPOSITORY,
+  DEP_TYPE_GO_REPOSITORY,
+  DEP_TYPE_HTTP_ARCHIVE,
+} from '../../../lib/constants/dependency';
 
 jest.mock('hasha');
 jest.mock('../../../lib/util/got');
@@ -39,7 +45,7 @@ describe('manager/bazel/update', () => {
     it('updates tag', async () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
-        depType: 'git_repository',
+        depType: DEP_TYPE_GIT_REPOSITORY,
         managerData: {
           def: `git_repository(\n    name = "build_bazel_rules_nodejs",\n    remote = "https://github.com/bazelbuild/rules_nodejs.git",\n    tag = "0.1.8",\n)`,
         },
@@ -53,7 +59,7 @@ describe('manager/bazel/update', () => {
     it('updates container_pull deptype and prserves comment', async () => {
       const upgrade = {
         depName: 'hasura',
-        depType: 'container_pull',
+        depType: DEP_TYPE_CONTAINER_PULL,
         managerData: {
           def: `container_pull(
           name="hasura",
@@ -80,7 +86,7 @@ describe('manager/bazel/update', () => {
     it('updates commit to tag', async () => {
       const upgrade = {
         depName: 'com_github_google_uuid',
-        depType: 'go_repository',
+        depType: DEP_TYPE_GO_REPOSITORY,
         managerData: {
           def: `go_repository(
     name = "com_github_google_uuid",
@@ -105,7 +111,7 @@ describe('manager/bazel/update', () => {
     it('updates commit-based http archive', async () => {
       const upgrade = {
         depName: 'distroless',
-        depType: 'http_archive',
+        depType: DEP_TYPE_HTTP_ARCHIVE,
         repo: 'GoogleContainerTools/distroless',
         managerData: {
           def: `http_archive(\n  name="distroless",\n  sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",\n  strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",\n  urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]\n)`,
@@ -119,7 +125,7 @@ describe('manager/bazel/update', () => {
     it('updates http archive with content other then WORKSPACE', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
-        depType: 'http_archive',
+        depType: DEP_TYPE_HTTP_ARCHIVE,
         repo: 'bazelbuild/bazel-skylib',
         managerData: {
           def: `http_archive(
@@ -140,7 +146,7 @@ describe('manager/bazel/update', () => {
     it('updates finds url instead of urls', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
-        depType: 'http_archive',
+        depType: DEP_TYPE_HTTP_ARCHIVE,
         repo: 'bazelbuild/bazel-skylib',
         managerData: {
           def: `http_archive(
@@ -161,7 +167,7 @@ describe('manager/bazel/update', () => {
     it('returns null if no urls resolve hashes', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
-        depType: 'http_archive',
+        depType: DEP_TYPE_HTTP_ARCHIVE,
         repo: 'bazelbuild/bazel-skyfoo',
         managerData: {
           def: `http_archive(
@@ -180,7 +186,7 @@ describe('manager/bazel/update', () => {
     it('errors for http_archive without urls', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
-        depType: 'http_archive',
+        depType: DEP_TYPE_HTTP_ARCHIVE,
         repo: 'bazelbuild/bazel-skylib',
         managerData: {
           def:
@@ -202,7 +208,7 @@ http_archive(
     it('updates http_archive with urls array', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
-        depType: 'http_archive',
+        depType: DEP_TYPE_HTTP_ARCHIVE,
         repo: 'bazelbuild/bazel-skylib',
         managerData: {
           def:

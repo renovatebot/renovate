@@ -1,5 +1,10 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from '../../../lib/manager/gitlabci/update';
+import {
+  DEP_TYPE_IMAGE,
+  DEP_TYPE_IMAGE_NAME,
+  DEP_TYPE_SERVICE_IMAGE,
+} from '../../../lib/constants/dependency';
 
 const yamlFile = readFileSync(
   'test/manager/gitlabci/_fixtures/gitlab-ci.yaml',
@@ -11,7 +16,7 @@ describe('manager/gitlabci/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         managerData: { lineNumber: 36 },
-        depType: 'image',
+        depType: DEP_TYPE_IMAGE,
         depName: 'hadolint/hadolint',
         newValue: '7.0.0',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -22,7 +27,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        depType: 'image',
+        depType: DEP_TYPE_IMAGE,
         managerData: { lineNumber: 36 },
         depName: 'hadolint/hadolint',
         newValue: 'latest',
@@ -33,7 +38,7 @@ describe('manager/gitlabci/update', () => {
     it('returns null if mismatch', () => {
       const upgrade = {
         managerData: { lineNumber: 17 },
-        depType: 'image',
+        depType: DEP_TYPE_IMAGE,
         depName: 'postgres',
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -44,7 +49,7 @@ describe('manager/gitlabci/update', () => {
     it('replaces image-name value', () => {
       const upgrade = {
         managerData: { lineNumber: 102 },
-        depType: 'image-name',
+        depType: DEP_TYPE_IMAGE_NAME,
         depName: 'image-name-test',
         newValue: '1.35',
       };
@@ -54,7 +59,7 @@ describe('manager/gitlabci/update', () => {
     it('returns same image-name value', () => {
       const upgrade = {
         managerData: { lineNumber: 102 },
-        depType: 'image-name',
+        depType: DEP_TYPE_IMAGE_NAME,
         depName: 'image-name-test',
         newValue: '1.15',
       };
@@ -64,7 +69,7 @@ describe('manager/gitlabci/update', () => {
     it('replaces service-image update', () => {
       const upgrade = {
         managerData: { lineNumber: 55 },
-        depType: 'service-image',
+        depType: DEP_TYPE_SERVICE_IMAGE,
         depName: 'hadolint/hadolint',
         newValue: '7.0.0',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -76,7 +81,7 @@ describe('manager/gitlabci/update', () => {
     it('returns null if service-image mismatch', () => {
       const upgrade = {
         managerData: { lineNumber: 17 },
-        depType: 'service-image',
+        depType: DEP_TYPE_SERVICE_IMAGE,
         depName: 'postgres',
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',

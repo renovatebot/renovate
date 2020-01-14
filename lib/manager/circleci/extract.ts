@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
+import { DEP_TYPE_DOCKER, DEP_TYPE_ORB } from '../../constants/dependency';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -24,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             const depName = orbMatch[1];
             const [orbName, currentValue] = orbMatch[2].split('@');
             const dep: PackageDependency = {
-              depType: 'orb',
+              depType: DEP_TYPE_ORB,
               depName,
               currentValue,
               managerData: { lineNumber },
@@ -50,7 +51,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           },
           'CircleCI docker image'
         );
-        dep.depType = 'docker';
+        dep.depType = DEP_TYPE_DOCKER;
         dep.managerData = { lineNumber };
         deps.push(dep);
       }

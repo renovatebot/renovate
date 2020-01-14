@@ -1,5 +1,9 @@
 import { getRangeStrategy } from '../../../lib/manager/composer';
 import { RangeConfig } from '../../../lib/manager/common';
+import {
+  DEP_TYPE_DEV_REQUIRE,
+  DEP_TYPE_REQUIRE,
+} from '../../../lib/constants/dependency';
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
@@ -9,7 +13,7 @@ describe('getRangeStrategy', () => {
   it('pins require-dev', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: 'require-dev',
+      depType: DEP_TYPE_DEV_REQUIRE,
     };
     expect(getRangeStrategy(config)).toEqual('pin');
   });
@@ -17,14 +21,14 @@ describe('getRangeStrategy', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       managerData: { composerJsonType: 'project' },
-      depType: 'require',
+      depType: DEP_TYPE_REQUIRE,
     };
     expect(getRangeStrategy(config)).toEqual('pin');
   });
   it('widens complex ranges', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: 'require',
+      depType: DEP_TYPE_REQUIRE,
       currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
@@ -32,13 +36,16 @@ describe('getRangeStrategy', () => {
   it('widens complex bump', () => {
     const config: RangeConfig = {
       rangeStrategy: 'bump',
-      depType: 'require',
+      depType: DEP_TYPE_REQUIRE,
       currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('defaults to replace', () => {
-    const config: RangeConfig = { rangeStrategy: 'auto', depType: 'require' };
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: DEP_TYPE_REQUIRE,
+    };
     expect(getRangeStrategy(config)).toEqual('replace');
   });
 });

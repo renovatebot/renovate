@@ -1,5 +1,9 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from '../../../lib/manager/terraform/update';
+import {
+  DEP_TYPE_GITHUB,
+  DEP_TYPE_TERRAFORM,
+} from '../../../lib/constants/dependency';
 
 const tf1 = readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
 
@@ -7,7 +11,7 @@ describe('manager/terraform/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        depType: 'github',
+        depType: DEP_TYPE_GITHUB,
         depName: 'foo',
         managerData: { lineNumber: 1 },
         depNameShort: 'hashicorp/example',
@@ -19,7 +23,7 @@ describe('manager/terraform/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        depType: 'github',
+        depType: DEP_TYPE_GITHUB,
         depName: 'foo',
         managerData: { lineNumber: 1 },
         depNameShort: 'hashicorp/example',
@@ -30,7 +34,7 @@ describe('manager/terraform/update', () => {
     });
     it('returns null if wrong line', () => {
       const upgrade = {
-        depType: 'github',
+        depType: DEP_TYPE_GITHUB,
         depName: 'foo',
         managerData: { lineNumber: 2 },
         depNameShort: 'hashicorp/example',
@@ -41,7 +45,7 @@ describe('manager/terraform/update', () => {
     });
     it('updates github versions', () => {
       const upgrade = {
-        depType: 'github',
+        depType: DEP_TYPE_GITHUB,
         currentValue: 'v0.1.0',
         newValue: 'v0.1.3',
         depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
@@ -60,7 +64,7 @@ describe('manager/terraform/update', () => {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
-        depType: 'terraform',
+        depType: DEP_TYPE_TERRAFORM,
         managerData: { lineNumber: 11 },
         moduleName: 'consul',
         source: 'hashicorp/consul/aws',
@@ -74,7 +78,7 @@ describe('manager/terraform/update', () => {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
-        depType: 'terraform',
+        depType: DEP_TYPE_TERRAFORM,
         managerData: { lineNumber: 10 },
         moduleName: 'consul',
         source: 'hashicorp/consul/aws',
@@ -89,7 +93,7 @@ describe('manager/terraform/update', () => {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
-        depType: 'terraform',
+        depType: DEP_TYPE_TERRAFORM,
         managerData: {
           lineNumber: 10,
           terraformDependencyType: 'module',
@@ -107,7 +111,7 @@ describe('manager/terraform/update', () => {
         currentValue: '1.36.1',
         depName: 'azurerm',
         depNameShort: 'azurerm',
-        depType: 'terraform',
+        depType: DEP_TYPE_TERRAFORM,
         managerData: {
           lineNumber: 99,
           terraformDependencyType: 'provider',

@@ -1,6 +1,11 @@
 import * as configMigration from '../../lib/config/migration';
 import { getConfig } from '../../lib/config/defaults';
 import { RenovateConfig } from '../../lib/config';
+import {
+  DEP_TYPE_DEPENDENCY,
+  DEP_TYPE_DEV,
+  DEP_TYPE_OPTIONAL,
+} from '../../lib/constants/dependency';
 
 const defaultConfig = getConfig();
 
@@ -94,7 +99,7 @@ describe('config/migration', () => {
         depTypes: [
           'dependencies',
           {
-            depType: 'optionalDependencies',
+            depType: DEP_TYPE_OPTIONAL,
             respectLatest: false,
             automerge: 'minor',
             schedule: 'before 5am on Mondays',
@@ -257,7 +262,7 @@ describe('config/migration', () => {
           depTypes: [
             'dependencies',
             {
-              depType: 'optionalDependencies',
+              depType: DEP_TYPE_OPTIONAL,
               respectLatest: false,
             },
           ],
@@ -325,11 +330,11 @@ describe('config/migration', () => {
             packageRules: [
               {
                 pinVersions: true,
-                depTypeList: ['devDependencies'],
+                depTypeList: [DEP_TYPE_DEV],
               },
               {
                 pinVersions: true,
-                depTypeList: ['dependencies'],
+                depTypeList: [DEP_TYPE_DEPENDENCY],
               },
             ],
           },

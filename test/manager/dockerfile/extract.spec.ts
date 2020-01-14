@@ -1,5 +1,9 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from '../../../lib/manager/dockerfile/extract';
+import {
+  DEP_STAGE_FINAL,
+  DEP_STAGE_STAGED,
+} from '../../../lib/constants/dependency';
 
 const d1 = readFileSync(
   'test/manager/dockerfile/_fixtures/Dockerfile1',
@@ -131,9 +135,9 @@ describe('lib/manager/dockerfile/extract', () => {
       ).deps;
       expect(res).toMatchSnapshot();
       const passed = [
-        res[2].depType === 'final',
-        res[1].depType === 'stage',
-        res[0].depType === 'stage',
+        res[2].depType === DEP_STAGE_FINAL,
+        res[1].depType === DEP_STAGE_STAGED,
+        res[0].depType === DEP_STAGE_STAGED,
         res[2].managerData.lineNumber > res[1].managerData.lineNumber,
         res[2].managerData.lineNumber > res[0].managerData.lineNumber,
       ].every(Boolean);

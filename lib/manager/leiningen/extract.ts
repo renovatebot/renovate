@@ -1,5 +1,10 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageDependency, PackageFile } from '../common';
+import {
+  DEP_TYPE_DEPENDENCY,
+  DEP_TYPE_MANAGED,
+  DEP_TYPE_PLUGIN_POM,
+} from '../../constants/dependency';
 
 export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
 
@@ -138,15 +143,15 @@ export function extractPackageFile(content: string): PackageFile {
 
   const deps: PackageDependency[] = [
     ...collect('dependencies', {
-      depType: 'dependencies',
+      depType: DEP_TYPE_DEPENDENCY,
       registryUrls,
     }),
     ...collect('managed-dependencies', {
-      depType: 'managed-dependencies',
+      depType: DEP_TYPE_MANAGED,
       registryUrls,
     }),
     ...collect('dev-dependencies', {
-      depType: 'managed-dependencies',
+      depType: DEP_TYPE_MANAGED,
       registryUrls,
     }),
     ...collect('plugins', {
@@ -154,7 +159,7 @@ export function extractPackageFile(content: string): PackageFile {
       registryUrls,
     }),
     ...collect('pom-plugins', {
-      depType: 'pom-plugins',
+      depType: DEP_TYPE_PLUGIN_POM,
       registryUrls,
     }),
   ];

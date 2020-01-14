@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from '../../../lib/manager/poetry/update';
+import { DEP_TYPE_DEPENDENCY } from '../../../lib/constants/dependency';
 
 const pyproject1toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.1.toml',
@@ -16,7 +17,7 @@ describe('manager/poetry/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         depName: 'dep1',
-        depType: 'dependencies',
+        depType: DEP_TYPE_DEPENDENCY,
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
@@ -28,7 +29,7 @@ describe('manager/poetry/update', () => {
     it('handles already replace values', () => {
       const upgrade = {
         depName: 'dep1',
-        depType: 'dependencies',
+        depType: DEP_TYPE_DEPENDENCY,
         newValue: '0.0.0',
         managerData: { nestedVersion: false },
       };
@@ -38,7 +39,7 @@ describe('manager/poetry/update', () => {
     it('replaces nested value', () => {
       const upgrade = {
         depName: 'dep1',
-        depType: 'dependencies',
+        depType: DEP_TYPE_DEPENDENCY,
         newValue: '1.0.0',
         managerData: { nestedVersion: true },
       };
@@ -50,7 +51,7 @@ describe('manager/poetry/update', () => {
     it('replaces nested value for path dependency', () => {
       const upgrade = {
         depName: 'dep3',
-        depType: 'dependencies',
+        depType: DEP_TYPE_DEPENDENCY,
         newValue: '1.0.0',
         managerData: { nestedVersion: true },
       };
@@ -62,7 +63,7 @@ describe('manager/poetry/update', () => {
     it('gracefully handles nested value for path dependency withou version field', () => {
       const upgrade = {
         depName: 'dep4',
-        depType: 'dependencies',
+        depType: DEP_TYPE_DEPENDENCY,
         newValue: '1.0.0',
         managerData: { nestedVersion: true },
       };

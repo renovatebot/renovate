@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import { DEP_TYPE_NUGET } from '../../constants/dependency';
 
 export function extractPackageFile(
   content: string,
@@ -32,7 +33,7 @@ export function extractPackageFile(
       const depName = match[1];
       const currentValue = match[2];
       const dep: PackageDependency = {
-        depType: 'nuget',
+        depType: DEP_TYPE_NUGET,
         depName,
         currentValue,
         managerData: { lineNumber },

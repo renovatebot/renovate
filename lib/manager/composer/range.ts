@@ -1,6 +1,10 @@
 import { logger } from '../../logger';
 import { RangeConfig } from '../common';
 import { RangeStrategy } from '../../versioning';
+import {
+  DEP_TYPE_DEV_REQUIRE,
+  DEP_TYPE_REQUIRE,
+} from '../../constants/dependency';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const {
@@ -22,7 +26,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
-  if (depType === 'require-dev') {
+  if (depType === DEP_TYPE_DEV_REQUIRE) {
     // Always pin dev dependencies
     logger.trace({ dependency: depName }, 'Pinning require-dev');
     return 'pin';
@@ -30,7 +34,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const isApp =
     composerJsonType &&
     !['library', 'metapackage', 'composer-plugin'].includes(composerJsonType);
-  if (isApp && depType === 'require') {
+  if (isApp && depType === DEP_TYPE_REQUIRE) {
     // Pin dependencies if it's an app/project
     logger.trace({ dependency: depName }, 'Pinning app require');
     return 'pin';

@@ -2,6 +2,7 @@ import { safeLoad } from 'js-yaml';
 import { isValid } from '../../versioning/npm/index';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
+import { DEP_TYPE_DEPENDENCY } from '../../constants/dependency';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -39,7 +40,7 @@ export function extractPackageFile(
     const doc = safeLoad(content);
     const deps = [
       ...getDeps(doc.dependencies, {
-        depType: 'dependencies',
+        depType: DEP_TYPE_DEPENDENCY,
       }),
       ...getDeps(doc.dev_dependencies, {
         depType: 'dev_dependencies',

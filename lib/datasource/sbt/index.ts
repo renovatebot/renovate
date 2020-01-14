@@ -3,6 +3,7 @@ import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
 import { logger } from '../../logger';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DEP_TYPE_PLUGIN } from '../../constants/dependency';
 
 async function resolvePackageReleases(
   searchRoot: string,
@@ -91,7 +92,7 @@ export async function getPkgReleases(
   const { lookupName, depType } = config;
 
   const registryUrls =
-    depType === 'plugin'
+    depType === DEP_TYPE_PLUGIN
       ? [SBT_PLUGINS_REPO, ...config.registryUrls]
       : config.registryUrls;
 
@@ -104,7 +105,7 @@ export async function getPkgReleases(
   const searchRoots: string[] = [];
   repoRoots.forEach(repoRoot => {
     // Optimize lookup order
-    if (depType === 'plugin') {
+    if (depType === DEP_TYPE_PLUGIN) {
       searchRoots.push(`${repoRoot}/${groupIdSplit.join('.')}`);
       searchRoots.push(`${repoRoot}/${groupIdSplit.join('/')}`);
     } else {
@@ -116,12 +117,12 @@ export async function getPkgReleases(
   for (let idx = 0; idx < searchRoots.length; idx += 1) {
     const searchRoot = searchRoots[idx];
     const versions =
-      depType === 'plugin'
+      depType === DEP_TYPE_PLUGIN
         ? await resolvePluginReleases(searchRoot, artifact, scalaVersion)
         : await resolvePackageReleases(searchRoot, artifact, scalaVersion);
 
     const dependencyUrl =
-      depType === 'plugin' ? `${searchRoot}/${artifact}` : searchRoot;
+      depType === DEP_TYPE_PLUGIN ? `${searchRoot}/${artifact}` : searchRoot;
 
     if (versions) {
       return {

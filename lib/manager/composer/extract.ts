@@ -3,6 +3,10 @@ import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
+import {
+  DEP_TYPE_DEV_REQUIRE,
+  DEP_TYPE_REQUIRE,
+} from '../../constants/dependency';
 
 interface Repo {
   name?: string;
@@ -115,7 +119,7 @@ export async function extractPackageFile(
     res.registryUrls = registryUrls;
   }
   const deps = [];
-  const depTypes = ['require', 'require-dev'];
+  const depTypes = [DEP_TYPE_REQUIRE, DEP_TYPE_DEV_REQUIRE];
   for (const depType of depTypes) {
     if (composerJson[depType]) {
       try {

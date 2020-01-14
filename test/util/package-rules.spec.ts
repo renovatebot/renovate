@@ -1,5 +1,10 @@
 import { applyPackageRules, Config } from '../../lib/util/package-rules';
 import { UpdateType } from '../../lib/config';
+import {
+  DEP_TYPE_DEPENDENCY,
+  DEP_TYPE_DEV,
+  DEP_TYPE_PEER,
+} from '../../lib/constants/dependency';
 
 type TestConfig = Config & { x?: number; y?: number };
 
@@ -397,13 +402,13 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          depTypeList: ['dependencies', 'peerDependencies'],
+          depTypeList: [DEP_TYPE_DEPENDENCY, DEP_TYPE_PEER],
           x: 1,
         },
       ],
     };
     const dep = {
-      depType: 'dependencies',
+      depType: DEP_TYPE_DEPENDENCY,
       depName: 'a',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -413,14 +418,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          depTypeList: ['dependencies', 'peerDependencies'],
+          depTypeList: [DEP_TYPE_DEPENDENCY, DEP_TYPE_PEER],
           packageNames: ['a'],
           x: 1,
         },
       ],
     };
     const dep = {
-      depType: 'devDependencies',
+      depType: DEP_TYPE_DEV,
       depName: 'a',
     };
     const res = applyPackageRules({ ...config, ...dep });
