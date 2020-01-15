@@ -32,18 +32,18 @@ function replaceAt(
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
-  logger.trace({ config: updateOptions }, 'poetry.updateDependency()');
-  if (!updateOptions) {
+  logger.trace({ config: upgrade }, 'poetry.updateDependency()');
+  if (!upgrade) {
     return null;
   }
-  const { depType, depName, newValue, managerData } = updateOptions;
+  const { depType, depName, newValue, managerData } = upgrade;
   const { nestedVersion } = managerData;
   const parsedContents: PoetryFile = parse(fileContent);
   if (!parsedContents.tool.poetry[depType]) {
     logger.info(
-      { config: updateOptions },
+      { config: upgrade },
       `Error: Section tool.poetry.${depType} doesn't exist in pyproject.toml file, update failed`
     );
     return null;
@@ -53,7 +53,7 @@ export function updateDependency({
     const oldDep = parsedContents.tool.poetry[depType][depName];
     if (!oldDep) {
       logger.info(
-        { config: updateOptions },
+        { config: upgrade },
         `Could not get version of dependency ${depType}, update failed (most likely name is invalid)`
       );
       return null;
@@ -64,7 +64,7 @@ export function updateDependency({
   }
   if (!oldVersion) {
     logger.info(
-      { config: updateOptions },
+      { config: upgrade },
       `Could not get version of dependency ${depType}, update failed (most likely name is invalid)`
     );
     return null;

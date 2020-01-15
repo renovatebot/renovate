@@ -4,19 +4,19 @@ describe('manager/dockerfile/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const fileContent = '# comment FROM node:8\nFROM node:8\nRUN something\n';
-      const updateOptions = {
+      const upgrade = {
         managerData: { lineNumber: 1, fromPrefix: 'FROM', fromSuffix: '' },
         depName: 'node',
         newValue: '8.1-alpine',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('replaces existing value with suffix', () => {
       const fileContent =
         '# comment FROM node:8\nFROM node:8 as base\nRUN something\n';
-      const updateOptions = {
+      const upgrade = {
         managerData: {
           lineNumber: 1,
           fromPrefix: 'FROM',
@@ -26,13 +26,13 @@ describe('manager/dockerfile/update', () => {
         newValue: '8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('handles strange whitespace', () => {
       const fileContent =
         '# comment FROM node:8\nFROM   node:8 as base\nRUN something\n';
-      const updateOptions = {
+      const upgrade = {
         managerData: {
           lineNumber: 1,
           fromPrefix: 'FROM',
@@ -43,25 +43,25 @@ describe('manager/dockerfile/update', () => {
 
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('returns null if mismatch', () => {
       const fileContent =
         '# comment FROM node:8\nFROM   node:8 as base\nRUN something\n';
-      const updateOptions = {
+      const upgrade = {
         managerData: { lineNumber: 0, fromPrefix: 'FROM', fromSuffix: '' },
         depName: 'node',
         newValue: '8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toBeNull();
     });
     it('returns unchanged', () => {
       const fileContent =
         '# comment FROM node:8\nFROM node:8 as base\nRUN something\n';
-      const updateOptions = {
+      const upgrade = {
         managerData: {
           lineNumber: 1,
           fromPrefix: 'FROM',
@@ -70,18 +70,18 @@ describe('manager/dockerfile/update', () => {
         depName: 'node',
         newValue: '8',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toBe(fileContent);
     });
     it('returns null on error', () => {
       const fileContent = null;
-      const updateOptions = {
+      const upgrade = {
         managerData: { lineNumber: 1, fromPrefix: 'FROM', fromSuffix: '' },
         depName: 'node',
         newValue: '8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toBeNull();
     });
     it('handles similar FROM', () => {
@@ -105,11 +105,11 @@ describe('manager/dockerfile/update', () => {
       };
       let res = dockerfile.updateDependency({
         fileContent,
-        updateOptions: upgrade1,
+        upgrade: upgrade1,
       });
       res = dockerfile.updateDependency({
         fileContent: res,
-        updateOptions: upgrade2,
+        upgrade: upgrade2,
       });
       expect(res).toMatchSnapshot();
       expect(res.includes('as stage-1')).toBe(true);
@@ -117,7 +117,7 @@ describe('manager/dockerfile/update', () => {
     it('replaces COPY --from', () => {
       const fileContent =
         'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n';
-      const updateOptions = {
+      const upgrade = {
         managerData: {
           lineNumber: 1,
           fromPrefix: 'COPY --from=',
@@ -126,9 +126,9 @@ describe('manager/dockerfile/update', () => {
         depName: 'gcr.io/k8s-skaffold/skaffold',
         newValue: 'v0.12.0',
       };
-      const res = dockerfile.updateDependency({ fileContent, updateOptions });
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
   });
 });

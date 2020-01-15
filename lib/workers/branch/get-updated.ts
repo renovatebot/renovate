@@ -47,7 +47,7 @@ export async function getUpdatedPackageFiles(
       const updateDependency = get(manager, 'updateDependency');
       newContent = await updateDependency({
         fileContent: existingContent,
-        updateOptions: upgrade,
+        upgrade,
       });
       if (!newContent) {
         if (config.parentBranch) {

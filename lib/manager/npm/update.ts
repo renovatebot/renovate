@@ -78,27 +78,27 @@ export function bumpPackageVersion(
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
-  const { depType, depName } = updateOptions;
-  let { newValue } = updateOptions;
-  if (updateOptions.currentRawValue) {
-    if (updateOptions.currentDigest) {
+  const { depType, depName } = upgrade;
+  let { newValue } = upgrade;
+  if (upgrade.currentRawValue) {
+    if (upgrade.currentDigest) {
       logger.info('Updating package.json git digest');
-      newValue = updateOptions.currentRawValue.replace(
-        updateOptions.currentDigest,
-        updateOptions.newDigest.substring(0, updateOptions.currentDigest.length)
+      newValue = upgrade.currentRawValue.replace(
+        upgrade.currentDigest,
+        upgrade.newDigest.substring(0, upgrade.currentDigest.length)
       );
     } else {
       logger.info('Updating package.json git version tag');
-      newValue = updateOptions.currentRawValue.replace(
-        updateOptions.currentValue,
-        updateOptions.newValue
+      newValue = upgrade.currentRawValue.replace(
+        upgrade.currentValue,
+        upgrade.newValue
       );
     }
   }
-  if (updateOptions.npmPackageAlias) {
-    newValue = `npm:${updateOptions.lookupName}@${newValue}`;
+  if (upgrade.npmPackageAlias) {
+    newValue = `npm:${upgrade.lookupName}@${newValue}`;
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
@@ -109,8 +109,8 @@ export function updateDependency({
       logger.trace('Version is already updated');
       return bumpPackageVersion(
         fileContent,
-        updateOptions.packageJsonVersion,
-        updateOptions.bumpVersion
+        upgrade.packageJsonVersion,
+        upgrade.bumpVersion
       );
     }
     // Update the file = this is what we want
@@ -200,8 +200,8 @@ export function updateDependency({
     }
     return bumpPackageVersion(
       newFileContent,
-      updateOptions.packageJsonVersion,
-      updateOptions.bumpVersion
+      upgrade.packageJsonVersion,
+      upgrade.bumpVersion
     );
   } catch (err) {
     logger.info({ err }, 'updateDependency error');

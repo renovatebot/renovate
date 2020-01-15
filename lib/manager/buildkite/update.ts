@@ -4,11 +4,11 @@ import { regEx } from '../../util/regex';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    const lineIdx = updateOptions.managerData.lineNumber - 1;
-    logger.debug(`buildkite.updateDependency: ${updateOptions.newValue}`);
+    const lineIdx = upgrade.managerData.lineNumber - 1;
+    logger.debug(`buildkite.updateDependency: ${upgrade.newValue}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[lineIdx];
     const depLine = regEx(`^(\\s+[^#]+#)[^:]+(.*)$`);
@@ -16,10 +16,7 @@ export function updateDependency({
       logger.debug('No image line found');
       return null;
     }
-    const newLine = lineToChange.replace(
-      depLine,
-      `$1${updateOptions.newValue}$2`
-    );
+    const newLine = lineToChange.replace(depLine, `$1${upgrade.newValue}$2`);
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
       return fileContent;

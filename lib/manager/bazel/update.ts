@@ -83,43 +83,36 @@ function setNewHash(content: string, hash: string): string {
 
 export async function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
   try {
     logger.debug(
-      `bazel.updateDependency(): ${updateOptions.newValue ||
-        updateOptions.newDigest}`
+      `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
     );
     let newDef: string;
-    if (updateOptions.depType === 'container_pull') {
-      newDef = updateOptions.managerData.def
-        .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${updateOptions.newValue}"`)
-        .replace(/(digest\s*=\s*)"[^"]+"/, `$1"${updateOptions.newDigest}"`);
+    if (upgrade.depType === 'container_pull') {
+      newDef = upgrade.managerData.def
+        .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
+        .replace(/(digest\s*=\s*)"[^"]+"/, `$1"${upgrade.newDigest}"`);
     }
     if (
-      updateOptions.depType === 'git_repository' ||
-      updateOptions.depType === 'go_repository'
+      upgrade.depType === 'git_repository' ||
+      upgrade.depType === 'go_repository'
     ) {
-      newDef = updateOptions.managerData.def
-        .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${updateOptions.newValue}"`)
-        .replace(/(commit\s*=\s*)"[^"]+"/, `$1"${updateOptions.newDigest}"`);
-      if (
-        updateOptions.currentDigest &&
-        updateOptions.updateType !== 'digest'
-      ) {
+      newDef = upgrade.managerData.def
+        .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
+        .replace(/(commit\s*=\s*)"[^"]+"/, `$1"${upgrade.newDigest}"`);
+      if (upgrade.currentDigest && upgrade.updateType !== 'digest') {
         newDef = newDef.replace(
           /(commit\s*=\s*)"[^"]+".*?\n/,
-          `$1"${updateOptions.newDigest}",  # ${updateOptions.newValue}\n`
+          `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
         );
       }
-    } else if (
-      updateOptions.depType === 'http_archive' &&
-      updateOptions.newValue
-    ) {
+    } else if (upgrade.depType === 'http_archive' && upgrade.newValue) {
       newDef = updateWithNewVersion(
-        updateOptions.managerData.def,
-        updateOptions.currentValue,
-        updateOptions.newValue
+        upgrade.managerData.def,
+        upgrade.currentValue,
+        upgrade.newValue
       );
       const massages = {
         'bazel-skylib.': 'bazel_skylib-',
@@ -143,27 +136,23 @@ export async function updateDependency({
       }
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
-    } else if (
-      updateOptions.depType === 'http_archive' &&
-      updateOptions.newDigest
-    ) {
-      const [, shortRepo] = updateOptions.repo.split('/');
-      const url = `https://github.com/${updateOptions.repo}/archive/${updateOptions.newDigest}.tar.gz`;
+    } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
+      const [, shortRepo] = upgrade.repo.split('/');
+      const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
       const hash = await getHashFromUrl(url);
-      newDef = setNewHash(updateOptions.managerData.def, hash);
+      newDef = setNewHash(upgrade.managerData.def, hash);
       newDef = newDef.replace(
         regEx(`(strip_prefix\\s*=\\s*)"[^"]*"`),
-        `$1"${shortRepo}-${updateOptions.newDigest}"`
+        `$1"${shortRepo}-${upgrade.newDigest}"`
       );
       const match =
-        updateOptions.managerData.def.match(/(?<=archive\/).*(?=\.tar\.gz)/g) ||
-        [];
+        upgrade.managerData.def.match(/(?<=archive\/).*(?=\.tar\.gz)/g) || [];
       match.forEach(matchedHash => {
-        newDef = newDef.replace(matchedHash, updateOptions.newDigest);
+        newDef = newDef.replace(matchedHash, upgrade.newDigest);
       });
     }
-    logger.debug({ oldDef: updateOptions.managerData.def, newDef });
-    let existingRegExStr = `${updateOptions.depType}\\([^\\)]+name\\s*=\\s*"${updateOptions.depName}"(.*\\n)+?\\s*\\)`;
+    logger.debug({ oldDef: upgrade.managerData.def, newDef });
+    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }

@@ -3,25 +3,22 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
-  logger.debug(`mix.updateDependency: ${updateOptions.newValue}`);
+  logger.debug(`mix.updateDependency: ${upgrade.newValue}`);
 
   const lines = fileContent.split('\n');
-  const lineToChange = lines[updateOptions.managerData.lineNumber];
+  const lineToChange = lines[upgrade.managerData.lineNumber];
 
-  if (!lineToChange.includes(updateOptions.depName)) return null;
+  if (!lineToChange.includes(upgrade.depName)) return null;
 
-  const newLine = lineToChange.replace(
-    /"(.*?)"/,
-    `"${updateOptions.newValue}"`
-  );
+  const newLine = lineToChange.replace(/"(.*?)"/, `"${upgrade.newValue}"`);
 
   if (newLine === lineToChange) {
     logger.debug('No changes necessary');
     return fileContent;
   }
 
-  lines[updateOptions.managerData.lineNumber] = newLine;
+  lines[upgrade.managerData.lineNumber] = newLine;
   return lines.join('\n');
 }

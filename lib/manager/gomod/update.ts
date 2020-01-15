@@ -3,11 +3,11 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(`gomod.updateDependency: ${updateOptions.newValue}`);
-    const { depName, depType } = updateOptions;
+    logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
+    const { depName, depType } = upgrade;
     let depNameNoVersion = depName
       .split('/')
       .slice(0, 3)
@@ -16,7 +16,7 @@ export function updateDependency({
       depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
     }
     const lines = fileContent.split('\n');
-    const lineToChange = lines[updateOptions.managerData.lineNumber];
+    const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
@@ -33,7 +33,7 @@ export function updateDependency({
         /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
       );
     } else if (depType === 'require') {
-      if (updateOptions.managerData.multiLine) {
+      if (upgrade.managerData.multiLine) {
         updateLineExp = new RegExp(/^(\s+[^\s]+)(\s+)([^\s]+)/);
       } else {
         updateLineExp = new RegExp(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
@@ -44,10 +44,10 @@ export function updateDependency({
       return null;
     }
     let newLine: string;
-    if (updateOptions.updateType === 'digest') {
-      const newDigestRightSized = updateOptions.newDigest.substring(
+    if (upgrade.updateType === 'digest') {
+      const newDigestRightSized = upgrade.newDigest.substring(
         0,
-        updateOptions.currentDigest.length
+        upgrade.currentDigest.length
       );
       if (lineToChange.includes(newDigestRightSized)) {
         return fileContent;
@@ -61,42 +61,36 @@ export function updateDependency({
         `$1$2${newDigestRightSized}`
       );
     } else {
-      newLine = lineToChange.replace(
-        updateLineExp,
-        `$1$2${updateOptions.newValue}`
-      );
+      newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
     }
-    if (updateOptions.updateType === 'major') {
+    if (upgrade.updateType === 'major') {
       logger.debug({ depName }, 'gomod: major update');
       if (depName.startsWith('gopkg.in/')) {
         const oldV = depName.split('.').pop();
-        newLine = newLine.replace(`.${oldV}`, `.v${updateOptions.newMajor}`);
+        newLine = newLine.replace(`.${oldV}`, `.v${upgrade.newMajor}`);
         // Package renames - I couldn't think of a better place to do this
         newLine = newLine.replace(
           'gorethink/gorethink.v5',
           'rethinkdb/rethinkdb-go.v5'
         );
       } else if (
-        updateOptions.newMajor > 1 &&
-        !newLine.includes(`/v${updateOptions.newMajor}`)
+        upgrade.newMajor > 1 &&
+        !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
         // If package has no version, pin to latest one.
-        newLine = newLine.replace(
-          depName,
-          depName + '/v' + updateOptions.newMajor
-        );
+        newLine = newLine.replace(depName, depName + '/v' + upgrade.newMajor);
         if (/^v(0|1)\./.test(upgrade.currentValue)) {
           // Add version
           newLine = newLine.replace(
             updateLineExp,
-            `$1/v${updateOptions.newMajor}$2$3`
+            `$1/v${upgrade.newMajor}$2$3`
           );
         } else {
           // Replace version
-          const [oldV] = updateOptions.currentValue.split('.');
+          const [oldV] = upgrade.currentValue.split('.');
           newLine = newLine.replace(
             new RegExp(`/${oldV}(\\s+)`),
-            `/v${updateOptions.newMajor}$1`
+            `/v${upgrade.newMajor}$1`
           );
         }
       }
@@ -104,7 +98,7 @@ export function updateDependency({
     if (lineToChange.endsWith('+incompatible')) {
       let toAdd = '+incompatible';
 
-      if (updateOptions.updateType === 'major' && updateOptions.newMajor >= 2) {
+      if (upgrade.updateType === 'major' && upgrade.newMajor >= 2) {
         toAdd = '';
       }
       newLine += toAdd;
@@ -113,7 +107,7 @@ export function updateDependency({
       logger.debug('No changes necessary');
       return fileContent;
     }
-    lines[updateOptions.managerData.lineNumber] = newLine;
+    lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new go.mod version');

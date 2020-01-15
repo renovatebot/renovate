@@ -23,14 +23,14 @@ async function getChecksum(url: string): Promise<string> {
 
 export async function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
   try {
-    logger.debug(updateOptions, 'gradle-wrapper.updateDependency()');
+    logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');
-    let { downloadUrl, checksumUrl } = updateOptions;
+    let { downloadUrl, checksumUrl } = upgrade;
 
-    if (updateOptions.managerData.gradleWrapperType === 'all') {
+    if (upgrade.managerData.gradleWrapperType === 'all') {
       downloadUrl = replaceType(downloadUrl);
       checksumUrl = replaceType(checksumUrl);
     }
@@ -38,13 +38,11 @@ export async function updateDependency({
     downloadUrl = downloadUrl.replace(':', '\\:');
     const checksum = await getChecksum(checksumUrl);
 
-    lines[
-      updateOptions.managerData.lineNumber
-    ] = `distributionUrl=${downloadUrl}`;
+    lines[upgrade.managerData.lineNumber] = `distributionUrl=${downloadUrl}`;
 
-    if (updateOptions.managerData.checksumLineNumber) {
+    if (upgrade.managerData.checksumLineNumber) {
       lines[
-        updateOptions.managerData.checksumLineNumber
+        upgrade.managerData.checksumLineNumber
       ] = `distributionSha256Sum=${checksum}`;
     }
     // TODO: insert if not present

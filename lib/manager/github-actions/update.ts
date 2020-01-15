@@ -4,13 +4,13 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    const newFrom = getNewFrom(updateOptions);
+    const newFrom = getNewFrom(upgrade);
     logger.debug(`github-actions.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
-    const lineToChange = lines[updateOptions.managerData.lineNumber];
+    const lineToChange = lines[upgrade.managerData.lineNumber];
     const imageLine = new RegExp(/^(.+docker:\/\/)[^"]+("\s*)?$/);
     if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
@@ -21,7 +21,7 @@ export function updateDependency({
       logger.debug('No changes necessary');
       return fileContent;
     }
-    lines[updateOptions.managerData.lineNumber] = newLine;
+    lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new github-actions value');

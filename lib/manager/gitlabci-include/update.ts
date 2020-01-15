@@ -4,10 +4,10 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    const { depName, newValue } = updateOptions;
+    const { depName, newValue } = upgrade;
 
     const yawn = new YAWN(fileContent);
 

@@ -27,10 +27,10 @@ function replaceAt(
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
-  logger.trace({ config: updateOptions }, 'updateDependency()');
-  if (!updateOptions || !updateOptions.depName || !updateOptions.newValue) {
+  logger.trace({ config: upgrade }, 'updateDependency()');
+  if (!upgrade || !upgrade.depName || !upgrade.newValue) {
     logger.debug('Failed to update dependency, invalid upgrade');
     return fileContent;
   }
@@ -39,7 +39,7 @@ export function updateDependency({
     logger.debug('Failed to update dependency, invalid requirements.yaml file');
     return fileContent;
   }
-  const { depName, newValue } = updateOptions;
+  const { depName, newValue } = upgrade;
   const oldVersion = doc.dependencies.filter(dep => dep.name === depName)[0]
     .version;
   doc.dependencies = doc.dependencies.map(dep =>

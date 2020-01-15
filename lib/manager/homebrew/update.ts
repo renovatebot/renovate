@@ -136,7 +136,7 @@ function updateSha256(
 // TODO: Refactor
 export async function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): Promise<string> {
   logger.trace('updateDependency()');
   /*
@@ -147,74 +147,62 @@ export async function updateDependency({
   // Example urls:
   // "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
   // "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
-  const oldParsedUrlPath = parseUrlPath(updateOptions.managerData.url);
+  const oldParsedUrlPath = parseUrlPath(upgrade.managerData.url);
   if (!oldParsedUrlPath) {
     logger.debug(
-      `Failed to update - upgrade.managerData.url is invalid ${updateOptions.depName}`
+      `Failed to update - upgrade.managerData.url is invalid ${upgrade.depName}`
     );
     return fileContent;
   }
   let newSha256;
   try {
-    newUrl = `https://github.com/${updateOptions.managerData.ownerName}/${
-      updateOptions.managerData.repoName
-    }/releases/download/${updateOptions.newValue}/${
-      updateOptions.managerData.repoName
-    }-${coerce(updateOptions.newValue)}.tar.gz`;
+    newUrl = `https://github.com/${upgrade.managerData.ownerName}/${
+      upgrade.managerData.repoName
+    }/releases/download/${upgrade.newValue}/${
+      upgrade.managerData.repoName
+    }-${coerce(upgrade.newValue)}.tar.gz`;
     newSha256 = await fromStream(got.stream(newUrl), {
       algorithm: 'sha256',
     });
   } catch (errOuter) {
     logger.debug(
-      `Failed to download release download for ${updateOptions.depName} - trying archive instead`
+      `Failed to download release download for ${upgrade.depName} - trying archive instead`
     );
     try {
-      newUrl = `https://github.com/${updateOptions.managerData.ownerName}/${updateOptions.managerData.repoName}/archive/${updateOptions.newValue}.tar.gz`;
+      newUrl = `https://github.com/${upgrade.managerData.ownerName}/${upgrade.managerData.repoName}/archive/${upgrade.newValue}.tar.gz`;
       newSha256 = await fromStream(got.stream(newUrl), {
         algorithm: 'sha256',
       });
     } catch (errInner) {
       logger.debug(
-        `Failed to download archive download for ${updateOptions.depName} - update failed`
+        `Failed to download archive download for ${upgrade.depName} - update failed`
       );
       return fileContent;
     }
   }
   if (!newSha256) {
     logger.debug(
-      `Failed to generate new sha256 for ${updateOptions.depName} - update failed`
+      `Failed to generate new sha256 for ${upgrade.depName} - update failed`
     );
     return fileContent;
   }
   const newParsedUrlPath = parseUrlPath(newUrl);
   if (!newParsedUrlPath) {
-    logger.debug(
-      `Failed to update url for dependency ${updateOptions.depName}`
-    );
+    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return fileContent;
   }
-  if (updateOptions.newValue !== newParsedUrlPath.currentValue) {
-    logger.debug(
-      `Failed to update url for dependency ${updateOptions.depName}`
-    );
+  if (upgrade.newValue !== newParsedUrlPath.currentValue) {
+    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return fileContent;
   }
-  newContent = updateUrl(fileContent, updateOptions.managerData.url, newUrl);
+  newContent = updateUrl(fileContent, upgrade.managerData.url, newUrl);
   if (!newContent) {
-    logger.debug(
-      `Failed to update url for dependency ${updateOptions.depName}`
-    );
+    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return fileContent;
   }
-  newContent = updateSha256(
-    newContent,
-    updateOptions.managerData.sha256,
-    newSha256
-  );
+  newContent = updateSha256(newContent, upgrade.managerData.sha256, newSha256);
   if (!newContent) {
-    logger.debug(
-      `Failed to update sha256 for dependency ${updateOptions.depName}`
-    );
+    logger.debug(`Failed to update sha256 for dependency ${upgrade.depName}`);
     return fileContent;
   }
   return newContent;

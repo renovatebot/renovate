@@ -9,26 +9,26 @@ const yamlFile = readFileSync(
 describe('manager/gitlabci-include/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'repository',
         depName: 'mikebryant/include-source-example',
         newValue: '1.0.1',
       };
-      const res = updateDependency({ fileContent: yamlFile, updateOptions });
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns same', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'repository',
         depName: 'mikebryant/include-source-example',
         newValue: '1.0.0',
       };
-      const res = updateDependency({ fileContent: yamlFile, updateOptions });
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).toEqual(yamlFile);
     });
     it('returns null if error', () => {
-      const res = updateDependency({ fileContent: null, updateOptions: null });
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

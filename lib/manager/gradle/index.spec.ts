@@ -228,12 +228,12 @@ describe('manager/gradle', () => {
         'utf8'
       );
       // prettier-ignore
-      const updateOptions = {
+      const upgrade = {
         depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8'
       };
       const buildGradleContentUpdated = manager.updateDependency({
         fileContent: buildGradleContent,
-        updateOptions,
+        upgrade,
       });
 
       expect(buildGradleContent).not.toMatch('cglib:cglib-nodep:3.2.8');
@@ -252,7 +252,7 @@ describe('manager/gradle', () => {
             id "com.github.ben-manes.versions" version "0.20.0"
         }
         `;
-      const updateOptions = {
+      const upgrade = {
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
@@ -260,7 +260,7 @@ describe('manager/gradle', () => {
       };
       const buildGradleContentUpdated = manager.updateDependency({
         fileContent: buildGradleContent,
-        updateOptions,
+        upgrade,
       });
 
       expect(buildGradleContent).not.toMatch(
@@ -285,7 +285,7 @@ describe('manager/gradle', () => {
             id("com.github.ben-manes.versions") version "0.20.0"
         }
         `;
-      const updateOptions = {
+      const upgrade = {
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
@@ -293,7 +293,7 @@ describe('manager/gradle', () => {
       };
       const buildGradleContentUpdated = manager.updateDependency({
         fileContent: buildGradleContent,
-        updateOptions,
+        upgrade,
       });
 
       expect(buildGradleContent).not.toMatch(

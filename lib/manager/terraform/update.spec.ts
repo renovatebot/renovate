@@ -6,41 +6,41 @@ const tf1 = readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
 describe('manager/terraform/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'github',
         depName: 'foo',
         managerData: { lineNumber: 1 },
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.1',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).not.toEqual(tf1);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns same', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'github',
         depName: 'foo',
         managerData: { lineNumber: 1 },
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).toEqual(tf1);
     });
     it('returns null if wrong line', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'github',
         depName: 'foo',
         managerData: { lineNumber: 2 },
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).toBeNull();
     });
     it('updates github versions', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'github',
         currentValue: 'v0.1.0',
         newValue: 'v0.1.3',
@@ -51,12 +51,12 @@ describe('manager/terraform/update', () => {
         source:
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).not.toEqual(tf1);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('skips terraform versions wrong line', () => {
-      const updateOptions = {
+      const upgrade = {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
@@ -66,11 +66,11 @@ describe('manager/terraform/update', () => {
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).toBeNull();
     });
     it('updates terraform versions', () => {
-      const updateOptions = {
+      const upgrade = {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
@@ -80,12 +80,12 @@ describe('manager/terraform/update', () => {
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).not.toEqual(tf1);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('updates terraform versions with terraformDependencyType `module` ', () => {
-      const updateOptions = {
+      const upgrade = {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
@@ -98,12 +98,12 @@ describe('manager/terraform/update', () => {
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).not.toEqual(tf1);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('updates terraform versions with terraformDependencyType `provider` ', () => {
-      const updateOptions = {
+      const upgrade = {
         currentValue: '1.36.1',
         depName: 'azurerm',
         depNameShort: 'azurerm',
@@ -117,9 +117,9 @@ describe('manager/terraform/update', () => {
           'https://github.com/terraform-providers/terraform-provider-azurerm',
         newValue: '1.38.0',
       };
-      const res = updateDependency({ fileContent: tf1, updateOptions });
+      const res = updateDependency({ fileContent: tf1, upgrade });
       expect(res).not.toEqual(tf1);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
   });
 });

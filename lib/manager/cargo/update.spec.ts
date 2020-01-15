@@ -23,39 +23,39 @@ describe('lib/manager/cargo/update', () => {
     it('returns same for invalid toml', () => {
       const cargotoml = 'invalid toml !#$#';
       expect(
-        updateDependency({ fileContent: cargotoml, updateOptions: config })
+        updateDependency({ fileContent: cargotoml, upgrade: config })
       ).toEqual(cargotoml);
     });
     it('returns same for null upgrade', () => {
       const cargotoml = '[dependencies]\n';
       expect(
-        updateDependency({ fileContent: cargotoml, updateOptions: null })
+        updateDependency({ fileContent: cargotoml, upgrade: null })
       ).toEqual(cargotoml);
     });
     it('returns same if version has not changed', () => {
       const cargotoml = '[dependencies]\n';
       expect(
-        updateDependency({ fileContent: cargotoml, updateOptions: null })
+        updateDependency({ fileContent: cargotoml, upgrade: null })
       ).toEqual(cargotoml);
-      const updateOptions = {
+      const upgrade = {
         depName: 'libc',
         depType: 'dependencies',
         managerData: { nestedVersion: false },
         newValue: '=0.2.43',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
-      expect(updateDependency({ fileContent: cargo1toml, updateOptions })).toBe(
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toBe(
         cargo1toml
       );
     });
     it('returns same for invalid target', () => {
       const cargotoml = '[dependencies]\n';
       expect(
-        updateDependency({ fileContent: cargotoml, updateOptions: null })
+        updateDependency({ fileContent: cargotoml, upgrade: null })
       ).toEqual(cargotoml);
-      const updateOptions = {
+      const upgrade = {
         depName: 'platform-specific-dep',
         depType: 'dependencies',
         managerData: { nestedVersion: false },
@@ -63,101 +63,101 @@ describe('lib/manager/cargo/update', () => {
         newValue: '1.2.3',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
-      expect(updateDependency({ fileContent: cargo1toml, updateOptions })).toBe(
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toBe(
         cargo1toml
       );
     });
     it('returns same for invalid depType', () => {
       const cargotoml = '[dependencies]\n';
       expect(
-        updateDependency({ fileContent: cargotoml, updateOptions: null })
+        updateDependency({ fileContent: cargotoml, upgrade: null })
       ).toEqual(cargotoml);
-      const updateOptions = {
+      const upgrade = {
         depName: 'libc',
         depType: 'foobar',
         managerData: { nestedVersion: false },
         newValue: '1.2.3',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
-      expect(updateDependency({ fileContent: cargo1toml, updateOptions })).toBe(
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toBe(
         cargo1toml
       );
     });
     it('returns same for invalid depName', () => {
       const cargotoml = '[dependencies]\n';
       expect(
-        updateDependency({ fileContent: cargotoml, updateOptions: null })
+        updateDependency({ fileContent: cargotoml, upgrade: null })
       ).toEqual(cargotoml);
-      const updateOptions = {
+      const upgrade = {
         depName: 'does not exist',
         depType: 'dependencies',
         managerData: { nestedVersion: false },
         newValue: '1.2.3',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
-      expect(updateDependency({ fileContent: cargo1toml, updateOptions })).toBe(
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toBe(
         cargo1toml
       );
     });
     it('updates normal dependency', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'libc',
         depType: 'dependencies',
         managerData: { nestedVersion: false },
         newValue: '0.3.0',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).not.toBe(
+        cargo1toml
+      );
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).not.toBe(cargo1toml);
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).toMatchSnapshot();
     });
     it('updates normal dependency with mismatch on first try', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'same_version_1',
         depType: 'dependencies',
         managerData: { nestedVersion: false },
         newValue: '1.2.3',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).not.toBe(
+        cargo1toml
+      );
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).not.toBe(cargo1toml);
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).toMatchSnapshot();
     });
     it('updates nested version dependency', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'pcap-sys',
         depType: 'dependencies',
         managerData: { nestedVersion: true },
         newValue: '0.2.0',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).not.toBe(
+        cargo1toml
+      );
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).not.toBe(cargo1toml);
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).toMatchSnapshot();
     });
     it('updates platform specific dependency', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'winapi',
         target: 'cfg(windows)',
         depType: 'dependencies',
@@ -165,61 +165,61 @@ describe('lib/manager/cargo/update', () => {
         newValue: '0.4.0',
       };
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).not.toBeNull();
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).not.toBe(
+        cargo1toml
+      );
       expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).not.toBe(cargo1toml);
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
+        updateDependency({ fileContent: cargo1toml, upgrade })
       ).toMatchSnapshot();
     });
     it('handles invalid standard tables gracefully', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'dep5',
         managerData: { nestedVersion: true },
         depType: 'dependencies',
         newValue: '2.0.0',
       };
-      expect(
-        updateDependency({ fileContent: cargo4toml, updateOptions })
-      ).toEqual(cargo4toml);
+      expect(updateDependency({ fileContent: cargo4toml, upgrade })).toEqual(
+        cargo4toml
+      );
     });
     it('does not update in case of error', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'libc',
         devType: 'dev-dependencies', // Wrong devType
         managerData: { nestedVersion: false },
         newValue: '0.3.0',
       };
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).toEqual(cargo1toml);
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toEqual(
+        cargo1toml
+      );
     });
     it('does not update in case of error', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'libc',
         devType: 'dependencies',
         managerData: { nestedVersion: true }, // Should be false
         newValue: '0.3.0',
       };
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).toEqual(cargo1toml);
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toEqual(
+        cargo1toml
+      );
     });
     it('does not update in case of error', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'pcap-sys',
         devType: 'dependencies',
         managerData: { nestedVersion: false }, // Should be true
         newValue: '0.3.0',
       };
-      expect(
-        updateDependency({ fileContent: cargo1toml, updateOptions })
-      ).toEqual(cargo1toml);
+      expect(updateDependency({ fileContent: cargo1toml, upgrade })).toEqual(
+        cargo1toml
+      );
     });
     it('updates platform specific normal dependency', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'wasm-bindgen',
         depType: 'dependencies',
         managerData: { nestedVersion: false },
@@ -227,14 +227,14 @@ describe('lib/manager/cargo/update', () => {
         newValue: '0.3.0',
       };
       expect(
-        updateDependency({ fileContent: cargo5toml, updateOptions })
+        updateDependency({ fileContent: cargo5toml, upgrade })
       ).not.toBeNull();
-      expect(
-        updateDependency({ fileContent: cargo5toml, updateOptions })
-      ).not.toBe(cargo5toml);
+      expect(updateDependency({ fileContent: cargo5toml, upgrade })).not.toBe(
+        cargo5toml
+      );
     });
     it('updates platform specific table dependency', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'web-sys',
         managerData: { nestedVersion: true },
         depType: 'dependencies',
@@ -242,11 +242,11 @@ describe('lib/manager/cargo/update', () => {
         newValue: '0.4.0',
       };
       expect(
-        updateDependency({ fileContent: cargo5toml, updateOptions })
+        updateDependency({ fileContent: cargo5toml, upgrade })
       ).not.toBeNull();
-      expect(
-        updateDependency({ fileContent: cargo5toml, updateOptions })
-      ).not.toBe(cargo5toml);
+      expect(updateDependency({ fileContent: cargo5toml, upgrade })).not.toBe(
+        cargo5toml
+      );
     });
   });
 });

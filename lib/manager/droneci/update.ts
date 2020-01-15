@@ -4,13 +4,13 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
     const lines = fileContent.split('\n');
-    const lineToChange = lines[updateOptions.managerData.lineNumber];
-    if (updateOptions.depType === 'docker') {
-      const newFrom = getNewFrom(updateOptions);
+    const lineToChange = lines[upgrade.managerData.lineNumber];
+    if (upgrade.depType === 'docker') {
+      const newFrom = getNewFrom(upgrade);
       logger.debug(`droneci.updateDependency(): ${newFrom}`);
       const imageLine = /^(\s* image:\s*'?"?)[^\s'"]+('?"?\s*)$/;
       if (!imageLine.test(lineToChange)) {
@@ -22,7 +22,7 @@ export function updateDependency({
         logger.debug('No changes necessary');
         return fileContent;
       }
-      lines[updateOptions.managerData.lineNumber] = newLine;
+      lines[upgrade.managerData.lineNumber] = newLine;
       return lines.join('\n');
     }
     logger.error('Unknown DroneCI depType');

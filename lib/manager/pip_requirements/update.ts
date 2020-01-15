@@ -4,17 +4,15 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(
-      `pip_requirements.updateDependency(): ${updateOptions.newValue}`
-    );
+    logger.debug(`pip_requirements.updateDependency(): ${upgrade.newValue}`);
     const lines = fileContent.split('\n');
-    const oldValue = lines[updateOptions.managerData.lineNumber];
+    const oldValue = lines[upgrade.managerData.lineNumber];
     let newValue;
     const multiDependencyRegex = new RegExp(
-      `(install_requires\\s*[=]\\s*\\[.*)(${updateOptions.depName}.+?(?='))(.*])`,
+      `(install_requires\\s*[=]\\s*\\[.*)(${upgrade.depName}.+?(?='))(.*])`,
       'g'
     );
     const multipleDependencyMatch = multiDependencyRegex.exec(oldValue);
@@ -22,7 +20,7 @@ export function updateDependency({
       const dependency = multipleDependencyMatch[2];
       const updatedDependency = dependency.replace(
         new RegExp(dependencyPattern),
-        `$1$2${updateOptions.newValue}`
+        `$1$2${upgrade.newValue}`
       );
       newValue = oldValue.replace(
         multiDependencyRegex,
@@ -31,10 +29,10 @@ export function updateDependency({
     } else {
       newValue = oldValue.replace(
         new RegExp(dependencyPattern),
-        `$1$2${updateOptions.newValue}`
+        `$1$2${upgrade.newValue}`
       );
     }
-    lines[updateOptions.managerData.lineNumber] = newValue;
+    lines[upgrade.managerData.lineNumber] = newValue;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new package version');

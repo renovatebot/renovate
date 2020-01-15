@@ -5,9 +5,9 @@ const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
-  const { currentValue, newValue, fileReplacePosition } = updateOptions;
+  const { currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
   const oldVal = isVersion(currentValue) ? `"${currentValue}"` : currentValue;

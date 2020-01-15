@@ -9,20 +9,20 @@ const fileContent = readFileSync(
 describe('manager/pub/update', () => {
   describe('updateDependency', () => {
     it('returns content untouched if versions are same', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'foo',
         currentValue: '1',
         newValue: '1',
         depType: 'dependencies',
       };
-      const res = updateDependency({ fileContent, updateOptions });
+      const res = updateDependency({ fileContent, upgrade });
       expect(res).toEqual(fileContent);
     });
     it('returns null if content was updated', () => {
       expect(
         updateDependency({
           fileContent,
-          updateOptions: {
+          upgrade: {
             depName: 'test',
             currentValue: '0.0.1',
             newValue: '1',
@@ -33,7 +33,7 @@ describe('manager/pub/update', () => {
       expect(
         updateDependency({
           fileContent,
-          updateOptions: {
+          upgrade: {
             depName: 'build',
             currentValue: '0.0.1',
             newValue: '1',
@@ -43,27 +43,27 @@ describe('manager/pub/update', () => {
       ).toBe(null);
     });
     it('replaces one-line value', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'foo',
         currentValue: '1',
         newValue: '1.2.3',
         depType: 'dependencies',
       };
-      const res = updateDependency({ fileContent, updateOptions });
+      const res = updateDependency({ fileContent, upgrade });
       expect(res).not.toEqual(fileContent);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
     it('replaces nested value', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'bar',
         currentValue: '1',
         newValue: '1.2.3',
         depType: 'dependencies',
       };
-      const res = updateDependency({ fileContent, updateOptions });
+      const res = updateDependency({ fileContent, upgrade });
       expect(res).not.toEqual(fileContent);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
   });

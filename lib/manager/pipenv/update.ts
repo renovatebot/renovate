@@ -25,10 +25,10 @@ function replaceAt(
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    const { depType, depName, newValue, managerData = {} } = updateOptions;
+    const { depType, depName, newValue, managerData = {} } = upgrade;
     const { nestedVersion } = managerData;
     logger.debug(`pipenv.updateDependency(): ${newValue}`);
     const parsedContents = parse(fileContent);

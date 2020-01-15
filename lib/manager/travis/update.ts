@@ -5,13 +5,13 @@ import { logger } from '../../logger';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(`travis.updateDependency(): ${updateOptions.newValue}`);
+    logger.debug(`travis.updateDependency(): ${upgrade.newValue}`);
     const indent = detectIndent(fileContent).indent || '  ';
     let quote: string;
-    if (is.string(updateOptions.currentValue[0])) {
+    if (is.string(upgrade.currentValue[0])) {
       quote =
         fileContent.split(`'`).length > fileContent.split(`"`).length
           ? `'`
@@ -21,7 +21,7 @@ export function updateDependency({
     }
     let newString = `node_js:\n`;
     // TODO: `newValue` is a string!
-    (updateOptions.newValue as any).forEach(version => {
+    (upgrade.newValue as any).forEach(version => {
       newString += `${indent}- ${quote}${version}${quote}\n`;
     });
     return fileContent.replace(/node_js:(\n\s+-[^\n]+)+\n/, newString);

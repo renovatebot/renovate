@@ -168,15 +168,15 @@ function buildGradleDependency(config: Upgrade): GradleDependency {
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string {
   // prettier-ignore
-  logger.debug(`gradle.updateDependency(): packageFile:${updateOptions.packageFile} depName:${updateOptions.depName}, version:${updateOptions.currentVersion} ==> ${updateOptions.newValue}`);
+  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
 
   return updateGradleVersion(
     fileContent,
-    buildGradleDependency(updateOptions),
-    updateOptions.newValue
+    buildGradleDependency(upgrade),
+    upgrade.newValue
   );
 }
 

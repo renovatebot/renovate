@@ -4,9 +4,9 @@ import { UpdateDependencyConfig } from '../common';
 
 export default async function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
-  const git = Git(updateOptions.localDir);
+  const git = Git(upgrade.localDir);
 
   try {
     await git.raw([
@@ -14,7 +14,7 @@ export default async function updateDependency({
       'update',
       '--init',
       '--remote',
-      updateOptions.depName,
+      upgrade.depName,
     ]);
     return fileContent;
   } catch (err) {

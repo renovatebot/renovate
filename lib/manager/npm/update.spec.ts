@@ -15,7 +15,7 @@ const input01GlobContent = readFixture('inputs/01-glob.json');
 describe('workers/branch/package-json', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'cheerio',
         newValue: '0.22.1',
@@ -23,12 +23,12 @@ describe('workers/branch/package-json', () => {
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
     it('replaces a github dependency value', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'gulp',
         currentValue: 'v4.0.0-alpha.2',
@@ -42,12 +42,12 @@ describe('workers/branch/package-json', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
-        updateOptions,
+        upgrade,
       });
       expect(res).toMatchSnapshot();
     });
     it('replaces a npm package alias', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'hapi',
         npmPackageAlias: true,
@@ -62,12 +62,12 @@ describe('workers/branch/package-json', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
-        updateOptions,
+        upgrade,
       });
       expect(res).toMatchSnapshot();
     });
     it('replaces a github short hash', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'gulp',
         currentDigest: 'abcdef7',
@@ -81,12 +81,12 @@ describe('workers/branch/package-json', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
-        updateOptions,
+        upgrade,
       });
       expect(res).toMatchSnapshot();
     });
     it('replaces a github fully specified version', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'n',
         currentValue: 'v1.0.0',
@@ -100,33 +100,33 @@ describe('workers/branch/package-json', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
-        updateOptions,
+        upgrade,
       });
       expect(res).toMatchSnapshot();
       expect(res.includes('v1.1.0')).toBe(true);
     });
     it('updates resolutions too', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'config',
         newValue: '1.22.0',
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
     });
     it('updates glob resolutions', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'dependencies',
         depName: 'config',
         newValue: '1.22.0',
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01GlobContent,
-        updateOptions,
+        upgrade,
       });
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
@@ -134,7 +134,7 @@ describe('workers/branch/package-json', () => {
       );
     });
     it('replaces only the first instance of a value', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-touch',
         newValue: '1.6.1',
@@ -142,12 +142,12 @@ describe('workers/branch/package-json', () => {
       const outputContent = readFixture('outputs/012.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
     it('replaces only the second instance of a value', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-sanitize',
         newValue: '1.6.1',
@@ -155,31 +155,31 @@ describe('workers/branch/package-json', () => {
       const outputContent = readFixture('outputs/013.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
     it('handles the case where the desired version is already supported', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-touch',
         newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toEqual(input01Content);
     });
     it('returns null if throws error', () => {
-      const updateOptions = {
+      const upgrade = {
         depType: 'blah',
         depName: 'angular-touch-not',
         newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toBeNull();
     });

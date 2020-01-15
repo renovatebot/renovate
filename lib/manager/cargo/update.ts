@@ -26,13 +26,13 @@ function replaceAt(
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string {
-  logger.trace({ config: updateOptions }, 'poetry.updateDependency()');
-  if (!updateOptions) {
+  logger.trace({ config: upgrade }, 'poetry.updateDependency()');
+  if (!upgrade) {
     return fileContent;
   }
-  const { target, depType, depName, newValue, managerData } = updateOptions;
+  const { target, depType, depName, newValue, managerData } = upgrade;
   const { nestedVersion } = managerData;
   let parsedContent: CargoConfig;
   try {
@@ -53,12 +53,12 @@ export function updateDependency({
   if (!section) {
     if (target) {
       logger.info(
-        { config: updateOptions },
+        { config: upgrade },
         `Error: Section [target.${target}.${depType}] doesn't exist in Cargo.toml file, update failed`
       );
     } else {
       logger.info(
-        { config: updateOptions },
+        { config: upgrade },
         `Error: Section [${depType}] doesn't exist in Cargo.toml file, update failed`
       );
     }
@@ -68,7 +68,7 @@ export function updateDependency({
   const oldDep = section[depName];
   if (!oldDep) {
     logger.info(
-      { config: updateOptions },
+      { config: upgrade },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
     return fileContent;
@@ -86,7 +86,7 @@ export function updateDependency({
   }
   if (!oldVersion) {
     logger.info(
-      { config: updateOptions },
+      { config: upgrade },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
     return fileContent;

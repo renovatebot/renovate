@@ -3,9 +3,9 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string {
-  const { depName, depType, currentValue, newValue } = updateOptions;
+  const { depName, depType, currentValue, newValue } = upgrade;
 
   if (currentValue === newValue) return fileContent;
 

@@ -3,22 +3,19 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    logger.debug(`nuget.updateDependency(): ${updateOptions.newFrom}`);
+    logger.debug(`nuget.updateDependency(): ${upgrade.newFrom}`);
     const lines = fileContent.split('\n');
-    const lineToChange = lines[updateOptions.managerData.lineNumber];
+    const lineToChange = lines[upgrade.managerData.lineNumber];
     const regex = /(Version\s*=\s*"\[?)([^",\])]+)/;
-    const newLine = lineToChange.replace(
-      regex,
-      `$1${updateOptions.newVersion}`
-    );
+    const newLine = lineToChange.replace(regex, `$1${upgrade.newVersion}`);
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
       return fileContent;
     }
-    lines[updateOptions.managerData.lineNumber] = newLine;
+    lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new nuget value');

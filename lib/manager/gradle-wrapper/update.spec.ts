@@ -18,7 +18,7 @@ describe('manager/gradle-wrapper/update', () => {
     });
 
     it('replaces existing value', async () => {
-      const updateOptions = {
+      const upgrade = {
         toVersion: '5.0.0',
         version: '5.0.0',
         managerData: {
@@ -38,7 +38,7 @@ describe('manager/gradle-wrapper/update', () => {
       });
       const res = await dcUpdate.updateDependency({
         fileContent: propertiesFile2,
-        updateOptions,
+        upgrade,
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -52,7 +52,7 @@ describe('manager/gradle-wrapper/update', () => {
     });
 
     it('returns same', async () => {
-      const updateOptions = {
+      const upgrade = {
         toVersion: '4.10.3',
         version: '4.10.3',
         managerData: {
@@ -71,13 +71,13 @@ describe('manager/gradle-wrapper/update', () => {
       });
       const res = await dcUpdate.updateDependency({
         fileContent: propertiesFile2,
-        updateOptions,
+        upgrade,
       });
       expect(res).toEqual(propertiesFile2);
     });
 
     it('returns null for 404 on checksum', async () => {
-      const updateOptions = {
+      const upgrade = {
         toVersion: '4.10.3',
         version: '4.10.3',
         managerData: {
@@ -94,13 +94,13 @@ describe('manager/gradle-wrapper/update', () => {
       });
       const res = await dcUpdate.updateDependency({
         fileContent: propertiesFile2,
-        updateOptions,
+        upgrade,
       });
       expect(res).toBeNull();
     });
 
     it('returns null for unknown error on checksum', async () => {
-      const updateOptions = {
+      const upgrade = {
         toVersion: '4.10.3',
         version: '4.10.3',
         managerData: {
@@ -115,7 +115,7 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockRejectedValueOnce(new Error());
       const res = await dcUpdate.updateDependency({
         fileContent: propertiesFile2,
-        updateOptions,
+        upgrade,
       });
       expect(res).toBeNull();
     });
@@ -123,7 +123,7 @@ describe('manager/gradle-wrapper/update', () => {
     it('returns null if error', async () => {
       const res = await dcUpdate.updateDependency({
         fileContent: null,
-        updateOptions: null,
+        upgrade: null,
       });
       expect(res).toBeNull();
     });

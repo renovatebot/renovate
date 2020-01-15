@@ -12,38 +12,38 @@ const input02Content = readFixture('package-2.js');
 describe('workers/branch/package-js', () => {
   describe('.updateDependency(fileContent, depName, currentValue, newValue)', () => {
     it('replaces a dependency value', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'xmldom',
         currentValue: '0.1.19',
         newValue: '0.22.1',
       };
       const testContent = updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toMatchSnapshot();
     });
     it('handles alternative quotes and white space', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'xmldom',
         currentValue: '0.1.19',
         newValue: '0.22.1',
       };
       const testContent = updateDependency({
         fileContent: input02Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toMatchSnapshot();
     });
     it('handles the case where the desired version is already supported', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'query-string',
         currentValue: '0.2.0',
         newValue: '0.2.0',
       };
       const testContent = updateDependency({
         fileContent: input01Content,
-        updateOptions,
+        upgrade,
       });
       expect(testContent).toEqual(input01Content);
     });

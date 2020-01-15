@@ -9,35 +9,35 @@ const yamlFile = readFileSync(
 describe('manager/docker-compose/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
-      const updateOptions = {
+      const upgrade = {
         managerData: { lineNumber: 18 },
         depName: 'postgres',
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = updateDependency({ fileContent: yamlFile, updateOptions });
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(updateOptions.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
-      const updateOptions = {
+      const upgrade = {
         managerData: { lineNumber: 4 },
         depName: 'quay.io/something/redis',
         newValue: 'alpine',
       };
-      const res = updateDependency({ fileContent: yamlFile, updateOptions });
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).toEqual(yamlFile);
     });
     it('returns null if mismatch', () => {
-      const updateOptions = {
+      const upgrade = {
         managerData: { lineNumber: 17 },
         newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
       };
-      const res = updateDependency({ fileContent: yamlFile, updateOptions });
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).toBeNull();
     });
     it('returns null if error', () => {
-      const res = updateDependency({ fileContent: null, updateOptions: null });
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

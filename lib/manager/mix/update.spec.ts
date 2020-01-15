@@ -10,40 +10,40 @@ const sample = fs.readFileSync(
 describe('lib/manager/mix/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'postgrex',
         managerData: { lineNumber: 18 },
         newValue: '~> 0.8.2',
       };
-      const res = updateDependency({ fileContent: sample, updateOptions });
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).not.toEqual(sample);
-      expect(res.includes(updateOptions.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('return the same', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'postgrex',
         managerData: { lineNumber: 18 },
         newValue: '~> 0.8.1',
       };
-      const res = updateDependency({ fileContent: sample, updateOptions });
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).toEqual(sample);
     });
     it('returns null if wrong line', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'postgrex',
         managerData: { lineNumber: 19 },
         newValue: '~> 0.8.2',
       };
-      const res = updateDependency({ fileContent: sample, updateOptions });
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).toBeNull();
     });
     it('returns null for unsupported depType', () => {
-      const updateOptions = {
+      const upgrade = {
         depName: 'cowboy',
         managerData: { lineNumber: 19 },
         newValue: '~> 0.8.2',
       };
-      const res = updateDependency({ fileContent: sample, updateOptions });
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).toBeNull();
     });
   });

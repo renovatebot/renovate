@@ -15,12 +15,12 @@ export function getNewFrom(upgrade: Upgrade): string {
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    const { lineNumber, fromSuffix } = updateOptions.managerData;
-    let { fromPrefix } = updateOptions.managerData;
-    const newFrom = getNewFrom(updateOptions);
+    const { lineNumber, fromSuffix } = upgrade.managerData;
+    let { fromPrefix } = upgrade.managerData;
+    const newFrom = getNewFrom(upgrade);
     logger.debug(`docker.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[lineNumber];

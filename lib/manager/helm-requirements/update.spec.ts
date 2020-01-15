@@ -12,24 +12,20 @@ describe('lib/manager/helm-requirements/update', () => {
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const updateOptions = undefined;
+      const upgrade = undefined;
 
-      expect(updateDependency({ fileContent: content, updateOptions })).toBe(
-        content
-      );
+      expect(updateDependency({ fileContent: content, upgrade })).toBe(content);
     });
     it('returns the same fileContent for invalid requirements.yaml file', () => {
       const content = `
        Invalid requirements.yaml content.
       `;
-      const updateOptions = {
+      const upgrade = {
         depName: 'redis',
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
-      expect(updateDependency({ fileContent: content, updateOptions })).toBe(
-        content
-      );
+      expect(updateDependency({ fileContent: content, upgrade })).toBe(content);
     });
     it('returns the same fileContent for empty upgrade', () => {
       const content = `
@@ -41,10 +37,8 @@ describe('lib/manager/helm-requirements/update', () => {
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const updateOptions = {};
-      expect(updateDependency({ fileContent: content, updateOptions })).toBe(
-        content
-      );
+      const upgrade = {};
+      expect(updateDependency({ fileContent: content, upgrade })).toBe(content);
     });
     it('upgrades dependency if valid upgrade', () => {
       const content = `
@@ -56,16 +50,16 @@ describe('lib/manager/helm-requirements/update', () => {
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const updateOptions = {
+      const upgrade = {
         depName: 'redis',
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
+      expect(updateDependency({ fileContent: content, upgrade })).not.toBe(
+        content
+      );
       expect(
-        updateDependency({ fileContent: content, updateOptions })
-      ).not.toBe(content);
-      expect(
-        updateDependency({ fileContent: content, updateOptions })
+        updateDependency({ fileContent: content, upgrade })
       ).toMatchSnapshot();
     });
     it('upgrades dependency if version field comes before name field', () => {
@@ -78,16 +72,16 @@ describe('lib/manager/helm-requirements/update', () => {
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const updateOptions = {
+      const upgrade = {
         depName: 'redis',
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
+      expect(updateDependency({ fileContent: content, upgrade })).not.toBe(
+        content
+      );
       expect(
-        updateDependency({ fileContent: content, updateOptions })
-      ).not.toBe(content);
-      expect(
-        updateDependency({ fileContent: content, updateOptions })
+        updateDependency({ fileContent: content, upgrade })
       ).toMatchSnapshot();
     });
     it('upgrades dependency if newValue version value is repeated', () => {
@@ -100,16 +94,16 @@ describe('lib/manager/helm-requirements/update', () => {
           version: 0.9.0
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const updateOptions = {
+      const upgrade = {
         depName: 'postgresql',
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
+      expect(updateDependency({ fileContent: content, upgrade })).not.toBe(
+        content
+      );
       expect(
-        updateDependency({ fileContent: content, updateOptions })
-      ).not.toBe(content);
-      expect(
-        updateDependency({ fileContent: content, updateOptions })
+        updateDependency({ fileContent: content, upgrade })
       ).toMatchSnapshot();
     });
   });

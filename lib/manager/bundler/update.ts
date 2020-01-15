@@ -9,18 +9,18 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
     const delimiter =
       fileContent.split('"').length > fileContent.split("'").length ? '"' : "'";
     const lines = fileContent.split('\n');
-    const lineToChange = lines[updateOptions.managerData.lineNumber];
-    if (!lineToChange.includes(updateOptions.depName)) {
+    const lineToChange = lines[upgrade.managerData.lineNumber];
+    if (!lineToChange.includes(upgrade.depName)) {
       logger.debug('No gem match on line');
       return null;
     }
-    const newValue = updateOptions.newValue
+    const newValue = upgrade.newValue
       .split(',')
       .map(part => `, ${delimiter}${part.trim()}${delimiter}`)
       .join('');
@@ -34,7 +34,7 @@ export function updateDependency({
       logger.debug('No changes necessary');
       return fileContent;
     }
-    lines[updateOptions.managerData.lineNumber] = newLine;
+    lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.info({ err }, 'Error setting new Gemfile value');

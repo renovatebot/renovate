@@ -182,6 +182,11 @@ export interface UpdateArtifact {
   config: UpdateArtifactsConfig;
 }
 
+export interface UpdateDependencyConfig {
+  fileContent: string;
+  upgrade: Upgrade;
+}
+
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;

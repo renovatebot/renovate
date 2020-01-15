@@ -3,9 +3,9 @@ import { UpdateDependencyConfig } from '../common';
 
 export function updateDependency({
   fileContent,
-  updateOptions,
+  upgrade,
 }: UpdateDependencyConfig): string {
-  const { depName, currentValue, newValue } = updateOptions;
+  const { depName, currentValue, newValue } = upgrade;
   logger.debug(`meteor.updateDependency(): ${depName} = ${newValue}`);
   const regexReplace = new RegExp(
     `('|")(${depName})('|"):(\\s+)('|")${currentValue}('|")`
