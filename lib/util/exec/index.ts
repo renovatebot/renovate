@@ -105,7 +105,7 @@ export async function exec(
   const seconds = Math.round(duration[0] + duration[1] / 1e9);
   logger.debug(
     { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
-    'Command completed'
+    'exec completed'
   );
   return res;
 }
