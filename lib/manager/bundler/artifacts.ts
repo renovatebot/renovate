@@ -13,7 +13,6 @@ import {
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import {
-  BUNDLER_COULD_NOT_RESOLVE,
   BUNDLER_INVALID_CREDENTIALS,
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
@@ -201,10 +200,16 @@ export async function updateArtifacts(
       }
       logger.info(
         { err },
-        'Gemfile.lock update failed due to incompatible packages - skipping branch'
+        'Gemfile.lock update failed due to incompatible packages'
       );
-      // Do not set global.repoCache because we don't want to stop trying other branches
-      throw new Error(BUNDLER_COULD_NOT_RESOLVE);
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: err.stdout + '\n' + err.stderr,
+          },
+        },
+      ];
     }
     logger.warn(
       { err },
