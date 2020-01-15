@@ -1,5 +1,6 @@
 import * as validate from '../../../../lib/workers/repository/finalise/validate';
 import { platform } from '../../../util';
+import { PULL_REQUEST_STATUS_OPEN } from '../../../../lib/constants/pull-requests';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -13,7 +14,7 @@ describe('workers/repository/validate', () => {
     it('catches error', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PULL_REQUEST_STATUS_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -26,7 +27,7 @@ describe('workers/repository/validate', () => {
     it('returns if no matching files', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PULL_REQUEST_STATUS_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -40,7 +41,7 @@ describe('workers/repository/validate', () => {
     it('validates failures if cannot parse', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PULL_REQUEST_STATUS_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -58,7 +59,7 @@ describe('workers/repository/validate', () => {
     it('validates failures if config validation fails', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PULL_REQUEST_STATUS_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -76,7 +77,7 @@ describe('workers/repository/validate', () => {
     it('validates successfully', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PULL_REQUEST_STATUS_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },

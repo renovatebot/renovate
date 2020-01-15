@@ -32,6 +32,10 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import {
+  PULL_REQUEST_STATUS_ALL,
+  PULL_REQUEST_STATUS_OPEN,
+} from '../../constants/pull-requests';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -401,13 +405,13 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
   pr.isStale = pr.diverged_commits_count > 0;
-  pr.state = pr.state === 'opened' ? 'open' : pr.state;
+  pr.state = pr.state === 'opened' ? PULL_REQUEST_STATUS_OPEN : pr.state;
   pr.isModified = true;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
     pr.isConflicted = true;
-  } else if (pr.state === 'open') {
+  } else if (pr.state === PULL_REQUEST_STATUS_OPEN) {
     const branchStatus = await getBranchStatus(pr.branchName, []);
     if (branchStatus === 'success') {
       pr.canMerge = true;
@@ -434,7 +438,7 @@ export async function getPr(iid: number): Promise<Pr> {
     }
   } catch (err) {
     logger.debug({ err }, 'Error getting PR branch');
-    if (pr.state === 'open' || err.statusCode !== 404) {
+    if (pr.state === PULL_REQUEST_STATUS_OPEN || err.statusCode !== 404) {
       logger.warn({ err }, 'Error getting PR branch');
       pr.isConflicted = true;
     }
@@ -920,7 +924,7 @@ const mapPullRequests = (pr: {
   number: pr.iid,
   branchName: pr.source_branch,
   title: pr.title,
-  state: pr.state === 'opened' ? 'open' : pr.state,
+  state: pr.state === 'opened' ? PULL_REQUEST_STATUS_OPEN : pr.state,
   createdAt: pr.created_at,
 });
 
@@ -950,7 +954,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
+  if (desiredState === PULL_REQUEST_STATUS_ALL) {
     return true;
   }
   if (desiredState[0] === '!') {
@@ -962,7 +966,7 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function findPr(
   branchName: string,
   prTitle?: string | null,
-  state = 'all'
+  state = PULL_REQUEST_STATUS_ALL
 ): Promise<Pr> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();

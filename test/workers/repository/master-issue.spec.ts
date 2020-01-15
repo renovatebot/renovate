@@ -5,6 +5,7 @@ import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
 import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
+import { PULL_REQUEST_STATUS_NOT_OPEN } from '../../../lib/constants/pull-requests';
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -351,10 +352,14 @@ describe('workers/repository/master-issue', () => {
       expect(platform.findPr).toHaveBeenCalledTimes(2);
       expect(platform.findPr.mock.calls[0][0]).toBe('branchName1');
       expect(platform.findPr.mock.calls[0][1]).toBe('pr1');
-      expect(platform.findPr.mock.calls[0][2]).toBe('!open');
+      expect(platform.findPr.mock.calls[0][2]).toBe(
+        PULL_REQUEST_STATUS_NOT_OPEN
+      );
       expect(platform.findPr.mock.calls[1][0]).toBe('branchName2');
       expect(platform.findPr.mock.calls[1][1]).toBe('pr2');
-      expect(platform.findPr.mock.calls[1][2]).toBe('!open');
+      expect(platform.findPr.mock.calls[1][2]).toBe(
+        PULL_REQUEST_STATUS_NOT_OPEN
+      );
 
       // same with dry run
       await dryRun(branches, platform, 0, 0, 0, 2);

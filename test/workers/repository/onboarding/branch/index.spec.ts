@@ -2,6 +2,7 @@ import { mock } from 'jest-mock-extended';
 import { RenovateConfig, platform, getConfig } from '../../../../util';
 import { checkOnboardingBranch } from '../../../../../lib/workers/repository/onboarding/branch';
 import { Pr } from '../../../../../lib/platform';
+import { PULL_REQUEST_STATUS_OPEN } from '../../../../../lib/constants/pull-requests';
 
 jest.mock('../../../../../lib/workers/repository/onboarding/branch/rebase');
 
@@ -62,7 +63,11 @@ describe('workers/repository/onboarding/branch', () => {
       config.requireConfig = true;
       platform.findPr.mockResolvedValue(mock<Pr>());
       platform.getPrList.mockResolvedValueOnce([
-        { ...mock<Pr>(), branchName: 'renovate/something', state: 'open' },
+        {
+          ...mock<Pr>(),
+          branchName: 'renovate/something',
+          state: PULL_REQUEST_STATUS_OPEN,
+        },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });

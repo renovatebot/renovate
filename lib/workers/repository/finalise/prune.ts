@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { PULL_REQUEST_STATUS_OPEN } from '../../../constants/pull-requests';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -8,7 +9,11 @@ async function cleanUpBranches(
 ): Promise<void> {
   for (const branchName of remainingBranches) {
     try {
-      const pr = await platform.findPr(branchName, null, 'open');
+      const pr = await platform.findPr(
+        branchName,
+        null,
+        PULL_REQUEST_STATUS_OPEN
+      );
       const branchPr = await platform.getBranchPr(branchName);
       const skipAutoclose = branchPr && branchPr.isModified;
       if (pr && !skipAutoclose) {

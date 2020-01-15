@@ -4,10 +4,11 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { PULL_REQUEST_STATUS_OPEN } from '../../../constants/pull-requests';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
-    .filter(pr => pr.state === 'open')
+    .filter(pr => pr.state === PULL_REQUEST_STATUS_OPEN)
     .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
     .filter(pr => pr.title && pr.title.match(new RegExp('renovate', 'i')));
 }

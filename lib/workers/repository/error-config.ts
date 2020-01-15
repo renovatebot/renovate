@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { RenovateConfig } from '../../config';
+import { PULL_REQUEST_STATUS_OPEN } from '../../constants/pull-requests';
 
 export async function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -16,7 +17,7 @@ export async function raiseConfigWarningIssue(
     body += `Message: \`${error.validationMessage}\`\n`;
   }
   const pr = await platform.getBranchPr(config.onboardingBranch);
-  if (pr && pr.state && pr.state.startsWith('open')) {
+  if (pr && pr.state && pr.state === PULL_REQUEST_STATUS_OPEN) {
     logger.info('Updating onboarding PR with config error notice');
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
     body += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;

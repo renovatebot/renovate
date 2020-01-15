@@ -6,6 +6,11 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../../lib/constants/error-messages';
+import {
+  PULL_REQUEST_STATUS_CLOSED,
+  PULL_REQUEST_STATUS_MERGED,
+  PULL_REQUEST_STATUS_OPEN,
+} from '../../../lib/constants/pull-requests';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
@@ -492,7 +497,11 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.findPr('userName1/pullRequest5', 'title', 'open')
+            await bitbucket.findPr(
+              'userName1/pullRequest5',
+              'title',
+              PULL_REQUEST_STATUS_OPEN
+            )
           ).toMatchSnapshot();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -500,7 +509,11 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.findPr('userName1/pullRequest5', 'title', 'closed')
+            await bitbucket.findPr(
+              'userName1/pullRequest5',
+              'title',
+              PULL_REQUEST_STATUS_CLOSED
+            )
           ).toBeUndefined();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -575,7 +588,7 @@ describe('platform/bitbucket-server', () => {
             body: {
               version: 0,
               number: 5,
-              state: 'MERGED',
+              state: PULL_REQUEST_STATUS_MERGED.toUpperCase(),
               reviewers: [],
               fromRef: {},
               toRef: {},

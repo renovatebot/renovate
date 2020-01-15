@@ -3,6 +3,7 @@ import { platform } from '../../../../platform';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
+import { PULL_REQUEST_STATUS_NOT_OPEN } from '../../../../constants/pull-requests';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
@@ -35,7 +36,11 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
 export type Pr = any;
 
 const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
-  platform.findPr(config.onboardingBranch, config.onboardingPrTitle, '!open');
+  platform.findPr(
+    config.onboardingBranch,
+    config.onboardingPrTitle,
+    PULL_REQUEST_STATUS_NOT_OPEN
+  );
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');

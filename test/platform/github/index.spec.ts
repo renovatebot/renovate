@@ -5,6 +5,11 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../lib/constants/error-messages';
+import {
+  PULL_REQUEST_STATUS_CLOSED,
+  PULL_REQUEST_STATUS_NOT_OPEN,
+  PULL_REQUEST_STATUS_OPEN,
+} from '../../../lib/constants/pull-requests';
 
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
@@ -550,7 +555,13 @@ describe('platform/github', () => {
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: [{ number: 91, head: { ref: 'somebranch' }, state: 'open' }],
+            body: [
+              {
+                number: 91,
+                head: { ref: 'somebranch' },
+                state: PULL_REQUEST_STATUS_OPEN,
+              },
+            ],
           } as any)
       );
       api.get.mockImplementationOnce(
@@ -565,7 +576,7 @@ describe('platform/github', () => {
                 sha: '1234',
               },
               head: { ref: 'somebranch' },
-              state: 'open',
+              state: PULL_REQUEST_STATUS_OPEN,
             },
           } as any)
       );
@@ -1022,7 +1033,7 @@ describe('platform/github', () => {
                   },
                   {
                     number: 1,
-                    state: 'closed',
+                    state: 'open',
                     title: 'title-1',
                   },
                 ],
@@ -1411,7 +1422,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: 'open',
+            state: PULL_REQUEST_STATUS_OPEN,
           },
         ],
       } as any);
@@ -1425,11 +1436,15 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: 'closed',
+            state: PULL_REQUEST_STATUS_CLOSED,
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null, '!open');
+      const res = await github.findPr(
+        'branch-a',
+        null,
+        PULL_REQUEST_STATUS_NOT_OPEN
+      );
       expect(res).toBeDefined();
     });
     it('caches pr list', async () => {
@@ -1439,7 +1454,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: 'open',
+            state: PULL_REQUEST_STATUS_OPEN,
           },
         ],
       } as any);
@@ -1447,7 +1462,11 @@ describe('platform/github', () => {
       expect(res).toBeDefined();
       res = await github.findPr('branch-a', 'branch a pr');
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr', 'open');
+      res = await github.findPr(
+        'branch-a',
+        'branch a pr',
+        PULL_REQUEST_STATUS_OPEN
+      );
       expect(res).toBeDefined();
       res = await github.findPr('branch-b');
       expect(res).not.toBeDefined();
@@ -1585,21 +1604,21 @@ describe('platform/github', () => {
     [
       {
         number: 1,
-        state: 'closed',
+        state: PULL_REQUEST_STATUS_CLOSED,
         base: { sha: '1234' },
         mergeable: true,
         merged_at: 'sometime',
       },
       {
         number: 1,
-        state: 'open',
+        state: PULL_REQUEST_STATUS_OPEN,
         mergeable_state: 'dirty',
         base: { sha: '1234' },
         commits: 1,
       },
       {
         number: 1,
-        state: 'open',
+        state: PULL_REQUEST_STATUS_OPEN,
         base: { sha: '5678' },
         commits: 1,
         mergeable: true,
@@ -1635,7 +1654,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: 'open',
+              state: PULL_REQUEST_STATUS_OPEN,
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 2,
@@ -1675,7 +1694,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: 'open',
+              state: PULL_REQUEST_STATUS_OPEN,
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 2,
@@ -1723,7 +1742,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: 'open',
+              state: PULL_REQUEST_STATUS_OPEN,
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 2,
@@ -1779,7 +1798,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: 'open',
+              state: PULL_REQUEST_STATUS_OPEN,
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 1,
@@ -1828,7 +1847,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: 'open',
+              state: PULL_REQUEST_STATUS_OPEN,
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 1,

@@ -29,6 +29,11 @@ import {
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import {
+  PULL_REQUEST_STATUS_CLOSED,
+  PULL_REQUEST_STATUS_MERGED,
+  PULL_REQUEST_STATUS_OPEN,
+} from '../../constants/pull-requests';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -93,7 +98,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      if (existingPr.state === 'closed') {
+      if (existingPr.state === PULL_REQUEST_STATUS_CLOSED) {
         const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
@@ -126,7 +131,7 @@ export async function processBranch(
             await platform.deleteBranch(config.branchName);
           }
         }
-      } else if (existingPr.state === 'merged') {
+      } else if (existingPr.state === PULL_REQUEST_STATUS_MERGED) {
         logger.info(
           { pr: existingPr.number },
           'Merged PR is blocking this branch'
@@ -158,7 +163,7 @@ export async function processBranch(
       logger.debug('Checking if PR has been edited');
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== 'open') {
+        if (branchPr.state !== PULL_REQUEST_STATUS_OPEN) {
           logger.info(
             'PR has been closed or merged since this run started - aborting'
           );
