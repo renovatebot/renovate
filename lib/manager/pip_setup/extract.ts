@@ -85,12 +85,12 @@ export async function extractSetupFile(
   });
   // istanbul ignore if
   if (res.stderr) {
-    const stderr = res.stderr.replace(/.*\n\s*import imp/, '').trim();
+    const stderr = res.stderr
+      .replace(/.*\n\s*import imp/, '')
+      .trim()
+      .replace('fatal: No names found, cannot describe anything.', '');
     if (stderr.length) {
-      logger.warn(
-        { stdout: res.stdout, stderr: res.stderr },
-        'Error in read setup file'
-      );
+      logger.warn({ stdout: res.stdout, stderr }, 'Error in read setup file');
     }
   }
   return JSON.parse(res.stdout);
