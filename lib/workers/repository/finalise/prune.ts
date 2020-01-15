@@ -8,7 +8,10 @@ async function cleanUpBranches(
 ): Promise<void> {
   for (const branchName of remainingBranches) {
     try {
-      const pr = await platform.findPr(branchName, null, 'open');
+      const pr = await platform.findPr({
+        branchName,
+        state: 'open',
+      });
       const branchPr = await platform.getBranchPr(branchName);
       const skipAutoclose = branchPr && branchPr.isModified;
       if (pr && !skipAutoclose) {

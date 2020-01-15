@@ -30,9 +30,9 @@ describe('config/decrypt', () => {
     it('handles invalid encrypted value', () => {
       config.encrypted = { a: 1 };
       config.privateKey = privateKey;
-      const res = decryptConfig(config, privateKey);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.a).not.toBeDefined();
+      expect(() => decryptConfig(config, privateKey)).toThrow(
+        Error('config-validation')
+      );
     });
     it('replaces npm token placeholder in npmrc', () => {
       config.privateKey = privateKey;

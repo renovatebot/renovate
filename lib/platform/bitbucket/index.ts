@@ -17,6 +17,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  FindPRConfig,
   EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
@@ -224,11 +225,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -248,7 +249,7 @@ export async function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   if (closePr) {
-    const pr = await findPr(branchName, null, 'open');
+    const pr = await findPr({ branchName, state: 'open' });
     if (pr) {
       await api.post(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
@@ -375,7 +376,7 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 

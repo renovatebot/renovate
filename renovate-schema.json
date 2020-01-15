@@ -855,6 +855,13 @@
       "type": "integer",
       "default": null
     },
+    "additionalReviewers": {
+      "description": "Additional reviewers for Pull Requests (in contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "fileMatch": {
       "description": "RegEx (re2) pattern for matching manager files",
       "type": "array",

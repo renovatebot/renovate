@@ -110,6 +110,7 @@ export function dispatchError(
     ) {
       throw new Error(REPOSITORY_CHANGED);
     }
+    logger.debug({ err }, '422 Error thrown from GitHub');
     throw new Error(PLATFORM_FAILURE);
   }
   throw err;
