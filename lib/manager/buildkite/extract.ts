@@ -7,11 +7,11 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = fileContent.split('\n');
     let isPluginsSection = false;
     let pluginsIndent = '';
     for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {

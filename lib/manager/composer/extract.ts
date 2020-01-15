@@ -83,15 +83,15 @@ function parseRepositories(
 }
 
 export async function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
 }: ExtractPackageFileConfig): Promise<PackageFile | null> {
-  logger.trace(`composer.extractPackageFile(${packageFile})`);
+  logger.trace(`composer.extractPackageFile(${fileName})`);
   let composerJson: ComposerConfig;
   try {
-    composerJson = JSON.parse(content);
+    composerJson = JSON.parse(fileContent);
   } catch (err) {
-    logger.info({ packageFile }, 'Invalid JSON');
+    logger.info({ fileName }, 'Invalid JSON');
     return null;
   }
   const repositories: Record<string, Repo> = {};
@@ -99,11 +99,11 @@ export async function extractPackageFile({
   const res: PackageFile = { deps: [] };
 
   // handle lockfile
-  const lockfilePath = packageFile.replace(/\.json$/, '.lock');
+  const lockfilePath = fileName.replace(/\.json$/, '.lock');
   const lockContents = await platform.getFile(lockfilePath);
   let lockParsed;
   if (lockContents) {
-    logger.debug({ packageFile }, 'Found composer lock file');
+    logger.debug({ fileName }, 'Found composer lock file');
     try {
       lockParsed = JSON.parse(lockContents);
     } catch (err) /* istanbul ignore next */ {
@@ -171,10 +171,7 @@ export async function extractPackageFile({
           deps.push(dep);
         }
       } catch (err) /* istanbul ignore next */ {
-        logger.info(
-          { packageFile, depType, err },
-          'Error parsing composer.json'
-        );
+        logger.info({ fileName, depType, err }, 'Error parsing composer.json');
         return null;
       }
     }

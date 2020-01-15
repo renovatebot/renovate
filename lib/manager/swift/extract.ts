@@ -139,17 +139,17 @@ function getDepName(url: string): string | null {
 export function extractPackageFile(
   extractPackageFileConfig: ExtractPackageFileConfig
 ): PackageFile | null {
-  const { content, packageFile } = extractPackageFileConfig || {};
-  if (!content) return null;
+  const { fileContent, fileName } = extractPackageFileConfig || {};
+  if (!fileContent) return null;
 
   const result: PackageFile = {
-    packageFile,
+    packageFile: fileName,
     deps: null,
   };
   const deps: PackageDependency[] = [];
 
   let offset = 0;
-  let restStr = content;
+  let restStr = fileContent;
   let state: string = null;
   let match = getMatch(restStr, state);
 

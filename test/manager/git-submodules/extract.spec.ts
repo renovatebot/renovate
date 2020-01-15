@@ -25,16 +25,16 @@ describe('lib/manager/gitsubmodules/extract', () => {
     it('handles empty gitmodules file', async () => {
       expect(
         await extractPackageFile({
-          content: '',
-          packageFile: '.gitmodules.1',
+          fileContent: '',
+          fileName: '.gitmodules.1',
           config: { localDir },
         })
       ).toBeNull();
     });
     it('default to master branch', async () => {
       const res = await extractPackageFile({
-        content: '',
-        packageFile: '.gitmodules.2',
+        fileContent: '',
+        fileName: '.gitmodules.2',
         config: { localDir },
       });
       expect(res.deps).toMatchSnapshot();
@@ -42,8 +42,8 @@ describe('lib/manager/gitsubmodules/extract', () => {
     });
     it('extract branch', async () => {
       const res = await extractPackageFile({
-        content: '',
-        packageFile: '.gitmodules.3',
+        fileContent: '',
+        fileName: '.gitmodules.3',
         config: { localDir },
       });
       expect(res.deps).toMatchSnapshot();
@@ -51,8 +51,8 @@ describe('lib/manager/gitsubmodules/extract', () => {
     });
     it('extract relative URL', async () => {
       const res = await extractPackageFile({
-        content: '',
-        packageFile: '.gitmodules.4',
+        fileContent: '',
+        fileName: '.gitmodules.4',
         config: { localDir },
       });
       expect(res.deps).toMatchSnapshot();

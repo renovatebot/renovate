@@ -174,8 +174,8 @@ export interface UpdateArtifactsResult {
 }
 
 export interface ExtractPackageFileConfig {
-  content: string;
-  packageFile?: string;
+  fileContent: string;
+  fileName?: string;
   config?: ExtractConfig;
 }
 

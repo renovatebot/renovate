@@ -46,12 +46,12 @@ export function getDep(currentFrom: string): PackageDependency {
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   let lineNumber = 0;
-  for (const fromLine of content.split('\n')) {
+  for (const fromLine of fileContent.split('\n')) {
     const fromMatch = fromLine.match(/^FROM /i);
     if (fromMatch) {
       logger.trace({ lineNumber, fromLine }, 'FROM line');

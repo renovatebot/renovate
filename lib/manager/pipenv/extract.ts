@@ -115,13 +115,13 @@ function extractFromSection(
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.debug('pipenv.extractPackageFile()');
 
   let pipfile: PipFile;
   try {
-    pipfile = toml.parse(content);
+    pipfile = toml.parse(fileContent);
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');
     return null;

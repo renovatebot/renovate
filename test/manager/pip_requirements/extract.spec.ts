@@ -38,16 +38,16 @@ describe('lib/manager/pip_requirements/extract', () => {
     it('returns null for empty', () => {
       expect(
         extractPackageFile({
-          content: 'nothing here',
-          packageFile: 'requirements.txt',
+          fileContent: 'nothing here',
+          fileName: 'requirements.txt',
           config,
         })
       ).toBeNull();
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile({
-        content: requirements1,
-        packageFile: 'unused_file_name',
+        fileContent: requirements1,
+        fileName: 'unused_file_name',
         config,
       });
       expect(res).toMatchSnapshot();
@@ -56,8 +56,8 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile({
-        content: requirements2,
-        packageFile: 'unused_file_name',
+        fileContent: requirements2,
+        fileName: 'unused_file_name',
         config,
       }).deps;
       expect(res).toMatchSnapshot();
@@ -65,8 +65,8 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('handles comments and commands', () => {
       const res = extractPackageFile({
-        content: requirements3,
-        packageFile: 'unused_file_name',
+        fileContent: requirements3,
+        fileName: 'unused_file_name',
         config,
       }).deps;
       expect(res).toMatchSnapshot();
@@ -74,8 +74,8 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('handles extras and complex index url', () => {
       const res = extractPackageFile({
-        content: requirements4,
-        packageFile: 'unused_file_name',
+        fileContent: requirements4,
+        fileName: 'unused_file_name',
         config,
       });
       expect(res).toMatchSnapshot();
@@ -86,8 +86,8 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('handles extra index url', () => {
       const res = extractPackageFile({
-        content: requirements5,
-        packageFile: 'unused_file_name',
+        fileContent: requirements5,
+        fileName: 'unused_file_name',
         config,
       });
       expect(res).toMatchSnapshot();
@@ -99,8 +99,8 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('handles extra index url and defaults without index to config', () => {
       const res = extractPackageFile({
-        content: requirements6,
-        packageFile: 'unused_file_name',
+        fileContent: requirements6,
+        fileName: 'unused_file_name',
         config,
       });
       expect(res).toMatchSnapshot();
@@ -112,8 +112,8 @@ describe('lib/manager/pip_requirements/extract', () => {
     });
     it('handles extra index url and defaults without index to pypi', () => {
       const res = extractPackageFile({
-        content: requirements6,
-        packageFile: 'unused_file_name',
+        fileContent: requirements6,
+        fileName: 'unused_file_name',
         config: {},
       });
       expect(res).toMatchSnapshot();

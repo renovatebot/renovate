@@ -31,47 +31,47 @@ const requirements5Lock = readFileSync(
 
 describe('lib/manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
-    let packageFile;
+    let fileName;
     beforeEach(() => {
-      packageFile = 'composer.json';
+      fileName = 'composer.json';
     });
     it('returns null for invalid json', async () => {
       expect(
-        await extractPackageFile({ content: 'nothing here', packageFile })
+        await extractPackageFile({ fileContent: 'nothing here', fileName })
       ).toBeNull();
     });
     it('returns null for empty deps', async () => {
       expect(
-        await extractPackageFile({ content: '{}', packageFile })
+        await extractPackageFile({ fileContent: '{}', fileName })
       ).toBeNull();
     });
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile({
-        content: requirements1,
-        packageFile,
+        fileContent: requirements1,
+        fileName,
       });
       expect(res).toMatchSnapshot();
     });
     it('extracts registryUrls', async () => {
       const res = await extractPackageFile({
-        content: requirements2,
-        packageFile,
+        fileContent: requirements2,
+        fileName,
       });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts object registryUrls', async () => {
       const res = await extractPackageFile({
-        content: requirements3,
-        packageFile,
+        fileContent: requirements3,
+        fileName,
       });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts repositories and registryUrls', async () => {
       const res = await extractPackageFile({
-        content: requirements4,
-        packageFile,
+        fileContent: requirements4,
+        fileName,
       });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
@@ -79,8 +79,8 @@ describe('lib/manager/composer/extract', () => {
     it('extracts object repositories and registryUrls with lock file', async () => {
       platform.getFile.mockResolvedValue(requirements5Lock);
       const res = await extractPackageFile({
-        content: requirements5,
-        packageFile,
+        fileContent: requirements5,
+        fileName,
       });
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
@@ -88,8 +88,8 @@ describe('lib/manager/composer/extract', () => {
     it('extracts dependencies with lock file', async () => {
       platform.getFile.mockResolvedValue('some content');
       const res = await extractPackageFile({
-        content: requirements1,
-        packageFile,
+        fileContent: requirements1,
+        fileName,
       });
       expect(res).toMatchSnapshot();
     });

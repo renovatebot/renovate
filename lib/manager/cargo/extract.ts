@@ -67,13 +67,13 @@ function extractFromSection(
 }
 
 export function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
 }: ExtractPackageFileConfig): PackageFile | null {
-  logger.trace(`cargo.extractPackageFile(${packageFile})`);
+  logger.trace(`cargo.extractPackageFile(${fileName})`);
   let parsedContent: CargoConfig;
   try {
-    parsedContent = parse(content);
+    parsedContent = parse(fileContent);
   } catch (err) {
     logger.debug({ err }, 'Error parsing Cargo.toml file');
     return null;

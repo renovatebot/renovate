@@ -158,7 +158,7 @@ function extractClassName(content: string): string | null {
 
 // TODO: Maybe check if quotes/double-quotes are balanced
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('extractPackageFile()');
   /*
@@ -167,7 +167,7 @@ export function extractPackageFile({
     3. extract url field (get depName from url)
     4. extract sha256 field
   */
-  const cleanContent = removeComments(content);
+  const cleanContent = removeComments(fileContent);
   const className = extractClassName(cleanContent);
   if (!className) {
     logger.debug('Invalid class definition');

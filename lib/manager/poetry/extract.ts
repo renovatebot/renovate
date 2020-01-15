@@ -84,19 +84,19 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
 }
 
 export function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
 }: ExtractPackageFileConfig): PackageFile | null {
-  logger.trace(`poetry.extractPackageFile(${packageFile})`);
+  logger.trace(`poetry.extractPackageFile(${fileName})`);
   let pyprojectfile: PoetryFile;
   try {
-    pyprojectfile = parse(content);
+    pyprojectfile = parse(fileContent);
   } catch (err) {
     logger.debug({ err }, 'Error parsing pyproject.toml file');
     return null;
   }
   if (!(pyprojectfile.tool && pyprojectfile.tool.poetry)) {
-    logger.debug(`${packageFile} contains no poetry section`);
+    logger.debug(`${fileName} contains no poetry section`);
     return null;
   }
   const deps = [

@@ -40,28 +40,28 @@ class LineMapper {
 }
 
 export function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {
-    config = safeLoad(content, { json: true });
+    config = safeLoad(fileContent, { json: true });
     // istanbul ignore if
     if (!config) {
       logger.debug(
-        { packageFile },
+        { fileName },
         'Null config when parsing Docker Compose content'
       );
       return null;
     }
   } catch (err) {
     logger.debug({ err }, 'err');
-    logger.info({ packageFile }, 'Parsing Docker Compose config YAML');
+    logger.info({ fileName }, 'Parsing Docker Compose config YAML');
     return null;
   }
   try {
-    const lineMapper = new LineMapper(content, /^\s*image:/);
+    const lineMapper = new LineMapper(fileContent, /^\s*image:/);
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
@@ -86,7 +86,7 @@ export function extractPackageFile({
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     logger.warn(
-      { packageFile, content, err },
+      { fileName, fileContent, err },
       'Error extracting Docker Compose file'
     );
     return null;

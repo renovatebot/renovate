@@ -7,12 +7,12 @@ import {
 } from '../common';
 
 export default function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;
-  for (const line of content.split('\n')) {
+  for (const line of fileContent.split('\n')) {
     const match = line.match(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
     if (match) {
       const currentFrom = match[1];

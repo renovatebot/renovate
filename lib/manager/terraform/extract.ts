@@ -29,15 +29,18 @@ export function getTerraformDependencyType(
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
-  logger.trace({ content }, 'terraform.extractPackageFile()');
-  if (!content.includes('module "') && !content.includes('provider "')) {
+  logger.trace({ fileContent }, 'terraform.extractPackageFile()');
+  if (
+    !fileContent.includes('module "') &&
+    !fileContent.includes('provider "')
+  ) {
     return null;
   }
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = fileContent.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       const terraformDependency = line.match(

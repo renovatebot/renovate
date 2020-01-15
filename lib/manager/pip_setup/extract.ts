@@ -97,16 +97,16 @@ export async function extractSetupFile(
 }
 
 export async function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
   config,
 }: ExtractPackageFileConfig): Promise<PackageFile | null> {
   logger.debug('pip_setup.extractPackageFile()');
   let setup: PythonSetup;
   try {
-    setup = await extractSetupFile(content, packageFile, config);
+    setup = await extractSetupFile(fileContent, fileName, config);
   } catch (err) {
-    logger.warn({ err, content, packageFile }, 'Failed to read setup.py file');
+    logger.warn({ err, fileContent, fileName }, 'Failed to read setup.py file');
     return null;
   }
   const requires: string[] = [];
@@ -119,7 +119,7 @@ export async function extractPackageFile({
     }
   }
   const regex = new RegExp(`^${dependencyPattern}`);
-  const lines = content.split('\n');
+  const lines = fileContent.split('\n');
   const deps = requires
     .map(req => {
       const lineNumber = lines.findIndex(l => l.includes(req));

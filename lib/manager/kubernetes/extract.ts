@@ -7,19 +7,19 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('kubernetes.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;
 
   const isKubernetesManifest =
-    content.match(/\s*apiVersion\s*:/) && content.match(/\s*kind\s*:/);
+    fileContent.match(/\s*apiVersion\s*:/) && fileContent.match(/\s*kind\s*:/);
   if (!isKubernetesManifest) {
     return null;
   }
 
-  for (const line of content.split('\n')) {
+  for (const line of fileContent.split('\n')) {
     const match = line.match(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
     if (match) {
       const currentFrom = match[1];

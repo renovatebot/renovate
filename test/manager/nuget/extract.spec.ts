@@ -14,15 +14,15 @@ describe('lib/manager/nuget/extract', () => {
     });
     it('returns empty for invalid csproj', () => {
       expect(
-        extractPackageFile({ content: 'nothing here', config })
+        extractPackageFile({ fileContent: 'nothing here', config })
       ).toMatchSnapshot();
     });
     it('extracts all dependencies', () => {
-      const res = extractPackageFile({ content: sample, config }).deps;
+      const res = extractPackageFile({ fileContent: sample, config }).deps;
       expect(res).toMatchSnapshot();
     });
     it('extracts all dependencies when config is undefined', () => {
-      const res = extractPackageFile({ content: sample }).deps;
+      const res = extractPackageFile({ fileContent: sample }).deps;
       expect(res).toMatchSnapshot();
     });
   });

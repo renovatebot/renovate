@@ -7,12 +7,12 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile {
   const deps: PackageDependency[] = [];
 
   const regex = /([^{\s,]*)[\s,]*{[\s,]*:mvn\/version[\s,]+"([^"]+)"[\s,]*}/;
-  let rest = content;
+  let rest = fileContent;
   let match = rest.match(regex);
   let offset = 0;
   while (match) {
@@ -21,7 +21,7 @@ export function extractPackageFile({
       offset + match.index + wholeSubstr.indexOf(currentValue);
 
     offset += match.index + wholeSubstr.length;
-    rest = content.slice(offset);
+    rest = fileContent.slice(offset);
     match = rest.match(regex);
 
     deps.push({

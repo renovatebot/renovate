@@ -19,50 +19,50 @@ const ibazel = fs.readFileSync(
 describe('lib/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency', () => {
-      const res = extractPackageFile({ content: aalib });
+      const res = extractPackageFile({ fileContent: aalib });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips sourceforge dependency', () => {
-      const res = extractPackageFile({ content: aap });
+      const res = extractPackageFile({ fileContent: aap });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips github dependency with wrong format', () => {
-      const res = extractPackageFile({ content: acmetool });
+      const res = extractPackageFile({ fileContent: acmetool });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('extracts "releases" github dependency', () => {
-      const res = extractPackageFile({ content: aide });
+      const res = extractPackageFile({ fileContent: aide });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
     it('extracts "archive" github dependency', () => {
-      const res = extractPackageFile({ content: ibazel });
+      const res = extractPackageFile({ fileContent: ibazel });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
     it('handles no space before class header', () => {
-      const content = `class Ibazel < Formula
+      const fileContent = `class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
           url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
     it('returns null for invalid class header', () => {
-      const content = `
+      const fileContent = `
           class Ibazel !?# Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -70,10 +70,10 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      expect(extractPackageFile({ content })).toBeNull();
+      expect(extractPackageFile({ fileContent })).toBeNull();
     });
     it('returns null for invalid class header', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < NotFormula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -81,10 +81,10 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      expect(extractPackageFile({ content })).toBeNull();
+      expect(extractPackageFile({ fileContent })).toBeNull();
     });
     it('skips if there is no url field', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -92,13 +92,13 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -106,13 +106,13 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -120,13 +120,13 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -134,13 +134,13 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -148,13 +148,13 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if there is no sha256 field', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -162,13 +162,13 @@ describe('lib/manager/homebrew/extract', () => {
           not_sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('invalid-sha256');
       expect(res).toMatchSnapshot();
     });
     it('skips if sha256 field is invalid', () => {
-      const content = `
+      const fileContent = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
           homepage 'https://github.com/bazelbuild/bazel-watcher'
@@ -176,7 +176,7 @@ describe('lib/manager/homebrew/extract', () => {
           sha256 '26f5125218fad2741d3caf937b0229'
           end
       `;
-      const res = extractPackageFile({ content });
+      const res = extractPackageFile({ fileContent });
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('invalid-sha256');
       expect(res).toMatchSnapshot();

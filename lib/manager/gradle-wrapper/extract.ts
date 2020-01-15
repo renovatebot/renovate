@@ -7,10 +7,10 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
-  const lines = content.split('\n');
+  const lines = fileContent.split('\n');
 
   let lineNumber = 0;
   for (const line of lines) {

@@ -43,11 +43,11 @@ async function getBranch(
 }
 
 export default async function extractPackageFile({
-  packageFile,
+  fileName,
   config,
 }: ExtractPackageFileConfig): Promise<PackageFile | null> {
   const git = Git(config.localDir);
-  const gitModulesPath = upath.join(config.localDir, packageFile);
+  const gitModulesPath = upath.join(config.localDir, fileName);
 
   const depNames = (
     (await git.raw([

@@ -8,13 +8,13 @@ import {
 import { logger } from '../../logger';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   let doc;
   try {
-    doc = yaml.safeLoad(content, { json: true });
+    doc = yaml.safeLoad(fileContent, { json: true });
   } catch (err) {
-    logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
+    logger.warn({ err, fileContent }, 'Failed to parse .travis.yml file.');
     return null;
   }
   let deps: PackageDependency[] = [];

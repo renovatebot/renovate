@@ -29,12 +29,12 @@ function extractDepFromInclude(includeObj: {
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
   config,
 }: ExtractPackageFileConfig): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const doc = yaml.safeLoad(content, { json: true });
+    const doc = yaml.safeLoad(fileContent, { json: true });
     if (doc.include && is.array(doc.include)) {
       for (const includeObj of doc.include) {
         const dep = extractDepFromInclude(includeObj);

@@ -7,12 +7,12 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.debug('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
   let lineNumber = 0;
-  for (const line of content.split('\n')) {
+  for (const line of fileContent.split('\n')) {
     // old github actions syntax will be deprecated on September 30, 2019
     // after that, the first line can be removed
     const match =

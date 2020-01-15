@@ -11,40 +11,40 @@ import {
 import { platform } from '../../platform';
 
 export async function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
   config,
 }: ExtractPackageFileConfig): Promise<PackageFile> {
   try {
-    const baseDir = upath.parse(packageFile).dir;
+    const baseDir = upath.parse(fileName).dir;
     const chartFileName = upath.join(baseDir, 'Chart.yaml');
     const chartContents = await platform.getFile(chartFileName);
     if (!chartContents) {
-      logger.debug({ packageFile }, 'Failed to find helm Chart.yaml');
+      logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;
     }
     const chart = yaml.safeLoad(chartContents, { json: true });
     if (!(chart && chart.apiVersion && chart.name && chart.version)) {
       logger.debug(
-        { packageFile },
+        { fileName },
         'Failed to find required fields in Chart.yaml'
       );
       return null;
     }
   } catch (err) {
-    logger.debug({ packageFile }, 'Failed to parse helm Chart.yaml');
+    logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
     return null;
   }
   let deps = [];
   let doc;
   try {
-    doc = yaml.safeLoad(content, { json: true });
+    doc = yaml.safeLoad(fileContent, { json: true });
   } catch (err) {
-    logger.debug({ packageFile }, 'Failed to parse helm requirements.yaml');
+    logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
     return null;
   }
   if (!(doc && is.array(doc.dependencies))) {
-    logger.debug({ packageFile }, 'requirements.yaml has no dependencies');
+    logger.debug({ fileName }, 'requirements.yaml has no dependencies');
     return null;
   }
   deps = doc.dependencies.map(dep => {

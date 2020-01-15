@@ -14,10 +14,10 @@ const tf2 = `module "relative" {
 describe('lib/manager/terraform/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
+      expect(extractPackageFile({ fileContent: 'nothing here' })).toBeNull();
     });
     it('extracts', () => {
-      const res = extractPackageFile({ content: tf1 });
+      const res = extractPackageFile({ fileContent: tf1 });
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(19);
       expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(7);
@@ -37,7 +37,7 @@ describe('lib/manager/terraform/extract', () => {
       ).toHaveLength(5);
     });
     it('returns null if only local deps', () => {
-      expect(extractPackageFile({ content: tf2 })).toBeNull();
+      expect(extractPackageFile({ fileContent: tf2 })).toBeNull();
     });
   });
   describe('getTerraformDependencyType()', () => {

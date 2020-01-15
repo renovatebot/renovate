@@ -103,8 +103,8 @@ export function extractPackageFile(
 ): Result<PackageFile | null> {
   return managers[manager] && managers[manager].extractPackageFile
     ? managers[manager].extractPackageFile({
-        content,
-        packageFile: fileName,
+        fileContent: content,
+        fileName,
         config,
       })
     : null;

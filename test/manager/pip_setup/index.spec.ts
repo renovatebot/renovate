@@ -11,8 +11,8 @@ import {
 import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
 
-const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
-const content = readFileSync(packageFile, 'utf8');
+const fileName = 'test/manager/pip_setup/_fixtures/setup.py';
+const fileContent = readFileSync(fileName, 'utf8');
 
 const packageFileJson = 'test/manager/pip_setup/_fixtures/setup.py.json';
 const jsonContent = readFileSync(packageFileJson, 'utf8');
@@ -58,7 +58,7 @@ describe('lib/manager/pip_setup/index', () => {
         { stdout: jsonContent, stderr: '' },
       ]);
       expect(
-        await extractPackageFile({ content, packageFile, config })
+        await extractPackageFile({ fileContent, fileName, config })
       ).toMatchSnapshot();
       expect(exec).toHaveBeenCalledTimes(4);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -71,8 +71,8 @@ describe('lib/manager/pip_setup/index', () => {
 
       expect(
         await extractPackageFile({
-          content,
-          packageFile,
+          fileContent,
+          fileName,
           config: {
             ...config,
             binarySource: 'docker',
@@ -88,8 +88,8 @@ describe('lib/manager/pip_setup/index', () => {
       ]);
       expect(
         await extractPackageFile({
-          content: 'raise Exception()',
-          packageFile: '/tmp/folders/foobar.py',
+          fileContent: 'raise Exception()',
+          fileName: '/tmp/folders/foobar.py',
           config,
         })
       ).toBeNull();
@@ -100,8 +100,8 @@ describe('lib/manager/pip_setup/index', () => {
       const execSnapshots = mockExecAll(exec, new Error());
       expect(
         await extractPackageFile({
-          content: 'raise Exception()',
-          packageFile: '/tmp/folders/foobar.py',
+          fileContent: 'raise Exception()',
+          fileName: '/tmp/folders/foobar.py',
           config,
         })
       ).toBeNull();

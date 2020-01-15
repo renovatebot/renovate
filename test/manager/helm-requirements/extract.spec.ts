@@ -16,7 +16,7 @@ describe('lib/manager/helm/extract', () => {
       name: example
       version: 0.1.0
       `);
-      const content = `
+      const fileContent = `
       dependencies:
         - name: redis
           version: 0.9.0
@@ -27,10 +27,10 @@ describe('lib/manager/helm/extract', () => {
         - name: broken
           version: 0.8.1
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -49,7 +49,7 @@ describe('lib/manager/helm/extract', () => {
       name: example
       version: 0.1.0
       `);
-      const content = `
+      const fileContent = `
       dependencies:
         - name: redis
           version: 0.9.0
@@ -58,10 +58,10 @@ describe('lib/manager/helm/extract', () => {
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -78,10 +78,10 @@ describe('lib/manager/helm/extract', () => {
       description: A Helm chart for Kubernetes
       name: example
       `);
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content: '',
-        packageFile,
+        fileContent: '',
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -98,16 +98,16 @@ describe('lib/manager/helm/extract', () => {
       name: example
       version: 0.1.0
       `);
-      const content = `
+      const fileContent = `
       dependencies:
         - name: redis
           version: 0.9.0
           repository: '@placeholder'
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             placeholder: 'https://my-registry.gcr.io/',
@@ -124,7 +124,7 @@ describe('lib/manager/helm/extract', () => {
       arr:
       [
       `);
-      const content = `
+      const fileContent = `
       dependencies:
         - name: redis
           version: 0.9.0
@@ -133,10 +133,10 @@ describe('lib/manager/helm/extract', () => {
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -153,7 +153,7 @@ describe('lib/manager/helm/extract', () => {
       name: example
       version: 0.1.0
       `);
-      const content = `
+      const fileContent = `
       dependencies:
         - name: redis
           version: 0.9.0
@@ -162,10 +162,10 @@ describe('lib/manager/helm/extract', () => {
           version: 0.8.1
           repository: file:///some/local/path/
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -183,13 +183,13 @@ describe('lib/manager/helm/extract', () => {
       name: example
       version: 0.1.0
       `);
-      const content = `
+      const fileContent = `
       hello: world
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -206,15 +206,15 @@ describe('lib/manager/helm/extract', () => {
       name: example
       version: 0.1.0
       `);
-      const content = `
+      const fileContent = `
       Invalid requirements.yaml content.
       dependencies:
       [
       `;
-      const packageFile = 'requirements.yaml';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',
@@ -224,11 +224,11 @@ describe('lib/manager/helm/extract', () => {
       expect(result).toBeNull();
     });
     it('returns null if Chart.yaml is empty', async () => {
-      const content = '';
-      const packageFile = 'requirements.yaml';
+      const fileContent = '';
+      const fileName = 'requirements.yaml';
       const result = await extractPackageFile({
-        content,
-        packageFile,
+        fileContent,
+        fileName,
         config: {
           aliases: {
             stable: 'https://kubernetes-charts.storage.googleapis.com/',

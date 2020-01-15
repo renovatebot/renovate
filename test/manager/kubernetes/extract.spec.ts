@@ -25,21 +25,23 @@ describe('lib/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
-        extractPackageFile({ content: kubernetesConfigMapFile })
+        extractPackageFile({ fileContent: kubernetesConfigMapFile })
       ).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile({ content: kubernetesImagesFile });
+      const res = extractPackageFile({ fileContent: kubernetesImagesFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
     it('extracts image line in a YAML array', () => {
-      const res = extractPackageFile({ content: kubernetesArraySyntaxFile });
+      const res = extractPackageFile({
+        fileContent: kubernetesArraySyntaxFile,
+      });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('ignores non-Kubernetes YAML files', () => {
-      expect(extractPackageFile({ content: otherYamlFile })).toBeNull();
+      expect(extractPackageFile({ fileContent: otherYamlFile })).toBeNull();
     });
   });
 });

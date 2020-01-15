@@ -11,16 +11,16 @@ describe('lib/manager/gitlabci-include/extract', () => {
     it('returns null for empty', () => {
       expect(
         extractPackageFile({
-          content: 'nothing here',
-          packageFile: '.gitlab-ci.yml',
+          fileContent: 'nothing here',
+          fileName: '.gitlab-ci.yml',
           config: {},
         })
       ).toBeNull();
     });
     it('extracts multiple include blocks', () => {
       const res = extractPackageFile({
-        content: yamlFile,
-        packageFile: '.gitlab-ci.yml',
+        fileContent: yamlFile,
+        fileName: '.gitlab-ci.yml',
         config: {},
       });
       expect(res.deps).toMatchSnapshot();
@@ -33,8 +33,8 @@ describe('lib/manager/gitlabci-include/extract', () => {
       ];
       endpoints.forEach(endpoint => {
         const res = extractPackageFile({
-          content: yamlFile,
-          packageFile: '.gitlab-ci.yml',
+          fileContent: yamlFile,
+          fileName: '.gitlab-ci.yml',
           config: {
             endpoint,
           },

@@ -11,11 +11,11 @@ const droneYAML = readFileSync(
 describe('lib/manager/droneci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
+      expect(extractPackageFile({ fileContent: 'nothing here' })).toBeNull();
     });
 
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile({ content: droneYAML });
+      const res = extractPackageFile({ fileContent: droneYAML });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
     });

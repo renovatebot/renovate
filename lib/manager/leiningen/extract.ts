@@ -127,20 +127,20 @@ function extractLeinRepos(content: string): string[] {
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile {
   const collect = (key: string, ctx: ExtractContext): PackageDependency[] => {
     let result: PackageDependency[] = [];
-    let restContent = trimAtKey(content, key);
+    let restContent = trimAtKey(fileContent, key);
     while (restContent) {
-      const offset = content.length - restContent.length;
+      const offset = fileContent.length - restContent.length;
       result = [...result, ...extractFromVectors(restContent, offset, ctx)];
       restContent = trimAtKey(restContent, key);
     }
     return result;
   };
 
-  const registryUrls = extractLeinRepos(content);
+  const registryUrls = extractLeinRepos(fileContent);
 
   const deps: PackageDependency[] = [
     ...collect('dependencies', {

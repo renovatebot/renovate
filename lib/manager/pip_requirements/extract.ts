@@ -18,14 +18,14 @@ const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern}
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
 export function extractPackageFile({
-  content,
+  fileContent,
   config,
 }: ExtractPackageFileConfig): PackageFile | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
   let indexUrl: string;
   const extraUrls = [];
-  content.split('\n').forEach(line => {
+  fileContent.split('\n').forEach(line => {
     if (line.startsWith('--index-url ')) {
       indexUrl = line.substring('--index-url '.length).split(' ')[0];
     }
@@ -50,7 +50,7 @@ export function extractPackageFile({
   registryUrls = registryUrls.concat(extraUrls);
 
   const regex = new RegExp(`^${dependencyPattern}$`, 'g');
-  const deps = content
+  const deps = fileContent
     .split('\n')
     .map((rawline, lineNumber) => {
       let dep: PackageDependency = {};

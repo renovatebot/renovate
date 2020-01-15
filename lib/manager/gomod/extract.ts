@@ -44,12 +44,12 @@ function getDep(
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
-  logger.trace({ content }, 'gomod.extractPackageFile()');
+  logger.trace({ fileContent }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = fileContent.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       const replaceMatch = line.match(

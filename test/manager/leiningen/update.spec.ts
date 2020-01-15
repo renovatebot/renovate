@@ -11,7 +11,7 @@ const leinProjectClj = readFileSync(
 
 describe('manager/leiningen/update', () => {
   it('updatePackageFile', () => {
-    const { deps } = extractPackageFile({ content: leinProjectClj });
+    const { deps } = extractPackageFile({ fileContent: leinProjectClj });
     const dep = deps.pop();
     const upgrade = {
       ...dep,

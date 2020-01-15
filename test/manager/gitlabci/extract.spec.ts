@@ -14,16 +14,16 @@ const yamlFile1 = readFileSync(
 describe('lib/manager/gitlabci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile({ content: 'nothing here' })).toBeNull();
+      expect(extractPackageFile({ fileContent: 'nothing here' })).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile({ content: yamlFile });
+      const res = extractPackageFile({ fileContent: yamlFile });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });
 
     it('extracts multiple image lines with comments', () => {
-      const res = extractPackageFile({ content: yamlFile1 });
+      const res = extractPackageFile({ fileContent: yamlFile1 });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });

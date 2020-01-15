@@ -6,10 +6,10 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   let deps: PackageDependency[] = [];
-  const npmDepends = content.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
+  const npmDepends = fileContent.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
   if (!npmDepends) {
     return null;
   }
@@ -24,7 +24,7 @@ export function extractPackageFile({
         const [depName, currentValue] = arr;
         // istanbul ignore if
         if (!(depName && currentValue)) {
-          logger.warn({ content }, 'Incomplete npm.depends match');
+          logger.warn({ fileContent }, 'Incomplete npm.depends match');
         }
         return {
           depName,
@@ -34,7 +34,7 @@ export function extractPackageFile({
       })
       .filter(dep => dep.depName && dep.currentValue);
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ content }, 'Failed to parse meteor package.js');
+    logger.warn({ fileContent }, 'Failed to parse meteor package.js');
   }
   // istanbul ignore if
   if (!deps.length) {

@@ -7,12 +7,12 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile {
   logger.trace('ruby-version.extractPackageFile()');
   const dep: PackageDependency = {
     depName: 'ruby',
-    currentValue: content.trim(),
+    currentValue: fileContent.trim(),
     datasource: 'rubyVersion',
   };
   if (!isValid(dep.currentValue)) {

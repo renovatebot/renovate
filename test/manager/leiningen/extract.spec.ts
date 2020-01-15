@@ -50,6 +50,8 @@ describe('manager/clojure/extract', () => {
     ]);
   });
   it('extractPackageFile', () => {
-    expect(extractPackageFile({ content: leinProjectClj })).toMatchSnapshot();
+    expect(
+      extractPackageFile({ fileContent: leinProjectClj })
+    ).toMatchSnapshot();
   });
 });

@@ -7,16 +7,16 @@ import {
 } from '../common';
 
 export function extractPackageFile({
-  content,
-  packageFile,
+  fileContent,
+  fileName,
   config = {},
 }: ExtractPackageFileConfig): PackageFile {
-  logger.trace(`nuget.extractPackageFile(${packageFile})`);
+  logger.trace(`nuget.extractPackageFile(${fileName})`);
   const { isVersion } = get(config.versionScheme || 'semver');
   const deps: PackageDependency[] = [];
 
   let lineNumber = 0;
-  for (const line of content.split('\n')) {
+  for (const line of fileContent.split('\n')) {
     /**
      * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
      * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version

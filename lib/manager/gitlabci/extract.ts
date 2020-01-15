@@ -18,11 +18,11 @@ function skipCommentLines(
 }
 
 export function extractPackageFile({
-  content,
+  fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = fileContent.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
       const imageMatch = line.match(/^\s*image:\s*'?"?([^\s]+|)'?"?\s*$/);
