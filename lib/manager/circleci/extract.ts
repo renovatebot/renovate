@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
+import { VERSION_SCHEME_NPM } from '../../constants/version-schemes';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -31,7 +32,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               datasource: 'orb',
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: 'npm',
+              versionScheme: VERSION_SCHEME_NPM,
               rangeStrategy: 'pin',
             };
             deps.push(dep);

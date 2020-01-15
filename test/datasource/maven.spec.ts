@@ -2,6 +2,7 @@ import nock from 'nock';
 import fs from 'fs';
 import * as datasource from '../../lib/datasource';
 import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
+import { VERSION_SCHEME_LOOSE } from '../../lib/constants/version-schemes';
 
 const hostRules = require('../../lib/util/host-rules');
 
@@ -27,7 +28,7 @@ const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
 
 const config = {
   datasource: 'maven',
-  versionScheme: 'loose',
+  versionScheme: VERSION_SCHEME_LOOSE,
 };
 
 describe('datasource/maven', () => {

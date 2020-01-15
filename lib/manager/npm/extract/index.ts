@@ -17,6 +17,7 @@ import {
 import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { VERSION_SCHEME_NODE } from '../../../constants/version-schemes';
 
 export async function extractPackageFile(
   content: string,
@@ -148,7 +149,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = 'github';
         dep.lookupName = 'nodejs/node';
-        dep.versionScheme = 'node';
+        dep.versionScheme = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
         dep.datasource = 'npm';
         dep.commitMessageTopic = 'Yarn';
@@ -169,7 +170,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = 'github';
         dep.lookupName = 'nodejs/node';
-        dep.versionScheme = 'node';
+        dep.versionScheme = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
         dep.datasource = 'npm';
         dep.commitMessageTopic = 'Yarn';

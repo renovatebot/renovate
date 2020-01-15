@@ -11,6 +11,12 @@ import * as _docker from '../../../../../lib/datasource/docker';
 import * as _gitSubmodules from '../../../../../lib/datasource/git-submodules';
 import { mocked, getConfig } from '../../../../util';
 import { CONFIG_VALIDATION } from '../../../../../lib/constants/error-messages';
+import {
+  VERSION_SCHEME_DOCKER,
+  VERSION_SCHEME_GIT,
+  VERSION_SCHEME_NPM,
+  VERSION_SCHEME_PEP440,
+} from '../../../../../lib/constants/version-schemes';
 
 jest.mock('../../../../../lib/datasource/docker');
 jest.mock('../../../../../lib/datasource/git-submodules');
@@ -26,7 +32,7 @@ describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
     config = getConfig();
     config.manager = 'npm';
-    config.versionScheme = 'npm';
+    config.versionScheme = VERSION_SCHEME_NPM;
     config.rangeStrategy = 'replace';
     global.repoCache = {};
     jest.resetAllMocks();
@@ -165,7 +171,7 @@ describe('workers/repository/process/lookup', () => {
       config.allowedVersions = '<1';
       config.depName = 'q';
       config.datasource = 'npm';
-      config.versionScheme = 'docker'; // this doesn't make sense but works for this test
+      config.versionScheme = VERSION_SCHEME_DOCKER; // this doesn't make sense but works for this test
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -1014,7 +1020,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles PEP440', async () => {
       config.manager = 'pip_requirements';
-      config.versionScheme = 'pep440';
+      config.versionScheme = VERSION_SCHEME_PEP440;
       config.rangeStrategy = 'pin';
       config.lockedVersion = '0.9.4';
       config.currentValue = '~=0.9';
@@ -1108,7 +1114,7 @@ describe('workers/repository/process/lookup', () => {
         config.currentValue = currentValue;
         config.depName = 'node';
         config.datasource = 'docker';
-        config.versionScheme = 'docker';
+        config.versionScheme = VERSION_SCHEME_DOCKER;
         docker.getPkgReleases.mockResolvedValueOnce({
           releases: [
             { version: '8.1.0' },
@@ -1235,7 +1241,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles git submodule update', async () => {
       config.datasource = 'gitSubmodules';
-      config.versionScheme = 'git';
+      config.versionScheme = VERSION_SCHEME_GIT;
       gitSubmodules.getPkgReleases.mockResolvedValueOnce({
         releases: [
           {

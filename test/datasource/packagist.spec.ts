@@ -2,6 +2,7 @@ import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
 import * as _hostRules from '../../lib/util/host-rules';
+import { VERSION_SCHEME_COMPOSER } from '../../lib/constants/version-schemes';
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
@@ -29,7 +30,7 @@ describe('datasource/packagist', () => {
       global.repoCache = {};
       config = {
         datasource: 'packagist',
-        versionScheme: 'composer',
+        versionScheme: VERSION_SCHEME_COMPOSER,
         registryUrls: [
           'https://composer.renovatebot.com',
           'https://packagist.org',

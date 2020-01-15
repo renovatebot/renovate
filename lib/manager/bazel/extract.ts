@@ -4,6 +4,7 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
+import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
 
 interface UrlParsedResult {
   repo: string;
@@ -237,7 +238,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.currentValue = currentValue;
       dep.depName = depName;
       dep.datasource = 'docker';
-      dep.versionScheme = 'docker';
+      dep.versionScheme = VERSION_SCHEME_DOCKER;
       dep.lookupName = repository;
       deps.push(dep);
     } else {

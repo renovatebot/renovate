@@ -1,6 +1,7 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
+import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
@@ -18,7 +19,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),
         managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: 'semver',
+        versionScheme: VERSION_SCHEME_SEMVER,
       };
 
       let shaLineNumber = 0;
