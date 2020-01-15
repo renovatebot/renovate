@@ -69,10 +69,16 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = (
   currentValue: string,
   rangeStrategy: RangeStrategy,
-  _fromVersion: string,
+  fromVersion: string,
   toVersion: string
 ): string => {
   let result = null;
+  if (isVersion(currentValue)) {
+    return currentValue.startsWith('v') ? 'v' + toVersion : toVersion;
+  }
+  if (currentValue.replace(/^=\s*/, '') === fromVersion) {
+    return currentValue.replace(fromVersion, toVersion);
+  }
   switch (rangeStrategy) {
     case 'pin':
       result = pin({ to: vtrim(toVersion) });
@@ -87,11 +93,6 @@ const getNewValue = (
     default:
       logger.warn(`Unsupported strategy ${rangeStrategy}`);
   }
-
-  if (currentValue !== vtrim(currentValue) && isSingleVersion(result)) {
-    result = `v${result}`;
-  }
-
   return result;
 };
 

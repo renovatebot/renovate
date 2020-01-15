@@ -1,3 +1,4 @@
+import { hrtime } from 'process';
 import { promisify } from 'util';
 import {
   exec as cpExec,
@@ -5,7 +6,7 @@ import {
 } from 'child_process';
 import { dockerCmd, DockerOptions, setDockerConfig } from './docker';
 import { getChildProcessEnv } from './env';
-import { basicEnvVars } from './env/basic-vars';
+import { logger } from '../../logger';
 
 let localDir;
 
@@ -19,9 +20,11 @@ const pExec: (
   opts: ChildProcessExecOptions & { encoding: string }
 ) => Promise<ExecResult> = promisify(cpExec);
 
+type ExtraEnv<T = unknown> = Record<string, T>;
+
 export interface ExecOptions extends ChildProcessExecOptions {
-  inheritEnvVars?: string[];
-  docker?: DockerOptions;
+  extraEnv?: ExtraEnv | null | undefined;
+  docker?: DockerOptions | null | undefined;
 }
 
 export interface ExecResult {
@@ -29,44 +32,80 @@ export interface ExecResult {
   stderr: string;
 }
 
-export function exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-  const { env: customEnv = {}, inheritEnvVars = [], docker } = opts;
-  const cwd = opts.cwd || localDir;
+function createChildEnv(
+  env: NodeJS.ProcessEnv,
+  extraEnv: ExtraEnv
+): ExtraEnv<string> {
+  const extraEnvKeys = Object.keys(extraEnv || {});
 
-  let pExecCommand = cmd;
-  const pExecOptions = {
+  const childEnv =
+    env || extraEnv
+      ? {
+          ...extraEnv,
+          ...getChildProcessEnv(extraEnvKeys),
+          ...env,
+        }
+      : getChildProcessEnv();
+
+  const result: ExtraEnv<string> = {};
+  Object.entries(childEnv).forEach(([key, val]) => {
+    if (val === null) return;
+    if (val === undefined) return;
+    result[key] = val.toString();
+  });
+  return result;
+}
+
+function dockerEnvVars(
+  extraEnv: ExtraEnv,
+  childEnv: ExtraEnv<string>
+): string[] {
+  const extraEnvKeys = Object.keys(extraEnv || {});
+  return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
+}
+
+export async function exec(
+  cmd: string | string[],
+  opts: ExecOptions = {}
+): Promise<ExecResult> {
+  const startTime = hrtime();
+  const { env, extraEnv, docker } = opts;
+  const cwd = opts.cwd || localDir;
+  const childEnv = createChildEnv(env, extraEnv);
+
+  const execOptions: ExecOptions = { ...opts };
+  delete execOptions.extraEnv;
+  delete execOptions.docker;
+
+  const pExecOptions: ChildProcessExecOptions & { encoding: string } = {
     encoding: 'utf-8',
-    ...opts,
+    ...execOptions,
+    env: childEnv,
     cwd,
   };
-  delete pExecOptions.inheritEnvVars;
-  delete pExecOptions.docker;
 
-  const processEnv = getChildProcessEnv(inheritEnvVars);
-  const isCustomEnv = opts.env || opts.inheritEnvVars;
-  if (isCustomEnv) {
-    [...basicEnvVars, ...inheritEnvVars].forEach(key => {
-      if (
-        typeof customEnv[key] === 'undefined' &&
-        typeof processEnv[key] !== 'undefined'
-      ) {
-        customEnv[key] = processEnv[key];
-      }
-    });
-  }
-  pExecOptions.env = isCustomEnv ? customEnv : processEnv;
+  // TODO: simplify after callers' refactoring
+  const singleCommand = typeof cmd === 'string' ? cmd : cmd.join(' && ');
+  let pExecCommand = singleCommand.startsWith('docker run')
+    ? singleCommand
+    : `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
 
   if (docker) {
     const dockerOptions = {
       ...docker,
       cwd,
-      envVars: inheritEnvVars.filter(
-        key => typeof pExecOptions.env[key] !== 'undefined'
-      ),
+      envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    pExecCommand = dockerCmd(cmd, dockerOptions);
+    pExecCommand = dockerCmd(pExecCommand, dockerOptions);
   }
 
-  return pExec(pExecCommand, pExecOptions);
+  const res = await pExec(pExecCommand, pExecOptions);
+  const duration = hrtime(startTime);
+  const seconds = Math.round(duration[0] + duration[1] / 1e9);
+  logger.debug(
+    { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
+    'exec completed'
+  );
+  return res;
 }

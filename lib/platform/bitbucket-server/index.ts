@@ -16,6 +16,8 @@ import {
   GotResponse,
   CreatePRConfig,
   BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -381,12 +383,12 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 
 // TODO: coverage
 // istanbul ignore next
-export async function findPr(
-  branchName: string,
-  prTitle?: string,
+export async function findPr({
+  branchName,
+  prTitle,
   state = 'all',
-  refreshCache?: boolean
-): Promise<Pr | null> {
+  refreshCache,
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
   const prList = await getPrList({ refreshCache });
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
@@ -404,7 +406,10 @@ export async function getBranchPr(
   refreshCache?: boolean
 ): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, undefined, 'open');
+  const existingPr = await findPr({
+    branchName,
+    state: 'open',
+  });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 
@@ -790,20 +795,20 @@ async function deleteComment(prNo: number, commentId: number): Promise<void> {
   );
 }
 
-export async function ensureComment(
-  prNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  const sanitizedContent = sanitize(content);
   try {
-    const comments = await getComments(prNo);
+    const comments = await getComments(number);
     let body: string;
     let commentId: number | undefined;
     let commentNeedsUpdating: boolean | undefined;
     if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
-      body = `### ${topic}\n\n${content}`;
+      logger.debug(`Ensuring comment "${topic}" in #${number}`);
+      body = `### ${topic}\n\n${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -811,8 +816,8 @@ export async function ensureComment(
         }
       });
     } else {
-      logger.debug(`Ensuring content-only comment in #${prNo}`);
-      body = `${content}`;
+      logger.debug(`Ensuring content-only comment in #${number}`);
+      body = `${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text === body) {
           commentId = comment.id;
@@ -821,14 +826,17 @@ export async function ensureComment(
       });
     }
     if (!commentId) {
-      await addComment(prNo, body);
+      await addComment(number, body);
       logger.info(
-        { repository: config.repository, prNo, topic },
+        { repository: config.repository, prNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
-      await editComment(prNo, commentId, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment updated');
+      await editComment(number, commentId, body);
+      logger.info(
+        { repository: config.repository, prNo: number },
+        'Comment updated'
+      );
     } else {
       logger.debug('Comment is already update-to-date');
     }

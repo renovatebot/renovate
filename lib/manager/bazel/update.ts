@@ -121,8 +121,12 @@ export async function updateDependency(
         upgrade.newValue
       );
       const massages = {
-        'bazel-skylib.0.9.0': 'bazel_skylib-0.9.0',
-        '0.19.5/rules_go-0.19.5.tar.gz': 'v0.19.5/rules_go-v0.19.5.tar.gz',
+        'bazel-skylib.': 'bazel_skylib-',
+        '/bazel-gazelle/releases/download/0':
+          '/bazel-gazelle/releases/download/v0',
+        '/bazel-gazelle-0': '/bazel-gazelle-v0',
+        '/rules_go/releases/download/0': '/rules_go/releases/download/v0',
+        '/rules_go-0': '/rules_go-v0',
       };
       for (const [from, to] of Object.entries(massages)) {
         newDef = newDef.replace(from, to);

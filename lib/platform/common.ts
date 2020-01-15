@@ -129,6 +129,17 @@ export interface BranchStatusConfig {
   state: string | null;
   url?: string;
 }
+export interface FindPRConfig {
+  branchName: string;
+  prTitle?: string | null;
+  state?: 'open' | 'closed' | '!open' | 'all';
+  refreshCache?: boolean;
+}
+export interface EnsureCommentConfig {
+  number: number;
+  topic: string;
+  content: string;
+}
 /**
  * TODO: Proper typing
  */
@@ -165,20 +176,12 @@ export interface Platform {
   getBranchStatusCheck(branchName: string, context: string): Promise<string>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
-  ensureComment(
-    number: number,
-    subject: string,
-    content: string
-  ): Promise<boolean>;
+  ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   setBaseBranch(baseBranch: string): Promise<void>;
   commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
   getPr(number: number): Promise<Pr>;
-  findPr(
-    branchName: string,
-    prTitle: string | null,
-    state?: string
-  ): Promise<Pr>;
+  findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   mergeBranch(branchName: string): Promise<void>;
   getBranchStatus(
     branchName: string,

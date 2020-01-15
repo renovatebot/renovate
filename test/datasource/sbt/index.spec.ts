@@ -30,10 +30,10 @@ describe('datasource/sbt', () => {
     beforeEach(() => {
       nock.disableNetConnect();
       nock('https://failed_repo')
-        .get('/maven/org/scalatest')
+        .get('/maven/org/scalatest/')
         .reply(404, null);
       nock('https://repo.maven.apache.org')
-        .get('/maven2/org/scalatest')
+        .get('/maven2/org/scalatest/')
         .reply(
           200,
           '<a href="scalatest/" title=\'scalatest/\'>scalatest_2.12/</a>\n' +
@@ -42,17 +42,17 @@ describe('datasource/sbt', () => {
             "<a href='scalatest_native2.12/'>scalatest_2.12/</a>"
         );
       nock('https://repo.maven.apache.org')
-        .get('/maven2/org/scalatest/scalatest')
+        .get('/maven2/org/scalatest/scalatest/')
         .reply(200, "<a href='1.2.0/'>1.2.0/</a>");
       nock('https://repo.maven.apache.org')
-        .get('/maven2/org/scalatest/scalatest_2.12')
+        .get('/maven2/org/scalatest/scalatest_2.12/')
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
       nock('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/com.github.gseitz')
+        .get('/sbt/sbt-plugin-releases/com.github.gseitz/')
         .reply(200, '');
       nock('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray')
+        .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
         .reply(
           200,
           '<html>\n' +
@@ -65,7 +65,7 @@ describe('datasource/sbt', () => {
         );
       nock('https://dl.bintray.com')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12'
+          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
         )
         .reply(
           200,
@@ -80,7 +80,7 @@ describe('datasource/sbt', () => {
         );
       nock('https://dl.bintray.com')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0'
+          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
         )
         .reply(
           200,
