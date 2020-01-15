@@ -135,12 +135,16 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    if (err.stderr && err.stderr.startsWith('fatal: Could not parse object')) {
+    const output = err.stdout + err.stderr;
+    if (
+      err.message.includes('fatal: Could not parse object') ||
+      output.includes('but that version could not be found')
+    ) {
       return [
         {
           artifactError: {
             lockFile: lockFileName,
-            stderr: err.stdout + '\n' + err.stderr,
+            stderr: output,
           },
         },
       ];
@@ -162,7 +166,6 @@ export async function updateArtifacts(
       global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    const output = err.stdout + err.stderr;
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
     if (output.match(resolveMatchRe)) {
       logger.debug({ err }, 'Bundler has a resolve error');
