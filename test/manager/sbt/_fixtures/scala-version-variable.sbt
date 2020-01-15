@@ -1,4 +1,4 @@
-val ScalaVersion = "2.12.10"
+val ScalaVersion = "2.12"
 val versionExample = "0.0.8"
 
 scalaVersion := ScalaVersion
