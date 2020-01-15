@@ -325,6 +325,14 @@ describe('workers/pr', () => {
       expect(reviewers.length).toEqual(2);
       expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
     });
+    it('should add and deduplicate additionalReviewers on new PR', async () => {
+      config.reviewers = ['@foo', 'bar'];
+      config.additionalReviewers = ['bar', 'baz', '@boo'];
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       config.semanticCommitScope = null;

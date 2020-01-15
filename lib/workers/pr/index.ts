@@ -1,4 +1,5 @@
 import sampleSize from 'lodash/sampleSize';
+import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
 import { getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
@@ -15,12 +16,14 @@ function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
 }
 
+function noLeadingAtSymbol(input: string): string {
+  return input.length && input[0] === '@' ? input.slice(1) : input;
+}
+
 async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   if (config.assignees.length > 0) {
     try {
-      let assignees = config.assignees.map(assignee =>
-        assignee.length && assignee[0] === '@' ? assignee.slice(1) : assignee
-      );
+      let assignees = config.assignees.map(noLeadingAtSymbol);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -40,9 +43,13 @@ async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   }
   if (config.reviewers.length > 0) {
     try {
-      let reviewers = config.reviewers.map(reviewer =>
-        reviewer.length && reviewer[0] === '@' ? reviewer.slice(1) : reviewer
-      );
+      let reviewers = config.reviewers.map(noLeadingAtSymbol);
+      if (config.additionalReviewers.length > 0) {
+        const additionalReviewers = config.additionalReviewers.map(
+          noLeadingAtSymbol
+        );
+        reviewers = uniq(reviewers.concat(additionalReviewers));
+      }
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }

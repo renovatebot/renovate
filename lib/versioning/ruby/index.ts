@@ -75,6 +75,9 @@ const getNewValue = ({
   if (isVersion(currentValue)) {
     return currentValue.startsWith('v') ? 'v' + toVersion : toVersion;
   }
+  if (currentValue.replace(/^=\s*/, '') === fromVersion) {
+    return currentValue.replace(fromVersion, toVersion);
+  }
   switch (rangeStrategy) {
     case 'pin':
       result = pin({ to: vtrim(toVersion) });

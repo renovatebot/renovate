@@ -1,5 +1,6 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
+import { get } from '../../versioning';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -23,10 +24,21 @@ const getScalaVersion = (str: string): string =>
 /*
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
  */
-const normalizeScalaVersion = (str: string): string =>
-  /^\d+\.\d+\.\d+$/.test(str)
-    ? str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2')
-    : str;
+const normalizeScalaVersion = (str: string): string => {
+  // istanbul ignore if
+  if (!str) return str;
+  const versioning = get('maven');
+  if (versioning.isVersion(str)) {
+    // Do not normalize unstable versions
+    if (!versioning.isStable(str)) return str;
+    // Do not normalize versions prior to 2.10
+    if (!versioning.isGreaterThan(str, '2.10.0')) return str;
+  }
+  if (/^\d+\.\d+\.\d+$/.test(str))
+    return str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2');
+  // istanbul ignore next
+  return str;
+};
 
 const isScalaVersionVariable = (str: string): boolean =>
   /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
