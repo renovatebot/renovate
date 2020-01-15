@@ -80,13 +80,8 @@ export const comparer = (
   function minSatisfyingVersion(versions: string[], range: string): string {
     return versions.find(v => equals(v, range)) || null;
   }
-  function getNewValue(
-    { toVersion }: NewValueConfig = {
-      currentValue: null,
-      rangeStrategy: null,
-      toVersion: arguments[0],
-    }
-  ): string {
+  function getNewValue(newValueConfig: NewValueConfig): string {
+    const { toVersion } = newValueConfig || {};
     return toVersion;
   }
   function sortVersions(version: string, other: string): number {
