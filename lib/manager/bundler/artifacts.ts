@@ -145,6 +145,16 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
+    if (err.stderr && err.stderr.startsWith('fatal: Could not parse object')) {
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: err.stdout + '\n' + err.stderr,
+          },
+        },
+      ];
+    }
     if (
       (err.stdout &&
         err.stdout.includes('Please supply credentials for this source')) ||
@@ -158,6 +168,7 @@ export async function updateArtifacts(
         { err },
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
+      // Do not generate these PRs because we don't yet support Bundler authentication
       global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
