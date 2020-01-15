@@ -460,12 +460,22 @@ describe('semverRuby', () => {
     });
     it('handles major ranges', () => {
       expect(
-        semverRuby.getNewValue('~> 1', 'replace', '1.2.0', '2.0.3')
+        semverRuby.getNewValue({
+          currentValue: '~> 1',
+          rangeStrategy: 'replace',
+          fromVersion: '1.2.0',
+          toVersion: '2.0.3',
+        })
       ).toEqual('~> 2');
     });
     it('handles explicit equals', () => {
       expect(
-        semverRuby.getNewValue('= 5.2.2', 'replace', '5.2.2', '5.2.2.1')
+        semverRuby.getNewValue({
+          currentValue: '= 5.2.2',
+          rangeStrategy: 'replace',
+          fromVersion: '5.2.2',
+          toVersion: '5.2.2.1',
+        })
       ).toEqual('= 5.2.2.1');
     });
 
