@@ -135,7 +135,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    if (err.stderr && err.stderr.startsWith('fatal: Could not parse object')) {
+    if (err.message.includes('fatal: Could not parse object')) {
       return [
         {
           artifactError: {
