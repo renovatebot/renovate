@@ -33,7 +33,6 @@ export async function updateArtifacts(
   const localLockFileName = join(config.localDir, lockFileName);
   try {
     await outputFile(localPackageFileName, newPackageFileContent);
-    let cmd = 'poetry';
     const execOptions: ExecOptions = {
       cwd: join(config.localDir, subDirectory),
     };
@@ -46,11 +45,12 @@ export async function updateArtifacts(
     } else {
       logger.info('Running poetry via global poetry');
     }
+    const cmd: string[] = [];
     for (let i = 0; i < updatedDeps.length; i += 1) {
       const dep = updatedDeps[i];
-      cmd += ` update --lock --no-interaction ${dep}`;
-      await exec(cmd, execOptions);
+      cmd.push(`poetry update --lock --no-interaction ${dep}`);
     }
+    await exec(cmd, execOptions);
     const newPoetryLockContent = await readFile(localLockFileName, 'utf8');
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);
