@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { isValid } from '../../versioning/maven';
@@ -14,10 +15,16 @@ export function parsePom(raw: string): XmlDocument | null {
   } catch (e) {
     return null;
   }
-  const { name, attr } = project;
+  const { name, attr, children } = project;
   if (name !== 'project') return null;
-  if (attr.xmlns !== 'http://maven.apache.org/POM/4.0.0') return null;
-  return project;
+  if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') return project;
+  if (
+    is.nonEmptyArray(children) &&
+    children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
+  ) {
+    return project;
+  }
+  return null;
 }
 
 export function containsPlaceholder(str: string): boolean {
