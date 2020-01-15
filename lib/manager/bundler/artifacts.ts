@@ -138,8 +138,7 @@ export async function updateArtifacts(
     const output = err.stdout + err.stderr;
     if (
       err.message.includes('fatal: Could not parse object') ||
-      output.includes('but that version could not be found') ||
-      output.includes('"bundle lock" was called with arguments')
+      output.includes('but that version could not be found')
     ) {
       return [
         {
