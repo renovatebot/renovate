@@ -1,3 +1,4 @@
+import { hrtime } from 'process';
 import { promisify } from 'util';
 import {
   exec as cpExec,
@@ -5,6 +6,7 @@ import {
 } from 'child_process';
 import { dockerCmd, DockerOptions, setDockerConfig } from './docker';
 import { getChildProcessEnv } from './env';
+import { logger } from '../../logger';
 
 let localDir;
 
@@ -62,10 +64,11 @@ function dockerEnvVars(
   return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
 }
 
-export function exec(
+export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
+  const startTime = hrtime();
   const { env, extraEnv, docker } = opts;
   const cwd = opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
@@ -97,5 +100,12 @@ export function exec(
     pExecCommand = dockerCmd(pExecCommand, dockerOptions);
   }
 
-  return pExec(pExecCommand, pExecOptions);
+  const res = await pExec(pExecCommand, pExecOptions);
+  const duration = hrtime(startTime);
+  const seconds = Math.round(duration[0] + duration[1] / 1e9);
+  logger.debug(
+    { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
+    'Command completed'
+  );
+  return res;
 }

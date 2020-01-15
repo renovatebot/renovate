@@ -1,5 +1,4 @@
 import { join } from 'upath';
-import { hrtime } from 'process';
 import { outputFile, readFile } from 'fs-extra';
 import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/exec/env';
@@ -26,8 +25,6 @@ export async function updateArtifacts(
   }
   const localPackageFileName = join(config.localDir, packageFileName);
   const localLockFileName = join(config.localDir, lockFileName);
-  let stdout: string;
-  let stderr: string;
   try {
     await outputFile(localPackageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
@@ -53,12 +50,11 @@ export async function updateArtifacts(
         cmd = 'cargo';
       }
       cmd += ` update --manifest-path ${localPackageFileName} --package ${dep}`;
-      const startTime = hrtime();
       try {
-        ({ stdout, stderr } = await exec(cmd, {
+        await exec(cmd, {
           cwd,
           env,
-        }));
+        });
       } catch (err) /* istanbul ignore next */ {
         // Two different versions of one dependency can be present in the same
         // crate, and when that happens an attempt to update it with --package ${dep}
@@ -74,20 +70,14 @@ export async function updateArtifacts(
         const msgStart = 'error: There are multiple';
         if (err.code === 101 && err.stderr.startsWith(msgStart)) {
           cmd = cmd.replace(/ --package.*/, '');
-          ({ stdout, stderr } = await exec(cmd, {
+          await exec(cmd, {
             cwd,
             env,
-          }));
+          });
         } else {
           throw err; // this is caught below
         }
       }
-      const duration = hrtime(startTime);
-      const seconds = Math.round(duration[0] + duration[1] / 1e9);
-      logger.info(
-        { seconds, type: 'Cargo.lock', stdout, stderr },
-        'Updated lockfile'
-      );
     }
     logger.debug('Returning updated Cargo.lock');
     const newCargoLockContent = await readFile(localLockFileName, 'utf8');
