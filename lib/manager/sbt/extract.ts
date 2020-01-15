@@ -1,5 +1,6 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
+import { get } from '../../versioning';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -19,6 +20,23 @@ const isScalaVersion = (str: string): boolean =>
 
 const getScalaVersion = (str: string): string =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
+
+/*
+  https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
+ */
+const normalizeScalaVersion = (str: string): string => {
+  if (!str) return str;
+  const versioning = get('maven');
+  if (versioning.isVersion(str)) {
+    // Do not normalize unstable versions
+    if (!versioning.isStable(str)) return str;
+    // Do not normalize versions prior to 2.10
+    if (!versioning.isGreaterThan(str, '2.10.0')) return str;
+  }
+  return /^\d+\.\d+\.\d+$/.test(str)
+    ? str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2')
+    : str;
+};
 
 const isScalaVersionVariable = (str: string): boolean =>
   /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
@@ -176,7 +194,7 @@ function parseSbtLine(
   if (!isComment(line)) {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
-      scalaVersion = getScalaVersion(line);
+      scalaVersion = normalizeScalaVersion(getScalaVersion(line));
     } else if (isScalaVersionVariable(line)) {
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
@@ -244,7 +262,7 @@ function parseSbtLine(
         scalaVersion ||
         (scalaVersionVariable &&
           variables[scalaVersionVariable] &&
-          variables[scalaVersionVariable].val),
+          normalizeScalaVersion(variables[scalaVersionVariable].val)),
     };
   if (deps.length) return { deps };
   return null;
