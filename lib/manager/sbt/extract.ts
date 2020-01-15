@@ -25,6 +25,7 @@ const getScalaVersion = (str: string): string =>
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
  */
 const normalizeScalaVersion = (str: string): string => {
+  // istanbul ignore if
   if (!str) return str;
   const versioning = get('maven');
   if (versioning.isVersion(str)) {
