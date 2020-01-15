@@ -69,6 +69,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = ({
   currentValue,
   rangeStrategy,
+  fromVersion,
   toVersion,
   fromVersion,
 }: NewValueConfig): string => {
