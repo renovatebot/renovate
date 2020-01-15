@@ -6,6 +6,15 @@ function countInstancesOf(str: string, char: string): number {
   return str.split(char).length - 1;
 }
 
+function isMajorRange(range: string): boolean {
+  const splitRange = range.split(',').map(part => part.trim());
+  return (
+    splitRange.length === 1 &&
+    splitRange[0].startsWith('~>') &&
+    countInstancesOf(splitRange[0], '.') === 0
+  );
+}
+
 function isCommonRubyMajorRange(range: string): boolean {
   const splitRange = range.split(',').map(part => part.trim());
   return (
@@ -45,6 +54,9 @@ export default ({ to, range }: { range: string; to: string }): string => {
   } else if (isCommonRubyMinorRange(range)) {
     const firstPart = reduceOnePrecision(to) + '.0';
     newRange = `~> ${firstPart}, >= ${to}`;
+  } else if (isMajorRange(range)) {
+    const majorPart = to.split('.')[0];
+    newRange = '~>' + (range.includes(' ') ? ' ' : '') + majorPart;
   } else {
     const lastPart = range
       .split(',')

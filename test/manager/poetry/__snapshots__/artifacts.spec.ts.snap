@@ -5,7 +5,8 @@ Array [
   Object {
     "artifactError": Object {
       "lockFile": "poetry.lock",
-      "stderr": "not found",
+      "stderr": "undefined
+undefined",
     },
   },
 ]

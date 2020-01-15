@@ -783,7 +783,9 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr('branch-a', null);
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+      });
       expect(res).toBeDefined();
     });
     it('returns true if not open', async () => {
@@ -797,11 +799,10 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr(
-        'branch-a',
-        null,
-        PULL_REQUEST_STATUS_NOT_OPEN
-      );
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        state: PULL_REQUEST_STATUS_NOT_OPEN,
+      });
       expect(res).toBeDefined();
     });
 
@@ -816,11 +817,11 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr(
-        'branch-a',
-        'branch a pr',
-        PULL_REQUEST_STATUS_OPEN
-      );
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: PULL_REQUEST_STATUS_OPEN,
+      });
       expect(res).toBeDefined();
     });
 
@@ -835,7 +836,10 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr('branch-a', 'branch a pr');
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toBeDefined();
     });
   });

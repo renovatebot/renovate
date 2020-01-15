@@ -389,7 +389,9 @@ describe('platform/bitbucket', () => {
     it('finds pr', async () => {
       await initRepo();
       await mocked(async () => {
-        expect(await bitbucket.findPr('branch', 'title')).toMatchSnapshot();
+        expect(
+          await bitbucket.findPr({ branchName: 'branch', prTitle: 'title' })
+        ).toMatchSnapshot();
       });
     });
   });

@@ -16,6 +16,7 @@ import {
   GotResponse,
   CreatePRConfig,
   BranchStatusConfig,
+  FindPRConfig,
   EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
@@ -386,12 +387,12 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 
 // TODO: coverage
 // istanbul ignore next
-export async function findPr(
-  branchName: string,
-  prTitle?: string,
+export async function findPr({
+  branchName,
+  prTitle,
   state = PULL_REQUEST_STATUS_ALL,
-  refreshCache?: boolean
-): Promise<Pr | null> {
+  refreshCache,
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
   const prList = await getPrList({ refreshCache });
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
@@ -409,11 +410,10 @@ export async function getBranchPr(
   refreshCache?: boolean
 ): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(
+  const existingPr = await findPr({
     branchName,
-    undefined,
-    PULL_REQUEST_STATUS_OPEN
-  );
+    state: PULL_REQUEST_STATUS_OPEN,
+  });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 

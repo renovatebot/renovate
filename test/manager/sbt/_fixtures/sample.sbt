@@ -1,4 +1,4 @@
-scalaVersion := "2.12.10"
+scalaVersion := "2.9.10"
 
 // libraryDependencies += "org.example" % "foo" % "0.0.0"
 libraryDependencies += "org.example" % "foo" % "0.0.1"

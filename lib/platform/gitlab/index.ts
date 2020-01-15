@@ -15,6 +15,7 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  FindPRConfig,
   EnsureCommentConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
@@ -963,11 +964,11 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = PULL_REQUEST_STATUS_ALL
-): Promise<Pr> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = PULL_REQUEST_STATUS_ALL,
+}: FindPRConfig): Promise<Pr> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   return prList.find(

@@ -233,11 +233,11 @@ describe('platform/azure', () => {
             state: PULL_REQUEST_STATUS_OPEN,
           } as any)
       );
-      const res = await azure.findPr(
-        'branch-a',
-        'branch a pr',
-        PULL_REQUEST_STATUS_OPEN
-      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: PULL_REQUEST_STATUS_OPEN,
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found not open', async () => {
@@ -269,11 +269,11 @@ describe('platform/azure', () => {
             state: PULL_REQUEST_STATUS_CLOSED,
           } as any)
       );
-      const res = await azure.findPr(
-        'branch-a',
-        'branch a pr',
-        PULL_REQUEST_STATUS_NOT_OPEN
-      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: PULL_REQUEST_STATUS_NOT_OPEN,
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it close', async () => {
@@ -305,11 +305,11 @@ describe('platform/azure', () => {
             state: PULL_REQUEST_STATUS_CLOSED,
           } as any)
       );
-      const res = await azure.findPr(
-        'branch-a',
-        'branch a pr',
-        PULL_REQUEST_STATUS_CLOSED
-      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: PULL_REQUEST_STATUS_CLOSED,
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it all state', async () => {
@@ -341,7 +341,10 @@ describe('platform/azure', () => {
             state: PULL_REQUEST_STATUS_CLOSED,
           } as any)
       );
-      const res = await azure.findPr('branch-a', 'branch a pr');
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toMatchSnapshot();
     });
   });

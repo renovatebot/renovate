@@ -36,11 +36,11 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
 export type Pr = any;
 
 const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
-  platform.findPr(
-    config.onboardingBranch,
-    config.onboardingPrTitle,
-    PULL_REQUEST_STATUS_NOT_OPEN
-  );
+  platform.findPr({
+    branchName: config.onboardingBranch,
+    prTitle: config.onboardingPrTitle,
+    state: PULL_REQUEST_STATUS_NOT_OPEN,
+  });
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
