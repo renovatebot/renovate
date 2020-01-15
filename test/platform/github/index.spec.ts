@@ -1320,7 +1320,11 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       api.get.mockReturnValueOnce({ body: [] } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.post.mock.calls[1]).toMatchSnapshot();
     });
@@ -1334,7 +1338,11 @@ describe('platform/github', () => {
             body: graphqlClosedPullrequests,
           } as any)
       );
-      await github.ensureComment(2499, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 2499,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1345,7 +1353,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(1);
       expect(api.patch.mock.calls).toMatchSnapshot();
@@ -1357,7 +1369,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1368,7 +1384,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '!merge' }],
       } as any);
-      await github.ensureComment(42, null, '!merge');
+      await github.ensureComment({
+        number: 42,
+        topic: null,
+        content: '!merge',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1395,7 +1415,9 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null);
+      const res = await github.findPr({
+        branchName: 'branch-a',
+      });
       expect(res).toBeDefined();
     });
     it('returns true if not open', async () => {
@@ -1409,7 +1431,10 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null, '!open');
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: '!open',
+      });
       expect(res).toBeDefined();
     });
     it('caches pr list', async () => {
@@ -1423,13 +1448,20 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      let res = await github.findPr('branch-a', null);
+      let res = await github.findPr({ branchName: 'branch-a' });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr');
+      res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr', 'open');
+      res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+      });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-b');
+      res = await github.findPr({ branchName: 'branch-b' });
       expect(res).not.toBeDefined();
     });
   });

@@ -73,7 +73,9 @@ export function decryptConfig(
               decryptedConfig[eKey] = decryptedStr;
             }
           } catch (err) {
-            logger.warn({ err }, `Error decrypting ${eKey}`);
+            const error = new Error('config-validation');
+            error.validationError = `Failed to decrypt field ${eKey}. Please re-encrypt and try again.`;
+            throw error;
           }
         }
       } else {

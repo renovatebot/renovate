@@ -12,6 +12,11 @@ const sbtMissingScalaVersion = readFileSync(
   'utf8'
 );
 
+const sbtDependencyFile = readFileSync(
+  resolve(__dirname, `./_fixtures/dependency-file.scala`),
+  'utf8'
+);
+
 describe('lib/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
@@ -47,6 +52,9 @@ describe('lib/manager/sbt/extract', () => {
     });
     it('skips deps when scala version is missing', () => {
       expect(extractPackageFile(sbtMissingScalaVersion)).toMatchSnapshot();
+    });
+    it('extract deps from native scala file with variables', () => {
+      expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot();
     });
   });
 });

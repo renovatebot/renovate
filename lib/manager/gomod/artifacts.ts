@@ -26,8 +26,6 @@ export async function updateArtifacts({
     return null;
   }
   const cwd = join(config.localDir, dirname(goModFileName));
-  let stdout: string;
-  let stderr: string;
   try {
     const localGoModFileName = join(config.localDir, goModFileName);
     const massagedGoMod = newGoModContent.replace(
@@ -39,7 +37,6 @@ export async function updateArtifacts({
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    const startTime = process.hrtime();
     let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running go via docker');
@@ -83,16 +80,10 @@ export async function updateArtifacts({
       args += '"';
     }
     logger.debug({ cmd, args }, 'go get command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+    await exec(`${cmd} ${args}`, {
       cwd,
       env,
-    }));
-    let duration = process.hrtime(startTime);
-    let seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'go.sum', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     if (
       config.postUpdateOptions &&
       config.postUpdateOptions.includes('gomodTidy')
@@ -102,16 +93,10 @@ export async function updateArtifacts({
         args += '"';
       }
       logger.debug({ cmd, args }, 'go mod tidy command');
-      ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+      await exec(`${cmd} ${args}`, {
         cwd,
         env,
-      }));
-      duration = process.hrtime(startTime);
-      seconds = Math.round(duration[0] + duration[1] / 1e9);
-      logger.info(
-        { seconds, stdout, stderr },
-        'Tidied Go Modules after update'
-      );
+      });
     }
     const res = [];
     let status = await platform.getRepoStatus();
@@ -134,13 +119,10 @@ export async function updateArtifacts({
         args += '"';
       }
       logger.debug({ cmd, args }, 'go mod vendor command');
-      ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+      await exec(`${cmd} ${args}`, {
         cwd,
         env,
-      }));
-      duration = process.hrtime(startTime);
-      seconds = Math.round(duration[0] + duration[1] / 1e9);
-      logger.info({ seconds, stdout, stderr }, 'Vendored modules');
+      });
       if (
         config.postUpdateOptions &&
         config.postUpdateOptions.includes('gomodTidy')
@@ -150,16 +132,10 @@ export async function updateArtifacts({
           args += '"';
         }
         logger.debug({ cmd, args }, 'go mod tidy command');
-        ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+        await exec(`${cmd} ${args}`, {
           cwd,
           env,
-        }));
-        duration = process.hrtime(startTime);
-        seconds = Math.round(duration[0] + duration[1] / 1e9);
-        logger.info(
-          { seconds, stdout, stderr },
-          'Tidied Go Modules after vendoring'
-        );
+        });
       }
       status = await platform.getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {

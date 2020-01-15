@@ -349,12 +349,12 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
       expect(platform.findPr).toHaveBeenCalledTimes(2);
-      expect(platform.findPr.mock.calls[0][0]).toBe('branchName1');
-      expect(platform.findPr.mock.calls[0][1]).toBe('pr1');
-      expect(platform.findPr.mock.calls[0][2]).toBe('!open');
-      expect(platform.findPr.mock.calls[1][0]).toBe('branchName2');
-      expect(platform.findPr.mock.calls[1][1]).toBe('pr2');
-      expect(platform.findPr.mock.calls[1][2]).toBe('!open');
+      expect(platform.findPr.mock.calls[0][0].branchName).toBe('branchName1');
+      expect(platform.findPr.mock.calls[0][0].prTitle).toBe('pr1');
+      expect(platform.findPr.mock.calls[0][0].state).toBe('!open');
+      expect(platform.findPr.mock.calls[1][0].branchName).toBe('branchName2');
+      expect(platform.findPr.mock.calls[1][0].prTitle).toBe('pr2');
+      expect(platform.findPr.mock.calls[1][0].state).toBe('!open');
 
       // same with dry run
       await dryRun(branches, platform, 0, 0, 0, 2);

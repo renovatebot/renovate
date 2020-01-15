@@ -1336,6 +1336,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'additionalReviewers',
+    description:
+      'Additional reviewers for Pull Requests (in contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it)',
+    type: 'array',
+    subType: 'string',
+    mergeable: true,
+  },
+  {
     name: 'fileMatch',
     description: 'RegEx (re2) pattern for matching manager files',
     type: 'array',
@@ -1814,7 +1822,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['\\.sbt$'],
+      fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
       timeout: 300,
       versionScheme: 'ivy',
     },

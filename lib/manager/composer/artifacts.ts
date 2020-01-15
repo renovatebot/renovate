@@ -30,8 +30,6 @@ export async function updateArtifacts({
   }
   const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
   await fs.ensureDir(upath.join(cwd, 'vendor'));
-  let stdout: string;
-  let stderr: string;
   try {
     const localPackageFileName = upath.join(config.localDir, packageFileName);
     await fs.outputFile(localPackageFileName, newPackageFileContent);
@@ -96,7 +94,6 @@ export async function updateArtifacts({
       const localAuthFileName = upath.join(cwd, 'auth.json');
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
-    const startTime = process.hrtime();
     let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running composer via docker');
@@ -132,16 +129,10 @@ export async function updateArtifacts({
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+    await exec(`${cmd} ${args}`, {
       cwd,
       env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'composer.lock', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;

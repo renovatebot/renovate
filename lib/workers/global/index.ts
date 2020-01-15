@@ -64,7 +64,6 @@ export async function start(): Promise<0 | 1> {
     let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
-    setExecConfig(config);
     config = await autodiscoverRepositories(config);
 
     limits.init(config);
@@ -78,6 +77,7 @@ export async function start(): Promise<0 | 1> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
+      setExecConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach(rule => hostRules.add(rule));
