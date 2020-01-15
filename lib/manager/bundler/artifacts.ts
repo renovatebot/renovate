@@ -152,7 +152,7 @@ export async function updateArtifacts(
     ) {
       logger.warn(
         { err },
-        'Gemfile.lock update failed due to missing credentials'
+        'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
       global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
@@ -183,11 +183,17 @@ export async function updateArtifacts(
           config
         );
       }
-      logger.warn({ err }, 'Cannot resolve bundler lock update error');
+      logger.info(
+        { err },
+        'Cannot resolve bundler lock update error - skipping branch.'
+      );
       // Do not set global.repoCache because we don't want to stop trying other branches
       throw new Error(BUNDLER_COULD_NOT_RESOLVE);
     }
-    logger.warn({ err }, 'Unknown bundler lock file update error');
+    logger.warn(
+      { err },
+      'Unknown bundler lock file update error - skipping branch.'
+    );
     global.repoCache.bundlerArtifactsError = BUNDLER_UNKNOWN_ERROR;
     throw new Error(BUNDLER_UNKNOWN_ERROR);
   }
