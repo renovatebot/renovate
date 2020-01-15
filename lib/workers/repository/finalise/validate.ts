@@ -4,6 +4,7 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
@@ -119,7 +120,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       }
     } catch (err) {
       // istanbul ignore if
-      if (err.message === 'repository-changed') {
+      if (err.message === REPOSITORY_CHANGED) {
         logger.info('Cannot access PR files to check them');
       } else {
         logger.warn(

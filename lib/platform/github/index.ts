@@ -26,6 +26,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { getGraphqlNodes } from './gh-graphql-wrapper';
 import {
   PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -1090,12 +1091,12 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message === 'platform-failure') {
+      if (err.message === PLATFORM_FAILURE) {
         throw err;
       }
       if (
         err.statusCode === 403 ||
-        err.message === 'integration-unauthorized'
+        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
       ) {
         logger.info('No permission to view check runs');
       } else {
@@ -1549,7 +1550,7 @@ export async function ensureComment({
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'platform-failure') {
+    if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
     if (
@@ -1676,7 +1677,7 @@ export async function updatePr(
     );
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === 'platform-failure') {
+    if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');
