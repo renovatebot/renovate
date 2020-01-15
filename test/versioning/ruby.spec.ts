@@ -358,7 +358,7 @@ describe('semverRuby', () => {
       [
         ['1.2.3', '1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['v1.2.3', 'v1.0.3', 'pin', '1.0.3', '1.2.3'],
-        ['1.2.3', '= 1.0.3', 'pin', '1.0.3', '1.2.3'],
+        ['= 1.2.3', '= 1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '!= 1.0.3', 'pin', '1.0.4', '1.2.3'],
         ['1.2.3', '> 1.0.3', 'pin', '1.0.4', '1.2.3'],
         ['1.2.3', '< 1.0.3', 'pin', '1.0.2', '1.2.3'],
@@ -457,6 +457,16 @@ describe('semverRuby', () => {
           toVersion: '4.3.0',
         })
       ).toEqual('4.3.0');
+    });
+    it('handles major ranges', () => {
+      expect(
+        semverRuby.getNewValue('~> 1', 'replace', '1.2.0', '2.0.3')
+      ).toEqual('~> 2');
+    });
+    it('handles explicit equals', () => {
+      expect(
+        semverRuby.getNewValue('= 5.2.2', 'replace', '5.2.2', '5.2.2.1')
+      ).toEqual('= 5.2.2.1');
     });
 
     it('returns correct version for replace strategy', () => {
