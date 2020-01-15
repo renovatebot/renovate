@@ -69,12 +69,15 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 const getNewValue = (
   currentValue: string,
   rangeStrategy: RangeStrategy,
-  _fromVersion: string,
+  fromVersion: string,
   toVersion: string
 ): string => {
   let result = null;
   if (isVersion(currentValue)) {
     return currentValue.startsWith('v') ? 'v' + toVersion : toVersion;
+  }
+  if (currentValue.replace(/^=\s*/, '') === fromVersion) {
+    return currentValue.replace(fromVersion, toVersion);
   }
   switch (rangeStrategy) {
     case 'pin':
