@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import { updateArtifacts } from '../../../lib/manager/poetry/artifacts';
@@ -6,6 +7,7 @@ import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
+import { setDockerConfig } from '../../../lib/util/exec/docker';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -17,13 +19,17 @@ const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
-  localDir: '/tmp/github/some/repo',
+  localDir: join('/tmp/github/some/repo'),
 };
 
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setDockerConfig({
+      ...config,
+      dockerUser: 'foobar',
+    });
   });
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = ['dep1'];
