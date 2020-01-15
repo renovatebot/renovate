@@ -16,6 +16,11 @@ import {
   BUNDLER_INVALID_CREDENTIALS,
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
+import {
+  BINARY_SOURCE_AUTO,
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../constants/data-binary-source';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -42,7 +47,7 @@ export async function updateArtifacts(
     const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv();
     let cmd;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running bundler via docker');
       let tag = 'latest';
       let rubyConstraint: string;
@@ -103,8 +108,8 @@ export async function updateArtifacts(
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BINARY_SOURCE_AUTO ||
+      config.binarySource === BINARY_SOURCE_GLOBAL
     ) {
       logger.info('Running bundler via global bundler');
       cmd = 'bundle';

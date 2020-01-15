@@ -5,6 +5,7 @@ import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -40,7 +41,7 @@ export async function updateArtifacts(
     const cwd = join(config.localDir, subDirectory);
     const env = getChildProcessEnv();
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running poetry via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {

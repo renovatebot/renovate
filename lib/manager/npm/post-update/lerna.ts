@@ -1,6 +1,7 @@
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { BINARY_SOURCE_GLOBAL } from '../../../constants/data-binary-source';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -44,7 +45,7 @@ export async function generateLockFiles(
         '--ignore-scripts --ignore-engines --ignore-platform --mutex network:31879';
     }
     cmd = `npm i -g -C ~/.npm/lerna@${lernaVersion} lerna@${lernaVersion} && ${lernaClient} install ${params} && ~/.npm/lerna@${lernaVersion}/bin/lerna bootstrap --no-ci -- ${params}`;
-    if (binarySource === 'global') {
+    if (binarySource === BINARY_SOURCE_GLOBAL) {
       cmd = `${lernaClient} install ${params} && lerna bootstrap --no-ci -- ${params}`;
     }
     await exec(cmd, {
