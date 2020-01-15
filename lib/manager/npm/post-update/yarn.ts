@@ -28,7 +28,6 @@ export async function generateLockFile(
   let stderr: string;
   let cmd: string;
   try {
-    const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
       const installedPath = join(
@@ -97,12 +96,10 @@ export async function generateLockFile(
       : ' --mutex network:31879';
     const installCmd = cmd + ' install' + cmdExtras;
     // TODO: Switch to native util.promisify once using only node 8
-    ({ stdout, stderr } = await exec(installCmd, {
+    await exec(installCmd, {
       cwd,
       env,
-    }));
-    logger.debug(`yarn stdout:\n${stdout}`);
-    logger.debug(`yarn stderr:\n${stderr}`);
+    });
     const lockUpdates = upgrades
       .filter(upgrade => upgrade.isLockfileUpdate)
       .map(upgrade => upgrade.depName);
@@ -160,13 +157,7 @@ export async function generateLockFile(
         ? /* istanbul ignore next */ dedupeRes.stderr
         : '';
     }
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
-    logger.info(
-      { seconds, type: 'yarn.lock', stdout, stderr },
-      'Generated lockfile'
-    );
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       {
