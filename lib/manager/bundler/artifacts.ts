@@ -161,13 +161,14 @@ export async function updateArtifacts(
       global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
+    const output = err.stdout + err.stderr;
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
-    if (err.stderr && err.stderr.match(resolveMatchRe)) {
+    if (output.match(resolveMatchRe)) {
       logger.debug({ err }, 'Bundler has a resolve error');
       const resolveMatches = [];
       let resolveMatch;
       do {
-        resolveMatch = resolveMatchRe.exec(err.stderr);
+        resolveMatch = resolveMatchRe.exec(output);
         if (resolveMatch) {
           resolveMatches.push(resolveMatch[1].split(' ').shift());
         }
