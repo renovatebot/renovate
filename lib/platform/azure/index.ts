@@ -17,6 +17,7 @@ import {
   VulnerabilityAlert,
   CreatePRConfig,
   BranchStatusConfig,
+  FindPRConfig,
   EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
@@ -275,11 +276,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   return azurePr;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   // TODO: fix typing
   let prsFiltered: any[] = [];
@@ -316,7 +317,7 @@ export async function findPr(
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 
