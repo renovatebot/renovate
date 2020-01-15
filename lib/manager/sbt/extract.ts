@@ -34,9 +34,10 @@ const normalizeScalaVersion = (str: string): string => {
     // Do not normalize versions prior to 2.10
     if (!versioning.isGreaterThan(str, '2.10.0')) return str;
   }
-  return /^\d+\.\d+\.\d+$/.test(str)
-    ? str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2')
-    : str;
+  if (/^\d+\.\d+\.\d+$/.test(str))
+    return str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2');
+  // istanbul ignore next
+  return str;
 };
 
 const isScalaVersionVariable = (str: string): boolean =>
