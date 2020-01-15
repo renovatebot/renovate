@@ -1,5 +1,4 @@
 import { parse, join } from 'upath';
-import { hrtime } from 'process';
 import { outputFile, readFile } from 'fs-extra';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
@@ -34,9 +33,6 @@ export async function updateArtifacts(
   }
   const localPackageFileName = join(config.localDir, packageFileName);
   const localLockFileName = join(config.localDir, lockFileName);
-  let stdout: string;
-  let stderr: string;
-  const startTime = hrtime();
   try {
     await outputFile(localPackageFileName, newPackageFileContent);
     logger.debug(`Updating ${lockFileName}`);
@@ -57,15 +53,8 @@ export async function updateArtifacts(
     for (let i = 0; i < updatedDeps.length; i += 1) {
       const dep = updatedDeps[i];
       cmd += ` update --lock --no-interaction ${dep}`;
-      ({ stdout, stderr } = await exec(cmd, execOptions));
+      await exec(cmd, execOptions);
     }
-    const duration = hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: `${lockFileName}`, stdout, stderr },
-      'Updated lockfile'
-    );
-    logger.debug(`Returning updated ${lockFileName}`);
     const newPoetryLockContent = await readFile(localLockFileName, 'utf8');
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);
@@ -78,6 +67,7 @@ export async function updateArtifacts(
     } else {
       fileName = lockFileName;
     }
+    logger.debug(`Returning updated ${fileName}`);
     return [
       {
         file: {

@@ -36,14 +36,11 @@ export async function updateArtifacts(
     return null;
   }
   const cwd = join(config.localDir, dirname(packageFileName));
-  let stdout: string;
-  let stderr: string;
   try {
     const localPackageFileName = join(config.localDir, packageFileName);
     await outputFile(localPackageFileName, newPackageFileContent);
     const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv();
-    const startTime = process.hrtime();
     let cmd;
     if (config.binarySource === 'docker') {
       logger.info('Running bundler via docker');
@@ -120,16 +117,10 @@ export async function updateArtifacts(
       cmd += '"';
     }
     logger.debug({ cmd }, 'bundler command');
-    ({ stdout, stderr } = await exec(cmd, {
+    await exec(cmd, {
       cwd,
       env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'Gemfile.lock', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
