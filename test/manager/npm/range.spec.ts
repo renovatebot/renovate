@@ -1,9 +1,9 @@
 import { getRangeStrategy } from '../../../lib/manager/npm';
 import { RangeConfig } from '../../../lib/manager/common';
 import {
-  DEP_TYPE_DEPENDENCY,
-  DEP_TYPE_DEV,
-  DEP_TYPE_PEER,
+  DEP_TYPE_DEPENDENCIES,
+  DEP_TYPE_DEV_DEPENDENCIES,
+  DEP_TYPE_PEER_DEPENDENCIES,
 } from '../../../lib/constants/dependency';
 
 describe('getRangeStrategy', () => {
@@ -14,14 +14,14 @@ describe('getRangeStrategy', () => {
   it('pins devDependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: DEP_TYPE_DEV,
+      depType: DEP_TYPE_DEV_DEPENDENCIES,
     };
     expect(getRangeStrategy(config)).toEqual('pin');
   });
   it('pins app dependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: DEP_TYPE_DEPENDENCY,
+      depType: DEP_TYPE_DEPENDENCIES,
       packageJsonType: 'app',
     };
     expect(getRangeStrategy(config)).toEqual('pin');
@@ -29,14 +29,14 @@ describe('getRangeStrategy', () => {
   it('widens peerDependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: DEP_TYPE_PEER,
+      depType: DEP_TYPE_PEER_DEPENDENCIES,
     };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('widens complex ranges', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: DEP_TYPE_DEPENDENCY,
+      depType: DEP_TYPE_DEPENDENCIES,
       currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
@@ -44,7 +44,7 @@ describe('getRangeStrategy', () => {
   it('widens complex bump', () => {
     const config: RangeConfig = {
       rangeStrategy: 'bump',
-      depType: DEP_TYPE_DEPENDENCY,
+      depType: DEP_TYPE_DEPENDENCIES,
       currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
@@ -52,7 +52,7 @@ describe('getRangeStrategy', () => {
   it('defaults to replace', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
-      depType: DEP_TYPE_DEPENDENCY,
+      depType: DEP_TYPE_DEPENDENCIES,
     };
     expect(getRangeStrategy(config)).toEqual('replace');
   });

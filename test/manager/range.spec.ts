@@ -1,6 +1,6 @@
 import { getRangeStrategy } from '../../lib/manager';
 import { RangeConfig } from '../../lib/manager/common';
-import { DEP_TYPE_DEPENDENCY } from '../../lib/constants/dependency';
+import { DEP_TYPE_DEPENDENCIES } from '../../lib/constants/dependency';
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
@@ -11,7 +11,7 @@ describe('getRangeStrategy', () => {
     const config: RangeConfig = {
       manager: 'npm',
       rangeStrategy: 'auto',
-      depType: DEP_TYPE_DEPENDENCY,
+      depType: DEP_TYPE_DEPENDENCIES,
       packageJsonType: 'app',
     };
     expect(getRangeStrategy(config)).toEqual('pin');

@@ -1,7 +1,7 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageDependency, PackageFile } from '../common';
 import {
-  DEP_TYPE_DEPENDENCY,
+  DEP_TYPE_DEPENDENCIES,
   DEP_TYPE_MANAGED,
   DEP_TYPE_PLUGIN_POM,
 } from '../../constants/dependency';
@@ -143,7 +143,7 @@ export function extractPackageFile(content: string): PackageFile {
 
   const deps: PackageDependency[] = [
     ...collect('dependencies', {
-      depType: DEP_TYPE_DEPENDENCY,
+      depType: DEP_TYPE_DEPENDENCIES,
       registryUrls,
     }),
     ...collect('managed-dependencies', {

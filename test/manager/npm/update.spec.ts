@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import * as npmUpdater from '../../../lib/manager/npm/update';
 import {
-  DEP_TYPE_DEPENDENCY,
-  DEP_TYPE_DEV,
+  DEP_TYPE_DEPENDENCIES,
+  DEP_TYPE_DEV_DEPENDENCIES,
 } from '../../../lib/constants/dependency';
 
 function readFixture(fixture) {
@@ -20,7 +20,7 @@ describe('workers/branch/package-json', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'cheerio',
         newValue: '0.22.1',
       };
@@ -30,7 +30,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces a github dependency value', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'gulp',
         currentValue: 'v4.0.0-alpha.2',
         currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
@@ -46,7 +46,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces a npm package alias', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'hapi',
         npmPackageAlias: true,
         lookupName: '@hapi/hapi',
@@ -63,7 +63,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces a github short hash', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'gulp',
         currentDigest: 'abcdef7',
         currentRawValue: 'gulpjs/gulp#abcdef7',
@@ -79,7 +79,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces a github fully specified version', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'n',
         currentValue: 'v1.0.0',
         currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
@@ -96,7 +96,7 @@ describe('workers/branch/package-json', () => {
     });
     it('updates resolutions too', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'config',
         newValue: '1.22.0',
       };
@@ -106,7 +106,7 @@ describe('workers/branch/package-json', () => {
     });
     it('updates glob resolutions', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEPENDENCY,
+        depType: DEP_TYPE_DEPENDENCIES,
         depName: 'config',
         newValue: '1.22.0',
       };
@@ -121,7 +121,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces only the first instance of a value', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEV,
+        depType: DEP_TYPE_DEV_DEPENDENCIES,
         depName: 'angular-touch',
         newValue: '1.6.1',
       };
@@ -131,7 +131,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces only the second instance of a value', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEV,
+        depType: DEP_TYPE_DEV_DEPENDENCIES,
         depName: 'angular-sanitize',
         newValue: '1.6.1',
       };
@@ -141,7 +141,7 @@ describe('workers/branch/package-json', () => {
     });
     it('handles the case where the desired version is already supported', () => {
       const upgrade = {
-        depType: DEP_TYPE_DEV,
+        depType: DEP_TYPE_DEV_DEPENDENCIES,
         depName: 'angular-touch',
         newValue: '1.5.8',
       };
