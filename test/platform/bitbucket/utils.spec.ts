@@ -3,9 +3,8 @@ import { GotApi } from '../../../lib/platform/common';
 
 jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
 
-const api: jest.Mocked<
-  GotApi
-> = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
+const api: jest.Mocked<GotApi> = require('../../../lib/platform/bitbucket/bb-got-wrapper')
+  .api;
 
 const range = (count: number) => [...Array(count).keys()];
 
