@@ -8,6 +8,7 @@ import {
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
+import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
 
 export async function extractPackageFile({
   fileContent,
@@ -67,7 +68,7 @@ export async function extractPackageFile({
         dep.skipReason = 'no-version';
       }
       if (!dep.skipReason) {
-        dep.datasource = 'rubygems';
+        dep.datasource = DATASOURCE_RUBYGEMS;
       }
       res.deps.push(dep);
     }

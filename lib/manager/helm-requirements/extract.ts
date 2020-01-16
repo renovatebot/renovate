@@ -9,6 +9,7 @@ import {
   ExtractPackageFileConfig,
 } from '../common';
 import { platform } from '../../platform';
+import { DATASOURCE_HELM } from '../../constants/data-binary-source';
 
 export async function extractPackageFile({
   fileContent,
@@ -81,7 +82,7 @@ export async function extractPackageFile({
   });
   const res = {
     deps,
-    datasource: 'helm',
+    datasource: DATASOURCE_HELM,
   };
   return res;
 }

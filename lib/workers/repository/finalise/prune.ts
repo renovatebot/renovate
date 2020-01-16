@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -57,7 +58,7 @@ async function cleanUpBranches(
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message !== 'repository-changed') {
+      if (err.message !== REPOSITORY_CHANGED) {
         logger.warn({ err, branch: branchName }, 'Error pruning branch');
       }
     }

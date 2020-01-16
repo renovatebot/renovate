@@ -6,6 +6,7 @@ import * as npmHelper from '../../../../lib/manager/npm/post-update/npm';
 import { mocked } from '../../../util';
 import { envMock, mockExecAll } from '../../../execUtil';
 import * as _env from '../../../../lib/util/exec/env';
+import { BINARY_SOURCE_GLOBAL } from '../../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -121,7 +122,7 @@ describe('generateLockFile', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = false;
-    const binarySource = 'global';
+    const binarySource = BINARY_SOURCE_GLOBAL;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},

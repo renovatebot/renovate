@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
   fileContent,
@@ -19,7 +20,7 @@ export function extractPackageFile({
     );
     if (match) {
       const dependency: PackageDependency = {
-        datasource: 'gradleVersion',
+        datasource: DATASOURCE_GRADLE_VERSION,
         depType: 'gradle-wrapper',
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),

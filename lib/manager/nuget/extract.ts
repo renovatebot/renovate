@@ -5,6 +5,7 @@ import {
   PackageFile,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
   fileContent,
@@ -40,7 +41,7 @@ export function extractPackageFile({
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: 'nuget',
+        datasource: DATASOURCE_NUGET,
       };
       if (!isVersion(currentValue)) {
         dep.skipReason = 'not-version';

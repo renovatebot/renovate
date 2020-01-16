@@ -4,6 +4,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_GIT_TAGS } from '../../constants/data-binary-source';
 
 const regExps = {
   wildcard: /^.*?/,
@@ -161,7 +162,7 @@ export function extractPackageFile(
     const depName = getDepName(lookupName);
     if (depName && currentValue && fileReplacePosition) {
       const dep: PackageDependency = {
-        datasource: 'gitTags',
+        datasource: DATASOURCE_GIT_TAGS,
         depName,
         lookupName,
         currentValue,

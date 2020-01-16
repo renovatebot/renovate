@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_ORB } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
   fileContent,
@@ -34,7 +35,7 @@ export function extractPackageFile({
               depName,
               currentValue,
               managerData: { lineNumber },
-              datasource: 'orb',
+              datasource: DATASOURCE_ORB,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
               versionScheme: 'npm',

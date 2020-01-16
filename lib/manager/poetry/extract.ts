@@ -7,6 +7,7 @@ import {
   ExtractPackageFileConfig,
 } from '../common';
 import { PoetryFile, PoetrySection } from './types';
+import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -50,7 +51,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as string,
       managerData: { nestedVersion },
-      datasource: 'pypi',
+      datasource: DATASOURCE_PYPI,
     };
     if (skipReason) {
       dep.skipReason = skipReason;

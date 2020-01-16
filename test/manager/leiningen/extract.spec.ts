@@ -6,6 +6,7 @@ import {
   extractFromVectors,
   extractPackageFile,
 } from '../../../lib/manager/leiningen/extract';
+import { DATASOURCE_MAVEN } from '../../../lib/constants/data-binary-source';
 
 const leinProjectClj = readFileSync(
   resolve(__dirname, `./_fixtures/project.clj`),
@@ -26,7 +27,7 @@ describe('manager/clojure/extract', () => {
     expect(extractFromVectors('[[]]')).toEqual([]);
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
-        datasource: 'maven',
+        datasource: DATASOURCE_MAVEN,
         depName: 'foo:bar',
         currentValue: '1.2.3',
         fileReplacePosition: 11,
@@ -36,13 +37,13 @@ describe('manager/clojure/extract', () => {
       extractFromVectors('[\t[foo/bar "1.2.3"]\n["foo/baz"  "4.5.6"] ]')
     ).toEqual([
       {
-        datasource: 'maven',
+        datasource: DATASOURCE_MAVEN,
         depName: 'foo:bar',
         currentValue: '1.2.3',
         fileReplacePosition: 12,
       },
       {
-        datasource: 'maven',
+        datasource: DATASOURCE_MAVEN,
         depName: 'foo:baz',
         currentValue: '4.5.6',
         fileReplacePosition: 33,

@@ -6,6 +6,7 @@ import {
   PackageFile,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_GITLAB } from '../../constants/data-binary-source';
 
 function extractDepFromInclude(includeObj: {
   file: any;
@@ -16,7 +17,7 @@ function extractDepFromInclude(includeObj: {
     return null;
   }
   const dep: PackageDependency = {
-    datasource: 'gitlab',
+    datasource: DATASOURCE_GITLAB,
     depName: includeObj.project,
     depType: 'repository',
   };

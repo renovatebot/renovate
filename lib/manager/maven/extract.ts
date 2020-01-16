@@ -1,9 +1,11 @@
+import is from '@sindresorhus/is';
 import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { isValid } from '../../versioning/maven';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
+import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 
 export const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
 
@@ -14,10 +16,16 @@ export function parsePom(raw: string): XmlDocument | null {
   } catch (e) {
     return null;
   }
-  const { name, attr } = project;
+  const { name, attr, children } = project;
   if (name !== 'project') return null;
-  if (attr.xmlns !== 'http://maven.apache.org/POM/4.0.0') return null;
-  return project;
+  if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') return project;
+  if (
+    is.nonEmptyArray(children) &&
+    children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
+  ) {
+    return project;
+  }
+  return null;
 }
 
 export function containsPlaceholder(str: string): boolean {
@@ -44,7 +52,7 @@ function depFromNode(node: XmlElement): PackageDependency | null {
     const depName = `${groupId}:${artifactId}`;
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
-    const datasource = 'maven';
+    const datasource = DATASOURCE_MAVEN;
     const registryUrls = [DEFAULT_MAVEN_REPO];
     return {
       datasource,
@@ -151,7 +159,7 @@ export function extractPackage(
   if (!project) return null;
 
   const result: PackageFile = {
-    datasource: 'maven',
+    datasource: DATASOURCE_MAVEN,
     packageFile,
     deps: [],
   };

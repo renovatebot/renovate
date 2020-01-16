@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
   fileContent,
@@ -25,7 +26,7 @@ export function extractPackageFile({
     match = rest.match(regex);
 
     deps.push({
-      datasource: 'maven',
+      datasource: DATASOURCE_MAVEN,
       depName: expandDepName(depName),
       currentValue,
       fileReplacePosition,

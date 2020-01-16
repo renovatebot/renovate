@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
   fileContent,
@@ -68,7 +69,7 @@ export function extractPackageFile({
             skipReason,
           };
           if (repo) {
-            dep.datasource = 'github';
+            dep.datasource = DATASOURCE_GITHUB;
             dep.lookupName = repo;
           }
           deps.push(dep);

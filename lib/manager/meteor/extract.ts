@@ -4,6 +4,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_NPM } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
   fileContent,
@@ -29,7 +30,7 @@ export function extractPackageFile({
         return {
           depName,
           currentValue,
-          datasource: 'npm',
+          datasource: DATASOURCE_NPM,
         };
       })
       .filter(dep => dep.depName && dep.currentValue);

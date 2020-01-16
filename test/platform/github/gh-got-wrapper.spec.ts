@@ -4,7 +4,10 @@ import _got from '../../../lib/util/got';
 import { api } from '../../../lib/platform/github/gh-got-wrapper';
 import {
   PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
 } from '../../../lib/constants/error-messages';
 
 jest.mock('../../../lib/util/got');
@@ -122,7 +125,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('platform-failure');
+    expect(e.message).toEqual(PLATFORM_FAILURE);
   });
   it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', async () => {
     const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
@@ -136,7 +139,7 @@ describe('platform/gh-got-wrapper', () => {
       );
       const e = await getError();
       expect(e).toBeDefined();
-      expect(e.message).toEqual('platform-failure');
+      expect(e.message).toEqual(PLATFORM_FAILURE);
     }
   });
   it('should throw platform failure for 500', async () => {
@@ -148,7 +151,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('platform-failure');
+    expect(e.message).toEqual(PLATFORM_FAILURE);
   });
   it('should throw platform failure ParseError', async () => {
     got.mockImplementationOnce(() =>
@@ -158,7 +161,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('platform-failure');
+    expect(e.message).toEqual(PLATFORM_FAILURE);
   });
   it('should throw for unauthorized integration', async () => {
     got.mockImplementationOnce(() =>
@@ -169,7 +172,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('integration-unauthorized');
+    expect(e.message).toEqual(PLATFORM_INTEGRATION_UNAUTHORIZED);
   });
   it('should throw for unauthorized integration', async () => {
     const gotErr = {
@@ -202,7 +205,7 @@ describe('platform/gh-got-wrapper', () => {
     got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('repository-changed');
+    expect(e.message).toEqual(REPOSITORY_CHANGED);
   });
   it('should throw platform failure on 422 response', async () => {
     const gotErr = {
@@ -212,7 +215,7 @@ describe('platform/gh-got-wrapper', () => {
     got.mockRejectedValueOnce(gotErr);
     const e = await getError();
     expect(e).toBeDefined();
-    expect(e.message).toEqual('platform-failure');
+    expect(e.message).toEqual(PLATFORM_FAILURE);
   });
   it('should throw original error when failed to add reviewers', async () => {
     const gotErr = {

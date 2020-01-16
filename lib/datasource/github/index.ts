@@ -7,6 +7,7 @@ import {
 } from '../common';
 import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
+import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
 const ghGot = api.get;
 
@@ -25,7 +26,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   try {
     res = await got(url, opts);
   } catch (err) {
-    if (err.message === 'platform-failure') {
+    if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
     logger.debug(
@@ -52,7 +53,7 @@ export async function getPreset(
       const defaultJson = await fetchJSONFile(pkgName, 'default.json');
       return defaultJson;
     } catch (err) {
-      if (err.message === 'platform-failure') {
+      if (err.message === PLATFORM_FAILURE) {
         throw err;
       }
       if (err.message === 'dep not found') {

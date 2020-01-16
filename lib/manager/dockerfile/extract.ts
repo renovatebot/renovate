@@ -4,6 +4,7 @@ import {
   PackageDependency,
   PackageFile,
 } from '../common';
+import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -34,7 +35,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(currentFrom: string): PackageDependency {
   const dep = splitImageParts(currentFrom);
-  dep.datasource = 'docker';
+  dep.datasource = DATASOURCE_DOCKER;
   if (
     dep.depName &&
     (dep.depName === 'node' || dep.depName.endsWith('/node')) &&

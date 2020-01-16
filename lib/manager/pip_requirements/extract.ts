@@ -8,6 +8,7 @@ import {
   PackageDependency,
   PackageFile,
 } from '../common';
+import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -69,7 +70,7 @@ export function extractPackageFile({
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: 'pypi',
+        datasource: DATASOURCE_PYPI,
       };
       if (
         isValid(currentValue) &&

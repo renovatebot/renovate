@@ -6,6 +6,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
@@ -199,7 +200,7 @@ export function extractPackageFile({
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
-    datasource: 'github',
+    datasource: DATASOURCE_GITHUB,
   };
   if (skipReason) {
     dep.skipReason = skipReason;
