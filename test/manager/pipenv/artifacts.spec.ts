@@ -6,6 +6,7 @@ import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -62,7 +63,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await pipenv.updateArtifacts('Pipfile', [], '{}', {
         ...config,
-        binarySource: 'docker',
+        binarySource: BINARY_SOURCE_DOCKER,
         dockerUser: 'foobar',
       })
     ).not.toBeNull();
