@@ -6,9 +6,13 @@ import {
   RangeConfig,
   Result,
   PackageUpdateResult,
+  ExtractPackageFileConfig,
 } from './common';
 import { RangeStrategy } from '../versioning';
 
+interface ExtractPackageFileManager extends ExtractPackageFileConfig {
+  manager: string;
+}
 const managerList = [
   'ansible',
   'bazel',
@@ -95,12 +99,12 @@ export function getPackageUpdates(
     : null;
 }
 
-export function extractPackageFile(
-  manager: string,
-  fileContent: string,
-  fileName?: string,
-  config?: ExtractConfig
-): Result<PackageFile | null> {
+export function extractPackageFile({
+  manager,
+  fileContent,
+  fileName,
+  config,
+}: ExtractPackageFileManager): Result<PackageFile | null> {
   return managers[manager] && managers[manager].extractPackageFile
     ? managers[manager].extractPackageFile({
         fileContent,

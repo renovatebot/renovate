@@ -39,14 +39,14 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   }
   const packageFiles = [];
   for (const packageFile of matchedFiles) {
-    const content = await platform.getFile(packageFile);
-    if (content) {
-      const res = await extractPackageFile(
+    const fileContent = await platform.getFile(packageFile);
+    if (fileContent) {
+      const res = await extractPackageFile({
         manager,
-        content,
-        packageFile,
-        config
-      );
+        fileContent,
+        fileName: packageFile,
+        config,
+      });
       if (res) {
         packageFiles.push({
           packageFile,

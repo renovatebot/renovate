@@ -10,21 +10,21 @@ async function getUrl(
   gitModulesPath: string,
   submoduleName: string
 ): Promise<string> {
-  const path = (await Git().raw([
-    'config',
-    '--file',
-    gitModulesPath,
-    '--get',
-    `submodule.${submoduleName}.url`,
-  ])).trim();
+  const path = (
+    await Git().raw([
+      'config',
+      '--file',
+      gitModulesPath,
+      '--get',
+      `submodule.${submoduleName}.url`,
+    ])
+  ).trim();
   if (!path.startsWith('../')) {
     return path;
   }
-  const remoteUrl = (await git.raw([
-    'config',
-    '--get',
-    'remote.origin.url',
-  ])).trim();
+  const remoteUrl = (
+    await git.raw(['config', '--get', 'remote.origin.url'])
+  ).trim();
   return URL.resolve(`${remoteUrl}/`, path);
 }
 

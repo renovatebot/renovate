@@ -31,7 +31,13 @@ describe('manager', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null', () => {
-      expect(manager.extractPackageFile('unknown', null)).toBeNull();
+      expect(
+        manager.extractPackageFile({
+          manager: 'unknown',
+          config: null,
+          fileContent: null,
+        })
+      ).toBeNull();
     });
   });
 

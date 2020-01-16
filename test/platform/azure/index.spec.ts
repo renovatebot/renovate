@@ -6,12 +6,8 @@ import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: jest.Mocked<typeof import('../../../lib/platform/azure')>;
-  let azureApi: jest.Mocked<
-    typeof import('../../../lib/platform/azure/azure-got-wrapper')
-  >;
-  let azureHelper: jest.Mocked<
-    typeof import('../../../lib/platform/azure/azure-helper')
-  >;
+  let azureApi: jest.Mocked<typeof import('../../../lib/platform/azure/azure-got-wrapper')>;
+  let azureHelper: jest.Mocked<typeof import('../../../lib/platform/azure/azure-helper')>;
   let GitStorage;
   beforeEach(() => {
     // reset module

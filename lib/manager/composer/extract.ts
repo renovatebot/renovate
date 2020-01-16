@@ -127,9 +127,9 @@ export async function extractPackageFile({
   for (const depType of depTypes) {
     if (composerJson[depType]) {
       try {
-        for (const [depName, version] of Object.entries(composerJson[
-          depType
-        ] as Record<string, string>)) {
+        for (const [depName, version] of Object.entries(
+          composerJson[depType] as Record<string, string>
+        )) {
           const currentValue = version.trim();
           // Default datasource and lookupName
           let datasource = DATASOURCE_PACKAGIST;
