@@ -8,6 +8,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   DATASOURCE_FAILURE,
 } from '../../../constants/error-messages';
+import { BINARY_SOURCE_GLOBAL } from '../../../constants/data-binary-source';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -83,7 +84,7 @@ export async function generateLockFile(
         }
       }
     }
-    if (binarySource === 'global') {
+    if (binarySource === BINARY_SOURCE_GLOBAL) {
       cmd = 'yarn';
     }
     logger.debug(`Using yarn: ${cmd}`);

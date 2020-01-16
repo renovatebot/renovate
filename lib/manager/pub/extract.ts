@@ -3,6 +3,7 @@ import { isValid } from '../../versioning/npm/index';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { MANAGER_PUB } from '../../constants/managers';
+import { DATASOURCE_DART } from '../../constants/data-binary-source';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -51,7 +52,7 @@ export function extractPackageFile(
       return {
         packageFile,
         manager: MANAGER_PUB,
-        datasource: 'dart',
+        datasource: DATASOURCE_DART,
         deps,
       };
     }

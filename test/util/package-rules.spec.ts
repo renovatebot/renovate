@@ -7,6 +7,11 @@ import {
   MANAGER_PIPENV,
 } from '../../lib/constants/managers';
 
+import {
+  DATASOURCE_DOCKER,
+  DATASOURCE_ORB,
+} from '../../lib/constants/data-binary-source';
+
 type TestConfig = Config & { x?: number; y?: number };
 
 describe('applyPackageRules()', () => {
@@ -258,14 +263,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          datasources: ['orb', 'docker'],
+          datasources: [DATASOURCE_ORB, DATASOURCE_DOCKER],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: 'orb',
+      datasource: DATASOURCE_ORB,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -282,7 +287,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: 'orb',
+      datasource: DATASOURCE_ORB,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -292,7 +297,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          datasources: ['orb'],
+          datasources: [DATASOURCE_ORB],
           x: 1,
         },
       ],

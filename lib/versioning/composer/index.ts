@@ -1,7 +1,7 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
-import { VersioningApi, RangeStrategy } from '../common';
+import { VersioningApi, NewValueConfig } from '../common';
 
 function padZeroes(input: string): string {
   const sections = input.split('.');
@@ -65,12 +65,12 @@ const maxSatisfyingVersion = (versions: string[], range: string): string =>
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   if (rangeStrategy === 'pin') {
     return toVersion;
   }
@@ -84,12 +84,12 @@ function getNewValue(
     npm.isValid(currentValue) &&
     composer2npm(currentValue) === currentValue
   ) {
-    newValue = npm.getNewValue(
+    newValue = npm.getNewValue({
       currentValue,
       rangeStrategy,
       fromVersion,
-      padZeroes(toVersion)
-    );
+      toVersion: padZeroes(toVersion),
+    });
   } else if (currentValue.match(/^~(0\.[1-9][0-9]*)$/)) {
     // handle ~0.4 case first
     if (toMajor === 0) {
@@ -113,12 +113,12 @@ function getNewValue(
       .split('||')
       .pop()
       .trim();
-    const replacementValue = getNewValue(
-      lastValue,
+    const replacementValue = getNewValue({
+      currentValue: lastValue,
       rangeStrategy,
       fromVersion,
-      toVersion
-    );
+      toVersion,
+    });
     if (rangeStrategy === 'replace') {
       newValue = replacementValue;
     } else if (rangeStrategy === 'widen') {

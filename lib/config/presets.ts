@@ -13,6 +13,11 @@ import {
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../constants/error-messages';
+import {
+  DATASOURCE_GITHUB,
+  DATASOURCE_GITLAB,
+  DATASOURCE_NPM,
+} from '../constants/data-binary-source';
 
 const datasources = {
   github,
@@ -56,14 +61,14 @@ export function parsePreset(input: string): ParsedPreset {
   let presetName: string;
   let params: string[];
   if (str.startsWith('github>')) {
-    datasource = 'github';
+    datasource = DATASOURCE_GITHUB;
     str = str.substring('github>'.length);
   } else if (str.startsWith('gitlab>')) {
-    datasource = 'gitlab';
+    datasource = DATASOURCE_GITLAB;
     str = str.substring('gitlab>'.length);
   }
   str = str.replace(/^npm>/, '');
-  datasource = datasource || 'npm';
+  datasource = datasource || DATASOURCE_NPM;
   if (str.includes('(')) {
     params = str
       .slice(str.indexOf('(') + 1, -1)
@@ -91,7 +96,10 @@ export function parsePreset(input: string): ParsedPreset {
     // non-scoped namespace
     [, packageName] = str.match(/(.*?)(:|$)/);
     presetName = str.slice(packageName.length + 1);
-    if (datasource === 'npm' && !packageName.startsWith('renovate-config-')) {
+    if (
+      datasource === DATASOURCE_NPM &&
+      !packageName.startsWith('renovate-config-')
+    ) {
       packageName = `renovate-config-${packageName}`;
     }
     if (presetName === '') {

@@ -1,5 +1,5 @@
 import { api as npm } from '../npm';
-import { VersioningApi, RangeStrategy } from '../common';
+import { VersioningApi, NewValueConfig } from '../common';
 
 const isVersion = (input: string): string | boolean => npm.isVersion(input);
 
@@ -64,12 +64,12 @@ const isSingleVersion = (constraint: string): string | boolean =>
       .trim()
   );
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
@@ -78,12 +78,12 @@ function getNewValue(
     res += toVersion;
     return res;
   }
-  const newSemver = npm.getNewValue(
-    cargo2npm(currentValue),
+  const newSemver = npm.getNewValue({
+    currentValue: cargo2npm(currentValue),
     rangeStrategy,
     fromVersion,
-    toVersion
-  );
+    toVersion,
+  });
   let newCargo = npm2cargo(newSemver);
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {

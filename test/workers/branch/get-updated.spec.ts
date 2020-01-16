@@ -8,6 +8,7 @@ import {
   MANAGER_GIT_SUB_MODULES,
   MANAGER_NPM,
 } from '../../../lib/constants/managers';
+import { DATASOURCE_GIT_SUBMODULES } from '../../../lib/constants/data-binary-source';
 
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
@@ -119,7 +120,7 @@ describe('workers/branch/get-updated', () => {
     it('handles git submodules', async () => {
       config.upgrades.push({
         manager: MANAGER_GIT_SUB_MODULES,
-        datasource: 'gitSubmodules',
+        datasource: DATASOURCE_GIT_SUBMODULES,
       });
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
