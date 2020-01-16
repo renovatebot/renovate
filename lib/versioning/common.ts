@@ -9,6 +9,12 @@ export type RangeStrategy =
   | 'update-lockfile'
   | 'widen';
 
+export interface NewValueConfig {
+  currentValue: string;
+  rangeStrategy: RangeStrategy;
+  fromVersion?: string;
+  toVersion: string;
+}
 export interface VersioningApi {
   // validation
   isCompatible(version: string, range?: string): string | boolean | null;
@@ -28,12 +34,7 @@ export interface VersioningApi {
   isLessThanRange?(version: string, range: string): boolean;
   maxSatisfyingVersion(versions: string[], range: string): string | null;
   minSatisfyingVersion(versions: string[], range: string): string | null;
-  getNewValue(
-    currentValue: string,
-    rangeStrategy: RangeStrategy,
-    fromVersion: string,
-    toVersion: string
-  ): string;
+  getNewValue(newValueConfig: NewValueConfig): string;
   sortVersions(version: string, other: string): number;
 
   matches(version: string, range: string | Range): boolean;

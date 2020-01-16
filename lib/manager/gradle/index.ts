@@ -18,6 +18,10 @@ import {
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
+import {
+  BINARY_SOURCE_DOCKER,
+  DATASOURCE_MAVEN,
+} from '../../constants/data-binary-source';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -41,7 +45,7 @@ async function getGradleCommandLine(
   const gradlewExists = await exists(gradlewPath);
   const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
 
-  if (config.binarySource === 'docker') {
+  if (config.binarySource === BINARY_SOURCE_DOCKER) {
     cmd = `docker run --rm `;
     // istanbul ignore if
     if (config.dockerUser) {
@@ -142,7 +146,7 @@ export async function extractAllPackageFiles(
       gradleFiles.push({
         packageFile,
         manager: 'gradle',
-        datasource: 'maven',
+        datasource: DATASOURCE_MAVEN,
         deps: dependencies,
       });
 

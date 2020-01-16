@@ -3,6 +3,10 @@ import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
+import {
+  DATASOURCE_GIT_TAGS,
+  DATASOURCE_PACKAGIST,
+} from '../../constants/data-binary-source';
 
 interface Repo {
   name?: string;
@@ -124,7 +128,7 @@ export async function extractPackageFile(
         ] as Record<string, string>)) {
           const currentValue = version.trim();
           // Default datasource and lookupName
-          let datasource = 'packagist';
+          let datasource = DATASOURCE_PACKAGIST;
           let lookupName = depName;
 
           // Check custom repositories by type
@@ -133,7 +137,7 @@ export async function extractPackageFile(
             switch (repositories[depName].type) {
               case 'vcs':
               case 'git':
-                datasource = 'gitTags';
+                datasource = DATASOURCE_GIT_TAGS;
                 lookupName = repositories[depName].url;
                 break;
             }

@@ -1,6 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { RangeStrategy, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../common';
 
 const { is: isStable } = stable;
 
@@ -23,12 +23,7 @@ export const isVersion = (input: string): string => valid(input);
 
 export { isVersion as isValid, maxSatisfyingVersion };
 
-function getNewValue(
-  _currentValue: string,
-  _rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({ toVersion }: NewValueConfig): string {
   return toVersion;
 }
 

@@ -49,13 +49,11 @@ export function getRollbackUpdate(
     logger.info('No toVersion to roll back to');
     return null;
   }
-  let fromVersion: string;
-  const newValue = version.getNewValue(
+  const newValue = version.getNewValue({
     currentValue,
-    'replace',
-    fromVersion,
-    toVersion
-  );
+    rangeStrategy: 'replace',
+    toVersion,
+  });
   return {
     updateType: 'rollback',
     branchName:
