@@ -1,6 +1,13 @@
 import { applyPackageRules, Config } from '../../lib/util/package-rules';
 import { UpdateType } from '../../lib/config';
 import {
+  MANAGER_DOCKERFILE,
+  MANAGER_METEOR,
+  MANAGER_NPM,
+  MANAGER_PIPENV,
+} from '../../lib/constants/managers';
+
+import {
   DATASOURCE_DOCKER,
   DATASOURCE_ORB,
 } from '../../lib/constants/data-binary-source';
@@ -180,7 +187,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          managers: ['npm', 'meteor'],
+          managers: [MANAGER_NPM, MANAGER_METEOR],
           packageNames: ['node'],
           x: 1,
         },
@@ -189,7 +196,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       language: 'js',
-      manager: 'meteor',
+      manager: MANAGER_METEOR,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -199,7 +206,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          managers: ['dockerfile', 'npm'],
+          managers: [MANAGER_DOCKERFILE, MANAGER_NPM],
           packageNames: ['node'],
           x: 1,
         },
@@ -208,7 +215,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       language: 'python',
-      manager: 'pipenv',
+      manager: MANAGER_PIPENV,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -227,7 +234,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       language: 'js',
-      manager: 'meteor',
+      manager: MANAGER_METEOR,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -246,7 +253,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       language: 'python',
-      manager: 'pipenv',
+      manager: MANAGER_PIPENV,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
