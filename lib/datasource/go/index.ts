@@ -29,9 +29,11 @@ async function getDatasource(name: string): Promise<DataSource | null> {
   }
   const pkgUrl = `https://${name}?go-get=1`;
   try {
-    const res = (await got(pkgUrl, {
-      hostType: HOST_TYPE_GO,
-    })).body;
+    const res = (
+      await got(pkgUrl, {
+        hostType: HOST_TYPE_GO,
+      })
+    ).body;
     const sourceMatch = res.match(
       regEx(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
     );
