@@ -3,6 +3,11 @@ import * as _npm from '../../../lib/manager/npm';
 import * as _gitSubmodules from '../../../lib/manager/git-submodules';
 import { getUpdatedPackageFiles } from '../../../lib/workers/branch/get-updated';
 import { mocked, defaultConfig, platform } from '../../util';
+import {
+  MANAGER_COMPOSER,
+  MANAGER_GIT_SUB_MODULES,
+  MANAGER_NPM,
+} from '../../../lib/constants/managers';
 
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
@@ -30,14 +35,14 @@ describe('workers/branch/get-updated', () => {
     it('handles null content', async () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({
-        manager: 'npm',
+        manager: MANAGER_NPM,
       });
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles content change', async () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({
-        manager: 'npm',
+        manager: MANAGER_NPM,
       });
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
@@ -46,7 +51,7 @@ describe('workers/branch/get-updated', () => {
     it('handles lock files', async () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({
-        manager: 'composer',
+        manager: MANAGER_COMPOSER,
       });
       composer.updateDependency.mockReturnValue('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
@@ -63,7 +68,7 @@ describe('workers/branch/get-updated', () => {
     it('handles lockFileMaintenance', async () => {
       // config.parentBranch = 'some-branch';
       config.upgrades.push({
-        manager: 'composer',
+        manager: MANAGER_COMPOSER,
         updateType: 'lockFileMaintenance',
       });
       composer.updateArtifacts.mockResolvedValueOnce([
@@ -80,7 +85,7 @@ describe('workers/branch/get-updated', () => {
     it('handles lockFileMaintenance error', async () => {
       // config.parentBranch = 'some-branch';
       config.upgrades.push({
-        manager: 'composer',
+        manager: MANAGER_COMPOSER,
         updateType: 'lockFileMaintenance',
       });
       composer.updateArtifacts.mockResolvedValueOnce([
@@ -97,7 +102,7 @@ describe('workers/branch/get-updated', () => {
     it('handles lock file errors', async () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({
-        manager: 'composer',
+        manager: MANAGER_COMPOSER,
       });
       composer.updateDependency.mockReturnValue('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
@@ -113,7 +118,7 @@ describe('workers/branch/get-updated', () => {
     });
     it('handles git submodules', async () => {
       config.upgrades.push({
-        manager: 'git-submodules',
+        manager: MANAGER_GIT_SUB_MODULES,
         datasource: 'gitSubmodules',
       });
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');

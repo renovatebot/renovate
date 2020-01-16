@@ -11,6 +11,7 @@ import * as _docker from '../../../../../lib/datasource/docker';
 import * as _gitSubmodules from '../../../../../lib/datasource/git-submodules';
 import { mocked, getConfig } from '../../../../util';
 import { CONFIG_VALIDATION } from '../../../../../lib/constants/error-messages';
+import { MANAGER_PIP_REQUIREMENTS } from '../../../../../lib/constants/managers';
 
 jest.mock('../../../../../lib/datasource/docker');
 jest.mock('../../../../../lib/datasource/git-submodules');
@@ -1013,7 +1014,7 @@ describe('workers/repository/process/lookup', () => {
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('handles PEP440', async () => {
-      config.manager = 'pip_requirements';
+      config.manager = MANAGER_PIP_REQUIREMENTS;
       config.versionScheme = 'pep440';
       config.rangeStrategy = 'pin';
       config.lockedVersion = '0.9.4';
