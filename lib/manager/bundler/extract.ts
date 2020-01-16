@@ -4,7 +4,7 @@ import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
-import { DATASOURCE_RUBY_GEMS } from '../../constants/data-binary-source';
+import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
 
 export async function extractPackageFile(
   content: string,
@@ -64,7 +64,7 @@ export async function extractPackageFile(
         dep.skipReason = 'no-version';
       }
       if (!dep.skipReason) {
-        dep.datasource = DATASOURCE_RUBY_GEMS;
+        dep.datasource = DATASOURCE_RUBYGEMS;
       }
       res.deps.push(dep);
     }
