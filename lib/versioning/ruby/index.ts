@@ -71,7 +71,6 @@ const getNewValue = ({
   rangeStrategy,
   fromVersion,
   toVersion,
-  fromVersion,
 }: NewValueConfig): string => {
   let result = null;
   if (isVersion(currentValue)) {
