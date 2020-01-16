@@ -12,7 +12,7 @@ import {
   qualifierType,
   QualifierTypes,
 } from './compare';
-import { RangeStrategy, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../common';
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
@@ -114,12 +114,11 @@ const maxSatisfyingVersion = (versions: string[], range: string): string => {
   }, null);
 };
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string | null {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  toVersion,
+}: NewValueConfig): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return toVersion;
   }

@@ -1,4 +1,5 @@
 import swift from '../../lib/versioning/swift';
+import { RangeStrategy } from '../../lib/versioning';
 
 const {
   getNewValue,
@@ -79,13 +80,13 @@ describe('getNewValue()', () => {
       ['"1.2.3"..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '"1.2.3"..<"1.2.5"'],
       ['..."1.2.4"', 'auto', '1.2.3', '1.2.5', '..."1.2.5"'],
       ['..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '..<"1.2.5"'],
-    ].forEach(([range, strategy, fromVersion, toVersion, result]) => {
-      const newValue = getNewValue(
-        range,
-        strategy as any,
+    ].forEach(([range, rangeStrategy, fromVersion, toVersion, result]) => {
+      const newValue = getNewValue({
+        currentValue: range,
+        rangeStrategy: rangeStrategy as RangeStrategy,
         fromVersion,
-        toVersion
-      );
+        toVersion,
+      });
       expect(newValue).toEqual(result);
     });
   });

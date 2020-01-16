@@ -1,5 +1,6 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageDependency, PackageFile } from '../common';
+import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 
 export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
 
@@ -45,7 +46,7 @@ export function extractFromVectors(
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
-        datasource: 'maven',
+        datasource: DATASOURCE_MAVEN,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
         fileReplacePosition,
