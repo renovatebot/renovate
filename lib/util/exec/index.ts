@@ -68,7 +68,6 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const startTime = hrtime();
   const { env, extraEnv, docker } = opts;
   const cwd = opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
@@ -100,17 +99,16 @@ export async function exec(
 
   let res: ExecResult | null = null;
   for (const pExecCommand of commands) {
+    const startTime = hrtime();
     res = await pExec(pExecCommand, pExecOptions);
-  }
-
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
-
-  if (res) {
-    logger.debug(
-      { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
-      'exec completed'
-    );
+    const duration = hrtime(startTime);
+    const seconds = Math.round(duration[0] + duration[1] / 1e9);
+    if (res) {
+      logger.debug(
+        { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
+        'exec completed'
+      );
+    }
   }
 
   return res;
