@@ -26,6 +26,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { HOST_TYPE_BITBUCKET } from '../../constants/host-types';
 
 let config: utils.Config = {} as any;
 
@@ -78,7 +79,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: 'bitbucket',
+    hostType: HOST_TYPE_BITBUCKET,
     url: 'https://api.bitbucket.org/',
   });
   config = {

@@ -11,6 +11,7 @@ import {
   BINARY_SOURCE_DOCKER,
   BINARY_SOURCE_GLOBAL,
 } from '../../constants/data-binary-source';
+import { HOST_TYPE_GITHUB } from '../../constants/host-types';
 
 export async function updateArtifacts(
   goModFileName: string,
@@ -57,7 +58,7 @@ export async function updateArtifacts(
       cmd += `-w "${cwd}" `;
       cmd += `renovate/go `;
       const credentials = find({
-        hostType: 'github',
+        hostType: HOST_TYPE_GITHUB,
         url: 'https://api.github.com/',
       });
       if (credentials && credentials.token) {

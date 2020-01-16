@@ -33,6 +33,7 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { HOST_TYPE_GITLAB } from '../../constants/host-types';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -49,7 +50,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: 'gitlab',
+  hostType: HOST_TYPE_GITLAB,
   endpoint: 'https://gitlab.com/api/v4/',
 };
 

@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { HOST_TYPE_TERRAFORM } from '../../constants/host-types';
 
 interface TerraformProvider {
   namespace: string;
@@ -35,7 +36,7 @@ export async function getPkgReleases({
   try {
     const res: TerraformProvider = (await got(pkgUrl, {
       json: true,
-      hostType: 'terraform',
+      hostType: HOST_TYPE_TERRAFORM,
     })).body;
     // Simplify response before caching and returning
     const dep: ReleaseResult = {

@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { ReleaseResult } from './common';
 import * as hostRules from '../util/host-rules';
+import { HOST_TYPE_GITHUB } from '../constants/host-types';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
@@ -110,7 +111,7 @@ export function addMetaData(
   }
   const extraBaseUrls = [];
   // istanbul ignore next
-  hostRules.hosts({ hostType: 'github' }).forEach(host => {
+  hostRules.hosts({ hostType: HOST_TYPE_GITHUB }).forEach(host => {
     extraBaseUrls.push(host, `gist.${host}`);
   });
   if (dep.sourceUrl) {

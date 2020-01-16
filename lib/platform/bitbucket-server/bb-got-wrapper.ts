@@ -2,6 +2,7 @@ import URL from 'url';
 import { GotJSONOptions } from 'got';
 import got from '../../util/got';
 import { GotApi, GotApiOptions, GotResponse } from '../common';
+import { HOST_TYPE_BITBUCKET_SERVER } from '../../constants/host-types';
 
 let baseUrl: string;
 
@@ -11,7 +12,7 @@ function get(
 ): Promise<GotResponse> {
   const url = URL.resolve(baseUrl, path);
   const opts: GotApiOptions & GotJSONOptions = {
-    hostType: 'bitbucket-server',
+    hostType: HOST_TYPE_BITBUCKET_SERVER,
     json: true,
     ...options,
   };

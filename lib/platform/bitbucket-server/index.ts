@@ -26,6 +26,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { HOST_TYPE_BITBUCKET_SERVER } from '../../constants/host-types';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -57,7 +58,7 @@ interface BbsConfig {
 let config: BbsConfig = {} as any;
 
 const defaults: any = {
-  hostType: 'bitbucket-server',
+  hostType: HOST_TYPE_BITBUCKET_SERVER,
 };
 
 /* istanbul ignore next */

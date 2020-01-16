@@ -2,6 +2,7 @@ import url from 'url';
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { HOST_TYPE_MAVEN } from '../../constants/host-types';
 
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
   return (
@@ -35,7 +36,7 @@ function isConnectionError(err: { code: string }): boolean {
 
 export async function downloadHttpProtocol(
   pkgUrl: url.URL | string,
-  hostType = 'maven'
+  hostType = HOST_TYPE_MAVEN
 ): Promise<string | null> {
   let raw: { body: string };
   try {

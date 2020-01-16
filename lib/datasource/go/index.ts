@@ -4,6 +4,7 @@ import * as github from '../github';
 import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
 import { regEx } from '../../util/regex';
 import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
+import { HOST_TYPE_GO } from '../../constants/host-types';
 
 interface DataSource {
   datasource: string;
@@ -29,7 +30,7 @@ async function getDatasource(name: string): Promise<DataSource | null> {
   const pkgUrl = `https://${name}?go-get=1`;
   try {
     const res = (await got(pkgUrl, {
-      hostType: 'go',
+      hostType: HOST_TYPE_GO,
     })).body;
     const sourceMatch = res.match(
       regEx(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)

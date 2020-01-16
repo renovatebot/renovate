@@ -23,6 +23,7 @@ import {
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import { HOST_TYPE_AZURE } from '../../constants/host-types';
 
 interface Config {
   storage: GitStorage;
@@ -43,7 +44,7 @@ interface Config {
 let config: Config = {} as any;
 
 const defaults: any = {
-  hostType: 'azure',
+  hostType: HOST_TYPE_AZURE,
 };
 
 export function initPlatform({
