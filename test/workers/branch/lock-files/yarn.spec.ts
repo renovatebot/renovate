@@ -23,10 +23,7 @@ const yarnHelper = mocked(_yarnHelper);
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map(snapshot => ({
     ...snapshot,
-    cmd: snapshot.cmd.replace(
-      /^bash -l -c ".*\/yarn.*?\.js\s+/,
-      'bash -l -c "<yarn> '
-    ),
+    cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
 describe('generateLockFile', () => {

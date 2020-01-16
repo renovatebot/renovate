@@ -45,7 +45,7 @@ Array [
     },
   },
   Object {
-    "cmd": "python \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"/tmp/folders/foobar.py\\"",
+    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -363,7 +363,7 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"test/manager/pip_setup/_fixtures/setup.py\\"",
+    "cmd": "<extract.py> \\"test/manager/pip_setup/_fixtures/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -425,7 +425,7 @@ Array [
     },
   },
   Object {
-    "cmd": "python3 \\"/root/project/lib/manager/pip_setup/extract.py\\" \\"/tmp/folders/foobar.py\\"",
+    "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
