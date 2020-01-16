@@ -7,6 +7,7 @@ import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
+import { find } from '../../util/host-rules';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
@@ -74,6 +75,7 @@ export async function getDependency(
   if (cachedResult) {
     return cachedResult;
   }
+
   const authInfo = registryAuthToken(regUrl, { npmrc });
   const headers: OutgoingHttpHeaders = {};
 
@@ -86,10 +88,26 @@ export async function getDependency(
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: name },
-      'Using auth for npm lookup'
+      'Using auth (via npmrc) for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
+    logger.trace(
+      { token: maskToken(process.env.NPM_TOKEN), npmName: name },
+      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
+    );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
+  } else {
+    const opts = find({
+      hostType: 'npm',
+      url: regUrl,
+    });
+    if (opts.token) {
+      logger.trace(
+        { token: maskToken(opts.token), npmName: name },
+        'Using auth (via hostRules) for npm lookup'
+      );
+      headers.authorization = `Bearer ${opts.token}`;
+    }
   }
 
   if (
