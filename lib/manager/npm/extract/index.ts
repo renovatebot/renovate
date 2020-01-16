@@ -267,9 +267,9 @@ export async function extractPackageFile(
   for (const depType of Object.keys(depTypes)) {
     if (packageJson[depType]) {
       try {
-        for (const [depName, val] of Object.entries(packageJson[
-          depType
-        ] as Record<string, any>)) {
+        for (const [depName, val] of Object.entries(
+          packageJson[depType] as Record<string, any>
+        )) {
           const dep: PackageDependency = {
             depType,
             depName,

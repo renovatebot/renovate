@@ -188,9 +188,11 @@ export async function getPkgReleases({
         tag_name: string;
       }[];
 
-      versions = (await ghGot<GitHubRelease>(url, {
-        paginate: true,
-      })).body.map(o => o.tag_name);
+      versions = (
+        await ghGot<GitHubRelease>(url, {
+          paginate: true,
+        })
+      ).body.map(o => o.tag_name);
     } else {
       // tag
       const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
@@ -198,9 +200,11 @@ export async function getPkgReleases({
         name: string;
       }[];
 
-      versions = (await ghGot<GitHubTag>(url, {
-        paginate: true,
-      })).body.map(o => o.name);
+      versions = (
+        await ghGot<GitHubTag>(url, {
+          paginate: true,
+        })
+      ).body.map(o => o.name);
     }
   } catch (err) {
     logger.info({ repo, err }, 'Error retrieving from github');
