@@ -97,13 +97,13 @@ export function getPackageUpdates(
 
 export function extractPackageFile(
   manager: string,
-  content: string,
+  fileContent: string,
   fileName?: string,
   config?: ExtractConfig
 ): Result<PackageFile | null> {
   return managers[manager] && managers[manager].extractPackageFile
     ? managers[manager].extractPackageFile({
-        fileContent: content,
+        fileContent,
         fileName,
         config,
       })
