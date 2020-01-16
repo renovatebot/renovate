@@ -62,9 +62,9 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 }
 
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
-  const hashes = (await Promise.all(
-    urls.map(url => getHashFromUrl(url))
-  )).filter(Boolean);
+  const hashes = (
+    await Promise.all(urls.map(url => getHashFromUrl(url)))
+  ).filter(Boolean);
   const distinctHashes = [...new Set(hashes)];
   if (!distinctHashes.length) {
     logger.debug({ hashes, urls }, 'Could not calculate hash for URLs');

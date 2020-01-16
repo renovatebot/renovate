@@ -175,9 +175,11 @@ export async function initRepo({
       try {
         renovateConfig = JSON.parse(
           Buffer.from(
-            (await api.get(
-              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
-            )).body.content,
+            (
+              await api.get(
+                `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+              )
+            ).body.content,
             'base64'
           ).toString()
         );
@@ -450,9 +452,11 @@ export async function getPrFiles(mrNo: number): Promise<string[]> {
   if (!mrNo) {
     return [];
   }
-  const files = (await api.get(
-    `projects/${config.repository}/merge_requests/${mrNo}/changes`
-  )).body.changes;
+  const files = (
+    await api.get(
+      `projects/${config.repository}/merge_requests/${mrNo}/changes`
+    )
+  ).body.changes;
   return files.map((f: { new_path: string }) => f.new_path);
 }
 
@@ -686,9 +690,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    const issueBody = (await api.get(
-      `projects/${config.repository}/issues/${issue.iid}`
-    )).body.description;
+    const issueBody = (
+      await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+    ).body.description;
     return {
       number: issue.iid,
       body: issueBody,
@@ -709,9 +713,9 @@ export async function ensureIssue({
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
     if (issue) {
-      const existingDescription = (await api.get(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )).body.description;
+      const existingDescription = (
+        await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+      ).body.description;
       if (existingDescription !== description) {
         logger.debug('Updating issue body');
         await api.put(`projects/${config.repository}/issues/${issue.iid}`, {

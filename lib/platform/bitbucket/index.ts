@@ -100,9 +100,11 @@ export async function initRepo({
 
       let renovateConfig: RenovateConfig;
       try {
-        renovateConfig = (await api.get<RenovateConfig>(
-          `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
-        )).body;
+        renovateConfig = (
+          await api.get<RenovateConfig>(
+            `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
+          )
+        ).body;
       } catch {
         // Do nothing
       }
@@ -292,19 +294,21 @@ export function getCommitMessages(): Promise<string[]> {
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
-  const diff = (await api.get(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-    { json: false } as any
-  )).body;
+  const diff = (
+    await api.get(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
+      { json: false } as any
+    )
+  ).body;
 
   return utils.isConflicted(parseDiff(diff));
 }
 
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
-  const pr = (await api.get(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
-  )).body;
+  const pr = (
+    await api.get(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`)
+  ).body;
 
   // istanbul ignore if
   if (!pr) {
@@ -362,11 +366,13 @@ const escapeHash = (input: string): string =>
 // Return the commit SHA for a branch
 async function getBranchCommit(branchName: string): Promise<string | null> {
   try {
-    const branch = (await api.get(
-      `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
-        branchName
-      )}`
-    )).body;
+    const branch = (
+      await api.get(
+        `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
+          branchName
+        )}`
+      )
+    ).body;
     return branch.target.hash;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
@@ -483,9 +489,11 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
       ].join(' AND ')
     );
     return (
-      (await api.get(
-        `/2.0/repositories/${config.repository}/issues?q=${filter}`
-      )).body.values || /* istanbul ignore next */ []
+      (
+        await api.get(
+          `/2.0/repositories/${config.repository}/issues?q=${filter}`
+        )
+      ).body.values || /* istanbul ignore next */ []
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error finding issues');
@@ -606,9 +614,11 @@ export /* istanbul ignore next */ async function getIssueList(): Promise<
       ].join(' AND ')
     );
     return (
-      (await api.get(
-        `/2.0/repositories/${config.repository}/issues?q=${filter}`
-      )).body.values || /* istanbul ignore next */ []
+      (
+        await api.get(
+          `/2.0/repositories/${config.repository}/issues?q=${filter}`
+        )
+      ).body.values || /* istanbul ignore next */ []
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error finding issues');
@@ -699,9 +709,11 @@ export async function createPr({
   let reviewers = [];
 
   if (config.bbUseDefaultReviewers) {
-    const reviewersResponse = (await api.get<utils.PagedResult<Reviewer>>(
-      `/2.0/repositories/${config.repository}/default-reviewers`
-    )).body;
+    const reviewersResponse = (
+      await api.get<utils.PagedResult<Reviewer>>(
+        `/2.0/repositories/${config.repository}/default-reviewers`
+      )
+    ).body;
     reviewers = reviewersResponse.values.map((reviewer: Reviewer) => ({
       uuid: reviewer.uuid,
     }));
@@ -724,10 +736,11 @@ export async function createPr({
     reviewers,
   };
 
-  const prInfo = (await api.post(
-    `/2.0/repositories/${config.repository}/pullrequests`,
-    { body }
-  )).body;
+  const prInfo = (
+    await api.post(`/2.0/repositories/${config.repository}/pullrequests`, {
+      body,
+    })
+  ).body;
   // TODO: fix types
   const pr: Pr = {
     number: prInfo.id,
@@ -752,10 +765,12 @@ interface Commit {
 // Return a list of all modified files in a PR
 export async function getPrFiles(prNo: number): Promise<string[]> {
   logger.debug({ prNo }, 'getPrFiles');
-  const diff = (await api.get(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-    { json: false } as any
-  )).body;
+  const diff = (
+    await api.get(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
+      { json: false } as any
+    )
+  ).body;
   const files = parseDiff(diff).map(file => file.to);
   return files;
 }

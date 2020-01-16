@@ -223,10 +223,12 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  const res = (await got(pkgUrl, {
-    json: true,
-    retry: 5,
-  })).body.packages[name];
+  const res = (
+    await got(pkgUrl, {
+      json: true,
+      retry: 5,
+    })
+  ).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
     dep.name = name;
