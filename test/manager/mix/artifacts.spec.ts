@@ -5,6 +5,7 @@ import { updateArtifacts } from '../../../lib/manager/mix';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -58,7 +59,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts('mix.exs', ['plug'], '{}', {
         ...config,
-        binarySource: 'docker',
+        binarySource: BINARY_SOURCE_DOCKER,
       })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();

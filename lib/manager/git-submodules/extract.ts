@@ -3,6 +3,7 @@ import upath from 'upath';
 import URL from 'url';
 
 import { ManagerConfig, PackageFile } from '../common';
+import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
 
 async function getUrl(
   git: Git.SimpleGit,
@@ -83,5 +84,5 @@ export default async function extractPackageFile(
     })
   );
 
-  return { deps, datasource: 'gitSubmodules' };
+  return { deps, datasource: DATASOURCE_GIT_SUBMODULES };
 }

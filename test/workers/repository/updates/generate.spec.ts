@@ -1,5 +1,6 @@
 import { defaultConfig } from '../../../util';
 import { generateBranchConfig } from '../../../../lib/workers/repository/updates/generate';
+import { DATASOURCE_NPM } from '../../../../lib/constants/data-binary-source';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -439,7 +440,7 @@ describe('workers/repository/updates/generate', () => {
       const branch = [
         {
           commitBodyTable: true,
-          datasource: 'npm',
+          datasource: DATASOURCE_NPM,
           depName: '@types/some-dep',
           groupName: null,
           branchName: 'some-branch',
@@ -452,7 +453,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           commitBodyTable: true,
-          datasource: 'npm',
+          datasource: DATASOURCE_NPM,
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
