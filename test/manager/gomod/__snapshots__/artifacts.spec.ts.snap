@@ -18,7 +18,7 @@ exports[`.updateArtifacts() returns if no go.sum found 1`] = `Array []`;
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"go get -d ./...\\"",
+    "cmd": "go get -d ./...",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -38,7 +38,7 @@ Array [
 exports[`.updateArtifacts() returns updated go.sum 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"go get -d ./...\\"",
+    "cmd": "go get -d ./...",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -133,7 +133,7 @@ Array [
 exports[`.updateArtifacts() supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"go get -d ./...\\"",
+    "cmd": "go get -d ./...",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

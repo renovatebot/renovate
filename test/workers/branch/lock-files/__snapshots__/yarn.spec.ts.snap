@@ -3,7 +3,7 @@
 exports[`generateLockFile catches errors 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -22,7 +22,7 @@ Array [
 exports[`generateLockFile detects yarnIntegrity 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "node node_modules/yarn/bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -36,7 +36,7 @@ Array [
     },
   },
   Object {
-    "cmd": "bash -l -c \\"<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "node node_modules/yarn/bin/yarn.js upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -55,7 +55,7 @@ Array [
 exports[`generateLockFile finds yarn embedded in renovate 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "node /node_modules/renovate/node_modules/yarn/bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -74,7 +74,7 @@ Array [
 exports[`generateLockFile finds yarn globally 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "node /node_modules/yarn/bin/yarn.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -93,7 +93,7 @@ Array [
 exports[`generateLockFile generates lock files 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -107,7 +107,7 @@ Array [
     },
   },
   Object {
-    "cmd": "bash -l -c \\"npx yarn-deduplicate@1.1.1 --strategy fewer && yarn\\"",
+    "cmd": "npx yarn-deduplicate@1.1.1 --strategy fewer && yarn",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -121,7 +121,7 @@ Array [
     },
   },
   Object {
-    "cmd": "bash -l -c \\"npx yarn-deduplicate@1.1.1 --strategy highest && yarn\\"",
+    "cmd": "npx yarn-deduplicate@1.1.1 --strategy highest && yarn",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -140,7 +140,7 @@ Array [
 exports[`generateLockFile performs lock file updates 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext\\"",
+    "cmd": "node bin/yarn-1.9.4.js install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -154,7 +154,7 @@ Array [
     },
   },
   Object {
-    "cmd": "bash -l -c \\"<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext\\"",
+    "cmd": "node bin/yarn-1.9.4.js upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -173,7 +173,7 @@ Array [
 exports[`generateLockFile uses fallback yarn 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879\\"",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
