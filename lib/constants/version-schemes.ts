@@ -1,7 +1,7 @@
 export const VERSION_SCHEME_SEMVER = 'semver';
 export const VERSION_SCHEME_NPM = 'npm';
 export const VERSION_SCHEME_NODE = 'node';
-export const VERSION_SCHEME_HSCORP = 'hashicorp';
+export const VERSION_SCHEME_HASHICORP = 'hashicorp';
 export const VERSION_SCHEME_COMPOSER = 'composer';
 export const VERSION_SCHEME_GIT = 'git';
 export const VERSION_SCHEME_POETRY = 'poetry';
