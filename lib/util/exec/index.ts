@@ -99,7 +99,7 @@ export async function exec(
   }
 
   let res: ExecResult | null = null;
-  for (let pExecCommand of commands) {
+  for (const pExecCommand of commands) {
     res = await pExec(pExecCommand, pExecOptions);
   }
 

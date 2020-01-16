@@ -278,8 +278,8 @@ describe(`Child process execution wrapper`, () => {
     if (trustLevel) global.trustLevel = trustLevel;
     if (dockerUser) setDockerConfig({ cacheDir, localDir: cwd, dockerUser });
 
-    let actualCmd: string[] = [];
-    let actualOpts: ChildProcessExecOptions[] = [];
+    const actualCmd: string[] = [];
+    const actualOpts: ChildProcessExecOptions[] = [];
     cpExec.mockImplementation((execCmd, execOpts, callback) => {
       actualCmd.push(execCmd);
       actualOpts.push(execOpts);
