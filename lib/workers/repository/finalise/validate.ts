@@ -5,6 +5,10 @@ import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../constants/branch-constants';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
@@ -98,11 +102,11 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
           topic,
           content,
         });
-        status = 'failure';
+        status = BRANCH_STATUS_FAILURE;
         description = `Renovate config validation failed`; // GitHub limit
       } else {
         description = `Renovate config is valid`;
-        status = 'success';
+        status = BRANCH_STATUS_SUCCESS;
         await platform.ensureCommentRemoval(pr.number, topic);
       }
       // istanbul ignore else

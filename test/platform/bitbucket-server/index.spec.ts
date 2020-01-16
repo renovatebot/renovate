@@ -6,6 +6,12 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../../lib/constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../lib/constants/branch-constants';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
@@ -783,11 +789,11 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
-          ).resolves.toEqual('success');
+          ).resolves.toEqual(BRANCH_STATUS_SUCCESS);
 
           await expect(
             bitbucket.getBranchStatus('somebranch')
-          ).resolves.toEqual('success');
+          ).resolves.toEqual(BRANCH_STATUS_SUCCESS);
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -805,7 +811,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
-          ).resolves.toEqual('pending');
+          ).resolves.toEqual(BRANCH_STATUS_PENDING);
 
           api.get.mockReturnValueOnce({
             body: {
@@ -817,7 +823,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
-          ).resolves.toEqual('pending');
+          ).resolves.toEqual(BRANCH_STATUS_PENDING);
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -836,7 +842,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
-          ).resolves.toEqual('failed');
+          ).resolves.toEqual(BRANCH_STATUS_FAILED);
 
           api.get.mockImplementationOnce(() => {
             throw new Error('requst-failed');
@@ -844,7 +850,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
-          ).resolves.toEqual('failed');
+          ).resolves.toEqual(BRANCH_STATUS_FAILED);
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -885,7 +891,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
-          ).resolves.toEqual('success');
+          ).resolves.toEqual(BRANCH_STATUS_SUCCESS);
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -908,7 +914,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
-          ).resolves.toEqual('pending');
+          ).resolves.toEqual(BRANCH_STATUS_PENDING);
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -931,7 +937,7 @@ Followed by some information.
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
-          ).resolves.toEqual('failure');
+          ).resolves.toEqual(BRANCH_STATUS_FAILURE);
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -972,28 +978,28 @@ Followed by some information.
             branchName: 'somebranch',
             context: 'context-2',
             description: null as any,
-            state: 'success',
+            state: BRANCH_STATUS_SUCCESS,
           });
 
           await bitbucket.setBranchStatus({
             branchName: 'somebranch',
             context: 'context-2',
             description: null as any,
-            state: 'failed',
+            state: BRANCH_STATUS_FAILED,
           });
 
           await bitbucket.setBranchStatus({
             branchName: 'somebranch',
             context: 'context-2',
             description: null as any,
-            state: 'failure',
+            state: BRANCH_STATUS_FAILURE,
           });
 
           await bitbucket.setBranchStatus({
             branchName: 'somebranch',
             context: 'context-2',
             description: null as any,
-            state: 'pending',
+            state: BRANCH_STATUS_PENDING,
           });
 
           api.post.mockImplementationOnce(() => {
@@ -1004,14 +1010,14 @@ Followed by some information.
             branchName: 'somebranch',
             context: 'context-2',
             description: null as any,
-            state: 'success',
+            state: BRANCH_STATUS_SUCCESS,
           });
 
           await bitbucket.setBranchStatus({
             branchName: 'somebranch',
             context: 'context-1',
             description: null as any,
-            state: 'success',
+            state: BRANCH_STATUS_SUCCESS,
           });
 
           expect(api.get.mock.calls).toMatchSnapshot();

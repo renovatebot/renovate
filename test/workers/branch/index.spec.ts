@@ -14,6 +14,7 @@ import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
 } from '../../../lib/constants/error-messages';
+import { BRANCH_STATUS_PENDING } from '../../../lib/constants/branch-constants';
 
 jest.mock('../../../lib/workers/branch/get-updated');
 jest.mock('../../../lib/workers/branch/schedule');
@@ -81,7 +82,7 @@ describe('workers/branch', () => {
       config.prCreation = 'not-pending';
       platform.branchExists.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual('pending');
+      expect(res).toEqual(BRANCH_STATUS_PENDING);
     });
     it('skips branch if not stabilityDays not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
@@ -93,7 +94,7 @@ describe('workers/branch', () => {
         } as never,
       ];
       const res = await branchWorker.processBranch(config);
-      expect(res).toEqual('pending');
+      expect(res).toEqual(BRANCH_STATUS_PENDING);
     });
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -272,7 +273,9 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce('pending');
-      expect(await branchWorker.processBranch(config)).toEqual('pending');
+      expect(await branchWorker.processBranch(config)).toEqual(
+        BRANCH_STATUS_PENDING
+      );
     });
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({

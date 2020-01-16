@@ -1,6 +1,7 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
 import { PrBodyConfig } from './common';
+import { BRANCH_STATUS_FAILED } from '../../../constants/branch-constants';
 
 export async function getPrConfigDescription(
   config: PrBodyConfig
@@ -30,7 +31,7 @@ export async function getPrConfigDescription(
       config.requiredStatusChecks
     );
     // istanbul ignore if
-    if (branchStatus === 'failed') {
+    if (branchStatus === BRANCH_STATUS_FAILED) {
       prBody += 'Disabled due to failing status checks.';
     } else {
       prBody += 'Enabled.';

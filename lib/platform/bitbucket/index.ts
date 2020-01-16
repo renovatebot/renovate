@@ -26,6 +26,11 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 let config: utils.Config = {} as any;
 
@@ -400,32 +405,32 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return 'pending';
+    return BRANCH_STATUS_PENDING;
   }
   const noOfFailures = statuses.filter(
     (status: { state: string }) => status.state === 'FAILED'
   ).length;
   if (noOfFailures) {
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return 'pending';
+    return BRANCH_STATUS_PENDING;
   }
-  return 'success';
+  return BRANCH_STATUS_SUCCESS;
 }
 
 export async function getBranchStatusCheck(

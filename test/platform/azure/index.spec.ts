@@ -2,6 +2,11 @@ import is from '@sindresorhus/is';
 import * as _hostRules from '../../../lib/util/host-rules';
 import { RepoParams } from '../../../lib/platform/common';
 import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../lib/constants/branch-constants';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -410,12 +415,12 @@ describe('platform/azure', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', null);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -426,7 +431,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('should pass through failed', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -437,7 +442,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
-      expect(res).toEqual('pending');
+      expect(res).toEqual(BRANCH_STATUS_PENDING);
     });
   });
 
