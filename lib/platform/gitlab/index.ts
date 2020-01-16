@@ -229,7 +229,7 @@ export async function initRepo({
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if (['archived', 'empty'].includes(err.message)) {
+    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
       throw err;
     }
     if (err.statusCode === 403) {

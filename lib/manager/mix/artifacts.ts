@@ -1,6 +1,5 @@
 import upath from 'upath';
 import fs from 'fs-extra';
-import { hrtime } from 'process';
 import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
@@ -59,13 +58,10 @@ export async function updateArtifacts(
       : ['mix'];
   cmdParts.push('deps.update');
 
-  const startTime = hrtime();
   /* istanbul ignore next */
   try {
     const command = [...cmdParts, ...updatedDeps].join(' ');
-    const { stdout, stderr } = await exec(command, { cwd });
-    logger.debug(stdout);
-    if (stderr) logger.warn('error: ' + stderr);
+    await exec(command, { cwd });
   } catch (err) {
     logger.warn(
       { err, message: err.message },
@@ -82,18 +78,13 @@ export async function updateArtifacts(
     ];
   }
 
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
-  logger.info({ seconds, type: 'mix.lock' }, 'Updated lockfile');
-  logger.debug('Returning updated mix.lock');
-
   const localLockFileName = upath.join(cwd, lockFileName);
   const newMixLockContent = await fs.readFile(localLockFileName, 'utf8');
   if (existingLockFileContent === newMixLockContent) {
     logger.debug('mix.lock is unchanged');
     return null;
   }
-
+  logger.debug('Returning updated mix.lock');
   return [
     {
       file: {

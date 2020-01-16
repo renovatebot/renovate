@@ -36,14 +36,11 @@ export async function updateArtifacts(
     return null;
   }
   const cwd = join(config.localDir, dirname(packageFileName));
-  let stdout: string;
-  let stderr: string;
   try {
     const localPackageFileName = join(config.localDir, packageFileName);
     await outputFile(localPackageFileName, newPackageFileContent);
     const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv();
-    const startTime = process.hrtime();
     let cmd;
     if (config.binarySource === 'docker') {
       logger.info('Running bundler via docker');
@@ -120,16 +117,10 @@ export async function updateArtifacts(
       cmd += '"';
     }
     logger.debug({ cmd }, 'bundler command');
-    ({ stdout, stderr } = await exec(cmd, {
+    await exec(cmd, {
       cwd,
       env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'Gemfile.lock', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
@@ -144,12 +135,16 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    if (err.stderr && err.stderr.startsWith('fatal: Could not parse object')) {
+    const output = err.stdout + err.stderr;
+    if (
+      err.message.includes('fatal: Could not parse object') ||
+      output.includes('but that version could not be found')
+    ) {
       return [
         {
           artifactError: {
             lockFile: lockFileName,
-            stderr: err.stdout + '\n' + err.stderr,
+            stderr: output,
           },
         },
       ];
@@ -171,7 +166,6 @@ export async function updateArtifacts(
       global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    const output = err.stdout + err.stderr;
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
     if (output.match(resolveMatchRe)) {
       logger.debug({ err }, 'Bundler has a resolve error');
