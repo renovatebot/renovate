@@ -8,6 +8,19 @@ import {
   PackageUpdateResult,
 } from './common';
 import { RangeStrategy } from '../versioning';
+import {
+  LANGUAGE_DART,
+  LANGUAGE_DOCKER,
+  LANGUAGE_DOT_NET,
+  LANGUAGE_ELIXIR,
+  LANGUAGE_GOLANG,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PHP,
+  LANGUAGE_PYTHON,
+  LANGUAGE_RUBY,
+  LANGUAGE_RUST,
+} from '../constants/languages';
 
 const managerList = [
   'ansible',
@@ -56,17 +69,17 @@ for (const manager of managerList) {
 }
 
 const languageList = [
-  'dart',
-  'docker',
-  'dotnet',
-  'elixir',
-  'golang',
-  'js',
-  'node',
-  'php',
-  'python',
-  'ruby',
-  'rust',
+  LANGUAGE_DART,
+  LANGUAGE_DOCKER,
+  LANGUAGE_DOT_NET,
+  LANGUAGE_ELIXIR,
+  LANGUAGE_GOLANG,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PHP,
+  LANGUAGE_PYTHON,
+  LANGUAGE_RUBY,
+  LANGUAGE_RUST,
 ];
 
 export const get = <T extends keyof ManagerApi>(

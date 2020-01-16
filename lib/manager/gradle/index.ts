@@ -17,6 +17,7 @@ import {
 } from './gradle-updates-report';
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
 import { platform } from '../../platform';
+import { LANGUAGE_JAVA } from '../../constants/languages';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -173,4 +174,4 @@ export function updateDependency(
   );
 }
 
-export const language = 'java';
+export const language = LANGUAGE_JAVA;

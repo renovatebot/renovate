@@ -1,4 +1,6 @@
+import { LANGUAGE_DOCKER } from '../../constants/languages';
+
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
-export const language = 'docker';
+export const language = LANGUAGE_DOCKER;
