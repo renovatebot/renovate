@@ -8,6 +8,7 @@ import {
   SBT_PLUGINS_REPO,
 } from '../../../lib/datasource/sbt/util';
 import { VERSION_SCHEME_IVY } from '../../../lib/constants/version-schemes';
+import { DATASOURCE_SBT } from '../../../lib/constants/data-binary-source';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./_fixtures/maven-index.html`),
@@ -103,16 +104,16 @@ describe('datasource/sbt', () => {
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
           versionScheme: VERSION_SCHEME_IVY,
+          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toEqual(null);
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
           versionScheme: VERSION_SCHEME_IVY,
+          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalaz',
           depType: 'plugin',
           registryUrls: [SBT_PLUGINS_REPO],
@@ -122,8 +123,8 @@ describe('datasource/sbt', () => {
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
           versionScheme: VERSION_SCHEME_IVY,
+          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
             'https://failed_repo/maven',
@@ -140,8 +141,8 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
           versionScheme: VERSION_SCHEME_IVY,
+          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
         })
@@ -156,8 +157,8 @@ describe('datasource/sbt', () => {
     it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
           versionScheme: VERSION_SCHEME_IVY,
+          datasource: DATASOURCE_SBT,
           lookupName: 'org.foundweekends:sbt-bintray',
           depType: 'plugin',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
@@ -172,8 +173,8 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
           versionScheme: VERSION_SCHEME_IVY,
+          datasource: DATASOURCE_SBT,
           lookupName: 'org.foundweekends:sbt-bintray_2.12',
           depType: 'plugin',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],

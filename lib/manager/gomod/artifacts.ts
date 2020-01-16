@@ -6,6 +6,11 @@ import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import {
+  BINARY_SOURCE_AUTO,
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../constants/data-binary-source';
 
 export async function updateArtifacts(
   goModFileName: string,
@@ -38,7 +43,7 @@ export async function updateArtifacts(
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
@@ -66,8 +71,8 @@ export async function updateArtifacts(
         cmd += 'go';
       }
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BINARY_SOURCE_AUTO ||
+      config.binarySource === BINARY_SOURCE_GLOBAL
     ) {
       logger.info('Running go via global command');
       cmd = 'go';

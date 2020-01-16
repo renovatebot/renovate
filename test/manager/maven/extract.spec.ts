@@ -3,6 +3,11 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { extractPackage } from '../../../lib/manager/maven/extract';
 
+const minimumContent = readFileSync(
+  resolve(__dirname, `./_fixtures/minimum.pom.xml`),
+  'utf8'
+);
+
 const simpleContent = readFileSync(
   resolve(__dirname, `./_fixtures/simple.pom.xml`),
   'utf8'
@@ -19,6 +24,10 @@ describe('manager/maven/extract', () => {
 
     it('extract dependencies from any XML position', () => {
       const res = extractPackage(simpleContent);
+      expect(res).toMatchSnapshot();
+    });
+    it('tries minimum manifests', () => {
+      const res = extractPackage(minimumContent);
       expect(res).toMatchSnapshot();
     });
   });

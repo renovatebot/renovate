@@ -2,6 +2,7 @@ import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
 import { get } from '../../versioning';
 import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
+import { DATASOURCE_SBT } from '../../constants/data-binary-source';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -251,7 +252,7 @@ function parseSbtLine(
 
   if (dep)
     deps.push({
-      datasource: 'sbt',
+      datasource: DATASOURCE_SBT,
       registryUrls: registryUrls as string[],
       ...dep,
     });

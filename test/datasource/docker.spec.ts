@@ -5,6 +5,7 @@ import * as docker from '../../lib/datasource/docker';
 import { getPkgReleases } from '../../lib/datasource';
 import * as _hostRules from '../../lib/util/host-rules';
 import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
+import { DATASOURCE_DOCKER } from '../../lib/constants/data-binary-source';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
@@ -278,7 +279,7 @@ describe('api/docker', () => {
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
       const res = await getPkgReleases({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -301,7 +302,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const config = {
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
@@ -319,7 +320,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const res = await getPkgReleases({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'registry.company.com/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -329,7 +330,7 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({ headers: {} });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       await getPkgReleases({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
       });
       // The  tag limit parameter `n` needs to be limited to 1000 for ECR
@@ -354,7 +355,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'node',
       });
       expect(res.releases).toHaveLength(1);
@@ -375,7 +376,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'docker.io/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -396,7 +397,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
       expect(res.releases).toHaveLength(1);

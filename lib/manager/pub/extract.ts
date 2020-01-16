@@ -2,6 +2,7 @@ import { safeLoad } from 'js-yaml';
 import { isValid } from '../../versioning/npm/index';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
+import { DATASOURCE_DART } from '../../constants/data-binary-source';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -50,7 +51,7 @@ export function extractPackageFile(
       return {
         packageFile,
         manager: 'pub',
-        datasource: 'dart',
+        datasource: DATASOURCE_DART,
         deps,
       };
     }

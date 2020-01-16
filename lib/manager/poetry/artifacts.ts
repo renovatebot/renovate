@@ -5,6 +5,7 @@ import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -37,7 +38,7 @@ export async function updateArtifacts(
       cwd: join(config.localDir, subDirectory),
     };
 
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running poetry via docker');
       execOptions.docker = {
         image: 'renovate/poetry',

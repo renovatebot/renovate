@@ -1,6 +1,7 @@
 import * as datasource from '../../lib/datasource';
 import * as gitlab from '../../lib/datasource/gitlab';
 import { api } from '../../lib/platform/gitlab/gl-got-wrapper';
+import { DATASOURCE_GITLAB } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('../../lib/util/got');
@@ -61,7 +62,7 @@ describe('datasource/gitlab', () => {
       ];
       glGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
-        datasource: 'gitlab',
+        datasource: DATASOURCE_GITLAB,
         depName: 'some/dep',
         lookupType: 'releases',
       });
@@ -76,7 +77,7 @@ describe('datasource/gitlab', () => {
       glGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
         registryUrls: ['https://gitlab.company.com/api/v4/'],
-        datasource: 'gitlab',
+        datasource: DATASOURCE_GITLAB,
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
