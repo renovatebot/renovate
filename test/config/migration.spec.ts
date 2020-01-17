@@ -1,6 +1,7 @@
 import * as configMigration from '../../lib/config/migration';
 import { getConfig } from '../../lib/config/defaults';
 import { RenovateConfig } from '../../lib/config';
+import { PLATFORM_TYPE_GITHUB } from '../../lib/constants/platfroms';
 
 const defaultConfig = getConfig();
 
@@ -10,7 +11,7 @@ describe('config/migration', () => {
       const config: RenovateConfig = {
         endpoints: [{}],
         enabled: true,
-        platform: 'github',
+        platform: PLATFORM_TYPE_GITHUB,
         hostRules: [
           {
             platform: 'docker',
