@@ -1,6 +1,12 @@
 import { applyPackageRules, Config } from '../../lib/util/package-rules';
 import { UpdateType } from '../../lib/config';
 import {
+  LANGUAGE_DOCKER,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PYTHON,
+} from '../../lib/constants/languages';
+import {
   MANAGER_DOCKERFILE,
   MANAGER_METEOR,
   MANAGER_NPM,
@@ -195,7 +201,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'js',
+      language: LANGUAGE_JAVASCRIPT,
       manager: MANAGER_METEOR,
       depName: 'node',
     };
@@ -214,7 +220,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'python',
+      language: LANGUAGE_PYTHON,
       manager: MANAGER_PIPENV,
       depName: 'node',
     };
@@ -225,7 +231,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          languages: ['js', 'node'],
+          languages: [LANGUAGE_JAVASCRIPT, LANGUAGE_NODE],
           packageNames: ['node'],
           x: 1,
         },
@@ -233,7 +239,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'js',
+      language: LANGUAGE_JAVASCRIPT,
       manager: MANAGER_METEOR,
       depName: 'node',
     };
@@ -244,7 +250,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          languages: ['docker'],
+          languages: [LANGUAGE_DOCKER],
           packageNames: ['node'],
           x: 1,
         },
@@ -252,7 +258,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'python',
+      language: LANGUAGE_PYTHON,
       manager: MANAGER_PIPENV,
       depName: 'node',
     };
