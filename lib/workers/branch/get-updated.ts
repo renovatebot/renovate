@@ -91,12 +91,12 @@ export async function getUpdatedPackageFiles(
     const updatedDeps = packageFileUpdatedDeps[packageFile.name];
     const updateArtifacts = get(manager, 'updateArtifacts');
     if (updateArtifacts) {
-      const results = await updateArtifacts(
-        packageFile.name,
+      const results = await updateArtifacts({
+        packageFileName: packageFile.name,
         updatedDeps,
-        packageFile.contents,
-        config
-      );
+        newPackageFileContent: packageFile.contents,
+        config,
+      });
       if (is.nonEmptyArray(results)) {
         for (const res of results) {
           const { file, artifactError } = res;
@@ -118,12 +118,12 @@ export async function getUpdatedPackageFiles(
         const packageFileContents =
           updatedFileContents[packageFile] ||
           (await platform.getFile(packageFile, config.parentBranch));
-        const results = await updateArtifacts(
-          packageFile,
-          [],
-          packageFileContents,
-          config
-        );
+        const results = await updateArtifacts({
+          packageFileName: packageFile,
+          updatedDeps: [],
+          newPackageFileContent: packageFileContents,
+          config,
+        });
         if (is.nonEmptyArray(results)) {
           for (const res of results) {
             const { file, artifactError } = res;

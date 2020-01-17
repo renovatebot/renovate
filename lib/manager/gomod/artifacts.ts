@@ -4,7 +4,7 @@ import { exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import {
   BINARY_SOURCE_AUTO,
@@ -12,12 +12,12 @@ import {
   BINARY_SOURCE_GLOBAL,
 } from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  goModFileName: string,
-  _updatedDeps: string[],
-  newGoModContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName: goModFileName,
+  updatedDeps: _updatedDeps,
+  newPackageFileContent: newGoModContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
   const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
   const env = getChildProcessEnv(customEnv);

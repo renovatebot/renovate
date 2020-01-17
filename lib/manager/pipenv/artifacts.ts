@@ -3,16 +3,16 @@ import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
-import { UpdateArtifactsResult, UpdateArtifactsConfig } from '../common';
+import { UpdateArtifactsResult, UpdateArtifact } from '../common';
 import { platform } from '../../platform';
 import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  pipfileName: string,
-  _updatedDeps: string[],
-  newPipfileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName: pipfileName,
+  updatedDeps: _updatedDeps,
+  newPackageFileContent: newPipfileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
   const env = getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']);
