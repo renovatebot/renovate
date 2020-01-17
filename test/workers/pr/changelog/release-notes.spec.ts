@@ -22,6 +22,11 @@ const jsYamlChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const standardVersionChangelogMd = fs.readFileSync(
+  'test/workers/pr/_fixtures/standard-version.md',
+  'utf8'
+);
+
 const contentsResponse = [
   { name: 'lib' },
   { name: 'CHANGELOG.md' },
@@ -174,6 +179,23 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'nodeca/js-yaml',
         '3.10.0',
+        'https://github.com/',
+        'https://api.github.com/'
+      );
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+    it('parses standard-version', async () => {
+      ghGot
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
+          body: {
+            content: Buffer.from(standardVersionChangelogMd).toString('base64'),
+          },
+        });
+      const res = await getReleaseNotesMd(
+        'conventional-changelog/standard-version',
+        '7.1.0',
         'https://github.com/',
         'https://api.github.com/'
       );
