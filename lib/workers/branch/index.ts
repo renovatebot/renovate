@@ -29,6 +29,7 @@ import {
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -518,7 +519,7 @@ export async function processBranch(
         }
         const context = `renovate/artifacts`;
         const description = 'Artifact file update failure';
-        const state = 'failure';
+        const state = BRANCH_STATUS_FAILURE;
         const existingState = await platform.getBranchStatusCheck(
           config.branchName,
           context

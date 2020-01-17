@@ -17,6 +17,7 @@ import {
 } from './gradle-updates-report';
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
 import { platform } from '../../platform';
+import { LANGUAGE_JAVA } from '../../constants/languages';
 import { MANAGER_GRADLE } from '../../constants/managers';
 import {
   BINARY_SOURCE_DOCKER,
@@ -178,4 +179,4 @@ export function updateDependency(
   );
 }
 
-export const language = 'java';
+export const language = LANGUAGE_JAVA;
