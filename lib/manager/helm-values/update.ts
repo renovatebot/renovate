@@ -32,26 +32,24 @@ function updateDoc(
   currentValue: string,
   newValue: string
 ): boolean {
-  for (const key in parsedContent) {
-    if (Object.prototype.hasOwnProperty.call(parsedContent, key)) {
-      if (shouldUpdate(key, parsedContent[key], depName, currentValue)) {
-        // the next statement intentionally updates the passed in parameter
-        // with the updated dependency value
-        // eslint-disable-next-line no-param-reassign
-        parsedContent[key].tag = newValue;
-        return true;
-      }
+  for (const key of Object.keys(parsedContent)) {
+    if (shouldUpdate(key, parsedContent[key], depName, currentValue)) {
+      // the next statement intentionally updates the passed in parameter
+      // with the updated dependency value
+      // eslint-disable-next-line no-param-reassign
+      parsedContent[key].tag = newValue;
+      return true;
+    }
 
-      if (typeof parsedContent[key] === 'object') {
-        const foundMatch = updateDoc(
-          parsedContent[key],
-          depName,
-          currentValue,
-          newValue
-        );
-        if (foundMatch) {
-          return true;
-        }
+    if (typeof parsedContent[key] === 'object') {
+      const foundMatch = updateDoc(
+        parsedContent[key],
+        depName,
+        currentValue,
+        newValue
+      );
+      if (foundMatch) {
+        return true;
       }
     }
   }
