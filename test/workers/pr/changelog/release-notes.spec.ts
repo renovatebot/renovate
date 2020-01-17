@@ -185,7 +185,11 @@ describe('workers/pr/release-notes', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
-    it('parses standard-version', async () => {
+    it.each`
+      version
+      ${'7.0.1'}
+      ${'7.0.0'}
+    `('parses standard-version version $version', async ({ version }) => {
       ghGot
         .mockResolvedValueOnce({ body: contentsResponse })
         .mockResolvedValueOnce({
@@ -195,11 +199,45 @@ describe('workers/pr/release-notes', () => {
         });
       const res = await getReleaseNotesMd(
         'conventional-changelog/standard-version',
-        '7.1.0',
+        version,
         'https://github.com/',
         'https://api.github.com/'
       );
       expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+    it('does not contain version 7.0.1 when parsing standard-version 7.0.0', async () => {
+      ghGot
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
+          body: {
+            content: Buffer.from(standardVersionChangelogMd).toString('base64'),
+          },
+        });
+      const res = await getReleaseNotesMd(
+        'conventional-changelog/standard-version',
+        '7.0.0',
+        'https://github.com/',
+        'https://api.github.com/'
+      );
+      expect(res.body).toEqual(expect.not.stringContaining('7.0.1'));
+      expect(res).toMatchSnapshot();
+    });
+    it('contains bug fix header when parsing standard-version 7.0.1', async () => {
+      ghGot
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
+          body: {
+            content: Buffer.from(standardVersionChangelogMd).toString('base64'),
+          },
+        });
+      const res = await getReleaseNotesMd(
+        'conventional-changelog/standard-version',
+        '7.0.1',
+        'https://github.com/',
+        'https://api.github.com/'
+      );
+      expect(res.body).toEqual(expect.stringMatching(/bug fixes/i));
       expect(res).toMatchSnapshot();
     });
   });
