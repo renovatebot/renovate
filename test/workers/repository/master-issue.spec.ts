@@ -5,12 +5,13 @@ import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
 import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
+import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platfroms';
 
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
-  config.platform = 'github';
+  config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
   config.warnings = [];
 });

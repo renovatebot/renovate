@@ -3,6 +3,10 @@ import * as _repositoryWorker from '../../../lib/workers/repository';
 import * as _configParser from '../../../lib/config';
 import * as _platform from '../../../lib/platform';
 import * as _limits from '../../../lib/workers/global/limits';
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../../lib/constants/platfroms';
 
 jest.mock('../../../lib/workers/repository');
 
@@ -77,7 +81,7 @@ describe('lib/workers/global', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: ['a'],
-        platform: 'github',
+        platform: PLATFORM_TYPE_GITHUB,
         endpoint: 'https://github.com/',
       });
       await globalWorker.start();
@@ -87,7 +91,7 @@ describe('lib/workers/global', () => {
     it('gitlab', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],
-        platform: 'gitlab',
+        platform: PLATFORM_TYPE_GITLAB,
         endpoint: 'https://my.gitlab.com/',
       });
       await globalWorker.start();
