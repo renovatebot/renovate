@@ -1,6 +1,7 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
 import { PrBodyConfig } from './common';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platfroms';
 
 export async function getPrConfigDescription(
   config: PrBodyConfig
@@ -46,7 +47,7 @@ export async function getPrConfigDescription(
   } else {
     prBody += 'Whenever PR becomes conflicted';
   }
-  if (config.platform === 'github') {
+  if (config.platform === PLATFORM_TYPE_GITHUB) {
     prBody += `, or if you modify the PR title to begin with "\`rebase!\`".\n\n`;
   } else {
     prBody += '.\n\n';
