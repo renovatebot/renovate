@@ -179,11 +179,11 @@ export async function ensureMasterIssue(
     issueBody +=
       'These updates were closed unmerged and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
-      const pr = await platform.findPr(
-        branch.branchName,
-        branch.prTitle,
-        '!open'
-      );
+      const pr = await platform.findPr({
+        branchName: branch.branchName,
+        prTitle: branch.prTitle,
+        state: '!open',
+      });
       issueBody += getListItem(branch, 'recreate', pr);
     }
     issueBody += '\n';

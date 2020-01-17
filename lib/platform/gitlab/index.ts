@@ -15,6 +15,8 @@ import {
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
@@ -172,9 +174,11 @@ export async function initRepo({
       try {
         renovateConfig = JSON.parse(
           Buffer.from(
-            (await api.get(
-              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
-            )).body.content,
+            (
+              await api.get(
+                `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+              )
+            ).body.content,
             'base64'
           ).toString()
         );
@@ -223,7 +227,7 @@ export async function initRepo({
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if (['archived', 'empty'].includes(err.message)) {
+    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
       throw err;
     }
     if (err.statusCode === 403) {
@@ -447,9 +451,11 @@ export async function getPrFiles(mrNo: number): Promise<string[]> {
   if (!mrNo) {
     return [];
   }
-  const files = (await api.get(
-    `projects/${config.repository}/merge_requests/${mrNo}/changes`
-  )).body.changes;
+  const files = (
+    await api.get(
+      `projects/${config.repository}/merge_requests/${mrNo}/changes`
+    )
+  ).body.changes;
   return files.map((f: { new_path: string }) => f.new_path);
 }
 
@@ -683,9 +689,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    const issueBody = (await api.get(
-      `projects/${config.repository}/issues/${issue.iid}`
-    )).body.description;
+    const issueBody = (
+      await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+    ).body.description;
     return {
       number: issue.iid,
       body: issueBody,
@@ -706,9 +712,9 @@ export async function ensureIssue({
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
     if (issue) {
-      const existingDescription = (await api.get(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )).body.description;
+      const existingDescription = (
+        await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+      ).body.description;
       if (existingDescription !== description) {
         logger.debug('Updating issue body');
         await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
@@ -842,22 +848,22 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null | undefined,
-  rawContent: string
-): Promise<void> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
+  const sanitizedContent = sanitize(content);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
-  const comments = await getComments(issueNo);
+  const comments = await getComments(number);
   let body: string;
   let commentId;
   let commentNeedsUpdating;
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${issueNo}`);
-    body = `### ${topic}\n\n${content}`;
+    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    body = `### ${topic}\n\n${sanitizedContent}`;
     body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
@@ -866,8 +872,8 @@ export async function ensureComment(
       }
     });
   } else {
-    logger.debug(`Ensuring content-only comment in #${issueNo}`);
-    body = `${content}`;
+    logger.debug(`Ensuring content-only comment in #${number}`);
+    body = `${sanitizedContent}`;
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;
@@ -876,11 +882,17 @@ export async function ensureComment(
     });
   }
   if (!commentId) {
-    await addComment(issueNo, body);
-    logger.info({ repository: config.repository, issueNo }, 'Added comment');
+    await addComment(number, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Added comment'
+    );
   } else if (commentNeedsUpdating) {
-    await editComment(issueNo, commentId, body);
-    logger.info({ repository: config.repository, issueNo }, 'Updated comment');
+    await editComment(number, commentId, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Updated comment'
+    );
   } else {
     logger.debug('Comment is already update-to-date');
   }
@@ -952,11 +964,11 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   return prList.find(

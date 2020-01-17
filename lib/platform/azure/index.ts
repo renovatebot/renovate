@@ -17,6 +17,8 @@ import {
   VulnerabilityAlert,
   CreatePRConfig,
   BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -274,11 +276,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   return azurePr;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   // TODO: fix typing
   let prsFiltered: any[] = [];
@@ -315,7 +317,7 @@ export async function findPr(
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 
@@ -476,12 +478,12 @@ export async function updatePr(
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  content: string
-): Promise<void> {
-  logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
+  logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
@@ -490,7 +492,7 @@ export async function ensureComment(
       status: 1,
     },
     config.repoId,
-    issueNo
+    number
   );
 }
 
@@ -578,11 +580,11 @@ export async function addAssignees(
   assignees: string[]
 ): Promise<void> {
   logger.trace(`addAssignees(${issueNo}, ${assignees})`);
-  await ensureComment(
-    issueNo,
-    'Add Assignees',
-    assignees.map(a => `@<${a}>`).join(', ')
-  );
+  await ensureComment({
+    number: issueNo,
+    topic: 'Add Assignees',
+    content: assignees.map(a => `@<${a}>`).join(', '),
+  });
 }
 
 /**

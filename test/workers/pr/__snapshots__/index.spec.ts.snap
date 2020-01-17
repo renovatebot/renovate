@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/pr ensurePr should add and deduplicate additionalReviewers on new PR 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "foo",
+      "bar",
+      "baz",
+      "boo",
+    ],
+  ],
+]
+`;
+
 exports[`workers/pr ensurePr should add assignees and reviewers to new PR 1`] = `
 Array [
   Array [

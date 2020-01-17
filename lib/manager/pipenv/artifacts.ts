@@ -5,6 +5,7 @@ import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsResult, UpdateArtifact } from '../common';
 import { platform } from '../../platform';
+import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
 export async function updateArtifacts({
   packageFileName: pipfileName,
@@ -27,15 +28,12 @@ export async function updateArtifacts({
     return null;
   }
   const cwd = join(config.localDir, dirname(pipfileName));
-  let stdout: string;
-  let stderr: string;
   try {
     const localPipfileFileName = join(config.localDir, pipfileName);
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
-    const startTime = process.hrtime();
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running pipenv via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
@@ -53,17 +51,10 @@ export async function updateArtifacts({
     }
     const args = 'lock';
     logger.debug({ cmd, args }, 'pipenv lock command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+    await exec(`${cmd} ${args}`, {
       cwd,
       env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    stdout = stdout ? stdout.replace(/(Locking|Running)[^\s]*?\s/g, '') : null;
-    logger.info(
-      { seconds, type: 'Pipfile.lock', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     const status = await platform.getRepoStatus();
     if (!(status && status.modified.includes(lockFileName))) {
       return null;

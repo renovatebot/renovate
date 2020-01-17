@@ -6,12 +6,8 @@ import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: jest.Mocked<typeof import('../../../lib/platform/azure')>;
-  let azureApi: jest.Mocked<
-    typeof import('../../../lib/platform/azure/azure-got-wrapper')
-  >;
-  let azureHelper: jest.Mocked<
-    typeof import('../../../lib/platform/azure/azure-helper')
-  >;
+  let azureApi: jest.Mocked<typeof import('../../../lib/platform/azure/azure-got-wrapper')>;
+  let azureHelper: jest.Mocked<typeof import('../../../lib/platform/azure/azure-helper')>;
   let GitStorage;
   beforeEach(() => {
     // reset module
@@ -228,7 +224,11 @@ describe('platform/azure', () => {
             state: 'open',
           } as any)
       );
-      const res = await azure.findPr('branch-a', 'branch a pr', 'open');
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found not open', async () => {
@@ -260,7 +260,11 @@ describe('platform/azure', () => {
             state: 'closed',
           } as any)
       );
-      const res = await azure.findPr('branch-a', 'branch a pr', '!open');
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: '!open',
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it close', async () => {
@@ -292,7 +296,11 @@ describe('platform/azure', () => {
             state: 'closed',
           } as any)
       );
-      const res = await azure.findPr('branch-a', 'branch a pr', 'closed');
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'closed',
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it all state', async () => {
@@ -324,7 +332,10 @@ describe('platform/azure', () => {
             state: 'closed',
           } as any)
       );
-      const res = await azure.findPr('branch-a', 'branch a pr');
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toMatchSnapshot();
     });
   });
@@ -609,7 +620,11 @@ describe('platform/azure', () => {
             createThread: jest.fn(() => [{ id: 123 }]),
           } as any)
       );
-      await azure.ensureComment(42, 'some-subject', 'some\ncontent');
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });

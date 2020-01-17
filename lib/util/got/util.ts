@@ -3,7 +3,7 @@ import { Got } from './common';
 
 // TODO: missing types
 export const mergeInstances = (got as any).mergeInstances as (
-  ...args: (got.GotInstance<any>)[]
+  ...args: got.GotInstance<any>[]
 ) => Got;
 
 // TODO: missing types

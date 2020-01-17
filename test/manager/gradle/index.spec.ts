@@ -7,6 +7,7 @@ import { platform as _platform, Platform } from '../../../lib/platform';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -74,10 +75,12 @@ describe('manager/gradle', () => {
     it('should return empty if there are no dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.readFile.mockResolvedValue(fsReal.readFileSync(
-        'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
-        'utf8'
-      ) as any);
+      fs.readFile.mockResolvedValue(
+        fsReal.readFileSync(
+          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
+          'utf8'
+        ) as any
+      );
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -142,14 +145,6 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       await manager.extractAllPackageFiles(config, ['build.gradle']);
-
-      expect(exec.mock.calls[0][0]).toBe(
-        './gradlew --init-script renovate-plugin.gradle renovate'
-      );
-      expect(exec.mock.calls[0][1]).toMatchObject({
-        cwd: 'localDir',
-        timeout: 20000,
-      });
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -158,14 +153,6 @@ describe('manager/gradle', () => {
 
       fs.access.mockRejectedValue(undefined);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
-
-      expect(exec.mock.calls[0][0]).toBe(
-        'sh gradlew --init-script renovate-plugin.gradle renovate'
-      );
-      expect(exec.mock.calls[0][1]).toMatchObject({
-        cwd: 'localDir',
-        timeout: 20000,
-      });
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -208,7 +195,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
-        binarySource: 'docker',
+        binarySource: BINARY_SOURCE_DOCKER,
         ...config,
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
@@ -221,7 +208,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
-        binarySource: 'docker',
+        binarySource: BINARY_SOURCE_DOCKER,
         ...config,
         gradle: {},
       };

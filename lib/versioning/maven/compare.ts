@@ -327,34 +327,31 @@ function parseRange(rangeStr: string): any {
 
   const lastIdx = result.length - 1;
   let prevValue: string = null;
-  return result.reduce(
-    (acc, range, idx) => {
-      const { leftType, leftValue, rightType, rightValue } = range;
+  return result.reduce((acc, range, idx) => {
+    const { leftType, leftValue, rightType, rightValue } = range;
 
-      if (idx === 0 && leftValue === '') {
-        if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
-          prevValue = rightValue;
-          return [...acc, { ...range, leftValue: null }];
-        }
-        return null;
-      }
-      if (idx === lastIdx && rightValue === '') {
-        if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
-          if (prevValue && compare(prevValue, leftValue) === 1) return null;
-          return [...acc, { ...range, rightValue: null }];
-        }
-        return null;
-      }
-      if (isVersion(leftValue) && isVersion(rightValue)) {
-        if (compare(leftValue, rightValue) === 1) return null;
-        if (prevValue && compare(prevValue, leftValue) === 1) return null;
+    if (idx === 0 && leftValue === '') {
+      if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
         prevValue = rightValue;
-        return [...acc, range];
+        return [...acc, { ...range, leftValue: null }];
       }
       return null;
-    },
-    [] as Range[]
-  );
+    }
+    if (idx === lastIdx && rightValue === '') {
+      if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
+        if (prevValue && compare(prevValue, leftValue) === 1) return null;
+        return [...acc, { ...range, rightValue: null }];
+      }
+      return null;
+    }
+    if (isVersion(leftValue) && isVersion(rightValue)) {
+      if (compare(leftValue, rightValue) === 1) return null;
+      if (prevValue && compare(prevValue, leftValue) === 1) return null;
+      prevValue = rightValue;
+      return [...acc, range];
+    }
+    return null;
+  }, [] as Range[]);
 }
 
 function isValid(str: string): boolean {

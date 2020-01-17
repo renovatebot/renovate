@@ -7,6 +7,10 @@ import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import {
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../../lib/constants/data-binary-source';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -94,7 +98,7 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config: {
           ...config,
-          binarySource: 'global',
+          binarySource: BINARY_SOURCE_GLOBAL,
         },
       })
     ).toMatchSnapshot();
@@ -124,7 +128,7 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
-            binarySource: 'docker',
+            binarySource: BINARY_SOURCE_DOCKER,
           },
         })
       ).toMatchSnapshot();
@@ -152,7 +156,7 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
-            binarySource: 'docker',
+            binarySource: BINARY_SOURCE_DOCKER,
             dockerUser: 'foobar',
             compatibility: {
               ruby: '1.2.5',

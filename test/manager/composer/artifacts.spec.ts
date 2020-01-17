@@ -6,6 +6,10 @@ import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import {
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -128,7 +132,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: 'docker',
+          binarySource: BINARY_SOURCE_DOCKER,
           dockerUser: 'foobar',
         },
       })
@@ -146,7 +150,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: 'global',
+          binarySource: BINARY_SOURCE_GLOBAL,
         },
       })
     ).not.toBeNull();

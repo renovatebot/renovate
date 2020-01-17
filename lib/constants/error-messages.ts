@@ -39,7 +39,6 @@ export const DATASOURCE_FAILURE = 'registry-failure';
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
 
 // Bundler Error
-export const BUNDLER_COULD_NOT_RESOLVE = 'bundler-resolve';
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
 export const BUNDLER_UNKNOWN_ERROR = 'bundler-unknown';
 

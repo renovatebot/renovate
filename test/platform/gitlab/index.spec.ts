@@ -9,9 +9,7 @@ import {
 
 describe('platform/gitlab', () => {
   let gitlab: typeof import('../../../lib/platform/gitlab');
-  let api: jest.Mocked<
-    typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api
-  >;
+  let api: jest.Mocked<typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api>;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let GitStorage: jest.Mocked<
     typeof import('../../../lib/platform/git/storage')
@@ -707,7 +705,11 @@ describe('platform/gitlab', () => {
     it('add comment if not found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       api.get.mockReturnValueOnce({ body: [] } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
@@ -716,7 +718,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(1);
       expect(api.put.mock.calls).toMatchSnapshot();
@@ -726,7 +732,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       } as any);
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(0);
     });
@@ -735,7 +745,11 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '!merge' }],
       } as any);
-      await gitlab.ensureComment(42, null, '!merge');
+      await gitlab.ensureComment({
+        number: 42,
+        topic: null,
+        content: '!merge',
+      });
       expect(api.post).toHaveBeenCalledTimes(0);
       expect(api.put).toHaveBeenCalledTimes(0);
     });
@@ -762,7 +776,9 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr('branch-a', null);
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+      });
       expect(res).toBeDefined();
     });
     it('returns true if not open', async () => {
@@ -776,7 +792,10 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr('branch-a', null, '!open');
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        state: '!open',
+      });
       expect(res).toBeDefined();
     });
 
@@ -791,7 +810,11 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr('branch-a', 'branch a pr', 'open');
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+      });
       expect(res).toBeDefined();
     });
 
@@ -806,7 +829,10 @@ describe('platform/gitlab', () => {
           },
         ],
       } as any);
-      const res = await gitlab.findPr('branch-a', 'branch a pr');
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toBeDefined();
     });
   });

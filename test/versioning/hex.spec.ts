@@ -71,50 +71,105 @@ describe('lib/versioning/hex', () => {
   describe('hexScheme.getNewValue()', () => {
     it('handles tilde greater than', () => {
       expect(
-        hexScheme.getNewValue('~> 1.2', 'replace', '1.2.3', '2.0.7')
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2',
+          rangeStrategy: 'replace',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
       ).toEqual('~> 2.0');
-      expect(hexScheme.getNewValue('~> 1.2', 'pin', '1.2.3', '2.0.7')).toEqual(
-        '2.0.7'
-      );
-      expect(hexScheme.getNewValue('~> 1.2', 'bump', '1.2.3', '2.0.7')).toEqual(
-        '~> 2'
-      );
       expect(
-        hexScheme.getNewValue('~> 1.2.0', 'replace', '1.2.3', '2.0.7')
-      ).toEqual('~> 2.0.0');
-      expect(
-        hexScheme.getNewValue('~> 1.2.0', 'pin', '1.2.3', '2.0.7')
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2',
+          rangeStrategy: 'pin',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
       ).toEqual('2.0.7');
       expect(
-        hexScheme.getNewValue('~> 1.2.0', 'bump', '1.2.3', '2.0.7')
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2',
+          rangeStrategy: 'bump',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
+      ).toEqual('~> 2');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2.0',
+          rangeStrategy: 'replace',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
+      ).toEqual('~> 2.0.0');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2.0',
+          rangeStrategy: 'pin',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
+      ).toEqual('2.0.7');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '~> 1.2.0',
+          rangeStrategy: 'bump',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
       ).toEqual('~> 2.0.7');
     });
   });
   it('handles and', () => {
     expect(
-      hexScheme.getNewValue('>= 1.0.0 and <= 2.0.0', 'widen', '1.2.3', '2.0.7')
+      hexScheme.getNewValue({
+        currentValue: '>= 1.0.0 and <= 2.0.0',
+        rangeStrategy: 'widen',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.7',
+      })
     ).toEqual('>= 1.0.0 and <= 2.0.7');
     expect(
-      hexScheme.getNewValue(
-        '>= 1.0.0 and <= 2.0.0',
-        'replace',
-        '1.2.3',
-        '2.0.7'
-      )
+      hexScheme.getNewValue({
+        currentValue: '>= 1.0.0 and <= 2.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.7',
+      })
     ).toEqual('<= 2.0.7');
     expect(
-      hexScheme.getNewValue('>= 1.0.0 and <= 2.0.0', 'pin', '1.2.3', '2.0.7')
+      hexScheme.getNewValue({
+        currentValue: '>= 1.0.0 and <= 2.0.0',
+        rangeStrategy: 'pin',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.7',
+      })
     ).toEqual('2.0.7');
   });
   it('handles or', () => {
     expect(
-      hexScheme.getNewValue('>= 1.0.0 or <= 2.0.0', 'widen', '1.2.3', '2.0.7')
+      hexScheme.getNewValue({
+        currentValue: '>= 1.0.0 or <= 2.0.0',
+        rangeStrategy: 'widen',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.7',
+      })
     ).toEqual('>= 1.0.0 or <= 2.0.7');
     expect(
-      hexScheme.getNewValue('>= 1.0.0 or <= 2.0.0', 'replace', '1.2.3', '2.0.7')
+      hexScheme.getNewValue({
+        currentValue: '>= 1.0.0 or <= 2.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.7',
+      })
     ).toEqual('<= 2.0.7');
     expect(
-      hexScheme.getNewValue('>= 1.0.0 or <= 2.0.0', 'pin', '1.2.3', '2.0.7')
+      hexScheme.getNewValue({
+        currentValue: '>= 1.0.0 or <= 2.0.0',
+        rangeStrategy: 'pin',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.7',
+      })
     ).toEqual('2.0.7');
   });
 });

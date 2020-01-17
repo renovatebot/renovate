@@ -5,6 +5,7 @@ import * as _yarnHelper from '../../../../lib/manager/npm/post-update/yarn';
 import { mocked } from '../../../util';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../execUtil';
 import * as _env from '../../../../lib/util/exec/env';
+import { BINARY_SOURCE_GLOBAL } from '../../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -130,7 +131,7 @@ describe('generateLockFile', () => {
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await yarnHelper.generateLockFile('some-dir', undefined, {
-      binarySource: 'global',
+      binarySource: BINARY_SOURCE_GLOBAL,
     });
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
