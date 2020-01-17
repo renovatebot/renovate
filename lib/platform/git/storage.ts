@@ -512,10 +512,7 @@ export class Storage {
         }
       }
       // istanbul ignore if
-      if (
-        fileNames.length === 1 &&
-        (fileNames[0] === 'renovate.json' || fileNames[0] === '.gitmodules')
-      ) {
+      if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
         fileNames.unshift('-f');
       }
       if (fileNames.length) await this._git!.add(fileNames);
@@ -531,8 +528,10 @@ export class Storage {
       }
       await this._git!.commit(message);
       if (!(await this.hasDiff(`origin/${branchName}`))) {
-        logger.info('No files changed. Skipping git push');
-        return;
+        logger.warn(
+          { branchName, fileNames },
+          'No file changes detected. Is this an empty force push?'
+        );
       }
       await this._git!.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
