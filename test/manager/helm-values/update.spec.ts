@@ -17,6 +17,7 @@ describe('lib/manager/helm-values/update', () => {
         currentValue: '0.7.0-debian-9-r12',
         datasource: 'docker',
         newValue: '0.8.0',
+        dockerRepository: 'bitnami/postgres-exporter',
       };
       expect(updateDependency(content, upgrade)).toBe(content);
     });
@@ -40,6 +41,7 @@ describe('lib/manager/helm-values/update', () => {
         depName: 'bitnami/postgres-exporter',
         currentValue: '0.7.0-debian-9-r12',
         newValue: '0.8.0',
+        dockerRepository: 'bitnami/postgres-exporter',
       };
       expect(updateDependency(content, upgrade)).not.toBe(content);
       expect(updateDependency(content, upgrade)).toMatchSnapshot();
@@ -61,10 +63,36 @@ describe('lib/manager/helm-values/update', () => {
           some-non-image-related-key: 'with-some-value'
       `;
       const upgrade = {
-        depName: 'bitnami/postgresql',
+        depName: 'docker.io/bitnami/postgresql',
         currentValue: '11.6.0-debian-9-r0',
         newValue: '12.5.0',
+        dockerRepository: 'bitnami/postgresql',
       };
+      expect(updateDependency(content, upgrade)).not.toBe(content);
+      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+    });
+    it('upgrades correct dependency if registry included', () => {
+      const content = `
+      db:
+        image:
+          image:
+            repository: bitnami/postgresql
+            tag: 11.6.0-debian-9-r0
+            some-non-image-related-key: 'with-some-value'
+      warehouse:
+        image:
+          registry: docker.io
+          repository: bitnami/postgresql
+          tag: 11.6.0-debian-9-r0
+          some-non-image-related-key: 'with-some-value'
+      `;
+      const upgrade = {
+        depName: 'docker.io/bitnami/postgresql',
+        currentValue: '11.6.0-debian-9-r0',
+        newValue: '12.5.0',
+        dockerRepository: 'bitnami/postgresql',
+      };
+
       expect(updateDependency(content, upgrade)).not.toBe(content);
       expect(updateDependency(content, upgrade)).toMatchSnapshot();
     });

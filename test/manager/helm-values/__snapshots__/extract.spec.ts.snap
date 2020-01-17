@@ -13,13 +13,13 @@ Object {
       "currentDigest": undefined,
       "currentValue": "0.7.0-debian-9-r12",
       "datasource": "docker",
-      "depName": "bitnami/postgres-exporter",
+      "depName": "docker.io/bitnami/postgres-exporter",
     },
     Object {
       "currentDigest": undefined,
       "currentValue": "11.5.0-debian-9-r0",
       "datasource": "docker",
-      "depName": "bitnami/postgresql",
+      "depName": "docker.io/bitnami/postgresql",
     },
   ],
 }

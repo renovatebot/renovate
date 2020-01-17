@@ -6,14 +6,30 @@ import { matchesHelmValuesDockerHeuristic } from './util';
 function shouldUpdate(
   parentKey: string,
   data: any,
-  depName: string,
-  currentValue: string
+  dockerRepository: string,
+  currentValue: string,
+  originalRegistryValue: string
 ): boolean {
   return (
     matchesHelmValuesDockerHeuristic(parentKey, data) &&
-    data.repository === depName &&
-    data.tag === currentValue
+    data.repository === dockerRepository &&
+    data.tag === currentValue &&
+    ((!data.registry && !originalRegistryValue) ||
+      data.registry === originalRegistryValue)
   );
+}
+
+/**
+ * Extract the originally set registry value if it is included in the depName.
+ */
+function getOriginalRegistryValue(
+  depName: string,
+  dockerRepository: string
+): string | null {
+  if (depName.length > dockerRepository.length) {
+    return depName.substring(0, depName.lastIndexOf(dockerRepository) - 1);
+  }
+  return '';
 }
 
 /**
@@ -22,31 +38,42 @@ function shouldUpdate(
  * if it adheres to the supported structure.
  *
  * @param parsedContent The part of the yaml tree we should look at.
- * @param depName The name of the dependency that should be updated.
+ * @param dockerRepository The docker repository that should be updated.
  * @param currentValue The current version that should be updated.
  * @param newValue The update version that should be set instead of currentValue.
  */
 function updateDoc(
   parsedContent: object,
-  depName: string,
+  dockerRepository: string,
   currentValue: string,
-  newValue: string
+  newValue: string,
+  originalRegistryValue: string
 ): boolean {
   for (const key of Object.keys(parsedContent)) {
-    if (shouldUpdate(key, parsedContent[key], depName, currentValue)) {
+    if (
+      shouldUpdate(
+        key,
+        parsedContent[key],
+        dockerRepository,
+        currentValue,
+        originalRegistryValue
+      )
+    ) {
       // the next statement intentionally updates the passed in parameter
       // with the updated dependency value
       // eslint-disable-next-line no-param-reassign
       parsedContent[key].tag = newValue;
+
       return true;
     }
 
     if (typeof parsedContent[key] === 'object') {
       const foundMatch = updateDoc(
         parsedContent[key],
-        depName,
+        dockerRepository,
         currentValue,
-        newValue
+        newValue,
+        originalRegistryValue
       );
       if (foundMatch) {
         return true;
@@ -64,7 +91,8 @@ export function updateDependency(
     !upgrade ||
     !upgrade.depName ||
     !upgrade.newValue ||
-    !upgrade.currentValue
+    !upgrade.currentValue ||
+    !upgrade.dockerRepository
   ) {
     logger.debug('Failed to update dependency, invalid upgrade');
     return fileContent;
@@ -73,7 +101,17 @@ export function updateDependency(
   const yawn = new YAWN(fileContent);
   const doc = yawn.json;
 
-  updateDoc(doc, upgrade.depName, upgrade.currentValue, upgrade.newValue);
+  const originalRegistryValue = getOriginalRegistryValue(
+    upgrade.depName,
+    upgrade.dockerRepository
+  );
+  updateDoc(
+    doc,
+    upgrade.dockerRepository,
+    upgrade.currentValue,
+    upgrade.newValue,
+    originalRegistryValue
+  );
   yawn.json = doc;
 
   return yawn.yaml;

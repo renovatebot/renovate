@@ -2,7 +2,6 @@
 api:
   image:
     image:
-      registry: docker.io
       repository: bitnami/postgresql
       tag: 11.6.0-debian-9-r0
       some-non-image-related-key: 'with-some-value'

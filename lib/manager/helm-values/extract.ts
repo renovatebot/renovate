@@ -21,9 +21,10 @@ function findDependencies(
   Object.keys(parsedContent).forEach(key => {
     if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
       const currentItem = parsedContent[key];
-      // TODO include registry if present
+
+      const registry = currentItem.registry ? `${currentItem.registry}/` : '';
       packageDependencies.push(
-        getDep(`${currentItem.repository}:${currentItem.tag}`)
+        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`)
       );
     } else {
       findDependencies(parsedContent[key], packageDependencies);
