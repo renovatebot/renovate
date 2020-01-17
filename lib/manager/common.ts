@@ -179,6 +179,13 @@ export interface ExtractPackageFileConfig {
   config?: ExtractConfig;
 }
 
+export interface UpdateArtifact {
+  packageFileName: string;
+  updatedDeps: string[];
+  newPackageFileContent: string;
+  config: UpdateArtifactsConfig;
+}
+
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
@@ -199,10 +206,7 @@ export interface ManagerApi {
   getRangeStrategy(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
-    packageFileName: string,
-    updatedDeps: string[],
-    newPackageFileContent: string,
-    config: UpdateArtifactsConfig
+    updateArtifact: UpdateArtifact
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency(

@@ -3,16 +3,16 @@ import { outputFile, readFile } from 'fs-extra';
 import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`cargo.updateArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
     logger.debug('No updated cargo deps - returning null');

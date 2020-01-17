@@ -1,18 +1,18 @@
 import npm, { isVersion, isValid } from '../npm';
-import { RangeStrategy, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../common';
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
-  const res = npm.getNewValue(
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
+  const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
     fromVersion,
-    toVersion
-  );
+    toVersion,
+  });
   if (isVersion(res)) {
     // normalize out any 'v' prefix
     return isVersion(res);

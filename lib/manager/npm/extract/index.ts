@@ -17,6 +17,7 @@ import {
 import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { MANAGER_NPM } from '../../../constants/managers';
 import {
   DATASOURCE_GITHUB,
   DATASOURCE_NPM,
@@ -352,7 +353,7 @@ export async function extractAllPackageFiles(
       if (deps) {
         npmFiles.push({
           packageFile,
-          manager: 'npm',
+          manager: MANAGER_NPM,
           ...deps,
         });
       }

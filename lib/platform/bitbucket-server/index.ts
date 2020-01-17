@@ -26,6 +26,12 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -526,7 +532,7 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
 
   if (!(await branchExists(branchName))) {
@@ -538,12 +544,14 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return 'failed';
-    if (commitStatus.inProgress > 0) return 'pending';
-    return commitStatus.successful > 0 ? 'success' : 'pending';
+    if (commitStatus.failed > 0) return BRANCH_STATUS_FAILED;
+    if (commitStatus.inProgress > 0) return BRANCH_STATUS_PENDING;
+    return commitStatus.successful > 0
+      ? BRANCH_STATUS_SUCCESS
+      : BRANCH_STATUS_PENDING;
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
 }
 
@@ -574,12 +582,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return 'success';
+            return BRANCH_STATUS_SUCCESS;
           case 'INPROGRESS':
-            return 'pending';
+            return BRANCH_STATUS_PENDING;
           case 'FAILED':
           default:
-            return 'failure';
+            return BRANCH_STATUS_FAILURE;
         }
       }
     }
@@ -614,13 +622,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case 'success':
+      case BRANCH_STATUS_SUCCESS:
         body.state = 'SUCCESSFUL';
         break;
-      case 'pending':
+      case BRANCH_STATUS_PENDING:
         body.state = 'INPROGRESS';
         break;
-      case 'failure':
+      case BRANCH_STATUS_FAILURE:
       default:
         body.state = 'FAILED';
         break;

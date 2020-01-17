@@ -2,8 +2,9 @@ import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 import { updateArtifacts } from './artifacts';
 import { getRangeStrategy } from './range';
+import { LANGUAGE_RUBY } from '../../constants/languages';
 
-const language = 'ruby';
+const language = LANGUAGE_RUBY;
 
 /*
  * Each of the below functions contain some explanations within their own files.

@@ -14,7 +14,7 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"pipenv lock\\"",
+    "cmd": "pipenv lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -34,7 +34,7 @@ Array [
 exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"pipenv lock\\"",
+    "cmd": "pipenv lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

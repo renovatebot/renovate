@@ -6,6 +6,7 @@ import * as bitbucketServer from '../../lib/platform/bitbucket-server';
 import { PLATFORM_NOT_FOUND } from '../../lib/constants/error-messages';
 
 import * as platform from '../../lib/platform';
+import { PLATFORM_TYPE_BITBUCKET } from '../../lib/constants/platfroms';
 
 jest.unmock('../../lib/platform');
 
@@ -24,7 +25,7 @@ describe('platform', () => {
   });
   it('initializes', async () => {
     const config = {
-      platform: 'bitbucket',
+      platform: PLATFORM_TYPE_BITBUCKET,
       gitAuthor: 'user@domain.com',
       username: 'abc',
       password: '123',
@@ -33,7 +34,7 @@ describe('platform', () => {
   });
   it('initializes no author', async () => {
     const config = {
-      platform: 'bitbucket',
+      platform: PLATFORM_TYPE_BITBUCKET,
       username: 'abc',
       password: '123',
     };
