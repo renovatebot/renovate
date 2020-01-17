@@ -2,22 +2,28 @@ import { ensureDir, outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import {
+  BINARY_SOURCE_AUTO,
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  goModFileName: string,
-  _updatedDeps: string[],
-  newGoModContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName: goModFileName,
+  updatedDeps: _updatedDeps,
+  newPackageFileContent: newGoModContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
-  process.env.GOPATH =
-    process.env.GOPATH || join(config.cacheDir, './others/go');
-  await ensureDir(process.env.GOPATH);
-  logger.debug('Using GOPATH: ' + process.env.GOPATH);
+  const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
+  const env = getChildProcessEnv(customEnv);
+  env.GOPATH = env.GOPATH || join(config.cacheDir, './others/go');
+  await ensureDir(env.GOPATH);
+  logger.debug('Using GOPATH: ' + env.GOPATH);
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await platform.getFile(sumFileName);
   if (!existingGoSumContent) {
@@ -25,8 +31,6 @@ export async function updateArtifacts(
     return null;
   }
   const cwd = join(config.localDir, dirname(goModFileName));
-  let stdout: string;
-  let stderr: string;
   try {
     const localGoModFileName = join(config.localDir, goModFileName);
     const massagedGoMod = newGoModContent.replace(
@@ -38,17 +42,14 @@ export async function updateArtifacts(
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
-    const env = getChildProcessEnv(customEnv);
-    const startTime = process.hrtime();
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
-      const volumes = [config.localDir, process.env.GOPATH];
+      const volumes = [config.localDir, env.GOPATH];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = customEnv;
       cmd += envVars.map(e => `-e ${e} `).join('');
@@ -70,8 +71,8 @@ export async function updateArtifacts(
         cmd += 'go';
       }
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BINARY_SOURCE_AUTO ||
+      config.binarySource === BINARY_SOURCE_GLOBAL
     ) {
       logger.info('Running go via global command');
       cmd = 'go';
@@ -84,16 +85,10 @@ export async function updateArtifacts(
       args += '"';
     }
     logger.debug({ cmd, args }, 'go get command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+    await exec(`${cmd} ${args}`, {
       cwd,
       env,
-    }));
-    let duration = process.hrtime(startTime);
-    let seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'go.sum', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     if (
       config.postUpdateOptions &&
       config.postUpdateOptions.includes('gomodTidy')
@@ -103,16 +98,10 @@ export async function updateArtifacts(
         args += '"';
       }
       logger.debug({ cmd, args }, 'go mod tidy command');
-      ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+      await exec(`${cmd} ${args}`, {
         cwd,
         env,
-      }));
-      duration = process.hrtime(startTime);
-      seconds = Math.round(duration[0] + duration[1] / 1e9);
-      logger.info(
-        { seconds, stdout, stderr },
-        'Tidied Go Modules after update'
-      );
+      });
     }
     const res = [];
     let status = await platform.getRepoStatus();
@@ -135,13 +124,10 @@ export async function updateArtifacts(
         args += '"';
       }
       logger.debug({ cmd, args }, 'go mod vendor command');
-      ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+      await exec(`${cmd} ${args}`, {
         cwd,
         env,
-      }));
-      duration = process.hrtime(startTime);
-      seconds = Math.round(duration[0] + duration[1] / 1e9);
-      logger.info({ seconds, stdout, stderr }, 'Vendored modules');
+      });
       if (
         config.postUpdateOptions &&
         config.postUpdateOptions.includes('gomodTidy')
@@ -151,16 +137,10 @@ export async function updateArtifacts(
           args += '"';
         }
         logger.debug({ cmd, args }, 'go mod tidy command');
-        ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+        await exec(`${cmd} ${args}`, {
           cwd,
           env,
-        }));
-        duration = process.hrtime(startTime);
-        seconds = Math.round(duration[0] + duration[1] / 1e9);
-        logger.info(
-          { seconds, stdout, stderr },
-          'Tidied Go Modules after vendoring'
-        );
+        });
       }
       status = await platform.getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
@@ -183,10 +163,9 @@ export async function updateArtifacts(
         });
       }
     }
-    const finalGoModContent = (await readFile(
-      localGoModFileName,
-      'utf8'
-    )).replace(/\/\/ renovate-replace /g, '');
+    const finalGoModContent = (
+      await readFile(localGoModFileName, 'utf8')
+    ).replace(/\/\/ renovate-replace /g, '');
     if (finalGoModContent !== newGoModContent) {
       logger.info('Found updated go.mod after go.sum update');
       res.push({

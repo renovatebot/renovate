@@ -1,5 +1,9 @@
 import * as validate from '../../../../lib/workers/repository/finalise/validate';
 import { platform } from '../../../util';
+import {
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../../lib/constants/branch-constants';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -49,7 +53,9 @@ describe('workers/repository/validate', () => {
       platform.getFile.mockResolvedValue('not JSON');
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus.mock.calls[0][3]).toEqual('failure');
+      expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
+        BRANCH_STATUS_FAILURE
+      );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
@@ -65,7 +71,9 @@ describe('workers/repository/validate', () => {
       platform.getFile.mockResolvedValue('{"foo":1}');
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus.mock.calls[0][3]).toEqual('failure');
+      expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
+        BRANCH_STATUS_FAILURE
+      );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
@@ -81,7 +89,9 @@ describe('workers/repository/validate', () => {
       platform.getFile.mockResolvedValue('{}');
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus.mock.calls[0][3]).toEqual('success');
+      expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
+        BRANCH_STATUS_SUCCESS
+      );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
     });

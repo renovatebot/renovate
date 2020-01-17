@@ -348,8 +348,22 @@ describe('versioning/maven/index', () => {
   it('api', () => {
     expect(maven.isGreaterThan('1.1', '1')).toBe(true);
     expect(maven.maxSatisfyingVersion(['1'], '1')).toBe('1');
-    expect(maven.getNewValue('1', null, null, '1.1')).toBe('1.1');
-    expect(maven.getNewValue('[1.2.3,]', null, null, '1.2.4')).toBe('[1.2.3,]');
+    expect(
+      maven.getNewValue({
+        currentValue: '1',
+        rangeStrategy: null,
+        fromVersion: null,
+        toVersion: '1.1',
+      })
+    ).toBe('1.1');
+    expect(
+      maven.getNewValue({
+        currentValue: '[1.2.3,]',
+        rangeStrategy: null,
+        fromVersion: null,
+        toVersion: '1.2.4',
+      })
+    ).toBe('[1.2.3,]');
   });
   it('pins maven ranges', () => {
     const sample = [
@@ -366,9 +380,14 @@ describe('versioning/maven/index', () => {
       ['[1.2.3,[', '1.2.3', '1.2.4'],
     ];
     sample.forEach(([currentValue, fromVersion, toVersion]) => {
-      expect(getNewValue(currentValue, 'pin', fromVersion, toVersion)).toEqual(
-        toVersion
-      );
+      expect(
+        getNewValue({
+          currentValue,
+          rangeStrategy: 'pin',
+          fromVersion,
+          toVersion,
+        })
+      ).toEqual(toVersion);
     });
   });
 });

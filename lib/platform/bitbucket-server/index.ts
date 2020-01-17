@@ -14,10 +14,24 @@ import {
   Issue,
   VulnerabilityAlert,
   GotResponse,
+  CreatePRConfig,
+  BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
-
+import {
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -154,7 +168,7 @@ export async function initRepo({
       // Do nothing
     }
     if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
   }
 
@@ -191,14 +205,18 @@ export async function initRepo({
   });
 
   try {
-    const info = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
-    )).body;
+    const info = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      )
+    ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
-    )).body.displayId;
+    config.defaultBranch = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
+      )
+    ).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
@@ -209,7 +227,7 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug(err);
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
@@ -295,10 +313,12 @@ export async function getPr(
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
 
-    const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
-      { useCache: !refreshCache }
-    )).body;
+    const prCommits = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
+        { useCache: !refreshCache }
+      )
+    ).body;
 
     if (prCommits.totalCount === 1) {
       if (global.gitAuthor) {
@@ -375,12 +395,12 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 
 // TODO: coverage
 // istanbul ignore next
-export async function findPr(
-  branchName: string,
-  prTitle?: string,
+export async function findPr({
+  branchName,
+  prTitle,
   state = 'all',
-  refreshCache?: boolean
-): Promise<Pr | null> {
+  refreshCache,
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
   const prList = await getPrList({ refreshCache });
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
@@ -398,7 +418,10 @@ export async function getBranchPr(
   refreshCache?: boolean
 ): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, undefined, 'open');
+  const existingPr = await findPr({
+    branchName,
+    state: 'open',
+  });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 
@@ -488,10 +511,11 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = await config.storage.getBranchCommit(branchName);
 
-  return (await api.get(
-    `./rest/build-status/1.0/commits/stats/${branchCommit}`,
-    { useCache }
-  )).body;
+  return (
+    await api.get(`./rest/build-status/1.0/commits/stats/${branchCommit}`, {
+      useCache,
+    })
+  ).body;
 }
 
 // Returns the combined status for a branch.
@@ -508,11 +532,11 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
 
   if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+    throw new Error(REPOSITORY_CHANGED);
   }
 
   try {
@@ -520,12 +544,14 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return 'failed';
-    if (commitStatus.inProgress > 0) return 'pending';
-    return commitStatus.successful > 0 ? 'success' : 'pending';
+    if (commitStatus.failed > 0) return BRANCH_STATUS_FAILED;
+    if (commitStatus.inProgress > 0) return BRANCH_STATUS_PENDING;
+    return commitStatus.successful > 0
+      ? BRANCH_STATUS_SUCCESS
+      : BRANCH_STATUS_PENDING;
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
 }
 
@@ -556,12 +582,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return 'success';
+            return BRANCH_STATUS_SUCCESS;
           case 'INPROGRESS':
-            return 'pending';
+            return BRANCH_STATUS_PENDING;
           case 'FAILED':
           default:
-            return 'failure';
+            return BRANCH_STATUS_FAILURE;
         }
       }
     }
@@ -571,13 +597,13 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string | null,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   logger.debug(`setBranchStatus(${branchName})`);
 
   const existingStatus = await getBranchStatusCheck(branchName, context);
@@ -596,13 +622,13 @@ export async function setBranchStatus(
     };
 
     switch (state) {
-      case 'success':
+      case BRANCH_STATUS_SUCCESS:
         body.state = 'SUCCESSFUL';
         break;
-      case 'pending':
+      case BRANCH_STATUS_PENDING:
         body.state = 'INPROGRESS';
         break;
-      case 'failure':
+      case BRANCH_STATUS_FAILURE:
       default:
         body.state = 'FAILED';
         break;
@@ -681,7 +707,7 @@ export async function addReviewers(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
 
     const reviewersSet = new Set([...pr.reviewers, ...reviewers]);
@@ -700,9 +726,9 @@ export async function addReviewers(
     await getPr(prNo, true);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     } else {
       logger.fatal({ err }, `Failed to add reviewers ${reviewers} to #${prNo}`);
       throw err;
@@ -752,9 +778,11 @@ async function getCommentVersion(
   commentId: number
 ): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
-  const { version } = (await api.get(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
-  )).body;
+  const { version } = (
+    await api.get(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
+    )
+  ).body;
 
   return version;
 }
@@ -784,20 +812,20 @@ async function deleteComment(prNo: number, commentId: number): Promise<void> {
   );
 }
 
-export async function ensureComment(
-  prNo: number,
-  topic: string | null,
-  rawContent: string
-): Promise<boolean> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  const sanitizedContent = sanitize(content);
   try {
-    const comments = await getComments(prNo);
+    const comments = await getComments(number);
     let body: string;
     let commentId: number | undefined;
     let commentNeedsUpdating: boolean | undefined;
     if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
-      body = `### ${topic}\n\n${content}`;
+      logger.debug(`Ensuring comment "${topic}" in #${number}`);
+      body = `### ${topic}\n\n${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
@@ -805,8 +833,8 @@ export async function ensureComment(
         }
       });
     } else {
-      logger.debug(`Ensuring content-only comment in #${prNo}`);
-      body = `${content}`;
+      logger.debug(`Ensuring content-only comment in #${number}`);
+      body = `${sanitizedContent}`;
       comments.forEach(comment => {
         if (comment.text === body) {
           commentId = comment.id;
@@ -815,14 +843,17 @@ export async function ensureComment(
       });
     }
     if (!commentId) {
-      await addComment(prNo, body);
+      await addComment(number, body);
       logger.info(
-        { repository: config.repository, prNo, topic },
+        { repository: config.repository, prNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
-      await editComment(prNo, commentId, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment updated');
+      await editComment(number, commentId, body);
+      logger.info(
+        { repository: config.repository, prNo: number },
+        'Comment updated'
+      );
     } else {
       logger.debug('Comment is already update-to-date');
     }
@@ -859,13 +890,12 @@ export async function ensureCommentRemoval(
 const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  _labels?: string[] | null,
-  useDefaultBranch?: boolean
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  useDefaultBranch,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -874,17 +904,21 @@ export async function createPr(
   /* istanbul ignore else */
   if (config.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
-    const { id } = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
-    )).body;
+    const { id } = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      )
+    ).body;
 
-    const defReviewers = (await api.get(
-      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
-        config.repositorySlug
-      }/reviewers?sourceRefId=refs/heads/${escapeHash(
-        branchName
-      )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
-    )).body;
+    const defReviewers = (
+      await api.get(
+        `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
+          config.repositorySlug
+        }/reviewers?sourceRefId=refs/heads/${escapeHash(
+          branchName
+        )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
+      )
+    ).body;
 
     reviewers = defReviewers.map((u: { name: string }) => ({
       user: { name: u.name },
@@ -920,7 +954,7 @@ export async function createPr(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
       await deleteBranch(branchName);
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
   }
@@ -968,7 +1002,7 @@ export async function updatePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
     const { body } = await api.put<{ version: number }>(
@@ -986,9 +1020,9 @@ export async function updatePr(
     updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     } else {
       logger.fatal({ err }, `Failed to update PR`);
       throw err;
@@ -1006,7 +1040,7 @@ export async function mergePr(
   try {
     const pr = await getPr(prNo);
     if (!pr) {
-      throw Object.assign(new Error('not-found'), { statusCode: 404 });
+      throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await api.post<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
@@ -1014,7 +1048,7 @@ export async function mergePr(
     updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
       logger.warn({ err }, `Failed to merge PR`);
       return false;

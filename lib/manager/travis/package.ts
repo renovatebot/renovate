@@ -98,11 +98,13 @@ export async function getPackageUpdates(
     .sort((a, b) => a - b);
   const newMajor = newValue[newValue.length - 1];
   if (config.rangeStrategy === 'pin' || isVersion(config.currentValue[0])) {
-    const versions = (await getPkgReleases({
-      ...config,
-      datasource: 'github',
-      depName: 'nodejs/node',
-    })).releases.map(release => release.version);
+    const versions = (
+      await getPkgReleases({
+        ...config,
+        datasource: 'github',
+        depName: 'nodejs/node',
+      })
+    ).releases.map(release => release.version);
     newValue = newValue.map(value =>
       maxSatisfyingVersion(versions, `${value}`)
     );

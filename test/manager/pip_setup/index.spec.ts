@@ -2,7 +2,15 @@ import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
 import * as extract from '../../../lib/manager/pip_setup/extract';
 import { extractPackageFile } from '../../../lib/manager/pip_setup';
-import { ExecSnapshots, mockExecAll, mockExecSequence } from '../../execUtil';
+import {
+  ExecSnapshots,
+  envMock,
+  mockExecAll,
+  mockExecSequence,
+} from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { mocked } from '../../util';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = readFileSync(packageFile, 'utf8');
@@ -14,10 +22,11 @@ const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-let processEnv;
-
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
+
 jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 
 const pythonVersionCallResults = [
   { stdout: '', stderr: 'Python 2.7.17\\n' },
@@ -39,17 +48,7 @@ describe('lib/manager/pip_setup/index', () => {
       jest.resetModules();
       extract.resetModule();
 
-      processEnv = process.env;
-      process.env = {
-        HTTP_PROXY: 'http://example.com',
-        HTTPS_PROXY: 'https://example.com',
-        NO_PROXY: 'localhost',
-        HOME: '/home/user',
-        PATH: '/tmp/path',
-      };
-    });
-    afterEach(() => {
-      process.env = processEnv;
+      env.getChildProcessEnv.mockReturnValue(envMock.basic);
     });
     it('returns found deps', async () => {
       const execSnapshots = mockExecSequence(exec, [
@@ -71,7 +70,7 @@ describe('lib/manager/pip_setup/index', () => {
       expect(
         await extractPackageFile(content, packageFile, {
           ...config,
-          binarySource: 'docker',
+          binarySource: BINARY_SOURCE_DOCKER,
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toHaveLength(2); // TODO: figure out volume arguments in Windows

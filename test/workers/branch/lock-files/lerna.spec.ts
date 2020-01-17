@@ -2,17 +2,23 @@ import { exec as _exec } from 'child_process';
 import * as _lernaHelper from '../../../../lib/manager/npm/post-update/lerna';
 import { platform as _platform } from '../../../../lib/platform';
 import { mocked } from '../../../util';
-import { mockExecAll } from '../../../execUtil';
+import { envMock, mockExecAll } from '../../../execUtil';
+import * as _env from '../../../../lib/util/exec/env';
+import { BINARY_SOURCE_GLOBAL } from '../../../../lib/constants/data-binary-source';
 
 jest.mock('child_process');
+jest.mock('../../../../lib/util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const lernaHelper = mocked(_lernaHelper);
 const platform = mocked(_platform);
 
 describe('generateLockFiles()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns if no lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});
@@ -39,7 +45,7 @@ describe('generateLockFiles()', () => {
     );
     const execSnapshots = mockExecAll(exec);
     const skipInstalls = false;
-    const binarySource = 'global';
+    const binarySource = BINARY_SOURCE_GLOBAL;
     const res = await lernaHelper.generateLockFiles(
       'npm',
       'some-dir',

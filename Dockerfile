@@ -1,4 +1,4 @@
-FROM amd64/node:10.18.0@sha256:d76cca8f184c003dc5f50d2327615a5ff1dcd3ccb253ed7c78b4a835b3292ed9 AS tsbuild
+FROM amd64/node:10.18.1@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:2695d3e10e69cc500a16eae6d6629c803c43ab075fa5ce60813a0fc49c47e859
+FROM amd64/ubuntu:18.04@sha256:bc025862c3e8ec4a8754ea4756e33da6c41cba38330d7e324abd25c8e0b93300
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openss
 
 ## Gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jre-headless gradle && \
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-headless gradle && \
     rm -rf /var/lib/apt/lists/*
 
 ## Node.js

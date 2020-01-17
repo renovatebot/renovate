@@ -21,11 +21,9 @@ export async function getPkgReleases({
 
   const git = Git();
   try {
-    const newHash = (await git.listRemote([
-      '--refs',
-      registryUrls[0],
-      registryUrls[1],
-    ]))
+    const newHash = (
+      await git.listRemote(['--refs', registryUrls[0], registryUrls[1]])
+    )
       .trim()
       .split(/\t/)[0];
 

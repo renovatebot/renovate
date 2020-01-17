@@ -1,5 +1,6 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy } from '../versioning';
+import { ValidationMessage } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -119,10 +120,11 @@ export interface Package<T> extends ManagerData<T> {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
-  warnings?: { message: string }[];
+  warnings?: ValidationMessage[];
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
+  deprecationMessage?: string;
   digestOneAndOnly?: boolean;
   fromVersion?: string;
   lockedVersion?: string;
@@ -134,6 +136,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   skipReason?: string;
   source?: string;
   sourceLine?: number;
+  updates?: PackageUpdateResult[];
   versionLine?: number;
 }
 
@@ -170,6 +173,12 @@ export interface UpdateArtifactsResult {
   file?: { name: string; contents: string };
 }
 
+export interface UpdateArtifact {
+  packageFileName: string;
+  updatedDeps: string[];
+  newPackageFileContent: string;
+  config: UpdateArtifactsConfig;
+}
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
@@ -192,10 +201,7 @@ export interface ManagerApi {
   getRangeStrategy(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
-    packageFileName: string,
-    updatedDeps: string[],
-    newPackageFileContent: string,
-    config: UpdateArtifactsConfig
+    updateArtifact: UpdateArtifact
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency(

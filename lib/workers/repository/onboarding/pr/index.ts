@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import { getConfigDesc } from './config-description';
 import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
 import { getBaseBranchDesc } from './base-branch';
-import { getPrList, BranchConfig } from './pr-list';
+import { getPrList, PrBranchConfig } from './pr-list';
 import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
@@ -12,7 +12,7 @@ import { PackageFile } from '../../../../manager/common';
 export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
-  branches: BranchConfig[]
+  branches: PrBranchConfig[]
 ): Promise<void> {
   if (config.repoIsOnboarded) {
     return;
@@ -120,13 +120,13 @@ If you need any further assistance then you can also [request help here](${confi
     if (config.dryRun) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
-      const pr = await platform.createPr(
-        config.onboardingBranch,
-        config.onboardingPrTitle,
+      const pr = await platform.createPr({
+        branchName: config.onboardingBranch,
+        prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        useDefaultBranch
-      );
+        useDefaultBranch,
+      });
       logger.info({ pr: pr.displayNumber }, 'Created onboarding PR');
     }
   } catch (err) /* istanbul ignore next */ {

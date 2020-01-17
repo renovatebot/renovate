@@ -3,6 +3,11 @@ import { logger } from '../../../../logger';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
+import {
+  MANAGER_CIRCLE_CI,
+  MANAGER_DOCKER_COMPOSE,
+  MANAGER_DOCKERFILE,
+} from '../../../../constants/managers';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -11,7 +16,7 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.trace({ config });
   if (
     !config.schedule ||
-    config.schedule === 'at any time' ||
+    (config.schedule as never) === 'at any time' ||
     config.schedule[0] === 'at any time'
   ) {
     logger.debug('No schedule');
@@ -42,9 +47,9 @@ export function getConfigDesc(
   const enabledManagers = packageFiles ? Object.keys(packageFiles) : [];
   if (
     !(
-      enabledManagers.includes('dockerfile') ||
-      enabledManagers.includes('circleci') ||
-      enabledManagers.includes('docker-compose')
+      enabledManagers.includes(MANAGER_DOCKERFILE) ||
+      enabledManagers.includes(MANAGER_CIRCLE_CI) ||
+      enabledManagers.includes(MANAGER_DOCKER_COMPOSE)
     )
   ) {
     descriptionArr = descriptionArr.filter(val => !val.includes('Docker-only'));

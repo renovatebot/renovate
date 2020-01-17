@@ -117,19 +117,34 @@ describe('pep440.getNewValue()', () => {
     // impossible
     ['!=1.2.3', null],
   ].forEach(([currentValue, expectedBump]) => {
-    const bumped = getNewValue(currentValue, 'bump', '1.0.0', '1.2.3');
+    const bumped = getNewValue({
+      currentValue,
+      rangeStrategy: 'bump',
+      fromVersion: '1.0.0',
+      toVersion: '1.2.3',
+    });
     it(`bumps '${currentValue}' to '${expectedBump}'`, () => {
       expect(bumped).toBe(expectedBump);
     });
 
-    const replaced = getNewValue(currentValue, 'replace', '1.0.0', '1.2.3');
+    const replaced = getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      fromVersion: '1.0.0',
+      toVersion: '1.2.3',
+    });
     const needReplace = pep440.matches('1.2.3', currentValue);
     const expectedReplace = needReplace ? currentValue : bumped;
     it(`replaces '${currentValue}' to '${expectedReplace}'`, () => {
       expect(replaced).toBe(expectedReplace);
     });
 
-    const pinned = getNewValue(currentValue, 'pin', '1.0.0', '1.2.3');
+    const pinned = getNewValue({
+      currentValue,
+      rangeStrategy: 'pin',
+      fromVersion: '1.0.0',
+      toVersion: '1.2.3',
+    });
     const expectedPin = '==1.2.3';
     it(`pins '${currentValue}' to '${expectedPin}'`, () => {
       expect(pinned).toBe(expectedPin);
@@ -137,7 +152,12 @@ describe('pep440.getNewValue()', () => {
   });
 
   it('guards against unsupported rangeStrategy', () => {
-    const invalid = getNewValue('==1.0.0', 'update-lockfile', '1.0.0', '1.2.3');
+    const invalid = getNewValue({
+      currentValue: '==1.0.0',
+      rangeStrategy: 'update-lockfile',
+      fromVersion: '1.0.0',
+      toVersion: '1.2.3',
+    });
     expect(invalid).toEqual('==1.2.3');
   });
 });

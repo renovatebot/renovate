@@ -232,9 +232,9 @@ export async function getMergeMethod(
   repoId: string,
   project: string
 ): Promise<GitPullRequestMergeStrategy> {
-  const policyConfigurations = (await (await azureApi.policyApi()).getPolicyConfigurations(
-    project
-  ))
+  const policyConfigurations = (
+    await (await azureApi.policyApi()).getPolicyConfigurations(project)
+  )
     .filter(
       p =>
         p.settings.scope.some(s => s.repositoryId === repoId) &&

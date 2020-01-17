@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import { DATASOURCE_GITLAB } from '../../constants/data-binary-source';
 
 function extractDepFromInclude(includeObj: {
   file: any;
@@ -12,7 +13,7 @@ function extractDepFromInclude(includeObj: {
     return null;
   }
   const dep: PackageDependency = {
-    datasource: 'gitlab',
+    datasource: DATASOURCE_GITLAB,
     depName: includeObj.project,
     depType: 'repository',
   };

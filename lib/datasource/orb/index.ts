@@ -34,11 +34,13 @@ export async function getPkgReleases({
     variables: {},
   };
   try {
-    const res: OrbRelease = (await got.post(url, {
-      body,
-      json: true,
-      retry: 5,
-    })).body.data.orb;
+    const res: OrbRelease = (
+      await got.post(url, {
+        body,
+        json: true,
+        retry: 5,
+      })
+    ).body.data.orb;
     if (!res) {
       logger.info({ lookupName }, 'Failed to look up orb');
       return null;

@@ -1,6 +1,8 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
 import { PrBodyConfig } from './common';
+import { BRANCH_STATUS_FAILED } from '../../../constants/branch-constants';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platfroms';
 
 export async function getPrConfigDescription(
   config: PrBodyConfig
@@ -9,7 +11,7 @@ export async function getPrConfigDescription(
   prBody += emojify(`:date: **Schedule**: `);
   if (
     config.schedule &&
-    config.schedule !== 'at any time' &&
+    (config.schedule as never) !== 'at any time' &&
     config.schedule[0] !== 'at any time'
   ) {
     prBody += `"${config.schedule}"`;
@@ -30,7 +32,7 @@ export async function getPrConfigDescription(
       config.requiredStatusChecks
     );
     // istanbul ignore if
-    if (branchStatus === 'failed') {
+    if (branchStatus === BRANCH_STATUS_FAILED) {
       prBody += 'Disabled due to failing status checks.';
     } else {
       prBody += 'Enabled.';
@@ -46,7 +48,7 @@ export async function getPrConfigDescription(
   } else {
     prBody += 'Whenever PR becomes conflicted';
   }
-  if (config.platform === 'github') {
+  if (config.platform === PLATFORM_TYPE_GITHUB) {
     prBody += `, or if you modify the PR title to begin with "\`rebase!\`".\n\n`;
   } else {
     prBody += '.\n\n';

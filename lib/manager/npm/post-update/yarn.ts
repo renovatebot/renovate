@@ -4,6 +4,11 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  DATASOURCE_FAILURE,
+} from '../../../constants/error-messages';
+import { BINARY_SOURCE_GLOBAL } from '../../../constants/data-binary-source';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -24,7 +29,6 @@ export async function generateLockFile(
   let stderr: string;
   let cmd: string;
   try {
-    const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
       const installedPath = join(
@@ -80,7 +84,7 @@ export async function generateLockFile(
         }
       }
     }
-    if (binarySource === 'global') {
+    if (binarySource === BINARY_SOURCE_GLOBAL) {
       cmd = 'yarn';
     }
     logger.debug(`Using yarn: ${cmd}`);
@@ -93,12 +97,10 @@ export async function generateLockFile(
       : ' --mutex network:31879';
     const installCmd = cmd + ' install' + cmdExtras;
     // TODO: Switch to native util.promisify once using only node 8
-    ({ stdout, stderr } = await exec(installCmd, {
+    await exec(installCmd, {
       cwd,
       env,
-    }));
-    logger.debug(`yarn stdout:\n${stdout}`);
-    logger.debug(`yarn stderr:\n${stderr}`);
+    });
     const lockUpdates = upgrades
       .filter(upgrade => upgrade.isLockfileUpdate)
       .map(upgrade => upgrade.depName);
@@ -156,13 +158,7 @@ export async function generateLockFile(
         ? /* istanbul ignore next */ dedupeRes.stderr
         : '';
     }
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
-    logger.info(
-      { seconds, type: 'yarn.lock', stdout, stderr },
-      'Generated lockfile'
-    );
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       {
@@ -176,14 +172,14 @@ export async function generateLockFile(
     );
     if (err.stderr) {
       if (err.stderr.includes('ENOSPC: no space left on device')) {
-        throw new Error('disk-space');
+        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       if (
         err.stderr.includes('The registry may be down.') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new Error('registry-failure');
+        throw new Error(DATASOURCE_FAILURE);
       }
     }
     return { error: true, stderr: err.stderr };

@@ -4,6 +4,11 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
+import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import {
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../../constants/data-binary-source';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -25,7 +30,6 @@ export async function generateLockFile(
   let cmd: string;
   let args = '';
   try {
-    const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
       const installedPath = join(
@@ -63,11 +67,11 @@ export async function generateLockFile(
         }
       }
     }
-    if (binarySource === 'global') {
+    if (binarySource === BINARY_SOURCE_GLOBAL) {
       cmd = 'npm';
     }
     // istanbul ignore if
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running npm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if
@@ -135,10 +139,8 @@ export async function generateLockFile(
     }
     // istanbul ignore if
     if (stderr && stderr.includes('ENOSPC: no space left on device')) {
-      throw new Error('disk-space');
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (
       filename === 'npm-shrinkwrap.json' &&
       (await pathExists(join(cwd, 'package-lock.json')))
@@ -149,10 +151,6 @@ export async function generateLockFile(
       );
     }
     lockFile = await readFile(join(cwd, filename), 'utf8');
-    logger.info(
-      { seconds, type: filename, stdout, stderr },
-      'Generated lockfile'
-    );
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       {

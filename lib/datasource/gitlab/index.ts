@@ -100,9 +100,11 @@ export async function getPkgReleases({
         tag_name: string;
       }[];
 
-      versions = (await glGot<GlRelease>(url, {
-        paginate: true,
-      })).body.map(o => o.tag_name);
+      versions = (
+        await glGot<GlRelease>(url, {
+          paginate: true,
+        })
+      ).body.map(o => o.tag_name);
     } else {
       // tag
       const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
@@ -110,9 +112,11 @@ export async function getPkgReleases({
         name: string;
       }[];
 
-      versions = (await glGot<GlTag>(url, {
-        paginate: true,
-      })).body.map(o => o.name);
+      versions = (
+        await glGot<GlTag>(url, {
+          paginate: true,
+        })
+      ).body.map(o => o.name);
     }
   } catch (err) {
     // istanbul ignore next

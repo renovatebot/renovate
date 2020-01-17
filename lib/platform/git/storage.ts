@@ -5,6 +5,13 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 import { logger } from '../../logger';
 import * as limits from '../../workers/global/limits';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_FAILURE,
+  REPOSITORY_CHANGED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_TEMPORARY_ERROR,
+} from '../../constants/error-messages';
 
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
@@ -66,7 +73,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-failure');
+      throw new Error(PLATFORM_FAILURE);
     }
   }
 }
@@ -76,7 +83,7 @@ function localName(branchName: string): string {
 }
 
 function throwBaseBranchValidationError(branchName: string): never {
-  const error = new Error('config-validation');
+  const error = new Error(CONFIG_VALIDATION);
   error.validationError = 'baseBranch not found';
   error.validationMessage =
     'The following configured baseBranch could not be found: ' + branchName;
@@ -145,7 +152,7 @@ export class Storage {
             'fatal: ref refs/remotes/origin/HEAD is not a symbolic ref'
           )
         ) {
-          throw new Error('empty');
+          throw new Error(REPOSITORY_EMPTY);
         }
         throw err;
       }
@@ -180,7 +187,7 @@ export class Storage {
         await this._git.clone(config.url, '.', ['--depth=2']);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
-        throw new Error('platform-failure');
+        throw new Error(PLATFORM_FAILURE);
       }
       const cloneSeconds =
         Math.round(1 + 10 * convertHrtime(process.hrtime(cloneStart)).seconds) /
@@ -202,7 +209,7 @@ export class Storage {
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       if (err.message.includes('does not have any commits yet')) {
-        throw new Error('empty');
+        throw new Error(REPOSITORY_EMPTY);
       }
       logger.warn({ err }, 'Cannot retrieve latest commit date');
     }
@@ -222,7 +229,7 @@ export class Storage {
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
         logger.debug({ err }, 'Error setting git config');
-        throw new Error('temporary-error');
+        throw new Error(REPOSITORY_TEMPORARY_ERROR);
       }
     }
 
@@ -272,10 +279,9 @@ export class Storage {
       this._config.baseBranch = branchName;
       try {
         if (branchName !== 'master') {
-          this._config.baseBranchSha = (await this._git!.raw([
-            'rev-parse',
-            'origin/' + branchName,
-          ])).trim();
+          this._config.baseBranchSha = (
+            await this._git!.raw(['rev-parse', 'origin/' + branchName])
+          ).trim();
         }
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');
@@ -455,7 +461,7 @@ export class Storage {
       const exists = await this.branchExists(branchName);
       if (!exists) {
         logger.info({ branchName }, 'branch no longer exists - aborting');
-        throw new Error('repository-changed');
+        throw new Error(REPOSITORY_CHANGED);
       }
     }
     try {
@@ -540,7 +546,7 @@ export class Storage {
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');
-      throw new Error('repository-changed');
+      throw new Error(REPOSITORY_CHANGED);
     }
   }
 

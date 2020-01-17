@@ -1,4 +1,11 @@
 import { RenovateConfigStage } from './common';
+import {
+  PLATFORM_TYPE_AZURE,
+  PLATFORM_TYPE_BITBUCKET,
+  PLATFORM_TYPE_BITBUCKET_SERVER,
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../constants/platfroms';
 
 export interface RenovateOptionBase {
   admin?: boolean;
@@ -399,13 +406,13 @@ const options: RenovateOptions[] = [
     description: 'Platform type of repository',
     type: 'string',
     allowedValues: [
-      'azure',
-      'bitbucket',
-      'bitbucket-server',
-      'github',
-      'gitlab',
+      PLATFORM_TYPE_AZURE,
+      PLATFORM_TYPE_BITBUCKET,
+      PLATFORM_TYPE_BITBUCKET_SERVER,
+      PLATFORM_TYPE_GITHUB,
+      PLATFORM_TYPE_GITLAB,
     ],
-    default: 'github',
+    default: PLATFORM_TYPE_GITHUB,
     admin: true,
   },
   {
@@ -1336,6 +1343,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'additionalReviewers',
+    description:
+      'Additional reviewers for Pull Requests (in contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it)',
+    type: 'array',
+    subType: 'string',
+    mergeable: true,
+  },
+  {
     name: 'fileMatch',
     description: 'RegEx (re2) pattern for matching manager files',
     type: 'array',
@@ -1814,7 +1829,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['\\.sbt$'],
+      fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
       timeout: 300,
       versionScheme: 'ivy',
     },

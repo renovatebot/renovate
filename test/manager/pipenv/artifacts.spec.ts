@@ -4,14 +4,18 @@ import * as pipenv from '../../../lib/manager/pipenv/artifacts';
 import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
-import { mockExecAll } from '../../execUtil';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
@@ -19,32 +23,33 @@ const config = {
   cacheDir: '/tmp/renovate/cache',
 };
 
-const processEnv = process.env;
-
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
 
   it('returns if no Pipfile.lock found', async () => {
-    expect(await pipenv.updateArtifacts('Pipfile', [], '', config)).toBeNull();
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current Pipfile.lock' as any);
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -56,7 +61,12 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -68,10 +78,15 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', {
-        ...config,
-        binarySource: 'docker',
-        dockerUser: 'foobar',
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          binarySource: BINARY_SOURCE_DOCKER,
+          dockerUser: 'foobar',
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -82,7 +97,12 @@ describe('.updateArtifacts()', () => {
       throw new Error('not found');
     });
     expect(
-      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toMatchSnapshot();
   });
 });

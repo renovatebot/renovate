@@ -1,6 +1,8 @@
 import nock from 'nock';
 import fs from 'fs';
 import * as datasource from '../../lib/datasource';
+import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
+import { DATASOURCE_MAVEN } from '../../lib/constants/data-binary-source';
 
 const hostRules = require('../../lib/util/host-rules');
 
@@ -25,7 +27,7 @@ const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
 );
 
 const config = {
-  datasource: 'maven',
+  datasource: DATASOURCE_MAVEN,
   versionScheme: 'loose',
 };
 
@@ -176,7 +178,7 @@ describe('datasource/maven', () => {
           lookupName: 'org:artifact',
           registryUrls: ['http://central.maven.org/maven2/'],
         })
-      ).rejects.toThrow(Error('registry-failure'));
+      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {

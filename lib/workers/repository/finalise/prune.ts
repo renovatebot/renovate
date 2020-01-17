@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -8,7 +9,10 @@ async function cleanUpBranches(
 ): Promise<void> {
   for (const branchName of remainingBranches) {
     try {
-      const pr = await platform.findPr(branchName, null, 'open');
+      const pr = await platform.findPr({
+        branchName,
+        state: 'open',
+      });
       const branchPr = await platform.getBranchPr(branchName);
       const skipAutoclose = branchPr && branchPr.isModified;
       if (pr && !skipAutoclose) {
@@ -35,11 +39,12 @@ async function cleanUpBranches(
           if (dryRun) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
-            await platform.ensureComment(
-              pr.number,
-              'Autoclosing Skipped',
-              'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.'
-            );
+            await platform.ensureComment({
+              number: pr.number,
+              topic: 'Autoclosing Skipped',
+              content:
+                'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+            });
           }
         }
       } else if (dryRun) {
@@ -53,7 +58,7 @@ async function cleanUpBranches(
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message !== 'repository-changed') {
+      if (err.message !== REPOSITORY_CHANGED) {
         logger.warn({ err, branch: branchName }, 'Error pruning branch');
       }
     }

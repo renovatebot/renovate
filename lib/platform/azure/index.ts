@@ -15,9 +15,19 @@ import {
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
+  BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 interface Config {
   storage: GitStorage;
@@ -127,7 +137,7 @@ export async function initRepo({
       // Do nothing
     }
     if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
+      throw new Error(REPOSITORY_DISABLED);
     }
   }
 
@@ -271,11 +281,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   return azurePr;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle: string | null,
-  state = 'all'
-): Promise<Pr | null> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   // TODO: fix typing
   let prsFiltered: any[] = [];
@@ -312,7 +322,7 @@ export async function findPr(
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr(branchName, null, 'open');
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 
@@ -376,9 +386,9 @@ export async function getBranchStatusCheck(
     azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   if (branch.aheadCount === 0) {
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
-  return 'pending';
+  return BRANCH_STATUS_PENDING;
 }
 
 export async function getBranchStatus(
@@ -388,25 +398,25 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   const branchStatusCheck = await getBranchStatusCheck(branchName);
   return branchStatusCheck;
 }
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  body: string,
-  labels: string[],
-  useDefaultBranch?: boolean,
-  platformOptions: any = {}
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: body,
+  labels,
+  useDefaultBranch,
+  platformOptions = {},
+}: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
   const targetRefName = azureHelper.getNewBranchName(
     useDefaultBranch ? config.defaultBranch : config.baseBranch
@@ -473,12 +483,12 @@ export async function updatePr(
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null,
-  content: string
-): Promise<void> {
-  logger.debug(`ensureComment(${issueNo}, ${topic}, content)`);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
+  logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const body = `### ${topic}\n\n${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.createThread(
@@ -487,7 +497,7 @@ export async function ensureComment(
       status: 1,
     },
     config.repoId,
-    issueNo
+    number
   );
 }
 
@@ -520,13 +530,13 @@ export async function ensureCommentRemoval(
   }
 }
 
-export function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl: string
-): void {
+export function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): void {
   logger.debug(
     `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
   );
@@ -575,11 +585,11 @@ export async function addAssignees(
   assignees: string[]
 ): Promise<void> {
   logger.trace(`addAssignees(${issueNo}, ${assignees})`);
-  await ensureComment(
-    issueNo,
-    'Add Assignees',
-    assignees.map(a => `@<${a}>`).join(', ')
-  );
+  await ensureComment({
+    number: issueNo,
+    topic: 'Add Assignees',
+    content: assignees.map(a => `@<${a}>`).join(', '),
+  });
 }
 
 /**

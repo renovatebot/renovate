@@ -5,20 +5,26 @@ import { updateArtifacts } from '../../../lib/manager/bundler';
 import { platform as _platform } from '../../../lib/platform';
 import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
-import { mockExecAll } from '../../execUtil';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import {
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../../lib/constants/data-binary-source';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 const platform = mocked(_platform);
 const datasource = mocked(_datasource);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
 
 let config;
-let processEnv;
 
 describe('bundler.updateArtifacts()', () => {
   beforeEach(() => {
@@ -29,20 +35,17 @@ describe('bundler.updateArtifacts()', () => {
       localDir: '/tmp/github/some/repo',
     };
 
-    processEnv = process.env;
-    process.env = {
-      HTTP_PROXY: 'http://example.com',
-      HTTPS_PROXY: 'https://example.com',
-      NO_PROXY: 'localhost',
-      HOME: '/home/user',
-      PATH: '/tmp/path',
-    };
-  });
-  afterEach(() => {
-    process.env = processEnv;
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns null by default', async () => {
-    expect(await updateArtifacts('', [], '', config)).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: '',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if Gemfile.lock was not changed', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -53,7 +56,12 @@ describe('bundler.updateArtifacts()', () => {
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
-      await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: 'Updated Gemfile content',
+        config,
+      })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -66,7 +74,12 @@ describe('bundler.updateArtifacts()', () => {
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
-      await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: 'Updated Gemfile content',
+        config,
+      })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -79,9 +92,14 @@ describe('bundler.updateArtifacts()', () => {
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
-      await updateArtifacts('Gemfile', [], 'Updated Gemfile content', {
-        ...config,
-        binarySource: 'global',
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: 'Updated Gemfile content',
+        config: {
+          ...config,
+          binarySource: BINARY_SOURCE_GLOBAL,
+        },
       })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
@@ -104,9 +122,14 @@ describe('bundler.updateArtifacts()', () => {
       } as Git.StatusResult);
       fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
-        await updateArtifacts('Gemfile', [], 'Updated Gemfile content', {
-          ...config,
-          binarySource: 'docker',
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: 'Updated Gemfile content',
+          config: {
+            ...config,
+            binarySource: BINARY_SOURCE_DOCKER,
+          },
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
@@ -127,13 +150,18 @@ describe('bundler.updateArtifacts()', () => {
       } as Git.StatusResult);
       fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
-        await updateArtifacts('Gemfile', [], 'Updated Gemfile content', {
-          ...config,
-          binarySource: 'docker',
-          dockerUser: 'foobar',
-          compatibility: {
-            ruby: '1.2.5',
-            bundler: '3.2.1',
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: 'Updated Gemfile content',
+          config: {
+            ...config,
+            binarySource: BINARY_SOURCE_DOCKER,
+            dockerUser: 'foobar',
+            compatibility: {
+              ruby: '1.2.5',
+              bundler: '3.2.1',
+            },
           },
         })
       ).toMatchSnapshot();

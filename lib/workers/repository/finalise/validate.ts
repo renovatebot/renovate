@@ -1,9 +1,14 @@
 import JSON5 from 'json5';
-import { logger, setMeta } from '../../../logger';
+import { logger } from '../../../logger';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../constants/branch-constants';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
@@ -25,7 +30,6 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
   ) {
     return;
   }
-  setMeta({ repository: config.repository });
   logger.debug('branchPrefix: ' + config.branchPrefix);
   const renovatePrs = await getRenovatePrs(config.branchPrefix);
   logger.debug({ renovatePrs }, `Found ${renovatePrs.length} Renovate PRs`);
@@ -88,35 +92,39 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       // if the PR has renovate files then we set a status no matter what
       let status: 'failure' | 'success';
       let description: string;
-      const subject = `Renovate Configuration Errors`;
+      const topic = `Renovate Configuration Errors`;
       if (validations.length) {
         const content = validations
           .map(v => `\`${v.file}\`: ${v.message}`)
           .join('\n\n');
-        await platform.ensureComment(pr.number, subject, content);
-        status = 'failure';
+        await platform.ensureComment({
+          number: pr.number,
+          topic,
+          content,
+        });
+        status = BRANCH_STATUS_FAILURE;
         description = `Renovate config validation failed`; // GitHub limit
       } else {
         description = `Renovate config is valid`;
-        status = 'success';
-        await platform.ensureCommentRemoval(pr.number, subject);
+        status = BRANCH_STATUS_SUCCESS;
+        await platform.ensureCommentRemoval(pr.number, topic);
       }
       // istanbul ignore else
       if (pr.sourceRepo === config.repository) {
         logger.info({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
-        await platform.setBranchStatus(
-          pr.branchName,
+        await platform.setBranchStatus({
+          branchName: pr.branchName,
           context,
           description,
-          status
-        );
+          state: status,
+        });
       } else {
         logger.debug('Skipping branch status for forked PR');
       }
     } catch (err) {
       // istanbul ignore if
-      if (err.message === 'repository-changed') {
+      if (err.message === REPOSITORY_CHANGED) {
         logger.info('Cannot access PR files to check them');
       } else {
         logger.warn(

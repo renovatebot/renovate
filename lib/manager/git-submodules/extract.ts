@@ -3,27 +3,28 @@ import upath from 'upath';
 import URL from 'url';
 
 import { ManagerConfig, PackageFile } from '../common';
+import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
 
 async function getUrl(
   git: Git.SimpleGit,
   gitModulesPath: string,
   submoduleName: string
 ): Promise<string> {
-  const path = (await Git().raw([
-    'config',
-    '--file',
-    gitModulesPath,
-    '--get',
-    `submodule.${submoduleName}.url`,
-  ])).trim();
+  const path = (
+    await Git().raw([
+      'config',
+      '--file',
+      gitModulesPath,
+      '--get',
+      `submodule.${submoduleName}.url`,
+    ])
+  ).trim();
   if (!path.startsWith('../')) {
     return path;
   }
-  const remoteUrl = (await git.raw([
-    'config',
-    '--get',
-    'remote.origin.url',
-  ])).trim();
+  const remoteUrl = (
+    await git.raw(['config', '--get', 'remote.origin.url'])
+  ).trim();
   return URL.resolve(`${remoteUrl}/`, path);
 }
 
@@ -83,5 +84,5 @@ export default async function extractPackageFile(
     })
   );
 
-  return { deps, datasource: 'gitSubmodules' };
+  return { deps, datasource: DATASOURCE_GIT_SUBMODULES };
 }

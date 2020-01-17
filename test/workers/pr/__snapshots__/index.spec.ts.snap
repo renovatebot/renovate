@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/pr ensurePr should add and deduplicate additionalReviewers on new PR 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "foo",
+      "bar",
+      "baz",
+      "boo",
+    ],
+  ],
+]
+`;
+
 exports[`workers/pr ensurePr should add assignees and reviewers to new PR 1`] = `
 Array [
   Array [
@@ -26,251 +40,75 @@ Array [
 
 exports[`workers/pr ensurePr should add note about Pin 1`] = `
 Array [
-  "renovate/dummy-1.x",
-  "Update dependency dummy to v1.1.0",
-  "This PR contains the following updates:
-
-| Package | Type | Update | Change |
-|---|---|---|---|
-| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` |
-
-:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
-
----
-
-### Release Notes
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-</details>
-
----
-
-### Renovate configuration
-
-:date: **Schedule**: \\"before 5am\\" in timezone some timezone.
-
-:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
-
-:recycle: **Rebasing**: Whenever PR is stale, or if you modify the PR title to begin with \\"\`rebase!\`\\".
-
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
-
----
-
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
-  Array [],
-  false,
   Object {
-    "azureAutoComplete": false,
-    "gitLabAutomerge": false,
-    "statusCheckVerify": false,
+    "branchName": "renovate/dummy-1.x",
+    "labels": Array [],
+    "platformOptions": Object {
+      "azureAutoComplete": false,
+      "gitLabAutomerge": false,
+      "statusCheckVerify": false,
+    },
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` |\\n\\n:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" in timezone some timezone.\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Whenever PR is stale, or if you modify the PR title to begin with \\"\`rebase!\`\\".\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prTitle": "Update dependency dummy to v1.1.0",
+    "useDefaultBranch": false,
   },
 ]
 `;
 
 exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
-  "renovate/dummy-1.x",
-  "Update dependency dummy to v1.1.0",
-  "This PR contains the following updates:
-
-| Package | Type | Update | Change |
-|---|---|---|---|
-| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
-
----
-
-### Release Notes
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-</details>
-
----
-
-### Renovate configuration
-
-:date: **Schedule**: \\"before 5am\\" (UTC).
-
-:vertical_traffic_light: **Automerge**: Enabled.
-
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
-
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
-
----
-
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
-  Array [],
-  false,
   Object {
-    "azureAutoComplete": false,
-    "gitLabAutomerge": false,
-    "statusCheckVerify": false,
+    "branchName": "renovate/dummy-1.x",
+    "labels": Array [],
+    "platformOptions": Object {
+      "azureAutoComplete": false,
+      "gitLabAutomerge": false,
+      "statusCheckVerify": false,
+    },
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prTitle": "Update dependency dummy to v1.1.0",
+    "useDefaultBranch": false,
   },
 ]
 `;
 
 exports[`workers/pr ensurePr should create group PR 1`] = `
 Array [
-  "renovate/dummy-1.x",
-  "Update dependency dummy to v1.1.0",
-  "This PR contains the following updates:
-
-| Package | Type | Update | Change |
-|---|---|---|---|
-| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` |
-| a |  |  | \`zzzzzz\` -> \`aaaaaaa\` |
-| b |  | pin | \`some_old_value\` -> \`some_new_value\` |
-| c |  |  | \`\` -> \`\` |
-| d |  | lockFileMaintenance | \`\` -> \`\` |
-
-note 1
-
-note 2
-
-:abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.
-
-:wrench: This Pull Request updates lock files to use the latest dependency versions.
-
----
-
-### Release Notes
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-</details>
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-</details>
-
----
-
-### Renovate configuration
-
-:date: **Schedule**: At any time (no schedule defined).
-
-:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
-
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
-
-:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.
-
----
-
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
-  Array [],
-  false,
   Object {
-    "azureAutoComplete": false,
-    "gitLabAutomerge": false,
-    "statusCheckVerify": false,
+    "branchName": "renovate/dummy-1.x",
+    "labels": Array [],
+    "platformOptions": Object {
+      "azureAutoComplete": false,
+      "gitLabAutomerge": false,
+      "statusCheckVerify": false,
+    },
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` |\\n| a |  |  | \`zzzzzz\` -> \`aaaaaaa\` |\\n| b |  | pin | \`some_old_value\` -> \`some_new_value\` |\\n| c |  |  | \`\` -> \`\` |\\n| d |  | lockFileMaintenance | \`\` -> \`\` |\\n\\nnote 1\\n\\nnote 2\\n\\n:abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.\\n\\n:wrench: This Pull Request updates lock files to use the latest dependency versions.\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: At any time (no schedule defined).\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".\\n\\n:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prTitle": "Update dependency dummy to v1.1.0",
+    "useDefaultBranch": false,
   },
 ]
 `;
 
 exports[`workers/pr ensurePr should create privateRepo PR if success 1`] = `
 Array [
-  "renovate/dummy-1.x",
-  "Update dependency dummy to v1.1.0",
-  "This PR contains the following updates:
-
-| Package | Type | Update | Change |
-|---|---|---|---|
-| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
-
----
-
-### Release Notes
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-</details>
-
----
-
-### Renovate configuration
-
-:date: **Schedule**: At any time (no schedule defined).
-
-:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
-
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
-
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
-
----
-
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
-  Array [],
-  false,
   Object {
-    "azureAutoComplete": false,
-    "gitLabAutomerge": false,
-    "statusCheckVerify": false,
+    "branchName": "renovate/dummy-1.x",
+    "labels": Array [],
+    "platformOptions": Object {
+      "azureAutoComplete": false,
+      "gitLabAutomerge": false,
+      "statusCheckVerify": false,
+    },
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: At any time (no schedule defined).\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prTitle": "Update dependency dummy to v1.1.0",
+    "useDefaultBranch": false,
   },
 ]
 `;
 
 exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
-  "body": "This PR contains the following updates:
-
-| Package | Type | Update | Change |
-|---|---|---|---|
-| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
-
----
-
-### Release Notes
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-</details>
-
----
-
-### Renovate configuration
-
-:date: **Schedule**: \\"before 5am\\" (UTC).
-
-:vertical_traffic_light: **Automerge**: Enabled.
-
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
-
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
-
----
-
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+  "body": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
   "displayNumber": "Existing PR",
   "isModified": false,
   "title": "Update dependency dummy to v1.1.0",
@@ -279,40 +117,7 @@ Object {
 
 exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
-  "body": "This PR contains the following updates:
-
-| Package | Type | Update | Change |
-|---|---|---|---|
-| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
-
----
-
-### Release Notes
-
-<details>
-<summary>renovateapp/dummy</summary>
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-</details>
-
----
-
-### Renovate configuration
-
-:date: **Schedule**: \\"before 5am\\" (UTC).
-
-:vertical_traffic_light: **Automerge**: Enabled.
-
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
-
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
-
----
-
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+  "body": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
   "displayNumber": "Existing PR",
   "isModified": false,
   "title": "wrong",
