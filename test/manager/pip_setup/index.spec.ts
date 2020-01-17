@@ -38,10 +38,7 @@ const pythonVersionCallResults = [
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map(snapshot => ({
     ...snapshot,
-    cmd: snapshot.cmd.replace(
-      /^bash -l -c ".*\/extract\.py\\"\s+/,
-      'bash -l -c "<extract.py> '
-    ),
+    cmd: snapshot.cmd.replace(/^.*\/extract\.py"\s+/, '<extract.py> '),
   }));
 
 describe('lib/manager/pip_setup/index', () => {

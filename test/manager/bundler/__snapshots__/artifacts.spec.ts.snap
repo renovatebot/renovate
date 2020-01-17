@@ -65,7 +65,7 @@ exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 
 exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"bundle lock --update \\"",
+    "cmd": "bundle lock --update ",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -95,7 +95,7 @@ Array [
 exports[`bundler.updateArtifacts() works explicit global binarySource 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"bundle lock --update \\"",
+    "cmd": "bundle lock --update ",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -125,7 +125,7 @@ Array [
 exports[`bundler.updateArtifacts() works for default binarySource 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"bundle lock --update \\"",
+    "cmd": "bundle lock --update ",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
