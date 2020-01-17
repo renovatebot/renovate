@@ -3,7 +3,6 @@ import fs from 'fs';
 import * as datasource from '../../lib/datasource';
 import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
 import { DATASOURCE_MAVEN } from '../../lib/constants/data-binary-source';
-import { HOST_TYPE_MAVEN } from '../../lib/constants/host-types';
 
 const hostRules = require('../../lib/util/host-rules');
 
@@ -35,7 +34,7 @@ const config = {
 describe('datasource/maven', () => {
   beforeEach(() => {
     hostRules.add({
-      hostType: HOST_TYPE_MAVEN,
+      hostType: DATASOURCE_MAVEN,
       hostName: 'frontend_for_private_s3_repository',
       username: 'username',
       password: 'password',

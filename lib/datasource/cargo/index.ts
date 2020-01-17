@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { HOST_TYPE_CARGO } from '../../constants/host-types';
+import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
 
 export async function getPkgReleases({
   lookupName,
@@ -41,7 +41,7 @@ export async function getPkgReleases({
   const crateUrl = baseUrl + path;
   try {
     let res: any = await got(crateUrl, {
-      hostType: HOST_TYPE_CARGO,
+      hostType: DATASOURCE_CARGO,
     });
     if (!res || !res.body) {
       logger.warn(

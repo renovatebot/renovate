@@ -1,8 +1,6 @@
 import { add, find, clear, hosts } from '../../lib/util/host-rules';
-import {
-  HOST_TYPE_AZURE,
-  HOST_TYPE_NUGET,
-} from '../../lib/constants/host-types';
+import { DATASOURCE_NUGET } from '../../lib/constants/data-binary-source';
+import { PLATFORM_TYPE_AZURE } from '../../lib/constants/platfroms';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
@@ -12,7 +10,7 @@ describe('util/host-rules', () => {
     it('throws if both domainName and hostName', () => {
       expect(() =>
         add({
-          hostType: HOST_TYPE_AZURE,
+          hostType: PLATFORM_TYPE_AZURE,
           domainName: 'github.com',
           hostName: 'api.github.com',
         })
@@ -21,7 +19,7 @@ describe('util/host-rules', () => {
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
         add({
-          hostType: HOST_TYPE_AZURE,
+          hostType: PLATFORM_TYPE_AZURE,
           domainName: 'github.com',
           baseUrl: 'https://api.github.com',
         })
@@ -30,7 +28,7 @@ describe('util/host-rules', () => {
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
         add({
-          hostType: HOST_TYPE_AZURE,
+          hostType: PLATFORM_TYPE_AZURE,
           hostName: 'api.github.com',
           baseUrl: 'https://api.github.com',
         })
@@ -51,21 +49,21 @@ describe('util/host-rules', () => {
     });
     it('needs exact host matches', () => {
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         hostName: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
       });
-      expect(find({ hostType: HOST_TYPE_NUGET })).toMatchSnapshot();
+      expect(find({ hostType: DATASOURCE_NUGET })).toMatchSnapshot();
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://nuget.org' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.org' })
       ).not.toEqual({});
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://not.nuget.org' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://not.nuget.org' })
       ).toEqual({});
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://not-nuget.org' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://not-nuget.org' })
       ).toEqual({});
     });
     it('matches on empty rules', () => {
@@ -73,16 +71,16 @@ describe('util/host-rules', () => {
         json: true,
       });
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://api.github.com' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://api.github.com' })
       ).toEqual({ json: true });
     });
     it('matches on hostType', () => {
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         token: 'abc',
       });
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://nuget.local/api' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
     });
     it('matches on domainName', () => {
@@ -91,7 +89,8 @@ describe('util/host-rules', () => {
         token: 'def',
       });
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://api.github.com' }).token
+        find({ hostType: DATASOURCE_NUGET, url: 'https://api.github.com' })
+          .token
       ).toEqual('def');
     });
     it('matches on hostName', () => {
@@ -100,50 +99,50 @@ describe('util/host-rules', () => {
         token: 'abc',
       });
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://nuget.local/api' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
     });
     it('matches on hostType and endpoint', () => {
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         baseUrl: 'https://nuget.local/api',
         token: 'abc',
       });
       expect(
-        find({ hostType: HOST_TYPE_NUGET, url: 'https://nuget.local/api' })
+        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.local/api' })
           .token
       ).toEqual('abc');
     });
     it('matches on endpoint subresource', () => {
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         baseUrl: 'https://nuget.local/api',
         token: 'abc',
       });
       expect(
         find({
-          hostType: HOST_TYPE_NUGET,
+          hostType: DATASOURCE_NUGET,
           url: 'https://nuget.local/api/sub-resource',
         })
       ).toMatchSnapshot();
     });
     it('returns hosts', () => {
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         token: 'aaaaaa',
       });
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         baseUrl: 'https://nuget.local/api',
         token: 'abc',
       });
       add({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
         hostName: 'my.local.registry',
         token: 'def',
       });
       const res = hosts({
-        hostType: HOST_TYPE_NUGET,
+        hostType: DATASOURCE_NUGET,
       });
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);

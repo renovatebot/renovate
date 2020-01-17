@@ -1,7 +1,7 @@
 import { GotJSONOptions } from 'got';
 import got from '../../util/got';
 import { GotApi, GotApiOptions, GotResponse } from '../common';
-import { HOST_TYPE_BITBUCKET } from '../../constants/host-types';
+import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platfroms';
 
 async function get(
   path: string,
@@ -9,7 +9,7 @@ async function get(
 ): Promise<GotResponse> {
   const opts: GotApiOptions & GotJSONOptions = {
     json: true,
-    hostType: HOST_TYPE_BITBUCKET,
+    hostType: PLATFORM_TYPE_BITBUCKET,
     baseUrl: 'https://api.bitbucket.org/',
     ...options,
   };

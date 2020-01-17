@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { HOST_TYPE_HEX } from '../../constants/host-types';
+import { DATASOURCE_HEX } from '../../constants/data-binary-source';
 
 interface HexRelease {
   html_url: string;
@@ -29,7 +29,7 @@ export async function getPkgReleases({
   try {
     const response = await got(hexUrl, {
       json: true,
-      hostType: HOST_TYPE_HEX,
+      hostType: DATASOURCE_HEX,
     });
 
     const hexRelease: HexRelease = response.body;

@@ -1,4 +1,4 @@
-import url from 'url';
+import url, { URLSearchParams } from 'url';
 import delay from 'delay';
 
 import { api } from './bb-got-wrapper';
@@ -21,12 +21,12 @@ import {
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platfroms';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { HOST_TYPE_BITBUCKET_SERVER } from '../../constants/host-types';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -58,7 +58,7 @@ interface BbsConfig {
 let config: BbsConfig = {} as any;
 
 const defaults: any = {
-  hostType: HOST_TYPE_BITBUCKET_SERVER,
+  hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
 };
 
 /* istanbul ignore next */

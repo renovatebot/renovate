@@ -3,8 +3,10 @@ import got from '../../util/got';
 import * as github from '../github';
 import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
 import { regEx } from '../../util/regex';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
-import { HOST_TYPE_GO } from '../../constants/host-types';
+import {
+  DATASOURCE_GITHUB,
+  DATASOURCE_GO,
+} from '../../constants/data-binary-source';
 
 interface DataSource {
   datasource: string;
@@ -31,7 +33,7 @@ async function getDatasource(name: string): Promise<DataSource | null> {
   try {
     const res = (
       await got(pkgUrl, {
-        hostType: HOST_TYPE_GO,
+        hostType: DATASOURCE_GO,
       })
     ).body;
     const sourceMatch = res.match(

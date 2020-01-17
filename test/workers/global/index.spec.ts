@@ -3,11 +3,11 @@ import * as _repositoryWorker from '../../../lib/workers/repository';
 import * as _configParser from '../../../lib/config';
 import * as _platform from '../../../lib/platform';
 import * as _limits from '../../../lib/workers/global/limits';
-import { HOST_TYPE_DOCKER } from '../../../lib/constants/host-types';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../../lib/constants/platfroms';
+import { DATASOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 jest.mock('../../../lib/workers/repository');
 
@@ -46,7 +46,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: HOST_TYPE_DOCKER,
+          hostType: DATASOURCE_DOCKER,
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',
@@ -66,7 +66,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: HOST_TYPE_DOCKER,
+          hostType: DATASOURCE_DOCKER,
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',

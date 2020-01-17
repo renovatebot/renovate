@@ -3,7 +3,8 @@ import is from '@sindresorhus/is';
 import { getOptions, RenovateOptions } from './definitions';
 import { RenovateConfig } from './common';
 import { logger } from '../logger';
-import { HOST_TYPE_DOCKER, HOST_TYPE_GITHUB } from '../constants/host-types';
+import { DATASOURCE_DOCKER } from '../constants/data-binary-source';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platfroms';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
@@ -58,7 +59,7 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
 
   if (env.GITHUB_COM_TOKEN) {
     config.hostRules.push({
-      hostType: HOST_TYPE_GITHUB,
+      hostType: PLATFORM_TYPE_GITHUB,
       domainName: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });
@@ -66,7 +67,7 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
 
   if (env.DOCKER_USERNAME && env.DOCKER_PASSWORD) {
     config.hostRules.push({
-      hostType: HOST_TYPE_DOCKER,
+      hostType: DATASOURCE_DOCKER,
       username: env.DOCKER_USERNAME,
       password: env.DOCKER_PASSWORD,
     });

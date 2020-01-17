@@ -1,6 +1,9 @@
 import { logger } from '../../logger';
 import { create } from './util';
-import { HOST_TYPE_GITHUB, HOST_TYPE_GITLAB } from '../../constants/host-types';
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platfroms';
 
 // istanbul ignore next
 export default create({
@@ -14,9 +17,9 @@ export default create({
         { hostname: options.hostname },
         'Converting token to Bearer auth'
       );
-      if (options.hostType === HOST_TYPE_GITHUB) {
+      if (options.hostType === PLATFORM_TYPE_GITHUB) {
         options.headers.authorization = `token ${options.token}`; // eslint-disable-line no-param-reassign
-      } else if (options.hostType === HOST_TYPE_GITLAB) {
+      } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
         options.headers['Private-token'] = options.token; // eslint-disable-line no-param-reassign
       } else {
         options.headers.authorization = `Bearer ${options.token}`; // eslint-disable-line no-param-reassign

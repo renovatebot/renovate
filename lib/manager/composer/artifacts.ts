@@ -13,12 +13,12 @@ import {
   BINARY_SOURCE_AUTO,
   BINARY_SOURCE_DOCKER,
   BINARY_SOURCE_GLOBAL,
+  DATASOURCE_PACKAGIST,
 } from '../../constants/data-binary-source';
 import {
-  HOST_TYPE_GITHUB,
-  HOST_TYPE_GITLAB,
-  HOST_TYPE_PACKAGIST,
-} from '../../constants/host-types';
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platfroms';
 
 export async function updateArtifacts(
   packageFileName: string,
@@ -49,7 +49,7 @@ export async function updateArtifacts(
     }
     const authJson = {};
     let credentials = hostRules.find({
-      hostType: HOST_TYPE_GITHUB,
+      hostType: PLATFORM_TYPE_GITHUB,
       url: 'https://api.github.com/',
     });
     // istanbul ignore if
@@ -59,7 +59,7 @@ export async function updateArtifacts(
       };
     }
     credentials = hostRules.find({
-      hostType: HOST_TYPE_GITLAB,
+      hostType: PLATFORM_TYPE_GITLAB,
       url: 'https://gitlab.com/api/v4/',
     });
     // istanbul ignore if
@@ -75,7 +75,7 @@ export async function updateArtifacts(
           if (regUrl) {
             const { host } = URL.parse(regUrl);
             const hostRule = hostRules.find({
-              hostType: HOST_TYPE_PACKAGIST,
+              hostType: DATASOURCE_PACKAGIST,
               url: regUrl,
             });
             // istanbul ignore else

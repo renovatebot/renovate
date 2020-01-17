@@ -5,7 +5,7 @@ import {
   ChangeLogConfig,
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
-import { HOST_TYPE_GITHUB } from '../../../../lib/constants/host-types';
+import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platfroms';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
@@ -39,7 +39,7 @@ describe('workers/pr/changelog', () => {
       ghGot.mockClear();
       hostRules.clear();
       hostRules.add({
-        hostType: HOST_TYPE_GITHUB,
+        hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://api.github.com/',
         token: 'abc',
       });
@@ -158,7 +158,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: HOST_TYPE_GITHUB,
+        hostType: PLATFORM_TYPE_GITHUB,
         token: 'super_secret',
         baseUrl: 'https://github-enterprise.example.com/',
       });
@@ -171,7 +171,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: HOST_TYPE_GITHUB,
+        hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://github-enterprise.example.com/',
         token: 'abc',
       });

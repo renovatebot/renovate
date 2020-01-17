@@ -14,9 +14,9 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { HOST_TYPE_GITHUB } from '../../constants/host-types';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platfroms';
 
-const hostType = HOST_TYPE_GITHUB;
+const hostType = PLATFORM_TYPE_GITHUB;
 export const getHostType = (): string => hostType;
 
 let baseUrl = 'https://api.github.com/';

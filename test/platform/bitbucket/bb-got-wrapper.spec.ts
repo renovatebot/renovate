@@ -1,5 +1,5 @@
 import { GotApi } from '../../../lib/platform/common';
-import { HOST_TYPE_BITBUCKET } from '../../../lib/constants/host-types';
+import { PLATFORM_TYPE_BITBUCKET } from '../../../lib/constants/platfroms';
 
 describe('platform/gl-got-wrapper', () => {
   let api: GotApi;
@@ -16,7 +16,7 @@ describe('platform/gl-got-wrapper', () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
-      hostType: HOST_TYPE_BITBUCKET,
+      hostType: PLATFORM_TYPE_BITBUCKET,
       baseUrl: 'https://api.bitbucket.org',
       token: 'token',
     });

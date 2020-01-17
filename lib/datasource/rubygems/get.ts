@@ -6,7 +6,7 @@ import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
 import { ReleaseResult } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { HOST_TYPE_RUBYGEMS } from '../../constants/host-types';
+import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
@@ -37,7 +37,7 @@ const processError = ({ err, ...rest }): null => {
 };
 
 const getHeaders = (): OutgoingHttpHeaders => {
-  return { hostType: HOST_TYPE_RUBYGEMS };
+  return { hostType: DATASOURCE_RUBYGEMS };
 };
 
 const fetch = async ({ dependency, registry, path }): Promise<any> => {

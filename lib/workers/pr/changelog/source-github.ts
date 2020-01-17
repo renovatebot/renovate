@@ -6,7 +6,7 @@ import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
 import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
 import { Release } from '../../../datasource';
-import { HOST_TYPE_GITHUB } from '../../../constants/host-types';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platfroms';
 
 const ghGot = api.get;
 
@@ -64,7 +64,7 @@ export async function getChangeLogJSON({
     ? 'https://api.github.com/'
     : sourceUrl;
   const config = hostRules.find({
-    hostType: HOST_TYPE_GITHUB,
+    hostType: PLATFORM_TYPE_GITHUB,
     url,
   });
   if (!config.token) {
