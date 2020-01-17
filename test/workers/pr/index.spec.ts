@@ -8,6 +8,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
+import { PLATFORM_TYPE_GITLAB } from '../../../lib/constants/platfroms';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
@@ -432,7 +433,7 @@ describe('workers/pr', () => {
       platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];
-      config.platform = 'gitlab';
+      config.platform = PLATFORM_TYPE_GITLAB;
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });

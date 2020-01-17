@@ -3,7 +3,7 @@
 exports[`manager/gradle extractPackageFile should configure the renovate report plugin 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -23,7 +23,7 @@ Array [
 exports[`manager/gradle extractPackageFile should execute gradlew when available 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -43,7 +43,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return empty if renovate report is invalid 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -63,7 +63,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return empty if there are no dependencies 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -83,7 +83,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "gradle --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -226,7 +226,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return gradle dependencies 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -310,7 +310,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir/foo",
       "encoding": "utf-8",
@@ -453,7 +453,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return gradle.kts dependencies 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -475,7 +475,7 @@ exports[`manager/gradle extractPackageFile should return null and gradle should 
 exports[`manager/gradle extractPackageFile should run gradlew through \`sh\` when available but not executable 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"sh gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "sh gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -497,7 +497,7 @@ exports[`manager/gradle extractPackageFile should throw registry failure if grad
 exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -598,7 +598,7 @@ Array [
 exports[`manager/gradle extractPackageFile should use repositories only for current project 2`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",

@@ -279,10 +279,9 @@ export class Storage {
       this._config.baseBranch = branchName;
       try {
         if (branchName !== 'master') {
-          this._config.baseBranchSha = (await this._git!.raw([
-            'rev-parse',
-            'origin/' + branchName,
-          ])).trim();
+          this._config.baseBranchSha = (
+            await this._git!.raw(['rev-parse', 'origin/' + branchName])
+          ).trim();
         }
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');

@@ -33,10 +33,12 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformProvider = (await got(pkgUrl, {
-      json: true,
-      hostType: 'terraform',
-    })).body;
+    const res: TerraformProvider = (
+      await got(pkgUrl, {
+        json: true,
+        hostType: 'terraform',
+      })
+    ).body;
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       name: repository,

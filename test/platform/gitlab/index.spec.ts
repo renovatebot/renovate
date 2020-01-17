@@ -15,9 +15,7 @@ import {
 
 describe('platform/gitlab', () => {
   let gitlab: typeof import('../../../lib/platform/gitlab');
-  let api: jest.Mocked<
-    typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api
-  >;
+  let api: jest.Mocked<typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api>;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let GitStorage: jest.Mocked<
     typeof import('../../../lib/platform/git/storage')

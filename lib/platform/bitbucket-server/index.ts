@@ -205,14 +205,18 @@ export async function initRepo({
   });
 
   try {
-    const info = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
-    )).body;
+    const info = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      )
+    ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
-    )).body.displayId;
+    config.defaultBranch = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
+      )
+    ).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
@@ -309,10 +313,12 @@ export async function getPr(
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
 
-    const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
-      { useCache: !refreshCache }
-    )).body;
+    const prCommits = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
+        { useCache: !refreshCache }
+      )
+    ).body;
 
     if (prCommits.totalCount === 1) {
       if (global.gitAuthor) {
@@ -505,10 +511,11 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = await config.storage.getBranchCommit(branchName);
 
-  return (await api.get(
-    `./rest/build-status/1.0/commits/stats/${branchCommit}`,
-    { useCache }
-  )).body;
+  return (
+    await api.get(`./rest/build-status/1.0/commits/stats/${branchCommit}`, {
+      useCache,
+    })
+  ).body;
 }
 
 // Returns the combined status for a branch.
@@ -771,9 +778,11 @@ async function getCommentVersion(
   commentId: number
 ): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
-  const { version } = (await api.get(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
-  )).body;
+  const { version } = (
+    await api.get(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
+    )
+  ).body;
 
   return version;
 }
@@ -895,17 +904,21 @@ export async function createPr({
   /* istanbul ignore else */
   if (config.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
-    const { id } = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
-    )).body;
+    const { id } = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      )
+    ).body;
 
-    const defReviewers = (await api.get(
-      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
-        config.repositorySlug
-      }/reviewers?sourceRefId=refs/heads/${escapeHash(
-        branchName
-      )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
-    )).body;
+    const defReviewers = (
+      await api.get(
+        `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
+          config.repositorySlug
+        }/reviewers?sourceRefId=refs/heads/${escapeHash(
+          branchName
+        )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
+      )
+    ).body;
 
     reviewers = defReviewers.map((u: { name: string }) => ({
       user: { name: u.name },

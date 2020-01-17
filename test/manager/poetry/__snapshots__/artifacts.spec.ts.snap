@@ -15,7 +15,7 @@ undefined",
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"poetry update --lock --no-interaction dep1\\"",
+    "cmd": "poetry update --lock --no-interaction dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -34,7 +34,7 @@ Array [
 exports[`.updateArtifacts() returns updated poetry.lock 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"poetry update --lock --no-interaction dep1\\"",
+    "cmd": "poetry update --lock --no-interaction dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
