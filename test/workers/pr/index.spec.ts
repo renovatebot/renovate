@@ -3,6 +3,7 @@ import * as _changelogHelper from '../../../lib/workers/pr/changelog';
 import { getConfig } from '../../../lib/config/defaults';
 import { platform as _platform, Pr } from '../../../lib/platform';
 import { mocked } from '../../util';
+import { PLATFORM_TYPE_GITLAB } from '../../../lib/constants/platfroms';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
@@ -427,7 +428,7 @@ describe('workers/pr', () => {
       platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];
-      config.platform = 'gitlab';
+      config.platform = PLATFORM_TYPE_GITLAB;
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
