@@ -41,6 +41,11 @@ const pyproject8toml = readFileSync(
   'utf8'
 );
 
+const pyproject9toml = readFileSync(
+  'test/manager/poetry/_fixtures/pyproject.9.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
@@ -124,6 +129,11 @@ describe('lib/manager/poetry/extract', () => {
       expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
+    });
+    it('extracts pep440 dependencies', () => {
+      const res = extractPackageFile(pyproject9toml, filename);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(34);
     });
   });
 });
