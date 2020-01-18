@@ -528,10 +528,11 @@ export class Storage {
       }
       await this._git!.commit(message);
       if (!(await this.hasDiff(`origin/${branchName}`))) {
-        logger.warn(
+        logger.info(
           { branchName, fileNames },
-          'No file changes detected. Is this an empty force push?'
+          'No file changes detected. Skipping commit'
         );
+        return;
       }
       await this._git!.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
