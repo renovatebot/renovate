@@ -332,6 +332,34 @@ export async function getAdditionalFiles(
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 
+  // Store the original npmrc so we can reset it later
+  let npmrcFilePath = upath.join(config.localDir, '.npmrc');
+  let originalNpmrcContent = null;
+  try {
+    originalNpmrcContent = await fs.readFile(npmrcFilePath, 'utf8');
+  } catch {
+    originalNpmrcContent = null;
+  }
+
+  // Update the npmrc with the custom host roles
+  const newNpmrc = originalNpmrcContent ? [originalNpmrcContent] : [];
+  const npmHostRules = hostRules.findAll({
+    hostType: 'npm',
+  });
+  for (let hostRule of npmHostRules) {
+    if (hostRule.token) {
+      newNpmrc.push(
+        `${hostRule.baseUrl}:_authToken=${hostRule.token}`
+          .replace('https://', '//')
+          .replace('http://', '//')
+      );
+    }
+  }
+  try {
+    const newContent = newNpmrc.join('\n');
+    await fs.writeFile(npmrcFilePath, newContent);
+  } catch {}
+
   const env = getChildProcessEnv([
     'NPM_CONFIG_CACHE',
     'YARN_CACHE_FOLDER',
@@ -663,6 +691,17 @@ export async function getAdditionalFiles(
         }
       }
     }
+  }
+
+  // Reset the npmrc file back to it's original content
+  if (originalNpmrcContent) {
+    try {
+      await fs.writeFile(npmrcFilePath, originalNpmrcContent);
+    } catch {}
+  } else {
+    try {
+      await fs.unlink(npmrcFilePath);
+    } catch {}
   }
 
   return { artifactErrors, updatedArtifacts };
