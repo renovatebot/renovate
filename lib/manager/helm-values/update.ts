@@ -1,11 +1,14 @@
 import YAWN from 'yawn-yaml/cjs';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
-import { matchesHelmValuesDockerHeuristic } from './util';
+import {
+  matchesHelmValuesDockerHeuristic,
+  HelmDockerImageDependency,
+} from './util';
 
 function shouldUpdate(
   parentKey: string,
-  data: any,
+  data: unknown | HelmDockerImageDependency,
   dockerRepository: string,
   currentValue: string,
   originalRegistryValue: string
@@ -25,7 +28,7 @@ function shouldUpdate(
 function getOriginalRegistryValue(
   depName: string,
   dockerRepository: string
-): string | null {
+): string {
   if (depName.length > dockerRepository.length) {
     return depName.substring(0, depName.lastIndexOf(dockerRepository) - 1);
   }
@@ -41,9 +44,10 @@ function getOriginalRegistryValue(
  * @param dockerRepository The docker repository that should be updated.
  * @param currentValue The current version that should be updated.
  * @param newValue The update version that should be set instead of currentValue.
+ * @returns True if the parsedContent was updated, false otherwise.
  */
 function updateDoc(
-  parsedContent: object,
+  parsedContent: object | HelmDockerImageDependency,
   dockerRepository: string,
   currentValue: string,
   newValue: string,

@@ -3,7 +3,10 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 
 import { PackageFile, PackageDependency } from '../common';
-import { matchesHelmValuesDockerHeuristic } from './util';
+import {
+  matchesHelmValuesDockerHeuristic,
+  HelmDockerImageDependency,
+} from './util';
 
 /**
  * Recursively find all supported dependencies in the yaml object.
@@ -11,7 +14,7 @@ import { matchesHelmValuesDockerHeuristic } from './util';
  * @param parsedContent
  */
 function findDependencies(
-  parsedContent: object,
+  parsedContent: object | HelmDockerImageDependency,
   packageDependencies: Array<PackageDependency>
 ): Array<PackageDependency> {
   if (!parsedContent || typeof parsedContent !== 'object') {

@@ -1,6 +1,23 @@
+export type HelmDockerImageDependency = {
+  registry?: string;
+  repository: string;
+  tag: string;
+};
+
 /**
- * Determine whether a given partial Helm values.yaml object potentially defines
- * a Docker dependency.
+ * This is a workaround helper to allow the usage of 'unknown' in
+ * a type-guard function while checking that keys exist.
+ *
+ * @see https://github.com/microsoft/TypeScript/issues/21732
+ * @see https://stackoverflow.com/a/58630274
+ */
+function hasKey<K extends string>(k: K, o: {}): o is { [_ in K]: {} } {
+  return typeof o === 'object' && k in o;
+}
+
+/**
+ * Type guard to determine whether a given partial Helm values.yaml object potentially
+ * defines a Helm Docker dependency.
  *
  * There is no exact standard of how Docker dependencies are defined in Helm
  * values.yaml files (as of January 1st 2020), this function defines a
@@ -12,13 +29,13 @@
  */
 export function matchesHelmValuesDockerHeuristic(
   parentKey: string,
-  data: any
-): boolean {
+  data: unknown
+): data is HelmDockerImageDependency {
   return (
     parentKey === 'image' &&
     data &&
     typeof data === 'object' &&
-    data.repository &&
-    data.tag
+    hasKey('repository', data) &&
+    hasKey('tag', data)
   );
 }
