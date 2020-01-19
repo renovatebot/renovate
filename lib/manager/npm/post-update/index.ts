@@ -333,11 +333,13 @@ export async function getAdditionalFiles(
   await writeUpdatedPackageFiles(config);
 
   // Store the original npmrc so we can reset it later
-  let npmrcFilePath = upath.join(config.localDir, '.npmrc');
+  const npmrcFilePath = upath.join(config.localDir, '.npmrc');
   let originalNpmrcContent = null;
   try {
     originalNpmrcContent = await fs.readFile(npmrcFilePath, 'utf8');
+    logger.debug('npmrc file found in repository');
   } catch {
+    logger.debug('No npmrc file found in repository');
     originalNpmrcContent = null;
   }
 
@@ -346,7 +348,7 @@ export async function getAdditionalFiles(
   const npmHostRules = hostRules.findAll({
     hostType: 'npm',
   });
-  for (let hostRule of npmHostRules) {
+  for (const hostRule of npmHostRules) {
     if (hostRule.token) {
       newNpmrc.push(
         `${hostRule.baseUrl}:_authToken=${hostRule.token}`
@@ -358,7 +360,9 @@ export async function getAdditionalFiles(
   try {
     const newContent = newNpmrc.join('\n');
     await fs.writeFile(npmrcFilePath, newContent);
-  } catch {}
+  } catch {
+    logger.warn('Unable to write custom npmrc file');
+  }
 
   const env = getChildProcessEnv([
     'NPM_CONFIG_CACHE',
@@ -697,11 +701,15 @@ export async function getAdditionalFiles(
   if (originalNpmrcContent) {
     try {
       await fs.writeFile(npmrcFilePath, originalNpmrcContent);
-    } catch {}
+    } catch {
+      logger.warn('Unable to reset npmrc to original contents');
+    }
   } else {
     try {
       await fs.unlink(npmrcFilePath);
-    } catch {}
+    } catch {
+      logger.warn('Unable to delete custom npmrc');
+    }
   }
 
   return { artifactErrors, updatedArtifacts };
