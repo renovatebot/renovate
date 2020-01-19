@@ -26,10 +26,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setExecConfig({
-      ...config,
-      dockerUser: 'foobar',
-    });
+    setExecConfig(config);
   });
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = ['dep1'];
@@ -83,6 +80,11 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker', async () => {
+    setExecConfig({
+      ...config,
+      binarySource: BINARY_SOURCE_DOCKER,
+      dockerUser: 'foobar',
+    });
     platform.getFile.mockResolvedValueOnce('Old poetry.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -94,8 +96,6 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: BINARY_SOURCE_DOCKER,
-          dockerUser: 'foobar',
         },
       })
     ).not.toBeNull();
