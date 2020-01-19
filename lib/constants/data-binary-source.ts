@@ -23,6 +23,11 @@ export const DATASOURCE_TERRAFORM = 'terraform';
 export const DATASOURCE_TERRAFORM_PROVIDER = 'terraformProvider';
 
 // Binary Source
+export enum BinarySource {
+  Auto = 'auto',
+  Docker = 'docker',
+  Global = 'global',
+}
 export const BINARY_SOURCE_DOCKER = 'docker';
 export const BINARY_SOURCE_GLOBAL = 'global';
 export const BINARY_SOURCE_AUTO = 'auto';

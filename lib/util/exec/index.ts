@@ -4,15 +4,25 @@ import {
   exec as cpExec,
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
-import { dockerCmd, DockerOptions, setDockerConfig } from './docker';
+import { dockerCmd } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
+import { DockerOptions, ExecConfig, Opt } from './common';
+import { RenovateConfig } from '../../config';
+import { BinarySource } from '../../constants/data-binary-source';
 
-let localDir;
+const execConfig: ExecConfig = {
+  binarySource: null,
+  dockerUser: null,
+  localDir: null,
+  cacheDir: null,
+};
 
-export function setExecConfig(config): void {
-  localDir = config.localDir;
-  setDockerConfig(config);
+export function setExecConfig(config: Partial<RenovateConfig>): void {
+  for (const key of Object.keys(execConfig)) {
+    const value = config[key];
+    execConfig[key] = value || null;
+  }
 }
 
 const pExec: (
@@ -23,8 +33,8 @@ const pExec: (
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
-  extraEnv?: ExtraEnv | null | undefined;
-  docker?: DockerOptions | null | undefined;
+  extraEnv?: Opt<ExtraEnv>;
+  docker?: Opt<DockerOptions>;
 }
 
 export interface ExecResult {
@@ -69,7 +79,7 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, extraEnv, docker } = opts;
-  const cwd = opts.cwd || localDir;
+  const cwd = opts.cwd || execConfig.localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
@@ -84,7 +94,7 @@ export async function exec(
   };
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  if (docker) {
+  if (execConfig.binarySource === BinarySource.Docker) {
     const dockerOptions = {
       ...docker,
       cwd,
@@ -93,7 +103,7 @@ export async function exec(
 
     let singleCommand = commands.join(' && ');
     singleCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
-    singleCommand = dockerCmd(singleCommand, dockerOptions);
+    singleCommand = dockerCmd(singleCommand, dockerOptions, execConfig);
     commands = [singleCommand];
   }
 

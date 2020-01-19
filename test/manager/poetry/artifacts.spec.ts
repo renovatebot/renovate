@@ -7,7 +7,7 @@ import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
-import { setDockerConfig } from '../../../lib/util/exec/docker';
+import { setExecConfig } from '../../../lib/util/exec';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -26,7 +26,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setDockerConfig({
+    setExecConfig({
       ...config,
       dockerUser: 'foobar',
     });
