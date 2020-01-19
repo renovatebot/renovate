@@ -86,9 +86,10 @@ export async function exec(
 
   // TODO: simplify after callers' refactoring
   const singleCommand = typeof cmd === 'string' ? cmd : cmd.join(' && ');
-  let pExecCommand = singleCommand.startsWith('docker run')
-    ? singleCommand
-    : `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
+  let pExecCommand =
+    singleCommand.startsWith('docker run') || process.platform === 'win32'
+      ? singleCommand
+      : `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
 
   if (docker) {
     const dockerOptions = {
