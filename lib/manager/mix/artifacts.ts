@@ -3,14 +3,15 @@ import fs from 'fs-extra';
 import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`mix.getArtifacts(${packageFileName})`);
   if (updatedDeps.length < 1) {
     logger.debug('No updated mix deps - returning null');
@@ -46,7 +47,7 @@ export async function updateArtifacts(
   }
 
   const cmdParts =
-    config.binarySource === 'docker'
+    config.binarySource === BINARY_SOURCE_DOCKER
       ? [
           'docker',
           'run',

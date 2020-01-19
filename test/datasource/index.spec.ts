@@ -1,5 +1,10 @@
 import * as datasource from '../../lib/datasource';
 import * as _npm from '../../lib/datasource/npm';
+import {
+  DATASOURCE_DOCKER,
+  DATASOURCE_GITHUB,
+  DATASOURCE_NPM,
+} from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/datasource/docker');
 jest.mock('../../lib/datasource/npm');
@@ -8,9 +13,9 @@ const npmDatasource: any = _npm;
 
 describe('datasource/index', () => {
   it('returns if digests are supported', async () => {
-    expect(await datasource.supportsDigests({ datasource: 'github' })).toBe(
-      true
-    );
+    expect(
+      await datasource.supportsDigests({ datasource: DATASOURCE_GITHUB })
+    ).toBe(true);
   });
   it('returns null for no datasource', async () => {
     expect(
@@ -30,7 +35,7 @@ describe('datasource/index', () => {
   it('returns getDigest', async () => {
     expect(
       await datasource.getDigest({
-        datasource: 'docker',
+        datasource: DATASOURCE_DOCKER,
         depName: 'docker/node',
       })
     ).toBeUndefined();
@@ -38,7 +43,7 @@ describe('datasource/index', () => {
   it('adds changelogUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
     const res = await datasource.getPkgReleases({
-      datasource: 'npm',
+      datasource: DATASOURCE_NPM,
       depName: 'react-native',
     });
     expect(res).toMatchSnapshot();
@@ -48,7 +53,7 @@ describe('datasource/index', () => {
   it('adds sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
     const res = await datasource.getPkgReleases({
-      datasource: 'npm',
+      datasource: DATASOURCE_NPM,
       depName: 'node',
     });
     expect(res).toMatchSnapshot();
@@ -59,7 +64,7 @@ describe('datasource/index', () => {
       sourceUrl: ' https://abc.com',
     });
     const res = await datasource.getPkgReleases({
-      datasource: 'npm',
+      datasource: DATASOURCE_NPM,
       depName: 'abc',
     });
     expect(res.sourceUrl).toEqual('https://abc.com');
@@ -69,7 +74,7 @@ describe('datasource/index', () => {
       sourceUrl: 'scm:git@github.com:Jasig/cas.git',
     });
     const res = await datasource.getPkgReleases({
-      datasource: 'npm',
+      datasource: DATASOURCE_NPM,
       depName: 'cas',
     });
     expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');

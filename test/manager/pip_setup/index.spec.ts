@@ -10,6 +10,7 @@ import {
 } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = readFileSync(packageFile, 'utf8');
@@ -37,10 +38,7 @@ const pythonVersionCallResults = [
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map(snapshot => ({
     ...snapshot,
-    cmd: snapshot.cmd.replace(
-      /^bash -l -c ".*\/extract\.py\\"\s+/,
-      'bash -l -c "<extract.py> '
-    ),
+    cmd: snapshot.cmd.replace(/^.*\/extract\.py"\s+/, '<extract.py> '),
   }));
 
 describe('lib/manager/pip_setup/index', () => {
@@ -72,7 +70,7 @@ describe('lib/manager/pip_setup/index', () => {
       expect(
         await extractPackageFile(content, packageFile, {
           ...config,
-          binarySource: 'docker',
+          binarySource: BINARY_SOURCE_DOCKER,
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toHaveLength(2); // TODO: figure out volume arguments in Windows

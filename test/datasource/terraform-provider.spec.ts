@@ -1,6 +1,7 @@
 import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
+import { DATASOURCE_TERRAFORM_PROVIDER } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/util/got');
 
@@ -21,7 +22,7 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
-          datasource: 'terraformProvider',
+          datasource: DATASOURCE_TERRAFORM_PROVIDER,
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -34,7 +35,7 @@ describe('datasource/terraform', () => {
       );
       expect(
         await datasource.getPkgReleases({
-          datasource: 'terraformProvider',
+          datasource: DATASOURCE_TERRAFORM_PROVIDER,
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -45,7 +46,7 @@ describe('datasource/terraform', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: 'terraformProvider',
+          datasource: DATASOURCE_TERRAFORM_PROVIDER,
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -55,7 +56,7 @@ describe('datasource/terraform', () => {
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        datasource: 'terraformProvider',
+        datasource: DATASOURCE_TERRAFORM_PROVIDER,
         lookupName: 'azurerm',
       });
       expect(res).toMatchSnapshot();

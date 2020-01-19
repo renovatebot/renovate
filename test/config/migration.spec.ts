@@ -6,6 +6,7 @@ import {
   DEP_TYPE_DEV_DEPENDENCIES,
   DEP_TYPE_OPTIONAL_DEPENDENCIES,
 } from '../../lib/constants/dependency';
+import { PLATFORM_TYPE_GITHUB } from '../../lib/constants/platfroms';
 
 const defaultConfig = getConfig();
 
@@ -15,7 +16,7 @@ describe('config/migration', () => {
       const config: RenovateConfig = {
         endpoints: [{}],
         enabled: true,
-        platform: 'github',
+        platform: PLATFORM_TYPE_GITHUB,
         hostRules: [
           {
             platform: 'docker',

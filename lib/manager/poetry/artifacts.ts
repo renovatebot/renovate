@@ -3,15 +3,16 @@ import { parse, join } from 'upath';
 import { outputFile, readFile } from 'fs-extra';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   if (!is.nonEmptyArray(updatedDeps)) {
     logger.debug('No updated poetry deps - returning null');
@@ -37,7 +38,7 @@ export async function updateArtifacts(
       cwd: join(config.localDir, subDirectory),
     };
 
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running poetry via docker');
       execOptions.docker = {
         image: 'renovate/poetry',

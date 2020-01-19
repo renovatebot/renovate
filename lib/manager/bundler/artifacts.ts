@@ -10,19 +10,24 @@ import {
   matches,
   sortVersions,
 } from '../../versioning/ruby';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import {
   BUNDLER_INVALID_CREDENTIALS,
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
+import {
+  BINARY_SOURCE_AUTO,
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {
@@ -42,7 +47,7 @@ export async function updateArtifacts(
     const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv();
     let cmd;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running bundler via docker');
       let tag = 'latest';
       let rubyConstraint: string;
@@ -103,8 +108,8 @@ export async function updateArtifacts(
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BINARY_SOURCE_AUTO ||
+      config.binarySource === BINARY_SOURCE_GLOBAL
     ) {
       logger.info('Running bundler via global bundler');
       cmd = 'bundle';
@@ -185,12 +190,12 @@ export async function updateArtifacts(
         const newUpdatedDeps = [
           ...new Set([...updatedDeps, ...resolveMatches]),
         ];
-        return updateArtifacts(
+        return updateArtifacts({
           packageFileName,
-          newUpdatedDeps,
+          updatedDeps: newUpdatedDeps,
           newPackageFileContent,
-          config
-        );
+          config,
+        });
       }
       logger.info(
         { err },

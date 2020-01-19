@@ -4,15 +4,20 @@ import { exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import {
+  BINARY_SOURCE_AUTO,
+  BINARY_SOURCE_DOCKER,
+  BINARY_SOURCE_GLOBAL,
+} from '../../constants/data-binary-source';
 
-export async function updateArtifacts(
-  goModFileName: string,
-  _updatedDeps: string[],
-  newGoModContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName: goModFileName,
+  updatedDeps: _updatedDeps,
+  newPackageFileContent: newGoModContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
   const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
   const env = getChildProcessEnv(customEnv);
@@ -38,7 +43,7 @@ export async function updateArtifacts(
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BINARY_SOURCE_DOCKER) {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
@@ -66,8 +71,8 @@ export async function updateArtifacts(
         cmd += 'go';
       }
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BINARY_SOURCE_AUTO ||
+      config.binarySource === BINARY_SOURCE_GLOBAL
     ) {
       logger.info('Running go via global command');
       cmd = 'go';
@@ -158,10 +163,9 @@ export async function updateArtifacts(
         });
       }
     }
-    const finalGoModContent = (await readFile(
-      localGoModFileName,
-      'utf8'
-    )).replace(/\/\/ renovate-replace /g, '');
+    const finalGoModContent = (
+      await readFile(localGoModFileName, 'utf8')
+    ).replace(/\/\/ renovate-replace /g, '');
     if (finalGoModContent !== newGoModContent) {
       logger.info('Found updated go.mod after go.sum update');
       res.push({

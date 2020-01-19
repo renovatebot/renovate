@@ -7,6 +7,7 @@ import { platform as _platform, Platform } from '../../../lib/platform';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
+import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -74,10 +75,12 @@ describe('manager/gradle', () => {
     it('should return empty if there are no dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.readFile.mockResolvedValue(fsReal.readFileSync(
-        'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
-        'utf8'
-      ) as any);
+      fs.readFile.mockResolvedValue(
+        fsReal.readFileSync(
+          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
+          'utf8'
+        ) as any
+      );
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -192,7 +195,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
-        binarySource: 'docker',
+        binarySource: BINARY_SOURCE_DOCKER,
         ...config,
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
@@ -205,7 +208,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
-        binarySource: 'docker',
+        binarySource: BINARY_SOURCE_DOCKER,
         ...config,
         gradle: {},
       };

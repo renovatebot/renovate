@@ -2,13 +2,23 @@ import { api as nodever } from '../../lib/versioning/node';
 
 describe('semver.getNewValue()', () => {
   it('returns normalized toVersion', () => {
-    expect(nodever.getNewValue('1.0.0', 'replace', '1.0.0', 'v1.1.0')).toEqual(
-      '1.1.0'
-    );
+    expect(
+      nodever.getNewValue({
+        currentValue: '1.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0.0',
+        toVersion: 'v1.1.0',
+      })
+    ).toEqual('1.1.0');
   });
   it('returns range', () => {
-    expect(nodever.getNewValue('~8.0.0', 'replace', '8.0.2', 'v8.2.0')).toEqual(
-      '~8.2.0'
-    );
+    expect(
+      nodever.getNewValue({
+        currentValue: '~8.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '8.0.2',
+        toVersion: 'v8.2.0',
+      })
+    ).toEqual('~8.2.0');
   });
 });

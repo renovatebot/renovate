@@ -5,6 +5,23 @@ import {
   DEP_TYPE_DEV_DEPENDENCIES,
   DEP_TYPE_PEER_DEPENDENCIES,
 } from '../../lib/constants/dependency';
+import {
+  LANGUAGE_DOCKER,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PYTHON,
+} from '../../lib/constants/languages';
+import {
+  MANAGER_DOCKERFILE,
+  MANAGER_METEOR,
+  MANAGER_NPM,
+  MANAGER_PIPENV,
+} from '../../lib/constants/managers';
+
+import {
+  DATASOURCE_DOCKER,
+  DATASOURCE_ORB,
+} from '../../lib/constants/data-binary-source';
 
 type TestConfig = Config & { x?: number; y?: number };
 
@@ -181,7 +198,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          managers: ['npm', 'meteor'],
+          managers: [MANAGER_NPM, MANAGER_METEOR],
           packageNames: ['node'],
           x: 1,
         },
@@ -189,8 +206,8 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'js',
-      manager: 'meteor',
+      language: LANGUAGE_JAVASCRIPT,
+      manager: MANAGER_METEOR,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -200,7 +217,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          managers: ['dockerfile', 'npm'],
+          managers: [MANAGER_DOCKERFILE, MANAGER_NPM],
           packageNames: ['node'],
           x: 1,
         },
@@ -208,8 +225,8 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'python',
-      manager: 'pipenv',
+      language: LANGUAGE_PYTHON,
+      manager: MANAGER_PIPENV,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -219,7 +236,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          languages: ['js', 'node'],
+          languages: [LANGUAGE_JAVASCRIPT, LANGUAGE_NODE],
           packageNames: ['node'],
           x: 1,
         },
@@ -227,8 +244,8 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'js',
-      manager: 'meteor',
+      language: LANGUAGE_JAVASCRIPT,
+      manager: MANAGER_METEOR,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -238,7 +255,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          languages: ['docker'],
+          languages: [LANGUAGE_DOCKER],
           packageNames: ['node'],
           x: 1,
         },
@@ -246,8 +263,8 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'python',
-      manager: 'pipenv',
+      language: LANGUAGE_PYTHON,
+      manager: MANAGER_PIPENV,
       depName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -257,14 +274,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          datasources: ['orb', 'docker'],
+          datasources: [DATASOURCE_ORB, DATASOURCE_DOCKER],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: 'orb',
+      datasource: DATASOURCE_ORB,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -281,7 +298,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: 'orb',
+      datasource: DATASOURCE_ORB,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -291,7 +308,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          datasources: ['orb'],
+          datasources: [DATASOURCE_ORB],
           x: 1,
         },
       ],

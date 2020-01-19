@@ -68,7 +68,6 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const startTime = hrtime();
   const { env, extraEnv, docker } = opts;
   const cwd = opts.cwd || localDir;
   const childEnv = createChildEnv(env, extraEnv);
@@ -84,12 +83,7 @@ export async function exec(
     cwd,
   };
 
-  // TODO: simplify after callers' refactoring
-  const singleCommand = typeof cmd === 'string' ? cmd : cmd.join(' && ');
-  let pExecCommand = singleCommand.startsWith('docker run')
-    ? singleCommand
-    : `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
-
+  let commands = typeof cmd === 'string' ? [cmd] : cmd;
   if (docker) {
     const dockerOptions = {
       ...docker,
@@ -97,15 +91,25 @@ export async function exec(
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    pExecCommand = dockerCmd(pExecCommand, dockerOptions);
+    let singleCommand = commands.join(' && ');
+    singleCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
+    singleCommand = dockerCmd(singleCommand, dockerOptions);
+    commands = [singleCommand];
   }
 
-  const res = await pExec(pExecCommand, pExecOptions);
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
-  logger.debug(
-    { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
-    'exec completed'
-  );
+  let res: ExecResult | null = null;
+  for (const pExecCommand of commands) {
+    const startTime = hrtime();
+    res = await pExec(pExecCommand, pExecOptions);
+    const duration = hrtime(startTime);
+    const seconds = Math.round(duration[0] + duration[1] / 1e9);
+    if (res) {
+      logger.debug(
+        { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
+        'exec completed'
+      );
+    }
+  }
+
   return res;
 }

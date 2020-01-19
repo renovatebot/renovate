@@ -33,6 +33,12 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -174,9 +180,11 @@ export async function initRepo({
       try {
         renovateConfig = JSON.parse(
           Buffer.from(
-            (await api.get(
-              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
-            )).body.content,
+            (
+              await api.get(
+                `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+              )
+            ).body.content,
             'base64'
           ).toString()
         );
@@ -303,12 +311,12 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
 
   if (!(await branchExists(branchName))) {
@@ -319,16 +327,16 @@ export async function getBranchStatus(
   logger.debug(`Got res with ${res.length} results`);
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return 'pending';
+    return BRANCH_STATUS_PENDING;
   }
-  let status = 'success';
+  let status = BRANCH_STATUS_SUCCESS;
   // Return 'success' if all are success
   res.forEach(check => {
     // If one is failed then don't overwrite that
     if (status !== 'failure') {
       if (!check.allow_failure) {
         if (check.status === 'failed') {
-          status = 'failure';
+          status = BRANCH_STATUS_FAILURE;
         } else if (check.status !== 'success') {
           ({ status } = check);
         }
@@ -410,7 +418,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.isConflicted = true;
   } else if (pr.state === 'open') {
     const branchStatus = await getBranchStatus(pr.branchName, []);
-    if (branchStatus === 'success') {
+    if (branchStatus === BRANCH_STATUS_SUCCESS) {
       pr.canMerge = true;
     }
   }
@@ -449,9 +457,11 @@ export async function getPrFiles(mrNo: number): Promise<string[]> {
   if (!mrNo) {
     return [];
   }
-  const files = (await api.get(
-    `projects/${config.repository}/merge_requests/${mrNo}/changes`
-  )).body.changes;
+  const files = (
+    await api.get(
+      `projects/${config.repository}/merge_requests/${mrNo}/changes`
+    )
+  ).body.changes;
   return files.map((f: { new_path: string }) => f.new_path);
 }
 
@@ -685,9 +695,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    const issueBody = (await api.get(
-      `projects/${config.repository}/issues/${issue.iid}`
-    )).body.description;
+    const issueBody = (
+      await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+    ).body.description;
     return {
       number: issue.iid,
       body: issueBody,
@@ -708,9 +718,9 @@ export async function ensureIssue({
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
     if (issue) {
-      const existingDescription = (await api.get(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )).body.description;
+      const existingDescription = (
+        await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+      ).body.description;
       if (existingDescription !== description) {
         logger.debug('Updating issue body');
         await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
