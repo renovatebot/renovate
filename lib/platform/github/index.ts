@@ -39,6 +39,11 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platfroms';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -1058,12 +1063,12 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   let commitStatus;
   try {
@@ -1128,15 +1133,15 @@ export async function getBranchStatus(
     commitStatus.state === 'failed' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
     checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
   ) {
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
-  return 'pending';
+  return BRANCH_STATUS_PENDING;
 }
 
 async function getStatusCheck(
@@ -1659,7 +1664,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: 'success',
+      state: BRANCH_STATUS_SUCCESS,
       url: 'https://github.com/renovatebot/renovate',
     });
   }

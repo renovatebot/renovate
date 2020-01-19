@@ -34,6 +34,12 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platfroms';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -306,12 +312,12 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
 
   if (!(await branchExists(branchName))) {
@@ -322,16 +328,16 @@ export async function getBranchStatus(
   logger.debug(`Got res with ${res.length} results`);
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return 'pending';
+    return BRANCH_STATUS_PENDING;
   }
-  let status = 'success';
+  let status = BRANCH_STATUS_SUCCESS;
   // Return 'success' if all are success
   res.forEach(check => {
     // If one is failed then don't overwrite that
     if (status !== 'failure') {
       if (!check.allow_failure) {
         if (check.status === 'failed') {
-          status = 'failure';
+          status = BRANCH_STATUS_FAILURE;
         } else if (check.status !== 'success') {
           ({ status } = check);
         }
@@ -413,7 +419,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.isConflicted = true;
   } else if (pr.state === 'open') {
     const branchStatus = await getBranchStatus(pr.branchName, []);
-    if (branchStatus === 'success') {
+    if (branchStatus === BRANCH_STATUS_SUCCESS) {
       pr.canMerge = true;
     }
   }

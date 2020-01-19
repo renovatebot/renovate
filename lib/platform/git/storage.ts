@@ -475,6 +475,14 @@ export class Storage {
     }
   }
 
+  async hasDiff(branchName: string): Promise<boolean> {
+    try {
+      return (await this._git!.diff(['HEAD', branchName])) !== '';
+    } catch (err) {
+      return true;
+    }
+  }
+
   async commitFilesToBranch({
     branchName,
     files,
@@ -519,6 +527,13 @@ export class Storage {
         }
       }
       await this._git!.commit(message);
+      if (!(await this.hasDiff(`origin/${branchName}`))) {
+        logger.info(
+          { branchName, fileNames },
+          'No file changes detected. Skipping commit'
+        );
+        return;
+      }
       await this._git!.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
         '-u': true,
