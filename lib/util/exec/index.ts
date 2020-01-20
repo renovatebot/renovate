@@ -93,7 +93,7 @@ export async function exec(
   };
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  if (execConfig.binarySource === BinarySource.Docker) {
+  if (execConfig.binarySource === BinarySource.Docker && docker) {
     logger.debug('Using docker to execute');
     const dockerOptions = {
       ...docker,
