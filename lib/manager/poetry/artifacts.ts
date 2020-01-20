@@ -5,7 +5,6 @@ import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
-import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
 
 export async function updateArtifacts({
   packageFileName,
@@ -34,23 +33,15 @@ export async function updateArtifacts({
   const localLockFileName = join(config.localDir, lockFileName);
   try {
     await outputFile(localPackageFileName, newPackageFileContent);
-    const execOptions: ExecOptions = {
-      cwd: join(config.localDir, subDirectory),
-    };
-
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
-      logger.info('Running poetry via docker');
-      execOptions.docker = {
-        image: 'renovate/poetry',
-      };
-    } else {
-      logger.info('Running poetry via global poetry');
-    }
     const cmd: string[] = [];
     for (let i = 0; i < updatedDeps.length; i += 1) {
       const dep = updatedDeps[i];
       cmd.push(`poetry update --lock --no-interaction ${dep}`);
     }
+    const execOptions: ExecOptions = {
+      cwd: join(config.localDir, subDirectory),
+      docker: { image: 'renovate/poetry' },
+    };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readFile(localLockFileName, 'utf8');
     if (existingLockFileContent === newPoetryLockContent) {
