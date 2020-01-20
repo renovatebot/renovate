@@ -34,11 +34,23 @@ describe('.updateArtifacts()', () => {
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = ['dep1'];
     expect(
-      await updateArtifacts('pyproject.toml', updatedDeps, '', config)
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '',
+        config,
+      })
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
-    expect(await updateArtifacts('pyproject.toml', [], '', config)).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockResolvedValueOnce('Current poetry.lock');
@@ -46,7 +58,12 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
-      await updateArtifacts('pyproject.toml', updatedDeps, '', config)
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '',
+        config,
+      })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -56,7 +73,12 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
-      await updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -66,10 +88,15 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
-      await updateArtifacts('pyproject.toml', updatedDeps, '{}', {
-        ...config,
-        binarySource: BINARY_SOURCE_DOCKER,
-        dockerUser: 'foobar',
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          binarySource: BINARY_SOURCE_DOCKER,
+          dockerUser: 'foobar',
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -81,7 +108,12 @@ describe('.updateArtifacts()', () => {
     });
     const updatedDeps = ['dep1'];
     expect(
-      await updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toMatchSnapshot();
   });
 });

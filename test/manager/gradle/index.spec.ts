@@ -75,10 +75,12 @@ describe('manager/gradle', () => {
     it('should return empty if there are no dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.readFile.mockResolvedValue(fsReal.readFileSync(
-        'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
-        'utf8'
-      ) as any);
+      fs.readFile.mockResolvedValue(
+        fsReal.readFileSync(
+          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
+          'utf8'
+        ) as any
+      );
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);

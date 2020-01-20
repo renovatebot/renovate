@@ -2,7 +2,7 @@ import { gte, lte, satisfies } from '@renovate/pep440';
 import { parse as parseVersion } from '@renovate/pep440/lib/version';
 import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
-import { RangeStrategy } from '../common';
+import { NewValueConfig } from '../common';
 
 function getFutureVersion(
   baseVersion: string,
@@ -35,12 +35,12 @@ interface Range {
   version: string;
 }
 
-export function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+export function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   // easy pin
   if (rangeStrategy === 'pin') {
     return '==' + toVersion;
@@ -67,7 +67,12 @@ export function getNewValue(
         rangeStrategy +
         '. Using "replace" instead.'
     );
-    return getNewValue(currentValue, 'replace', fromVersion, toVersion);
+    return getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      fromVersion,
+      toVersion,
+    });
   }
   if (ranges.some(range => range.operator === '===')) {
     // the operator "===" is used for legacy non PEP440 versions

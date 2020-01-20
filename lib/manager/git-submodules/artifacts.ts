@@ -1,11 +1,8 @@
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
-export default function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): UpdateArtifactsResult[] | null {
+export default function updateArtifacts({
+  updatedDeps,
+}: UpdateArtifact): UpdateArtifactsResult[] | null {
   return [
     {
       file: {
