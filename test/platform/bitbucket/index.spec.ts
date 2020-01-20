@@ -1,6 +1,12 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
 import { GotApi, RepoParams } from '../../../lib/platform/common';
+import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../lib/constants/branch-constants';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
@@ -127,7 +133,7 @@ describe('platform/bitbucket', () => {
       expect.assertions(1);
       await expect(
         initRepo({ repository: 'some/empty', optimizeForDisabled: true })
-      ).rejects.toThrow('disabled');
+      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
   });
 
@@ -194,13 +200,17 @@ describe('platform/bitbucket', () => {
     const getBranchStatus = wrap('getBranchStatus');
     it('works', async () => {
       await initRepo();
-      expect(await getBranchStatus('master', null)).toBe('success');
-      expect(await getBranchStatus('master', ['foo'])).toBe('failed');
-      expect(await getBranchStatus('master', true)).toBe('failed');
-      expect(await getBranchStatus('branch', true)).toBe('success');
-      expect(await getBranchStatus('pending/branch', true)).toBe('pending');
+      expect(await getBranchStatus('master', null)).toBe(BRANCH_STATUS_SUCCESS);
+      expect(await getBranchStatus('master', ['foo'])).toBe(
+        BRANCH_STATUS_FAILED
+      );
+      expect(await getBranchStatus('master', true)).toBe(BRANCH_STATUS_FAILED);
+      expect(await getBranchStatus('branch', true)).toBe(BRANCH_STATUS_SUCCESS);
+      expect(await getBranchStatus('pending/branch', true)).toBe(
+        BRANCH_STATUS_PENDING
+      );
       expect(await getBranchStatus('branch-with-empty-status', true)).toBe(
-        'pending'
+        BRANCH_STATUS_PENDING
       );
     });
   });
@@ -223,7 +233,7 @@ describe('platform/bitbucket', () => {
           branchName: 'branch',
           context: 'context',
           description: 'description',
-          state: 'failed',
+          state: BRANCH_STATUS_FAILED,
           url: 'targetUrl',
         });
         expect(api.post.mock.calls).toMatchSnapshot();
@@ -360,7 +370,11 @@ describe('platform/bitbucket', () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureComment(3, 'topic', 'content');
+      await bitbucket.ensureComment({
+        number: 3,
+        topic: 'topic',
+        content: 'content',
+      });
     });
   });
 
@@ -384,7 +398,9 @@ describe('platform/bitbucket', () => {
     it('finds pr', async () => {
       await initRepo();
       await mocked(async () => {
-        expect(await bitbucket.findPr('branch', 'title')).toMatchSnapshot();
+        expect(
+          await bitbucket.findPr({ branchName: 'branch', prTitle: 'title' })
+        ).toMatchSnapshot();
       });
     });
   });

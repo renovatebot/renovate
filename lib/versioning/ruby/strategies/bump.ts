@@ -8,8 +8,6 @@ export default ({ range, to }: { range: string; to: string }): string => {
   const ranges = range.split(',').map(parseRange);
   const results = ranges.map(({ operator, version: ver, delimiter }) => {
     switch (operator) {
-      case null:
-        return to;
       case GT:
         return lte(to, ver)
           ? `${GT}${delimiter}${ver}`

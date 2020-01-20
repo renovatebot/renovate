@@ -2,6 +2,12 @@ import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
+import { regEx } from '../../util/regex';
+import { extractLockFileEntries } from './locked-version';
+import {
+  DATASOURCE_RUBYGEMS,
+  DATASOURCE_GITHUB,
+} from '../../constants/data-binary-source';
 
 function parseHashArgs(str: string): Partial<PackageDependency> {
   const result: Partial<PackageDependency> = {};
@@ -23,7 +29,7 @@ function parseHashArgs(str: string): Partial<PackageDependency> {
   const { tag, git, github } = parsed;
 
   if (git) {
-    result.datasource = 'github';
+    result.datasource = DATASOURCE_GITHUB;
     const gitMatch = git.match(
       /[@/]github\.com[:/](?<user>[^/]+)\/(?<repo>[^/]+)\.git$/
     );
@@ -87,8 +93,8 @@ export async function extractPackageFile(
       if (!dep.currentValue && !dep.skipReason) {
         if (versions) {
           dep.currentValue = versions
-            .replace(/\s*,\s*/, '')
-            .replace(/['"]/g, '')
+            .replace(regEx('\\s*,\\s*'), '')
+            .replace(regEx('[\'"]', 'g'), '')
             .trim();
           if (!isValid(dep.currentValue)) {
             dep.skipReason = 'invalid-value';
@@ -96,16 +102,18 @@ export async function extractPackageFile(
         } else {
           dep.skipReason = 'no-version';
         }
-        if (!dep.skipReason) dep.datasource = 'rubygems';
+        if (!dep.skipReason) {
+          dep.datasource = DATASOURCE_RUBYGEMS;
+        }
       }
       res.deps.push(dep);
     }
-    const groupMatch = line.match(/^group\s+(.*?)\s+do/);
+    const groupMatch = line.match(regEx('^group\\s+(.*?)\\s+do'));
     if (groupMatch) {
       const depTypes = groupMatch[1]
         .split(',')
         .map(group => group.trim())
-        .map(group => group.replace(/^:/, ''));
+        .map(group => group.replace(regEx('^:'), ''));
       const groupLineNumber = lineNumber;
       let groupContent = '';
       let groupLine = '';
@@ -113,7 +121,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         groupLine = lines[lineNumber];
         if (groupLine !== 'end') {
-          groupContent += (groupLine || '').replace(/^ {2}/, '') + '\n';
+          groupContent += (groupLine || '').replace(regEx('^ {2}'), '') + '\n';
         }
       }
       const groupRes = await extractPackageFile(groupContent);
@@ -147,7 +155,7 @@ export async function extractPackageFile(
           sourceLine = 'end';
         }
         if (sourceLine !== 'end') {
-          sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
+          sourceContent += sourceLine.replace(regEx('^ {2}'), '') + '\n';
         }
       }
       const sourceRes = await extractPackageFile(sourceContent);
@@ -163,7 +171,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const platformsMatch = line.match(/^platforms\s+(.*?)\s+do/);
+    const platformsMatch = line.match(regEx('^platforms\\s+(.*?)\\s+do'));
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -172,7 +180,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         platformsLine = lines[lineNumber];
         if (platformsLine !== 'end') {
-          platformsContent += platformsLine.replace(/^ {2}/, '') + '\n';
+          platformsContent += platformsLine.replace(regEx('^ {2}'), '') + '\n';
         }
       }
       const platformsRes = await extractPackageFile(platformsContent);
@@ -188,7 +196,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = line.match(/^if\s+(.*?)/);
+    const ifMatch = line.match(regEx('^if\\s+(.*?)'));
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
@@ -197,7 +205,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         ifLine = lines[lineNumber];
         if (ifLine !== 'end') {
-          ifContent += ifLine.replace(/^ {2}/, '') + '\n';
+          ifContent += ifLine.replace(regEx('^ {2}'), '') + '\n';
         }
       }
       const ifRes = await extractPackageFile(ifContent);
@@ -222,7 +230,16 @@ export async function extractPackageFile(
     const lockContent = await platform.getFile(gemfileLock);
     if (lockContent) {
       logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
-      const bundledWith = lockContent.match(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/);
+      const lockedEntries = extractLockFileEntries(lockContent);
+      for (const dep of res.deps) {
+        const lockedDepValue = lockedEntries.get(dep.depName);
+        if (lockedDepValue) {
+          dep.lockedVersion = lockedDepValue;
+        }
+      }
+      const bundledWith = lockContent.match(
+        regEx('\\nBUNDLED WITH\\n\\s+(.*?)(\\n|$)')
+      );
       if (bundledWith) {
         res.compatibility = res.compatibility || {};
         res.compatibility.bundler = bundledWith[1];

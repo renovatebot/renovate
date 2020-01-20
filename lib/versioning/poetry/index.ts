@@ -1,7 +1,7 @@
 import { parseRange } from 'semver-utils';
 import { major, minor } from 'semver';
 import { api as npm } from '../npm';
-import { RangeStrategy, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../common';
 
 function notEmpty(s: string): boolean {
   return s !== '';
@@ -82,12 +82,12 @@ function handleShort(
   return null;
 }
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     const parsedRange = parseRange(npmCurrentValue);
@@ -107,12 +107,12 @@ function getNewValue(
       }
     }
   }
-  const newSemver = npm.getNewValue(
-    poetry2npm(currentValue),
+  const newSemver = npm.getNewValue({
+    currentValue: poetry2npm(currentValue),
     rangeStrategy,
     fromVersion,
-    toVersion
-  );
+    toVersion,
+  });
   const newPoetry = npm2poetry(newSemver);
   return newPoetry;
 }

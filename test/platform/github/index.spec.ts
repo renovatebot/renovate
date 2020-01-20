@@ -1,5 +1,15 @@
 import fs from 'fs-extra';
 import { GotApi, GotResponse } from '../../../lib/platform/common';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+  REPOSITORY_RENAMED,
+} from '../../../lib/constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../lib/constants/branch-constants';
 
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
@@ -220,7 +230,7 @@ describe('platform/github', () => {
           repository: 'some/repo',
           optimizeForDisabled: true,
         } as any)
-      ).rejects.toThrow('disabled');
+      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
     it('should rebase', async () => {
       function squashInitRepo(args: any) {
@@ -443,7 +453,7 @@ describe('platform/github', () => {
         github.initRepo({
           repository: 'some/repo',
         } as any)
-      ).rejects.toThrow('not-found');
+      ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
     it('should throw error if renamed', async () => {
       api.get.mockReturnValueOnce({
@@ -458,7 +468,7 @@ describe('platform/github', () => {
           includeForks: true,
           repository: 'some/repo',
         } as any)
-      ).rejects.toThrow('renamed');
+      ).rejects.toThrow(REPOSITORY_RENAMED);
     });
   });
   describe('getRepoForceRebase', () => {
@@ -576,14 +586,14 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       const res = await github.getBranchStatus('somebranch', null);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       await initRepo({
         repository: 'some/repo',
       });
       const res = await github.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should pass through success', async () => {
       await initRepo({
@@ -598,7 +608,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('should pass through failed', async () => {
       await initRepo({
@@ -613,7 +623,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should fail if a check run has failed', async () => {
       await initRepo({
@@ -651,7 +661,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should suceed if no status and all passed check runs', async () => {
       await initRepo({
@@ -689,7 +699,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('should fail if a check run has failed', async () => {
       await initRepo({
@@ -726,7 +736,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('pending');
+      expect(res).toEqual(BRANCH_STATUS_PENDING);
     });
   });
   describe('getBranchStatusCheck', () => {
@@ -1315,7 +1325,11 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       api.get.mockReturnValueOnce({ body: [] } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.post.mock.calls[1]).toMatchSnapshot();
     });
@@ -1329,7 +1343,11 @@ describe('platform/github', () => {
             body: graphqlClosedPullrequests,
           } as any)
       );
-      await github.ensureComment(2499, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 2499,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1340,7 +1358,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(1);
       expect(api.patch.mock.calls).toMatchSnapshot();
@@ -1352,7 +1374,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       } as any);
-      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      await github.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1363,7 +1389,11 @@ describe('platform/github', () => {
       api.get.mockReturnValueOnce({
         body: [{ id: 1234, body: '!merge' }],
       } as any);
-      await github.ensureComment(42, null, '!merge');
+      await github.ensureComment({
+        number: 42,
+        topic: null,
+        content: '!merge',
+      });
       expect(api.post).toHaveBeenCalledTimes(1);
       expect(api.patch).toHaveBeenCalledTimes(0);
     });
@@ -1390,7 +1420,9 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null);
+      const res = await github.findPr({
+        branchName: 'branch-a',
+      });
       expect(res).toBeDefined();
     });
     it('returns true if not open', async () => {
@@ -1404,7 +1436,10 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      const res = await github.findPr('branch-a', null, '!open');
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: '!open',
+      });
       expect(res).toBeDefined();
     });
     it('caches pr list', async () => {
@@ -1418,13 +1453,20 @@ describe('platform/github', () => {
           },
         ],
       } as any);
-      let res = await github.findPr('branch-a', null);
+      let res = await github.findPr({ branchName: 'branch-a' });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr');
+      res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-a', 'branch a pr', 'open');
+      res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+      });
       expect(res).toBeDefined();
-      res = await github.findPr('branch-b');
+      res = await github.findPr({ branchName: 'branch-b' });
       expect(res).not.toBeDefined();
     });
   });

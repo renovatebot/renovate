@@ -1,11 +1,12 @@
 import * as cleanup from '../../../../lib/workers/repository/finalise/prune';
 import { platform, RenovateConfig, getConfig } from '../../../util';
+import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platfroms';
 
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
-  config.platform = 'github';
+  config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
   config.warnings = [];
 });

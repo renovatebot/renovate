@@ -1,6 +1,7 @@
 import { isValid } from '../../versioning/hex';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
+import { DATASOURCE_HEX } from '../../constants/data-binary-source';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
@@ -33,9 +34,9 @@ export function extractPackageFile(content: string): PackageFile {
             managerData: {},
           };
 
-          dep.datasource = datasource || 'hex';
+          dep.datasource = datasource || DATASOURCE_HEX;
 
-          if (dep.datasource === 'hex') {
+          if (dep.datasource === DATASOURCE_HEX) {
             dep.currentValue = currentValue;
             dep.lookupName = depName;
           }
@@ -48,7 +49,7 @@ export function extractPackageFile(content: string): PackageFile {
             dep.skipReason = 'unsupported-version';
           }
 
-          if (dep.datasource !== 'hex') {
+          if (dep.datasource !== DATASOURCE_HEX) {
             dep.skipReason = 'non-hex depTypes';
           }
 

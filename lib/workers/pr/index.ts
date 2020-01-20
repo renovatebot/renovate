@@ -1,20 +1,38 @@
 import sampleSize from 'lodash/sampleSize';
+import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
 import { getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
 import { platform, BranchStatus, Pr } from '../../platform';
 import { BranchConfig } from '../common';
+import {
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_FAILURE,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+} from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_CREATED,
+  BRANCH_STATUS_ERROR,
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_RUNNING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
 }
 
+function noLeadingAtSymbol(input: string): string {
+  return input.length && input[0] === '@' ? input.slice(1) : input;
+}
+
 async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   if (config.assignees.length > 0) {
     try {
-      let assignees = config.assignees.map(assignee =>
-        assignee.length && assignee[0] === '@' ? assignee.slice(1) : assignee
-      );
+      let assignees = config.assignees.map(noLeadingAtSymbol);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -34,9 +52,13 @@ async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   }
   if (config.reviewers.length > 0) {
     try {
-      let reviewers = config.reviewers.map(reviewer =>
-        reviewer.length && reviewer[0] === '@' ? reviewer.slice(1) : reviewer
-      );
+      let reviewers = config.reviewers.map(noLeadingAtSymbol);
+      if (config.additionalReviewers.length > 0) {
+        const additionalReviewers = config.additionalReviewers.map(
+          noLeadingAtSymbol
+        );
+        reviewers = uniq(reviewers.concat(additionalReviewers));
+      }
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
@@ -99,7 +121,13 @@ export async function ensurePr(
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
-    if (['created', 'pending', 'running'].includes(await getBranchStatus())) {
+    if (
+      [
+        BRANCH_STATUS_CREATED,
+        BRANCH_STATUS_PENDING,
+        BRANCH_STATUS_RUNNING,
+      ].includes(await getBranchStatus())
+    ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -114,7 +142,11 @@ export async function ensurePr(
     }
     if (
       config.forcePr ||
-      ['failure', 'error', 'failed'].includes(await getBranchStatus())
+      [
+        BRANCH_STATUS_FAILURE,
+        BRANCH_STATUS_ERROR,
+        BRANCH_STATUS_FAILED,
+      ].includes(await getBranchStatus())
     ) {
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
@@ -123,11 +155,11 @@ export async function ensurePr(
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) !== 'success') {
+    if ((await getBranchStatus()) !== BRANCH_STATUS_SUCCESS) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return 'pending';
+      return BRANCH_STATUS_PENDING;
     }
     logger.debug('Branch status success');
   } else if (
@@ -143,8 +175,8 @@ export async function ensurePr(
   ) {
     logger.debug('Checking branch combined status');
     if (
-      (await getBranchStatus()) === 'pending' ||
-      (await getBranchStatus()) === 'running'
+      (await getBranchStatus()) === BRANCH_STATUS_PENDING ||
+      (await getBranchStatus()) === BRANCH_STATUS_RUNNING
     ) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
@@ -159,7 +191,7 @@ export async function ensurePr(
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return 'pending';
+        return BRANCH_STATUS_PENDING;
       }
       logger.debug(
         `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`
@@ -230,7 +262,11 @@ export async function ensurePr(
       // istanbul ignore if
       if (
         config.automerge &&
-        ['failure', 'error', 'failed'].includes(await getBranchStatus())
+        [
+          BRANCH_STATUS_FAILURE,
+          BRANCH_STATUS_ERROR,
+          BRANCH_STATUS_FAILED,
+        ].includes(await getBranchStatus())
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
@@ -347,7 +383,7 @@ export async function ensurePr(
       config.branchAutomergeFailureMessage &&
       !config.suppressNotifications.includes('branchAutomergeFailure')
     ) {
-      const subject = 'Branch automerge failure';
+      const topic = 'Branch automerge failure';
       let content =
         'This PR was configured for branch automerge, however this is not possible so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
@@ -358,14 +394,22 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info('Would add comment to PR #' + pr.number);
       } else {
-        await platform.ensureComment(pr.number, subject, content);
+        await platform.ensureComment({
+          number: pr.number,
+          topic,
+          content,
+        });
       }
     }
     // Skip assign and review if automerging PR
     if (
       config.automerge &&
       !config.assignAutomerge &&
-      !['failure', 'error', 'failed'].includes(await getBranchStatus())
+      ![
+        BRANCH_STATUS_FAILURE,
+        BRANCH_STATUS_ERROR,
+        BRANCH_STATUS_FAILED,
+      ].includes(await getBranchStatus())
     ) {
       logger.debug(
         `Skipping assignees and reviewers as automerge=${config.automerge}`
@@ -378,10 +422,10 @@ export async function ensurePr(
   } catch (err) {
     // istanbul ignore if
     if (
-      err.message === 'repository-changed' ||
-      err.message === 'rate-limit-exceeded' ||
-      err.message === 'platform-failure' ||
-      err.message === 'integration-unauthorized'
+      err.message === REPOSITORY_CHANGED ||
+      err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
+      err.message === PLATFORM_FAILURE ||
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('Passing error up');
       throw err;
@@ -420,7 +464,7 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
       branchName,
       requiredStatusChecks
     );
-    if (branchStatus !== 'success') {
+    if (branchStatus !== BRANCH_STATUS_SUCCESS) {
       logger.info(
         `PR is not ready for merge (branch status is ${branchStatus})`
       );
@@ -440,7 +484,11 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
         );
         return false;
       }
-      return platform.ensureComment(pr.number, null, automergeComment);
+      return platform.ensureComment({
+        number: pr.number,
+        topic: null,
+        content: automergeComment,
+      });
     }
     // Let's merge this
     logger.debug(`Automerging #${pr.number}`);
