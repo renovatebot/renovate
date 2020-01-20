@@ -9,12 +9,8 @@ import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { platform } from '../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
-import {
-  BINARY_SOURCE_AUTO,
-  BINARY_SOURCE_DOCKER,
-  BINARY_SOURCE_GLOBAL,
-  DATASOURCE_PACKAGIST,
-} from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
+import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -105,7 +101,7 @@ export async function updateArtifacts({
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
     let cmd: string;
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
@@ -118,8 +114,8 @@ export async function updateArtifacts({
       cmd += `-w "${cwd}" `;
       cmd += `renovate/composer composer`;
     } else if (
-      config.binarySource === BINARY_SOURCE_AUTO ||
-      config.binarySource === BINARY_SOURCE_GLOBAL
+      config.binarySource === BinarySource.Auto ||
+      config.binarySource === BinarySource.Global
     ) {
       logger.info('Running composer via global composer');
       cmd = 'composer';

@@ -1,27 +1,11 @@
-type Opt<T> = T | null | undefined;
+import {
+  VolumeOption,
+  VolumesPair,
+  DockerOptions,
+  ExecConfig,
+} from '../common';
 
-type VolumesPair = [string, string];
-export type VolumeOption = Opt<string> | Opt<VolumesPair>;
-
-export interface DockerOptions {
-  image: string;
-  tag?: Opt<string>;
-  volumes?: Opt<VolumeOption[]>;
-  envVars?: Opt<Opt<string>[]>;
-  cwd?: Opt<string>;
-}
-
-let dockerUser: string | null = null; // Set globally, not configurable per-command
-let localDir: string | null = null; // Always used as a mapped volume, also is default working directory if none provided per-command
-let cacheDir: string | null = null; // Always used as a mapped volume
-
-export function setDockerConfig(config): void {
-  dockerUser = config.dockerUser;
-  localDir = config.localDir;
-  cacheDir = config.cacheDir;
-}
-
-function expandVolumeOption(x: Opt<VolumeOption>): VolumesPair | null {
+function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   if (typeof x === 'string') return [x, x];
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
@@ -48,8 +32,7 @@ function uniq<T = unknown>(
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
-  const allVolumes: VolumeOption[] = [localDir, cacheDir, ...volumes];
-  const expanded: Opt<VolumesPair>[] = allVolumes.map(expandVolumeOption);
+  const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter(vol => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => {
@@ -57,13 +40,18 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   });
 }
 
-export function dockerCmd(cmd: string, options: DockerOptions): string {
-  const { image, tag, envVars, cwd, volumes } = options;
+export function dockerCmd(
+  cmd: string,
+  options: DockerOptions,
+  config: ExecConfig
+): string {
+  const { image, tag, envVars, cwd, volumes = [] } = options;
+  const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
   if (dockerUser) result.push(`--user=${dockerUser}`);
 
-  result.push(...prepareVolumes(volumes));
+  result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
 
   if (envVars) {
     result.push(
