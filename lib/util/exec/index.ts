@@ -94,6 +94,7 @@ export async function exec(
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
   if (execConfig.binarySource === BinarySource.Docker) {
+    logger.debug('Using docker to execute');
     const dockerOptions = {
       ...docker,
       cwd,
@@ -114,7 +115,7 @@ export async function exec(
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (res) {
       logger.debug(
-        { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
+        { cmd: pExecCommand, seconds, stdout: res.stdout, stderr: res.stderr },
         'exec completed'
       );
     }
