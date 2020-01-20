@@ -28,7 +28,11 @@ export const api: GotApi = {} as any;
 
 for (const x of helpers) {
   (api as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
-    get(url, { ...opts, method: x.toUpperCase() });
+    get(url, {
+      ...opts,
+      method: x.toUpperCase(),
+      retry: { errorCodes: 'ECONNRESET' },
+    });
 }
 
 api.setBaseUrl = (e: string): void => {

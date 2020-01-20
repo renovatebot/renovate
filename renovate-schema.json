@@ -3,6 +3,22 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "postUpgradeTasks": {
+      "description": "Post-upgrade tasks that are executed before a commit is made by Renovate",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "postUpgradeFiles": {
+      "description": "Files that match these Ant matchers will be committed if they are present after running post-upgrade tasks",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
     "onboardingBranch": {
       "description": "Change this value in order to override the default onboarding branch name.",
       "type": "string",

@@ -29,6 +29,8 @@ export interface RenovateSharedConfig {
   statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
+  postUpgradeTasks?: string[];
+  postUpgradeFiles?: string[];
 }
 
 type UpdateConfig<

@@ -83,6 +83,22 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'postUpgradeTasks',
+    description:
+      'Post-upgrade tasks that are executed before a commit is made by Renovate',
+    type: 'array',
+    subType: 'string',
+    default: [],
+  },
+  {
+    name: 'postUpgradeFiles',
+    description:
+      'Files that match these Ant matchers will be committed if they are present after running post-upgrade tasks',
+    type: 'array',
+    subType: 'string',
+    default: [],
+  },
+  {
     name: 'onboardingBranch',
     description:
       'Change this value in order to override the default onboarding branch name.',

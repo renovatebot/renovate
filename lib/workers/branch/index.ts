@@ -1,5 +1,9 @@
 import { DateTime } from 'luxon';
 
+import antMatcher from 'ant-path-matcher';
+import find from 'find';
+import { readFile } from 'fs-extra';
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -30,6 +34,7 @@ import {
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
+import { exec } from '../../util/exec';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -320,6 +325,46 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
+
+    logger.info(`Post change hook: ${config.postUpgradeTasks}`);
+
+    if (is.nonEmptyArray(config.postUpgradeTasks)) {
+      for (const cmd of config.postUpgradeTasks) {
+        logger.debug({ cmd }, 'Executing post-change hook');
+
+        const execResult = await exec(cmd, {
+          cwd: config.localDir,
+        });
+
+        logger.debug(execResult, 'Executed post-change hook');
+      }
+    }
+
+    if (is.nonEmptyArray(config.postUpgradeFiles)) {
+      const files = find.fileSync(config.localDir);
+
+      for (const filePath of files) {
+        const matcher = antMatcher();
+        const relativePath = filePath.substring(config.localDir.length + 1);
+
+        if (!relativePath.startsWith('.git/')) {
+          for (const pattern of config.postUpgradeFiles) {
+            if (matcher.match(pattern, relativePath)) {
+              logger.debug(
+                { file: filePath, pattern },
+                'Post upgrade file saved'
+              );
+              const existingContent = await readFile(filePath);
+              config.updatedArtifacts.push({
+                name: relativePath,
+                contents: existingContent.toString(),
+              });
+            }
+          }
+        }
+      }
+    }
+
     if (config.artifactErrors && config.artifactErrors.length) {
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
