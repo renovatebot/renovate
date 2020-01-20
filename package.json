@@ -202,7 +202,7 @@
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "24.9.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
-    "copyfiles": "2.1.1",
+    "copyfiles": "2.2.0",
     "cross-env": "6.0.3",
     "eslint": "6.8.0",
     "eslint-config-airbnb-typescript": "6.3.1",
