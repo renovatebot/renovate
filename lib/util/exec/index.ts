@@ -7,9 +7,8 @@ import {
 import { dockerCmd } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
-import { DockerOptions, ExecConfig, Opt } from './common';
+import { BinarySource, DockerOptions, ExecConfig, Opt } from './common';
 import { RenovateConfig } from '../../config';
-import { BinarySource } from '../../constants/data-binary-source';
 
 const execConfig: ExecConfig = {
   binarySource: null,

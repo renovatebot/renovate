@@ -3,9 +3,12 @@ import {
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
 import { exec, ExecOptions, setExecConfig } from '../../lib/util/exec';
-import { ExecConfig, VolumeOption } from '../../lib/util/exec/common';
+import {
+  BinarySource,
+  ExecConfig,
+  VolumeOption,
+} from '../../lib/util/exec/common';
 import { envMock } from '../execUtil';
-import { BinarySource } from '../../lib/constants/data-binary-source';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 

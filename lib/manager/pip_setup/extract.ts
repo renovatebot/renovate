@@ -4,10 +4,8 @@ import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
-import {
-  BINARY_SOURCE_DOCKER,
-  DATASOURCE_PYPI,
-} from '../../constants/data-binary-source';
+import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
@@ -53,7 +51,7 @@ export async function extractSetupFile(
   const cwd = config.localDir;
   let cmd: string;
   const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
-  if (config.binarySource === BINARY_SOURCE_DOCKER) {
+  if (config.binarySource === BinarySource.Docker) {
     logger.info('Running python via docker');
     await exec(`docker pull renovate/pip`);
     cmd = 'docker';

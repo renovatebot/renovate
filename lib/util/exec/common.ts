@@ -1,6 +1,10 @@
-import { BinarySource } from '../../constants/data-binary-source';
-
 export type Opt<T> = T | null | undefined;
+
+export enum BinarySource {
+  Auto = 'auto',
+  Docker = 'docker',
+  Global = 'global',
+}
 
 export interface ExecConfig {
   binarySource: Opt<BinarySource>;
