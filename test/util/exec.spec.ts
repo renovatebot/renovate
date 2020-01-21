@@ -98,18 +98,6 @@ describe(`Child process execution wrapper`, () => {
     ],
 
     [
-      'subDirectory',
-      {
-        execConfig,
-        processEnv,
-        inCmd,
-        inOpts: { subDirectory: 'backend' },
-        outCmd,
-        outOpts: [{ cwd: cwd + 'backend', encoding, env: envMock.basic }],
-      },
-    ],
-
-    [
       'Explicit env option',
       {
         execConfig,

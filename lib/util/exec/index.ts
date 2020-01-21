@@ -81,6 +81,7 @@ export async function exec(
 ): Promise<ExecResult> {
   const { env, extraEnv, docker, subDirectory } = opts;
   let cwd;
+  // istanbul ignore if
   if (subDirectory) {
     cwd = join(execConfig.localDir, subDirectory);
   }
