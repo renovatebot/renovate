@@ -53,6 +53,20 @@ Array [
 exports[`.updateArtifacts() returns updated poetry.lock using docker 1`] = `
 Array [
   Object {
+    "cmd": "docker pull renovate/poetry:latest",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+  Object {
     "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/poetry bash -l -c \\"poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
