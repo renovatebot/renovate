@@ -2,7 +2,6 @@ import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import { updateArtifacts } from '../../../lib/manager/poetry/artifacts';
-import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
@@ -16,7 +15,6 @@ jest.mock('../../../lib/util/exec/env');
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const platform = mocked(_platform);
 
 const config = {
   localDir: join('/tmp/github/some/repo'),
@@ -50,7 +48,7 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockResolvedValueOnce('Current poetry.lock');
+    fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const updatedDeps = ['dep1'];
@@ -65,7 +63,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock', async () => {
-    platform.getFile.mockResolvedValueOnce('Old poetry.lock');
+    fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
@@ -85,7 +83,7 @@ describe('.updateArtifacts()', () => {
       binarySource: BinarySource.Docker,
       dockerUser: 'foobar',
     });
-    platform.getFile.mockResolvedValueOnce('Old poetry.lock');
+    fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
@@ -102,7 +100,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockResolvedValueOnce('Current poetry.lock');
+    fs.readFile.mockResolvedValueOnce('Current poetry.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
