@@ -11,6 +11,25 @@ Array [
 ]
 `;
 
+exports[`.updateArtifacts() catches read error 2`] = `
+Array [
+  Object {
+    "cmd": "pod install",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
 exports[`.updateArtifacts() catches write error 1`] = `
 Array [
   Object {
@@ -21,6 +40,8 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() catches write error 2`] = `Array []`;
 
 exports[`.updateArtifacts() does not return stderr if lockfile has changed 1`] = `
 Array [
@@ -33,9 +54,89 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `"docker run --rm --user=ubuntu -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo --entrypoint pod renovate/cocoapods:1.2.4 install"`;
+exports[`.updateArtifacts() does not return stderr if lockfile has changed 2`] = `
+Array [
+  Object {
+    "cmd": "pod install",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
 
-exports[`.updateArtifacts() falls back to the \`latest\` Docker image tag 1`] = `"docker run --rm --user=ubuntu -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo --entrypoint pod renovate/cocoapods:latest install"`;
+exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() falls back to the \`latest\` Docker image tag 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns null for invalid local directory 1`] = `Array []`;
+
+exports[`.updateArtifacts() returns null if no Podfile.lock found 1`] = `Array []`;
+
+exports[`.updateArtifacts() returns null if no updatedDeps were provided 1`] = `Array []`;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "pod install",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns null if updatedDeps is empty 1`] = `Array []`;
 
 exports[`.updateArtifacts() returns pod exec error 1`] = `
 Array [
@@ -43,6 +144,25 @@ Array [
     "artifactError": Object {
       "lockFile": "Podfile.lock",
       "stderr": "exec exception",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns pod exec error 2`] = `
+Array [
+  Object {
+    "cmd": "pod install",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
     },
   },
 ]
@@ -59,6 +179,25 @@ Array [
 ]
 `;
 
+exports[`.updateArtifacts() returns pod exec stderr 2`] = `
+Array [
+  Object {
+    "cmd": "pod install",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
 exports[`.updateArtifacts() returns updated Podfile 1`] = `
 Array [
   Object {
@@ -70,4 +209,21 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Podfile 2`] = `"docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo --entrypoint pod renovate/cocoapods:latest install"`;
+exports[`.updateArtifacts() returns updated Podfile 2`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;

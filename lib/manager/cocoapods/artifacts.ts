@@ -2,9 +2,9 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import { hrtime } from 'process';
 import { platform } from '../../platform';
-import { exec, ExecResult } from '../../util/exec';
+import { exec, ExecOptions, ExecResult } from '../../util/exec';
 import { logger } from '../../logger';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { getPkgReleases } from '../../datasource/docker';
 import { get as getVersioning } from '../../versioning';
 
@@ -19,15 +19,18 @@ async function getImageTag(
   let result = 'latest';
   if (releases && releases.releases) {
     const versioning = getVersioning(versionScheme);
-    let versions: string[] = releases.releases.map(release => release.version);
-    versions = versions.filter(version => versioning.isVersion(version));
+    const allVersions: string[] = releases.releases.map(
+      release => release.version
+    );
+    let versions = allVersions.filter(version => versioning.isVersion(version));
     if (constraint) {
       versions = versions.filter(version =>
         versioning.matches(version, constraint)
       );
     }
     versions = versions.sort(versioning.sortVersions);
-    if (versions.length) {
+
+    if (constraint && versions.length) {
       result = versions[versions.length - 1];
     }
   }
@@ -40,13 +43,13 @@ async function getImageTag(
   return result;
 }
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
-  await logger.debug(`cocoapods.getArtifacts(${packageFileName})`);
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+  logger.debug(`cocoapods.getArtifacts(${packageFileName})`);
 
   if (updatedDeps.length < 1) {
     logger.debug('CocoaPods: empty update - returning null');
@@ -87,36 +90,26 @@ export async function updateArtifacts(
     return null;
   }
 
-  const cmdParts: string[] = [];
-  if (config.binarySource === 'docker') {
-    cmdParts.push('docker run --rm');
+  const match = existingLockFileContent.match(
+    /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
+  );
+  const cocoapodsVersion =
+    match && match.groups ? match.groups.cocoapodsVersion : null;
 
-    if (config.dockerUser) cmdParts.push(`--user=${config.dockerUser}`);
-
-    cmdParts.push(`-v ${cwd}:${cwd}`);
-    cmdParts.push(`-w ${cwd}`);
-    cmdParts.push(`--entrypoint pod`);
-
-    const match = existingLockFileContent.match(
-      /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
-    );
-    const cocoapodsVersion =
-      match && match.groups ? match.groups.cocoapodsVersion : null;
-    const imageName = 'renovate/cocoapods';
-    const imageTag = await getImageTag(imageName, 'ruby', cocoapodsVersion);
-    cmdParts.push(`${imageName}:${imageTag}`);
-  } else {
-    cmdParts.push('pod');
-  }
-  cmdParts.push('install');
+  const cmd = 'pod install';
+  const execOptions: ExecOptions = {
+    docker: {
+      image: 'renovate/cocoapods',
+      tag: await getImageTag('renovate/cocoapods', 'ruby', cocoapodsVersion),
+    },
+  };
 
   const startTime = hrtime();
   let execResult: ExecResult | null = null;
   let execError: Error | null = null;
   /* istanbul ignore next */
   try {
-    const command = cmdParts.join(' ');
-    execResult = await exec(command, { cwd });
+    execResult = await exec(cmd, execOptions);
   } catch (err) {
     execError = err;
   }

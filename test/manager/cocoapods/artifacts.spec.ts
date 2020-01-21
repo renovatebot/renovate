@@ -1,130 +1,38 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
-import * as _exec from '../../../lib/util/exec';
+import { exec as _exec } from 'child_process';
 import { platform as _platform } from '../../../lib/platform';
 import { updateArtifacts } from '../../../lib/manager/cocoapods';
 import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
-
-const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec = mocked(_exec).exec;
-const platform = mocked(_platform);
-const datasource = mocked(_datasource);
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { setExecConfig } from '../../../lib/util/exec';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 jest.mock('fs-extra');
-jest.mock('../../../lib/util/exec');
+jest.mock('child_process');
+jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
 
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
+const platform = mocked(_platform);
+const datasource = mocked(_datasource);
+
 const config = {
-  localDir: '/tmp/github/some/repo',
+  localDir: join('/tmp/github/some/repo'),
 };
 
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-  });
-  it('returns null if no Podfile.lock found', async () => {
-    expect(await updateArtifacts('Podfile', ['foo'], '', config)).toBeNull();
-  });
-  it('returns null if no updatedDeps were provided', async () => {
-    expect(await updateArtifacts('Podfile', [], '', config)).toBeNull();
-  });
-  it('returns null for invalid local directory', async () => {
-    const noLocalDirConfig = {
-      localDir: undefined,
-    };
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', noLocalDirConfig)
-    ).toBeNull();
-  });
-  it('returns null if updatedDeps is empty', async () => {
-    expect(await updateArtifacts('Podfile', [], '', config)).toBeNull();
-  });
-  it('returns null if unchanged', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Podfile');
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: '',
-    });
-    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
-    expect(await updateArtifacts('Podfile', ['foo'], '', config)).toBeNull();
-  });
-  it('returns updated Podfile', async () => {
-    platform.getFile.mockResolvedValueOnce('Old Podfile');
-    let dockerCommand = '';
-    exec.mockImplementationOnce(cmd => {
-      dockerCommand = cmd;
-      return Promise.resolve({
-        stdout: '',
-        stderr: '',
-      });
-    });
-    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', {
-        ...config,
-        binarySource: 'docker',
-      })
-    ).toMatchSnapshot();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
-  });
-  it('catches write error', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Podfile');
-    fs.outputFile.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', config)
-    ).toMatchSnapshot();
-  });
-  it('catches read error', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Podfile');
-    fs.outputFile.mockResolvedValueOnce(null as never);
-    fs.readFile.mockImplementationOnce(() => {
-      throw new Error('read error');
-    });
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', config)
-    ).toMatchSnapshot();
-  });
-  it('returns pod exec error', async () => {
-    exec.mockImplementationOnce(() => {
-      throw new Error('exec exception');
-    });
-    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
-    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', config)
-    ).toMatchSnapshot();
-  });
-  it('returns pod exec stderr', async () => {
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: 'Something happened',
-    });
-    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
-    fs.outputFile.mockImplementationOnce(() => {});
-    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', config)
-    ).toMatchSnapshot();
-  });
-  it('does not return stderr if lockfile has changed', async () => {
-    exec.mockResolvedValueOnce({
-      stdout: '',
-      stderr: 'Just a warning',
-    });
-    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
-    fs.outputFile.mockImplementationOnce(() => {});
-    fs.readFile.mockResolvedValueOnce('New Podfile.lock' as any);
-    expect(
-      await updateArtifacts('Podfile', ['foo'], '', config)
-    ).toMatchSnapshot();
-  });
-  it('dynamically selects Docker image tag', async () => {
-    platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
-    datasource.getPkgReleases.mockResolvedValueOnce({
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setExecConfig(config);
+
+    datasource.getPkgReleases.mockResolvedValue({
       releases: [
         { version: '1.2.0' },
         { version: '1.2.1' },
@@ -134,47 +42,212 @@ describe('.updateArtifacts()', () => {
         { version: '1.2.5' },
       ],
     });
-
-    let dockerCommand = '';
-    exec.mockImplementationOnce(cmd => {
-      dockerCommand = cmd;
-      return Promise.resolve({
-        stdout: '',
-        stderr: '',
-      });
-    });
-
+  });
+  it('returns null if no Podfile.lock found', async () => {
+    const execSnapshots = mockExecAll(exec);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns null if no updatedDeps were provided', async () => {
+    const execSnapshots = mockExecAll(exec);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns null for invalid local directory', async () => {
+    const execSnapshots = mockExecAll(exec);
+    const noLocalDirConfig = {
+      localDir: undefined,
+    };
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config: noLocalDirConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns null if updatedDeps is empty', async () => {
+    const execSnapshots = mockExecAll(exec);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns null if unchanged', async () => {
+    const execSnapshots = mockExecAll(exec);
+    platform.getFile.mockResolvedValueOnce('Current Podfile');
+    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns updated Podfile', async () => {
+    const execSnapshots = mockExecAll(exec);
+    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    platform.getFile.mockResolvedValueOnce('Old Podfile');
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
-    await updateArtifacts('Podfile', ['foo'], '', {
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('catches write error', async () => {
+    const execSnapshots = mockExecAll(exec);
+    platform.getFile.mockResolvedValueOnce('Current Podfile');
+    fs.outputFile.mockImplementationOnce(() => {
+      throw new Error('not found');
+    });
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('catches read error', async () => {
+    const execSnapshots = mockExecAll(exec);
+    platform.getFile.mockResolvedValueOnce('Current Podfile');
+    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readFile.mockImplementationOnce(() => {
+      throw new Error('read error');
+    });
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns pod exec error', async () => {
+    const execSnapshots = mockExecAll(exec, new Error('exec exception'));
+    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
+    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns pod exec stderr', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '',
+      stderr: 'Something happened',
+    });
+    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
+    fs.outputFile.mockImplementationOnce(() => {});
+    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('does not return stderr if lockfile has changed', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '',
+      stderr: 'Just a warning',
+    });
+    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
+    fs.outputFile.mockImplementationOnce(() => {});
+    fs.readFile.mockResolvedValueOnce('New Podfile.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('dynamically selects Docker image tag', async () => {
+    const execSnapshots = mockExecAll(exec);
+
+    setExecConfig({
       ...config,
       binarySource: 'docker',
       dockerUser: 'ubuntu',
     });
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
-    expect(exec).toBeCalledTimes(1);
+
+    platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
+
+    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    await updateArtifacts({
+      packageFileName: 'Podfile',
+      updatedDeps: ['foo'],
+      newPackageFileContent: '',
+      config,
+    });
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('falls back to the `latest` Docker image tag', async () => {
+    const execSnapshots = mockExecAll(exec);
+
+    setExecConfig({
+      ...config,
+      binarySource: 'docker',
+      dockerUser: 'ubuntu',
+    });
+
     platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [],
     });
 
-    let dockerCommand = '';
-    exec.mockImplementationOnce(cmd => {
-      dockerCommand = cmd;
-      return Promise.resolve({
-        stdout: '',
-        stderr: '',
-      });
-    });
-
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
-    await updateArtifacts('Podfile', ['foo'], '', {
-      ...config,
-      binarySource: 'docker',
-      dockerUser: 'ubuntu',
+    await updateArtifacts({
+      packageFileName: 'Podfile',
+      updatedDeps: ['foo'],
+      newPackageFileContent: '',
+      config,
     });
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
-    expect(exec).toBeCalledTimes(1);
+    expect(execSnapshots).toMatchSnapshot();
   });
 });
