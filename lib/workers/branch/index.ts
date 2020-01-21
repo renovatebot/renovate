@@ -446,7 +446,7 @@ export async function processBranch(
     } else if (
       err.message !== DATASOURCE_FAILURE &&
       err.message !== 'disable-gitfs' &&
-      err.message !== DATASOURCE_FAILURE
+      err.message !== PLATFORM_FAILURE
     ) {
       logger.error({ err }, `Error updating branch: ${err.message}`);
     }
