@@ -195,6 +195,7 @@ const options: RenovateOptions[] = [
       'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`',
     admin: true,
     type: 'string',
+    allowedValues: ['auto', 'global', 'docker'],
     default: 'auto',
   },
   {

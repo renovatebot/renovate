@@ -5,7 +5,7 @@ import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
-import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -90,7 +90,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: BINARY_SOURCE_DOCKER,
+          binarySource: BinarySource.Docker,
           dockerUser: 'foobar',
         },
       })

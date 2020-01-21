@@ -4,7 +4,7 @@ import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
 
 export async function updateArtifacts({
   packageFileName,
@@ -47,7 +47,7 @@ export async function updateArtifacts({
   }
 
   const cmdParts =
-    config.binarySource === BINARY_SOURCE_DOCKER
+    config.binarySource === BinarySource.Docker
       ? [
           'docker',
           'run',

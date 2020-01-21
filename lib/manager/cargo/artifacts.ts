@@ -5,7 +5,7 @@ import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
-import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
 
 export async function updateArtifacts({
   packageFileName,
@@ -36,7 +36,7 @@ export async function updateArtifacts({
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
       let cmd: string;
-      if (config.binarySource === BINARY_SOURCE_DOCKER) {
+      if (config.binarySource === BinarySource.Docker) {
         logger.info('Running cargo via docker');
         cmd = `docker run --rm `;
         if (config.dockerUser) {
