@@ -5,6 +5,7 @@ import {
   ChangeLogConfig,
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
+import { VERSION_SCHEME_SEMVER } from '../../../../lib/constants/version-schemes';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
@@ -14,7 +15,7 @@ const ghGot = mocked(api).get;
 const upgrade: ChangeLogConfig = {
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
-  versionScheme: 'semver',
+  versionScheme: VERSION_SCHEME_SEMVER,
   fromVersion: '1.0.0',
   toVersion: '3.0.0',
   sourceUrl: 'https://github.com/chalk/chalk',
