@@ -5,7 +5,7 @@ import {
   PLATFORM_TYPE_BITBUCKET_SERVER,
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../constants/platfroms';
+} from '../constants/platforms';
 
 export interface RenovateOptionBase {
   admin?: boolean;
