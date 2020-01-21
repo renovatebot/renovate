@@ -24,7 +24,7 @@ interface TestInput {
   inOpts: ExecOptions;
   outCmd: string[];
   outOpts: OutOpts[];
-  trustLevel?: 'high' | 'low' | unknown;
+  trustLevel?: 'high' | 'low';
 }
 
 describe(`Child process execution wrapper`, () => {
@@ -310,7 +310,7 @@ describe(`Child process execution wrapper`, () => {
       outCmd: outCommand,
       outOpts,
       trustLevel,
-    } = testOpts as any;
+    } = testOpts;
 
     process.env = procEnv;
     if (trustLevel) global.trustLevel = trustLevel;
@@ -329,5 +329,33 @@ describe(`Child process execution wrapper`, () => {
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);
+  });
+
+  it('Supports image prefetch', async () => {
+    const actualCmd: string[] = [];
+    cpExec.mockImplementation((execCmd, execOpts, callback) => {
+      actualCmd.push(execCmd);
+      callback(null, { stdout: '', stderr: '' });
+      return undefined;
+    });
+
+    setExecConfig({ binarySource: BinarySource.Global });
+    await exec(inCmd, { docker });
+    await exec(inCmd, { docker });
+
+    setExecConfig({ binarySource: BinarySource.Docker });
+    await exec(inCmd, { docker });
+    await exec(inCmd, { docker });
+
+    setExecConfig({ binarySource: BinarySource.Global });
+    await exec(inCmd, { docker });
+    await exec(inCmd, { docker });
+
+    expect(actualCmd).toEqual([
+      ...repeat(inCmd),
+      `docker pull ${image}`,
+      ...repeat(`docker run --rm ${image} bash -l -c "${inCmd}"`),
+      ...repeat(inCmd),
+    ]);
   });
 });

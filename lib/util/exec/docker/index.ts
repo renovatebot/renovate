@@ -80,5 +80,6 @@ export function dockerCmd(
     return [mainCommand];
   }
 
+  prefetchedDockerImages.add(taggedImage);
   return [`docker pull ${taggedImage}`, mainCommand];
 }
