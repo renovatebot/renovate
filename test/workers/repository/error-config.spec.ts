@@ -3,7 +3,7 @@ import { CONFIG_VALIDATION } from '../../../lib/constants/error-messages';
 import { raiseConfigWarningIssue } from '../../../lib/workers/repository/error-config';
 import { RenovateConfig, getConfig, platform } from '../../util';
 import { Pr } from '../../../lib/platform';
-import { PULL_REQUEST_STATUS_OPEN } from '../../../lib/constants/pull-requests';
+import { PR_STATUS_OPEN } from '../../../lib/constants/pull-requests';
 
 jest.mock('../../../lib/platform');
 
@@ -41,7 +41,7 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
-        state: PULL_REQUEST_STATUS_OPEN,
+        state: PR_STATUS_OPEN,
       });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
@@ -53,7 +53,7 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
-        state: PULL_REQUEST_STATUS_OPEN,
+        state: PR_STATUS_OPEN,
       });
       const res = await raiseConfigWarningIssue(
         { ...config, dryRun: true },

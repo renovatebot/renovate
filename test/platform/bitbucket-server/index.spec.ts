@@ -7,9 +7,9 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../lib/constants/error-messages';
 import {
-  PULL_REQUEST_STATUS_CLOSED,
-  PULL_REQUEST_STATUS_MERGED,
-  PULL_REQUEST_STATUS_OPEN,
+  PR_STATUS_CLOSED,
+  PR_STATUS_MERGED,
+  PR_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
@@ -506,7 +506,7 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PULL_REQUEST_STATUS_OPEN,
+              state: PR_STATUS_OPEN,
             })
           ).toMatchSnapshot();
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -518,7 +518,7 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PULL_REQUEST_STATUS_CLOSED,
+              state: PR_STATUS_CLOSED,
             })
           ).toBeUndefined();
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -594,7 +594,7 @@ describe('platform/bitbucket-server', () => {
             body: {
               version: 0,
               number: 5,
-              state: PULL_REQUEST_STATUS_MERGED.toUpperCase(),
+              state: PR_STATUS_MERGED.toUpperCase(),
               reviewers: [],
               fromRef: {},
               toRef: {},

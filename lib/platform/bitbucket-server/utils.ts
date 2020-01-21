@@ -3,16 +3,16 @@ import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Pr } from '../common';
 import {
-  PULL_REQUEST_STATUS_CLOSED,
-  PULL_REQUEST_STATUS_MERGED,
-  PULL_REQUEST_STATUS_OPEN,
+  PR_STATUS_CLOSED,
+  PR_STATUS_MERGED,
+  PR_STATUS_OPEN,
 } from '../../constants/pull-requests';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
-  MERGED: PULL_REQUEST_STATUS_MERGED,
-  DECLINED: PULL_REQUEST_STATUS_CLOSED,
-  OPEN: PULL_REQUEST_STATUS_OPEN,
+  MERGED: PR_STATUS_MERGED,
+  DECLINED: PR_STATUS_CLOSED,
+  OPEN: PR_STATUS_OPEN,
 };
 
 export function prInfo(pr: any): Pr {

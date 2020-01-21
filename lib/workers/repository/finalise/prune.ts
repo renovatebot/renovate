@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
-import { PULL_REQUEST_STATUS_OPEN } from '../../../constants/pull-requests';
+import { PR_STATUS_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function cleanUpBranches(
@@ -12,7 +12,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: PULL_REQUEST_STATUS_OPEN,
+        state: PR_STATUS_OPEN,
       });
       const branchPr = await platform.getBranchPr(branchName);
       const skipAutoclose = branchPr && branchPr.isModified;

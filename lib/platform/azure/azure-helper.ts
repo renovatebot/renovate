@@ -9,9 +9,9 @@ import * as azureApi from './azure-got-wrapper';
 import { logger } from '../../logger';
 import { Pr } from '../common';
 import {
-  PULL_REQUEST_STATUS_CLOSED,
-  PULL_REQUEST_STATUS_MERGED,
-  PULL_REQUEST_STATUS_OPEN,
+  PR_STATUS_CLOSED,
+  PR_STATUS_MERGED,
+  PR_STATUS_OPEN,
 } from '../../constants/pull-requests';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
@@ -176,11 +176,11 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
   //   All = 4,
   // }
   if (azurePr.status === 2) {
-    pr.state = PULL_REQUEST_STATUS_CLOSED;
+    pr.state = PR_STATUS_CLOSED;
   } else if (azurePr.status === 3) {
-    pr.state = PULL_REQUEST_STATUS_MERGED;
+    pr.state = PR_STATUS_MERGED;
   } else {
-    pr.state = PULL_REQUEST_STATUS_OPEN;
+    pr.state = PR_STATUS_OPEN;
   }
 
   // mergeStatus

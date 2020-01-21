@@ -24,9 +24,9 @@ import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import {
-  PULL_REQUEST_STATUS_ALL,
-  PULL_REQUEST_STATUS_NOT_OPEN,
-  PULL_REQUEST_STATUS_OPEN,
+  PR_STATUS_ALL,
+  PR_STATUS_NOT_OPEN,
+  PR_STATUS_OPEN,
 } from '../../constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
@@ -288,7 +288,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PULL_REQUEST_STATUS_ALL,
+  state = PR_STATUS_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   // TODO: fix typing
@@ -305,13 +305,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case PULL_REQUEST_STATUS_ALL:
+      case PR_STATUS_ALL:
         // no more filter needed, we can go further...
         break;
-      case PULL_REQUEST_STATUS_NOT_OPEN:
-        prsFiltered = prsFiltered.filter(
-          item => item.state !== PULL_REQUEST_STATUS_OPEN
-        );
+      case PR_STATUS_NOT_OPEN:
+        prsFiltered = prsFiltered.filter(item => item.state !== PR_STATUS_OPEN);
         break;
       default:
         prsFiltered = prsFiltered.filter(item => item.state === state);
@@ -330,7 +328,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PULL_REQUEST_STATUS_OPEN,
+    state: PR_STATUS_OPEN,
   });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }

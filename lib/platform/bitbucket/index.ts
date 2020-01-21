@@ -26,10 +26,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import {
-  PULL_REQUEST_STATUS_ALL,
-  PULL_REQUEST_STATUS_OPEN,
-} from '../../constants/pull-requests';
+import { PR_STATUS_ALL, PR_STATUS_OPEN } from '../../constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -214,7 +211,7 @@ export function getFile(
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PULL_REQUEST_STATUS_ALL) {
+  if (desiredState === PR_STATUS_ALL) {
     return true;
   }
   if (desiredState[0] === '!') {
@@ -239,7 +236,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PULL_REQUEST_STATUS_ALL,
+  state = PR_STATUS_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -260,7 +257,7 @@ export async function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   if (closePr) {
-    const pr = await findPr({ branchName, state: PULL_REQUEST_STATUS_OPEN });
+    const pr = await findPr({ branchName, state: PR_STATUS_OPEN });
     if (pr) {
       await api.post(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
@@ -393,7 +390,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PULL_REQUEST_STATUS_OPEN,
+    state: PR_STATUS_OPEN,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }

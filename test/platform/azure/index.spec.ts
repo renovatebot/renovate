@@ -8,9 +8,9 @@ import {
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
 import {
-  PULL_REQUEST_STATUS_CLOSED,
-  PULL_REQUEST_STATUS_NOT_OPEN,
-  PULL_REQUEST_STATUS_OPEN,
+  PR_STATUS_CLOSED,
+  PR_STATUS_NOT_OPEN,
+  PR_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
 
 describe('platform/azure', () => {
@@ -217,7 +217,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PULL_REQUEST_STATUS_OPEN,
+                  state: PR_STATUS_OPEN,
                 },
               ]),
           } as any)
@@ -231,13 +231,13 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PULL_REQUEST_STATUS_OPEN,
+            state: PR_STATUS_OPEN,
           } as any)
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PULL_REQUEST_STATUS_OPEN,
+        state: PR_STATUS_OPEN,
       });
       expect(res).toMatchSnapshot();
     });
@@ -253,7 +253,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PULL_REQUEST_STATUS_CLOSED,
+                  state: PR_STATUS_CLOSED,
                 },
               ]),
           } as any)
@@ -267,13 +267,13 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PULL_REQUEST_STATUS_CLOSED,
+            state: PR_STATUS_CLOSED,
           } as any)
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PULL_REQUEST_STATUS_NOT_OPEN,
+        state: PR_STATUS_NOT_OPEN,
       });
       expect(res).toMatchSnapshot();
     });
@@ -289,7 +289,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PULL_REQUEST_STATUS_CLOSED,
+                  state: PR_STATUS_CLOSED,
                 },
               ]),
           } as any)
@@ -303,13 +303,13 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PULL_REQUEST_STATUS_CLOSED,
+            state: PR_STATUS_CLOSED,
           } as any)
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PULL_REQUEST_STATUS_CLOSED,
+        state: PR_STATUS_CLOSED,
       });
       expect(res).toMatchSnapshot();
     });
@@ -325,7 +325,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PULL_REQUEST_STATUS_CLOSED,
+                  state: PR_STATUS_CLOSED,
                 },
               ]),
           } as any)
@@ -339,7 +339,7 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PULL_REQUEST_STATUS_CLOSED,
+            state: PR_STATUS_CLOSED,
           } as any)
       );
       const res = await azure.findPr({

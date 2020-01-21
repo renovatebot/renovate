@@ -7,9 +7,9 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../lib/constants/error-messages';
 import {
-  PULL_REQUEST_STATUS_MERGED,
-  PULL_REQUEST_STATUS_NOT_OPEN,
-  PULL_REQUEST_STATUS_OPEN,
+  PR_STATUS_MERGED,
+  PR_STATUS_NOT_OPEN,
+  PR_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
@@ -799,13 +799,13 @@ describe('platform/gitlab', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: PULL_REQUEST_STATUS_MERGED,
+            state: PR_STATUS_MERGED,
           },
         ],
       } as any);
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        state: PULL_REQUEST_STATUS_NOT_OPEN,
+        state: PR_STATUS_NOT_OPEN,
       });
       expect(res).toBeDefined();
     });
@@ -824,7 +824,7 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PULL_REQUEST_STATUS_OPEN,
+        state: PR_STATUS_OPEN,
       });
       expect(res).toBeDefined();
     });
@@ -911,7 +911,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: PULL_REQUEST_STATUS_MERGED,
+          state: PR_STATUS_MERGED,
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -933,7 +933,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: PULL_REQUEST_STATUS_OPEN,
+          state: PR_STATUS_OPEN,
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -952,7 +952,7 @@ describe('platform/gitlab', () => {
               id: 1,
               iid: 12345,
               description: 'a merge request',
-              state: PULL_REQUEST_STATUS_OPEN,
+              state: PR_STATUS_OPEN,
               merge_status: 'cannot_be_merged',
               diverged_commits_count: 2,
               source_branch: 'some-branch',
@@ -1052,7 +1052,7 @@ These updates have all been created already. Click a checkbox below to force a r
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: PULL_REQUEST_STATUS_MERGED,
+          state: PR_STATUS_MERGED,
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
