@@ -5,7 +5,7 @@ import {
   ExecConfig,
 } from '../common';
 
-const prefetchedDockerImages: Set<string> = new Set<string>();
+const prefetchedDockerImages = new Set<string>();
 
 export function resetPrefetchedImages(): void {
   prefetchedDockerImages.clear();
