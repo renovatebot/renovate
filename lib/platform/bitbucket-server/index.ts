@@ -1069,6 +1069,10 @@ export function getPrBody(input: string): string {
   logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
+    .replace(
+      'tick the rebase/retry checkbox below',
+      'rename this PR to start with "rebase!"'
+    )
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
