@@ -7,7 +7,7 @@ import {
 
 const prefetchedDockerImages: Set<string> = new Set<string>();
 
-export function resetPrefetchedImages() {
+export function resetPrefetchedImages(): void {
   prefetchedDockerImages.clear();
 }
 
