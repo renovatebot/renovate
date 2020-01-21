@@ -25,7 +25,7 @@ export async function readLocalFile(fileName: string): Promise<string> {
   try {
     const fileContent = await readFile(localFileName, 'utf8');
     return fileContent;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.trace({ err }, 'Error reading local file');
     return null;
   }

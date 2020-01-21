@@ -79,10 +79,10 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker } = opts;
+  const { env, extraEnv, docker, subDirectory } = opts;
   let cwd;
-  if (opts.subDirectory) {
-    cwd = join(execConfig.localDir, opts.subDirectory);
+  if (subDirectory) {
+    cwd = join(execConfig.localDir, subDirectory);
   }
   cwd = cwd || opts.cwd || execConfig.localDir;
   const childEnv = createChildEnv(env, extraEnv);
