@@ -5,7 +5,7 @@ import { updateArtifacts } from '../../../lib/manager/mix';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
-import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -96,7 +96,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: BINARY_SOURCE_DOCKER,
+          binarySource: BinarySource.Docker,
         },
       })
     ).toMatchSnapshot();

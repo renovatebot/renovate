@@ -5,7 +5,7 @@ import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifactsResult, UpdateArtifact } from '../common';
 import { platform } from '../../platform';
-import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
 
 export async function updateArtifacts({
   packageFileName: pipfileName,
@@ -33,7 +33,7 @@ export async function updateArtifacts({
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
     let cmd: string;
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running pipenv via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {

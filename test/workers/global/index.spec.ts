@@ -6,7 +6,7 @@ import * as _limits from '../../../lib/workers/global/limits';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../../../lib/constants/platfroms';
+} from '../../../lib/constants/platforms';
 
 jest.mock('../../../lib/workers/repository');
 

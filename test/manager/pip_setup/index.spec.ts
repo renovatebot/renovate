@@ -10,7 +10,7 @@ import {
 } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { mocked } from '../../util';
-import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = readFileSync(packageFile, 'utf8');
@@ -70,7 +70,7 @@ describe('lib/manager/pip_setup/index', () => {
       expect(
         await extractPackageFile(content, packageFile, {
           ...config,
-          binarySource: BINARY_SOURCE_DOCKER,
+          binarySource: BinarySource.Docker,
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toHaveLength(2); // TODO: figure out volume arguments in Windows

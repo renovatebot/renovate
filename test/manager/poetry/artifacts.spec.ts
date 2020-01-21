@@ -6,8 +6,8 @@ import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
-import { BINARY_SOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
-import { setDockerConfig } from '../../../lib/util/exec/docker';
+import { setExecConfig } from '../../../lib/util/exec';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -26,10 +26,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setDockerConfig({
-      ...config,
-      dockerUser: 'foobar',
-    });
+    setExecConfig(config);
   });
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = ['dep1'];
@@ -83,6 +80,11 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker', async () => {
+    setExecConfig({
+      ...config,
+      binarySource: BinarySource.Docker,
+      dockerUser: 'foobar',
+    });
     platform.getFile.mockResolvedValueOnce('Old poetry.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -94,8 +96,6 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: BINARY_SOURCE_DOCKER,
-          dockerUser: 'foobar',
         },
       })
     ).not.toBeNull();

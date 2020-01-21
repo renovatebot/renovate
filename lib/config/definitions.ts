@@ -25,7 +25,7 @@ import {
   PLATFORM_TYPE_BITBUCKET_SERVER,
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../constants/platfroms';
+} from '../constants/platforms';
 
 export interface RenovateOptionBase {
   admin?: boolean;
@@ -215,6 +215,7 @@ const options: RenovateOptions[] = [
       'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`',
     admin: true,
     type: 'string',
+    allowedValues: ['auto', 'global', 'docker'],
     default: 'auto',
   },
   {
