@@ -5,6 +5,12 @@ import {
   ExecConfig,
 } from '../common';
 
+const prefetchedDockerImages: Set<string> = new Set<string>();
+
+export function resetPrefetchedImages() {
+  prefetchedDockerImages.clear();
+}
+
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   if (typeof x === 'string') return [x, x];
   if (Array.isArray(x) && x.length === 2) {
@@ -44,7 +50,7 @@ export function dockerCmd(
   cmd: string,
   options: DockerOptions,
   config: ExecConfig
-): string {
+): string[] {
   const { image, tag, envVars, cwd, volumes = [] } = options;
   const { localDir, cacheDir, dockerUser } = config;
 
@@ -68,5 +74,11 @@ export function dockerCmd(
 
   result.push(cmd);
 
-  return result.join(' ');
+  const mainCommand = result.join(' ');
+
+  if (prefetchedDockerImages.has(taggedImage)) {
+    return [mainCommand];
+  }
+
+  return [`docker pull ${taggedImage}`, mainCommand];
 }

@@ -8,6 +8,7 @@ import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { setExecConfig } from '../../../lib/util/exec';
 import { BinarySource } from '../../../lib/util/exec/common';
+import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -27,6 +28,7 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     setExecConfig(config);
+    resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = ['dep1'];

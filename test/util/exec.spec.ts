@@ -9,6 +9,7 @@ import {
   VolumeOption,
 } from '../../lib/util/exec/common';
 import { envMock } from '../execUtil';
+import { resetPrefetchedImages } from '../../lib/util/exec/docker';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
@@ -50,6 +51,7 @@ describe(`Child process execution wrapper`, () => {
   }
 
   beforeEach(() => {
+    resetPrefetchedImages();
     jest.resetAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
@@ -152,7 +154,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: { docker, cwd },
         outCmd: [
-          `docker pull ${image}:latest`,
+          `docker pull ${image}`,
           `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: repeat({ cwd, encoding, env: envMock.basic }),
@@ -183,7 +185,7 @@ describe(`Child process execution wrapper`, () => {
           cwd,
         },
         outCmd: [
-          `docker pull ${image}:latest`,
+          `docker pull ${image}`,
           `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: repeat({ cwd, encoding, env: envMock.filtered }),
@@ -238,7 +240,7 @@ describe(`Child process execution wrapper`, () => {
           cwd,
         },
         outCmd: [
-          `docker pull ${image}:latest`,
+          `docker pull ${image}`,
           `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: repeat({
@@ -272,7 +274,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: { cwd, docker: { image, volumes } },
         outCmd: [
-          `docker pull ${image}:latest`,
+          `docker pull ${image}`,
           `docker run --rm ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: repeat({ cwd, encoding, env: envMock.basic }),
@@ -291,7 +293,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: { docker: { image } },
         outCmd: [
-          `docker pull ${image}:latest`,
+          `docker pull ${image}`,
           `docker run --rm --user=foobar ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: repeat({ cwd, encoding, env: envMock.basic }),

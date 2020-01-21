@@ -17,14 +17,11 @@ const execConfig: ExecConfig = {
   cacheDir: null,
 };
 
-const prefetchedDockerImages: Set<string> = new Set<string>();
-
 export function setExecConfig(config: Partial<RenovateConfig>): void {
   for (const key of Object.keys(execConfig)) {
     const value = config[key];
     execConfig[key] = value || null;
   }
-  prefetchedDockerImages.clear();
 }
 
 const pExec: (
@@ -106,14 +103,7 @@ export async function exec(
 
     let singleCommand = commands.join(' && ');
     singleCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
-    singleCommand = dockerCmd(singleCommand, dockerOptions, execConfig);
-
-    const { image, tag = 'latest' } = docker;
-    const imageQualified = `${image}:${tag}`;
-    commands = prefetchedDockerImages.has(imageQualified)
-      ? [singleCommand]
-      : [`docker pull ${imageQualified}`, singleCommand];
-    prefetchedDockerImages.add(imageQualified);
+    commands = dockerCmd(singleCommand, dockerOptions, execConfig);
   }
 
   let res: ExecResult | null = null;

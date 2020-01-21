@@ -53,7 +53,7 @@ Array [
 exports[`.updateArtifacts() returns updated poetry.lock using docker 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/poetry:latest",
+    "cmd": "docker pull renovate/poetry",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
