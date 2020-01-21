@@ -1,4 +1,3 @@
-import parse from 'github-url-from-git';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
@@ -34,10 +33,12 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformProvider = (await got(pkgUrl, {
-      json: true,
-      hostType: 'terraform',
-    })).body;
+    const res: TerraformProvider = (
+      await got(pkgUrl, {
+        json: true,
+        hostType: 'terraform',
+      })
+    ).body;
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       name: repository,
@@ -45,7 +46,7 @@ export async function getPkgReleases({
       releases: null,
     };
     if (res.source) {
-      dep.sourceUrl = parse(res.source);
+      dep.sourceUrl = res.source;
     }
     dep.releases = res.versions.map(version => ({
       version,

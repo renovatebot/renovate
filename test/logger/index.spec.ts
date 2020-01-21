@@ -2,6 +2,8 @@ import _fs from 'fs-extra';
 import {
   logger,
   setMeta,
+  addMeta,
+  removeMeta,
   levels,
   getErrors,
   addStream,
@@ -29,6 +31,14 @@ describe('logger', () => {
 
   it('sets meta', () => {
     setMeta({ any: 'test' });
+  });
+
+  it('adds meta', () => {
+    addMeta({ new: 'test' });
+  });
+
+  it('removes meta', () => {
+    removeMeta(['new']);
   });
 
   it('sets level', () => {

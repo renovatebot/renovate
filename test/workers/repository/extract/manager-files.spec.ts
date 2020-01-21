@@ -1,8 +1,13 @@
 import { getManagerPackageFiles } from '../../../../lib/workers/repository/extract/manager-files';
 import * as _fileMatch from '../../../../lib/workers/repository/extract/file-match';
 import * as _dockerfile from '../../../../lib/manager/dockerfile';
-import { mocked, platform } from '../../../util';
+import { mocked, platform, getConfig } from '../../../util';
 import { RenovateConfig } from '../../../../lib/config';
+import {
+  MANAGER_DOCKERFILE,
+  MANAGER_NPM,
+  MANAGER_TRAVIS,
+} from '../../../../lib/constants/managers';
 
 jest.mock('../../../../lib/workers/repository/extract/file-match');
 jest.mock('../../../../lib/manager/dockerfile');
@@ -15,10 +20,10 @@ describe('workers/repository/extract/manager-files', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = { ...require('../../../config/config/_fixtures') };
+      config = getConfig;
     });
     it('returns empty of manager is disabled', async () => {
-      const managerConfig = { manager: 'travis', enabled: false };
+      const managerConfig = { manager: MANAGER_TRAVIS, enabled: false };
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
@@ -29,13 +34,13 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toHaveLength(0);
     });
     it('skips files if null content returned', async () => {
-      const managerConfig = { manager: 'npm', enabled: true };
+      const managerConfig = { manager: MANAGER_NPM, enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
     it('returns files with extractPackageFile', async () => {
-      const managerConfig = { manager: 'dockerfile', enabled: true };
+      const managerConfig = { manager: MANAGER_DOCKERFILE, enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       platform.getFile.mockResolvedValue('some content');
       dockerfile.extractPackageFile = jest.fn(() => ({
@@ -45,7 +50,7 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns files with extractAllPackageFiles', async () => {
-      const managerConfig = { manager: 'npm', enabled: true };
+      const managerConfig = { manager: MANAGER_NPM, enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       platform.getFile.mockResolvedValue('{}');
       const res = await getManagerPackageFiles(managerConfig);

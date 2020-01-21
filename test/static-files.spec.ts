@@ -11,9 +11,9 @@ function filterFiles(files: string[]): string[] {
 }
 
 async function getFiles(dir: string): Promise<string[]> {
-  return filterFiles(await glob(`${dir}/**/*`, { dot: true, nodir: true })).map(
-    (file: string) => file.replace(`${dir}/`, '')
-  );
+  return filterFiles(
+    await glob(`${dir}/**/*`, { dot: true, nodir: true })
+  ).map((file: string) => file.replace(`${dir}/`, ''));
 }
 
 describe('static-files', () => {

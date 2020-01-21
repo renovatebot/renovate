@@ -13,6 +13,11 @@ export async function autodiscoverRepositories(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   if (!config.autodiscover) {
+    if (!(config.repositories && config.repositories.length)) {
+      logger.warn(
+        'No repositories found - did you want to run with flag --autodiscover?'
+      );
+    }
     return config;
   }
   // Autodiscover list of repositories

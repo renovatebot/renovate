@@ -3,6 +3,7 @@ import upath from 'upath';
 
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 import {
   init,
@@ -16,6 +17,10 @@ import {
 } from './gradle-updates-report';
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
 import { platform } from '../../platform';
+import { LANGUAGE_JAVA } from '../../constants/languages';
+import { MANAGER_GRADLE } from '../../constants/managers';
+import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -39,7 +44,7 @@ async function getGradleCommandLine(
   const gradlewExists = await exists(gradlewPath);
   const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
 
-  if (config.binarySource === 'docker') {
+  if (config.binarySource === BinarySource.Docker) {
     cmd = `docker run --rm `;
     // istanbul ignore if
     if (config.dockerUser) {
@@ -87,7 +92,7 @@ async function executeGradle(
     }
     logger.warn({ err, cmd }, 'Gradle run failed');
     logger.info('Aborting Renovate due to Gradle lookup errors');
-    throw new Error('registry-failure');
+    throw new Error(DATASOURCE_FAILURE);
   }
   logger.debug(stdout + stderr);
   logger.info('Gradle report complete');
@@ -139,8 +144,8 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        manager: 'gradle',
-        datasource: 'maven',
+        manager: MANAGER_GRADLE,
+        datasource: DATASOURCE_MAVEN,
         deps: dependencies,
       });
 
@@ -172,4 +177,4 @@ export function updateDependency(
   );
 }
 
-export const language = 'java';
+export const language = LANGUAGE_JAVA;

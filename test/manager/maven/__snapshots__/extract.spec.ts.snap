@@ -35,6 +35,16 @@ Object {
       ],
     },
     Object {
+      "currentValue": "2.4.2",
+      "datasource": "maven",
+      "depName": "org.apache.maven.plugins:maven-release-plugin",
+      "fileReplacePosition": 1287,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
+      ],
+    },
+    Object {
       "currentValue": "1.8.1",
       "datasource": "maven",
       "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
@@ -152,6 +162,15 @@ Object {
       "val": "1.2.3.4",
     },
   },
+  "packageFile": null,
+}
+`;
+
+exports[`manager/maven/extract extractDependencies tries minimum manifests 1`] = `
+Object {
+  "datasource": "maven",
+  "deps": Array [],
+  "mavenProps": Object {},
   "packageFile": null,
 }
 `;

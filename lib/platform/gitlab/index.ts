@@ -3,22 +3,42 @@ import is from '@sindresorhus/is';
 
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
   RepoConfig,
-  PlatformPrOptions,
   GotResponse,
   Pr,
   Issue,
   VulnerabilityAlert,
+  CreatePRConfig,
+  EnsureIssueConfig,
+  BranchStatusConfig,
+  FindPRConfig,
+  EnsureCommentConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { RenovateConfig } from '../../config';
+import {
+  PLATFORM_AUTHENTICATION_ERROR,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
@@ -120,8 +140,11 @@ export async function initRepo({
     archived: boolean;
     mirror: boolean;
     default_branch: string;
+    empty_repo: boolean;
     http_url_to_repo: string;
     forked_from_project: boolean;
+    repository_access_level: 'disabled' | 'private' | 'enabled';
+    merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   }>;
   try {
     res = await api.get(`projects/${config.repository}`);
@@ -129,25 +152,39 @@ export async function initRepo({
       logger.info(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error('archived');
+      throw new Error(REPOSITORY_ARCHIVED);
     }
     if (res.body.mirror) {
       logger.info(
         'Repository is a mirror - throwing error to abort renovation'
       );
-      throw new Error('mirror');
+      throw new Error(REPOSITORY_MIRRORED);
     }
-    if (res.body.default_branch === null) {
-      throw new Error('empty');
+    if (res.body.repository_access_level === 'disabled') {
+      logger.info(
+        'Repository portion of project is disabled - throwing error to abort renovation'
+      );
+      throw new Error(REPOSITORY_DISABLED);
+    }
+    if (res.body.merge_requests_access_level === 'disabled') {
+      logger.info(
+        'MRs are disabled for the project - throwing error to abort renovation'
+      );
+      throw new Error(REPOSITORY_DISABLED);
+    }
+    if (res.body.default_branch === null || res.body.empty_repo) {
+      throw new Error(REPOSITORY_EMPTY);
     }
     if (optimizeForDisabled) {
       let renovateConfig: RenovateConfig;
       try {
         renovateConfig = JSON.parse(
           Buffer.from(
-            (await api.get(
-              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
-            )).body.content,
+            (
+              await api.get(
+                `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+              )
+            ).body.content,
             'base64'
           ).toString()
         );
@@ -155,7 +192,7 @@ export async function initRepo({
         // Do nothing
       }
       if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
+        throw new Error(REPOSITORY_DISABLED);
       }
     }
     config.defaultBranch = res.body.default_branch;
@@ -194,18 +231,18 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
-      throw new Error('empty');
+      throw new Error(REPOSITORY_EMPTY);
     }
-    if (['archived', 'empty'].includes(err.message)) {
+    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new Error('forbidden');
+      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
-    if (err.message === 'disabled') {
+    if (err.message === REPOSITORY_DISABLED) {
       throw err;
     }
     logger.info({ err }, 'Unknown GitLab initRepo error');
@@ -274,32 +311,32 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
 
   if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+    throw new Error(REPOSITORY_CHANGED);
   }
 
   const res = await getStatus(branchName);
   logger.debug(`Got res with ${res.length} results`);
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return 'pending';
+    return BRANCH_STATUS_PENDING;
   }
-  let status = 'success';
+  let status = BRANCH_STATUS_SUCCESS;
   // Return 'success' if all are success
   res.forEach(check => {
     // If one is failed then don't overwrite that
     if (status !== 'failure') {
       if (!check.allow_failure) {
         if (check.status === 'failed') {
-          status = 'failure';
+          status = BRANCH_STATUS_FAILURE;
         } else if (check.status !== 'success') {
           ({ status } = check);
         }
@@ -311,14 +348,14 @@ export async function getBranchStatus(
 
 // Pull Request
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  labels?: string[] | null,
-  useDefaultBranch?: boolean,
-  platformOptions?: PlatformPrOptions
-): Promise<Pr> {
+export async function createPr({
+  branchName,
+  prTitle: title,
+  prBody: rawDescription,
+  labels,
+  useDefaultBranch,
+  platformOptions,
+}: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   const targetBranch = useDefaultBranch
     ? config.defaultBranch
@@ -381,7 +418,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.isConflicted = true;
   } else if (pr.state === 'open') {
     const branchStatus = await getBranchStatus(pr.branchName, []);
-    if (branchStatus === 'success') {
+    if (branchStatus === BRANCH_STATUS_SUCCESS) {
       pr.canMerge = true;
     }
   }
@@ -420,9 +457,11 @@ export async function getPrFiles(mrNo: number): Promise<string[]> {
   if (!mrNo) {
     return [];
   }
-  const files = (await api.get(
-    `projects/${config.repository}/merge_requests/${mrNo}/changes`
-  )).body.changes;
+  const files = (
+    await api.get(
+      `projects/${config.repository}/merge_requests/${mrNo}/changes`
+    )
+  ).body.changes;
   return files.map((f: { new_path: string }) => f.new_path);
 }
 
@@ -520,18 +559,18 @@ export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
-export function commitFilesToBranch(
-  branchName: string,
-  files: any[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
+export function commitFilesToBranch({
+  branchName,
+  files,
+  message,
+  parentBranch = config.baseBranch,
+}: CommitFilesConfig): Promise<void> {
+  return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch
-  );
+    parentBranch,
+  });
 }
 
 export function getFile(
@@ -584,13 +623,13 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
@@ -656,9 +695,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    const issueBody = (await api.get(
-      `projects/${config.repository}/issues/${issue.iid}`
-    )).body.description;
+    const issueBody = (
+      await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+    ).body.description;
     return {
       number: issue.iid,
       body: issueBody,
@@ -669,19 +708,19 @@ export async function findIssue(title: string): Promise<Issue | null> {
   }
 }
 
-export async function ensureIssue(
-  title: string,
-  body: string
-): Promise<'updated' | 'created' | null> {
+export async function ensureIssue({
+  title,
+  body,
+}: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
     if (issue) {
-      const existingDescription = (await api.get(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )).body.description;
+      const existingDescription = (
+        await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+      ).body.description;
       if (existingDescription !== description) {
         logger.debug('Updating issue body');
         await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
@@ -815,22 +854,22 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null | undefined,
-  rawContent: string
-): Promise<void> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<void> {
+  const sanitizedContent = sanitize(content);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
-  const comments = await getComments(issueNo);
+  const comments = await getComments(number);
   let body: string;
   let commentId;
   let commentNeedsUpdating;
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${issueNo}`);
-    body = `### ${topic}\n\n${content}`;
+    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    body = `### ${topic}\n\n${sanitizedContent}`;
     body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
@@ -839,8 +878,8 @@ export async function ensureComment(
       }
     });
   } else {
-    logger.debug(`Ensuring content-only comment in #${issueNo}`);
-    body = `${content}`;
+    logger.debug(`Ensuring content-only comment in #${number}`);
+    body = `${sanitizedContent}`;
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;
@@ -849,11 +888,17 @@ export async function ensureComment(
     });
   }
   if (!commentId) {
-    await addComment(issueNo, body);
-    logger.info({ repository: config.repository, issueNo }, 'Added comment');
+    await addComment(number, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Added comment'
+    );
   } else if (commentNeedsUpdating) {
-    await editComment(issueNo, commentId, body);
-    logger.info({ repository: config.repository, issueNo }, 'Updated comment');
+    await editComment(number, commentId, body);
+    logger.info(
+      { repository: config.repository, issueNo: number },
+      'Updated comment'
+    );
   } else {
     logger.debug('Comment is already update-to-date');
   }
@@ -902,7 +947,7 @@ async function fetchPrList(): Promise<Pr[]> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
-      throw new Error('authentication-error');
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
   }
@@ -925,11 +970,11 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr> {
+export async function findPr({
+  branchName,
+  prTitle,
+  state = 'all',
+}: FindPRConfig): Promise<Pr> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   return prList.find(

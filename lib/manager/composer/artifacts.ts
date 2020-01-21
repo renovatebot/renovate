@@ -3,24 +3,26 @@ import URL from 'url';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { exec } from '../../util/exec';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { platform } from '../../platform';
+import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
+import { BinarySource } from '../../util/exec/common';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
-  process.env.COMPOSER_CACHE_DIR =
-    process.env.COMPOSER_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/composer');
-  await fs.ensureDir(process.env.COMPOSER_CACHE_DIR);
-  logger.debug('Using composer cache ' + process.env.COMPOSER_CACHE_DIR);
+  const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
+  env.COMPOSER_CACHE_DIR =
+    env.COMPOSER_CACHE_DIR || upath.join(config.cacheDir, './others/composer');
+  await fs.ensureDir(env.COMPOSER_CACHE_DIR);
+  logger.debug('Using composer cache ' + env.COMPOSER_CACHE_DIR);
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
@@ -29,8 +31,6 @@ export async function updateArtifacts(
   }
   const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
   await fs.ensureDir(upath.join(cwd, 'vendor'));
-  let stdout: string;
-  let stderr: string;
   try {
     const localPackageFileName = upath.join(config.localDir, packageFileName);
     await fs.outputFile(localPackageFileName, newPackageFileContent);
@@ -95,30 +95,28 @@ export async function updateArtifacts(
       const localAuthFileName = upath.join(cwd, 'auth.json');
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
-    const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
-    const startTime = process.hrtime();
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
         cmd += `--user=${config.dockerUser} `;
       }
-      const volumes = [config.localDir, process.env.COMPOSER_CACHE_DIR];
+      const volumes = [config.localDir, env.COMPOSER_CACHE_DIR];
       cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
       const envVars = ['COMPOSER_CACHE_DIR'];
       cmd += envVars.map(e => `-e ${e} `);
       cmd += `-w "${cwd}" `;
       cmd += `renovate/composer composer`;
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BinarySource.Auto ||
+      config.binarySource === BinarySource.Global
     ) {
       logger.info('Running composer via global composer');
       cmd = 'composer';
     } else {
       logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'bundle';
+      cmd = 'composer';
     }
     let args;
     if (config.isLockFileMaintenance) {
@@ -132,16 +130,10 @@ export async function updateArtifacts(
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
+    await exec(`${cmd} ${args}`, {
       cwd,
       env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'composer.lock', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
@@ -167,7 +159,7 @@ export async function updateArtifacts(
       err.message &&
       err.message.includes('write error (disk full?)')
     ) {
-      throw new Error('disk-space');
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }

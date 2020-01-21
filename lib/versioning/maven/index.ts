@@ -9,8 +9,10 @@ import {
   autoExtendMavenRange,
   parseRange,
   EXCLUDING_POINT,
+  qualifierType,
+  QualifierTypes,
 } from './compare';
-import { RangeStrategy, VersioningApi } from '../common';
+import { NewValueConfig, VersioningApi } from '../common';
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
@@ -88,21 +90,13 @@ const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 const isStable = (version: string): boolean | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
-    const qualToken = tokens.find(token => token.type === TYPE_QUALIFIER);
-    if (qualToken) {
-      const val = qualToken.val;
-      // TODO: Can this if be removed, we never get here
-      // istanbul ignore if
-      if (
-        val === 'final' ||
-        val === 'ga' ||
-        val === 'release' ||
-        val === 'latest'
-      )
-        return true;
-
-      if (val === 'release' || val === 'sp') return true;
-      return false;
+    for (const token of tokens) {
+      if (token.type === TYPE_QUALIFIER) {
+        const qualType = qualifierType(token);
+        if (qualType && qualType < QualifierTypes.Release) {
+          return false;
+        }
+      }
     }
     return true;
   }
@@ -120,12 +114,11 @@ const maxSatisfyingVersion = (versions: string[], range: string): string => {
   }, null);
 };
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string | null {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  toVersion,
+}: NewValueConfig): string | null {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return toVersion;
   }

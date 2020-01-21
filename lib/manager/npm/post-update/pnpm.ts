@@ -4,6 +4,7 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig } from '../../common';
+import { BinarySource } from '../../../util/exec/common';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -23,7 +24,6 @@ export async function generateLockFile(
   let stderr: string;
   let cmd: string;
   try {
-    const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
       const installedPath = join(
@@ -61,10 +61,10 @@ export async function generateLockFile(
         }
       }
     }
-    if (config.binarySource === 'global') {
+    if (config.binarySource === BinarySource.Global) {
       cmd = 'pnpm';
     }
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running pnpm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if
@@ -100,15 +100,7 @@ export async function generateLockFile(
       cwd,
       env,
     }));
-    logger.debug(`pnpm stdout:\n${stdout}`);
-    logger.debug(`pnpm stderr:\n${stderr}`);
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
     lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
-    logger.info(
-      { seconds, type: 'pnpm-lock.yaml', stdout, stderr },
-      'Generated lockfile'
-    );
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       {

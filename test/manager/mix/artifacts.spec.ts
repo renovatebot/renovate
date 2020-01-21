@@ -1,15 +1,21 @@
 import _fs from 'fs-extra';
-import { exec as _exec } from '../../../lib/util/exec';
+import { exec as _exec } from 'child_process';
 import { platform as _platform } from '../../../lib/platform';
 import { updateArtifacts } from '../../../lib/manager/mix';
+import { mocked } from '../../util';
+import { envMock, mockExecAll } from '../../execUtil';
+import * as _env from '../../../lib/util/exec/env';
+import { BinarySource } from '../../../lib/util/exec/common';
 
-const fs: any = _fs;
-const exec: any = _exec;
-const platform: any = _platform;
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const platform = mocked(_platform);
+const env = mocked(_env);
 
 jest.mock('fs-extra');
-jest.mock('../../../lib/util/exec');
+jest.mock('child_process');
 jest.mock('../../../lib/platform');
+jest.mock('../../../lib/util/exec/env');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -18,59 +24,96 @@ const config = {
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns null if no mix.lock found', async () => {
-    expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: ['plug'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if no updatedDeps were provided', async () => {
-    expect(await updateArtifacts('mix.exs', [], '', config)).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if no local directory found', async () => {
     const noLocalDirConfig = {
       localDir: null,
     };
     expect(
-      await updateArtifacts('mix.exs', ['plug'], '', noLocalDirConfig)
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: ['plug'],
+        newPackageFileContent: '',
+        config: noLocalDirConfig,
+      })
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
-    expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: ['plug'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockReturnValueOnce('Current mix.lock');
-    exec.mockReturnValue({
-      stdout: '',
-      stderr: '',
-    });
-    fs.readFile.mockReturnValueOnce('Current mix.lock');
-    expect(await updateArtifacts('mix.exs', ['plug'], '', config)).toBeNull();
+    platform.getFile.mockResolvedValueOnce('Current mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('Current mix.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: ['plug'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated mix.lock', async () => {
-    platform.getFile.mockReturnValueOnce('Old mix.lock');
-    let dockerCommand = null;
-    exec.mockImplementationOnce(cmd => {
-      dockerCommand = cmd;
-      return Promise.resolve({
-        stdout: '',
-        stderror: '',
-      });
-    });
-    fs.readFile.mockImplementationOnce(() => 'New mix.lock');
+    platform.getFile.mockResolvedValueOnce('Old mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New mix.lock' as any);
     expect(
-      await updateArtifacts('mix.exs', ['plug'], '{}', {
-        ...config,
-        binarySource: 'docker',
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: ['plug'],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          binarySource: BinarySource.Docker,
+        },
       })
     ).toMatchSnapshot();
-    expect(dockerCommand.replace(/\\(\w)/g, '/$1')).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockReturnValueOnce('Current mix.lock');
+    platform.getFile.mockResolvedValueOnce('Current mix.lock');
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
-      await updateArtifacts('mix.exs', ['plug'], '{}', config)
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: ['plug'],
+        newPackageFileContent: '{}',
+        config,
+      })
     ).toMatchSnapshot();
   });
 });

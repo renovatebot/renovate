@@ -1,7 +1,7 @@
 import { outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/env';
+import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource/docker';
 import {
@@ -10,15 +10,20 @@ import {
   matches,
   sortVersions,
 } from '../../versioning/ruby';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import {
+  BUNDLER_INVALID_CREDENTIALS,
+  BUNDLER_UNKNOWN_ERROR,
+} from '../../constants/error-messages';
+import { BinarySource } from '../../util/exec/common';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {
@@ -32,16 +37,13 @@ export async function updateArtifacts(
     return null;
   }
   const cwd = join(config.localDir, dirname(packageFileName));
-  let stdout: string;
-  let stderr: string;
   try {
     const localPackageFileName = join(config.localDir, packageFileName);
     await outputFile(localPackageFileName, newPackageFileContent);
     const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv();
-    const startTime = process.hrtime();
     let cmd;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running bundler via docker');
       let tag = 'latest';
       let rubyConstraint: string;
@@ -102,8 +104,8 @@ export async function updateArtifacts(
       cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
       cmd += ' && bundle';
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BinarySource.Auto ||
+      config.binarySource === BinarySource.Global
     ) {
       logger.info('Running bundler via global bundler');
       cmd = 'bundle';
@@ -116,16 +118,10 @@ export async function updateArtifacts(
       cmd += '"';
     }
     logger.debug({ cmd }, 'bundler command');
-    ({ stdout, stderr } = await exec(cmd, {
+    await exec(cmd, {
       cwd,
       env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'Gemfile.lock', stdout, stderr },
-      'Generated lockfile'
-    );
+    });
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
@@ -140,29 +136,81 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
+    const output = err.stdout + err.stderr;
+    if (
+      err.message.includes('fatal: Could not parse object') ||
+      output.includes('but that version could not be found')
+    ) {
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: output,
+          },
+        },
+      ];
+    }
     if (
       (err.stdout &&
         err.stdout.includes('Please supply credentials for this source')) ||
-      (err.stderr && err.stderr.includes('Authentication is required'))
+      (err.stderr && err.stderr.includes('Authentication is required')) ||
+      (err.stderr &&
+        err.stderr.includes(
+          'Please make sure you have the correct access rights'
+        ))
     ) {
-      logger.warn(
+      logger.info(
         { err },
-        'Gemfile.lock update failed due to missing credentials'
+        'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
-      global.repoCache.bundlerArtifactsError = 'bundler-credentials';
-      throw new Error('bundler-credentials');
+      // Do not generate these PRs because we don't yet support Bundler authentication
+      global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
+      throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    if (err.stderr && err.stderr.includes('incompatible marshal file format')) {
-      const gemrcFile = await platform.getFile(join(cwd, '.gemrc'));
-      logger.debug(
-        { err, gemfile: newPackageFileContent, gemrcFile },
-        'Gemfile marshalling error'
+    const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
+    if (output.match(resolveMatchRe)) {
+      logger.debug({ err }, 'Bundler has a resolve error');
+      const resolveMatches = [];
+      let resolveMatch;
+      do {
+        resolveMatch = resolveMatchRe.exec(output);
+        if (resolveMatch) {
+          resolveMatches.push(resolveMatch[1].split(' ').shift());
+        }
+      } while (resolveMatch);
+      if (resolveMatches.some(match => !updatedDeps.includes(match))) {
+        logger.debug(
+          { resolveMatches, updatedDeps },
+          'Found new resolve matches - reattempting recursively'
+        );
+        const newUpdatedDeps = [
+          ...new Set([...updatedDeps, ...resolveMatches]),
+        ];
+        return updateArtifacts({
+          packageFileName,
+          updatedDeps: newUpdatedDeps,
+          newPackageFileContent,
+          config,
+        });
+      }
+      logger.info(
+        { err },
+        'Gemfile.lock update failed due to incompatible packages'
       );
-      logger.warn('Gemfile.lock update failed due to marshalling error');
-    } else {
-      logger.warn({ err }, 'Failed to generate Gemfile.lock (unknown error)');
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: err.stdout + '\n' + err.stderr,
+          },
+        },
+      ];
     }
-    global.repoCache.bundlerArtifactsError = 'bundler-unknown';
-    throw new Error('bundler-unknown');
+    logger.warn(
+      { err },
+      'Gemfile.lock update failed due to unknown reason - skipping branch'
+    );
+    global.repoCache.bundlerArtifactsError = BUNDLER_UNKNOWN_ERROR;
+    throw new Error(BUNDLER_UNKNOWN_ERROR);
   }
 }

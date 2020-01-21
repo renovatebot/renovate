@@ -2,6 +2,7 @@ import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
 import * as _hostRules from '../../lib/util/host-rules';
+import { DATASOURCE_PACKAGIST } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
@@ -25,9 +26,10 @@ describe('datasource/packagist', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.find = jest.fn(input => input);
+      hostRules.hosts = jest.fn(() => []);
       global.repoCache = {};
       config = {
-        datasource: 'packagist',
+        datasource: DATASOURCE_PACKAGIST,
         versionScheme: 'composer',
         registryUrls: [
           'https://composer.renovatebot.com',
@@ -38,7 +40,7 @@ describe('datasource/packagist', () => {
     });
     it('supports custom registries', async () => {
       config = {
-        datasource: 'packagist',
+        datasource: DATASOURCE_PACKAGIST,
         registryUrls: ['https://composer.renovatebot.com'],
       };
       const res = await datasource.getPkgReleases({

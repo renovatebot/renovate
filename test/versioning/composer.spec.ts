@@ -107,60 +107,143 @@ describe('semver.matches()', () => {
 });
 describe('semver.getNewValue()', () => {
   it('returns pinned toVersion', () => {
-    expect(semver.getNewValue('~1.0', 'pin', '1.0', 'V1.1')).toEqual('V1.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.0',
+        rangeStrategy: 'pin',
+        fromVersion: '1.0',
+        toVersion: 'V1.1',
+      })
+    ).toEqual('V1.1');
   });
   it('returns toVersion', () => {
-    expect(semver.getNewValue('v1.0', 'replace', '1.0', '1.1')).toEqual('v1.1');
+    expect(
+      semver.getNewValue({
+        currentValue: 'v1.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0',
+        toVersion: '1.1',
+      })
+    ).toEqual('v1.1');
   });
   it('bumps short caret to same', () => {
-    expect(semver.getNewValue('^1.0', 'bump', '1.0.0', '1.0.7')).toEqual(
-      '^1.0'
-    );
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.0.7',
+      })
+    ).toEqual('^1.0');
   });
   it('handles tilde zero', () => {
-    expect(semver.getNewValue('~0.2', 'replace', '0.2.0', '0.3.0')).toEqual(
-      '~0.3'
-    );
-    expect(semver.getNewValue('~0.2', 'replace', '0.2.0', '1.1.0')).toEqual(
-      '~1.0'
-    );
+    expect(
+      semver.getNewValue({
+        currentValue: '~0.2',
+        rangeStrategy: 'replace',
+        fromVersion: '0.2.0',
+        toVersion: '0.3.0',
+      })
+    ).toEqual('~0.3');
+    expect(
+      semver.getNewValue({
+        currentValue: '~0.2',
+        rangeStrategy: 'replace',
+        fromVersion: '0.2.0',
+        toVersion: '1.1.0',
+      })
+    ).toEqual('~1.0');
   });
   it('handles tilde major', () => {
-    expect(semver.getNewValue('~4', 'replace', '4.0.0', '4.2.0')).toEqual('~4');
-    expect(semver.getNewValue('~4', 'replace', '4.0.0', '5.1.0')).toEqual('~5');
+    expect(
+      semver.getNewValue({
+        currentValue: '~4',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0',
+        toVersion: '4.2.0',
+      })
+    ).toEqual('~4');
+    expect(
+      semver.getNewValue({
+        currentValue: '~4',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0',
+        toVersion: '5.1.0',
+      })
+    ).toEqual('~5');
   });
   it('handles tilde minor', () => {
-    expect(semver.getNewValue('~4.0', 'replace', '4.0.0', '5.1.0')).toEqual(
-      '~5.0'
-    );
-    expect(semver.getNewValue('~4.0', 'replace', '4.0.0', '4.1.0')).toEqual(
-      '~4.1'
-    );
     expect(
-      semver.getNewValue('~1.2 || ~2.0', 'replace', '2.0.0', '3.1.0')
+      semver.getNewValue({
+        currentValue: '~4.0',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0',
+        toVersion: '5.1.0',
+      })
+    ).toEqual('~5.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~4.0',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0',
+        toVersion: '4.1.0',
+      })
+    ).toEqual('~4.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.2 || ~2.0',
+        rangeStrategy: 'replace',
+        fromVersion: '2.0.0',
+        toVersion: '3.1.0',
+      })
     ).toEqual('~3.0');
     expect(
-      semver.getNewValue('~1.2 || ~2.0', 'widen', '2.0.0', '3.1.0')
+      semver.getNewValue({
+        currentValue: '~1.2 || ~2.0',
+        rangeStrategy: 'widen',
+        fromVersion: '2.0.0',
+        toVersion: '3.1.0',
+      })
     ).toEqual('~1.2 || ~2.0 || ~3.0');
   });
   it('returns toVersion if unsupported', () => {
-    expect(semver.getNewValue('+4.0.0', 'replace', '4.0.0', '4.2.0')).toEqual(
-      '4.2.0'
-    );
+    expect(
+      semver.getNewValue({
+        currentValue: '+4.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0',
+        toVersion: '4.2.0',
+      })
+    ).toEqual('4.2.0');
   });
   it('returns versioned toVersion', () => {
-    expect(semver.getNewValue('v4.0.0', 'replace', '4.0.0', '4.2.0')).toEqual(
-      'v4.2.0'
-    );
+    expect(
+      semver.getNewValue({
+        currentValue: 'v4.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0',
+        toVersion: '4.2.0',
+      })
+    ).toEqual('v4.2.0');
   });
   it('bumps short caret with v', () => {
-    expect(semver.getNewValue('^v1.0', 'bump', '1.0.0', '1.1.7')).toEqual(
-      '^v1.1'
-    );
+    expect(
+      semver.getNewValue({
+        currentValue: '^v1.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.7',
+      })
+    ).toEqual('^v1.1');
   });
   it('handles differing lengths', () => {
-    expect(semver.getNewValue('3.6.*', 'replace', '3.6.0', '3.7')).toEqual(
-      '3.7.*'
-    );
+    expect(
+      semver.getNewValue({
+        currentValue: '3.6.*',
+        rangeStrategy: 'replace',
+        fromVersion: '3.6.0',
+        toVersion: '3.7',
+      })
+    ).toEqual('3.7.*');
   });
 });

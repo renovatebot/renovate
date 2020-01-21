@@ -7,6 +7,7 @@ import {
   parseIndexDir,
   SBT_PLUGINS_REPO,
 } from '../../../lib/datasource/sbt/util';
+import { DATASOURCE_SBT } from '../../../lib/constants/data-binary-source';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./_fixtures/maven-index.html`),
@@ -30,10 +31,10 @@ describe('datasource/sbt', () => {
     beforeEach(() => {
       nock.disableNetConnect();
       nock('https://failed_repo')
-        .get('/maven/org/scalatest')
+        .get('/maven/org/scalatest/')
         .reply(404, null);
       nock('https://repo.maven.apache.org')
-        .get('/maven2/org/scalatest')
+        .get('/maven2/org/scalatest/')
         .reply(
           200,
           '<a href="scalatest/" title=\'scalatest/\'>scalatest_2.12/</a>\n' +
@@ -42,17 +43,17 @@ describe('datasource/sbt', () => {
             "<a href='scalatest_native2.12/'>scalatest_2.12/</a>"
         );
       nock('https://repo.maven.apache.org')
-        .get('/maven2/org/scalatest/scalatest')
+        .get('/maven2/org/scalatest/scalatest/')
         .reply(200, "<a href='1.2.0/'>1.2.0/</a>");
       nock('https://repo.maven.apache.org')
-        .get('/maven2/org/scalatest/scalatest_2.12')
+        .get('/maven2/org/scalatest/scalatest_2.12/')
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
       nock('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/com.github.gseitz')
+        .get('/sbt/sbt-plugin-releases/com.github.gseitz/')
         .reply(200, '');
       nock('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray')
+        .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
         .reply(
           200,
           '<html>\n' +
@@ -65,7 +66,7 @@ describe('datasource/sbt', () => {
         );
       nock('https://dl.bintray.com')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12'
+          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
         )
         .reply(
           200,
@@ -80,7 +81,7 @@ describe('datasource/sbt', () => {
         );
       nock('https://dl.bintray.com')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0'
+          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
         )
         .reply(
           200,
@@ -102,7 +103,7 @@ describe('datasource/sbt', () => {
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
+          datasource: DATASOURCE_SBT,
           versionScheme: 'ivy',
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
@@ -110,7 +111,7 @@ describe('datasource/sbt', () => {
       ).toEqual(null);
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
+          datasource: DATASOURCE_SBT,
           versionScheme: 'ivy',
           lookupName: 'org.scalatest:scalaz',
           depType: 'plugin',
@@ -121,7 +122,7 @@ describe('datasource/sbt', () => {
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
+          datasource: DATASOURCE_SBT,
           versionScheme: 'ivy',
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
@@ -139,7 +140,7 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
+          datasource: DATASOURCE_SBT,
           versionScheme: 'ivy',
           lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
@@ -155,7 +156,7 @@ describe('datasource/sbt', () => {
     it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
+          datasource: DATASOURCE_SBT,
           versionScheme: 'ivy',
           lookupName: 'org.foundweekends:sbt-bintray',
           depType: 'plugin',
@@ -171,7 +172,7 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          datasource: 'sbt',
+          datasource: DATASOURCE_SBT,
           versionScheme: 'ivy',
           lookupName: 'org.foundweekends:sbt-bintray_2.12',
           depType: 'plugin',

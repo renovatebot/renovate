@@ -4,9 +4,16 @@ import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
+import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import { BinarySource } from '../../util/exec/common';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
+
+// istanbul ignore next
+export function resetModule(): void {
+  pythonAlias = null;
+}
 
 export function parsePythonVersion(str: string): number[] {
   const arr = str.split(' ')[1].split('.');
@@ -14,6 +21,7 @@ export function parsePythonVersion(str: string): number[] {
 }
 
 export async function getPythonAlias(): Promise<string> {
+  // istanbul ignore if
   if (pythonAlias) {
     return pythonAlias;
   }
@@ -43,8 +51,7 @@ export async function extractSetupFile(
   const cwd = config.localDir;
   let cmd: string;
   const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
-  // istanbul ignore if
-  if (config.binarySource === 'docker') {
+  if (config.binarySource === BinarySource.Docker) {
     logger.info('Running python via docker');
     await exec(`docker pull renovate/pip`);
     cmd = 'docker';
@@ -75,12 +82,12 @@ export async function extractSetupFile(
   });
   // istanbul ignore if
   if (res.stderr) {
-    const stderr = res.stderr.replace(/.*\n\s*import imp/, '').trim();
+    const stderr = res.stderr
+      .replace(/.*\n\s*import imp/, '')
+      .trim()
+      .replace('fatal: No names found, cannot describe anything.', '');
     if (stderr.length) {
-      logger.warn(
-        { stdout: res.stdout, stderr: res.stderr },
-        'Error in read setup file'
-      );
+      logger.warn({ stdout: res.stdout, stderr }, 'Error in read setup file');
     }
   }
   return JSON.parse(res.stdout);
@@ -133,7 +140,7 @@ export async function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: 'pypi',
+        datasource: DATASOURCE_PYPI,
       };
       return dep;
     })

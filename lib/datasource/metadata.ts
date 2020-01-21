@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { ReleaseResult } from './common';
+import * as hostRules from '../util/host-rules';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
@@ -71,7 +72,6 @@ export function addMetaData(
   if (!dep) {
     return;
   }
-
   const depName = lookupName ? lookupName.toLowerCase() : null;
   if (
     manualChangelogUrls[datasource] &&
@@ -89,20 +89,36 @@ export function addMetaData(
   const massageGithubUrl = (url: string): string => {
     return url
       .replace('http:', 'https:')
+      .replace(/^git:\/?\/?/, 'https://')
       .replace('www.github.com', 'github.com')
       .split('/')
       .slice(0, 5)
       .join('/');
   };
-  if (dep.sourceUrl && dep.sourceUrl.includes('github.com')) {
-    dep.sourceUrl = parse(massageGithubUrl(dep.sourceUrl));
-  }
   if (
-    !dep.sourceUrl &&
     dep.changelogUrl &&
-    dep.changelogUrl.match(/^https?:\/\/(www\.)?github\.com/)
+    dep.changelogUrl.includes('github.com') &&
+    !dep.sourceUrl
   ) {
-    dep.sourceUrl = massageGithubUrl(dep.changelogUrl);
+    dep.sourceUrl = dep.changelogUrl;
+  }
+  if (dep.homepage && dep.homepage.includes('github.com')) {
+    if (!dep.sourceUrl) {
+      dep.sourceUrl = dep.homepage;
+    }
+    delete dep.homepage;
+  }
+  const extraBaseUrls = [];
+  // istanbul ignore next
+  hostRules.hosts({ hostType: 'github' }).forEach(host => {
+    extraBaseUrls.push(host, `gist.${host}`);
+  });
+  if (dep.sourceUrl) {
+    // try massaging it
+    dep.sourceUrl =
+      parse(massageGithubUrl(dep.sourceUrl), {
+        extraBaseUrls,
+      }) || dep.sourceUrl;
   }
 
   // Clean up any empty urls
@@ -110,6 +126,10 @@ export function addMetaData(
   for (const url of urls) {
     if (is.nonEmptyString(dep[url])) {
       dep[url] = dep[url].trim();
+      // istanbul ignore if
+      if (!dep[url].match(/^https?:\/\//)) {
+        delete dep[url];
+      }
     } else {
       delete dep[url];
     }

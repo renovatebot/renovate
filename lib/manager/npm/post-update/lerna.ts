@@ -1,6 +1,7 @@
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { BinarySource } from '../../../util/exec/common';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -19,11 +20,8 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  let stdout: string;
-  let stderr: string;
   let cmd: string;
   try {
-    const startTime = process.hrtime();
     let lernaVersion: string;
     try {
       const pJson = JSON.parse(await platform.getFile('package.json'));
@@ -47,36 +45,24 @@ export async function generateLockFiles(
         '--ignore-scripts --ignore-engines --ignore-platform --mutex network:31879';
     }
     cmd = `npm i -g -C ~/.npm/lerna@${lernaVersion} lerna@${lernaVersion} && ${lernaClient} install ${params} && ~/.npm/lerna@${lernaVersion}/bin/lerna bootstrap --no-ci -- ${params}`;
-    if (binarySource === 'global') {
+    if (binarySource === BinarySource.Global) {
       cmd = `${lernaClient} install ${params} && lerna bootstrap --no-ci -- ${params}`;
     }
-    logger.debug({ cmd });
-    // TODO: Switch to native util.promisify once using only node 8
-    ({ stdout, stderr } = await exec(cmd, {
+    await exec(cmd, {
       cwd,
       env,
-    }));
-    logger.debug(`npm stdout:\n${stdout}`);
-    logger.debug(`npm stderr:\n${stderr}`);
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { type: 'lerna', seconds, lernaClient, stdout, stderr },
-      'Generated lockfile'
-    );
+    });
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       {
         cmd,
         err,
-        stdout,
-        stderr,
         type: 'lerna',
         lernaClient,
       },
       'lock file error'
     );
-    return { error: true, stderr: stderr || err.stderr };
+    return { error: true, stderr: err.stderr };
   }
   return { error: false };
 }

@@ -7,6 +7,7 @@ import {
 } from '../common';
 import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
+import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
 const ghGot = api.get;
 
@@ -25,7 +26,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   try {
     res = await got(url, opts);
   } catch (err) {
-    if (err.message === 'platform-failure') {
+    if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
     logger.debug(
@@ -52,7 +53,7 @@ export async function getPreset(
       const defaultJson = await fetchJSONFile(pkgName, 'default.json');
       return defaultJson;
     } catch (err) {
-      if (err.message === 'platform-failure') {
+      if (err.message === PLATFORM_FAILURE) {
         throw err;
       }
       if (err.message === 'dep not found') {
@@ -187,9 +188,11 @@ export async function getPkgReleases({
         tag_name: string;
       }[];
 
-      versions = (await ghGot<GitHubRelease>(url, {
-        paginate: true,
-      })).body.map(o => o.tag_name);
+      versions = (
+        await ghGot<GitHubRelease>(url, {
+          paginate: true,
+        })
+      ).body.map(o => o.tag_name);
     } else {
       // tag
       const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
@@ -197,9 +200,11 @@ export async function getPkgReleases({
         name: string;
       }[];
 
-      versions = (await ghGot<GitHubTag>(url, {
-        paginate: true,
-      })).body.map(o => o.name);
+      versions = (
+        await ghGot<GitHubTag>(url, {
+          paginate: true,
+        })
+      ).body.map(o => o.name);
     }
   } catch (err) {
     logger.info({ repo, err }, 'Error retrieving from github');

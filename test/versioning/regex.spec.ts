@@ -1,4 +1,5 @@
 import { get, VersioningApi } from '../../lib/versioning';
+import { CONFIG_VALIDATION } from '../../lib/constants/error-messages';
 
 describe('regex', () => {
   const regex: VersioningApi = get(
@@ -16,7 +17,7 @@ describe('regex', () => {
       '^(?<major>\\d+)?(?<=y)x$',
     ]) {
       it(re, () => {
-        expect(() => get(`regex:${re}`)).toThrow('config-validation');
+        expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
       });
     }
   });
@@ -327,7 +328,14 @@ describe('regex', () => {
 
   describe('.getNewValue', () => {
     it('returns toVersion', () => {
-      expect(regex.getNewValue(null, null, null, '1.2.3')).toBe('1.2.3');
+      expect(
+        regex.getNewValue({
+          currentValue: null,
+          rangeStrategy: null,
+          fromVersion: null,
+          toVersion: '1.2.3',
+        })
+      ).toBe('1.2.3');
     });
   });
 

@@ -2,13 +2,13 @@ import is from '@sindresorhus/is';
 
 import URL from 'url';
 import delay from 'delay';
-import parse from 'github-url-from-git';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
@@ -135,7 +135,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
     const release = versions[version];
     dep.homepage = release.homepage || dep.homepage;
     if (release.source && release.source.url) {
-      dep.sourceUrl = parse(release.source.url) || release.source.url;
+      dep.sourceUrl = release.source.url;
     }
     return {
       version: version.replace(/^v/, ''),
@@ -219,10 +219,12 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  const res = (await got(pkgUrl, {
-    json: true,
-    retry: 5,
-  })).body.packages[name];
+  const res = (
+    await got(pkgUrl, {
+      json: true,
+      retry: 5,
+    })
+  ).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
     dep.name = name;
@@ -288,7 +290,7 @@ async function packageLookup(
       err.host === 'packagist.org'
     ) {
       logger.info('Packagist.org timeout');
-      throw new Error('registry-failure');
+      throw new Error(DATASOURCE_FAILURE);
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');
     return null;

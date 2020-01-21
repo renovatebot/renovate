@@ -11,6 +11,25 @@ Array [
 ]
 `;
 
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "mix deps.update plug",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
 exports[`.updateArtifacts() returns updated mix.lock 1`] = `
 Array [
   Object {
@@ -22,4 +41,21 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated mix.lock 2`] = `"docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/mix mix deps.update plug"`;
+exports[`.updateArtifacts() returns updated mix.lock 2`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm -v /tmp/github/some/repo:/tmp/github/some/repo -w /tmp/github/some/repo renovate/mix mix deps.update plug",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;

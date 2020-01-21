@@ -1,5 +1,9 @@
 import * as env from '../../lib/config/env';
 import { RenovateOptions } from '../../lib/config/definitions';
+import {
+  PLATFORM_TYPE_BITBUCKET,
+  PLATFORM_TYPE_GITLAB,
+} from '../../lib/constants/platforms';
 
 describe('config/env', () => {
   describe('.getConfig(env)', () => {
@@ -59,14 +63,14 @@ describe('config/env', () => {
     });
     it('supports GitLab token', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: 'gitlab',
+        RENOVATE_PLATFORM: PLATFORM_TYPE_GITLAB,
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab custom endpoint', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: 'gitlab',
+        RENOVATE_PLATFORM: PLATFORM_TYPE_GITLAB,
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
@@ -89,7 +93,7 @@ describe('config/env', () => {
     });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: 'bitbucket',
+        RENOVATE_PLATFORM: PLATFORM_TYPE_BITBUCKET,
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
@@ -98,7 +102,7 @@ describe('config/env', () => {
     });
     it('supports Bitbucket username/password', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: 'bitbucket',
+        RENOVATE_PLATFORM: PLATFORM_TYPE_BITBUCKET,
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',

@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLockFiles() defaults to latest 1`] = `
+Array [
+  Object {
+    "cmd": "npm i -g -C ~/.npm/lerna@latest lerna@latest && npm install --package-lock-only --no-audit && ~/.npm/lerna@latest/bin/lerna bootstrap --no-ci -- --package-lock-only --no-audit",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFiles() generates package-lock.json files 1`] = `
+Array [
+  Object {
+    "cmd": "npm i -g -C ~/.npm/lerna@2.0.0 lerna@2.0.0 && npm install --package-lock-only --no-audit && ~/.npm/lerna@2.0.0/bin/lerna bootstrap --no-ci -- --package-lock-only --no-audit",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFiles() generates yarn.lock files 1`] = `
+Array [
+  Object {
+    "cmd": "npm i -g -C ~/.npm/lerna@2.0.0 lerna@2.0.0 && yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879 && ~/.npm/lerna@2.0.0/bin/lerna bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
+exports[`generateLockFiles() performs full npm install 1`] = `
+Array [
+  Object {
+    "cmd": "npm install --ignore-scripts  --no-audit && lerna bootstrap --no-ci -- --ignore-scripts  --no-audit",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;

@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
+import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
+import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -56,7 +58,7 @@ export async function getUpdatedPackageFiles(
           { existingContent, config: upgrade },
           'Error updating file'
         );
-        throw new Error('update-failure');
+        throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       if (newContent !== existingContent) {
         if (config.parentBranch) {
@@ -72,7 +74,7 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === existingContent &&
-        upgrade.datasource === 'gitSubmodules'
+        upgrade.datasource === DATASOURCE_GIT_SUBMODULES
       ) {
         updatedFileContents[packageFile] = newContent;
       }
@@ -89,12 +91,12 @@ export async function getUpdatedPackageFiles(
     const updatedDeps = packageFileUpdatedDeps[packageFile.name];
     const updateArtifacts = get(manager, 'updateArtifacts');
     if (updateArtifacts) {
-      const results = await updateArtifacts(
-        packageFile.name,
+      const results = await updateArtifacts({
+        packageFileName: packageFile.name,
         updatedDeps,
-        packageFile.contents,
-        config
-      );
+        newPackageFileContent: packageFile.contents,
+        config,
+      });
       if (is.nonEmptyArray(results)) {
         for (const res of results) {
           const { file, artifactError } = res;
@@ -116,12 +118,12 @@ export async function getUpdatedPackageFiles(
         const packageFileContents =
           updatedFileContents[packageFile] ||
           (await platform.getFile(packageFile, config.parentBranch));
-        const results = await updateArtifacts(
-          packageFile,
-          [],
-          packageFileContents,
-          config
-        );
+        const results = await updateArtifacts({
+          packageFileName: packageFile,
+          updatedDeps: [],
+          newPackageFileContent: packageFileContents,
+          config,
+        });
         if (is.nonEmptyArray(results)) {
           for (const res of results) {
             const { file, artifactError } = res;

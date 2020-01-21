@@ -21,6 +21,10 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## additionalReviewers
+
+In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it. This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
+
 ## aliases
 
 The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requiremenets` manager only.
@@ -384,7 +388,7 @@ Beware that Renovate follows tags strictly. For example, if you are following a 
 
 ## gitLabAutomerge
 
-Caution: when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
+Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged. This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 ## github-actions
 

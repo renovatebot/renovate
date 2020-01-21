@@ -2,6 +2,7 @@ import * as semver from 'semver';
 import { logger } from '../../../../logger';
 import * as versioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -66,7 +67,7 @@ export function filterVersions(
         semver.satisfies(semver.coerce(v), allowedVersions)
       );
     } else {
-      const error = new Error('config-validation');
+      const error = new Error(CONFIG_VALIDATION);
       error.configFile = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
