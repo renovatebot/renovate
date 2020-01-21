@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { hrtime } from 'process';
 import { promisify } from 'util';
 import {
@@ -32,6 +33,7 @@ const pExec: (
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
+  subDirectory?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
 }
@@ -78,12 +80,17 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { env, extraEnv, docker } = opts;
-  const cwd = opts.cwd || execConfig.localDir;
+  let cwd;
+  if (opts.subDirectory) {
+    cwd = join(execConfig.localDir, opts.subDirectory);
+  }
+  cwd = cwd || opts.cwd || execConfig.localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
+  delete execOptions.subDirectory;
 
   const pExecOptions: ChildProcessExecOptions & { encoding: string } = {
     encoding: 'utf-8',
