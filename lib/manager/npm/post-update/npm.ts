@@ -5,6 +5,7 @@ import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import { BinarySource } from '../../../util/exec/common';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -63,11 +64,11 @@ export async function generateLockFile(
         }
       }
     }
-    if (binarySource === 'global') {
+    if (binarySource === BinarySource.Global) {
       cmd = 'npm';
     }
     // istanbul ignore if
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running npm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if

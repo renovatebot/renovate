@@ -6,12 +6,13 @@ import { RenovateConfig, getConfig, platform } from '../../util';
 import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
 import { PULL_REQUEST_STATUS_NOT_OPEN } from '../../../lib/constants/pull-requests';
+import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platforms';
 
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
-  config.platform = 'github';
+  config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
   config.warnings = [];
 });

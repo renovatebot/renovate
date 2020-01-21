@@ -3,19 +3,20 @@ import URL from 'url';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { exec } from '../../util/exec';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { platform } from '../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
+import { BinarySource } from '../../util/exec/common';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
   const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
   env.COMPOSER_CACHE_DIR =
@@ -95,7 +96,7 @@ export async function updateArtifacts(
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
     let cmd: string;
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;
       if (config.dockerUser) {
@@ -108,8 +109,8 @@ export async function updateArtifacts(
       cmd += `-w "${cwd}" `;
       cmd += `renovate/composer composer`;
     } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
+      config.binarySource === BinarySource.Auto ||
+      config.binarySource === BinarySource.Global
     ) {
       logger.info('Running composer via global composer');
       cmd = 'composer';

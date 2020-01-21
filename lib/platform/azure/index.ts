@@ -28,6 +28,11 @@ import {
   PULL_REQUEST_STATUS_NOT_OPEN,
   PULL_REQUEST_STATUS_OPEN,
 } from '../../constants/pull-requests';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 interface Config {
   storage: GitStorage;
@@ -390,9 +395,9 @@ export async function getBranchStatusCheck(
     azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   if (branch.aheadCount === 0) {
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
-  return 'pending';
+  return BRANCH_STATUS_PENDING;
 }
 
 export async function getBranchStatus(
@@ -402,12 +407,12 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   const branchStatusCheck = await getBranchStatusCheck(branchName);
   return branchStatusCheck;
@@ -554,6 +559,10 @@ export async function mergePr(pr: number): Promise<void> {
 export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 4000)
+    .replace(
+      'tick the rebase/retry checkbox below',
+      'rename this PR to start with "rebase!"'
+    )
     .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace('<summary>', '**')
     .replace('</summary>', '**')

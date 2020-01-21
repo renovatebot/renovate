@@ -279,10 +279,9 @@ export class Storage {
       this._config.baseBranch = branchName;
       try {
         if (branchName !== 'master') {
-          this._config.baseBranchSha = (await this._git!.raw([
-            'rev-parse',
-            'origin/' + branchName,
-          ])).trim();
+          this._config.baseBranchSha = (
+            await this._git!.raw(['rev-parse', 'origin/' + branchName])
+          ).trim();
         }
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');
@@ -476,6 +475,14 @@ export class Storage {
     }
   }
 
+  async hasDiff(branchName: string): Promise<boolean> {
+    try {
+      return (await this._git!.diff(['HEAD', branchName])) !== '';
+    } catch (err) {
+      return true;
+    }
+  }
+
   async commitFilesToBranch({
     branchName,
     files,
@@ -520,6 +527,13 @@ export class Storage {
         }
       }
       await this._git!.commit(message);
+      if (!(await this.hasDiff(`origin/${branchName}`))) {
+        logger.info(
+          { branchName, fileNames },
+          'No file changes detected. Skipping commit'
+        );
+        return;
+      }
       await this._git!.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
         '-u': true,

@@ -34,6 +34,7 @@ import {
   PULL_REQUEST_STATUS_MERGED,
   PULL_REQUEST_STATUS_OPEN,
 } from '../../constants/pull-requests';
+import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -523,7 +524,7 @@ export async function processBranch(
         }
         const context = `renovate/artifacts`;
         const description = 'Artifact file update failure';
-        const state = 'failure';
+        const state = BRANCH_STATUS_FAILURE;
         const existingState = await platform.getBranchStatusCheck(
           config.branchName,
           context

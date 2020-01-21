@@ -9,14 +9,14 @@ import {
 } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import { RangeStrategy } from '../common';
+import { NewValueConfig } from '../common';
 
-export function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+export function getNewValue({
+  currentValue,
+  rangeStrategy,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return toVersion;
   }
@@ -24,17 +24,22 @@ export function getNewValue(
     if (satisfies(toVersion, currentValue)) {
       return currentValue;
     }
-    return getNewValue(currentValue, 'replace', fromVersion, toVersion);
+    return getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      fromVersion,
+      toVersion,
+    });
   }
   const parsedRange = parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
-    const newValue = getNewValue(
+    const newValue = getNewValue({
       currentValue,
-      'replace',
+      rangeStrategy: 'replace',
       fromVersion,
-      toVersion
-    );
+      toVersion,
+    });
     if (element.operator && element.operator.startsWith('<')) {
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
@@ -63,7 +68,12 @@ export function getNewValue(
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
       if (!element.operator) {
-        return getNewValue(currentValue, 'replace', fromVersion, toVersion);
+        return getNewValue({
+          currentValue,
+          rangeStrategy: 'replace',
+          fromVersion,
+          toVersion,
+        });
       }
       if (element.operator === '^') {
         const split = currentValue.split('.');

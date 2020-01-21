@@ -5,6 +5,7 @@ import { mocked } from '../../../util';
 import * as _pnpmHelper from '../../../../lib/manager/npm/post-update/pnpm';
 import { envMock, mockExecAll } from '../../../execUtil';
 import * as _env from '../../../../lib/util/exec/env';
+import { BinarySource } from '../../../../lib/util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -37,7 +38,7 @@ describe('generateLockFile', () => {
     getInstalledPath.mockReturnValueOnce('node_modules/pnpm');
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    config.binarySource = 'docker';
+    config.binarySource = BinarySource.Docker;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
@@ -99,7 +100,7 @@ describe('generateLockFile', () => {
     });
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    config.binarySource = 'global';
+    config.binarySource = BinarySource.Global;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');

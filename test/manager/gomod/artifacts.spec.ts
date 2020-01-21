@@ -6,6 +6,7 @@ import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -46,7 +47,12 @@ describe('.updateArtifacts()', () => {
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, config)
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -57,7 +63,12 @@ describe('.updateArtifacts()', () => {
       modified: [],
     } as StatusResult);
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, config)
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -69,7 +80,12 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New go.sum' as any);
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, config)
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -81,10 +97,15 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New go.sum' as any);
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, {
-        ...config,
-        binarySource: 'docker',
-        dockerUser: 'foobar',
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          binarySource: BinarySource.Docker,
+          dockerUser: 'foobar',
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -97,9 +118,14 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New go.sum' as any);
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, {
-        ...config,
-        binarySource: 'global',
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          binarySource: BinarySource.Global,
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -115,9 +141,14 @@ describe('.updateArtifacts()', () => {
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New go.sum' as any);
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, {
-        ...config,
-        binarySource: 'docker',
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          binarySource: BinarySource.Docker,
+        },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -137,10 +168,15 @@ describe('.updateArtifacts()', () => {
     try {
       global.appMode = true;
       expect(
-        await gomod.updateArtifacts('go.mod', [], gomod1, {
-          ...config,
-          binarySource: 'docker',
-          postUpdateOptions: ['gomodTidy'],
+        await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            binarySource: BinarySource.Docker,
+            postUpdateOptions: ['gomodTidy'],
+          },
         })
       ).not.toBeNull();
       expect(execSnapshots).toMatchSnapshot();
@@ -155,7 +191,12 @@ describe('.updateArtifacts()', () => {
       throw new Error('This update totally doesnt work');
     });
     expect(
-      await gomod.updateArtifacts('go.mod', [], gomod1, config)
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });

@@ -11,6 +11,15 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import {
+  BRANCH_STATUS_CREATED,
+  BRANCH_STATUS_ERROR,
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_RUNNING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -112,7 +121,13 @@ export async function ensurePr(
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
-    if (['created', 'pending', 'running'].includes(await getBranchStatus())) {
+    if (
+      [
+        BRANCH_STATUS_CREATED,
+        BRANCH_STATUS_PENDING,
+        BRANCH_STATUS_RUNNING,
+      ].includes(await getBranchStatus())
+    ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -127,7 +142,11 @@ export async function ensurePr(
     }
     if (
       config.forcePr ||
-      ['failure', 'error', 'failed'].includes(await getBranchStatus())
+      [
+        BRANCH_STATUS_FAILURE,
+        BRANCH_STATUS_ERROR,
+        BRANCH_STATUS_FAILED,
+      ].includes(await getBranchStatus())
     ) {
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
@@ -136,11 +155,11 @@ export async function ensurePr(
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) !== 'success') {
+    if ((await getBranchStatus()) !== BRANCH_STATUS_SUCCESS) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return 'pending';
+      return BRANCH_STATUS_PENDING;
     }
     logger.debug('Branch status success');
   } else if (
@@ -156,8 +175,8 @@ export async function ensurePr(
   ) {
     logger.debug('Checking branch combined status');
     if (
-      (await getBranchStatus()) === 'pending' ||
-      (await getBranchStatus()) === 'running'
+      (await getBranchStatus()) === BRANCH_STATUS_PENDING ||
+      (await getBranchStatus()) === BRANCH_STATUS_RUNNING
     ) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
@@ -172,7 +191,7 @@ export async function ensurePr(
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return 'pending';
+        return BRANCH_STATUS_PENDING;
       }
       logger.debug(
         `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`
@@ -243,7 +262,11 @@ export async function ensurePr(
       // istanbul ignore if
       if (
         config.automerge &&
-        ['failure', 'error', 'failed'].includes(await getBranchStatus())
+        [
+          BRANCH_STATUS_FAILURE,
+          BRANCH_STATUS_ERROR,
+          BRANCH_STATUS_FAILED,
+        ].includes(await getBranchStatus())
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
@@ -382,7 +405,11 @@ export async function ensurePr(
     if (
       config.automerge &&
       !config.assignAutomerge &&
-      !['failure', 'error', 'failed'].includes(await getBranchStatus())
+      ![
+        BRANCH_STATUS_FAILURE,
+        BRANCH_STATUS_ERROR,
+        BRANCH_STATUS_FAILED,
+      ].includes(await getBranchStatus())
     ) {
       logger.debug(
         `Skipping assignees and reviewers as automerge=${config.automerge}`
@@ -437,7 +464,7 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
       branchName,
       requiredStatusChecks
     );
-    if (branchStatus !== 'success') {
+    if (branchStatus !== BRANCH_STATUS_SUCCESS) {
       logger.info(
         `PR is not ready for merge (branch status is ${branchStatus})`
       );

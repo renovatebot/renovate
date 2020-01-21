@@ -30,6 +30,12 @@ import {
   PULL_REQUEST_STATUS_ALL,
   PULL_REQUEST_STATUS_OPEN,
 } from '../../constants/pull-requests';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -203,14 +209,18 @@ export async function initRepo({
   });
 
   try {
-    const info = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
-    )).body;
+    const info = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      )
+    ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
-    )).body.displayId;
+    config.defaultBranch = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
+      )
+    ).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
@@ -307,10 +317,12 @@ export async function getPr(
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
 
-    const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
-      { useCache: !refreshCache }
-    )).body;
+    const prCommits = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
+        { useCache: !refreshCache }
+      )
+    ).body;
 
     if (prCommits.totalCount === 1) {
       if (global.gitAuthor) {
@@ -503,10 +515,11 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = await config.storage.getBranchCommit(branchName);
 
-  return (await api.get(
-    `./rest/build-status/1.0/commits/stats/${branchCommit}`,
-    { useCache }
-  )).body;
+  return (
+    await api.get(`./rest/build-status/1.0/commits/stats/${branchCommit}`, {
+      useCache,
+    })
+  ).body;
 }
 
 // Returns the combined status for a branch.
@@ -523,7 +536,7 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
 
   if (!(await branchExists(branchName))) {
@@ -535,12 +548,14 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return 'failed';
-    if (commitStatus.inProgress > 0) return 'pending';
-    return commitStatus.successful > 0 ? 'success' : 'pending';
+    if (commitStatus.failed > 0) return BRANCH_STATUS_FAILED;
+    if (commitStatus.inProgress > 0) return BRANCH_STATUS_PENDING;
+    return commitStatus.successful > 0
+      ? BRANCH_STATUS_SUCCESS
+      : BRANCH_STATUS_PENDING;
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
 }
 
@@ -571,12 +586,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return 'success';
+            return BRANCH_STATUS_SUCCESS;
           case 'INPROGRESS':
-            return 'pending';
+            return BRANCH_STATUS_PENDING;
           case 'FAILED':
           default:
-            return 'failure';
+            return BRANCH_STATUS_FAILURE;
         }
       }
     }
@@ -611,13 +626,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case 'success':
+      case BRANCH_STATUS_SUCCESS:
         body.state = 'SUCCESSFUL';
         break;
-      case 'pending':
+      case BRANCH_STATUS_PENDING:
         body.state = 'INPROGRESS';
         break;
-      case 'failure':
+      case BRANCH_STATUS_FAILURE:
       default:
         body.state = 'FAILED';
         break;
@@ -767,9 +782,11 @@ async function getCommentVersion(
   commentId: number
 ): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
-  const { version } = (await api.get(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
-  )).body;
+  const { version } = (
+    await api.get(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
+    )
+  ).body;
 
   return version;
 }
@@ -891,17 +908,21 @@ export async function createPr({
   /* istanbul ignore else */
   if (config.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
-    const { id } = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
-    )).body;
+    const { id } = (
+      await api.get(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      )
+    ).body;
 
-    const defReviewers = (await api.get(
-      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
-        config.repositorySlug
-      }/reviewers?sourceRefId=refs/heads/${escapeHash(
-        branchName
-      )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
-    )).body;
+    const defReviewers = (
+      await api.get(
+        `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
+          config.repositorySlug
+        }/reviewers?sourceRefId=refs/heads/${escapeHash(
+          branchName
+        )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
+      )
+    ).body;
 
     reviewers = defReviewers.map((u: { name: string }) => ({
       user: { name: u.name },
@@ -1051,6 +1072,10 @@ export function getPrBody(input: string): string {
   logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use
   return smartTruncate(input, 30000)
+    .replace(
+      'tick the rebase/retry checkbox below',
+      'rename this PR to start with "rebase!"'
+    )
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')

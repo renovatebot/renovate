@@ -4,6 +4,7 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig } from '../../common';
+import { BinarySource } from '../../../util/exec/common';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -60,10 +61,10 @@ export async function generateLockFile(
         }
       }
     }
-    if (config.binarySource === 'global') {
+    if (config.binarySource === BinarySource.Global) {
       cmd = 'pnpm';
     }
-    if (config.binarySource === 'docker') {
+    if (config.binarySource === BinarySource.Docker) {
       logger.info('Running pnpm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if

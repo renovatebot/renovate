@@ -1,5 +1,6 @@
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
+import { DATASOURCE_ORB } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/util/got');
 
@@ -37,7 +38,7 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
-          datasource: 'orb',
+          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -46,7 +47,7 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({ body: { data: {} } });
       expect(
         await datasource.getPkgReleases({
-          datasource: 'orb',
+          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
@@ -59,7 +60,7 @@ describe('datasource/orb', () => {
       );
       expect(
         await datasource.getPkgReleases({
-          datasource: 'orb',
+          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -70,7 +71,7 @@ describe('datasource/orb', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: 'orb',
+          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -80,7 +81,7 @@ describe('datasource/orb', () => {
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
-        datasource: 'orb',
+        datasource: DATASOURCE_ORB,
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
@@ -92,7 +93,7 @@ describe('datasource/orb', () => {
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
-        datasource: 'orb',
+        datasource: DATASOURCE_ORB,
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();

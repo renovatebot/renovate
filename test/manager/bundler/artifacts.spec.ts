@@ -7,6 +7,7 @@ import * as _datasource from '../../../lib/datasource/docker';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import { BinarySource } from '../../../lib/util/exec/common';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -34,7 +35,14 @@ describe('bundler.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns null by default', async () => {
-    expect(await updateArtifacts('', [], '', config)).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: '',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toBeNull();
   });
   it('returns null if Gemfile.lock was not changed', async () => {
     platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
@@ -45,7 +53,12 @@ describe('bundler.updateArtifacts()', () => {
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
-      await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: 'Updated Gemfile content',
+        config,
+      })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -58,7 +71,12 @@ describe('bundler.updateArtifacts()', () => {
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
-      await updateArtifacts('Gemfile', [], 'Updated Gemfile content', config)
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: 'Updated Gemfile content',
+        config,
+      })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -71,9 +89,14 @@ describe('bundler.updateArtifacts()', () => {
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
-      await updateArtifacts('Gemfile', [], 'Updated Gemfile content', {
-        ...config,
-        binarySource: 'global',
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: 'Updated Gemfile content',
+        config: {
+          ...config,
+          binarySource: BinarySource.Global,
+        },
       })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
@@ -96,9 +119,14 @@ describe('bundler.updateArtifacts()', () => {
       } as Git.StatusResult);
       fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
-        await updateArtifacts('Gemfile', [], 'Updated Gemfile content', {
-          ...config,
-          binarySource: 'docker',
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: 'Updated Gemfile content',
+          config: {
+            ...config,
+            binarySource: BinarySource.Docker,
+          },
         })
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
@@ -119,13 +147,18 @@ describe('bundler.updateArtifacts()', () => {
       } as Git.StatusResult);
       fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
-        await updateArtifacts('Gemfile', [], 'Updated Gemfile content', {
-          ...config,
-          binarySource: 'docker',
-          dockerUser: 'foobar',
-          compatibility: {
-            ruby: '1.2.5',
-            bundler: '3.2.1',
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: 'Updated Gemfile content',
+          config: {
+            ...config,
+            binarySource: BinarySource.Docker,
+            dockerUser: 'foobar',
+            compatibility: {
+              ruby: '1.2.5',
+              bundler: '3.2.1',
+            },
           },
         })
       ).toMatchSnapshot();

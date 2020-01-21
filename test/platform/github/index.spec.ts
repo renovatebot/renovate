@@ -10,6 +10,11 @@ import {
   PULL_REQUEST_STATUS_NOT_OPEN,
   PULL_REQUEST_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../lib/constants/branch-constants';
 
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
@@ -592,14 +597,14 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       const res = await github.getBranchStatus('somebranch', null);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       await initRepo({
         repository: 'some/repo',
       });
       const res = await github.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should pass through success', async () => {
       await initRepo({
@@ -614,7 +619,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('should pass through failed', async () => {
       await initRepo({
@@ -629,7 +634,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should fail if a check run has failed', async () => {
       await initRepo({
@@ -667,7 +672,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('should suceed if no status and all passed check runs', async () => {
       await initRepo({
@@ -705,7 +710,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('should fail if a check run has failed', async () => {
       await initRepo({
@@ -742,7 +747,7 @@ describe('platform/github', () => {
           } as any)
       );
       const res = await github.getBranchStatus('somebranch', []);
-      expect(res).toEqual('pending');
+      expect(res).toEqual(BRANCH_STATUS_PENDING);
     });
   });
   describe('getBranchStatusCheck', () => {

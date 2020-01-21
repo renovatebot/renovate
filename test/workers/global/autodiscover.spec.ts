@@ -2,6 +2,7 @@ import { autodiscoverRepositories } from '../../../lib/workers/global/autodiscov
 import * as platform from '../../../lib/platform';
 import * as _hostRules from '../../../lib/util/host-rules';
 import * as _ghApi from '../../../lib/platform/github';
+import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platforms';
 
 jest.mock('../../../lib/platform/github');
 jest.unmock('../../../lib/platform');
@@ -16,7 +17,7 @@ describe('lib/workers/global/autodiscover', () => {
     jest.resetAllMocks();
     config = {};
     await platform.initPlatform({
-      platform: 'github',
+      platform: PLATFORM_TYPE_GITHUB,
       token: 'abc123',
       endpoint: 'endpoint',
     });
@@ -26,7 +27,7 @@ describe('lib/workers/global/autodiscover', () => {
   });
   it('autodiscovers github but empty', async () => {
     config.autodiscover = true;
-    config.platform = 'github';
+    config.platform = PLATFORM_TYPE_GITHUB;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
@@ -36,7 +37,7 @@ describe('lib/workers/global/autodiscover', () => {
   });
   it('autodiscovers github repos', async () => {
     config.autodiscover = true;
-    config.platform = 'github';
+    config.platform = PLATFORM_TYPE_GITHUB;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
@@ -47,7 +48,7 @@ describe('lib/workers/global/autodiscover', () => {
   it('filters autodiscovered github repos', async () => {
     config.autodiscover = true;
     config.autodiscoverFilter = 'project/re*';
-    config.platform = 'github';
+    config.platform = PLATFORM_TYPE_GITHUB;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));

@@ -5,6 +5,7 @@ import * as _yarnHelper from '../../../../lib/manager/npm/post-update/yarn';
 import { mocked } from '../../../util';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../execUtil';
 import * as _env from '../../../../lib/util/exec/env';
+import { BinarySource } from '../../../../lib/util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -22,10 +23,7 @@ const yarnHelper = mocked(_yarnHelper);
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map(snapshot => ({
     ...snapshot,
-    cmd: snapshot.cmd.replace(
-      /^bash -l -c ".*\/yarn.*?\.js\s+/,
-      'bash -l -c "<yarn> '
-    ),
+    cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
 describe('generateLockFile', () => {
@@ -133,7 +131,7 @@ describe('generateLockFile', () => {
     });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await yarnHelper.generateLockFile('some-dir', undefined, {
-      binarySource: 'global',
+      binarySource: BinarySource.Global,
     });
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');

@@ -11,12 +11,16 @@ import {
   PULL_REQUEST_STATUS_NOT_OPEN,
   PULL_REQUEST_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
+import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_FAILURE,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../../lib/constants/branch-constants';
 
 describe('platform/gitlab', () => {
   let gitlab: typeof import('../../../lib/platform/gitlab');
-  let api: jest.Mocked<
-    typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api
-  >;
+  let api: jest.Mocked<typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api>;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let GitStorage: jest.Mocked<
     typeof import('../../../lib/platform/git/storage')
@@ -404,11 +408,11 @@ describe('platform/gitlab', () => {
     });
     it('returns success if requiredStatusChecks null', async () => {
       const res = await gitlab.getBranchStatus('somebranch', null);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       const res = await gitlab.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual('failed');
+      expect(res).toEqual(BRANCH_STATUS_FAILED);
     });
     it('returns pending if no results', async () => {
       await initRepo();
@@ -416,7 +420,7 @@ describe('platform/gitlab', () => {
         body: [],
       } as any);
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('pending');
+      expect(res).toEqual(BRANCH_STATUS_PENDING);
     });
     it('returns success if all are success', async () => {
       await initRepo();
@@ -424,7 +428,7 @@ describe('platform/gitlab', () => {
         body: [{ status: 'success' }, { status: 'success' }],
       } as any);
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('returns success if optional jobs fail', async () => {
       await initRepo();
@@ -435,7 +439,7 @@ describe('platform/gitlab', () => {
         ],
       } as any);
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
     it('returns failure if any mandatory jobs fails', async () => {
       await initRepo();
@@ -447,7 +451,7 @@ describe('platform/gitlab', () => {
         ],
       } as any);
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('failure');
+      expect(res).toEqual(BRANCH_STATUS_FAILURE);
     });
     it('returns custom statuses', async () => {
       await initRepo();
@@ -504,7 +508,7 @@ describe('platform/gitlab', () => {
         'somebranch',
         'some-context'
       );
-      expect(res).toEqual('success');
+      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
     });
   });
   describe('setBranchStatus', () => {

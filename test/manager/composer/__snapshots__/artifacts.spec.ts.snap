@@ -25,7 +25,7 @@ Array [
 exports[`.updateArtifacts() performs lockFileMaintenance 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -45,7 +45,7 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -65,7 +65,7 @@ Array [
 exports[`.updateArtifacts() returns updated composer.lock 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -105,7 +105,7 @@ Array [
 exports[`.updateArtifacts() supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -125,7 +125,7 @@ Array [
 exports[`.updateArtifacts() uses hostRules to write auth.json 1`] = `
 Array [
   Object {
-    "cmd": "bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

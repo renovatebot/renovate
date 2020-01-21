@@ -39,6 +39,11 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import {
+  BRANCH_STATUS_FAILED,
+  BRANCH_STATUS_PENDING,
+  BRANCH_STATUS_SUCCESS,
+} from '../../constants/branch-constants';
+import {
   PULL_REQUEST_STATUS_ALL,
   PULL_REQUEST_STATUS_CLOSED,
   PULL_REQUEST_STATUS_OPEN,
@@ -126,9 +131,11 @@ export async function initPlatform({
   let gitAuthor: string;
   let renovateUsername: string;
   try {
-    const userData = (await api.get(defaults.endpoint + 'user', {
-      token,
-    })).body;
+    const userData = (
+      await api.get(defaults.endpoint + 'user', {
+        token,
+      })
+    ).body;
     renovateUsername = userData.login;
     gitAuthor = userData.name;
   } catch (err) {
@@ -136,9 +143,11 @@ export async function initPlatform({
     throw new Error('Init: Authentication failure');
   }
   try {
-    const userEmail = (await api.get(defaults.endpoint + 'user/emails', {
-      token,
-    })).body;
+    const userEmail = (
+      await api.get(defaults.endpoint + 'user/emails', {
+        token,
+      })
+    ).body;
     if (userEmail.length && userEmail[0].email) {
       gitAuthor += ` <${userEmail[0].email}>`;
     } else {
@@ -263,9 +272,11 @@ export async function initRepo({
       try {
         const renovateConfig = JSON.parse(
           Buffer.from(
-            (await api.get(
-              `repos/${config.repository}/contents/${defaultConfigFile}`
-            )).body.content,
+            (
+              await api.get(
+                `repos/${config.repository}/contents/${defaultConfigFile}`
+              )
+            ).body.content,
             'base64'
           ).toString()
         );
@@ -294,9 +305,11 @@ export async function initRepo({
       try {
         renovateConfig = JSON.parse(
           Buffer.from(
-            (await api.get(
-              `repos/${config.repository}/contents/${defaultConfigFile}`
-            )).body.content,
+            (
+              await api.get(
+                `repos/${config.repository}/contents/${defaultConfigFile}`
+              )
+            ).body.content,
             'base64'
           ).toString()
         );
@@ -369,17 +382,18 @@ export async function initRepo({
     config.parentRepo = config.repository;
     config.repository = null;
     // Get list of existing repos
-    const existingRepos = (await api.get<{ full_name: string }[]>(
-      'user/repos?per_page=100',
-      {
+    const existingRepos = (
+      await api.get<{ full_name: string }[]>('user/repos?per_page=100', {
         token: forkToken || opts.token,
         paginate: true,
-      }
-    )).body.map(r => r.full_name);
+      })
+    ).body.map(r => r.full_name);
     try {
-      config.repository = (await api.post(`repos/${repository}/forks`, {
-        token: forkToken || opts.token,
-      })).body.full_name;
+      config.repository = (
+        await api.post(`repos/${repository}/forks`, {
+          token: forkToken || opts.token,
+        })
+      ).body.full_name;
     } catch (err) /* istanbul ignore next */ {
       logger.info({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
@@ -848,9 +862,11 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     { prNo },
     'PR not found in open or closed PRs list - trying to fetch it directly'
   );
-  const pr = (await api.get(
-    `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-  )).body;
+  const pr = (
+    await api.get(
+      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+    )
+  ).body;
   if (!pr) {
     return null;
   }
@@ -870,10 +886,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     if (pr.commits === 1) {
       if (global.gitAuthor) {
         // Check against gitAuthor
-        const commitAuthorEmail = (await api.get(
-          `repos/${config.parentRepo ||
-            config.repository}/pulls/${prNo}/commits`
-        )).body[0].commit.author.email;
+        const commitAuthorEmail = (
+          await api.get(
+            `repos/${config.parentRepo ||
+              config.repository}/pulls/${prNo}/commits`
+          )
+        ).body[0].commit.author.email;
         if (commitAuthorEmail === global.gitAuthor.email) {
           logger.debug(
             { prNo },
@@ -901,9 +919,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     } else {
       // Check if only one author of all commits
       logger.debug({ prNo }, 'Checking all commits');
-      const prCommits = (await api.get(
-        `repos/${config.parentRepo || config.repository}/pulls/${prNo}/commits`
-      )).body;
+      const prCommits = (
+        await api.get(
+          `repos/${config.parentRepo ||
+            config.repository}/pulls/${prNo}/commits`
+        )
+      ).body;
       // Filter out "Update branch" presses
       const remainingCommits = prCommits.filter(
         (commit: {
@@ -1051,12 +1072,12 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   let commitStatus;
   try {
@@ -1121,15 +1142,15 @@ export async function getBranchStatus(
     commitStatus.state === 'failed' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
-    return 'failed';
+    return BRANCH_STATUS_FAILED;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
     checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
   ) {
-    return 'success';
+    return BRANCH_STATUS_SUCCESS;
   }
-  return 'pending';
+  return BRANCH_STATUS_PENDING;
 }
 
 async function getStatusCheck(
@@ -1287,9 +1308,11 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug('Found issue ' + issue.number);
-  const issueBody = (await api.get(
-    `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
-  )).body.body;
+  const issueBody = (
+    await api.get(
+      `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
+    )
+  ).body.body;
   return {
     number: issue.number,
     body: issueBody,
@@ -1335,9 +1358,13 @@ export async function ensureIssue({
           await closeIssue(i.number);
         }
       }
-      const issueBody = (await api.get(
-        `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
-      )).body.body;
+      const issueBody = (
+        await api.get(
+          `repos/${config.parentRepo || config.repository}/issues/${
+            issue.number
+          }`
+        )
+      ).body.body;
       if (issueBody === body && issue.state === 'open') {
         logger.info('Issue is open and up to date - nothing to do');
         return null;
@@ -1499,9 +1526,11 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   const url = `repos/${config.parentRepo ||
     config.repository}/issues/${issueNo}/comments?per_page=100`;
   try {
-    const comments = (await api.get<Comment[]>(url, {
-      paginate: true,
-    })).body;
+    const comments = (
+      await api.get<Comment[]>(url, {
+        paginate: true,
+      })
+    ).body;
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* istanbul ignore next */ {
@@ -1624,10 +1653,12 @@ export async function createPr({
     options.body.maintainer_can_modify = true;
   }
   logger.debug({ title, head, base }, 'Creating PR');
-  const pr = (await api.post<Pr>(
-    `repos/${config.parentRepo || config.repository}/pulls`,
-    options
-  )).body;
+  const pr = (
+    await api.post<Pr>(
+      `repos/${config.parentRepo || config.repository}/pulls`,
+      options
+    )
+  ).body;
   logger.debug({ branch: branchName, pr: pr.number }, 'PR created');
   // istanbul ignore if
   if (config.prList) {
@@ -1642,7 +1673,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: 'success',
+      state: BRANCH_STATUS_SUCCESS,
       url: 'https://github.com/renovatebot/renovate',
     });
   }
@@ -1656,9 +1687,11 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
   if (!prNo) {
     return [];
   }
-  const files = (await api.get(
-    `repos/${config.parentRepo || config.repository}/pulls/${prNo}/files`
-  )).body;
+  const files = (
+    await api.get(
+      `repos/${config.parentRepo || config.repository}/pulls/${prNo}/files`
+    )
+  ).body;
   return files.map((f: { filename: string }) => f.filename);
 }
 

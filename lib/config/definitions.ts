@@ -1,4 +1,11 @@
 import { RenovateConfigStage } from './common';
+import {
+  PLATFORM_TYPE_AZURE,
+  PLATFORM_TYPE_BITBUCKET,
+  PLATFORM_TYPE_BITBUCKET_SERVER,
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../constants/platforms';
 
 export interface RenovateOptionBase {
   admin?: boolean;
@@ -188,6 +195,7 @@ const options: RenovateOptions[] = [
       'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`',
     admin: true,
     type: 'string',
+    allowedValues: ['auto', 'global', 'docker'],
     default: 'auto',
   },
   {
@@ -399,13 +407,13 @@ const options: RenovateOptions[] = [
     description: 'Platform type of repository',
     type: 'string',
     allowedValues: [
-      'azure',
-      'bitbucket',
-      'bitbucket-server',
-      'github',
-      'gitlab',
+      PLATFORM_TYPE_AZURE,
+      PLATFORM_TYPE_BITBUCKET,
+      PLATFORM_TYPE_BITBUCKET_SERVER,
+      PLATFORM_TYPE_GITHUB,
+      PLATFORM_TYPE_GITLAB,
     ],
-    default: 'github',
+    default: PLATFORM_TYPE_GITHUB,
     admin: true,
   },
   {
