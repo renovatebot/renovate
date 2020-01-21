@@ -92,11 +92,6 @@ describe('lib/manager/bundler/extract', () => {
       ).toBe(true);
       validateGems(railsGemfile, res);
     });
-    it('parses manageiq Gemfile', async () => {
-      const res = await extractPackageFile(manageiqGemfile, 'Gemfile');
-      expect(res.deps).toHaveLength(91);
-      expect(res).toMatchSnapshot();
-    });
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
@@ -161,6 +156,11 @@ describe('lib/manager/bundler/extract', () => {
         })
       ).toBe(true);
       validateGems(gitlabFossGemfile, res);
+    });
+    it('parses manageiq Gemfile', async () => {
+      const res = await extractPackageFile(manageiqGemfile, 'Gemfile');
+      expect(res.deps).toHaveLength(91);
+      expect(res).toMatchSnapshot();
     });
     it('parses git deps', async () => {
       const res = await extractPackageFile(githubGemfile, 'Gemfile');
