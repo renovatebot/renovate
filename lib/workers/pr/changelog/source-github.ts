@@ -6,7 +6,7 @@ import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
 import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
 import { Release } from '../../../datasource';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 
 const ghGot = api.get;
 

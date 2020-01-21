@@ -1,5 +1,5 @@
 import { GotApi } from '../../../lib/platform/common';
-import { PLATFORM_TYPE_BITBUCKET } from '../../../lib/constants/platfroms';
+import { PLATFORM_TYPE_BITBUCKET } from '../../../lib/constants/platforms';
 
 describe('platform/gl-got-wrapper', () => {
   let api: GotApi;

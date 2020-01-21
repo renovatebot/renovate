@@ -23,7 +23,7 @@ import {
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platfroms';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,

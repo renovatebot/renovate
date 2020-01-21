@@ -1,6 +1,6 @@
 import { add, find, clear, hosts } from '../../lib/util/host-rules';
 import { DATASOURCE_NUGET } from '../../lib/constants/data-binary-source';
-import { PLATFORM_TYPE_AZURE } from '../../lib/constants/platfroms';
+import { PLATFORM_TYPE_AZURE } from '../../lib/constants/platforms';
 
 describe('util/host-rules', () => {
   beforeEach(() => {

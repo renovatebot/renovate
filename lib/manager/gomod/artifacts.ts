@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 export async function updateArtifacts({
   packageFileName: goModFileName,

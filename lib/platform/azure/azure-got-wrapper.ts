@@ -3,7 +3,7 @@ import { IGitApi } from 'azure-devops-node-api/GitApi';
 import { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import * as hostRules from '../../util/host-rules';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platfroms';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 
 const hostType = PLATFORM_TYPE_AZURE;
 let endpoint: string;

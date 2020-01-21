@@ -1,5 +1,5 @@
 import * as _hostRules from '../../../lib/util/host-rules';
-import { PLATFORM_TYPE_AZURE } from '../../../lib/constants/platfroms';
+import { PLATFORM_TYPE_AZURE } from '../../../lib/constants/platforms';
 
 describe('platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('../../../lib/platform/azure/azure-got-wrapper');

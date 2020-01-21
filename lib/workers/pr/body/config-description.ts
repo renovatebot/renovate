@@ -2,7 +2,7 @@ import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
 import { PrBodyConfig } from './common';
 import { BRANCH_STATUS_FAILED } from '../../../constants/branch-constants';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 
 export async function getPrConfigDescription(
   config: PrBodyConfig

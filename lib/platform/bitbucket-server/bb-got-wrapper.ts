@@ -2,7 +2,7 @@ import URL from 'url';
 import { GotJSONOptions } from 'got';
 import got from '../../util/got';
 import { GotApi, GotApiOptions, GotResponse } from '../common';
-import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platfroms';
+import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 
 let baseUrl: string;
 

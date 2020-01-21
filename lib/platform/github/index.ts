@@ -38,7 +38,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,

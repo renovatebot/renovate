@@ -14,7 +14,7 @@ import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../../constants/platfroms';
+} from '../../constants/platforms';
 
 export async function updateArtifacts({
   packageFileName,

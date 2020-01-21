@@ -21,7 +21,7 @@ import {
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
-import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platfroms';
+import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,

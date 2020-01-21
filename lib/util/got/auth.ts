@@ -3,7 +3,7 @@ import { create } from './util';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../../constants/platfroms';
+} from '../../constants/platforms';
 
 // istanbul ignore next
 export default create({

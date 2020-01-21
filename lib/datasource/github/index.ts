@@ -8,7 +8,7 @@ import {
 import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 const ghGot = api.get;
 

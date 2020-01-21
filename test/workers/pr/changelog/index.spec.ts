@@ -5,7 +5,7 @@ import {
   ChangeLogConfig,
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
-import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platforms';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');

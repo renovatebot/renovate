@@ -4,7 +4,7 @@ import { getOptions, RenovateOptions } from './definitions';
 import { RenovateConfig } from './common';
 import { logger } from '../logger';
 import { DATASOURCE_DOCKER } from '../constants/data-binary-source';
-import { PLATFORM_TYPE_GITHUB } from '../constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
