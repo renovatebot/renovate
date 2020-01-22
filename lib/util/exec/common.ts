@@ -1,3 +1,9 @@
+import {
+  exec as cpExec,
+  ExecOptions as ChildProcessExecOptions,
+} from 'child_process';
+import { promisify } from 'util';
+
 export type Opt<T> = T | null | undefined;
 
 export enum BinarySource {
@@ -23,3 +29,17 @@ export interface DockerOptions {
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
 }
+
+export interface RawExecOptions extends ChildProcessExecOptions {
+  encoding: string;
+}
+
+export interface ExecResult {
+  stdout: string;
+  stderr: string;
+}
+
+export const rawExec: (
+  cmd: string,
+  opts: RawExecOptions
+) => Promise<ExecResult> = promisify(cpExec);

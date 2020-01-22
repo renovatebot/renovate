@@ -1,14 +1,18 @@
 import { join } from 'path';
 import { hrtime } from 'process';
-import { promisify } from 'util';
-import {
-  exec as cpExec,
-  ExecOptions as ChildProcessExecOptions,
-} from 'child_process';
+import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dockerCmd } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
-import { BinarySource, DockerOptions, ExecConfig, Opt } from './common';
+import {
+  BinarySource,
+  ExecConfig,
+  ExecResult,
+  RawExecOptions,
+  rawExec,
+  Opt,
+  DockerOptions,
+} from './common';
 import { RenovateConfig } from '../../config';
 
 const execConfig: ExecConfig = {
@@ -25,22 +29,12 @@ export function setExecConfig(config: Partial<RenovateConfig>): void {
   }
 }
 
-const pExec: (
-  cmd: string,
-  opts: ChildProcessExecOptions & { encoding: string }
-) => Promise<ExecResult> = promisify(cpExec);
-
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
   subDirectory?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
-}
-
-export interface ExecResult {
-  stdout: string;
-  stderr: string;
 }
 
 function createChildEnv(
@@ -93,7 +87,7 @@ export async function exec(
   delete execOptions.docker;
   delete execOptions.subDirectory;
 
-  const pExecOptions: ChildProcessExecOptions & { encoding: string } = {
+  const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',
     ...execOptions,
     env: childEnv,
@@ -109,21 +103,26 @@ export async function exec(
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    let singleCommand = commands.join(' && ');
-    singleCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
-    singleCommand = dockerCmd(singleCommand, dockerOptions, execConfig);
-    commands = [singleCommand];
+    let rawCommand = commands.join(' && ');
+    rawCommand = `bash -l -c "${rawCommand.replace(/"/g, '\\"')}"`;
+    rawCommand = await dockerCmd(rawCommand, dockerOptions, execConfig);
+    commands = [rawCommand];
   }
 
   let res: ExecResult | null = null;
-  for (const pExecCommand of commands) {
+  for (const rawExecCommand of commands) {
     const startTime = hrtime();
-    res = await pExec(pExecCommand, pExecOptions);
+    res = await rawExec(rawExecCommand, rawExecOptions);
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (res) {
       logger.debug(
-        { cmd: pExecCommand, seconds, stdout: res.stdout, stderr: res.stderr },
+        {
+          cmd: rawExecCommand,
+          seconds,
+          stdout: res.stdout,
+          stderr: res.stderr,
+        },
         'exec completed'
       );
     }
