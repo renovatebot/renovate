@@ -175,6 +175,9 @@ Object {
   "displayNumber": "Pull Request #91",
   "head": Object {
     "ref": "somebranch",
+    "repo": Object {
+      "full_name": "some/repo",
+    },
   },
   "isModified": false,
   "isStale": true,

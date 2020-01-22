@@ -555,7 +555,13 @@ describe('platform/github', () => {
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: [{ number: 91, head: { ref: 'somebranch' }, state: 'open' }],
+            body: [
+              {
+                number: 91,
+                head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+                state: 'open',
+              },
+            ],
           } as any)
       );
       api.get.mockImplementationOnce(
@@ -569,7 +575,7 @@ describe('platform/github', () => {
               base: {
                 sha: '1234',
               },
-              head: { ref: 'somebranch' },
+              head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
               state: 'open',
             },
           } as any)
