@@ -98,7 +98,7 @@ export async function dockerCmd(
 
   const bashCommand = [
     ...prepareCommands(preCommands),
-    commands,
+    ...commands,
     ...prepareCommands(postCommands),
   ].join(' && ');
   result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`);
