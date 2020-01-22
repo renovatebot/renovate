@@ -1,16 +1,17 @@
 import { join } from 'path';
 import { hrtime } from 'process';
+import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dockerCmd } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
   BinarySource,
   ExecConfig,
-  ExecOptions,
   ExecResult,
-  ExtraEnv,
   RawExecOptions,
   rawExec,
+  Opt,
+  DockerOptions,
 } from './common';
 import { RenovateConfig } from '../../config';
 
@@ -26,6 +27,14 @@ export function setExecConfig(config: Partial<RenovateConfig>): void {
     const value = config[key];
     execConfig[key] = value || null;
   }
+}
+
+type ExtraEnv<T = unknown> = Record<string, T>;
+
+export interface ExecOptions extends ChildProcessExecOptions {
+  subDirectory?: string;
+  extraEnv?: Opt<ExtraEnv>;
+  docker?: Opt<DockerOptions>;
 }
 
 function createChildEnv(

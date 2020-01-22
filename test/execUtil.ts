@@ -1,5 +1,5 @@
 import { exec as _exec } from 'child_process';
-import { ExecOptions } from '../lib/util/exec/common';
+import { ExecOptions } from '../lib/util/exec';
 
 type CallOptions = ExecOptions | null | undefined;
 

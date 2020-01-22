@@ -34,14 +34,6 @@ export interface RawExecOptions extends ChildProcessExecOptions {
   encoding: string;
 }
 
-export type ExtraEnv<T = unknown> = Record<string, T>;
-
-export interface ExecOptions extends ChildProcessExecOptions {
-  subDirectory?: string;
-  extraEnv?: Opt<ExtraEnv>;
-  docker?: Opt<DockerOptions>;
-}
-
 export interface ExecResult {
   stdout: string;
   stderr: string;

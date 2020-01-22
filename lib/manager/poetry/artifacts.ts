@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { exec } from '../../util/exec';
+import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
@@ -8,7 +8,6 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
-import { ExecOptions } from '../../util/exec/common';
 
 export async function updateArtifacts({
   packageFileName,
