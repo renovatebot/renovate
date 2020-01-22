@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { dockerCmd } from './docker';
+import { generateDockerCommand } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
@@ -103,10 +103,14 @@ export async function exec(
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    let rawCommand = commands.join(' && ');
-    rawCommand = `bash -l -c "${rawCommand.replace(/"/g, '\\"')}"`;
-    rawCommand = await dockerCmd(rawCommand, dockerOptions, execConfig);
-    commands = [rawCommand];
+    let dockerCommand = commands.join(' && ');
+    dockerCommand = `bash -l -c "${dockerCommand.replace(/"/g, '\\"')}"`;
+    dockerCommand = await generateDockerCommand(
+      dockerCommand,
+      dockerOptions,
+      execConfig
+    );
+    commands = [dockerCommand];
   }
 
   let res: ExecResult | null = null;

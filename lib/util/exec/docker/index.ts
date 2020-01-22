@@ -56,7 +56,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   });
 }
 
-export async function dockerCmd(
+export async function generateDockerCommand(
   cmd: string,
   options: DockerOptions,
   config: ExecConfig
