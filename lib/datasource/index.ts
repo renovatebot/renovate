@@ -31,6 +31,7 @@ import {
   ReleaseResult,
   DigestConfig,
 } from './common';
+import { VERSION_SCHEME_SEMVER } from '../constants/version-schemes';
 
 export * from './common';
 
@@ -105,7 +106,9 @@ export async function getPkgReleases(
     return res;
   }
   const versionScheme =
-    config && config.versionScheme ? config.versionScheme : 'semver';
+    config && config.versionScheme
+      ? config.versionScheme
+      : VERSION_SCHEME_SEMVER;
   // Filter by version scheme
   const version = versioning.get(versionScheme);
   // Return a sorted list of valid Versions
