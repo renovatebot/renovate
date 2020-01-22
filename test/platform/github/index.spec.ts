@@ -557,6 +557,11 @@ describe('platform/github', () => {
           ({
             body: [
               {
+                number: 90,
+                head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+                state: 'open',
+              },
+              {
                 number: 91,
                 head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
                 state: 'open',
