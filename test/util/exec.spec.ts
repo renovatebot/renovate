@@ -6,6 +6,7 @@ import { exec, ExecOptions, setExecConfig } from '../../lib/util/exec';
 import {
   BinarySource,
   ExecConfig,
+  RawExecOptions,
   VolumeOption,
 } from '../../lib/util/exec/common';
 import { envMock } from '../execUtil';
@@ -15,15 +16,13 @@ const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
 
-type OutOpts = ChildProcessExecOptions & { encoding: string };
-
 interface TestInput {
   execConfig: Partial<ExecConfig>;
   processEnv: Record<string, string>;
   inCmd: string | string[];
   inOpts: ExecOptions;
   outCmd: string[];
-  outOpts: OutOpts[];
+  outOpts: RawExecOptions[];
   trustLevel?: 'high' | 'low';
 }
 
