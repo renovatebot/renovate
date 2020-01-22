@@ -295,10 +295,34 @@ describe(`Child process execution wrapper`, () => {
         },
         processEnv,
         inCmd,
-        inOpts: { docker: { image } },
+        inOpts: { docker },
         outCmd: [
           dockerPullCmd,
           `docker run --rm --user=foobar ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+      },
+    ],
+
+    [
+      'Docker extra commands',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+        },
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker: {
+            image,
+            preCommands: ['preCommand1', 'preCommand2', null],
+            postCommands: ['postCommand1', undefined, 'postCommand2'],
+          },
+        },
+        outCmd: [
+          dockerPullCmd,
+          `docker run --rm ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
         ],
         outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
       },

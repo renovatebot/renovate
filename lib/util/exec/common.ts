@@ -20,7 +20,10 @@ export interface ExecConfig {
 }
 
 export type VolumesPair = [string, string];
-export type VolumeOption = string | VolumesPair | null | undefined;
+export type VolumeOption = Opt<string | VolumesPair>;
+
+export type DockerExtraCommand = Opt<string>;
+export type DockerExtraCommands = Opt<DockerExtraCommand[]>;
 
 export interface DockerOptions {
   image: string;
@@ -28,6 +31,8 @@ export interface DockerOptions {
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
+  preCommands?: DockerExtraCommands;
+  postCommands?: DockerExtraCommands;
 }
 
 export interface RawExecOptions extends ChildProcessExecOptions {

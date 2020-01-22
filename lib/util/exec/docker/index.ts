@@ -3,6 +3,7 @@ import {
   VolumesPair,
   DockerOptions,
   ExecConfig,
+  DockerExtraCommands,
   rawExec,
 } from '../common';
 import { logger } from '../../../logger';
@@ -56,12 +57,24 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   });
 }
 
+function prepareCommands(commands: DockerExtraCommands = []): string[] {
+  return commands.filter(command => command && typeof command === 'string');
+}
+
 export async function dockerCmd(
-  cmd: string,
+  commands: string[],
   options: DockerOptions,
   config: ExecConfig
 ): Promise<string> {
-  const { image, tag, envVars, cwd, volumes = [] } = options;
+  const {
+    image,
+    tag,
+    envVars,
+    cwd,
+    volumes = [],
+    preCommands,
+    postCommands,
+  } = options;
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
@@ -83,7 +96,12 @@ export async function dockerCmd(
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  result.push(cmd);
+  const bashCommand = [
+    ...prepareCommands(preCommands),
+    commands,
+    ...prepareCommands(postCommands),
+  ].join(' && ');
+  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`);
 
   return result.join(' ');
 }
