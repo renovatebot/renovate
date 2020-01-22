@@ -61,7 +61,7 @@ function prepareCommands(commands: DockerExtraCommands = []): string[] {
   return commands.filter(command => command && typeof command === 'string');
 }
 
-export async function dockerCmd(
+export async function generateDockerCommand(
   commands: string[],
   options: DockerOptions,
   config: ExecConfig
