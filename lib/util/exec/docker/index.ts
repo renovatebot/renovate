@@ -3,12 +3,22 @@ import {
   VolumesPair,
   DockerOptions,
   ExecConfig,
+  rawExec,
 } from '../common';
+import { logger } from '../../../logger';
 
-const prefetchedDockerImages = new Set<string>();
+const prefetchedImages = new Set<string>();
+
+async function prefetchDockerImage(taggedImage: string): Promise<void> {
+  if (!prefetchedImages.has(taggedImage)) {
+    logger.debug(`Fetching Docker image: ${taggedImage}`);
+    prefetchedImages.add(taggedImage);
+    await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
+  }
+}
 
 export function resetPrefetchedImages(): void {
-  prefetchedDockerImages.clear();
+  prefetchedImages.clear();
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
@@ -46,11 +56,11 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   });
 }
 
-export function dockerCmd(
+export async function dockerCmd(
   cmd: string,
   options: DockerOptions,
   config: ExecConfig
-): string[] {
+): Promise<string> {
   const { image, tag, envVars, cwd, volumes = [] } = options;
   const { localDir, cacheDir, dockerUser } = config;
 
@@ -70,16 +80,10 @@ export function dockerCmd(
   if (cwd) result.push(`-w "${cwd}"`);
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
+  await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
   result.push(cmd);
 
-  const mainCommand = result.join(' ');
-
-  if (prefetchedDockerImages.has(taggedImage)) {
-    return [mainCommand];
-  }
-
-  prefetchedDockerImages.add(taggedImage);
-  return [`docker pull ${taggedImage}`, mainCommand];
+  return result.join(' ');
 }

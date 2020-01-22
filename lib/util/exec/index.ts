@@ -96,7 +96,8 @@ export async function exec(
 
     let rawCommand = commands.join(' && ');
     rawCommand = `bash -l -c "${rawCommand.replace(/"/g, '\\"')}"`;
-    commands = dockerCmd(rawCommand, dockerOptions, execConfig);
+    rawCommand = await dockerCmd(rawCommand, dockerOptions, execConfig);
+    commands = [rawCommand];
   }
 
   let res: ExecResult | null = null;
