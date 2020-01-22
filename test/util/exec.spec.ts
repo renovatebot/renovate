@@ -2,10 +2,11 @@ import {
   exec as _cpExec,
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
-import { exec, ExecOptions, setExecConfig } from '../../lib/util/exec';
+import { exec, setExecConfig } from '../../lib/util/exec';
 import {
   BinarySource,
   ExecConfig,
+  ExecOptions,
   VolumeOption,
 } from '../../lib/util/exec/common';
 import { envMock } from '../execUtil';
