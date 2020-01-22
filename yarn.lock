@@ -1402,6 +1402,11 @@
   resolved "https://registry.yarnpkg.com/@types/safe-regex/-/safe-regex-1.1.2.tgz#0434f128255fe79c34ff21ffd18c706b2bad8856"
   integrity sha512-wuS9LVpgIiTYaGKd+s6Dj0kRXBkttaXjVxzaXmviCACi8RO+INPayND+VNjAcall/l1Jkyhh9lyPfKW/aP/Yug==
 
+"@types/semver-stable@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/semver-stable/-/semver-stable-3.0.0.tgz#660cc139fc36749e0d3dae69ebfd079eb41327ac"
+  integrity sha512-lKoRU5o4X5fBHVQes2YOvSGckuTG7SpOxBQmJTczKl85hgQQHf6eQR1Yi/nmJzQWDEL2JVTUeUYR4iGz1zgdGg==
+
 "@types/semver-utils@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@types/semver-utils/-/semver-utils-1.1.0.tgz#d35645238680d2297a8c9b67395d8b37f0500895"
