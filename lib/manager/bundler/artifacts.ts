@@ -15,7 +15,6 @@ import {
   BUNDLER_INVALID_CREDENTIALS,
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { BinarySource } from '../../util/exec/common';
 
 async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
   const { packageFileName, config } = updateArtifact;
@@ -72,7 +71,7 @@ export async function updateArtifacts(
     newPackageFileContent,
     config,
   } = updateArtifact;
-  const { binarySource, compatibility = {} } = config;
+  const { compatibility = {} } = config;
 
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
@@ -102,22 +101,10 @@ export async function updateArtifacts(
     const execOptions: ExecOptions = {
       docker: {
         image: 'renovate/ruby',
+        tag: await getDockerTag(updateArtifact),
         preCommands,
       },
     };
-
-    if (binarySource === BinarySource.Docker) {
-      logger.info('Running bundler via docker');
-      execOptions.docker.tag = await getDockerTag(updateArtifact);
-    } else if (
-      config.binarySource === BinarySource.Auto ||
-      config.binarySource === BinarySource.Global
-    ) {
-      logger.info('Running bundler via global bundler');
-    } else {
-      logger.warn({ config }, 'Unsupported binarySource');
-    }
-    logger.debug({ cmd }, 'bundler command');
     await exec(cmd, execOptions);
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
