@@ -25,7 +25,8 @@ const isStable = (input: string): boolean => {
 };
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): string => validRange(input);
+export const isValid = (input: string): string =>
+  isVersion(input) || validRange(input);
 
 const maxSatisfyingVersion = (versions: string[], range: string): string => {
   const found = filter(versions, range).sort(sortVersions);

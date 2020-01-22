@@ -1,5 +1,6 @@
 import { parse } from 'toml';
-import { isValid } from '../../versioning/poetry';
+import * as poetry from '../../versioning/poetry';
+import * as pep440 from '../../versioning/pep440';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { PoetryFile, PoetrySection } from './types';
@@ -51,8 +52,12 @@ function extractFromSection(
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!isValid(dep.currentValue)) {
-      dep.skipReason = 'unknown-version';
+    } else if (!poetry.isValid(dep.currentValue)) {
+      if (pep440.isValid(dep.currentValue)) {
+        dep.versionScheme = 'pep440';
+      } else {
+        dep.skipReason = 'unknown-version';
+      }
     }
     deps.push(dep);
   });
