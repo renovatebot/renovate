@@ -103,10 +103,8 @@ export async function exec(
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    let dockerCommand = commands.join(' && ');
-    dockerCommand = `bash -l -c "${dockerCommand.replace(/"/g, '\\"')}"`;
-    dockerCommand = await generateDockerCommand(
-      dockerCommand,
+    const dockerCommand = await generateDockerCommand(
+      commands,
       dockerOptions,
       execConfig
     );
