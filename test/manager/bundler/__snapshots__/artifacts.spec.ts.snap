@@ -14,7 +14,13 @@ Array [
 exports[`bundler.updateArtifacts() Docker .ruby-version 2`] = `
 Array [
   Object {
-    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update \\"",
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -44,7 +50,13 @@ Array [
 exports[`bundler.updateArtifacts() Docker compatibility options 2`] = `
 Array [
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 --no-document && bundle lock --update \\"",
+    "cmd": "docker pull renovate/ruby:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 --no-document && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -65,7 +77,7 @@ exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 
 exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `
 Array [
   Object {
-    "cmd": "bundle lock --update ",
+    "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -95,7 +107,7 @@ Array [
 exports[`bundler.updateArtifacts() works explicit global binarySource 2`] = `
 Array [
   Object {
-    "cmd": "bundle lock --update ",
+    "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -125,7 +137,7 @@ Array [
 exports[`bundler.updateArtifacts() works for default binarySource 2`] = `
 Array [
   Object {
-    "cmd": "bundle lock --update ",
+    "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

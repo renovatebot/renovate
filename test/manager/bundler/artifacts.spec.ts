@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import Git from 'simple-git/promise';
@@ -8,6 +9,8 @@ import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { BinarySource } from '../../../lib/util/exec/common';
+import { setExecConfig } from '../../../lib/util/exec';
+import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -29,16 +32,20 @@ describe('bundler.updateArtifacts()', () => {
     jest.resetModules();
 
     config = {
-      localDir: '/tmp/github/some/repo',
+      // `join` fixes Windows CI
+      localDir: join('/tmp/github/some/repo'),
+      dockerUser: 'foobar',
     };
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    resetPrefetchedImages();
+    setExecConfig(config);
   });
   it('returns null by default', async () => {
     expect(
       await updateArtifacts({
         packageFileName: '',
-        updatedDeps: [],
+        updatedDeps: ['foo', 'bar'],
         newPackageFileContent: '',
         config,
       })
@@ -55,7 +62,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
-        updatedDeps: [],
+        updatedDeps: ['foo', 'bar'],
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
@@ -73,7 +80,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
-        updatedDeps: [],
+        updatedDeps: ['foo', 'bar'],
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
@@ -91,7 +98,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
-        updatedDeps: [],
+        updatedDeps: ['foo', 'bar'],
         newPackageFileContent: 'Updated Gemfile content',
         config: {
           ...config,
@@ -102,6 +109,9 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   describe('Docker', () => {
+    beforeEach(() => {
+      setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    });
     it('.ruby-version', async () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
@@ -121,7 +131,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: [],
+          updatedDeps: ['foo', 'bar'],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
@@ -149,7 +159,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: [],
+          updatedDeps: ['foo', 'bar'],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,

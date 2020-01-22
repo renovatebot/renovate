@@ -1,7 +1,6 @@
 import { outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
-import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/exec/env';
+import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource/docker';
 import {
@@ -18,12 +17,63 @@ import {
 } from '../../constants/error-messages';
 import { BinarySource } from '../../util/exec/common';
 
-export async function updateArtifacts({
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
+  const { packageFileName, config } = updateArtifact;
+  const { compatibility = {} } = config;
+  const { ruby } = compatibility;
+
+  let tag = 'latest';
+  let rubyConstraint: string;
+  if (ruby) {
+    logger.debug('Using rubyConstraint from config');
+    rubyConstraint = ruby;
+  } else {
+    const rubyVersionFile = join(dirname(packageFileName), '.ruby-version');
+    logger.debug('Checking ' + rubyVersionFile);
+    const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
+    if (rubyVersionFileContent) {
+      logger.debug('Using ruby version specified in .ruby-version');
+      rubyConstraint = rubyVersionFileContent
+        .replace(/^ruby-/, '')
+        .replace(/\n/g, '')
+        .trim();
+    }
+  }
+  if (rubyConstraint && isValid(rubyConstraint)) {
+    logger.debug({ rubyConstraint }, 'Found ruby compatibility');
+    const rubyReleases = await getPkgReleases({
+      lookupName: 'renovate/ruby',
+    });
+    if (rubyReleases && rubyReleases.releases) {
+      let versions = rubyReleases.releases.map(release => release.version);
+      versions = versions.filter(version => isVersion(version));
+      versions = versions.filter(version => matches(version, rubyConstraint));
+      versions = versions.sort(sortVersions);
+      if (versions.length) {
+        tag = versions.pop();
+      }
+    }
+    if (tag === 'latest') {
+      logger.warn(
+        { rubyConstraint },
+        'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
+      );
+    }
+  }
+  return tag;
+}
+
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact
+): Promise<UpdateArtifactsResult[] | null> {
+  const {
+    packageFileName,
+    updatedDeps,
+    newPackageFileContent,
+    config,
+  } = updateArtifact;
+  const { binarySource, compatibility = {} } = config;
+
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {
@@ -36,92 +86,39 @@ export async function updateArtifacts({
     logger.debug('No Gemfile.lock found');
     return null;
   }
-  const cwd = join(config.localDir, dirname(packageFileName));
   try {
     const localPackageFileName = join(config.localDir, packageFileName);
     await outputFile(localPackageFileName, newPackageFileContent);
     const localLockFileName = join(config.localDir, lockFileName);
-    const env = getChildProcessEnv();
-    let cmd;
-    if (config.binarySource === BinarySource.Docker) {
+    const cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+
+    const { bundler } = compatibility;
+    const bundlerVersion = bundler ? ` -v ${bundler}` : '';
+    const preCommands = [
+      'ruby --version',
+      `gem install bundler${bundlerVersion} --no-document`,
+    ];
+
+    const execOptions: ExecOptions = {
+      docker: {
+        image: 'renovate/ruby',
+        preCommands,
+      },
+    };
+
+    if (binarySource === BinarySource.Docker) {
       logger.info('Running bundler via docker');
-      let tag = 'latest';
-      let rubyConstraint: string;
-      if (config && config.compatibility && config.compatibility.ruby) {
-        logger.debug('Using rubyConstraint from config');
-        rubyConstraint = config.compatibility.ruby;
-      } else {
-        const rubyVersionFile = join(dirname(packageFileName), '.ruby-version');
-        logger.debug('Checking ' + rubyVersionFile);
-        const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
-        if (rubyVersionFileContent) {
-          logger.debug('Using ruby version specified in .ruby-version');
-          rubyConstraint = rubyVersionFileContent
-            .replace(/^ruby-/, '')
-            .replace(/\n/g, '')
-            .trim();
-        }
-      }
-      if (rubyConstraint && isValid(rubyConstraint)) {
-        logger.debug({ rubyConstraint }, 'Found ruby compatibility');
-        const rubyReleases = await getPkgReleases({
-          lookupName: 'renovate/ruby',
-        });
-        if (rubyReleases && rubyReleases.releases) {
-          let versions = rubyReleases.releases.map(release => release.version);
-          versions = versions.filter(version => isVersion(version));
-          versions = versions.filter(version =>
-            matches(version, rubyConstraint)
-          );
-          versions = versions.sort(sortVersions);
-          if (versions.length) {
-            tag = versions.pop();
-          }
-        }
-        if (tag === 'latest') {
-          logger.warn(
-            { rubyConstraint },
-            'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
-          );
-        }
-      }
-      const bundlerConstraint =
-        config && config.compatibility && config.compatibility.bundler
-          ? config.compatibility.bundler
-          : undefined;
-      let bundlerVersion = '';
-      if (bundlerConstraint && isVersion(bundlerConstraint)) {
-        bundlerVersion = ' -v ' + bundlerConstraint;
-      }
-      cmd = `docker run --rm `;
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [config.localDir];
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/ruby:${tag} bash -l -c "ruby --version && `;
-      cmd += 'gem install bundler' + bundlerVersion + ' --no-document';
-      cmd += ' && bundle';
+      execOptions.docker.tag = await getDockerTag(updateArtifact);
     } else if (
       config.binarySource === BinarySource.Auto ||
       config.binarySource === BinarySource.Global
     ) {
       logger.info('Running bundler via global bundler');
-      cmd = 'bundle';
     } else {
       logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'bundle';
-    }
-    cmd += ` lock --update ${updatedDeps.join(' ')}`;
-    if (cmd.includes('bash -l -c "')) {
-      cmd += '"';
     }
     logger.debug({ cmd }, 'bundler command');
-    await exec(cmd, {
-      cwd,
-      env,
-    });
+    await exec(cmd, execOptions);
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
