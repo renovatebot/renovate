@@ -100,7 +100,6 @@
     "@snyk/ruby-semver": "2.0.4",
     "@spatocode/dirwalk": "^0.0.1",
     "@yarnpkg/lockfile": "1.1.0",
-    "ant-path-matcher": "^0.0.3",
     "aws-sdk": "2.601.0",
     "azure-devops-node-api": "9.0.1",
     "bunyan": "1.8.12",
@@ -158,7 +157,8 @@
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
     "yarn": "1.21.1",
-    "yawn-yaml": "1.4.0"
+    "yawn-yaml": "1.4.0",
+    "micromatch": "latest"
   },
   "optionalDependencies": {
     "re2": "1.10.5"

@@ -113,6 +113,8 @@ export async function parseConfigs(
   });
   global.trustLevel = config.trustLevel || 'low';
   delete config.trustLevel;
+  global.allowedPostUpgradeTasks = config.allowedPostUpgradeTasks;
+  delete config.allowedPostUpgradeTasks;
 
   return config;
 }

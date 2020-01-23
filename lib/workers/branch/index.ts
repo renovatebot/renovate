@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon';
 
-import antMatcher from 'ant-path-matcher';
+import _ from 'lodash';
 import find from 'find';
 import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
+import micromatch from 'micromatch';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -326,39 +327,53 @@ export async function processBranch(
       logger.debug('No updated lock files in branch');
     }
 
-    logger.info(`Post change hook: ${config.postUpgradeTasks}`);
+    if (global.trustLevel === 'high') {
+      logger.debug('Executing post-change hooks');
+      if (
+        is.nonEmptyArray(config.postUpgradeTasks) &&
+        is.nonEmptyArray(global.allowedPostUpgradeTasks)
+      ) {
+        for (const cmd of config.postUpgradeTasks) {
+          if (
+            !_.some(global.allowedPostUpgradeTasks, (pattern: string) =>
+              cmd.match(pattern)
+            )
+          ) {
+            logger.debug(
+              { cmd, allowedPostUpgradeTasks: global.allowedPostUpgradeTasks },
+              'Post-upgrade task did not match any on allowed list'
+            );
+          } else {
+            logger.debug({ cmd }, 'Executing post-change hook');
 
-    if (is.nonEmptyArray(config.postUpgradeTasks)) {
-      for (const cmd of config.postUpgradeTasks) {
-        logger.debug({ cmd }, 'Executing post-change hook');
+            const execResult = await exec(cmd, {
+              cwd: config.localDir,
+            });
 
-        const execResult = await exec(cmd, {
-          cwd: config.localDir,
-        });
-
-        logger.debug(execResult, 'Executed post-change hook');
+            logger.debug(execResult, 'Executed post-change hook');
+          }
+        }
       }
-    }
 
-    if (is.nonEmptyArray(config.postUpgradeFiles)) {
-      const files = find.fileSync(config.localDir);
+      if (is.nonEmptyArray(config.postUpgradeFiles)) {
+        const files = find.fileSync(config.localDir);
 
-      for (const filePath of files) {
-        const matcher = antMatcher();
-        const relativePath = filePath.substring(config.localDir.length + 1);
+        for (const filePath of files) {
+          const relativePath = filePath.substring(config.localDir.length + 1);
 
-        if (!relativePath.startsWith('.git/')) {
-          for (const pattern of config.postUpgradeFiles) {
-            if (matcher.match(pattern, relativePath)) {
-              logger.debug(
-                { file: filePath, pattern },
-                'Post upgrade file saved'
-              );
-              const existingContent = await readFile(filePath);
-              config.updatedArtifacts.push({
-                name: relativePath,
-                contents: existingContent.toString(),
-              });
+          if (!relativePath.startsWith('.git/')) {
+            for (const pattern of config.postUpgradeFiles) {
+              if (micromatch.isMatch(relativePath, pattern)) {
+                logger.debug(
+                  { file: filePath, pattern },
+                  'Post upgrade file saved'
+                );
+                const existingContent = await readFile(filePath);
+                config.updatedArtifacts.push({
+                  name: relativePath,
+                  contents: existingContent.toString(),
+                });
+              }
             }
           }
         }

@@ -83,6 +83,14 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowedPostUpgradeTasks',
+    description:
+      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
+    type: 'array',
+    subType: 'string',
+    default: [],
+  },
+  {
     name: 'postUpgradeTasks',
     description:
       'Post-upgrade tasks that are executed before a commit is made by Renovate',
@@ -93,7 +101,7 @@ const options: RenovateOptions[] = [
   {
     name: 'postUpgradeFiles',
     description:
-      'Files that match these Ant matchers will be committed if they are present after running post-upgrade tasks',
+      'Files that match these glob patterns will be committed if they are present after running post-upgrade tasks',
     type: 'array',
     subType: 'string',
     default: [],
