@@ -1,8 +1,44 @@
 import { api as semver } from '../../lib/versioning/poetry';
 
 describe('semver.isValid(input)', () => {
-  it('should return null for irregular versions', () => {
-    expect(semver.isValid('17.04.0')).toBeFalsy();
+  test.each([
+    '==1.2.3',
+    '0.2',
+    '1.1.0',
+    '1.0a1',
+    '1.0b2',
+    '1.0rc1',
+    '1.0.dev4',
+    '1.0c1',
+    '2012.2',
+    '1.0.dev456',
+    '1.0a1',
+    '1.0a2.dev456',
+    '1.0a12.dev456',
+    '1.0a12',
+    '1.0b1.dev456',
+    '1.0b2',
+    '1.0b2.post345.dev456',
+    '1.0b2.post345',
+    '1.0rc1.dev456',
+    '1.0rc1',
+    '1.0',
+    '1.0+abc.5',
+    '1.0+abc.7',
+    '1.0+5',
+    '1.0.post456.dev34',
+    '1.0.post456',
+    '1.1.dev1',
+    '~=3.1', // version 3.1 or later, but not version 4.0 or later.
+    '~=3.1.2', // version 3.1.2 or later, but not version 3.2.0 or later.
+    '~=3.1a1', // version 3.1a1 or later, but not version 4.0 or later.
+    '==3.1', // specifically version 3.1 (or 3.1.0), excludes all pre-releases, post releases, developmental releases and any 3.1.x maintenance releases.
+    '==3.1.*', // any version that starts with 3.1. Equivalent to the ~=3.1.0 compatible release clause.
+    '~=3.1.0, !=3.1.3', // version 3.1.0 or later, but not version 3.1.3 and not version 3.2.0 or later.
+    '<=2.0',
+    '<2.0',
+  ])('%s', input => {
+    expect(semver.isValid(input)).toBeTruthy();
   });
   it('should support simple semver', () => {
     expect(semver.isValid('1.2.3')).toBeTruthy();

@@ -1,42 +1,45 @@
 import pep440 from '../../lib/versioning/pep440';
+import { api as semver } from '../../lib/versioning/poetry';
 
 describe('pep440.isValid(input)', () => {
-  it('should support simple pep440', () => {
-    expect(pep440.isValid('==1.2.3')).toBeTruthy();
-    expect(pep440.isValid('0.2')).toBeTruthy();
-    expect(pep440.isValid('1.1.0')).toBeTruthy();
-    expect(pep440.isValid('1.0a1')).toBeTruthy();
-    expect(pep440.isValid('1.0b2')).toBeTruthy();
-    expect(pep440.isValid('1.0rc1')).toBeTruthy();
-    expect(pep440.isValid('1.0.dev4')).toBeTruthy();
-    expect(pep440.isValid('1.0c1')).toBeTruthy();
-    expect(pep440.isValid('2012.2')).toBeTruthy();
-    expect(pep440.isValid('1.0.dev456')).toBeTruthy();
-    expect(pep440.isValid('1.0a1')).toBeTruthy();
-    expect(pep440.isValid('1.0a2.dev456')).toBeTruthy();
-    expect(pep440.isValid('1.0a12.dev456')).toBeTruthy();
-    expect(pep440.isValid('1.0a12')).toBeTruthy();
-    expect(pep440.isValid('1.0b1.dev456')).toBeTruthy();
-    expect(pep440.isValid('1.0b2')).toBeTruthy();
-    expect(pep440.isValid('1.0b2.post345.dev456')).toBeTruthy();
-    expect(pep440.isValid('1.0b2.post345')).toBeTruthy();
-    expect(pep440.isValid('1.0rc1.dev456')).toBeTruthy();
-    expect(pep440.isValid('1.0rc1')).toBeTruthy();
-    expect(pep440.isValid('1.0')).toBeTruthy();
-    expect(pep440.isValid('1.0+abc.5')).toBeTruthy();
-    expect(pep440.isValid('1.0+abc.7')).toBeTruthy();
-    expect(pep440.isValid('1.0+5')).toBeTruthy();
-    expect(pep440.isValid('1.0.post456.dev34')).toBeTruthy();
-    expect(pep440.isValid('1.0.post456')).toBeTruthy();
-    expect(pep440.isValid('1.1.dev1')).toBeTruthy();
-    expect(pep440.isValid('~=3.1')).toBeTruthy(); // version 3.1 or later, but not version 4.0 or later.
-    expect(pep440.isValid('~=3.1.2')).toBeTruthy(); // version 3.1.2 or later, but not version 3.2.0 or later.
-    expect(pep440.isValid('~=3.1a1')).toBeTruthy(); // version 3.1a1 or later, but not version 4.0 or later.
-    expect(pep440.isValid('==3.1')).toBeTruthy(); // specifically version 3.1 (or 3.1.0), excludes all pre-releases, post releases, developmental releases and any 3.1.x maintenance releases.
-    expect(pep440.isValid('==3.1.*')).toBeTruthy(); // any version that starts with 3.1. Equivalent to the ~=3.1.0 compatible release clause.
-    expect(pep440.isValid('~=3.1.0, !=3.1.3')).toBeTruthy(); // version 3.1.0 or later, but not version 3.1.3 and not version 3.2.0 or later.
-    expect(pep440.isValid('<=2.0')).toBeTruthy();
-    expect(pep440.isValid('<2.0')).toBeTruthy();
+  test.each([
+    '==1.2.3',
+    '0.2',
+    '1.1.0',
+    '1.0a1',
+    '1.0b2',
+    '1.0rc1',
+    '1.0.dev4',
+    '1.0c1',
+    '2012.2',
+    '1.0.dev456',
+    '1.0a1',
+    '1.0a2.dev456',
+    '1.0a12.dev456',
+    '1.0a12',
+    '1.0b1.dev456',
+    '1.0b2',
+    '1.0b2.post345.dev456',
+    '1.0b2.post345',
+    '1.0rc1.dev456',
+    '1.0rc1',
+    '1.0',
+    '1.0+abc.5',
+    '1.0+abc.7',
+    '1.0+5',
+    '1.0.post456.dev34',
+    '1.0.post456',
+    '1.1.dev1',
+    '~=3.1', // version 3.1 or later, but not version 4.0 or later.
+    '~=3.1.2', // version 3.1.2 or later, but not version 3.2.0 or later.
+    '~=3.1a1', // version 3.1a1 or later, but not version 4.0 or later.
+    '==3.1', // specifically version 3.1 (or 3.1.0), excludes all pre-releases, post releases, developmental releases and any 3.1.x maintenance releases.
+    '==3.1.*', // any version that starts with 3.1. Equivalent to the ~=3.1.0 compatible release clause.
+    '~=3.1.0, !=3.1.3', // version 3.1.0 or later, but not version 3.1.3 and not version 3.2.0 or later.
+    '<=2.0',
+    '<2.0',
+  ])('%s', input => {
+    expect(semver.isValid(input)).toBeTruthy();
   });
   it('should support pep440 with RC', () => {
     expect(pep440.isValid('==1.2.3rc0')).toBeTruthy();

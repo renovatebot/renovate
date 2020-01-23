@@ -192,7 +192,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0b2",
@@ -202,7 +201,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0rc1",
@@ -212,7 +210,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0.dev4",
@@ -222,7 +219,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0c1",
@@ -232,7 +228,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "2012.2",
@@ -251,7 +246,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0a1",
@@ -261,7 +255,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0a2.dev456",
@@ -271,7 +264,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0a12.dev456",
@@ -281,7 +273,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0a12",
@@ -291,7 +282,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0b1.dev456",
@@ -301,7 +291,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0b2",
@@ -311,7 +300,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0b2.post345.dev456",
@@ -321,7 +309,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0b2.post345",
@@ -331,7 +318,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0rc1.dev456",
@@ -341,7 +327,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0rc1",
@@ -351,7 +336,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0",
@@ -370,7 +354,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0+abc.7",
@@ -380,7 +363,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0+5",
@@ -390,7 +372,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0.post456.dev34",
@@ -400,7 +381,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.0.post456",
@@ -410,7 +390,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "1.1.dev1",
@@ -420,7 +399,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "~=3.1",
@@ -448,7 +426,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==3.1",
@@ -476,7 +453,6 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "<=2.0",
