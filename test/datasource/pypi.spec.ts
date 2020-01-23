@@ -16,6 +16,9 @@ const htmlResponse = fs.readFileSync(
 const badResponse = fs.readFileSync(
   'test/datasource/pypi/_fixtures/versions-html-badfile.html'
 );
+const mixedHyphensResponse = fs.readFileSync(
+  'test/datasource/pypi/_fixtures/versions-html-mixed-hyphens.html'
+);
 
 describe('datasource/pypi', () => {
   describe('getPkgReleases', () => {
@@ -200,6 +203,22 @@ describe('datasource/pypi', () => {
           compatibility: { python: '2.7' },
           datasource: DATASOURCE_PYPI,
           depName: 'dj-database-url',
+        })
+      ).toMatchSnapshot();
+    });
+    it('process data from simple endpoint with hyphens replaced with underscores', async () => {
+      got.mockReturnValueOnce({
+        body: mixedHyphensResponse + '',
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          datasource: DATASOURCE_PYPI,
+          depName: 'image-collector',
         })
       ).toMatchSnapshot();
     });
