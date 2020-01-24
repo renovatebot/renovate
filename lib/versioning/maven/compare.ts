@@ -101,7 +101,8 @@ function isNull(token: Token): boolean {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   );
 }
 
@@ -192,7 +193,8 @@ export function qualifierType(token: Token): number {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   ) {
     return QualifierTypes.Release;
   }
