@@ -72,6 +72,42 @@ Array [
 ]
 `;
 
+exports[`bundler.updateArtifacts() Docker invalid compatibility options 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker invalid compatibility options 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
 exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 1`] = `null`;
 
 exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `

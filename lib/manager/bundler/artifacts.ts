@@ -101,7 +101,7 @@ export async function updateArtifacts(
     const cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
 
     const { bundler } = compatibility;
-    const bundlerVersion = bundler ? ` -v ${bundler}` : '';
+    const bundlerVersion = bundler && isValid(bundler) ? ` -v ${bundler}` : '';
     const preCommands = [
       'ruby --version',
       `gem install bundler${bundlerVersion} --no-document`,
