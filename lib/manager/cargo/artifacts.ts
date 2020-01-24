@@ -1,11 +1,9 @@
 import { join } from 'upath';
 import { outputFile, readFile } from 'fs-extra';
-import { exec } from '../../util/exec';
-import { getChildProcessEnv } from '../../util/exec/env';
+import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
-import { BinarySource } from '../../util/exec/common';
 
 export async function updateArtifacts({
   packageFileName,
@@ -29,33 +27,18 @@ export async function updateArtifacts({
   try {
     await outputFile(localPackageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    const cwd = config.localDir;
-    const env = getChildProcessEnv();
     for (let i = 0; i < updatedDeps.length; i += 1) {
       const dep = updatedDeps[i];
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
-      let cmd: string;
-      if (config.binarySource === BinarySource.Docker) {
-        logger.info('Running cargo via docker');
-        cmd = `docker run --rm `;
-        if (config.dockerUser) {
-          cmd += `--user=${config.dockerUser} `;
-        }
-        const volumes = [cwd];
-        cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-        cmd += `-w "${cwd}" `;
-        cmd += `renovate/rust cargo`;
-      } else {
-        logger.info('Running cargo via global cargo');
-        cmd = 'cargo';
-      }
-      cmd += ` update --manifest-path ${localPackageFileName} --package ${dep}`;
+      let cmd = `cargo update --manifest-path ${localPackageFileName} --package ${dep}`;
+      const execOptions: ExecOptions = {
+        docker: {
+          image: 'renovate/rust',
+        },
+      };
       try {
-        await exec(cmd, {
-          cwd,
-          env,
-        });
+        await exec(cmd, execOptions);
       } catch (err) /* istanbul ignore next */ {
         // Two different versions of one dependency can be present in the same
         // crate, and when that happens an attempt to update it with --package ${dep}
@@ -71,10 +54,7 @@ export async function updateArtifacts({
         const msgStart = 'error: There are multiple';
         if (err.code === 101 && err.stderr.startsWith(msgStart)) {
           cmd = cmd.replace(/ --package.*/, '');
-          await exec(cmd, {
-            cwd,
-            env,
-          });
+          await exec(cmd, execOptions);
         } else {
           throw err; // this is caught below
         }
