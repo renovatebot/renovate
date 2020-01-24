@@ -1,11 +1,13 @@
-import { join } from 'upath';
-import { outputFile, readFile } from 'fs-extra';
 import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
+import {
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
 
 export async function updateArtifacts({
   packageFileName,
@@ -18,16 +20,14 @@ export async function updateArtifacts({
     logger.debug('No updated cargo deps - returning null');
     return null;
   }
-  const lockFileName = 'Cargo.lock';
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const lockFileName = getSiblingFileName(packageFileName, 'Cargo.lock');
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No Cargo.lock found');
     return null;
   }
-  const localPackageFileName = join(config.localDir, packageFileName);
-  const localLockFileName = join(config.localDir, lockFileName);
   try {
-    await outputFile(localPackageFileName, newPackageFileContent);
+    await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
     const cwd = config.localDir;
     const env = getChildProcessEnv();
@@ -50,7 +50,7 @@ export async function updateArtifacts({
         logger.info('Running cargo via global cargo');
         cmd = 'cargo';
       }
-      cmd += ` update --manifest-path ${localPackageFileName} --package ${dep}`;
+      cmd += ` update --manifest-path ${packageFileName} --package ${dep}`;
       try {
         await exec(cmd, {
           cwd,
@@ -81,7 +81,7 @@ export async function updateArtifacts({
       }
     }
     logger.debug('Returning updated Cargo.lock');
-    const newCargoLockContent = await readFile(localLockFileName, 'utf8');
+    const newCargoLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newCargoLockContent) {
       logger.debug('Cargo.lock is unchanged');
       return null;
