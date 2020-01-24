@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as pipenv from '../../../lib/manager/pipenv/artifacts';
@@ -7,6 +8,8 @@ import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { BinarySource } from '../../../lib/util/exec/common';
+import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
+import { setUtilConfig } from '../../../lib/util';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -19,14 +22,25 @@ const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
-  localDir: '/tmp/github/some/repo',
-  cacheDir: '/tmp/renovate/cache',
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/renovate/cache'),
+  dockerUser: 'foobar',
 };
+
+const dockerConfig = { ...config, binarySource: BinarySource.Docker };
 
 describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    env.getChildProcessEnv.mockReturnValue({
+      ...envMock.basic,
+      LANG: 'en_US.UTF-8',
+      LC_ALL: 'en_US',
+    });
+
+    setUtilConfig(config);
+    resetPrefetchedImages();
   });
 
   it('returns if no Pipfile.lock found', async () => {
@@ -71,6 +85,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
+    setUtilConfig(dockerConfig);
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValue({
@@ -82,11 +97,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-          dockerUser: 'foobar',
-        },
+        config: dockerConfig,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
