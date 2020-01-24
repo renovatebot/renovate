@@ -1975,7 +1975,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['\\.csproj$'],
+      fileMatch: ['\\.(?:cs|fs|vb)proj$'],
     },
     mergeable: true,
     cli: false,
