@@ -16,12 +16,14 @@ import {
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 
-async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
+async function getRubyConstraint(
+  updateArtifact: UpdateArtifact
+): Promise<string> {
   const { packageFileName, config } = updateArtifact;
   const { compatibility = {} } = config;
+  logger.warn({ compatibility });
   const { ruby } = compatibility;
 
-  let tag = 'latest';
   let rubyConstraint: string;
   if (ruby) {
     logger.debug('Using rubyConstraint from config');
@@ -38,28 +40,35 @@ async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
         .trim();
     }
   }
-  if (rubyConstraint && isValid(rubyConstraint)) {
-    logger.debug({ rubyConstraint }, 'Found ruby compatibility');
-    const rubyReleases = await getPkgReleases({
-      lookupName: 'renovate/ruby',
-    });
-    if (rubyReleases && rubyReleases.releases) {
-      let versions = rubyReleases.releases.map(release => release.version);
-      versions = versions.filter(version => isVersion(version));
-      versions = versions.filter(version => matches(version, rubyConstraint));
-      versions = versions.sort(sortVersions);
-      if (versions.length) {
-        tag = versions.pop();
-      }
-    }
-    if (tag === 'latest') {
-      logger.warn(
-        { rubyConstraint },
-        'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
-      );
+  return rubyConstraint;
+}
+
+async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
+  const constraint = await getRubyConstraint(updateArtifact);
+  if (!constraint) return 'latest';
+  if (!isValid(constraint)) {
+    logger.warn({ constraint }, 'Invalid constraint');
+    return 'latest';
+  }
+  logger.debug({ constraint }, 'Found ruby compatibility');
+  const rubyReleases = await getPkgReleases({
+    lookupName: 'renovate/ruby',
+  });
+  if (rubyReleases && rubyReleases.releases) {
+    let versions = rubyReleases.releases.map(release => release.version);
+    versions = versions.filter(
+      version => isVersion(version) && matches(version, constraint)
+    );
+    versions = versions.sort(sortVersions);
+    if (versions.length) {
+      return versions.pop();
     }
   }
-  return tag;
+  logger.warn(
+    { constraint },
+    'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
+  );
+  return 'latest';
 }
 
 export async function updateArtifacts(
