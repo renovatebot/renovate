@@ -7,6 +7,10 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+## allowedPostUpgradeTasks
+
+A list of regular expressions that determine which `postUpgradeTasks` are allowed to be executed. If this list is empty then no tasks will be executed.
+
 ## autodiscover
 
 Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to. To filter this list, use `autodiscoverFilter`.

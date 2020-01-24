@@ -1080,6 +1080,32 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
 - `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
+## postUpgradeFiles
+
+A list of [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern matchers that determine which files will be added to the final commit after `postUpgradeTasks` have been run.
+
+e.g.
+
+```json
+{
+  "postUpgradeFiles": ["yarn.lock", "*.js"]
+}
+```
+
+## postUpgradeTasks
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit it made. This is useful for running custom scripts or plugins. This is only available on Renovate instances that have a `trustLevel` of 'high'.
+
+Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed. If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "postUpgradeTasks": ["tslint --fix"]
+}
+```
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.

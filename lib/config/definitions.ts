@@ -89,6 +89,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    stage: 'global',
   },
   {
     name: 'postUpgradeTasks',
