@@ -3,7 +3,7 @@ import {
   VolumesPair,
   DockerOptions,
   ExecConfig,
-  DockerExtraCommands,
+  Opt,
   rawExec,
 } from '../common';
 import { logger } from '../../../logger';
@@ -57,7 +57,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   });
 }
 
-function prepareCommands(commands: DockerExtraCommands = []): string[] {
+function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter(command => command && typeof command === 'string');
 }
 
@@ -66,15 +66,10 @@ export async function generateDockerCommand(
   options: DockerOptions,
   config: ExecConfig
 ): Promise<string> {
-  const {
-    image,
-    tag,
-    envVars,
-    cwd,
-    volumes = [],
-    preCommands,
-    postCommands,
-  } = options;
+  const { image, tag, envVars, cwd } = options;
+  const volumes = options.volumes || [];
+  const preCommands = options.preCommands || [];
+  const postCommands = options.postCommands || [];
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
