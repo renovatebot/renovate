@@ -1,12 +1,28 @@
 import { ensureDir, outputFile, readFile } from 'fs-extra';
 import { join, dirname } from 'upath';
-import { exec } from '../../util/exec';
+import { exec, ExecOptions } from '../../util/exec';
 import { find } from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/exec/env';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
+
+function getPreCommands(): string[] | null {
+  const credentials = find({
+    hostType: 'github',
+    url: 'https://api.github.com/',
+  });
+  let preCommands = null;
+  if (credentials && credentials.token) {
+    const token = global.appMode
+      ? `x-access-token:${credentials.token}`
+      : credentials.token;
+    preCommands = [
+      `git config --global url.\\\\"https://${token}@github.com/\\\\".insteadOf \\\\"https://github.com/\\\\"`,
+    ];
+  }
+  return preCommands;
+}
 
 export async function updateArtifacts({
   packageFileName: goModFileName,
@@ -15,11 +31,11 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
-  const customEnv = ['GOPATH', 'GOPROXY', 'GONOSUMDB'];
-  const env = getChildProcessEnv(customEnv);
-  env.GOPATH = env.GOPATH || join(config.cacheDir, './others/go');
-  await ensureDir(env.GOPATH);
-  logger.debug('Using GOPATH: ' + env.GOPATH);
+
+  const goPath = process.env.GOPATH || join(config.cacheDir, './others/go');
+  await ensureDir(goPath);
+  logger.debug(`Using GOPATH: ${goPath}`);
+
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await platform.getFile(sumFileName);
   if (!existingGoSumContent) {
@@ -38,66 +54,31 @@ export async function updateArtifacts({
     }
     await outputFile(localGoModFileName, massagedGoMod);
     const localGoSumFileName = join(config.localDir, sumFileName);
-    let cmd: string;
-    if (config.binarySource === BinarySource.Docker) {
-      logger.info('Running go via docker');
-      cmd = `docker run --rm `;
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [config.localDir, env.GOPATH];
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      const envVars = customEnv;
-      cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += '-e CGO_ENABLED=0 ';
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/go `;
-      const credentials = find({
-        hostType: 'github',
-        url: 'https://api.github.com/',
-      });
-      if (credentials && credentials.token) {
-        logger.debug('Setting github.com credentials');
-        cmd += `bash -c "git config --global url.\\"https://${
-          global.appMode
-            ? `x-access-token:${credentials.token}`
-            : credentials.token
-        }@github.com/\\".insteadOf \\"https://github.com/\\" && go`;
-      } else {
-        cmd += 'go';
-      }
-    } else if (
-      config.binarySource === BinarySource.Auto ||
-      config.binarySource === BinarySource.Global
-    ) {
-      logger.info('Running go via global command');
-      cmd = 'go';
-    } else {
-      logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'go';
-    }
-    let args = 'get -d ./...';
-    if (cmd.includes('.insteadOf')) {
-      args += '"';
-    }
-    logger.debug({ cmd, args }, 'go get command');
-    await exec(`${cmd} ${args}`, {
+    const cmd = 'go';
+    const execOptions: ExecOptions = {
       cwd,
-      env,
-    });
+      extraEnv: {
+        GOPATH: goPath,
+        GOPROXY: process.env.GOPROXY,
+        GONOSUMDB: process.env.GONOSUMDB,
+        CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
+      },
+      docker: {
+        image: 'renovate/go',
+        volumes: [goPath],
+        preCommands: getPreCommands(),
+      },
+    };
+    let args = 'get -d ./...';
+    logger.debug({ cmd, args }, 'go get command');
+    await exec(`${cmd} ${args}`, execOptions);
     if (
       config.postUpdateOptions &&
       config.postUpdateOptions.includes('gomodTidy')
     ) {
       args = 'mod tidy';
-      if (cmd.includes('.insteadOf')) {
-        args += '"';
-      }
       logger.debug({ cmd, args }, 'go mod tidy command');
-      await exec(`${cmd} ${args}`, {
-        cwd,
-        env,
-      });
+      await exec(`${cmd} ${args}`, execOptions);
     }
     const res = [];
     let status = await platform.getRepoStatus();
@@ -116,14 +97,8 @@ export async function updateArtifacts({
     // istanbul ignore if
     if (await platform.getFile(vendorModulesFileName)) {
       args = 'mod vendor';
-      if (cmd.includes('.insteadOf')) {
-        args += '"';
-      }
       logger.debug({ cmd, args }, 'go mod vendor command');
-      await exec(`${cmd} ${args}`, {
-        cwd,
-        env,
-      });
+      await exec(`${cmd} ${args}`, execOptions);
       if (
         config.postUpdateOptions &&
         config.postUpdateOptions.includes('gomodTidy')
@@ -133,10 +108,7 @@ export async function updateArtifacts({
           args += '"';
         }
         logger.debug({ cmd, args }, 'go mod tidy command');
-        await exec(`${cmd} ${args}`, {
-          cwd,
-          env,
-        });
+        await exec(`${cmd} ${args}`, execOptions);
       }
       status = await platform.getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {

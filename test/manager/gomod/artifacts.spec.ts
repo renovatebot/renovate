@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as gomod from '../../../lib/manager/gomod/artifacts';
@@ -6,7 +7,9 @@ import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import { setExecConfig } from '../../../lib/util/exec';
 import { BinarySource } from '../../../lib/util/exec/common';
+import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -33,8 +36,16 @@ replace github.com/pkg/errors => ../errors
 `;
 
 const config = {
-  localDir: '/tmp/github/some/repo',
-  cacheDir: '/tmp/renovate/cache',
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/renovate/cache'),
+  dockerUser: 'foobar',
+};
+
+const goEnv = {
+  GONOSUMDB: '1',
+  GOPROXY: 'proxy.example.com',
+  CGO_ENABLED: '1',
 };
 
 describe('.updateArtifacts()', () => {
@@ -42,7 +53,9 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
 
-    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
+    setExecConfig(config);
+    resetPrefetchedImages();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -90,6 +103,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
+    setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -104,7 +118,6 @@ describe('.updateArtifacts()', () => {
         config: {
           ...config,
           binarySource: BinarySource.Docker,
-          dockerUser: 'foobar',
         },
       })
     ).not.toBeNull();
@@ -131,6 +144,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
+    setExecConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -154,6 +168,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials and appMode enabled', async () => {
+    setExecConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
