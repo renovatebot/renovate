@@ -370,7 +370,7 @@ describe('api/npm', () => {
     process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
   });
-  it('should use host rules if provided', async () => {
+  it('should use host rules by hostName if provided', async () => {
     hostRules.add({
       hostType: 'npm',
       hostName: 'npm.mycustomregistry.com',
@@ -380,6 +380,23 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     const npmrc = 'registry=https://npm.mycustomregistry.com/';
+    const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
+    expect(res).toMatchSnapshot();
+  });
+  it('should use host rules by baseUrl if provided', async () => {
+    hostRules.add({
+      hostType: 'npm',
+      baseUrl:
+        'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
+      token: 'abcde',
+    });
+    nock(
+      'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry'
+    )
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const npmrc =
+      'registry=https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/';
     const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });

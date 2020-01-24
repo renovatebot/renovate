@@ -299,6 +299,60 @@ interface UpdatedArtifcats {
   contents: string;
 }
 
+// istanbul ignore next
+async function getNpmrcContent(dir: string): Promise<string | null> {
+  const npmrcFilePath = upath.join(dir, '.npmrc');
+  let originalNpmrcContent = null;
+  try {
+    originalNpmrcContent = await fs.readFile(npmrcFilePath, 'utf8');
+    logger.debug('npmrc file found in repository');
+  } catch {
+    logger.debug('No npmrc file found in repository');
+    originalNpmrcContent = null;
+  }
+
+  return originalNpmrcContent;
+}
+
+// istanbul ignore next
+async function updateNpmrcContent(
+  dir: string,
+  originalContent: string,
+  additionalLines: string[]
+): Promise<void> {
+  const npmrcFilePath = upath.join(dir, '.npmrc');
+  const newNpmrc = originalContent
+    ? [originalContent, ...additionalLines]
+    : additionalLines;
+  try {
+    const newContent = newNpmrc.join('\n');
+    await fs.writeFile(npmrcFilePath, newContent);
+  } catch {
+    logger.warn('Unable to write custom npmrc file');
+  }
+}
+
+// istanbul ignore next
+async function resetNpmrcContent(
+  dir: string,
+  originalContent: string
+): Promise<void> {
+  const npmrcFilePath = upath.join(dir, '.npmrc');
+  if (originalContent) {
+    try {
+      await fs.writeFile(npmrcFilePath, originalContent);
+    } catch {
+      logger.warn('Unable to reset npmrc to original contents');
+    }
+  } else {
+    try {
+      await fs.unlink(npmrcFilePath);
+    } catch {
+      logger.warn('Unable to delete custom npmrc');
+    }
+  }
+}
+
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
   updatedArtifacts: UpdatedArtifcats[];
@@ -332,36 +386,25 @@ export async function getAdditionalFiles(
   await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 
-  // Store the original npmrc so we can reset it later
-  const npmrcFilePath = upath.join(config.localDir, '.npmrc');
-  let originalNpmrcContent = null;
-  try {
-    originalNpmrcContent = await fs.readFile(npmrcFilePath, 'utf8');
-    logger.debug('npmrc file found in repository');
-  } catch {
-    logger.debug('No npmrc file found in repository');
-    originalNpmrcContent = null;
-  }
-
-  // Update the npmrc with the custom host roles
-  const newNpmrc = originalNpmrcContent ? [originalNpmrcContent] : [];
+  // Determine the additional npmrc content to add based on host rules
+  const additionalNpmrcContent = [];
   const npmHostRules = hostRules.findAll({
     hostType: 'npm',
   });
   for (const hostRule of npmHostRules) {
     if (hostRule.token) {
-      newNpmrc.push(
-        `${hostRule.baseUrl}:_authToken=${hostRule.token}`
-          .replace('https://', '//')
-          .replace('http://', '//')
-      );
+      if (hostRule.baseUrl) {
+        additionalNpmrcContent.push(
+          `${hostRule.baseUrl}:_authToken=${hostRule.token}`
+            .replace('https://', '//')
+            .replace('http://', '//')
+        );
+      } else if (hostRule.hostName) {
+        additionalNpmrcContent.push(
+          `//${hostRule.hostName}/:_authToken=${hostRule.token}`
+        );
+      }
     }
-  }
-  try {
-    const newContent = newNpmrc.join('\n');
-    await fs.writeFile(npmrcFilePath, newContent);
-  } catch {
-    logger.warn('Unable to write custom npmrc file');
   }
 
   const env = getChildProcessEnv([
@@ -392,13 +435,20 @@ export async function getAdditionalFiles(
   }
   for (const lockFile of dirs.npmLockDirs) {
     const lockFileDir = path.dirname(lockFile);
+    const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+    const npmrcContent = await getNpmrcContent(fullLockFileDir);
+    await updateNpmrcContent(
+      fullLockFileDir,
+      npmrcContent,
+      additionalNpmrcContent
+    );
     const fileName = path.basename(lockFile);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
       upgrade => upgrade.npmLock === lockFile
     );
     const res = await npm.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
+      fullLockFileDir,
       env,
       fileName,
       config,
@@ -440,10 +490,18 @@ export async function getAdditionalFiles(
         logger.debug(`${lockFile} hasn't changed`);
       }
     }
+    await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
   for (const lockFile of dirs.yarnLockDirs) {
     const lockFileDir = path.dirname(lockFile);
+    const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+    const npmrcContent = await getNpmrcContent(fullLockFileDir);
+    await updateNpmrcContent(
+      fullLockFileDir,
+      npmrcContent,
+      additionalNpmrcContent
+    );
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
     const upgrades = config.upgrades.filter(
@@ -532,10 +590,18 @@ export async function getAdditionalFiles(
         logger.debug("yarn.lock hasn't changed");
       }
     }
+    await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
   for (const lockFile of dirs.pnpmShrinkwrapDirs) {
     const lockFileDir = path.dirname(lockFile);
+    const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+    const npmrcContent = await getNpmrcContent(fullLockFileDir);
+    await updateNpmrcContent(
+      fullLockFileDir,
+      npmrcContent,
+      additionalNpmrcContent
+    );
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const res = await pnpm.generateLockFile(
       upath.join(config.localDir, lockFileDir),
@@ -578,6 +644,7 @@ export async function getAdditionalFiles(
         logger.debug("pnpm-lock.yaml hasn't changed");
       }
     }
+    await resetNpmrcContent(fullLockFileDir, npmrcContent);
   }
 
   for (const lernaDir of dirs.lernaDirs) {
@@ -597,9 +664,16 @@ export async function getAdditionalFiles(
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
+    const fullLearnaFileDir = upath.join(config.localDir, lernaDir);
+    const npmrcContent = await getNpmrcContent(fullLearnaFileDir);
+    await updateNpmrcContent(
+      fullLearnaFileDir,
+      npmrcContent,
+      additionalNpmrcContent
+    );
     const res = await lerna.generateLockFiles(
       lernaPackageFile.lernaClient,
-      upath.join(config.localDir, lernaDir),
+      fullLearnaFileDir,
       env,
       skipInstalls,
       config.binarySource
@@ -695,21 +769,7 @@ export async function getAdditionalFiles(
         }
       }
     }
-  }
-
-  // Reset the npmrc file back to it's original content
-  if (originalNpmrcContent) {
-    try {
-      await fs.writeFile(npmrcFilePath, originalNpmrcContent);
-    } catch {
-      logger.warn('Unable to reset npmrc to original contents');
-    }
-  } else {
-    try {
-      await fs.unlink(npmrcFilePath);
-    } catch {
-      logger.warn('Unable to delete custom npmrc');
-    }
+    await resetNpmrcContent(fullLearnaFileDir, npmrcContent);
   }
 
   return { artifactErrors, updatedArtifacts };
