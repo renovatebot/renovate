@@ -49,9 +49,9 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
+    fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('Current Cargo.lock' as any);
+    fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -66,7 +66,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Cargo.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -81,7 +81,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Cargo.lock with docker', async () => {
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -98,7 +98,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
+    fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
