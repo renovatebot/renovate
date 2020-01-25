@@ -4,6 +4,7 @@ import { api as npm } from '../npm';
 import { api as pep440 } from '../pep440';
 import { NewValueConfig, VersioningApi } from '../common';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 
 function notEmpty(s: string): boolean {
   return s !== '';
@@ -100,13 +101,10 @@ function isVersion(input: string): string | boolean {
 
 function isSingleVersion(constraint: string): string | boolean {
   logger.trace(`poetry.isSingleVersion('${constraint}') === ???`);
-  const c = constraint.trim();
-  let result = false;
-  if (pep440.isVersion(c)) {
-    result = true;
-  } else if (c.startsWith('=') && npm.isVersion(c.substring(1).trim())) {
-    result = true;
-  }
+  const input = constraint.replace(regEx('^s*==?s*'), '').trim();
+  const result = pep440.isValid(input)
+    ? pep440.isSingleVersion(input)
+    : npm.isSingleVersion(poetry2npm(input));
   logger.trace(`poetry.isSingleVersion('${constraint}') === ${result}`);
   return result;
 }
