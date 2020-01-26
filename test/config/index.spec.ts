@@ -1,4 +1,4 @@
-import argv from './config/_fixtures/argv';
+import { getArgv } from './config/_fixtures/argv';
 import { getConfig } from '../../lib/config/defaults';
 import * as _npm from '../../lib/datasource/npm';
 import presetDefaults from './npm/_fixtures/renovate-config-default.json';
@@ -27,7 +27,7 @@ describe('config/index', () => {
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index');
-      defaultArgv = argv();
+      defaultArgv = getArgv();
       jest.mock('delay');
       require('delay').mockImplementation(() => Promise.resolve());
     });

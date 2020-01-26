@@ -1,6 +1,4 @@
-const { URL } = require('url');
-
-function generateRepo(endpoint, projectKey, repositorySlug) {
+function generateRepo(endpoint: string, projectKey: string, repositorySlug: string) {
   let projectKeyLower = projectKey.toLowerCase();
   return {
     slug: repositorySlug,
@@ -578,7 +576,7 @@ function generateServerResponses(endpoint) {
   };
 }
 
-module.exports = {
+export const responses = {
   'endpoint with no path': generateServerResponses(
     'https://stash.renovatebot.com'
   ),
