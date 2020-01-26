@@ -8,7 +8,6 @@ import {
 } from '../../../lib/constants/error-messages';
 import {
   PR_STATUS_CLOSED,
-  PR_STATUS_MERGED,
   PR_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
 import {
@@ -594,7 +593,7 @@ describe('platform/bitbucket-server', () => {
             body: {
               version: 0,
               number: 5,
-              state: PR_STATUS_MERGED.toUpperCase(),
+              state: 'MERGED',
               reviewers: [],
               fromRef: {},
               toRef: {},

@@ -7,7 +7,6 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../lib/constants/error-messages';
 import {
-  PR_STATUS_MERGED,
   PR_STATUS_NOT_OPEN,
   PR_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
@@ -799,7 +798,7 @@ describe('platform/gitlab', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: PR_STATUS_MERGED,
+            state: 'merged',
           },
         ],
       } as any);
@@ -911,7 +910,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: PR_STATUS_MERGED,
+          state: 'merged',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -933,7 +932,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: PR_STATUS_OPEN,
+          state: 'open',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -952,7 +951,7 @@ describe('platform/gitlab', () => {
               id: 1,
               iid: 12345,
               description: 'a merge request',
-              state: PR_STATUS_OPEN,
+              state: 'open',
               merge_status: 'cannot_be_merged',
               diverged_commits_count: 2,
               source_branch: 'some-branch',
@@ -1052,7 +1051,7 @@ These updates have all been created already. Click a checkbox below to force a r
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: PR_STATUS_MERGED,
+          state: 'merged',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',

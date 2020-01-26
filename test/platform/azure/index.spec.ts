@@ -7,11 +7,6 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
-import {
-  PR_STATUS_CLOSED,
-  PR_STATUS_NOT_OPEN,
-  PR_STATUS_OPEN,
-} from '../../../lib/constants/pull-requests';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -217,7 +212,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PR_STATUS_OPEN,
+                  state: 'open',
                 },
               ]),
           } as any)
@@ -231,13 +226,13 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PR_STATUS_OPEN,
+            state: 'open',
           } as any)
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATUS_OPEN,
+        state: 'open',
       });
       expect(res).toMatchSnapshot();
     });
@@ -253,7 +248,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PR_STATUS_CLOSED,
+                  state: 'closed',
                 },
               ]),
           } as any)
@@ -267,13 +262,13 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PR_STATUS_CLOSED,
+            state: 'closed',
           } as any)
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATUS_NOT_OPEN,
+        state: '!open',
       });
       expect(res).toMatchSnapshot();
     });
@@ -289,7 +284,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PR_STATUS_CLOSED,
+                  state: 'closed',
                 },
               ]),
           } as any)
@@ -303,13 +298,13 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PR_STATUS_CLOSED,
+            state: 'closed',
           } as any)
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATUS_CLOSED,
+        state: 'closed',
       });
       expect(res).toMatchSnapshot();
     });
@@ -325,7 +320,7 @@ describe('platform/azure', () => {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
                   title: 'branch a pr',
-                  state: PR_STATUS_CLOSED,
+                  state: 'closed',
                 },
               ]),
           } as any)
@@ -339,7 +334,7 @@ describe('platform/azure', () => {
             number: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            state: PR_STATUS_CLOSED,
+            state: 'closed',
           } as any)
       );
       const res = await azure.findPr({

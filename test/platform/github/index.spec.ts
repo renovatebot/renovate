@@ -6,7 +6,6 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../lib/constants/error-messages';
 import {
-  PR_STATUS_CLOSED,
   PR_STATUS_NOT_OPEN,
   PR_STATUS_OPEN,
 } from '../../../lib/constants/pull-requests';
@@ -564,7 +563,7 @@ describe('platform/github', () => {
               {
                 number: 91,
                 head: { ref: 'somebranch' },
-                state: PR_STATUS_OPEN,
+                state: 'open',
               },
             ],
           } as any)
@@ -581,7 +580,7 @@ describe('platform/github', () => {
                 sha: '1234',
               },
               head: { ref: 'somebranch' },
-              state: PR_STATUS_OPEN,
+              state: 'open',
             },
           } as any)
       );
@@ -1427,7 +1426,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: PR_STATUS_OPEN,
+            state: 'open',
           },
         ],
       } as any);
@@ -1443,7 +1442,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: PR_STATUS_CLOSED,
+            state: 'closed',
           },
         ],
       } as any);
@@ -1460,7 +1459,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: PR_STATUS_OPEN,
+            state: 'open',
           },
         ],
       } as any);
@@ -1613,21 +1612,21 @@ describe('platform/github', () => {
     [
       {
         number: 1,
-        state: PR_STATUS_CLOSED,
+        state: 'closed',
         base: { sha: '1234' },
         mergeable: true,
         merged_at: 'sometime',
       },
       {
         number: 1,
-        state: PR_STATUS_OPEN,
+        state: 'open',
         mergeable_state: 'dirty',
         base: { sha: '1234' },
         commits: 1,
       },
       {
         number: 1,
-        state: PR_STATUS_OPEN,
+        state: 'open',
         base: { sha: '5678' },
         commits: 1,
         mergeable: true,
@@ -1663,7 +1662,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: PR_STATUS_OPEN,
+              state: 'open',
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 2,
@@ -1703,7 +1702,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: PR_STATUS_OPEN,
+              state: 'open',
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 2,
@@ -1751,7 +1750,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: PR_STATUS_OPEN,
+              state: 'open',
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 2,
@@ -1807,7 +1806,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: PR_STATUS_OPEN,
+              state: 'open',
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 1,
@@ -1856,7 +1855,7 @@ describe('platform/github', () => {
           ({
             body: {
               number: 1,
-              state: PR_STATUS_OPEN,
+              state: 'open',
               mergeable_state: 'dirty',
               base: { sha: '1234' },
               commits: 1,
