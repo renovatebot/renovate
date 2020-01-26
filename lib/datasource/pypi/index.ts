@@ -86,10 +86,12 @@ function extractVersionFromLinkText(
   text: string,
   depName: string
 ): string | null {
-  const prefix = `${depName}-`;
-  const suffix = '.tar.gz';
-  if (text.startsWith(prefix) && text.endsWith(suffix)) {
-    return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+  const srcPrefixes = [`${depName}-`, `${depName.replace(/-/g, '_')}-`];
+  for (const prefix of srcPrefixes) {
+    const suffix = '.tar.gz';
+    if (text.startsWith(prefix) && text.endsWith(suffix)) {
+      return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+    }
   }
 
   // pep-0427 wheel packages
