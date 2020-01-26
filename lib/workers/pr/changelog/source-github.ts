@@ -68,6 +68,9 @@ export async function getChangeLogJSON({
   });
   if (!config.token) {
     logger.debug('Repository URL does not match any known hosts');
+    logger.warn(
+      'No Github token has been configured. Skipping release gathering!'
+    );
     return null;
   }
   const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
