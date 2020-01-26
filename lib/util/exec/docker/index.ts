@@ -3,7 +3,24 @@ import {
   VolumesPair,
   DockerOptions,
   ExecConfig,
+  Opt,
+  rawExec,
 } from '../common';
+import { logger } from '../../../logger';
+
+const prefetchedImages = new Set<string>();
+
+async function prefetchDockerImage(taggedImage: string): Promise<void> {
+  if (!prefetchedImages.has(taggedImage)) {
+    logger.debug(`Fetching Docker image: ${taggedImage}`);
+    prefetchedImages.add(taggedImage);
+    await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
+  }
+}
+
+export function resetPrefetchedImages(): void {
+  prefetchedImages.clear();
+}
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   if (typeof x === 'string') return [x, x];
@@ -40,12 +57,19 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   });
 }
 
-export function dockerCmd(
-  cmd: string,
+function prepareCommands(commands: Opt<string>[]): string[] {
+  return commands.filter(command => command && typeof command === 'string');
+}
+
+export async function generateDockerCommand(
+  commands: string[],
   options: DockerOptions,
   config: ExecConfig
-): string {
-  const { image, tag, envVars, cwd, volumes = [] } = options;
+): Promise<string> {
+  const { image, tag, envVars, cwd } = options;
+  const volumes = options.volumes || [];
+  const preCommands = options.preCommands || [];
+  const postCommands = options.postCommands || [];
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
@@ -64,9 +88,15 @@ export function dockerCmd(
   if (cwd) result.push(`-w "${cwd}"`);
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
+  await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  result.push(cmd);
+  const bashCommand = [
+    ...prepareCommands(preCommands),
+    ...commands,
+    ...prepareCommands(postCommands),
+  ].join(' && ');
+  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`);
 
   return result.join(' ');
 }

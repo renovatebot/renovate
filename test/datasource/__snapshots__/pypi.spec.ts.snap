@@ -80,6 +80,16 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getPkgReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "0.0.5",
+    },
+  ],
+}
+`;
+
 exports[`datasource/pypi getPkgReleases processes real data 1`] = `
 Object {
   "releases": Array [
