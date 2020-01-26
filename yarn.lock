@@ -1467,6 +1467,11 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+"@types/yawn-yaml@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@types/yawn-yaml/-/yawn-yaml-1.4.0.tgz#15e1c5722c9253d6da6a927d85ba34b2f34a3a02"
+  integrity sha512-9mfVO9Po29PF6lH24v3+5BCBXhnH+o3r9I6xRzU+AECT1cdlR/mNqk6NK2kTFGyo0vt8o4isjpq3V5iG3VmvFQ==
+
 "@typescript-eslint/eslint-plugin@2.17.0":
   version "2.17.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-2.17.0.tgz#880435a9f9bdd50b45fa286ba63fed723d73c837"
