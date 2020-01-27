@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { GotApi, GotResponse } from '../../../lib/platform/common';
+import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
@@ -208,7 +208,7 @@ describe('platform/github', () => {
     } as any);
   }
 
-  function forkInitRepo(args: any) {
+  function forkInitRepo(args: any, repo?: string): Promise<RepoConfig> {
     // repo info
     api.get.mockImplementationOnce(
       () =>
@@ -239,20 +239,25 @@ describe('platform/github', () => {
     api.get.mockImplementationOnce(
       () =>
         ({
-          body: [
-            {
-              full_name: 'forked_repo',
-            },
-          ],
+          body: repo
+            ? [
+                {
+                  full_name: repo,
+                },
+              ]
+            : [],
         } as any)
     );
-    // fork
-    api.post.mockImplementationOnce(
-      () =>
-        ({
-          body: { full_name: 'forked_repo' },
-        } as any)
-    );
+    // api.getBranchCommit
+    api.post.mockImplementationOnce(() => {
+      return {
+        body: repo
+          ? {
+              full_name: repo,
+            }
+          : {},
+      } as any;
+    });
     return github.initRepo(args);
   }
 
@@ -309,49 +314,6 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should forks when forkMode', async () => {
-      function forkInitRepo(args: any) {
-        // repo info
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: {
-                owner: {
-                  login: 'theowner',
-                },
-                default_branch: 'master',
-                allow_rebase_merge: true,
-                allow_squash_merge: true,
-                allow_merge_commit: true,
-              },
-            } as any)
-        );
-        // api.getBranchCommit
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: {
-                object: {
-                  sha: '1234',
-                },
-              },
-            } as any)
-        );
-        // api.getRepos
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: [],
-            } as any)
-        );
-        // api.getBranchCommit
-        api.post.mockImplementationOnce(
-          () =>
-            ({
-              body: {},
-            } as any)
-        );
-        return github.initRepo(args);
-      }
       const config = await forkInitRepo({
         repository: 'some/repo',
         forkMode: true,
@@ -359,10 +321,13 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should update fork when forkMode', async () => {
-      const config = await forkInitRepo({
-        repository: 'some/repo',
-        forkMode: true,
-      });
+      const config = await forkInitRepo(
+        {
+          repository: 'some/repo',
+          forkMode: true,
+        },
+        'forked_repo'
+      );
       expect(config).toMatchSnapshot();
     });
     it('should squash', async () => {
@@ -595,49 +560,57 @@ describe('platform/github', () => {
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
-  });
-  it('should return the PR object in fork mode', async () => {
-    await forkInitRepo({
-      repository: 'some/repo',
-      forkMode: true,
-    });
-    api.get.mockImplementationOnce(
-      () =>
-        ({
-          body: [
-            {
+    it('should return the PR object in fork mode', async () => {
+      await forkInitRepo(
+        {
+          repository: 'some/repo',
+          forkMode: true,
+        },
+        'forked/repo'
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [
+              {
+                number: 89,
+                head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+                state: 'open',
+              },
+              {
+                number: 90,
+                head: { ref: 'somebranch', repo: { full_name: 'forked/repo' } },
+                state: 'open',
+              },
+              {
+                number: 91,
+                head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+                state: 'open',
+              },
+            ],
+          } as any)
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
               number: 90,
-              head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+              additions: 1,
+              deletions: 1,
+              commits: 1,
+              base: {
+                sha: '1234',
+              },
+              head: { ref: 'somebranch', repo: { full_name: 'forked/repo' } },
               state: 'open',
             },
-            {
-              number: 91,
-              head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-              state: 'open',
-            },
-          ],
-        } as any)
-    );
-    api.get.mockImplementationOnce(
-      () =>
-        ({
-          body: {
-            number: 90,
-            additions: 1,
-            deletions: 1,
-            commits: 1,
-            base: {
-              sha: '1234',
-            },
-            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: 'open',
-          },
-        } as any)
-    );
-    api.get.mockResolvedValue({ body: { object: { sha: '12345' } } } as any);
-    const pr = await github.getBranchPr('somebranch');
-    expect(api.get.mock.calls).toMatchSnapshot();
-    expect(pr).toMatchSnapshot();
+          } as any)
+      );
+      api.get.mockResolvedValue({ body: { object: { sha: '12345' } } } as any);
+      const pr = await github.getBranchPr('somebranch');
+      expect(api.get.mock.calls).toMatchSnapshot();
+      expect(pr).toMatchSnapshot();
+    });
   });
   describe('getBranchStatus()', () => {
     it('returns success if requiredStatusChecks null', async () => {

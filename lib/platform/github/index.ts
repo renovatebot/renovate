@@ -1016,7 +1016,7 @@ export async function findPr({
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state) &&
-      (config.parentRepo ? true : config.repository === p.sourceRepo)
+      config.repository === p.sourceRepo
   );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
