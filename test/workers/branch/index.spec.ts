@@ -1,3 +1,4 @@
+import * as _fs from 'fs-extra';
 import * as branchWorker from '../../../lib/workers/branch';
 import * as _schedule from '../../../lib/workers/branch/schedule';
 import * as _checkExisting from '../../../lib/workers/branch/check-existing';
@@ -8,6 +9,7 @@ import * as _statusChecks from '../../../lib/workers/branch/status-checks';
 import * as _automerge from '../../../lib/workers/branch/automerge';
 import * as _prWorker from '../../../lib/workers/pr';
 import * as _getUpdated from '../../../lib/workers/branch/get-updated';
+import * as _exec from '../../../lib/util/exec';
 import { defaultConfig, platform, mocked } from '../../util';
 import { BranchConfig } from '../../../lib/workers/common';
 import {
@@ -15,6 +17,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../lib/constants/error-messages';
 import { BRANCH_STATUS_PENDING } from '../../../lib/constants/branch-constants';
+import { StatusResult } from '../../../lib/platform/git/storage';
 
 jest.mock('../../../lib/workers/branch/get-updated');
 jest.mock('../../../lib/workers/branch/schedule');
@@ -25,6 +28,8 @@ jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/pr');
+jest.mock('../../../lib/util/exec');
+jest.mock('fs-extra');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
@@ -35,6 +40,8 @@ const statusChecks = mocked(_statusChecks);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
+const exec = mocked(_exec);
+const fs = mocked(_fs);
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
@@ -523,6 +530,46 @@ describe('workers/branch', () => {
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
       ).toEqual('done');
+    });
+
+    it('executes post-upgrade tasks if trust is high', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as never);
+      platform.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: 'open',
+        body: `- [x] <!-- rebase-check -->`,
+        isModified: true,
+      } as never);
+      platform.getRepoStatus.mockResolvedValueOnce({
+        modified: ['/localDir/modified_file'],
+        not_added: [],
+        deleted: ['/localDir/deleted_file'],
+      } as StatusResult);
+      global.trustLevel = 'high';
+      global.allowedPostUpgradeTasks = ['^echo 1$'];
+
+      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+
+      const result = await branchWorker.processBranch({
+        ...config,
+        postUpgradeTasks: ['echo 1', 'disallowed task'],
+        postUpgradeFiles: ['modified_file', 'deleted_file'],
+        localDir: '/localDir',
+      });
+
+      expect(result).toEqual('done');
+      expect(exec.exec).toHaveBeenCalledWith('echo 1', { cwd: '/localDir' });
     });
   });
 });
