@@ -11,6 +11,14 @@ The below configuration options are applicable only if you are running your own 
 
 A list of regular expressions that determine which `postUpgradeTasks` are allowed to be executed. If this list is empty then no tasks will be executed.
 
+e.g.
+
+```json
+{
+  "allowedPostUpgradeTasks": ["^tslint --fix$", "^tslint --[a-z]+$"]
+}
+```
+
 ## autodiscover
 
 Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to. To filter this list, use `autodiscoverFilter`.
