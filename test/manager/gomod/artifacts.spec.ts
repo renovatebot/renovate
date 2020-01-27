@@ -7,7 +7,7 @@ import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
-import { setExecConfig } from '../../../lib/util/exec';
+import { setUtilConfig } from '../../../lib/util';
 import { BinarySource } from '../../../lib/util/exec/common';
 import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
@@ -54,7 +54,7 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    setExecConfig(config);
+    setUtilConfig(config);
     resetPrefetchedImages();
   });
   it('returns if no go.sum found', async () => {
@@ -103,7 +103,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -144,7 +144,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -168,7 +168,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials and appMode enabled', async () => {
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
