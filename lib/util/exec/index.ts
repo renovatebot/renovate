@@ -41,7 +41,12 @@ function createChildEnv(
   env: NodeJS.ProcessEnv,
   extraEnv: ExtraEnv
 ): ExtraEnv<string> {
-  const extraEnvKeys = Object.keys(extraEnv || {});
+  const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
+    if (val === null) return false;
+    if (val === undefined) return false;
+    return true;
+  });
+  const extraEnvKeys = Object.keys(extraEnvEntries);
 
   const childEnv =
     env || extraEnv
@@ -66,7 +71,9 @@ function dockerEnvVars(
   childEnv: ExtraEnv<string>
 ): string[] {
   const extraEnvKeys = Object.keys(extraEnv || {});
-  return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
+  return extraEnvKeys.filter(
+    key => typeof childEnv[key] === 'string' && childEnv[key].length > 0
+  );
 }
 
 export async function exec(
