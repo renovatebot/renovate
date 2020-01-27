@@ -23,7 +23,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug(`serviceImageLine: "${line}"`);
         const { currentIndent } = line.match(/^(?<currentIndent>\s*)/).groups;
         const depLineMatch = line.match(
-          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+):/
+          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/
         );
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
