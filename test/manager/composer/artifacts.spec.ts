@@ -8,7 +8,7 @@ import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { BinarySource } from '../../../lib/util/exec/common';
-import { setExecConfig } from '../../../lib/util/exec';
+import { setUtilConfig } from '../../../lib/util';
 import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 jest.mock('fs-extra');
@@ -35,7 +35,7 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setExecConfig(config);
+    setUtilConfig(config);
     resetPrefetchedImages();
   });
   it('returns if no composer.lock found', async () => {
@@ -124,7 +124,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
 
     const execSnapshots = mockExecAll(exec);
