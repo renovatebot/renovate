@@ -355,9 +355,9 @@ export async function processBranch(
         }
 
         if (is.nonEmptyArray(config.postUpgradeFiles)) {
-          const files = find.fileSync(config.localDir);
+          const status = await platform.getRepoStatus();
 
-          for (const filePath of files) {
+          for (const filePath of status.modified.concat(status.not_added)) {
             const relativePath = filePath.substring(config.localDir.length + 1);
 
             if (!relativePath.startsWith('.git/')) {
@@ -365,7 +365,7 @@ export async function processBranch(
                 if (micromatch.isMatch(relativePath, pattern)) {
                   logger.debug(
                     { file: filePath, pattern },
-                    'Post upgrade file saved'
+                    'Post-upgrade file saved'
                   );
                   const existingContent = await readFile(filePath);
                   config.updatedArtifacts.push({
@@ -375,6 +375,13 @@ export async function processBranch(
                 }
               }
             }
+          }
+
+          for (const filePath of status.deleted || []) {
+            config.updatedArtifacts.push({
+              name: '|delete|',
+              contents: filePath,
+            });
           }
         }
       }
