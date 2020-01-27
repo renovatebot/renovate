@@ -69,7 +69,7 @@ export async function getChangeLogJSON({
   if (!config.token) {
     logger.debug('Repository URL does not match any known hosts');
     logger.warn(
-      'No Github token has been configured. Skipping release gathering!'
+      'No github.com token has been configured. Skipping release notes retrieval'
     );
     return null;
   }
