@@ -573,13 +573,8 @@ describe('platform/github', () => {
           ({
             body: [
               {
-                number: 89,
-                head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-                state: 'open',
-              },
-              {
                 number: 90,
-                head: { ref: 'somebranch', repo: { full_name: 'forked/repo' } },
+                head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
                 state: 'open',
               },
               {
@@ -601,7 +596,7 @@ describe('platform/github', () => {
               base: {
                 sha: '1234',
               },
-              head: { ref: 'somebranch', repo: { full_name: 'forked/repo' } },
+              head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
               state: 'open',
             },
           } as any)

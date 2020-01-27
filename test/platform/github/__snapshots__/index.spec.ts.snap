@@ -230,7 +230,7 @@ Object {
   "head": Object {
     "ref": "somebranch",
     "repo": Object {
-      "full_name": "forked/repo",
+      "full_name": "other/repo",
     },
   },
   "isModified": false,
