@@ -67,10 +67,18 @@ export async function getChangeLogJSON({
     url,
   });
   if (!config.token) {
-    logger.debug('Repository URL does not match any known hosts');
-    logger.warn(
-      'No github.com token has been configured. Skipping release notes retrieval'
-    );
+    // istanbul ignore if
+    if (sourceUrl.includes('github.com')) {
+      logger.warn(
+        { manager, depName, sourceUrl },
+        'No github.com token has been configured. Skipping release notes retrieval'
+      );
+    } else {
+      logger.info(
+        { manager, depName, sourceUrl },
+        'Repository URL does not match any known hosts - skipping changelog retrieval'
+      );
+    }
     return null;
   }
   const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
