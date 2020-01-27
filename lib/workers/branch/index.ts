@@ -328,7 +328,7 @@ export async function processBranch(
     }
 
     if (global.trustLevel === 'high') {
-      logger.debug('Executing post-change hooks');
+      logger.debug('Checking for post-upgrade hooks');
       if (
         is.nonEmptyArray(config.postUpgradeTasks) &&
         is.nonEmptyArray(global.allowedPostUpgradeTasks)
@@ -353,26 +353,26 @@ export async function processBranch(
             logger.debug(execResult, 'Executed post-change hook');
           }
         }
-      }
 
-      if (is.nonEmptyArray(config.postUpgradeFiles)) {
-        const files = find.fileSync(config.localDir);
+        if (is.nonEmptyArray(config.postUpgradeFiles)) {
+          const files = find.fileSync(config.localDir);
 
-        for (const filePath of files) {
-          const relativePath = filePath.substring(config.localDir.length + 1);
+          for (const filePath of files) {
+            const relativePath = filePath.substring(config.localDir.length + 1);
 
-          if (!relativePath.startsWith('.git/')) {
-            for (const pattern of config.postUpgradeFiles) {
-              if (micromatch.isMatch(relativePath, pattern)) {
-                logger.debug(
-                  { file: filePath, pattern },
-                  'Post upgrade file saved'
-                );
-                const existingContent = await readFile(filePath);
-                config.updatedArtifacts.push({
-                  name: relativePath,
-                  contents: existingContent.toString(),
-                });
+            if (!relativePath.startsWith('.git/')) {
+              for (const pattern of config.postUpgradeFiles) {
+                if (micromatch.isMatch(relativePath, pattern)) {
+                  logger.debug(
+                    { file: filePath, pattern },
+                    'Post upgrade file saved'
+                  );
+                  const existingContent = await readFile(filePath);
+                  config.updatedArtifacts.push({
+                    name: relativePath,
+                    contents: existingContent.toString(),
+                  });
+                }
               }
             }
           }

@@ -31,7 +31,6 @@ for (const x of helpers) {
     get(url, {
       ...opts,
       method: x.toUpperCase(),
-      retry: { errorCodes: 'ECONNRESET' },
     });
 }
 
