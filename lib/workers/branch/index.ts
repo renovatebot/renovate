@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon';
 
 import _ from 'lodash';
-import find from 'find';
 import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
 import micromatch from 'micromatch';
