@@ -1,7 +1,14 @@
 import { getChildProcessEnv } from '../../lib/util/exec/env';
 
 describe('getChildProcess environment when trustlevel set to low', () => {
-  const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'HOME', 'PATH'];
+  const envVars = [
+    'HTTP_PROXY',
+    'HTTPS_PROXY',
+    'NO_PROXY',
+    'HOME',
+    'PATH',
+    'DOCKER_HOST',
+  ];
   beforeEach(() => {
     envVars.forEach(env => {
       process.env[env] = env;
@@ -13,6 +20,7 @@ describe('getChildProcess environment when trustlevel set to low', () => {
   it('returns default environment variables', () => {
     expect(getChildProcessEnv()).toMatchInlineSnapshot(`
       Object {
+        "DOCKER_HOST": "DOCKER_HOST",
         "HOME": "HOME",
         "HTTPS_PROXY": "HTTPS_PROXY",
         "HTTP_PROXY": "HTTP_PROXY",
@@ -29,6 +37,7 @@ describe('getChildProcess environment when trustlevel set to low', () => {
     process.env.LANG = 'LANG';
     expect(getChildProcessEnv(['LANG'])).toMatchInlineSnapshot(`
       Object {
+        "DOCKER_HOST": "DOCKER_HOST",
         "HOME": "HOME",
         "HTTPS_PROXY": "HTTPS_PROXY",
         "HTTP_PROXY": "HTTP_PROXY",

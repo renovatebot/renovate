@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/validation validateConfig(config) catches invalid handlebars templates 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid handlebars template in config path: commitMessage",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {

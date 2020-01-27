@@ -1333,7 +1333,7 @@
       "description": "Configuration object for C#/Nuget",
       "type": "object",
       "default": {
-        "fileMatch": ["\\.csproj$"]
+        "fileMatch": ["\\.(?:cs|fs|vb)proj$"]
       },
       "$ref": "#"
     },

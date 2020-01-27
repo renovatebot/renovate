@@ -773,7 +773,7 @@ See [Private npm module support](https://docs.renovatebot.com/private-modules) f
 
 ## nuget
 
-The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj`/`.fsproj`/`.vbproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj`/`.fsproj`/`.vbproj` format in order to be detected and supported by Renovate.
 
 ## nvm
 

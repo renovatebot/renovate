@@ -8,7 +8,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
-import { PLATFORM_TYPE_GITLAB } from '../../../lib/constants/platfroms';
+import { PLATFORM_TYPE_GITLAB } from '../../../lib/constants/platforms';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);

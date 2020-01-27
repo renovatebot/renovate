@@ -38,6 +38,11 @@ export async function getRepositoryData(
       logger.warn({ err }, `${repository} server error`);
       throw new Error(DATASOURCE_FAILURE);
     }
+    // istanbul ignore if
+    if (err.name === 'UnsupportedProtocolError') {
+      logger.info({ repository }, 'Unsupported protocol');
+      return null;
+    }
     logger.warn({ err }, `${repository} lookup failure: Unknown error`);
     return null;
   }
