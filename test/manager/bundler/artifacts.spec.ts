@@ -9,7 +9,7 @@ import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
 import { BinarySource } from '../../../lib/util/exec/common';
-import { setExecConfig } from '../../../lib/util/exec';
+import { setUtilConfig } from '../../../lib/util';
 import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
@@ -39,7 +39,7 @@ describe('bundler.updateArtifacts()', () => {
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     resetPrefetchedImages();
-    setExecConfig(config);
+    setUtilConfig(config);
   });
   it('returns null by default', async () => {
     expect(
@@ -110,7 +110,7 @@ describe('bundler.updateArtifacts()', () => {
   });
   describe('Docker', () => {
     beforeEach(() => {
-      setExecConfig({ ...config, binarySource: BinarySource.Docker });
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
