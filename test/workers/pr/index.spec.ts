@@ -9,7 +9,6 @@ import {
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
 import { PLATFORM_TYPE_GITLAB } from '../../../lib/constants/platforms';
-import { ChangeLogError } from '../../../lib/workers/pr/changelog';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
@@ -46,7 +45,9 @@ function setupChangelogMock() {
       },
     ],
   };
-  const errorValue = { error: ChangeLogError.MissingGithubToken };
+  const errorValue = {
+    error: _changelogHelper.ChangeLogError.MissingGithubToken,
+  };
   changelogHelper.getChangeLogJSON.mockResolvedValueOnce(resultValue);
   changelogHelper.getChangeLogJSON.mockResolvedValueOnce(errorValue);
   changelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
