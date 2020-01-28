@@ -75,6 +75,7 @@ interface LocalRepoConfig {
   storage: GitStorage;
   parentRepo: string;
   baseCommitSHA: string | null;
+  forkMode?: boolean;
   forkToken?: string;
   closedPrList: PrList | null;
   openPrList: PrList | null;
@@ -367,6 +368,8 @@ export async function initRepo({
   config.prList = null;
   config.openPrList = null;
   config.closedPrList = null;
+
+  config.forkMode = !!forkMode;
   if (forkMode) {
     logger.info('Bot is in forkMode');
     config.forkToken = forkToken;
@@ -1015,7 +1018,8 @@ export async function findPr({
     p =>
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
+      matchesState(p.state, state) &&
+      (config.forkMode || config.repository === p.sourceRepo) // #5188
   );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);

@@ -11,7 +11,7 @@ export function updateDependency(
     logger.debug(`buildkite.updateDependency: ${upgrade.newValue}`);
     const lines = currentFileContent.split('\n');
     const lineToChange = lines[lineIdx];
-    const depLine = regEx(`^(\\s+[^#]+#)[^:]+(:.*)$`);
+    const depLine = regEx(`^(\\s+[^#]+#)[^:]+(.*)$`);
     if (!lineToChange.match(depLine)) {
       logger.debug('No image line found');
       return null;
