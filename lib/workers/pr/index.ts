@@ -1,13 +1,13 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
-import { getChangeLogJSON } from './changelog';
+import { ChangeLogError, getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
-import { platform, BranchStatus, Pr } from '../../platform';
+import { BranchStatus, platform, Pr } from '../../platform';
 import { BranchConfig } from '../common';
 import {
-  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
@@ -236,8 +236,16 @@ export async function ensurePr(
             });
           }
         }
-      } else {
-        upgrade.changeLogError = logJSON.error;
+      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+        upgrade.prBodyNotes = [
+          ...upgrade.prBodyNotes,
+          [
+            '\n',
+            ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
+            'To add credentials for github.com to your config, please see [this guide](https://docs.renovatebot.com/pro/configuration-gitlab/#core-renovate-configuration).',
+            '\n',
+          ].join('\n'),
+        ];
       }
     }
     config.upgrades.push(upgrade);
