@@ -4,7 +4,12 @@ import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
+import {
+  ChangeLogConfig,
+  ChangeLogError,
+  ChangeLogRelease,
+  ChangeLogResult,
+} from './common';
 import { Release } from '../../../datasource';
 
 const ghGot = api.get;
@@ -79,7 +84,7 @@ export async function getChangeLogJSON({
         'Repository URL does not match any known hosts - skipping changelog retrieval'
       );
     }
-    return null;
+    return { error: ChangeLogError.MissingGithubToken };
   }
   const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'

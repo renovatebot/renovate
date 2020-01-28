@@ -9,6 +9,7 @@ import { getPrNotes, getPrExtraNotes } from './notes';
 import { getChangelogs } from './changelogs';
 import { getControls } from './controls';
 import { PrBodyConfig } from './common';
+import { PrUpgrade } from '../../common';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
@@ -66,7 +67,9 @@ function massageUpdateMetadata(config: PrBodyConfig): void {
   });
 }
 
-export async function getPrBody(config: PrBodyConfig): Promise<string> {
+export async function getPrBody(
+  config: PrBodyConfig<PrUpgrade>
+): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
     banner: getPrBanner(config),

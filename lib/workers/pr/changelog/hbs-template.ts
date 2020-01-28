@@ -1,5 +1,11 @@
 export default `### Release Notes
 
+{{#if githubTokenError}}
+:warning:
+Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+To add credentials for github.com to your config, please see this guide.
+{{/if}}
+
 {{#each upgrades as |upgrade|}}
 
 {{#if upgrade.hasReleaseNotes}}

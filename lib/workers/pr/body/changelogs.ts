@@ -1,15 +1,33 @@
 import handlebars from 'handlebars';
 import releaseNotesHbs from '../changelog/hbs-template';
 import { PrBodyConfig } from './common';
+import { PrUpgrade } from '../../common';
+import { ChangeLogError } from '../changelog';
 
-export function getChangelogs(config: PrBodyConfig): string {
+function containsChangeLogError(
+  config: PrBodyConfig<PrUpgrade>,
+  errorType: ChangeLogError
+): boolean {
+  return config.upgrades.some(upg => upg.changeLogError === errorType);
+}
+
+export function getChangelogs(config: PrBodyConfig<PrUpgrade>): string {
   let releaseNotes = '';
   // istanbul ignore if
-  if (!config.hasReleaseNotes) {
+  if (
+    !config.hasReleaseNotes &&
+    !config.upgrades.some(upg => upg.changeLogError)
+  ) {
     return releaseNotes;
   }
-  releaseNotes +=
-    '\n\n---\n\n' + handlebars.compile(releaseNotesHbs)(config) + '\n\n';
+  const rendered = handlebars.compile(releaseNotesHbs)({
+    ...config,
+    githubTokenError: containsChangeLogError(
+      config,
+      ChangeLogError.MissingGithubToken
+    ),
+  });
+  releaseNotes += `\n\n---\n\n${rendered}\n\n`;
   releaseNotes = releaseNotes.replace(/### \[`vv/g, '### [`v');
   // Generic replacements/link-breakers
 

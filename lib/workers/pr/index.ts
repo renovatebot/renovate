@@ -217,19 +217,27 @@ export async function ensurePr(
     const logJSON = await getChangeLogJSON(upgrade);
 
     if (logJSON) {
-      upgrade.githubName = logJSON.project ? logJSON.project.github : undefined;
-      upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
-      upgrade.releases = [];
-      if (
-        upgrade.hasReleaseNotes &&
-        upgrade.githubName &&
-        !commitRepos.includes(upgrade.githubName)
-      ) {
-        commitRepos.push(upgrade.githubName);
-        logJSON.versions.forEach(version => {
-          const release = { ...version };
-          upgrade.releases.push(release);
-        });
+      if (typeof logJSON.error === 'undefined') {
+        upgrade.githubName = logJSON.project
+          ? logJSON.project.github
+          : undefined;
+        upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
+        upgrade.releases = [];
+        if (
+          upgrade.hasReleaseNotes &&
+          upgrade.githubName &&
+          !commitRepos.includes(upgrade.githubName)
+        ) {
+          commitRepos.push(upgrade.githubName);
+          if (logJSON.versions) {
+            logJSON.versions.forEach(version => {
+              const release = { ...version };
+              upgrade.releases.push(release);
+            });
+          }
+        }
+      } else {
+        upgrade.changeLogError = logJSON.error;
       }
     }
     config.upgrades.push(upgrade);
