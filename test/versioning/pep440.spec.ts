@@ -67,7 +67,7 @@ test.each([...invalidInputs, ...ranges])(
   }
 );
 
-const versions = [
+const versions: string[] = [
   '0.9.4',
   '1.0.0',
   '1.1.5',
@@ -78,21 +78,33 @@ const versions = [
   '2.0.3',
 ];
 
-describe('pep440.maxSatisfyingVersion(versions, range)', () => {
-  it('returns correct value', () => {
-    expect(pep440.maxSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.3');
-  });
-  it('returns null when none found', () => {
-    expect(pep440.maxSatisfyingVersion(versions, '~=2.1')).toBeNull();
-  });
-});
+interface MinMaxSatisfyingSampleElem {
+  versionList: string[];
+  range: string;
+  min: string | null;
+  max: string | null;
+}
 
-describe('pep440.minSatisfyingVersion(versions, range)', () => {
-  it('returns correct value', () => {
-    expect(pep440.minSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.1');
-  });
-  it('returns null when none found', () => {
-    expect(pep440.minSatisfyingVersion(versions, '~=2.1')).toBeNull();
+const minMaxSample: MinMaxSatisfyingSampleElem[] = [
+  {
+    versionList: versions,
+    range: '~=1.2.1',
+    min: '1.2.1',
+    max: '1.2.3',
+  },
+  {
+    versionList: versions,
+    range: '~=2.1',
+    min: null,
+    max: null,
+  },
+];
+
+describe.each(minMaxSample)('Satisfying versions', sampleElem => {
+  const { versionList, range, min, max } = sampleElem;
+  it(`${range} => ${min} ... ${max}`, () => {
+    expect(pep440.minSatisfyingVersion(versionList, range)).toBe(min);
+    expect(pep440.maxSatisfyingVersion(versionList, range)).toBe(max);
   });
 });
 
