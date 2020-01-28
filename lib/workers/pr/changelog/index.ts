@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import * as sourceGithub from './source-github';
 import { getReleases } from './releases';
-import { ChangeLogConfig, ChangeLogError, ChangeLogResult } from './common';
+import { ChangeLogConfig, ChangeLogResult } from './common';
 
 export * from './common';
 
