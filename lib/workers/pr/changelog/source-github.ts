@@ -78,13 +78,14 @@ export async function getChangeLogJSON({
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
       );
+      return { error: ChangeLogError.MissingGithubToken };
     } else {
       logger.info(
         { manager, depName, sourceUrl },
         'Repository URL does not match any known hosts - skipping changelog retrieval'
       );
     }
-    return { error: ChangeLogError.MissingGithubToken };
+    return null;
   }
   const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'

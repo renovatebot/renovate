@@ -13,11 +13,11 @@ function containsChangeLogError(
 
 export function getChangelogs(config: PrBodyConfig<PrUpgrade>): string {
   let releaseNotes = '';
+  const hasChangeLogErrors = config.upgrades.some(
+    upg => typeof upg.changeLogError !== 'undefined'
+  );
   // istanbul ignore if
-  if (
-    !config.hasReleaseNotes &&
-    !config.upgrades.some(upg => upg.changeLogError)
-  ) {
+  if (!config.hasReleaseNotes && !hasChangeLogErrors) {
     return releaseNotes;
   }
   const rendered = handlebars.compile(releaseNotesHbs)({
