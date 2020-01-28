@@ -1,5 +1,8 @@
-import { outputFile, readFile } from 'fs-extra';
-import { join, dirname } from 'upath';
+import {
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource/docker';
@@ -29,7 +32,10 @@ async function getRubyConstraint(
     logger.debug('Using rubyConstraint from config');
     rubyConstraint = ruby;
   } else {
-    const rubyVersionFile = join(dirname(packageFileName), '.ruby-version');
+    const rubyVersionFile = getSiblingFileName(
+      packageFileName,
+      '.ruby-version'
+    );
     logger.debug('Checking ' + rubyVersionFile);
     const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
     if (rubyVersionFileContent) {
@@ -88,16 +94,15 @@ export async function updateArtifacts(
     logger.info('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(global.repoCache.bundlerArtifactsError);
   }
-  const lockFileName = packageFileName + '.lock';
+  const lockFileName = `${packageFileName}.lock`;
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
   }
   try {
-    const localPackageFileName = join(config.localDir, packageFileName);
-    await outputFile(localPackageFileName, newPackageFileContent);
-    const localLockFileName = join(config.localDir, lockFileName);
+    await writeLocalFile(packageFileName, newPackageFileContent);
+
     const cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
 
     const { bundler } = compatibility;
@@ -120,11 +125,12 @@ export async function updateArtifacts(
       return null;
     }
     logger.debug('Returning updated Gemfile.lock');
+    const lockFileContent = await readLocalFile(lockFileName);
     return [
       {
         file: {
           name: lockFileName,
-          contents: await readFile(localLockFileName, 'utf8'),
+          contents: lockFileContent,
         },
       },
     ];
