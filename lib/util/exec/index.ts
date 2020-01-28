@@ -1,7 +1,8 @@
 import { join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { generateDockerCommand } from './docker';
+import { uniq } from 'lodash';
+import { generateDockerCommand, isBasicVarAllowedForDocker } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
@@ -70,10 +71,20 @@ function dockerEnvVars(
   extraEnv: ExtraEnv,
   childEnv: ExtraEnv<string>
 ): string[] {
-  const extraEnvKeys = Object.keys(extraEnv || {});
-  return extraEnvKeys.filter(
+  let childEnvKeys = Object.keys(childEnv || {});
+  childEnvKeys = childEnvKeys.filter(
+    key =>
+      isBasicVarAllowedForDocker(key) &&
+      typeof childEnv[key] === 'string' &&
+      childEnv[key].length > 0
+  );
+
+  let extraEnvKeys = Object.keys(extraEnv || {});
+  extraEnvKeys = extraEnvKeys.filter(
     key => typeof childEnv[key] === 'string' && childEnv[key].length > 0
   );
+
+  return uniq([...childEnvKeys, ...extraEnvKeys]);
 }
 
 export async function exec(
