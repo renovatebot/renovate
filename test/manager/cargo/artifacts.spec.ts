@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as cargo from '../../../lib/manager/cargo/artifacts';
@@ -5,7 +6,9 @@ import { platform as _platform } from '../../../lib/platform';
 import { mocked } from '../../util';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
+import { setExecConfig } from '../../../lib/util/exec';
 import { BinarySource } from '../../../lib/util/exec/common';
+import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -17,7 +20,9 @@ const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
-  localDir: '/tmp/github/some/repo',
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
+  dockerUser: 'foobar',
 };
 
 describe('.updateArtifacts()', () => {
@@ -26,6 +31,8 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setExecConfig(config);
+    resetPrefetchedImages();
   });
   it('returns null if no Cargo.lock found', async () => {
     const updatedDeps = ['dep1'];
@@ -49,9 +56,9 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
+    fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('Current Cargo.lock' as any);
+    fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -66,7 +73,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Cargo.lock', async () => {
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
@@ -79,26 +86,23 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Cargo.lock with docker', async () => {
+    setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('New Cargo.lock' as any);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-          dockerUser: 'foobar',
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Cargo.lock');
+    fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
