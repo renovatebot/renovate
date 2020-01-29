@@ -1,22 +1,25 @@
 import fs from 'fs';
 import _got from '../../lib/util/got';
-import { getPkgReleases } from '../../lib/datasource/cdn';
+import { getPkgReleases } from '../../lib/datasource/cdnjs';
 import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
 
 const got: any = _got;
 
 let res1 = fs.readFileSync(
-  'test/datasource/cdn/_fixtures/d3-force.json',
+  'test/datasource/cdnjs/_fixtures/d3-force.json',
   'utf8'
 );
 res1 = JSON.parse(res1);
 
-let res2 = fs.readFileSync('test/datasource/cdn/_fixtures/bulma.json', 'utf8');
+let res2 = fs.readFileSync(
+  'test/datasource/cdnjs/_fixtures/bulma.json',
+  'utf8'
+);
 res2 = JSON.parse(res2);
 
 jest.mock('../../lib/util/got');
 
-describe('datasource/cdn', () => {
+describe('datasource/cdnjs', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

@@ -1,5 +1,5 @@
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_CDN } from '../../constants/data-binary-source';
+import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
@@ -20,7 +20,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = rest.match(regex);
 
     deps.push({
-      datasource: DATASOURCE_CDN,
+      datasource: DATASOURCE_CDNJS,
       depName,
       lookupName: `${depName}/${asset}`,
       currentValue,

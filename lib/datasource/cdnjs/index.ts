@@ -3,18 +3,18 @@ import got from '../../util/got';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
-interface CdnAsset {
+interface CdnjsAsset {
   version: string;
   files: string[];
 }
 
-interface CdnResponse {
+interface CdnjsResponse {
   homepage?: string;
   repository?: {
     type: 'git' | unknown;
     url?: string;
   };
-  assets?: CdnAsset[];
+  assets?: CdnjsAsset[];
 }
 
 export async function getPkgReleases({
@@ -22,7 +22,7 @@ export async function getPkgReleases({
 }: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
   // istanbul ignore if
   if (!lookupName) {
-    logger.warn('CDN lookup failure: empty lookupName');
+    logger.warn('CDNJS lookup failure: empty lookupName');
     return null;
   }
 
@@ -33,14 +33,14 @@ export async function getPkgReleases({
   try {
     const res = await got(url, { json: true });
 
-    const cdnResp: CdnResponse = res.body;
+    const cdnjsResp: CdnjsResponse = res.body;
 
-    if (!cdnResp || !cdnResp.assets) {
-      logger.warn({ depName }, `Invalid CDN response`);
+    if (!cdnjsResp || !cdnjsResp.assets) {
+      logger.warn({ depName }, `Invalid CDNJS response`);
       return null;
     }
 
-    const { assets, homepage, repository } = cdnResp;
+    const { assets, homepage, repository } = cdnjsResp;
 
     const releases = assets
       .filter(({ files }) => files.indexOf(assetName) !== -1)
@@ -59,7 +59,7 @@ export async function getPkgReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `CDN registry failure`);
+      logger.warn({ lookupName, err }, `CDNJS registry failure`);
       throw new Error(DATASOURCE_FAILURE);
     }
 
@@ -68,7 +68,7 @@ export async function getPkgReleases({
     } else if (err.statusCode === 404) {
       logger.debug(errorData, 'Package lookup error');
     } else {
-      logger.warn(errorData, 'CDN lookup failure: Unknown error');
+      logger.warn(errorData, 'CDNJS lookup failure: Unknown error');
     }
   }
 
