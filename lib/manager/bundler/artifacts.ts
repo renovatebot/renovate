@@ -24,7 +24,6 @@ async function getRubyConstraint(
 ): Promise<string> {
   const { packageFileName, config } = updateArtifact;
   const { compatibility = {} } = config;
-  logger.warn({ compatibility });
   const { ruby } = compatibility;
 
   let rubyConstraint: string;
@@ -36,7 +35,6 @@ async function getRubyConstraint(
       packageFileName,
       '.ruby-version'
     );
-    logger.debug('Checking ' + rubyVersionFile);
     const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
@@ -51,15 +49,22 @@ async function getRubyConstraint(
 
 async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
   const constraint = await getRubyConstraint(updateArtifact);
-  if (!constraint) return 'latest';
-  if (!isValid(constraint)) {
-    logger.warn({ constraint }, 'Invalid constraint');
+  if (!constraint) {
+    logger.debug('No ruby version constraint found, so using latest');
     return 'latest';
   }
-  logger.debug({ constraint }, 'Found ruby compatibility');
+  if (!isValid(constraint)) {
+    logger.warn({ constraint }, 'Invalid ruby version constraint');
+    return 'latest';
+  }
+  logger.debug(
+    { constraint },
+    'Found ruby version constraint - checking for a compatible renovate/ruby image to use'
+  );
   const rubyReleases = await getPkgReleases({
     lookupName: 'renovate/ruby',
   });
+  // istanbul ignore else
   if (rubyReleases && rubyReleases.releases) {
     let versions = rubyReleases.releases.map(release => release.version);
     versions = versions.filter(
@@ -67,8 +72,16 @@ async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
     );
     versions = versions.sort(sortVersions);
     if (versions.length) {
-      return versions.pop();
+      const rubyVersion = versions.pop();
+      logger.debug(
+        { constraint, rubyVersion },
+        'Found compatible ruby version'
+      );
+      return rubyVersion;
     }
+  } else {
+    logger.error('No renovate/ruby releases found');
+    return 'latest';
   }
   logger.warn(
     { constraint },
