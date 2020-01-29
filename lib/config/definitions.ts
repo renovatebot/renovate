@@ -1715,6 +1715,21 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'helmfile',
+    description: 'Configuration object for helmfile helmfile.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      aliases: {
+        stable: 'https://kubernetes-charts.storage.googleapis.com/',
+      },
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)helmfile.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
     name: 'circleci',
     description:
       'Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.',
