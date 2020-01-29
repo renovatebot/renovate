@@ -7,71 +7,91 @@ Object {
       "currentValue": "15.6.1",
       "datasource": "cdnjs",
       "depName": "prop-types",
-      "fileReplacePosition": 148,
       "lookupName": "prop-types/prop-types.min.js",
+      "managerData": Object {
+        "fileReplacePosition": 148,
+      },
     },
     Object {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react",
-      "fileReplacePosition": 285,
       "lookupName": "react/umd",
+      "managerData": Object {
+        "fileReplacePosition": 285,
+      },
     },
     Object {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react-dom",
-      "fileReplacePosition": 436,
       "lookupName": "react-dom/umd",
+      "managerData": Object {
+        "fileReplacePosition": 436,
+      },
     },
     Object {
       "currentValue": "2.2.1",
       "datasource": "cdnjs",
       "depName": "react-transition-group",
-      "fileReplacePosition": 926,
       "lookupName": "react-transition-group/react-transition-group.min.js",
+      "managerData": Object {
+        "fileReplacePosition": 926,
+      },
     },
     Object {
       "currentValue": "1.14.3",
       "datasource": "cdnjs",
       "depName": "popper.js",
-      "fileReplacePosition": 1078,
       "lookupName": "popper.js/umd",
+      "managerData": Object {
+        "fileReplacePosition": 1078,
+      },
     },
     Object {
       "currentValue": "0.10.4",
       "datasource": "cdnjs",
       "depName": "react-popper",
-      "fileReplacePosition": 1222,
       "lookupName": "react-popper/umd",
+      "managerData": Object {
+        "fileReplacePosition": 1222,
+      },
     },
     Object {
       "currentValue": "7.1.0",
       "datasource": "cdnjs",
       "depName": "reactstrap",
-      "fileReplacePosition": 1333,
       "lookupName": "reactstrap/reactstrap.min.js",
+      "managerData": Object {
+        "fileReplacePosition": 1333,
+      },
     },
     Object {
       "currentValue": "4.3.1",
       "datasource": "cdnjs",
       "depName": "react-router",
-      "fileReplacePosition": 1440,
       "lookupName": "react-router/react-router.min.js",
+      "managerData": Object {
+        "fileReplacePosition": 1440,
+      },
     },
     Object {
       "currentValue": "4.0.6",
       "datasource": "cdnjs",
       "depName": "react-markdown",
-      "fileReplacePosition": 1550,
       "lookupName": "react-markdown/react-markdown.js",
+      "managerData": Object {
+        "fileReplacePosition": 1550,
+      },
     },
     Object {
       "currentValue": "0.18.0",
       "datasource": "cdnjs",
       "depName": "axios",
-      "fileReplacePosition": 1748,
       "lookupName": "axios/axios.min.js",
+      "managerData": Object {
+        "fileReplacePosition": 1748,
+      },
     },
   ],
 }

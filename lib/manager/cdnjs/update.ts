@@ -5,7 +5,8 @@ export function updateDependency(
   fileContent: string,
   upgrade: Upgrade
 ): string | null {
-  const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
+  const { depName, currentValue, newValue, managerData } = upgrade;
+  const { fileReplacePosition } = managerData;
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
   const versionClosePosition = rightPart.indexOf('/');
@@ -19,6 +20,9 @@ export function updateDependency(
     const replacedPart = versionPart.replace(version, newValue);
     return leftPart + replacedPart + restPart;
   }
-  logger.debug({ depName, version, currentValue, newValue }, 'Unknown value');
+  logger.debug(
+    { depName, version, currentValue, newValue },
+    'File content was changed in unexpected way'
+  );
   return null;
 }

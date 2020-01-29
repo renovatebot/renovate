@@ -1565,7 +1565,7 @@ const options: RenovateOptions[] = [
     default: {
       enabled: true,
       fileMatch: ['\\.html?$'],
-      versionScheme: VERSION_SCHEME_NPM,
+      versionScheme: VERSION_SCHEME_SEMVER,
     },
     mergeable: true,
   },

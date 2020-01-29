@@ -24,7 +24,9 @@ export function extractPackageFile(content: string): PackageFile {
       depName,
       lookupName: `${depName}/${asset}`,
       currentValue,
-      fileReplacePosition,
+      managerData: {
+        fileReplacePosition,
+      },
     });
   }
 
