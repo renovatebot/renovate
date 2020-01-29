@@ -36,7 +36,7 @@ function toSemverRange(range: string): string {
 
 function getNewValue({ currentValue, toVersion }: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
-    return toVersion;
+    return toVersion.replace(/^v/, '');
   }
   if (fromRange.test(currentValue)) {
     const [, version] = currentValue.match(fromRange);
