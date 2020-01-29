@@ -61,18 +61,6 @@ function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter(command => command && typeof command === 'string');
 }
 
-const whitelistedDockerBasicVars = new Set([
-  'HTTP_PROXY',
-  'HTTPS_PROXY',
-  'NO_PROXY',
-  'LC_ALL',
-  'LANG',
-]);
-
-export function isBasicVarAllowedForDocker(varName: string): boolean {
-  return whitelistedDockerBasicVars.has(varName);
-}
-
 export async function generateDockerCommand(
   commands: string[],
   options: DockerOptions,
