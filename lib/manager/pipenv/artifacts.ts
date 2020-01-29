@@ -32,8 +32,6 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
-        LC_ALL: process.env.LC_ALL,
-        LANG: process.env.LANG,
       },
       docker: {
         image: 'renovate/pipenv',
