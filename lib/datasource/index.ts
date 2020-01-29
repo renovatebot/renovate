@@ -38,7 +38,7 @@ export * from './common';
 
 const datasources: Record<string, Datasource> = {
   cargo,
-  cdn: cdnjs,
+  cdnjs,
   dart,
   docker,
   helm,
