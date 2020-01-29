@@ -1,7 +1,16 @@
 import { getChildProcessEnv } from '../../lib/util/exec/env';
 
 describe('getChildProcess environment when trustlevel set to low', () => {
-  const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'HOME', 'PATH'];
+  const envVars = [
+    'HTTP_PROXY',
+    'HTTPS_PROXY',
+    'NO_PROXY',
+    'HOME',
+    'PATH',
+    'LC_ALL',
+    'LANG',
+    'DOCKER_HOST',
+  ];
   beforeEach(() => {
     envVars.forEach(env => {
       process.env[env] = env;
@@ -13,9 +22,12 @@ describe('getChildProcess environment when trustlevel set to low', () => {
   it('returns default environment variables', () => {
     expect(getChildProcessEnv()).toMatchInlineSnapshot(`
       Object {
+        "DOCKER_HOST": "DOCKER_HOST",
         "HOME": "HOME",
         "HTTPS_PROXY": "HTTPS_PROXY",
         "HTTP_PROXY": "HTTP_PROXY",
+        "LANG": "LANG",
+        "LC_ALL": "LC_ALL",
         "NO_PROXY": "NO_PROXY",
         "PATH": "PATH",
       }
@@ -26,13 +38,16 @@ describe('getChildProcess environment when trustlevel set to low', () => {
     expect(getChildProcessEnv()).not.toHaveProperty('PATH');
   });
   it('returns custom environment variables if passed and defined', () => {
-    process.env.LANG = 'LANG';
-    expect(getChildProcessEnv(['LANG'])).toMatchInlineSnapshot(`
+    process.env.FOOBAR = 'FOOBAR';
+    expect(getChildProcessEnv(['FOOBAR'])).toMatchInlineSnapshot(`
       Object {
+        "DOCKER_HOST": "DOCKER_HOST",
+        "FOOBAR": "FOOBAR",
         "HOME": "HOME",
         "HTTPS_PROXY": "HTTPS_PROXY",
         "HTTP_PROXY": "HTTP_PROXY",
         "LANG": "LANG",
+        "LC_ALL": "LC_ALL",
         "NO_PROXY": "NO_PROXY",
         "PATH": "PATH",
       }
