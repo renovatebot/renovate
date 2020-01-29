@@ -1005,7 +1005,7 @@
       "default": {
         "enabled": true,
         "fileMatch": ["\\.html?$"],
-        "versionScheme": "npm"
+        "versionScheme": "semver"
       },
       "$ref": "#"
     },
