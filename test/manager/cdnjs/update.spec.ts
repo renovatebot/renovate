@@ -9,16 +9,40 @@ const content = readFileSync(
 );
 
 describe('manager/cdnjs/update', () => {
-  it('updateDependency', () => {
+  it('updates dependency', () => {
     const { deps } = extractPackageFile(content);
     const dep = deps.pop();
     const upgrade = {
       ...dep,
-      newValue: `9.9.999`,
+      newValue: '9.9.999',
     };
     const { currentValue, newValue } = upgrade;
     const newFileContent = updateDependency(content, upgrade);
     const cmpContent = content.replace(currentValue, newValue);
     expect(newFileContent).toEqual(cmpContent);
+  });
+  it('returns same string for already updated dependency', () => {
+    const { deps } = extractPackageFile(content);
+    const dep = deps.pop();
+    const upgrade = {
+      ...dep,
+      newValue: '9.9.999',
+    };
+    const { currentValue, newValue } = upgrade;
+    const alreadyUpdated = content.replace(currentValue, '9.9.999');
+    const newFileContent = updateDependency(alreadyUpdated, upgrade);
+    expect(newFileContent).toBe(alreadyUpdated);
+  });
+  it('returns null if content has changed', () => {
+    const { deps } = extractPackageFile(content);
+    const dep = deps.pop();
+    const upgrade = {
+      ...dep,
+      newValue: '9.9.999',
+    };
+    const { currentValue, newValue } = upgrade;
+    const alreadyUpdated = content.replace(currentValue, '2020.1');
+    const newFileContent = updateDependency(alreadyUpdated, upgrade);
+    expect(newFileContent).toBeNull();
   });
 });
