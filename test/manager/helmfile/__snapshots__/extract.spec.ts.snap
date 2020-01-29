@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/helmfile/extract extractPackageFile() skip if repository details are not specified 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [],
+      "skipReason": "invalid-registry",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helmfile/extract extractPackageFile() skip local charts 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "depName": "./charts/example",
+      "skipReason": "local-chart",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helmfile/extract extractPackageFile() skip templetized release with invalid characters 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "{{\`{{ .Release.Name }}\`}}",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
+      "skipReason": "invalid-chart",
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
+    },
+  ],
+}
+`;

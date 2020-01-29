@@ -37,7 +37,7 @@ export function extractPackageFile(
     if (dep.chart.startsWith('./')) {
       return {
         depName,
-        skipReason: 'local-repository',
+        skipReason: 'local-chart',
       } as PackageDependency;
     }
 
@@ -58,6 +58,14 @@ export function extractPackageFile(
           return v != null;
         }),
     };
+
+    if (res.depName.includes('{') || res.depName.includes('}')) {
+      res.skipReason = 'invalid-chart';
+    }
+
+    if (is.emptyArray(res.registryUrls)) {
+      res.skipReason = 'invalid-registry';
+    }
 
     return res;
   });
