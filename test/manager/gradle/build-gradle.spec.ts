@@ -82,6 +82,22 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('returns an updated file if the version in single quotes defined as map is found in a different order', () => {
+    const gradleFile = `compile name : 'mysql-connector-java',
+               group  : 'mysql',
+               version: '6.0.5'`;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `compile name : 'mysql-connector-java',
+               group  : 'mysql',
+               version: '7.0.0'`
+    );
+  });
+
   it('returns an updated file if the version in double quotes defined as map is found', () => {
     const gradleFile = `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
@@ -95,6 +111,22 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
                version: "7.0.0"`
+    );
+  });
+
+  it('returns an updated file if the version in double quotes defined as map is found in a different order', () => {
+    const gradleFile = `compile name   : 'mysql-connector-java',
+               version: "6.0.5",
+               group  : 'mysql'`;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `compile name   : 'mysql-connector-java',
+               version: "7.0.0",
+               group  : 'mysql'`
     );
   });
 
@@ -114,6 +146,22 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('returns an updated file if the version in triple single quotes defined as map is found in a different order', () => {
+    const gradleFile = `compile version: '''6.0.5''',
+               group  : 'mysql',
+               name   : 'mysql-connector-java'`;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `compile version: '''7.0.0''',
+               group  : 'mysql',
+               name   : 'mysql-connector-java'`
+    );
+  });
+
   it('returns an updated file if the version in triple double quotes defined as map is found', () => {
     const gradleFile = `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
@@ -130,6 +178,22 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('returns an updated file if the version in triple double quotes defined as map is found in a different order', () => {
+    const gradleFile = `compile version: """6.0.5""",
+               name   : 'mysql-connector-java',
+               group  : 'mysql'`;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `compile version: """7.0.0""",
+               name   : 'mysql-connector-java',
+               group  : 'mysql'`
+    );
+  });
+
   it('returns a file updated if the version defined as a Kotlin named argument is found', () => {
     const gradleFile = `compile(group   = "mysql"               ,
                name    = "mysql-connector-java",
@@ -143,6 +207,22 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       `compile(group   = "mysql"               ,
                name    = "mysql-connector-java",
                version = "7.0.0")`
+    );
+  });
+
+  it('returns a file updated if the version defined as a Kotlin named argument is found in a different order', () => {
+    const gradleFile = `compile(group = "mysql",
+               version = "6.0.5",
+               name    = "mysql-connector-java")`;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `compile(group = "mysql",
+               version = "7.0.0",
+               name    = "mysql-connector-java")`
     );
   });
 
@@ -194,6 +274,26 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('should returns a file updated if the version defined in a variable as a map is found in a different order', () => {
+    const gradleFile = `String mysqlVersion = "6.0.5"
+               compile name   : 'mysql-connector-java',
+               group          : 'mysql'               ,
+               version        : mysqlVersion
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `String mysqlVersion = "7.0.0"
+               compile name   : 'mysql-connector-java',
+               group          : 'mysql'               ,
+               version        : mysqlVersion
+               `
+    );
+  });
+
   it('returns an updated file if the version defined in a variable in a simple template string without curly braces as a map is found', () => {
     const gradleFile = `String mysqlVersion = "6.0.5"
                compile group  : 'mysql'               ,
@@ -230,6 +330,26 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
                compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',
                version        : "\${mysqlVersion}"
+               `
+    );
+  });
+
+  it('returns an updated file if the version defined in a variable in a simple template string with curly braces as a map is found in a different order', () => {
+    const gradleFile = `String mysqlVersion = "6.0.5"
+               compile name   : 'mysql-connector-java',
+               version        : "\${mysqlVersion}",
+               group          : 'mysql'
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `String mysqlVersion = "7.0.0"
+               compile name   : 'mysql-connector-java',
+               version        : "\${mysqlVersion}",
+               group          : 'mysql'
                `
     );
   });
@@ -294,6 +414,26 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('should returns a file updated if the version defined in a variable as a Kotlin named argument is found in a different order', () => {
+    const gradleFile = `val mysqlVersion = "6.0.5"
+               compile(name  = "mysql-connector-java",
+               group         = "mysql"               ,
+               version       = mysqlVersion)
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `val mysqlVersion = "7.0.0"
+               compile(name  = "mysql-connector-java",
+               group         = "mysql"               ,
+               version       = mysqlVersion)
+               `
+    );
+  });
+
   it('returns an updated file if the version defined in a variable in a template string without curly braces as a Kotlin named argument is found', () => {
     const gradleFile = `val mysqlVersion = "6.0.5"
                compile(group = "mysql"               ,
@@ -330,6 +470,26 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
                compile(group = "mysql"               ,
                name          = "mysql-connector-java",
                version       = "\${mysqlVersion}")
+               `
+    );
+  });
+
+  it('returns an updated file if the version defined in a variable in a template string with curly braces as a Kotlin named argument is found in a different order', () => {
+    const gradleFile = `val mysqlVersion = "6.0.5"
+               compile(version = "\${mysqlVersion}"    ,
+               name            = "mysql-connector-java",
+               group           = "mysql")
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `val mysqlVersion = "7.0.0"
+               compile(version = "\${mysqlVersion}"    ,
+               name            = "mysql-connector-java",
+               group           = "mysql")
                `
     );
   });

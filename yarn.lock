@@ -1289,17 +1289,17 @@
     "@types/istanbul-lib-coverage" "*"
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@24.9.0":
-  version "24.9.0"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-24.9.0.tgz#78c6991cd1734cf0d390be24875e310bb0a9fb74"
-  integrity sha512-dXvuABY9nM1xgsXlOtLQXJKdacxZJd7AtvLsKZ/0b57ruMXDKCOXAC/M75GbllQX6o1pcZ5hAG4JzYy7Z/wM2w==
+"@types/jest@24.9.1":
+  version "24.9.1"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-24.9.1.tgz#02baf9573c78f1b9974a5f36778b366aa77bd534"
+  integrity sha512-Fb38HkXSVA4L8fGKEZ6le5bB8r6MRWlOCZbVuWZcmOMSCd2wCYOwN1ibj8daIoV9naq7aaOZjrLCoCMptKU/4Q==
   dependencies:
     jest-diff "^24.3.0"
 
-"@types/js-yaml@3.12.1":
-  version "3.12.1"
-  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
-  integrity sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
+"@types/js-yaml@3.12.2":
+  version "3.12.2"
+  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.2.tgz#a35a1809c33a68200fb6403d1ad708363c56470a"
+  integrity sha512-0CFu/g4mDSNkodVwWijdlr8jH7RoplRWNgovjFLEZeT+QEbbZXjBmCe3HwaWheAlCbHwomTwzZoSedeOycABug==
 
 "@types/json-schema@^7.0.3":
   version "7.0.3"
@@ -1466,6 +1466,11 @@
   integrity sha512-K8/LfZq2duW33XW/tFwEAfnZlqIfVsoyRB3kfXdPXYhl0nfM8mmh7GS0jg7WrX2Dgq/0Ha/pR1PaR+BvmWwjiQ==
   dependencies:
     "@types/yargs-parser" "*"
+
+"@types/yawn-yaml@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@types/yawn-yaml/-/yawn-yaml-1.4.0.tgz#15e1c5722c9253d6da6a927d85ba34b2f34a3a02"
+  integrity sha512-9mfVO9Po29PF6lH24v3+5BCBXhnH+o3r9I6xRzU+AECT1cdlR/mNqk6NK2kTFGyo0vt8o4isjpq3V5iG3VmvFQ==
 
 "@typescript-eslint/eslint-plugin@2.17.0":
   version "2.17.0"
@@ -1847,10 +1852,10 @@ aws-sdk-mock@4.5.0:
     sinon "^7.3.2"
     traverse "^0.6.6"
 
-aws-sdk@2.601.0, aws-sdk@^2.483.0:
-  version "2.601.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.601.0.tgz#7210e4e1edcffbe76e9b2a7181617966c9cfc731"
-  integrity sha512-i8ND3Hn0zjuwyau47io8Uyvbeb6dnOYbC6k34u3DvqH3I/kFDgDAme6L58LUzSHAPDWhUDjNXpScmMsGZVDWrw==
+aws-sdk@2.610.0, aws-sdk@^2.483.0:
+  version "2.610.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.610.0.tgz#a8633204bed83df763095824f8110ced4a717d2a"
+  integrity sha512-kqcoCTKjbxrUo2KeLQR2Jw6l4PvkbHXSDk8KqF2hXcpHibiOcMXZZPVe9X+s90RC/B2+qU95M7FImp9ByMcw7A==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -5875,10 +5880,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-luxon@1.21.3:
-  version "1.21.3"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.21.3.tgz#f1d5c2a7e855d039836cf4954f883ecac8fc4727"
-  integrity sha512-lLRwNcNnkZLuv13A1FUuZRZmTWF7ro2ricYvb0L9cvBYHPvZhQdKwrYnZzi103D2XKmlVmxWpdn2wfIiOt2YEw==
+luxon@1.22.0:
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.22.0.tgz#639525c7c69e594953c7b142794466b8ea85b868"
+  integrity sha512-3sLvlfbFo+AxVEY3IqxymbumtnlgBwjDExxK60W3d+trrUzErNAz/PfvPT+mva+vEUrdIodeCOs7fB6zHtRSrw==
 
 macos-release@^2.2.0:
   version "2.3.0"
@@ -7827,13 +7832,12 @@ regexpu-core@^4.6.0:
     unicode-match-property-ecmascript "^1.0.4"
     unicode-match-property-value-ecmascript "^1.1.0"
 
-registry-auth-token@4.1.0, registry-auth-token@^4.0.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/registry-auth-token/-/registry-auth-token-4.1.0.tgz#b17f4763c53785b5342fadb0a35d9825be976cfb"
-  integrity sha512-7uxS951DeOBOwsv8deX+l7HcjY2VZxaOgHtM6RKzg3HhpE+bJ0O7VbuMJLosC1T5WSFpHm0DuFIbqUl43jHpsA==
+registry-auth-token@4.1.1, registry-auth-token@^4.0.0:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/registry-auth-token/-/registry-auth-token-4.1.1.tgz#40a33be1e82539460f94328b0f7f0f84c16d9479"
+  integrity sha512-9bKS7nTl9+/A1s7tnPeGrUpRcVY+LUh7bfFgzpndALdPfXQBfQV77rQVtqgUV3ti4vc/Ik81Ex8UJDWDQ12zQA==
   dependencies:
     rc "^1.2.8"
-    safe-buffer "^5.0.1"
 
 registry-auth-token@^3.0.1:
   version "3.4.0"
@@ -9487,10 +9491,10 @@ validate-npm-package-name@3.0.0, validate-npm-package-name@^3.0.0, validate-npm-
   dependencies:
     builtins "^1.0.3"
 
-validator@12.1.0:
-  version "12.1.0"
-  resolved "https://registry.yarnpkg.com/validator/-/validator-12.1.0.tgz#a3a7315d5238cbc15e46ad8d5e479aafa7119925"
-  integrity sha512-gIC2RBuFRi574Rb9vewGCJ7TCLxHXNx6EKthEgs+Iz0pYa9a9Te1VLG/bGLsAyGWrqR5FfR7tbFUI7FEF2LiGA==
+validator@12.2.0:
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-12.2.0.tgz#660d47e96267033fd070096c3b1a6f2db4380a0a"
+  integrity sha512-jJfE/DW6tIK1Ek8nCfNFqt8Wb3nzMoAbocBF6/Icgg1ZFSBpObdnwVY2jQj6qUqzhx5jc71fpvBWyLGO7Xl+nQ==
 
 verror@1.10.0:
   version "1.10.0"
