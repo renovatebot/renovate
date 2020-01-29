@@ -7,6 +7,8 @@ describe('getChildProcess environment when trustlevel set to low', () => {
     'NO_PROXY',
     'HOME',
     'PATH',
+    'LC_ALL',
+    'LANG',
     'DOCKER_HOST',
   ];
   beforeEach(() => {
@@ -24,6 +26,8 @@ describe('getChildProcess environment when trustlevel set to low', () => {
         "HOME": "HOME",
         "HTTPS_PROXY": "HTTPS_PROXY",
         "HTTP_PROXY": "HTTP_PROXY",
+        "LANG": "LANG",
+        "LC_ALL": "LC_ALL",
         "NO_PROXY": "NO_PROXY",
         "PATH": "PATH",
       }
@@ -34,14 +38,16 @@ describe('getChildProcess environment when trustlevel set to low', () => {
     expect(getChildProcessEnv()).not.toHaveProperty('PATH');
   });
   it('returns custom environment variables if passed and defined', () => {
-    process.env.LANG = 'LANG';
-    expect(getChildProcessEnv(['LANG'])).toMatchInlineSnapshot(`
+    process.env.FOOBAR = 'FOOBAR';
+    expect(getChildProcessEnv(['FOOBAR'])).toMatchInlineSnapshot(`
       Object {
         "DOCKER_HOST": "DOCKER_HOST",
+        "FOOBAR": "FOOBAR",
         "HOME": "HOME",
         "HTTPS_PROXY": "HTTPS_PROXY",
         "HTTP_PROXY": "HTTP_PROXY",
         "LANG": "LANG",
+        "LC_ALL": "LC_ALL",
         "NO_PROXY": "NO_PROXY",
         "PATH": "PATH",
       }
