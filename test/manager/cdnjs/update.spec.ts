@@ -28,7 +28,7 @@ describe('manager/cdnjs/update', () => {
       ...dep,
       newValue: '9.9.999',
     };
-    const { currentValue, newValue } = upgrade;
+    const { currentValue } = upgrade;
     const alreadyUpdated = content.replace(currentValue, '9.9.999');
     const newFileContent = updateDependency(alreadyUpdated, upgrade);
     expect(newFileContent).toBe(alreadyUpdated);
@@ -40,7 +40,7 @@ describe('manager/cdnjs/update', () => {
       ...dep,
       newValue: '9.9.999',
     };
-    const { currentValue, newValue } = upgrade;
+    const { currentValue } = upgrade;
     const alreadyUpdated = content.replace(currentValue, '2020.1');
     const newFileContent = updateDependency(alreadyUpdated, upgrade);
     expect(newFileContent).toBeNull();
