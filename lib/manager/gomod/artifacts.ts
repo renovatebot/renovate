@@ -1,4 +1,4 @@
-import { ensureDir, outputFile, readFile } from 'fs-extra';
+import { ensureDir } from 'fs-extra';
 import { join, dirname } from 'upath';
 import { exec, ExecOptions } from '../../util/exec';
 import { find } from '../../util/host-rules';
@@ -6,6 +6,7 @@ import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 
 function getPreCommands(): string[] | null {
   const credentials = find({
@@ -42,9 +43,7 @@ export async function updateArtifacts({
     logger.debug('No go.sum found');
     return null;
   }
-  const cwd = join(config.localDir, dirname(goModFileName));
   try {
-    const localGoModFileName = join(config.localDir, goModFileName);
     const massagedGoMod = newGoModContent.replace(
       /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
       '\n// renovate-replace $1'
@@ -52,11 +51,10 @@ export async function updateArtifacts({
     if (massagedGoMod !== newGoModContent) {
       logger.debug('Removed some relative replace statements from go.mod');
     }
-    await outputFile(localGoModFileName, massagedGoMod);
-    const localGoSumFileName = join(config.localDir, sumFileName);
+    await writeLocalFile(goModFileName, massagedGoMod);
     const cmd = 'go';
     const execOptions: ExecOptions = {
-      cwd,
+      cwd: join(config.localDir, dirname(goModFileName)),
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
@@ -89,7 +87,7 @@ export async function updateArtifacts({
     res.push({
       file: {
         name: sumFileName,
-        contents: await readFile(localGoSumFileName, 'utf8'),
+        contents: await readLocalFile(sumFileName),
       },
     });
     const vendorDir = join(dirname(goModFileName), 'vendor/');
@@ -113,11 +111,10 @@ export async function updateArtifacts({
       status = await platform.getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
         if (f.startsWith(vendorDir)) {
-          const localModified = join(config.localDir, f);
           res.push({
             file: {
               name: f,
-              contents: await readFile(localModified, 'utf8'),
+              contents: await readLocalFile(f),
             },
           });
         }
@@ -131,9 +128,10 @@ export async function updateArtifacts({
         });
       }
     }
-    const finalGoModContent = (
-      await readFile(localGoModFileName, 'utf8')
-    ).replace(/\/\/ renovate-replace /g, '');
+    const finalGoModContent = (await readLocalFile(goModFileName)).replace(
+      /\/\/ renovate-replace /g,
+      ''
+    );
     if (finalGoModContent !== newGoModContent) {
       logger.info('Found updated go.mod after go.sum update');
       res.push({
