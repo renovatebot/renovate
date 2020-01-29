@@ -1255,6 +1255,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/global-agent@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@types/global-agent/-/global-agent-2.1.0.tgz#1becbcb067c9c7a8d2cd70b786ca1d062538e299"
+  integrity sha512-xBOerse4Agekl7VZJclA9bfuA9aa3u9T24TDkBiMQrZgu4qe5HMBPzVGzAt2k4dx/v3uIFI6CzG0Z9X894LHrg==
+
 "@types/got@9.6.9":
   version "9.6.9"
   resolved "https://registry.yarnpkg.com/@types/got/-/got-9.6.9.tgz#b3192188b96c871b9c67dc80d1b0336441432a38"
