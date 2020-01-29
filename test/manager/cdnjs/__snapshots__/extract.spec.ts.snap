@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/cdnjs/extract extractPackageFile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "15.6.1",
+      "datasource": "cdnjs",
+      "depName": "prop-types",
+      "fileReplacePosition": 148,
+      "lookupName": "prop-types/prop-types.min.js",
+    },
+    Object {
+      "currentValue": "16.3.2",
+      "datasource": "cdnjs",
+      "depName": "react",
+      "fileReplacePosition": 285,
+      "lookupName": "react/umd",
+    },
+    Object {
+      "currentValue": "16.3.2",
+      "datasource": "cdnjs",
+      "depName": "react-dom",
+      "fileReplacePosition": 436,
+      "lookupName": "react-dom/umd",
+    },
+    Object {
+      "currentValue": "2.2.1",
+      "datasource": "cdnjs",
+      "depName": "react-transition-group",
+      "fileReplacePosition": 926,
+      "lookupName": "react-transition-group/react-transition-group.min.js",
+    },
+    Object {
+      "currentValue": "1.14.3",
+      "datasource": "cdnjs",
+      "depName": "popper.js",
+      "fileReplacePosition": 1078,
+      "lookupName": "popper.js/umd",
+    },
+    Object {
+      "currentValue": "0.10.4",
+      "datasource": "cdnjs",
+      "depName": "react-popper",
+      "fileReplacePosition": 1222,
+      "lookupName": "react-popper/umd",
+    },
+    Object {
+      "currentValue": "7.1.0",
+      "datasource": "cdnjs",
+      "depName": "reactstrap",
+      "fileReplacePosition": 1333,
+      "lookupName": "reactstrap/reactstrap.min.js",
+    },
+    Object {
+      "currentValue": "4.3.1",
+      "datasource": "cdnjs",
+      "depName": "react-router",
+      "fileReplacePosition": 1440,
+      "lookupName": "react-router/react-router.min.js",
+    },
+    Object {
+      "currentValue": "4.0.6",
+      "datasource": "cdnjs",
+      "depName": "react-markdown",
+      "fileReplacePosition": 1550,
+      "lookupName": "react-markdown/react-markdown.js",
+    },
+    Object {
+      "currentValue": "0.18.0",
+      "datasource": "cdnjs",
+      "depName": "axios",
+      "fileReplacePosition": 1748,
+      "lookupName": "axios/axios.min.js",
+    },
+  ],
+}
+`;

@@ -1558,6 +1558,18 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'cdnjs',
+    description: 'Configuration object for CDNJS assets',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      enabled: true,
+      fileMatch: ['\\.html?$'],
+      versionScheme: VERSION_SCHEME_NPM,
+    },
+    mergeable: true,
+  },
+  {
     name: 'supportPolicy',
     description:
       'Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)',

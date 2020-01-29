@@ -1,6 +1,6 @@
 // Datasource
 export const DATASOURCE_CARGO = 'cargo';
-// export const DATASOURCE_CDNJS = 'cdnjs';
+export const DATASOURCE_CDNJS = 'cdnjs';
 export const DATASOURCE_DART = 'dart';
 export const DATASOURCE_DOCKER = 'docker';
 export const DATASOURCE_GIT_SUBMODULES = 'gitSubmodules';

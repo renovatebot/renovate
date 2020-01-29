@@ -178,6 +178,16 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 
 ## cargo
 
+## cdnjs
+
+Extend file matcher according to your project needs. Default value is:
+
+```json
+{
+  "fileMatch": ["\\.html?$"]
+}
+```
+
 ## circleci
 
 ## commitBody

@@ -17,6 +17,9 @@ Object {
   "cargo": Array [
     Object {},
   ],
+  "cdnjs": Array [
+    Object {},
+  ],
   "circleci": Array [
     Object {},
   ],
