@@ -38,6 +38,7 @@ describe('isValid(input)', () => {
   });
   it('should support simple semver', () => {
     expect(isValid('1.2.3')).toBe(true);
+    expect(isValid('v1.2.3')).toBe(true);
   });
   it('should support semver with dash', () => {
     expect(isValid('1.2.3-foo')).toBe(true);
@@ -59,21 +60,33 @@ describe('isValid(input)', () => {
       minSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
+      minSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
+    ).toBe('1.2.3');
+    expect(
       maxSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
+    ).toBe('1.2.3');
+    expect(
+      maxSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
       maxSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..."1.2.4"')
     ).toBe('1.2.4');
     expect(isLessThanRange('1.2.3', '..."1.2.4"')).toBe(false);
+    expect(isLessThanRange('v1.2.3', '..."1.2.4"')).toBe(false);
     expect(isLessThanRange('1.2.3', '"1.2.4"...')).toBe(true);
+    expect(isLessThanRange('v1.2.3', '"1.2.4"...')).toBe(true);
+
     expect(matches('1.2.4', '..."1.2.4"')).toBe(true);
+    expect(matches('v1.2.4', '..."1.2.4"')).toBe(true);
     expect(matches('1.2.4', '..."1.2.3"')).toBe(false);
+    expect(matches('v1.2.4', '..."1.2.3"')).toBe(false);
   });
 });
 describe('getNewValue()', () => {
   it('supports range update', () => {
     [
       ['1.2.3', 'auto', '1.2.3', '1.2.4', '1.2.3'],
+      ['v1.2.3', 'auto', 'v1.2.3', 'v1.2.4', 'v1.2.3'],
       ['from: "1.2.3"', 'auto', '1.2.3', '1.2.4', '1.2.4'],
       ['"1.2.3"...', 'auto', '1.2.3', '1.2.4', '"1.2.4"...'],
       ['"1.2.3"..."1.2.4"', 'auto', '1.2.3', '1.2.5', '"1.2.3"..."1.2.5"'],
