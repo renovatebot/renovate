@@ -1,4 +1,4 @@
-export const getArgv = () => [
+export default () => [
   '/usr/local/bin/node',
   '/Users/me/github/renovate/renovate',
 ];

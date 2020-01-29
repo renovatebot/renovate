@@ -576,7 +576,7 @@ function generateServerResponses(endpoint) {
   };
 }
 
-export const responses = {
+export default {
   'endpoint with no path': generateServerResponses(
     'https://stash.renovatebot.com'
   ),

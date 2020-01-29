@@ -32,7 +32,7 @@ function notFound() {
   throw err;
 }
 
-export const responses = {
+export default {
   '/2.0/user': {
     username: 'nobody',
   },
