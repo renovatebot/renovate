@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/cdnjs getPkgReleases filters releases by asset presence 1`] = `
+exports[`datasource/cdn getPkgReleases filters releases by asset presence 1`] = `
 Object {
   "homepage": "http://bulma.io",
   "releases": Array [
@@ -12,7 +12,7 @@ Object {
 }
 `;
 
-exports[`datasource/cdnjs getPkgReleases processes real data 1`] = `
+exports[`datasource/cdn getPkgReleases processes real data 1`] = `
 Object {
   "homepage": "https://d3js.org/d3-force/",
   "releases": Array [

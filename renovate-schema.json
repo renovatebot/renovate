@@ -999,8 +999,8 @@
       },
       "$ref": "#"
     },
-    "cdnjs": {
-      "description": "Configuration object for CDNJS assets",
+    "cdn": {
+      "description": "Configuration object for CDN assets",
       "type": "object",
       "default": {
         "enabled": true,

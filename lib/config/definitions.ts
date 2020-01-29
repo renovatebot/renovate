@@ -1558,8 +1558,8 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'cdnjs',
-    description: 'Configuration object for CDNJS assets',
+    name: 'cdn',
+    description: 'Configuration object for CDN assets',
     stage: 'repository',
     type: 'object',
     default: {
