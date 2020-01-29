@@ -1,0 +1,211 @@
+{
+  "name": "d3-force",
+  "filename": "d3-force.min.js",
+  "version": "1.1.0",
+  "description": "Force-directed graph layout using velocity Verlet integration.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d3/d3-force.git"
+  },
+  "keywords": [
+    "d3",
+    "d3-module",
+    "layout",
+    "network",
+    "graph",
+    "force",
+    "verlet",
+    "infovis"
+  ],
+  "author": "d3-force",
+  "homepage": "https://d3js.org/d3-force/",
+  "autoupdate": {
+    "source": "npm",
+    "target": "d3-force"
+  },
+  "license": "BSD-3-Clause",
+  "assets": [
+    {
+      "version": "1.1.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.6",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.5",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.4",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.3",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.7.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.7.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.6.3",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.6.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.6.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.6.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.5.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.4.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.4.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.2.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.2.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.1.0",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.0.4",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.0.3",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.0.2",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    },
+    {
+      "version": "0.0.1",
+      "files": [
+        "d3-force.js",
+        "d3-force.min.js"
+      ]
+    }
+  ]
+}
