@@ -6419,10 +6419,10 @@ node-gyp@^5.0.2, node-gyp@^5.0.5:
     tar "^4.4.12"
     which "1"
 
-node-html-parser@1.1.18:
-  version "1.1.18"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.1.18.tgz#fca0a0f56759a05a9749afbdfb289d2022a5c8db"
-  integrity sha512-aMMHT8E0Luj3wcgefp+r4bvsKzDtZr5kBCm8e9PwhRlyx1FswXOYie7WaRYOXbw+jwzLXFeu1W9b1GNRkS4G0A==
+node-html-parser@1.1.19:
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.1.19.tgz#551ddbea531433d849da98a31d7421c96f9df318"
+  integrity sha512-X7spStiBKw9HQfUdBpT8v4MZf2x4qCLu9w31meeqM9Egpne2B78bxZjC4b1ie6NgFMvyY1qdgjI9+scieXmkeA==
   dependencies:
     he "1.1.1"
 
