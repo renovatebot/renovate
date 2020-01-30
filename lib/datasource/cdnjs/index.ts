@@ -33,7 +33,7 @@ export async function getPkgReleases({
   const [depName, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 
-  const cacheKey = assetName;
+  const cacheKey = depName;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
