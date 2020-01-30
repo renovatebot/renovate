@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/cdn/extract extractPackageFile 1`] = `
+exports[`manager/cdnurl/extract extractPackageFile 1`] = `
 Object {
   "deps": Array [
     Object {

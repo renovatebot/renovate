@@ -1558,13 +1558,13 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'cdn',
+    name: 'cdnurl',
     description: 'Configuration object for CDN assets',
     stage: 'repository',
     type: 'object',
     default: {
       enabled: true,
-      fileMatch: ['\\.html?$'],
+      fileMatch: [],
       versionScheme: VERSION_SCHEME_SEMVER,
     },
     mergeable: true,

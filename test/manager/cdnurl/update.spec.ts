@@ -1,14 +1,14 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile } from '../../../lib/manager/cdn/extract';
-import { updateDependency } from '../../../lib/manager/cdn/update';
+import { extractPackageFile } from '../../../lib/manager/cdnurl/extract';
+import { updateDependency } from '../../../lib/manager/cdnurl/update';
 
 const content = readFileSync(
   resolve(__dirname, `./_fixtures/sample.html`),
   'utf8'
 );
 
-describe('manager/cdn/update', () => {
+describe('manager/cdnurl/update', () => {
   it('updates dependency', () => {
     const { deps } = extractPackageFile(content);
     const dep = deps.pop();

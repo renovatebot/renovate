@@ -999,12 +999,12 @@
       },
       "$ref": "#"
     },
-    "cdn": {
+    "cdnurl": {
       "description": "Configuration object for CDN assets",
       "type": "object",
       "default": {
         "enabled": true,
-        "fileMatch": ["\\.html?$"],
+        "fileMatch": [],
         "versionScheme": "semver"
       },
       "$ref": "#"
