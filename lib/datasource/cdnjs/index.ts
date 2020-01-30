@@ -74,7 +74,7 @@ export async function getPkgReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `Cdnjs registry failure`);
+      logger.warn({ lookupName, err }, `CDNJS registry failure`);
       throw new Error(DATASOURCE_FAILURE);
     }
 
@@ -83,7 +83,7 @@ export async function getPkgReleases({
     } else if (err.statusCode === 404) {
       logger.debug(errorData, 'Package lookup error');
     } else {
-      logger.warn(errorData, 'Cdnjs lookup failure: Unknown error');
+      logger.warn(errorData, 'CDNJS lookup failure: Unknown error');
     }
   }
 
