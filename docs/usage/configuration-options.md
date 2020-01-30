@@ -187,7 +187,7 @@ To enable this manager, add the matching files to `cdnurl.fileMatch`. For exampl
 ```json
 {
   "cdnurl": {
-      "fileMatch": ["\\.html?$"]
+    "fileMatch": ["\\.html?$"]
   }
 }
 ```
@@ -1020,10 +1020,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-    "groupName" "Vue monorepo packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
+    }
+  ]
 }
 ```
 
@@ -1031,10 +1033,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
-    "groupName" "All renovate packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "groupName": "All renovate packages"
+    }
+  ]
 }
 ```
 
