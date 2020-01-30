@@ -51,26 +51,25 @@ export function updateDependency(
   const newString = `${newValue}`;
   let newFileContent = fileContent;
 
-  let searchIndex = fileContent.indexOf('releases') + 'releases'.length;
-  for (; searchIndex < fileContent.length; searchIndex += 1) {
+  let searchIndex = newFileContent.indexOf('releases') + 'releases'.length;
+  for (; searchIndex < newFileContent.length; searchIndex += 1) {
     // First check if we have a hit for the old version
-    if (matchAt(fileContent, searchIndex, searchString)) {
+    if (matchAt(newFileContent, searchIndex, searchString)) {
       logger.trace(`Found match at index ${searchIndex}`);
       // Now test if the result matches
-      const testContent = replaceAt(
-        fileContent,
+      newFileContent = replaceAt(
+        newFileContent,
         searchIndex,
         searchString,
         newString
       );
-      // Compare the parsed yaml structure of old and new
-      if (_.isEqual(doc, yaml.safeLoad(testContent, { json: true }))) {
-        newFileContent = testContent;
-        break;
-      } else {
-        logger.debug('Mismatched replace at searchIndex ' + searchIndex);
-      }
     }
   }
-  return newFileContent;
+  // Compare the parsed yaml structure of old and new
+  if (_.isEqual(doc, yaml.safeLoad(newFileContent, { json: true }))) {
+    return newFileContent;
+  }
+
+  logger.debug(`Mismatched replace: ${newFileContent}`);
+  return fileContent;
 }
