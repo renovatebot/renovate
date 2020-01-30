@@ -180,13 +180,15 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 
 ## cdnurl
 
-**Important**: This manager isn't aware of subresource integrity (SRI) hashes.
+**Important**: This manager isn't aware of subresource integrity (SRI) hashes. It will search/replace any matching url it finds, without consideration for things such as script integrity hashes.
 
-Extend file matcher according to your project needs. For example:
+To enable this manager, add the matching files to `cdnurl.fileMatch`. For example:
 
 ```json
 {
-  "fileMatch": ["\\.html?$"]
+  "cdnurl": {
+      "fileMatch": ["\\.html?$"]
+  }
 }
 ```
 
