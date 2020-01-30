@@ -1422,10 +1422,10 @@
   resolved "https://registry.yarnpkg.com/@types/semver-utils/-/semver-utils-1.1.0.tgz#d35645238680d2297a8c9b67395d8b37f0500895"
   integrity sha512-p3ZoozEL036SPVLpMh1LuDebYQkes1rhBfXSFCbact9/FF6dkvR1UV/UqNO5wN5tvdlq+4jK+xTwgWwqRlFUJA==
 
-"@types/semver@6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-6.2.0.tgz#d688d574400d96c5b0114968705366f431831e1a"
-  integrity sha512-1OzrNb4RuAzIT7wHSsgZRlMBlNsJl+do6UblR7JMW4oB7bbR+uBEYtUh7gEc/jM84GGilh68lSOokyM/zNUlBA==
+"@types/semver@6.2.1":
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-6.2.1.tgz#a236185670a7860f1597cf73bea2e16d001461ba"
+  integrity sha512-+beqKQOh9PYxuHvijhVl+tIHvT6tuwOrE9m14zd+MT2A38KoKZhh7pYJ0SNleLtwDsiIxHDsIk9bv01oOxvSvA==
 
 "@types/shelljs@0.8.6":
   version "0.8.6"
