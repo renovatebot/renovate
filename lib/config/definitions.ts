@@ -1563,7 +1563,6 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'object',
     default: {
-      enabled: true,
       fileMatch: [],
       versionScheme: VERSION_SCHEME_SEMVER,
     },
