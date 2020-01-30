@@ -96,6 +96,7 @@ export async function updateArtifacts({
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
     const execOptions: ExecOptions = {
+      cwd,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
       },
