@@ -1003,7 +1003,6 @@
       "description": "Configuration object for CDN assets",
       "type": "object",
       "default": {
-        "enabled": true,
         "fileMatch": [],
         "versionScheme": "semver"
       },
