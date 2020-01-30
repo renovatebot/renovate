@@ -40,7 +40,6 @@ export function updateDependency(
     return fileContent;
   }
   const { depName, newValue } = upgrade;
-  logger.debug({ depName });
   const oldVersion = doc.releases.filter(
     dep => dep.chart.split('/')[1] === depName
   )[0].version;
@@ -66,10 +65,10 @@ export function updateDependency(
     }
   }
   // Compare the parsed yaml structure of old and new
-  if (_.isEqual(doc, yaml.safeLoad(newFileContent, { json: true }))) {
-    return newFileContent;
+  if (!_.isEqual(doc, yaml.safeLoad(newFileContent, { json: true }))) {
+    logger.trace(`Mismatched replace: ${newFileContent}`);
+    newFileContent = fileContent;
   }
 
-  logger.debug(`Mismatched replace: ${newFileContent}`);
-  return fileContent;
+  return newFileContent;
 }
