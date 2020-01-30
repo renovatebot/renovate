@@ -15,7 +15,7 @@ export function extractPackageFile(
   try {
     doc = yaml.safeLoad(content, { json: true });
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helmfile helmfile.yaml');
+    logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;
   }
   if (!(doc && is.array(doc.releases))) {
