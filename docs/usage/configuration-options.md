@@ -178,9 +178,11 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 
 ## cargo
 
-## cdn
+## cdnurl
 
-Extend file matcher according to your project needs. Default value is:
+**Important**: This manager isn't aware of subresource integrity (SRI) hashes.
+
+Extend file matcher according to your project needs. For example:
 
 ```json
 {

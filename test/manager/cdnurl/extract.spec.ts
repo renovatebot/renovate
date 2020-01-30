@@ -1,13 +1,13 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile } from '../../../lib/manager/cdn/extract';
+import { extractPackageFile } from '../../../lib/manager/cdnurl/extract';
 
 const input = readFileSync(
   resolve(__dirname, `./_fixtures/sample.html`),
   'utf8'
 );
 
-describe('manager/cdn/extract', () => {
+describe('manager/cdnurl/extract', () => {
   it('extractPackageFile', () => {
     expect(extractPackageFile(input)).toMatchSnapshot();
   });
