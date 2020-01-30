@@ -1,4 +1,4 @@
-const pr = id => ({
+const pr = (id: number) => ({
   id,
   source: { branch: { name: 'branch' } },
   destination: { branch: { name: 'master' } },
@@ -32,7 +32,7 @@ function notFound() {
   throw err;
 }
 
-module.exports = {
+export default {
   '/2.0/user': {
     username: 'nobody',
   },

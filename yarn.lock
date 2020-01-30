@@ -1219,6 +1219,11 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.7.tgz#1c8c25cbf6e59ffa7d6b9652c78e547d9a41692d"
   integrity sha512-luq8meHGYwvky0O7u0eQZdA7B4Wd9owUCqvbw2m3XCrCU8mplYOujMBbvyS547AxJkC+pGnd0Cm15eNxEUNU8g==
 
+"@types/clean-git-ref@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/clean-git-ref/-/clean-git-ref-2.0.0.tgz#309687ad1bcdd7012025b5bc76e7a209c378fb63"
+  integrity sha512-dVoH5zxekPWDBllQ+tpBoSfCVnmOt9JYBbPqtl0YvR0twDrgQ4qGEd1ZqPvAe7SGSALcIXl54bhE+cH7Px3g+A==
+
 "@types/convert-hrtime@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/convert-hrtime/-/convert-hrtime-2.0.0.tgz#48d8215750e602a8ea439591c741cc927c116bb1"
@@ -1254,6 +1259,11 @@
     "@types/events" "*"
     "@types/minimatch" "*"
     "@types/node" "*"
+
+"@types/global-agent@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@types/global-agent/-/global-agent-2.1.0.tgz#1becbcb067c9c7a8d2cd70b786ca1d062538e299"
+  integrity sha512-xBOerse4Agekl7VZJclA9bfuA9aa3u9T24TDkBiMQrZgu4qe5HMBPzVGzAt2k4dx/v3uIFI6CzG0Z9X894LHrg==
 
 "@types/got@9.6.9":
   version "9.6.9"
