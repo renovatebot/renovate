@@ -54,9 +54,7 @@ export function extractPackageFile(
       currentValue: dep.version,
       registryUrls: [aliases[repoName]]
         .concat([config.aliases[repoName]])
-        .filter((v, _) => {
-          return v != null;
-        }),
+        .filter(Boolean),
     };
 
     if (res.depName.includes('{') || res.depName.includes('}')) {
