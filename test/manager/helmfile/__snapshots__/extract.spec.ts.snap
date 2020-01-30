@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/helmfile/extract extractPackageFile() skip chart with unknown repository 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": Array [],
+      "skipReason": "invalid-registry",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/helmfile/extract extractPackageFile() skip if repository details are not specified 1`] = `
 Object {
   "datasource": "helm",

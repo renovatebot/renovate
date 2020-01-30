@@ -108,5 +108,30 @@ describe('lib/manager/helmfile/extract', () => {
       expect(updateDependency(content, upgrade)).not.toBe(content);
       expect(updateDependency(content, upgrade)).toMatchSnapshot();
     });
+
+    it('Not fail if same version in multiple package', () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+
+      releases:
+        - name: fluentd-elasticsearch-internal
+          version: 5.3.0
+          chart: kiwigrid/fluentd-elasticsearch
+        - name: nginx-ingress
+          version: 5.3.0
+          chart: stable/nginx-ingress
+        - name: fluentd-elasticsearch-external
+          version: 5.3.0
+          chart: kiwigrid/fluentd-elasticsearch
+      `;
+      const upgrade = {
+        depName: 'fluentd-elasticsearch',
+        newValue: '5.3.1',
+        repository: 'https://kiwigrid.github.io',
+      };
+      expect(updateDependency(content, upgrade)).toBe(content);
+    });
   });
 });
