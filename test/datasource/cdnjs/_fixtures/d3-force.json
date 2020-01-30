@@ -1,29 +1,9 @@
 {
-  "name": "d3-force",
-  "filename": "d3-force.min.js",
-  "version": "1.1.0",
-  "description": "Force-directed graph layout using velocity Verlet integration.",
   "repository": {
     "type": "git",
     "url": "https://github.com/d3/d3-force.git"
   },
-  "keywords": [
-    "d3",
-    "d3-module",
-    "layout",
-    "network",
-    "graph",
-    "force",
-    "verlet",
-    "infovis"
-  ],
-  "author": "d3-force",
   "homepage": "https://d3js.org/d3-force/",
-  "autoupdate": {
-    "source": "npm",
-    "target": "d3-force"
-  },
-  "license": "BSD-3-Clause",
   "assets": [
     {
       "version": "1.1.0",
