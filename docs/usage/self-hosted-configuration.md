@@ -7,15 +7,15 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
-## allowedPostUpgradeTasks
+## allowedPostUpgradeCommands
 
-A list of regular expressions that determine which `postUpgradeTasks` are allowed to be executed. If this list is empty then no tasks will be executed.
+A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed. If this list is empty then no tasks will be executed.
 
 e.g.
 
 ```json
 {
-  "allowedPostUpgradeTasks": ["^tslint --fix$", "^tslint --[a-z]+$"]
+  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 

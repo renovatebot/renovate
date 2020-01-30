@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
 import micromatch from 'micromatch';
+import { join } from 'upath';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -327,66 +328,75 @@ export async function processBranch(
     }
 
     if (global.trustLevel === 'high') {
-      logger.debug('Checking for post-upgrade hooks');
+      logger.info(
+        {
+          tasks: config.postUpgradeTasks,
+          allowedCommands: config.allowedPostUpgradeCommands,
+        },
+        'Checking for post-upgrade tasks'
+      );
+      const commands = config.postUpgradeTasks.commands || [];
+      const fileFilters = config.postUpgradeTasks.fileFilters || [];
+
       if (
-        is.nonEmptyArray(config.postUpgradeTasks) &&
-        is.nonEmptyArray(global.allowedPostUpgradeTasks)
+        is.nonEmptyArray(commands) &&
+        is.nonEmptyArray(config.allowedPostUpgradeCommands)
       ) {
-        for (const cmd of config.postUpgradeTasks) {
+        for (const cmd of commands) {
           if (
-            !_.some(global.allowedPostUpgradeTasks, (pattern: string) =>
+            !_.some(config.allowedPostUpgradeCommands, (pattern: string) =>
               cmd.match(pattern)
             )
           ) {
             logger.debug(
-              { cmd, allowedPostUpgradeTasks: global.allowedPostUpgradeTasks },
+              {
+                cmd,
+                allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
+              },
               'Post-upgrade task did not match any on allowed list'
             );
           } else {
-            logger.debug({ cmd }, 'Executing post-change hook');
+            logger.debug({ cmd }, 'Executing post-upgrade task');
 
             const execResult = await exec(cmd, {
               cwd: config.localDir,
             });
 
-            logger.debug(execResult, 'Executed post-change hook');
+            logger.debug({ cmd, ...execResult }, 'Executed post-upgrade task');
           }
         }
 
-        if (is.nonEmptyArray(config.postUpgradeFiles)) {
-          const status = await platform.getRepoStatus();
+        const status = await platform.getRepoStatus();
 
-          for (const filePath of status.modified.concat(status.not_added)) {
-            const relativePath = filePath.substring(config.localDir.length + 1);
-
-            for (const pattern of config.postUpgradeFiles) {
-              if (micromatch.isMatch(relativePath, pattern)) {
-                logger.debug(
-                  { file: filePath, pattern },
-                  'Post-upgrade file saved'
-                );
-                const existingContent = await readFile(filePath);
-                config.updatedArtifacts.push({
-                  name: relativePath,
-                  contents: existingContent.toString(),
-                });
-              }
+        for (const relativePath of status.modified.concat(status.not_added)) {
+          for (const pattern of fileFilters) {
+            if (micromatch.isMatch(relativePath, pattern)) {
+              logger.debug(
+                { file: relativePath, pattern },
+                'Post-upgrade file saved'
+              );
+              const existingContent = await readFile(
+                join(config.localDir, relativePath)
+              );
+              config.updatedArtifacts.push({
+                name: relativePath,
+                contents: existingContent.toString(),
+              });
             }
           }
+        }
 
-          for (const filePath of status.deleted || []) {
-            const relativePath = filePath.substring(config.localDir.length + 1);
-            for (const pattern of config.postUpgradeFiles) {
-              if (micromatch.isMatch(relativePath, pattern)) {
-                logger.debug(
-                  { file: filePath, pattern },
-                  'Post-upgrade file removed'
-                );
-                config.updatedArtifacts.push({
-                  name: '|delete|',
-                  contents: filePath,
-                });
-              }
+        for (const relativePath of status.deleted || []) {
+          for (const pattern of fileFilters) {
+            if (micromatch.isMatch(relativePath, pattern)) {
+              logger.debug(
+                { file: relativePath, pattern },
+                'Post-upgrade file removed'
+              );
+              config.updatedArtifacts.push({
+                name: '|delete|',
+                contents: relativePath,
+              });
             }
           }
         }

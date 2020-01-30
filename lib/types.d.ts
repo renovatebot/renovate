@@ -33,8 +33,6 @@ declare namespace NodeJS {
 
     trustLevel?: string;
 
-    allowedPostUpgradeTasks?: string[];
-
     updateRubyGemsVersions?: Promise<void>;
   }
 }

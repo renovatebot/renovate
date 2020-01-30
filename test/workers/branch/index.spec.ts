@@ -554,7 +554,6 @@ describe('workers/branch', () => {
         deleted: ['/localDir/deleted_file'],
       } as StatusResult);
       global.trustLevel = 'high';
-      global.allowedPostUpgradeTasks = ['^echo 1$'];
 
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
@@ -563,9 +562,12 @@ describe('workers/branch', () => {
 
       const result = await branchWorker.processBranch({
         ...config,
-        postUpgradeTasks: ['echo 1', 'disallowed task'],
-        postUpgradeFiles: ['modified_file', 'deleted_file'],
+        postUpgradeTasks: {
+          commands: ['echo 1', 'disallowed task'],
+          fileFilters: ['modified_file', 'deleted_file'],
+        },
         localDir: '/localDir',
+        allowedPostUpgradeCommands: ['^echo 1$'],
       });
 
       expect(result).toEqual('done');
