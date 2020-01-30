@@ -14,7 +14,7 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1",
+    "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -22,6 +22,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -33,7 +35,7 @@ Array [
 exports[`.updateArtifacts() returns updated Cargo.lock 1`] = `
 Array [
   Object {
-    "cmd": "cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1",
+    "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -41,6 +43,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -52,7 +56,13 @@ Array [
 exports[`.updateArtifacts() returns updated Cargo.lock with docker 1`] = `
 Array [
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust cargo update --manifest-path /tmp/github/some/repo/Cargo.toml --package dep1",
+    "cmd": "docker pull renovate/rust",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust bash -l -c \\"cargo update --manifest-path Cargo.toml --package dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -60,6 +70,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },

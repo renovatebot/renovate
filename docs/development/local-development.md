@@ -63,6 +63,8 @@ The following steps work to set up a brand new Windows 10 installation for devel
   1.19.0
   PS C:\Windows\system32> python --version
   Python 2.7.16
+  PS C:\Windows\system32> python -c "import mock; print(mock.__version__)"
+  3.0.5
   ```
 
 #### Fork and Clone

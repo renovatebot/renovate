@@ -1,3 +1,4 @@
+import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as composer from '../../../lib/manager/composer/artifacts';
@@ -6,10 +7,9 @@ import { mocked } from '../../util';
 import { StatusResult } from '../../../lib/platform/git/storage';
 import { envMock, mockExecAll } from '../../execUtil';
 import * as _env from '../../../lib/util/exec/env';
-import {
-  BINARY_SOURCE_DOCKER,
-  BINARY_SOURCE_GLOBAL,
-} from '../../../lib/constants/data-binary-source';
+import { BinarySource } from '../../../lib/util/exec/common';
+import { setUtilConfig } from '../../../lib/util';
+import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -24,8 +24,10 @@ const env = mocked(_env);
 const platform = mocked(_platform);
 
 const config = {
-  localDir: '/tmp/github/some/repo',
-  cacheDir: '/tmp/renovate/cache',
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/renovate/cache'),
+  dockerUser: 'foobar',
 };
 
 describe('.updateArtifacts()', () => {
@@ -33,6 +35,8 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setUtilConfig(config);
+    resetPrefetchedImages();
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -120,6 +124,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
+    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
 
     const execSnapshots = mockExecAll(exec);
@@ -130,11 +135,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          binarySource: BINARY_SOURCE_DOCKER,
-          dockerUser: 'foobar',
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -150,7 +151,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          binarySource: BINARY_SOURCE_GLOBAL,
+          binarySource: BinarySource.Global,
         },
       })
     ).not.toBeNull();

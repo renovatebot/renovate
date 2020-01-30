@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import * as handlebars from 'handlebars';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -66,6 +67,25 @@ export async function validateConfig(
           depName: 'Deprecation Warning',
           message: getDeprecationMessage(key),
         });
+      }
+      const templateKeys = [
+        'branchName',
+        'commitBody',
+        'commitMessage',
+        'prTitle',
+        'semanticCommitScope',
+      ];
+      if (templateKeys.includes(key) && val) {
+        try {
+          let res = handlebars.compile(val)(config);
+          res = handlebars.compile(res)(config);
+          res = handlebars.compile(res)(config);
+        } catch (err) {
+          errors.push({
+            depName: 'Configuration Error',
+            message: `Invalid handlebars template in config path: ${currentPath}`,
+          });
+        }
       }
       if (!optionTypes[key]) {
         errors.push({

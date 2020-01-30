@@ -4,7 +4,7 @@ import { platform as _platform } from '../../../../lib/platform';
 import { mocked } from '../../../util';
 import { envMock, mockExecAll } from '../../../execUtil';
 import * as _env from '../../../../lib/util/exec/env';
-import { BINARY_SOURCE_GLOBAL } from '../../../../lib/constants/data-binary-source';
+import { BinarySource } from '../../../../lib/util/exec/common';
 
 jest.mock('child_process');
 jest.mock('../../../../lib/util/exec/env');
@@ -45,7 +45,7 @@ describe('generateLockFiles()', () => {
     );
     const execSnapshots = mockExecAll(exec);
     const skipInstalls = false;
-    const binarySource = BINARY_SOURCE_GLOBAL;
+    const binarySource = BinarySource.Global;
     const res = await lernaHelper.generateLockFiles(
       'npm',
       'some-dir',

@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
 import { DEP_TYPE_DOCKER, DEP_TYPE_ORB } from '../../constants/dependency';
+import { VERSION_SCHEME_NPM } from '../../constants/version-schemes';
 import { DATASOURCE_ORB } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile | null {
@@ -33,7 +34,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               datasource: DATASOURCE_ORB,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: 'npm',
+              versionScheme: VERSION_SCHEME_NPM,
               rangeStrategy: 'pin',
             };
             deps.push(dep);

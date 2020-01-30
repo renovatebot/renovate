@@ -1,7 +1,7 @@
 import { fetchUpdates } from '../../../../lib/workers/repository/process/fetch';
 import * as _npm from '../../../../lib/manager/npm';
 import * as lookup from '../../../../lib/workers/repository/process/lookup';
-import { mocked } from '../../../util';
+import { getConfig, mocked, RenovateConfig } from '../../../util';
 import { ManagerApi } from '../../../../lib/manager/common';
 import { DATASOURCE_NPM } from '../../../../lib/constants/data-binary-source';
 
@@ -12,10 +12,10 @@ jest.mock('../../../../lib/workers/repository/process/lookup');
 
 describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = require('../../../config/config/_fixtures');
+      config = getConfig();
     });
     it('handles empty deps', async () => {
       const packageFiles = {

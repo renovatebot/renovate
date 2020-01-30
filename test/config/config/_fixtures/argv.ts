@@ -1,4 +1,4 @@
-module.exports = () => [
+export default () => [
   '/usr/local/bin/node',
   '/Users/me/github/renovate/renovate',
 ];
