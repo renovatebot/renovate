@@ -9,7 +9,7 @@ Object {
       "depName": "prop-types",
       "lookupName": "prop-types/prop-types.min.js",
       "managerData": Object {
-        "fileReplacePosition": 148,
+        "fileReplacePosition": 51,
       },
     },
     Object {
@@ -18,7 +18,7 @@ Object {
       "depName": "react",
       "lookupName": "react/umd",
       "managerData": Object {
-        "fileReplacePosition": 285,
+        "fileReplacePosition": 115,
       },
     },
     Object {
@@ -27,7 +27,7 @@ Object {
       "depName": "react-dom",
       "lookupName": "react-dom/umd",
       "managerData": Object {
-        "fileReplacePosition": 436,
+        "fileReplacePosition": 199,
       },
     },
     Object {
@@ -36,7 +36,7 @@ Object {
       "depName": "react-transition-group",
       "lookupName": "react-transition-group/react-transition-group.min.js",
       "managerData": Object {
-        "fileReplacePosition": 926,
+        "fileReplacePosition": 351,
       },
     },
     Object {
@@ -45,7 +45,7 @@ Object {
       "depName": "popper.js",
       "lookupName": "popper.js/umd",
       "managerData": Object {
-        "fileReplacePosition": 1078,
+        "fileReplacePosition": 436,
       },
     },
     Object {
@@ -54,7 +54,7 @@ Object {
       "depName": "react-popper",
       "lookupName": "react-popper/umd",
       "managerData": Object {
-        "fileReplacePosition": 1222,
+        "fileReplacePosition": 513,
       },
     },
     Object {
@@ -63,7 +63,7 @@ Object {
       "depName": "reactstrap",
       "lookupName": "reactstrap/reactstrap.min.js",
       "managerData": Object {
-        "fileReplacePosition": 1333,
+        "fileReplacePosition": 594,
       },
     },
     Object {
@@ -72,7 +72,7 @@ Object {
       "depName": "react-router",
       "lookupName": "react-router/react-router.min.js",
       "managerData": Object {
-        "fileReplacePosition": 1440,
+        "fileReplacePosition": 670,
       },
     },
     Object {
@@ -81,7 +81,7 @@ Object {
       "depName": "react-markdown",
       "lookupName": "react-markdown/react-markdown.js",
       "managerData": Object {
-        "fileReplacePosition": 1550,
+        "fileReplacePosition": 750,
       },
     },
     Object {
@@ -90,7 +90,7 @@ Object {
       "depName": "axios",
       "lookupName": "axios/axios.min.js",
       "managerData": Object {
-        "fileReplacePosition": 1748,
+        "fileReplacePosition": 888,
       },
     },
   ],

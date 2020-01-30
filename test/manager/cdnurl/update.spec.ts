@@ -1,10 +1,12 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile } from '../../../lib/manager/cdnurl/extract';
-import { updateDependency } from '../../../lib/manager/cdnurl/update';
+import {
+  extractPackageFile,
+  updateDependency,
+} from '../../../lib/manager/cdnurl';
 
 const content = readFileSync(
-  resolve(__dirname, `./_fixtures/sample.html`),
+  resolve(__dirname, `./_fixtures/sample.txt`),
   'utf8'
 );
 

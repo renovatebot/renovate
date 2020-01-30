@@ -1,9 +1,9 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile } from '../../../lib/manager/cdnurl/extract';
+import { extractPackageFile } from '../../../lib/manager/cdnurl';
 
 const input = readFileSync(
-  resolve(__dirname, `./_fixtures/sample.html`),
+  resolve(__dirname, `./_fixtures/sample.txt`),
   'utf8'
 );
 
