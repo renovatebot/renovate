@@ -1084,11 +1084,6 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created. The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-The `postUpdateTasks` configuration constists of two fields:
-
-1. A list of `commands` that are executed after Renovate has updated a dependency but before the commit it made
-2. A list of `fileFilters` that determine which files will be included in the final commit made by Renovate
-
 This is only available on Renovate instances that have a `trustLevel` of 'high'. Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed. If the list of allowed tasks is empty then no tasks will be executed.
 
 e.g.
@@ -1101,6 +1096,16 @@ e.g.
   }
 }
 ```
+
+The `postUpdateTasks` configuration consists of two fields:
+
+### commands
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit it made
+
+### fileFilters
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
 
 ## prBodyColumns
 

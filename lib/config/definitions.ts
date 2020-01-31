@@ -137,6 +137,7 @@ const options: RenovateOptions[] = [
       'Files that match these glob patterns will be committed if they are present after running a post-upgrade task',
     type: 'array',
     subType: 'string',
+    parent: 'postUpgradeTasks',
     default: [],
     cli: false,
   },

@@ -31,19 +31,19 @@
                   "type": "string"
                 },
                 "default": []
+              },
+              "fileFilters": {
+                "description": "Files that match these glob patterns will be committed if they are present after running a post-upgrade task",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
               }
             }
           }
         ]
       }
-    },
-    "fileFilters": {
-      "description": "Files that match these glob patterns will be committed if they are present after running a post-upgrade task",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": []
     },
     "onboardingBranch": {
       "description": "Change this value in order to override the default onboarding branch name.",
