@@ -76,6 +76,45 @@ Array [
 ]
 `;
 
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "Updated Gemfile.lock",
+      "name": "Gemfile.lock",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 2`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/ruby:1.2.0",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -e BUNDLE_GEMS__PRIVATE__COM -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "BUNDLE_GEMS__PRIVATE__COM": "some-user:some-password",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+    },
+  },
+]
+`;
+
 exports[`bundler.updateArtifacts() Docker invalid compatibility options 1`] = `
 Array [
   Object {
