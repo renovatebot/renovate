@@ -3,7 +3,6 @@ import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
-import { re } from 'github-url-from-git';
 
 const isValidChartName = (name: string): boolean => {
   return name.match(/[!@#$%^&*(),.?":{}/|<>A-Z]/) === null;
