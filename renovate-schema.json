@@ -3,7 +3,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "allowedPostUpgradeTasks": {
+    "allowedPostUpgradeCommands": {
       "description": "A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run",
       "type": "array",
       "items": {
@@ -13,14 +13,32 @@
     },
     "postUpgradeTasks": {
       "description": "Post-upgrade tasks that are executed before a commit is made by Renovate",
-      "type": "array",
-      "items": {
-        "type": "string"
+      "type": "object",
+      "default": {
+        "commands": [],
+        "fileFilters": []
       },
-      "default": []
+      "$ref": "#",
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "commands": {
+                "description": "A list of post-upgrade commands that are executed before a commit is made by Renovate",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              }
+            }
+          }
+        ]
+      }
     },
-    "postUpgradeFiles": {
-      "description": "Files that match these glob patterns will be committed if they are present after running post-upgrade tasks",
+    "fileFilters": {
+      "description": "Files that match these glob patterns will be committed if they are present after running a post-upgrade task",
       "type": "array",
       "items": {
         "type": "string"
