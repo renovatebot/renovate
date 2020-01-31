@@ -445,6 +445,12 @@ export function getConfigResponse(
             // eslint-disable-next-line no-param-reassign
             delete options.headers.authorization;
           }
+
+          if (options.href.indexOf('blob.core.windows.net') !== -1) {
+            // docker registry is hosted on Azure blob, redirect url includes authentication.
+            // eslint-disable-next-line no-param-reassign
+            delete options.headers.authorization;
+          }
         },
       ],
     },
