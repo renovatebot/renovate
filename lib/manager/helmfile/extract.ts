@@ -3,6 +3,11 @@ import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
+import { re } from 'github-url-from-git';
+
+const isValidChartName = (name: string): boolean => {
+  return name.match(/[!@#$%^&*(),.?":{}/|<>A-Z]/) === null;
+};
 
 export function extractPackageFile(
   content: string,
@@ -34,6 +39,7 @@ export function extractPackageFile(
     let depName = dep.chart;
     let repoName = null;
 
+    // If starts with ./ is for sure a local path
     if (dep.chart.startsWith('./')) {
       return {
         depName,
@@ -43,8 +49,8 @@ export function extractPackageFile(
 
     if (dep.chart.includes('/')) {
       const v = dep.chart.split('/');
-      depName = v[1];
-      repoName = v[0];
+      repoName = v.shift();
+      depName = v.join('/');
     } else {
       repoName = dep.chart;
     }
@@ -57,19 +63,24 @@ export function extractPackageFile(
         .filter(Boolean),
     };
 
-    if (res.depName.includes('{') || res.depName.includes('}')) {
-      res.skipReason = 'invalid-chart';
+    // If version is null is probably a local chart
+    if (!res.currentValue) {
+      res.skipReason = 'local-chart';
     }
 
+    // By definition on helm the chart name should be lowecase letter + number + -
+    // However helmfile support templating of that field
+    if (!isValidChartName(res.depName)) {
+      res.skipReason = 'unsupported-chart-type';
+    }
+
+    // Skip in case we cannot locate the registry
     if (is.emptyArray(res.registryUrls)) {
-      res.skipReason = 'invalid-registry';
+      res.skipReason = 'unknown-registry';
     }
 
     return res;
   });
-  const res = {
-    deps,
-    datasource: 'helm',
-  };
-  return res;
+
+  return { deps, datasource: 'helm' } as PackageFile;
 }

@@ -123,5 +123,49 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result).toMatchSnapshot();
       expect(result.deps.every(dep => dep.skipReason));
     });
+
+    it('skip chart with special character in the name', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: kiwigrid/example/example
+        - name: example2
+          version: 1.0.0
+          chart: kiwigrid/example?example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result.deps.every(dep => dep.skipReason));
+    });
+
+    it('skip chart that does not have specified version', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result.deps.every(dep => dep.skipReason));
+    });
   });
 });

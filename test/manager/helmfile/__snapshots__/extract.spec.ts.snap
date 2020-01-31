@@ -1,5 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/helmfile/extract extractPackageFile() skip chart that does not have specified version 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": undefined,
+      "depName": "example",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
+      "skipReason": "local-chart",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helmfile/extract extractPackageFile() skip chart with special character in the name 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example/example",
+      "registryUrls": Array [
+        "https://kiwigrid.github.io",
+      ],
+      "skipReason": "unsupported-chart-type",
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "depName": "example?example",
+      "registryUrls": Array [
+        "https://kiwigrid.github.io",
+      ],
+      "skipReason": "unsupported-chart-type",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/helmfile/extract extractPackageFile() skip chart with unknown repository 1`] = `
 Object {
   "datasource": "helm",
@@ -8,7 +48,7 @@ Object {
       "currentValue": "1.0.0",
       "depName": "example",
       "registryUrls": Array [],
-      "skipReason": "invalid-registry",
+      "skipReason": "unknown-registry",
     },
   ],
 }
@@ -22,7 +62,7 @@ Object {
       "currentValue": "1.0.0",
       "depName": "example",
       "registryUrls": Array [],
-      "skipReason": "invalid-registry",
+      "skipReason": "unknown-registry",
     },
   ],
 }
@@ -50,7 +90,7 @@ Object {
       "registryUrls": Array [
         "https://kubernetes-charts.storage.googleapis.com/",
       ],
-      "skipReason": "invalid-chart",
+      "skipReason": "unsupported-chart-type",
     },
     Object {
       "currentValue": "1.0.0",
