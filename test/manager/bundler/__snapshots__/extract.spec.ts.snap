@@ -4688,3 +4688,36 @@ Object {
   ],
 }
 `;
+
+exports[`lib/manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
+Object {
+  "compatibility": Object {
+    "bundler": "1.16.6",
+  },
+  "deps": Array [
+    Object {
+      "depName": "rubocop",
+      "lockedVersion": "0.68.1",
+      "managerData": Object {
+        "lineNumber": 3,
+      },
+      "registryUrls": Array [
+        "https://rubygems.org",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "brakeman",
+      "lockedVersion": "4.4.0",
+      "managerData": Object {
+        "lineNumber": 5,
+      },
+      "registryUrls": Array [
+        "https://rubygems.org",
+      ],
+      "skipReason": "no-version",
+    },
+  ],
+  "registryUrls": Array [],
+}
+`;

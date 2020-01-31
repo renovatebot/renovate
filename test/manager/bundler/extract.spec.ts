@@ -51,6 +51,15 @@ const gitlabFossGemfile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.gitlab-foss',
   'utf8'
 );
+const sourceBlockWithNewLinesGemfileLock = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.sourceBlockWithNewLines.lock',
+  'utf8'
+);
+const sourceBlockWithNewLinesGemfile = readFileSync(
+  'test/manager/bundler/_fixtures/Gemfile.sourceBlockWithNewLines',
+  'utf8'
+);
+
 function validateGems(raw, parsed) {
   const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
   const parsedGemCount = parsed.deps.length;
@@ -146,5 +155,15 @@ describe('lib/manager/bundler/extract', () => {
       })
     ).toBe(true);
     validateGems(gitlabFossGemfile, res);
+  });
+
+  it('parse source blocks with spaces in Gemfile', async () => {
+    platform.getFile.mockReturnValueOnce(sourceBlockWithNewLinesGemfileLock);
+    const res = await extractPackageFile(
+      sourceBlockWithNewLinesGemfile,
+      'Gemfile'
+    );
+    expect(res).toMatchSnapshot();
+    validateGems(sourceBlockWithNewLinesGemfile, res);
   });
 });
