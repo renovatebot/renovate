@@ -9824,10 +9824,10 @@ yarn@1.21.1:
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.1.tgz#1d5da01a9a03492dc4a5957befc1fd12da83d89c"
   integrity sha512-dQgmJv676X/NQczpbiDtc2hsE/pppGDJAzwlRiADMTvFzYbdxPj2WO4PcNyriSt2c4jsCMpt8UFRKHUozt21GQ==
 
-yawn-yaml@1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/yawn-yaml/-/yawn-yaml-1.4.0.tgz#46513da9d017f411680731968d48322004974a91"
-  integrity sha512-aSnPQaFrr+YsHqD+D5PAAdDIQcCtbYOJ7xFDIJDlNCxw3dEgE0wltLJgdHhe4QSLoTVhwRBe6ZJIt1x0oDsRqg==
+yawn-yaml@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/yawn-yaml/-/yawn-yaml-1.5.0.tgz#95fba7544d5375fce3dc84514f12218ed0d2ebcb"
+  integrity sha512-sH2zX9K1QiWhWh9U19pye660qlzrEAd5c4ebw/6lqz17LZw7xYi7nqXlBoVLVtc2FZFXDKiJIsvVcKGYbLVyFQ==
   dependencies:
     js-yaml "^3.4.2"
     lodash "^4.17.11"

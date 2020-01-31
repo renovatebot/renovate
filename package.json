@@ -156,7 +156,7 @@
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
     "yarn": "1.21.1",
-    "yawn-yaml": "1.4.0"
+    "yawn-yaml": "1.5.0"
   },
   "optionalDependencies": {
     "re2": "1.10.5"
