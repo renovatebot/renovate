@@ -34,8 +34,8 @@ export interface RenovateSharedConfig {
 }
 
 export type PostUpgradeTasks = {
-  commands: string[];
-  fileFilters: string[];
+  commands?: string[];
+  fileFilters?: string[];
 };
 
 type UpdateConfig<

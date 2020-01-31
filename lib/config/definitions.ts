@@ -129,6 +129,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     parent: 'postUpgradeTasks',
     default: [],
+    cli: false,
   },
   {
     name: 'fileFilters',
@@ -137,6 +138,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    cli: false,
   },
   {
     name: 'onboardingBranch',
