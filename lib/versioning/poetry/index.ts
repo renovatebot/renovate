@@ -30,7 +30,7 @@ function npm2poetry(input: string): string {
     .split(' ')
     .map(str => str.trim())
     .filter(notEmpty);
-  const operators = ['^', '~', '=', '>', '<', '<=', '>='];
+  const operators = ['^', '~', '~>', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
     if (operators.includes(res[i])) {
       const newValue = res[i] + ' ' + res[i + 1];
@@ -224,44 +224,66 @@ function minSatisfyingVersion(versions: string[], range: string): string {
   return result;
 }
 
-function getNewValue(newValueConfig: NewValueConfig): string {
-  try {
-    const {
-      currentValue,
-      rangeStrategy,
-      fromVersion,
-      toVersion,
-    } = newValueConfig;
-    if (rangeStrategy === 'replace') {
-      const npmCurrentValue = poetry2npm(currentValue);
-      const parsedRange = parseRange(npmCurrentValue);
-      const element = parsedRange[parsedRange.length - 1];
-      if (parsedRange.length === 1 && element.operator) {
-        if (element.operator === '^') {
-          const version = handleShort('^', npmCurrentValue, toVersion);
-          if (version) {
-            return npm2poetry(version);
-          }
+function getNewNpmValue(newValueConfig: NewValueConfig): string {
+  const {
+    currentValue,
+    rangeStrategy,
+    fromVersion,
+    toVersion,
+  } = newValueConfig;
+  if (rangeStrategy === 'replace') {
+    const npmCurrentValue = poetry2npm(currentValue);
+    const parsedRange = parseRange(npmCurrentValue);
+    const element = parsedRange[parsedRange.length - 1];
+    if (parsedRange.length === 1 && element.operator) {
+      if (element.operator === '^') {
+        const version = handleShort('^', npmCurrentValue, toVersion);
+        if (version) {
+          return npm2poetry(version);
         }
-        if (element.operator === '~') {
-          const version = handleShort('~', npmCurrentValue, toVersion);
-          if (version) {
-            return npm2poetry(version);
-          }
+      }
+      if (element.operator === '~') {
+        const version = handleShort('~', npmCurrentValue, toVersion);
+        if (version) {
+          return npm2poetry(version);
         }
       }
     }
-    const newSemver = npm.getNewValue({
-      currentValue: poetry2npm(currentValue),
-      rangeStrategy,
-      fromVersion,
-      toVersion,
-    });
-    const newPoetry = npm2poetry(newSemver);
-    return newPoetry;
-  } catch (_) {
+  }
+  const newSemver = npm.getNewValue({
+    currentValue: poetry2npm(currentValue),
+    rangeStrategy,
+    fromVersion,
+    toVersion,
+  });
+  const newPoetry = npm2poetry(newSemver);
+  return newPoetry;
+}
+
+function getNewValue(newValueConfig: NewValueConfig): string {
+  const {
+    currentValue,
+    rangeStrategy,
+    fromVersion,
+    toVersion,
+  } = newValueConfig;
+  const isPep440 =
+    pep440.isValid(currentValue) &&
+    pep440.isValid(fromVersion) &&
+    pep440.isValid(toVersion);
+  const isNpm =
+    pep440.isValid(currentValue) &&
+    pep440.isValid(fromVersion) &&
+    pep440.isValid(toVersion);
+  if (isNpm && isPep440) {
+    const pep440Result = pep440.getNewValue(newValueConfig);
+    const npmResult = getNewNpmValue(newValueConfig);
+    // if (newValueConfig.expectedValue !== npmResult || newValueConfig.expectedValue !== pep440Result) debugger;
+    return npmResult || pep440Result;
+  } else if (isPep440) {
     return pep440.getNewValue(newValueConfig);
   }
+  return getNewNpmValue(newValueConfig);
 }
 
 function sortVersions(version: string, other: string): number {
