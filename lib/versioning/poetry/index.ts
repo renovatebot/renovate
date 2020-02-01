@@ -25,6 +25,7 @@ function poetry2npm(input: string): string {
 // Poetry uses commas (like in cargo) instead of spaces (like in npm)
 // for AND operation.
 function npm2poetry(input: string): string {
+  if (!input) return null;
   // Note: this doesn't remove the ^
   const res = input
     .split(' ')
@@ -224,15 +225,15 @@ function minSatisfyingVersion(versions: string[], range: string): string {
   return result;
 }
 
-function getNewNpmValue(newValueConfig: NewValueConfig): string {
-  const {
-    currentValue,
-    rangeStrategy,
-    fromVersion,
-    toVersion,
-  } = newValueConfig;
+function getNewNpmValue(config: NewValueConfig): string | null {
+  if (!config.currentValue) return null;
+
+  const { rangeStrategy, fromVersion, toVersion } = config;
+  const currentValue = poetry2npm(config.currentValue);
+  if (!npm.isValid(currentValue)) return null;
+
   if (rangeStrategy === 'replace') {
-    const npmCurrentValue = poetry2npm(currentValue);
+    const npmCurrentValue = currentValue;
     const parsedRange = parseRange(npmCurrentValue);
     const element = parsedRange[parsedRange.length - 1];
     if (parsedRange.length === 1 && element.operator) {
@@ -250,36 +251,46 @@ function getNewNpmValue(newValueConfig: NewValueConfig): string {
       }
     }
   }
-  const newSemver = npm.getNewValue({
-    currentValue: poetry2npm(currentValue),
-    rangeStrategy,
-    fromVersion,
-    toVersion,
-  });
-  const newPoetry = npm2poetry(newSemver);
-  return newPoetry;
-}
 
-function getNewValue(newValueConfig: NewValueConfig): string {
-  const {
+  const newSemver = npm.getNewValue({
     currentValue,
     rangeStrategy,
     fromVersion,
     toVersion,
-  } = newValueConfig;
+  });
+
+  return npm2poetry(newSemver);
+}
+
+function getNewValue(newValueConfig: NewValueConfig): string {
+  const { currentValue, fromVersion, toVersion } = newValueConfig;
   const isPep440 =
     pep440.isValid(currentValue) &&
     pep440.isValid(fromVersion) &&
     pep440.isValid(toVersion);
   const isNpm =
-    pep440.isValid(currentValue) &&
-    pep440.isValid(fromVersion) &&
-    pep440.isValid(toVersion);
+    npm.isValid(currentValue) &&
+    npm.isValid(fromVersion) &&
+    npm.isValid(toVersion);
   if (isNpm && isPep440) {
+    const isNpmRange = x => !npm.isSingleVersion(x);
+    const isPep440Range = x => !pep440.isSingleVersion(x);
+
     const pep440Result = pep440.getNewValue(newValueConfig);
     const npmResult = getNewNpmValue(newValueConfig);
-    // if (newValueConfig.expectedValue !== npmResult || newValueConfig.expectedValue !== pep440Result) debugger;
-    return npmResult || pep440Result;
+
+    let result = npmResult || pep440Result;
+    if (npmResult && isNpmRange(currentValue) && isNpmRange(npmResult)) {
+      return npmResult;
+    } else if (
+      pep440Result &&
+      isPep440Range(currentValue) &&
+      isPep440Range(pep440Result)
+    ) {
+      return pep440Result;
+    }
+
+    return result;
   } else if (isPep440) {
     return pep440.getNewValue(newValueConfig);
   }

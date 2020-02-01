@@ -5,6 +5,13 @@ export interface NewValueTestConfig extends NewValueConfig {
   expectedValue: string;
 }
 
+export interface MinMaxSatisfyingSampleElem {
+  versionList: string[];
+  range: string;
+  min: string | null;
+  max: string | null;
+}
+
 export function getNewValueTestSuite(
   getNewValue: (NewValueConfig) => string | null
 ) {
