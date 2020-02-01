@@ -240,7 +240,7 @@ export async function ensurePr(
           [
             '\n',
             ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'To add credentials for github.com to your config, please see [this guide](https://docs.renovatebot.com/pro/configuration-gitlab/#core-renovate-configuration).',
+            'To add credentials for github.com to your config, please see [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes).',
             '\n',
           ].join('\n'),
         ];
