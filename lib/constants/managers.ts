@@ -3,6 +3,7 @@ export const MANAGER_BAZEL = 'bazel';
 export const MANAGER_BUILDKITE = 'buildkite';
 export const MANAGER_BUNDLER = 'bundler';
 export const MANAGER_CARGO = 'cargo';
+export const MANAGER_CDNURL = 'cdnurl';
 export const MANAGER_CIRCLE_CI = 'circleci';
 export const MANAGER_COMPOSER = 'composer';
 export const MANAGER_DEPS_EDN = 'deps-edn';

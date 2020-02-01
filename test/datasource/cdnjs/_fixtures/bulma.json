@@ -1,26 +1,9 @@
 {
-  "name": "bulma",
-  "filename": "css/bulma.min.css",
-  "version": "0.8.0",
-  "description": "Modern CSS framework based on Flexbox",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jgthms/bulma.git"
   },
-  "keywords": [
-    "css",
-    "sass",
-    "flexbox",
-    "responsive",
-    "framework"
-  ],
-  "author": "bulma",
   "homepage": "http://bulma.io",
-  "autoupdate": {
-    "source": "npm",
-    "target": "bulma"
-  },
-  "license": "MIT",
   "assets": [
     {
       "version": "0.8.0",

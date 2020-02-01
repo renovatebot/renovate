@@ -999,6 +999,15 @@
       },
       "$ref": "#"
     },
+    "cdnurl": {
+      "description": "Configuration object for CDN assets",
+      "type": "object",
+      "default": {
+        "fileMatch": [],
+        "versionScheme": "semver"
+      },
+      "$ref": "#"
+    },
     "supportPolicy": {
       "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)",
       "type": "array",

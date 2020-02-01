@@ -2,11 +2,15 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
 interface CdnjsAsset {
   version: string;
   files: string[];
 }
+
+const cacheNamespace = `datasource-${DATASOURCE_CDNJS}`;
+const cacheMinutes = 60;
 
 interface CdnjsResponse {
   homepage?: string;
@@ -28,7 +32,16 @@ export async function getPkgReleases({
 
   const [depName, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
-  const url = `https://api.cdnjs.com/libraries/${depName}`;
+
+  const cacheKey = depName;
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    cacheKey
+  );
+  // istanbul ignore if
+  if (cachedResult) return cachedResult;
+
+  const url = `https://api.cdnjs.com/libraries/${depName}?fields=homepage,repository,assets`;
 
   try {
     const res = await got(url, { json: true });
@@ -51,6 +64,8 @@ export async function getPkgReleases({
     if (homepage) result.homepage = homepage;
     if (repository && repository.url) result.sourceUrl = repository.url;
 
+    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+
     return result;
   } catch (err) {
     const errorData = { depName, err };
@@ -59,7 +74,7 @@ export async function getPkgReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `Cdnjs registry failure`);
+      logger.warn({ lookupName, err }, `CDNJS registry failure`);
       throw new Error(DATASOURCE_FAILURE);
     }
 
@@ -68,7 +83,7 @@ export async function getPkgReleases({
     } else if (err.statusCode === 404) {
       logger.debug(errorData, 'Package lookup error');
     } else {
-      logger.warn(errorData, 'Cdnjs lookup failure: Unknown error');
+      logger.warn(errorData, 'CDNJS lookup failure: Unknown error');
     }
   }
 

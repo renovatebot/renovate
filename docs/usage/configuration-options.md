@@ -178,6 +178,20 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 
 ## cargo
 
+## cdnurl
+
+**Important**: This manager isn't aware of subresource integrity (SRI) hashes. It will search/replace any matching url it finds, without consideration for things such as script integrity hashes.
+
+To enable this manager, add the matching files to `cdnurl.fileMatch`. For example:
+
+```json
+{
+  "cdnurl": {
+    "fileMatch": ["\\.html?$"]
+  }
+}
+```
+
 ## circleci
 
 ## commitBody
@@ -1006,10 +1020,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-    "groupName" "Vue monorepo packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
+    }
+  ]
 }
 ```
 
@@ -1017,10 +1033,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
-    "groupName" "All renovate packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "groupName": "All renovate packages"
+    }
+  ]
 }
 ```
 
