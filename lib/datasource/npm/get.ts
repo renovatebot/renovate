@@ -142,6 +142,7 @@ export async function getDependency(
     const latestVersion = res.versions[res['dist-tags'].latest];
     res.repository = res.repository || latestVersion.repository;
     res.homepage = res.homepage || latestVersion.homepage;
+    res.license = res.license || latestVersion.license;
 
     // Determine repository URL
     let sourceUrl: string;

@@ -54,14 +54,19 @@ async function getDependency(
       );
       return null;
     }
-    if (dep.info && dep.info.home_page) {
-      if (dep.info.home_page.match(/^https?:\/\/github.com/)) {
-        dependency.sourceUrl = dep.info.home_page.replace(
-          'http://',
-          'https://'
-        );
-      } else {
-        dependency.homepage = dep.info.home_page;
+    if (dep.info) {
+      if (dep.info.home_page) {
+        if (dep.info.home_page.match(/^https?:\/\/github.com/)) {
+          dependency.sourceUrl = dep.info.home_page.replace(
+            'http://',
+            'https://'
+          );
+        } else {
+          dependency.homepage = dep.info.home_page;
+        }
+      }
+      if (dep.info.license) {
+        dependency.license = dep.info.license;
       }
     }
     dependency.releases = [];

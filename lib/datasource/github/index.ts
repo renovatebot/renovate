@@ -216,6 +216,21 @@ export async function getPkgReleases({
     sourceUrl: 'https://github.com/' + repo,
     releases: null,
   };
+  try {
+    const url = `https://api.github.com/repos/${repo}/license`;
+    type LicenseInfo = {
+      download_url: string;
+      license: {
+        spdx_id: string;
+      };
+    };
+    const licenseInfo = (await ghGot<LicenseInfo>(url)).body;
+    dependency.licenseUrl = licenseInfo.download_url;
+    dependency.license = licenseInfo.license.spdx_id;
+  } catch (err) {
+    // istanbul ignore next
+    logger.debug({ repo, err }, 'Error retrieving license from github');
+  }
   dependency.releases = versions.map(version => ({
     version,
     gitRef: version,

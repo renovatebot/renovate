@@ -92,6 +92,7 @@ Object {
 
 exports[`datasource/pypi getPkgReleases processes real data 1`] = `
 Object {
+  "license": "MIT",
   "releases": Array [
     Object {
       "releaseTimestamp": "2017-04-03T16:55:14",

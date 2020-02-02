@@ -4,7 +4,8 @@
   "version": "0.0.0-semantic-release",
   "bin": {
     "renovate": "dist/renovate.js",
-    "renovate-config-validator": "bin/config-validator.js"
+    "renovate-config-validator": "bin/config-validator.js",
+    "renovate-license-dump": "dist/license-dump.js"
   },
   "scripts": {
     "build": "run-s clean compile:* copy-static-files",

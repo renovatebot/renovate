@@ -139,6 +139,7 @@ Object {
 
 exports[`datasource/nuget getPkgReleases processes real data (v3) feed is a nuget.org 1`] = `
 Object {
+  "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
   "pkgName": "nunit",
   "releases": Array [
     Object {
@@ -223,6 +224,7 @@ Object {
 
 exports[`datasource/nuget getPkgReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
+  "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
   "pkgName": "nunit",
   "releases": Array [
     Object {
@@ -319,6 +321,7 @@ Object {
 
 exports[`datasource/nuget getPkgReleases processes real data with no github project url (v3) 1`] = `
 Object {
+  "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
   "pkgName": "nunit",
   "releases": Array [],
   "sourceUrl": "https://nunit.org",
@@ -449,6 +452,7 @@ Object {
 
 exports[`datasource/nuget getPkgReleases processes real data without project url (v3) 1`] = `
 Object {
+  "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
   "pkgName": "nunit",
   "releases": Array [
     Object {

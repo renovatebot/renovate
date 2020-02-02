@@ -96,6 +96,12 @@ export async function getPkgReleases(
     dep.releases = match.versions.map(item => ({
       version: item.version,
     }));
+    if (match.licenseUrl) {
+      dep.licenseUrl = match.licenseUrl;
+    }
+    if (match.license) {
+      dep.license = match.license;
+    }
 
     try {
       // For nuget.org we have a way to get nuspec file

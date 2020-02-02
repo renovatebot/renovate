@@ -59,8 +59,9 @@ function getGlobalConfig(): Promise<RenovateConfig> {
   return configParser.parseConfigs(process.env, process.argv);
 }
 
-export async function start(): Promise<0 | 1> {
+export async function start(worker): Promise<0 | 1> {
   try {
+    worker = worker || repositoryWorker;
     let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
@@ -83,7 +84,7 @@ export async function start(): Promise<0 | 1> {
         repoConfig.hostRules.forEach(rule => hostRules.add(rule));
         repoConfig.hostRules = [];
       }
-      await repositoryWorker.renovateRepository(repoConfig);
+      await worker.renovateRepository(repoConfig);
     }
     setMeta({});
     printStats();
