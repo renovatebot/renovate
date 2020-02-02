@@ -59,7 +59,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
   return configParser.parseConfigs(process.env, process.argv);
 }
 
-export async function start(repoWorker): Promise<0 | 1> {
+export async function start(repoWorker?): Promise<0 | 1> {
   try {
     const worker = repoWorker || repositoryWorker;
     let config = await getGlobalConfig();
