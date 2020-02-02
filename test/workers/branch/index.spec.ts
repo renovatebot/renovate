@@ -549,9 +549,9 @@ describe('workers/branch', () => {
         isModified: true,
       } as never);
       platform.getRepoStatus.mockResolvedValueOnce({
-        modified: ['/localDir/modified_file'],
+        modified: ['modified_file'],
         not_added: [],
-        deleted: ['/localDir/deleted_file'],
+        deleted: ['deleted_file'],
       } as StatusResult);
       global.trustLevel = 'high';
 

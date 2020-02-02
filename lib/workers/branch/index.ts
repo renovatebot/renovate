@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import _ from 'lodash';
 import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
-import micromatch from 'micromatch';
+import minimatch from 'minimatch';
 import { join } from 'upath';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
@@ -327,8 +327,11 @@ export async function processBranch(
       logger.debug('No updated lock files in branch');
     }
 
-    if (global.trustLevel === 'high') {
-      logger.info(
+    if (
+      global.trustLevel === 'high' &&
+      is.nonEmptyArray(config.allowedPostUpgradeCommands)
+    ) {
+      logger.debug(
         {
           tasks: config.postUpgradeTasks,
           allowedCommands: config.allowedPostUpgradeCommands,
@@ -338,17 +341,14 @@ export async function processBranch(
       const commands = config.postUpgradeTasks.commands || [];
       const fileFilters = config.postUpgradeTasks.fileFilters || [];
 
-      if (
-        is.nonEmptyArray(commands) &&
-        is.nonEmptyArray(config.allowedPostUpgradeCommands)
-      ) {
+      if (is.nonEmptyArray(commands)) {
         for (const cmd of commands) {
           if (
             !_.some(config.allowedPostUpgradeCommands, (pattern: string) =>
               cmd.match(pattern)
             )
           ) {
-            logger.debug(
+            logger.warn(
               {
                 cmd,
                 allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
@@ -370,7 +370,7 @@ export async function processBranch(
 
         for (const relativePath of status.modified.concat(status.not_added)) {
           for (const pattern of fileFilters) {
-            if (micromatch.isMatch(relativePath, pattern)) {
+            if (minimatch(relativePath, pattern)) {
               logger.debug(
                 { file: relativePath, pattern },
                 'Post-upgrade file saved'
@@ -388,7 +388,7 @@ export async function processBranch(
 
         for (const relativePath of status.deleted || []) {
           for (const pattern of fileFilters) {
-            if (micromatch.isMatch(relativePath, pattern)) {
+            if (minimatch(relativePath, pattern)) {
               logger.debug(
                 { file: relativePath, pattern },
                 'Post-upgrade file removed'
