@@ -90,17 +90,6 @@ Array [
 ]
 `;
 
-exports[`config/validation validateConfig(config) included unsupported manager 1`] = `
-Array [
-  Object {
-    "depName": "Configuration Error",
-    "message": "packageRules:
-        You have included an unsupported manager in a package rule. Your list: foo.
-        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, cdnurl, circleci, composer, deps-edn, docker-compose, dockerfile, droneci, git-submodules, github-actions, gitlabci, gitlabci-include, gomod, gradle, gradle-wrapper, helm-requirements, helmfile, homebrew, kubernetes, leiningen, maven, meteor, mix, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, poetry, pub, sbt, swift, terraform, travis, ruby-version).",
-  },
-]
-`;
-
 exports[`config/validation validateConfig(config) returns deprecation warnings 1`] = `
 Array [
   Object {
