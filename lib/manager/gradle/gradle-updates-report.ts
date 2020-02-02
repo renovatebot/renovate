@@ -15,6 +15,7 @@ interface GradleDependency {
   name: string;
   group: string;
   version: string;
+  configuration: string;
 }
 
 type GradleDependencyWithRepos = GradleDependency & { repos: string[] };
@@ -23,6 +24,7 @@ type GradleDependencyWithRepos = GradleDependency & { repos: string[] };
 export interface BuildDependency {
   name: string;
   depGroup: string;
+  depType: string;
   depName?: string;
   currentValue?: string;
   registryUrls?: string[];
@@ -46,11 +48,19 @@ allprojects {
            .findAll { !it.startsWith('file:') }
            .unique()
         project.repositories = repos
-        def deps = (buildscript.configurations + configurations)
-          .collect { it.dependencies + it.dependencyConstraints }
-          .flatten()
-          .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
-          .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
+        def deps = []
+        (buildscript.configurations + configurations)
+           .collect {
+               def name = it.name == 'classpath' ? 'plugins' : it.name
+               new Tuple2<String, List<Object>>(name, it.dependencies + it.dependencyConstraints)
+           }.groupBy { it.first }
+           .each { configuration, dependencies ->
+               def depsByConfig = dependencies
+                       .flatten()
+                       .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
+                       .collect { ['name': it.name, 'group': it.group, 'version': it.version, 'configuration': configuration] }
+               deps.push(depsByConfig)
+           }
         project.dependencies = deps
     }
   }
@@ -130,6 +140,7 @@ function buildDependency(
   return {
     name: gradleModule.name,
     depGroup: gradleModule.group,
+    depType: gradleModule.configuration,
     depName: `${gradleModule.group}:${gradleModule.name}`,
     currentValue: gradleModule.version,
     registryUrls: gradleModule.repos,
