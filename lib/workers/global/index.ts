@@ -59,9 +59,9 @@ function getGlobalConfig(): Promise<RenovateConfig> {
   return configParser.parseConfigs(process.env, process.argv);
 }
 
-export async function start(worker): Promise<0 | 1> {
+export async function start(repoWorker): Promise<0 | 1> {
   try {
-    worker = worker || repositoryWorker;
+    const worker = repoWorker || repositoryWorker;
     let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);

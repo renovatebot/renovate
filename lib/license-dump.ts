@@ -1,21 +1,19 @@
 #!/usr/bin/env node
 
+import * as fs from 'fs-extra';
 import * as proxy from './proxy';
 import * as globalWorker from './workers/global';
 import * as datasource from './datasource';
 import { platform } from './platform';
-import * as fs from 'fs-extra';
 import { logger, setMeta } from './logger';
 
 import { extractAllDependencies } from './workers/repository/extract';
 import handleError from './workers/repository/error';
 import { initRepo } from './workers/repository/init';
-import { processResult } from './workers/repository/result';
+import { processResult, ProcessResult } from './workers/repository/result';
 
-proxy.bootstrap();
-
-var worker = {
-  renovateRepository: async function(repoConfig) {
+const worker = {
+  renovateRepository: async (repoConfig): Promise<ProcessResult> => {
     let config = { ...repoConfig };
     setMeta({ repository: config.repository });
     logger.info('Renovating repository');
@@ -34,7 +32,7 @@ var worker = {
             );
             if (license || licenseUrl) {
               logger.info(
-                `${config.repository} -> ${dep.depName}: ${license} ${licenseUrl}`
+                `${config.repository} -> ${manager}:${dep.depName}: ${license} ${licenseUrl}`
               );
             }
           }
