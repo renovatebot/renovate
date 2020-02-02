@@ -1123,6 +1123,18 @@
       },
       "$ref": "#"
     },
+    "helmfile": {
+      "description": "Configuration object for helmfile helmfile.yaml files.",
+      "type": "object",
+      "default": {
+        "aliases": {
+          "stable": "https://kubernetes-charts.storage.googleapis.com/"
+        },
+        "commitMessageTopic": "helm chart {{depName}}",
+        "fileMatch": ["(^|/)helmfile.yaml$"]
+      },
+      "$ref": "#"
+    },
     "circleci": {
       "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",

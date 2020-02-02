@@ -18,6 +18,7 @@ export const MANAGER_GO_MOD = 'gomod';
 export const MANAGER_GRADLE = 'gradle';
 export const MANAGER_GRADLE_WRAPPER = 'gradle-wrapper';
 export const MANAGER_HELM_REQUIREMENTS = 'helm-requirements';
+export const MANAGER_HELMFILE = 'helmfile';
 export const MANAGER_HOMEBREW = 'homebrew';
 export const MANAGER_KUBERNETES = 'kubernetes';
 export const MANAGER_LEININGEN = 'leiningen';
