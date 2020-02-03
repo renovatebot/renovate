@@ -43,7 +43,7 @@ function loadManagers(): void {
     let module = null;
     try {
       module = require(`./${manager}`); // eslint-disable-line
-    } catch (e) {
+    } catch (e) /* istanbul ignore next */ {
       logger.error(`Can not load manager "${manager}", skipping directory.`);
     }
 

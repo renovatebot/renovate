@@ -50,7 +50,6 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        manager: 'pub',
         datasource: DATASOURCE_DART,
         deps,
       };

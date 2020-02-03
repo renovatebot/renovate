@@ -353,7 +353,6 @@ export async function extractAllPackageFiles(
       if (deps) {
         npmFiles.push({
           packageFile,
-          manager: 'npm',
           ...deps,
         });
       }

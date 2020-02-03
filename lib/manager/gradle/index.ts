@@ -143,7 +143,6 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        manager: 'gradle',
         datasource: DATASOURCE_MAVEN,
         deps: dependencies,
       });
