@@ -172,8 +172,9 @@ export enum QualifierTypes {
 }
 
 export function qualifierType(token: Token): number {
-  if (typeof token.val !== 'string') {
-    return null;
+  switch (token.type) {
+    case TYPE_NUMBER:
+      return;
   }
   const val = token.val.toLowerCase();
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
