@@ -354,6 +354,17 @@ const minMaxSample: MinMaxSatisfyingSampleElem[] = [
   },
 ];
 
+function eliminateDoubleEquals(
+  testConfig: NewValueTestConfig
+): NewValueTestConfig {
+  const { rangeStrategy, expectedValue } = testConfig;
+  if (rangeStrategy !== 'pin') return testConfig;
+  return {
+    ...testConfig,
+    expectedValue: expectedValue && expectedValue.replace(/^==/g, ''),
+  };
+}
+
 export const sample = {
   singleVersions: [...npmSample.singleVersions, ...pep440Sample.singleVersions],
   exactVersions: [...npmSample.exactVersions, ...pep440Sample.singleVersions],
@@ -369,5 +380,5 @@ export const sample = {
     ...getNewValueTestCases,
     ...npmSample.getNewValueTestCases,
     ...pep440Sample.getNewValueTestCases,
-  ],
+  ].map(eliminateDoubleEquals),
 };

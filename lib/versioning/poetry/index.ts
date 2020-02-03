@@ -252,6 +252,8 @@ function getNewNpmValue(config: NewValueConfig): string | null {
     }
   }
 
+  if (!currentValue || !npm.isValid(currentValue)) return null;
+
   const newSemver = npm.getNewValue({
     currentValue,
     rangeStrategy,
@@ -259,42 +261,38 @@ function getNewNpmValue(config: NewValueConfig): string | null {
     toVersion,
   });
 
-  return npm2poetry(newSemver);
+  return newSemver ? npm2poetry(newSemver) : null;
 }
 
+const isNpmRange = x => !npm.isSingleVersion(x);
+const isPep440Range = x => !pep440.isSingleVersion(x);
+
 function getNewValue(newValueConfig: NewValueConfig): string {
-  const { currentValue, fromVersion, toVersion } = newValueConfig;
-  const isPep440 =
-    pep440.isValid(currentValue) &&
-    pep440.isValid(fromVersion) &&
-    pep440.isValid(toVersion);
-  const isNpm =
-    npm.isValid(currentValue) &&
-    npm.isValid(fromVersion) &&
-    npm.isValid(toVersion);
-  if (isNpm && isPep440) {
-    const isNpmRange = x => !npm.isSingleVersion(x);
-    const isPep440Range = x => !pep440.isSingleVersion(x);
+  const { currentValue, rangeStrategy } = newValueConfig;
 
-    const pep440Result = pep440.getNewValue(newValueConfig);
-    const npmResult = getNewNpmValue(newValueConfig);
+  let result;
 
-    let result = npmResult || pep440Result;
-    if (npmResult && isNpmRange(currentValue) && isNpmRange(npmResult)) {
-      return npmResult;
-    } else if (
-      pep440Result &&
-      isPep440Range(currentValue) &&
-      isPep440Range(pep440Result)
-    ) {
-      return pep440Result;
+  const pep440Result = pep440.getNewValue(newValueConfig);
+  const npmResult = getNewNpmValue(newValueConfig);
+  if (npmResult && pep440Result) {
+    if (isNpmRange(currentValue) && isNpmRange(npmResult)) {
+      result = npmResult;
+    } else if (isPep440Range(currentValue) && isPep440Range(pep440Result)) {
+      result = pep440Result;
+    } else {
+      result = npmResult || pep440Result;
     }
-
-    return result;
-  } else if (isPep440) {
-    return pep440.getNewValue(newValueConfig);
+  } else if (pep440Result) {
+    result = pep440Result;
+  } else {
+    result = npmResult;
   }
-  return getNewNpmValue(newValueConfig);
+
+  if (result && rangeStrategy === 'pin') {
+    result = result.replace(/^==/, '');
+  }
+
+  return result;
 }
 
 function sortVersions(version: string, other: string): number {
