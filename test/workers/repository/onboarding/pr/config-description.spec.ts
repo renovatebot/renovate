@@ -29,20 +29,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res).toMatchSnapshot();
       expect(res.indexOf('Docker-only')).not.toBe(-1);
     });
-    it('returns a filtered list', () => {
-      const packageFiles = {
-        npm: [],
-      };
-      config.description = [
-        'description 1',
-        'description two',
-        'something else',
-        'this is Docker-only',
-      ];
-      const res = getConfigDesc(config, packageFiles);
-      expect(res).toMatchSnapshot();
-      expect(res.indexOf('Docker-only')).toBe(-1);
-    });
     it('assignees, labels and schedule', () => {
       delete config.description;
       config.packageFiles = [];

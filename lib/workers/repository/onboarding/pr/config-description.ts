@@ -33,22 +33,12 @@ export function getConfigDesc(
 ): string {
   logger.debug('getConfigDesc()');
   logger.trace({ config });
-  let descriptionArr = getDescriptionArray(config);
+  const descriptionArr = getDescriptionArray(config);
   if (!descriptionArr.length) {
     logger.debug('No config description found');
     return '';
   }
   logger.debug({ length: descriptionArr.length }, 'Found description array');
-  const enabledManagers = packageFiles ? Object.keys(packageFiles) : [];
-  if (
-    !(
-      enabledManagers.includes('dockerfile') ||
-      enabledManagers.includes('circleci') ||
-      enabledManagers.includes('docker-compose')
-    )
-  ) {
-    descriptionArr = descriptionArr.filter(val => !val.includes('Docker-only'));
-  }
   let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
   desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
   descriptionArr.forEach(d => {
