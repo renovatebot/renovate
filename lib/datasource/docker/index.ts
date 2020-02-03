@@ -420,6 +420,33 @@ async function getTags(
   }
 }
 
+export function getConfigResponseBeforeRedirectHook(options: any): void {
+  if (options.search && options.search.indexOf('X-Amz-Algorithm') !== -1) {
+    // if there is no port in the redirect URL string, then delete it from the redirect options.
+    // This can be evaluated for removal after upgrading to Got v10
+    const portInUrl = options.href.split('/')[2].split(':')[1];
+    if (!portInUrl) {
+      // eslint-disable-next-line no-param-reassign
+      delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
+    }
+
+    // docker registry is hosted on amazon, redirect url includes authentication.
+    // eslint-disable-next-line no-param-reassign
+    delete options.headers.authorization;
+  }
+
+  if (
+    options.href &&
+    options.href.indexOf('blob.core.windows.net') !== -1 &&
+    options.headers &&
+    options.headers.authorization
+  ) {
+    // docker registry is hosted on Azure blob, redirect url includes authentication.
+    // eslint-disable-next-line no-param-reassign
+    delete options.headers.authorization;
+  }
+}
+
 export function getConfigResponse(
   url: string,
   headers: OutgoingHttpHeaders
@@ -427,32 +454,7 @@ export function getConfigResponse(
   return got(url, {
     headers,
     hooks: {
-      beforeRedirect: [
-        (options: any): void => {
-          if (
-            options.search &&
-            options.search.indexOf('X-Amz-Algorithm') !== -1
-          ) {
-            // if there is no port in the redirect URL string, then delete it from the redirect options.
-            // This can be evaluated for removal after upgrading to Got v10
-            const portInUrl = options.href.split('/')[2].split(':')[1];
-            if (!portInUrl) {
-              // eslint-disable-next-line no-param-reassign
-              delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-            }
-
-            // docker registry is hosted on amazon, redirect url includes authentication.
-            // eslint-disable-next-line no-param-reassign
-            delete options.headers.authorization;
-          }
-
-          if (options.href.indexOf('blob.core.windows.net') !== -1) {
-            // docker registry is hosted on Azure blob, redirect url includes authentication.
-            // eslint-disable-next-line no-param-reassign
-            delete options.headers.authorization;
-          }
-        },
-      ],
+      beforeRedirect: [getConfigResponseBeforeRedirectHook],
     },
   });
 }
