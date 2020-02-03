@@ -77,6 +77,12 @@ describe('semver.maxSatisfyingVersion()', () => {
     ).toBe('4.2.0');
     expect(
       semver.maxSatisfyingVersion(
+        ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
+        '~4'
+      )
+    ).toBe('4.2.0');
+    expect(
+      semver.maxSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~0.4'
       )
@@ -88,6 +94,12 @@ describe('semver.minSatisfyingVersion()', () => {
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
+        '~4'
+      )
+    ).toBe('4.0.0');
+    expect(
+      semver.minSatisfyingVersion(
+        ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
         '~4'
       )
     ).toBe('4.0.0');

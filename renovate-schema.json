@@ -1041,6 +1041,15 @@
       },
       "$ref": "#"
     },
+    "cdnurl": {
+      "description": "Configuration object for CDN assets",
+      "type": "object",
+      "default": {
+        "fileMatch": [],
+        "versionScheme": "semver"
+      },
+      "$ref": "#"
+    },
     "supportPolicy": {
       "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)",
       "type": "array",
@@ -1153,6 +1162,18 @@
         },
         "commitMessageTopic": "helm chart {{depName}}",
         "fileMatch": ["(^|/)requirements.yaml$"]
+      },
+      "$ref": "#"
+    },
+    "helmfile": {
+      "description": "Configuration object for helmfile helmfile.yaml files.",
+      "type": "object",
+      "default": {
+        "aliases": {
+          "stable": "https://kubernetes-charts.storage.googleapis.com/"
+        },
+        "commitMessageTopic": "helm chart {{depName}}",
+        "fileMatch": ["(^|/)helmfile.yaml$"]
       },
       "$ref": "#"
     },

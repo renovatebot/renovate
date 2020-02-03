@@ -1,0 +1,470 @@
+{
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgthms/bulma.git"
+  },
+  "homepage": "http://bulma.io",
+  "assets": [
+    {
+      "version": "0.8.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ]
+    },
+    {
+      "version": "0.7.5",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "only/0.7.5/style.css"
+      ]
+    },
+    {
+      "version": "0.7.4",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ]
+    },
+    {
+      "version": "0.7.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ]
+    },
+    {
+      "version": "0.7.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ]
+    },
+    {
+      "version": "0.7.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css"
+      ]
+    },
+    {
+      "version": "0.6.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.6.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.6.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.5.3",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.5.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.5.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.5.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.4.4",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.4.3",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.4.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.4.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.4.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.3.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.3.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.2.3",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.2.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.1.2",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.1.1",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.1.0",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.28",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.27",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.26",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.25",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.24",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.23",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.22",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.21",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.20",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.19",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.18",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.17",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.16",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.15",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.14",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.13",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.12",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.11",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.10",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.9",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.8",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.7",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.6",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.5",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.css.map",
+        "css/bulma.min.css",
+        "css/bulma.min.css.map"
+      ]
+    },
+    {
+      "version": "0.0.4",
+      "files": [
+        "css/bulma.css",
+        "css/bulma.min.css"
+      ]
+    }
+  ]
+}

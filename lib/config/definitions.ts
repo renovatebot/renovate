@@ -1597,6 +1597,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'cdnurl',
+    description: 'Configuration object for CDN assets',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      fileMatch: [],
+      versionScheme: VERSION_SCHEME_SEMVER,
+    },
+    mergeable: true,
+  },
+  {
     name: 'supportPolicy',
     description:
       'Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)',
@@ -1738,6 +1749,21 @@ const options: RenovateOptions[] = [
       },
       commitMessageTopic: 'helm chart {{depName}}',
       fileMatch: ['(^|/)requirements.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'helmfile',
+    description: 'Configuration object for helmfile helmfile.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      aliases: {
+        stable: 'https://kubernetes-charts.storage.googleapis.com/',
+      },
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)helmfile.yaml$'],
     },
     mergeable: true,
     cli: false,

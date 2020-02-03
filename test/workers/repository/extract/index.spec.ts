@@ -17,7 +17,7 @@ describe('workers/repository/extract/index', () => {
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       const res = await extractAllDependencies(config);
-      expect(res).toMatchSnapshot();
+      expect(Object.keys(res).includes('ansible')).toBe(true);
     });
     it('skips non-enabled maangers', async () => {
       config.enabledManagers = ['npm'];

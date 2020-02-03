@@ -4,6 +4,8 @@ const basicEnvVars = [
   'NO_PROXY',
   'HOME',
   'PATH',
+  'LC_ALL',
+  'LANG',
   'DOCKER_HOST',
 ];
 

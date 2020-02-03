@@ -16,34 +16,42 @@ const defaultConfig = getConfig();
 
 jest.mock('../../../lib/workers/pr/changelog');
 
-changelogHelper.getChangeLogJSON = jest.fn();
-changelogHelper.getChangeLogJSON.mockResolvedValue({
-  project: {
-    githubBaseURL: 'https://github.com/',
-    github: 'renovateapp/dummy',
-    repository: 'https://github.com/renovateapp/dummy',
-  },
-  hasReleaseNotes: true,
-  versions: [
-    {
-      date: new Date('2017-01-01'),
-      version: '1.1.0',
-      changes: [
-        {
-          date: new Date('2017-01-01'),
-          sha: 'abcdefghijklmnopqrstuvwxyz',
-          message: 'foo #3\nbar',
-        },
-      ],
-      releaseNotes: {
-        url: 'https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0',
-      },
-      compare: {
-        url: 'https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0',
-      },
+function setupChangelogMock() {
+  changelogHelper.getChangeLogJSON = jest.fn();
+  const resultValue = {
+    project: {
+      githubBaseURL: 'https://github.com/',
+      github: 'renovateapp/dummy',
+      repository: 'https://github.com/renovateapp/dummy',
     },
-  ],
-});
+    hasReleaseNotes: true,
+    versions: [
+      {
+        date: new Date('2017-01-01'),
+        version: '1.1.0',
+        changes: [
+          {
+            date: new Date('2017-01-01'),
+            sha: 'abcdefghijklmnopqrstuvwxyz',
+            message: 'foo #3\nbar',
+          },
+        ],
+        releaseNotes: {
+          url: 'https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0',
+        },
+        compare: {
+          url: 'https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0',
+        },
+      },
+    ],
+  };
+  const errorValue = {
+    error: _changelogHelper.ChangeLogError.MissingGithubToken,
+  };
+  changelogHelper.getChangeLogJSON.mockResolvedValueOnce(resultValue);
+  changelogHelper.getChangeLogJSON.mockResolvedValueOnce(errorValue);
+  changelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
+}
 
 describe('workers/pr', () => {
   describe('checkAutoMerge(pr, config)', () => {
@@ -121,6 +129,7 @@ describe('workers/pr', () => {
       isModified: false,
     } as never;
     beforeEach(() => {
+      setupChangelogMock();
       config = {
         ...defaultConfig,
       };

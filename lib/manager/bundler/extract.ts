@@ -110,7 +110,7 @@ export async function extractPackageFile(
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if
-          if (!sourceLine) {
+          if (sourceLine === null || sourceLine === undefined) {
             logger.error({ content, fileName }, 'Undefined sourceLine');
             sourceLine = 'end';
           }
