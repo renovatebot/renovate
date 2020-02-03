@@ -168,7 +168,6 @@ Array [
         ],
       },
     ],
-    "manager": "gradle",
     "packageFile": "build.gradle",
   },
   Object {
@@ -227,7 +226,6 @@ Array [
         ],
       },
     ],
-    "manager": "gradle",
     "packageFile": "subproject/build.gradle",
   },
 ]
@@ -313,7 +311,6 @@ Array [
         ],
       },
     ],
-    "manager": "gradle",
     "packageFile": "foo/build.gradle",
   },
 ]
@@ -399,7 +396,6 @@ Array [
         ],
       },
     ],
-    "manager": "gradle",
     "packageFile": "build.gradle.kts",
   },
   Object {
@@ -458,7 +454,6 @@ Array [
         ],
       },
     ],
-    "manager": "gradle",
     "packageFile": "subproject/build.gradle.kts",
   },
 ]
@@ -613,7 +608,6 @@ Array [
         ],
       },
     ],
-    "manager": "gradle",
     "packageFile": "build.gradle",
   },
 ]
