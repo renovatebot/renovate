@@ -2,7 +2,6 @@ import { safeLoad } from 'js-yaml';
 import { isValid } from '../../versioning/npm/index';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
-import { MANAGER_PUB } from '../../constants/managers';
 import { DATASOURCE_DART } from '../../constants/data-binary-source';
 
 function getDeps(
@@ -51,7 +50,7 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        manager: MANAGER_PUB,
+        manager: 'pub',
         datasource: DATASOURCE_DART,
         deps,
       };

@@ -3,11 +3,6 @@ import { logger } from '../../../../logger';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
-import {
-  MANAGER_CIRCLE_CI,
-  MANAGER_DOCKER_COMPOSE,
-  MANAGER_DOCKERFILE,
-} from '../../../../constants/managers';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -47,9 +42,9 @@ export function getConfigDesc(
   const enabledManagers = packageFiles ? Object.keys(packageFiles) : [];
   if (
     !(
-      enabledManagers.includes(MANAGER_DOCKERFILE) ||
-      enabledManagers.includes(MANAGER_CIRCLE_CI) ||
-      enabledManagers.includes(MANAGER_DOCKER_COMPOSE)
+      enabledManagers.includes('dockerfile') ||
+      enabledManagers.includes('circleci') ||
+      enabledManagers.includes('docker-compose')
     )
   ) {
     descriptionArr = descriptionArr.filter(val => !val.includes('Docker-only'));

@@ -18,7 +18,6 @@ import {
 import { PackageFile, ExtractConfig, Upgrade } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import { MANAGER_GRADLE } from '../../constants/managers';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import { BinarySource } from '../../util/exec/common';
 
@@ -144,7 +143,7 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        manager: MANAGER_GRADLE,
+        manager: 'gradle',
         datasource: DATASOURCE_MAVEN,
         deps: dependencies,
       });
