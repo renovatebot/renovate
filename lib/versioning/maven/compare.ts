@@ -172,7 +172,10 @@ export enum QualifierTypes {
 }
 
 export function qualifierType(token: Token): number {
-  const val = token.val;
+  if (typeof token.val !== 'string') {
+    return null;
+  }
+  const val = token.val.toLowerCase();
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
     return QualifierTypes.Alpha;
   }
