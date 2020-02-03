@@ -28,7 +28,7 @@ import {
 const managerList = [];
 const managers: Record<string, ManagerApi> = {};
 
-function isValidManagerModule(module: unknown): is ManagerApi {
+function isValidManagerModule(module: unknown): module is ManagerApi {
   // TODO: check interface and fail-fast?
   return !!module;
 }
