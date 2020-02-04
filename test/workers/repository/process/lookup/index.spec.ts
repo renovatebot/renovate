@@ -18,7 +18,6 @@ import {
   VERSION_SCHEME_PEP440,
 } from '../../../../../lib/constants/version-schemes';
 
-import { MANAGER_PIP_REQUIREMENTS } from '../../../../../lib/constants/managers';
 import {
   DATASOURCE_DOCKER,
   DATASOURCE_GIT_SUBMODULES,
@@ -1031,7 +1030,7 @@ describe('workers/repository/process/lookup', () => {
     it('handles PEP440', async () => {
       config.manager = 'pip_requirements';
       config.versionScheme = VERSION_SCHEME_PEP440;
-      config.manager = MANAGER_PIP_REQUIREMENTS;
+      config.manager = 'pip_requirements';
       config.versionScheme = 'pep440';
       config.rangeStrategy = 'pin';
       config.lockedVersion = '0.9.4';
