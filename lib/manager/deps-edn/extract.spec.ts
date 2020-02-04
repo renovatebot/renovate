@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { extractPackageFile } from './extract';
 
 const depsEdn = readFileSync(
-  resolve(__dirname, `./_fixtures__/deps.edn`),
+  resolve(__dirname, `./__fixtures__/deps.edn`),
   'utf8'
 );
 

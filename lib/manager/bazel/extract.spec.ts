@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const workspaceFile = readFileSync(
-  'lib/manager/bazel/_fixtures__/WORKSPACE1',
+  'lib/manager/bazel/__fixtures__/WORKSPACE1',
   'utf8'
 );
 
 const fileWithBzlExtension = readFileSync(
-  'lib/manager/bazel/_fixtures__/repositories.bzl',
+  'lib/manager/bazel/__fixtures__/repositories.bzl',
   'utf8'
 );
 

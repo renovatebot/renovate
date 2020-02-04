@@ -6,57 +6,57 @@ import { isValid } from '../../versioning/ruby';
 const platform: any = _platform;
 
 const railsGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.rails',
+  'lib/manager/bundler/__fixtures__/Gemfile.rails',
   'utf8'
 );
 const railsGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.rails.lock',
+  'lib/manager/bundler/__fixtures__/Gemfile.rails.lock',
   'utf8'
 );
 
 const sourceGroupGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.sourceGroup',
+  'lib/manager/bundler/__fixtures__/Gemfile.sourceGroup',
   'utf8'
 );
 const webPackerGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.webpacker',
+  'lib/manager/bundler/__fixtures__/Gemfile.webpacker',
   'utf8'
 );
 const webPackerGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.webpacker.lock',
+  'lib/manager/bundler/__fixtures__/Gemfile.webpacker.lock',
   'utf8'
 );
 const mastodonGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.mastodon',
+  'lib/manager/bundler/__fixtures__/Gemfile.mastodon',
   'utf8'
 );
 const mastodonGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.mastodon.lock',
+  'lib/manager/bundler/__fixtures__/Gemfile.mastodon.lock',
   'utf8'
 );
 const rubyCIGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.rubyci.lock',
+  'lib/manager/bundler/__fixtures__/Gemfile.rubyci.lock',
   'utf8'
 );
 
 const rubyCIGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.rubyci',
+  'lib/manager/bundler/__fixtures__/Gemfile.rubyci',
   'utf8'
 );
 const gitlabFossGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.gitlab-foss.lock',
+  'lib/manager/bundler/__fixtures__/Gemfile.gitlab-foss.lock',
   'utf8'
 );
 const gitlabFossGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.gitlab-foss',
+  'lib/manager/bundler/__fixtures__/Gemfile.gitlab-foss',
   'utf8'
 );
 const sourceBlockWithNewLinesGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.sourceBlockWithNewLines.lock',
+  'lib/manager/bundler/__fixtures__/Gemfile.sourceBlockWithNewLines.lock',
   'utf8'
 );
 const sourceBlockWithNewLinesGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures__/Gemfile.sourceBlockWithNewLines',
+  'lib/manager/bundler/__fixtures__/Gemfile.sourceBlockWithNewLines',
   'utf8'
 );
 

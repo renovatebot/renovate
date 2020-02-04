@@ -2,11 +2,11 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const file1 = readFileSync(
-  'lib/manager/circleci/_fixtures__/config.yml',
+  'lib/manager/circleci/__fixtures__/config.yml',
   'utf8'
 );
 const file2 = readFileSync(
-  'lib/manager/circleci/_fixtures__/config2.yml',
+  'lib/manager/circleci/__fixtures__/config2.yml',
   'utf8'
 );
 

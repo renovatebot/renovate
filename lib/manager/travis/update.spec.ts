@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { updateDependency } from './update';
 
 const content = readFileSync(
-  resolve('lib/manager/travis/_fixtures__/travis.yml'),
+  resolve('lib/manager/travis/__fixtures__/travis.yml'),
   'utf8'
 );
 

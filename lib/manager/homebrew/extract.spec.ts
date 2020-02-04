@@ -2,20 +2,20 @@ import fs from 'fs';
 import { extractPackageFile } from './extract';
 
 const aalib = fs.readFileSync(
-  'lib/manager/homebrew/_fixtures__/aalib.rb',
+  'lib/manager/homebrew/__fixtures__/aalib.rb',
   'utf8'
 );
-const aap = fs.readFileSync('lib/manager/homebrew/_fixtures__/aap.rb', 'utf8');
+const aap = fs.readFileSync('lib/manager/homebrew/__fixtures__/aap.rb', 'utf8');
 const acmetool = fs.readFileSync(
-  'lib/manager/homebrew/_fixtures__/acmetool.rb',
+  'lib/manager/homebrew/__fixtures__/acmetool.rb',
   'utf8'
 );
 const aide = fs.readFileSync(
-  'lib/manager/homebrew/_fixtures__/aide.rb',
+  'lib/manager/homebrew/__fixtures__/aide.rb',
   'utf8'
 );
 const ibazel = fs.readFileSync(
-  'lib/manager/homebrew/_fixtures__/ibazel.rb',
+  'lib/manager/homebrew/__fixtures__/ibazel.rb',
   'utf8'
 );
 

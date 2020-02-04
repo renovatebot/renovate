@@ -8,11 +8,11 @@ jest.mock('../../util/got');
 const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
 
 const aide = fs.readFileSync(
-  'lib/manager/homebrew/_fixtures__/aide.rb',
+  'lib/manager/homebrew/__fixtures__/aide.rb',
   'utf8'
 );
 const ibazel = fs.readFileSync(
-  'lib/manager/homebrew/_fixtures__/ibazel.rb',
+  'lib/manager/homebrew/__fixtures__/ibazel.rb',
   'utf8'
 );
 

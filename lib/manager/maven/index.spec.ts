@@ -7,19 +7,19 @@ import { platform as _platform } from '../../platform';
 const platform: any = _platform;
 
 const pomContent = readFileSync(
-  'lib/manager/maven/_fixtures__/simple.pom.xml',
+  'lib/manager/maven/__fixtures__/simple.pom.xml',
   'utf8'
 );
 const pomParent = readFileSync(
-  'lib/manager/maven/_fixtures__/parent.pom.xml',
+  'lib/manager/maven/__fixtures__/parent.pom.xml',
   'utf8'
 );
 const pomChild = readFileSync(
-  'lib/manager/maven/_fixtures__/child.pom.xml',
+  'lib/manager/maven/__fixtures__/child.pom.xml',
   'utf8'
 );
 const origContent = readFileSync(
-  'lib/manager/maven/_fixtures__/grouping.pom.xml',
+  'lib/manager/maven/__fixtures__/grouping.pom.xml',
   'utf8'
 );
 

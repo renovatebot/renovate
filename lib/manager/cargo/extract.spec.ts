@@ -2,23 +2,23 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const cargo1toml = readFileSync(
-  'lib/manager/cargo/_fixtures__/Cargo.1.toml',
+  'lib/manager/cargo/__fixtures__/Cargo.1.toml',
   'utf8'
 );
 const cargo2toml = readFileSync(
-  'lib/manager/cargo/_fixtures__/Cargo.2.toml',
+  'lib/manager/cargo/__fixtures__/Cargo.2.toml',
   'utf8'
 );
 const cargo3toml = readFileSync(
-  'lib/manager/cargo/_fixtures__/Cargo.3.toml',
+  'lib/manager/cargo/__fixtures__/Cargo.3.toml',
   'utf8'
 );
 const cargo4toml = readFileSync(
-  'lib/manager/cargo/_fixtures__/Cargo.4.toml',
+  'lib/manager/cargo/__fixtures__/Cargo.4.toml',
   'utf8'
 );
 const cargo5toml = readFileSync(
-  'lib/manager/cargo/_fixtures__/Cargo.5.toml',
+  'lib/manager/cargo/__fixtures__/Cargo.5.toml',
   'utf8'
 );
 

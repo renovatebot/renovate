@@ -4,7 +4,7 @@ import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
 const pkgContent = readFileSync(
-  resolve(__dirname, `./_fixtures__/SamplePackage.swift`),
+  resolve(__dirname, `./__fixtures__/SamplePackage.swift`),
   'utf8'
 );
 

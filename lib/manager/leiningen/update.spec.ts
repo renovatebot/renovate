@@ -5,7 +5,7 @@ import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
 const leinProjectClj = readFileSync(
-  resolve(__dirname, `./_fixtures__/project.clj`),
+  resolve(__dirname, `./__fixtures__/project.clj`),
   'utf8'
 );
 

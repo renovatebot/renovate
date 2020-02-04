@@ -3,7 +3,7 @@ import path from 'path';
 import { extractPackageFile } from '.';
 
 const sample = fs.readFileSync(
-  path.resolve(__dirname, './_fixtures__/mix.exs'),
+  path.resolve(__dirname, './__fixtures__/mix.exs'),
   'utf-8'
 );
 

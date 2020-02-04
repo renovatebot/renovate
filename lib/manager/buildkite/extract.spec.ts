@@ -2,19 +2,19 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const pipeline1 = readFileSync(
-  'lib/manager/buildkite/_fixtures__/pipeline1.yml',
+  'lib/manager/buildkite/__fixtures__/pipeline1.yml',
   'utf8'
 );
 const pipeline2 = readFileSync(
-  'lib/manager/buildkite/_fixtures__/pipeline2.yml',
+  'lib/manager/buildkite/__fixtures__/pipeline2.yml',
   'utf8'
 );
 const pipeline3 = readFileSync(
-  'lib/manager/buildkite/_fixtures__/pipeline3.yml',
+  'lib/manager/buildkite/__fixtures__/pipeline3.yml',
   'utf8'
 );
 const pipeline4 = readFileSync(
-  'lib/manager/buildkite/_fixtures__/pipeline4.yml',
+  'lib/manager/buildkite/__fixtures__/pipeline4.yml',
   'utf8'
 );
 

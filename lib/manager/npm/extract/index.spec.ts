@@ -10,7 +10,7 @@ const platform: any = _platform;
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../_fixtures__/${fixture}`),
+    path.resolve(__dirname, `../__fixtures__/${fixture}`),
     'utf8'
   );
 }

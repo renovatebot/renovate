@@ -5,7 +5,7 @@ import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
 const depsEdn = readFileSync(
-  resolve(__dirname, `./_fixtures__/deps.edn`),
+  resolve(__dirname, `./__fixtures__/deps.edn`),
   'utf8'
 );
 

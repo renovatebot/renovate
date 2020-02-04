@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const d1 = readFileSync(
-  'lib/manager/dockerfile/_fixtures__/Dockerfile1',
+  'lib/manager/dockerfile/__fixtures__/Dockerfile1',
   'utf8'
 );
 

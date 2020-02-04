@@ -2,23 +2,23 @@ import fs from 'fs';
 import { extractPackageFile } from './extract';
 
 const pipfile1 = fs.readFileSync(
-  'lib/manager/pipenv/_fixtures__/Pipfile1',
+  'lib/manager/pipenv/__fixtures__/Pipfile1',
   'utf8'
 );
 const pipfile2 = fs.readFileSync(
-  'lib/manager/pipenv/_fixtures__/Pipfile2',
+  'lib/manager/pipenv/__fixtures__/Pipfile2',
   'utf8'
 );
 const pipfile3 = fs.readFileSync(
-  'lib/manager/pipenv/_fixtures__/Pipfile3',
+  'lib/manager/pipenv/__fixtures__/Pipfile3',
   'utf8'
 );
 const pipfile4 = fs.readFileSync(
-  'lib/manager/pipenv/_fixtures__/Pipfile4',
+  'lib/manager/pipenv/__fixtures__/Pipfile4',
   'utf8'
 );
 const pipfile5 = fs.readFileSync(
-  'lib/manager/pipenv/_fixtures__/Pipfile5',
+  'lib/manager/pipenv/__fixtures__/Pipfile5',
   'utf8'
 );
 

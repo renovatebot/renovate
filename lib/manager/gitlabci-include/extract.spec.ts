@@ -2,7 +2,7 @@ import fs from 'fs';
 import { extractPackageFile } from './extract';
 
 const yamlFile = fs.readFileSync(
-  'lib/manager/gitlabci-include/_fixtures__/gitlab-ci.yaml',
+  'lib/manager/gitlabci-include/__fixtures__/gitlab-ci.yaml',
   'utf8'
 );
 

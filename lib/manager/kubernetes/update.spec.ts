@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const yamlFile = readFileSync(
-  'lib/manager/kubernetes/_fixtures__/kubernetes.yaml',
+  'lib/manager/kubernetes/__fixtures__/kubernetes.yaml',
   'utf8'
 );
 
 const arraySyntaxFile = readFileSync(
-  'lib/manager/kubernetes/_fixtures__/array-syntax.yaml',
+  'lib/manager/kubernetes/__fixtures__/array-syntax.yaml',
   'utf8'
 );
 

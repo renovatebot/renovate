@@ -5,27 +5,27 @@ import { platform as _platform, Platform } from '../../platform';
 const platform: jest.Mocked<Platform> = _platform as any;
 
 const requirements1 = readFileSync(
-  'lib/manager/composer/_fixtures__/composer1.json',
+  'lib/manager/composer/__fixtures__/composer1.json',
   'utf8'
 );
 const requirements2 = readFileSync(
-  'lib/manager/composer/_fixtures__/composer2.json',
+  'lib/manager/composer/__fixtures__/composer2.json',
   'utf8'
 );
 const requirements3 = readFileSync(
-  'lib/manager/composer/_fixtures__/composer3.json',
+  'lib/manager/composer/__fixtures__/composer3.json',
   'utf8'
 );
 const requirements4 = readFileSync(
-  'lib/manager/composer/_fixtures__/composer4.json',
+  'lib/manager/composer/__fixtures__/composer4.json',
   'utf8'
 );
 const requirements5 = readFileSync(
-  'lib/manager/composer/_fixtures__/composer5.json',
+  'lib/manager/composer/__fixtures__/composer5.json',
   'utf8'
 );
 const requirements5Lock = readFileSync(
-  'lib/manager/composer/_fixtures__/composer5.lock',
+  'lib/manager/composer/__fixtures__/composer5.lock',
   'utf8'
 );
 

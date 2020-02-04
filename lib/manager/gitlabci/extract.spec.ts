@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const yamlFile = readFileSync(
-  'lib/manager/gitlabci/_fixtures__/gitlab-ci.yaml',
+  'lib/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
   'utf8'
 );
 
 const yamlFile1 = readFileSync(
-  'lib/manager/gitlabci/_fixtures__/gitlab-ci.1.yaml',
+  'lib/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
   'utf8'
 );
 
