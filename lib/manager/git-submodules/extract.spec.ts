@@ -5,7 +5,7 @@ jest.mock('simple-git/promise.js');
 const simpleGit: any = _simpleGit;
 const Git = jest.requireActual('simple-git/promise');
 
-const localDir = `${__dirname}/_fixtures__`;
+const localDir = `${__dirname}/__fixtures__`;
 
 describe('lib/manager/gitsubmodules/extract', () => {
   beforeAll(() => {

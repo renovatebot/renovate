@@ -26,7 +26,7 @@ const config = {
 };
 
 const updatesDependenciesReport = fsReal.readFileSync(
-  'test/datasource/gradle/__fixtures__/updatesReport.json',
+  'test/datasource/gradle/_fixtures/updatesReport.json',
   'utf8'
 );
 
@@ -77,7 +77,7 @@ describe('manager/gradle', () => {
 
       fs.readFile.mockResolvedValue(
         fsReal.readFileSync(
-          'test/datasource/gradle/__fixtures__/updatesReportEmpty.json',
+          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
           'utf8'
         ) as any
       );
@@ -129,7 +129,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const multiProjectUpdatesReport = fsReal.readFileSync(
-        'test/datasource/gradle/__fixtures__/MultiProjectUpdatesReport.json',
+        'test/datasource/gradle/_fixtures/MultiProjectUpdatesReport.json',
         'utf8'
       );
       fs.readFile.mockResolvedValue(multiProjectUpdatesReport as any);
@@ -224,7 +224,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const buildGradleContent = fsReal.readFileSync(
-        'test/datasource/gradle/__fixtures__/build.gradle.example1',
+        'test/datasource/gradle/_fixtures/build.gradle.example1',
         'utf8'
       );
       // prettier-ignore

@@ -5,7 +5,7 @@ import {
   getTerraformDependencyType,
 } from './extract';
 
-const tf1 = readFileSync('test/datasource/terraform/__fixtures__/1.tf', 'utf8');
+const tf1 = readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
 const tf2 = `module "relative" {
   source = "../../modules/fe"
 }

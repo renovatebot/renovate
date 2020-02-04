@@ -15,7 +15,7 @@ async function getFiles(dir: string): Promise<string[]> {
     await glob(`${dir}/**/*`, {
       dot: true,
       nodir: true,
-      ignore: ['**/_fixtures/**/*'],
+      ignore: ['**/__fixtures__/**/*', '**/__mocks__/**/*'],
     })
   ).map((file: string) => file.replace(`${dir}/`, ''));
 }

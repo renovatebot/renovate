@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const csProj = readFileSync(
-  'test/datasource/nuget/__fixtures__/sample.csproj',
+  'test/datasource/nuget/_fixtures/sample.csproj',
   'utf8'
 );
 

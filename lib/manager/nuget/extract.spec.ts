@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const sample = readFileSync(
-  'test/datasource/nuget/__fixtures__/sample.csproj',
+  'test/datasource/nuget/_fixtures/sample.csproj',
   'utf8'
 );
 
