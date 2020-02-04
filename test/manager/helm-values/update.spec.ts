@@ -21,6 +21,21 @@ describe('lib/manager/helm-values/update', () => {
       };
       expect(updateDependency(content, upgrade)).toBe(content);
     });
+    // https://github.com/renovatebot/renovate/issues/5298
+    it('returns the same fileContent for duplicate key errors', () => {
+      const content = `
+      replicaCount: 1
+      replicaCount: 5
+      `;
+      const upgrade = {
+        depName: 'bitnami/postgres-exporter',
+        currentValue: '0.7.0-debian-9-r12',
+        datasource: 'docker',
+        newValue: '0.8.0',
+        dockerRepository: 'bitnami/postgres-exporter',
+      };
+      expect(updateDependency(content, upgrade)).toBe(content);
+    });
     it('returns the same fileContent for empty upgrade', () => {
       const content = 'someKey: "someValue"';
       const upgrade = {};

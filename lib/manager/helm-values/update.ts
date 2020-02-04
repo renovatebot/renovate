@@ -102,21 +102,27 @@ export function updateDependency(
     return fileContent;
   }
 
-  const yawn = new YAWN(fileContent);
-  const doc = yawn.json;
+  try {
+    const yawn = new YAWN(fileContent);
 
-  const originalRegistryValue = getOriginalRegistryValue(
-    upgrade.depName,
-    upgrade.dockerRepository
-  );
-  updateDoc(
-    doc,
-    upgrade.dockerRepository,
-    upgrade.currentValue,
-    upgrade.newValue,
-    originalRegistryValue
-  );
-  yawn.json = doc;
+    const doc = yawn.json;
 
-  return yawn.yaml;
+    const originalRegistryValue = getOriginalRegistryValue(
+      upgrade.depName,
+      upgrade.dockerRepository
+    );
+    updateDoc(
+      doc,
+      upgrade.dockerRepository,
+      upgrade.currentValue,
+      upgrade.newValue,
+      originalRegistryValue
+    );
+    yawn.json = doc;
+
+    return yawn.yaml;
+  } catch (err) {
+    logger.info({ err }, 'Error setting new helm-values value');
+    return fileContent;
+  }
 }
