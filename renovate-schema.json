@@ -3,6 +3,48 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "allowedPostUpgradeCommands": {
+      "description": "A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "postUpgradeTasks": {
+      "description": "Post-upgrade tasks that are executed before a commit is made by Renovate",
+      "type": "object",
+      "default": {
+        "commands": [],
+        "fileFilters": []
+      },
+      "$ref": "#",
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "commands": {
+                "description": "A list of post-upgrade commands that are executed before a commit is made by Renovate",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "fileFilters": {
+                "description": "Files that match these glob patterns will be committed if they are present after running a post-upgrade task",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              }
+            }
+          }
+        ]
+      }
+    },
     "onboardingBranch": {
       "description": "Change this value in order to override the default onboarding branch name.",
       "type": "string",
