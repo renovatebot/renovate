@@ -46,6 +46,10 @@
     {
       "packageNames": ["semantic-release"],
       "semanticCommitType": "build"
+    },
+    {
+      "packageNames": ["@types/jest"],
+      "groupName": "jest monorepo"
     }
   ]
 }
