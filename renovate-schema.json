@@ -1165,15 +1165,6 @@
       },
       "$ref": "#"
     },
-    "helm-values": {
-      "description": "Configuration object for helm values.yaml files.",
-      "type": "object",
-      "default": {
-        "commitMessageTopic": "helm values {{depName}}",
-        "fileMatch": ["(^|/)values.yaml$"]
-      },
-      "$ref": "#"
-    },
     "helmfile": {
       "description": "Configuration object for helmfile helmfile.yaml files.",
       "type": "object",

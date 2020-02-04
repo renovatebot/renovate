@@ -3,7 +3,7 @@ import { platform as _platform } from '../../../lib/platform';
 
 const platform: any = _platform;
 
-describe('lib/manager/helm-requirements/extract', () => {
+describe('lib/manager/helm/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

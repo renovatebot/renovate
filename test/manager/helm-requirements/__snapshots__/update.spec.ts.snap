@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/helm-requirements/update updateDependency() upgrades dependency if newValue version value is repeated 1`] = `
+exports[`lib/manager/helm/extract updateDependency() upgrades dependency if newValue version value is repeated 1`] = `
 "
       dependencies:
         - version: 0.9.0
@@ -12,7 +12,7 @@ exports[`lib/manager/helm-requirements/update updateDependency() upgrades depend
       "
 `;
 
-exports[`lib/manager/helm-requirements/update updateDependency() upgrades dependency if valid upgrade 1`] = `
+exports[`lib/manager/helm/extract updateDependency() upgrades dependency if valid upgrade 1`] = `
 "
       dependencies:
         - name: redis
@@ -24,7 +24,7 @@ exports[`lib/manager/helm-requirements/update updateDependency() upgrades depend
       "
 `;
 
-exports[`lib/manager/helm-requirements/update updateDependency() upgrades dependency if version field comes before name field 1`] = `
+exports[`lib/manager/helm/extract updateDependency() upgrades dependency if version field comes before name field 1`] = `
 "
       dependencies:
         - version: 0.11.0
