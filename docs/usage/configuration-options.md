@@ -483,6 +483,19 @@ Note: you shouldn't usually need to configure this unless you really care about 
 
 Renovate supports updating Helm Chart references within `requirements.yaml` files. If your Helm charts make use of Aliases then you will need to configure an `aliases` object in your config to tell Renovate where to look for them.
 
+## helm-values
+
+Renovate supports updating of Docker dependencies within Helm Chart `values.yaml` files or other YAML
+files that use the same format (via `fileMatch` configuration). Updates are performed if the files
+follow the conventional format used in most of the `stable` Helm charts:
+
+```yaml
+image:
+  repository: 'some-docker/dependency'
+  tag: v1.0.0
+  registry: registry.example.com # optional key, will default to "docker.io"
+```
+
 ## helmfile
 
 ## homebrew

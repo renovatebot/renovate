@@ -1754,6 +1754,18 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'helm-values',
+    description: 'Configuration object for helm values.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm values {{depName}}',
+      fileMatch: ['(^|/)values.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
     name: 'helmfile',
     description: 'Configuration object for helmfile helmfile.yaml files.',
     stage: 'package',
