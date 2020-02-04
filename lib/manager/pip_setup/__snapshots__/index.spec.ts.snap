@@ -377,7 +377,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<extract.py> \\"lib/manager/pip_setup/_fixtures/setup.py\\"",
+    "cmd": "<extract.py> \\"lib/manager/pip_setup/_fixtures__/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

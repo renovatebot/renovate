@@ -2,11 +2,11 @@ import { readFileSync } from 'fs';
 import extractPackageFile from './extract';
 
 const yamlFile1 = readFileSync(
-  'lib/manager/ansible/_fixtures/main1.yaml',
+  'lib/manager/ansible/_fixtures__/main1.yaml',
   'utf8'
 );
 const yamlFile2 = readFileSync(
-  'lib/manager/ansible/_fixtures/main2.yaml',
+  'lib/manager/ansible/_fixtures__/main2.yaml',
   'utf8'
 );
 

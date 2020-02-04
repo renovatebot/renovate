@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { extractPackageFile } from './extract';
 
 const invalidYAML = readFileSync(
-  resolve('lib/manager/travis/_fixtures/invalid.yml'),
+  resolve('lib/manager/travis/_fixtures__/invalid.yml'),
   'utf8'
 );
 

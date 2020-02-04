@@ -2,22 +2,22 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const kubernetesImagesFile = readFileSync(
-  'lib/manager/kubernetes/_fixtures/kubernetes.yaml',
+  'lib/manager/kubernetes/_fixtures__/kubernetes.yaml',
   'utf8'
 );
 
 const kubernetesConfigMapFile = readFileSync(
-  'lib/manager/kubernetes/_fixtures/configmap.yaml',
+  'lib/manager/kubernetes/_fixtures__/configmap.yaml',
   'utf8'
 );
 
 const kubernetesArraySyntaxFile = readFileSync(
-  'lib/manager/kubernetes/_fixtures/array-syntax.yaml',
+  'lib/manager/kubernetes/_fixtures__/array-syntax.yaml',
   'utf8'
 );
 
 const otherYamlFile = readFileSync(
-  'lib/manager/kubernetes/_fixtures/gitlab-ci.yaml',
+  'lib/manager/kubernetes/_fixtures__/gitlab-ci.yaml',
   'utf8'
 );
 

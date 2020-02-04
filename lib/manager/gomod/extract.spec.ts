@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
-const gomod1 = readFileSync('lib/manager/gomod/_fixtures/1/go.mod', 'utf8');
-const gomod2 = readFileSync('lib/manager/gomod/_fixtures/2/go.mod', 'utf8');
+const gomod1 = readFileSync('lib/manager/gomod/_fixtures__/1/go.mod', 'utf8');
+const gomod2 = readFileSync('lib/manager/gomod/_fixtures__/2/go.mod', 'utf8');
 
 describe('lib/manager/gomod/extract', () => {
   describe('extractPackageFile()', () => {

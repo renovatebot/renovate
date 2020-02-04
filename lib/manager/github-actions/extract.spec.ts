@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const workflow1 = readFileSync(
-  'lib/manager/github-actions/_fixtures/main.workflow.1',
+  'lib/manager/github-actions/_fixtures__/main.workflow.1',
   'utf8'
 );
 
 const workflow2 = readFileSync(
-  'lib/manager/github-actions/_fixtures/workflow.yml.1',
+  'lib/manager/github-actions/_fixtures__/workflow.yml.1',
   'utf8'
 );
 

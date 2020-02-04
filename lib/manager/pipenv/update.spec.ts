@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
-const pipfile = readFileSync('lib/manager/pipenv/_fixtures/Pipfile1', 'utf8');
+const pipfile = readFileSync('lib/manager/pipenv/_fixtures__/Pipfile1', 'utf8');
 
 describe('manager/pipenv/update', () => {
   describe('updateDependency', () => {

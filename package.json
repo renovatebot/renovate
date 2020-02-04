@@ -13,7 +13,7 @@
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
     "compile:dts": "tsc -p tsconfig.dts.json",
-    "copy-static-files": "copyfiles -u 1 -e **/_fixtures/** lib/**/*.json lib/**/*.py dist/",
+    "copy-static-files": "copyfiles -u 1 -e **/__fixtures__/**  -e **/__mocks__/** lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
     "eslint": "eslint --ext .js,.ts lib/ test/",
@@ -250,7 +250,7 @@
     "collectCoverageFrom": [
       "lib/**/*.{js,ts}",
       "!lib/**/*.{d,spec}.ts",
-      "!lib/**/_fixtures/**/*.{js,ts}"
+      "!lib/**/{__fixtures__,__mocks__}/**/*.{js,ts}"
     ],
     "coverageReporters": [
       "html",

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
-const tf1 = readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
+const tf1 = readFileSync('test/datasource/terraform/_fixtures__/1.tf', 'utf8');
 
 describe('manager/terraform/update', () => {
   describe('updateDependency', () => {

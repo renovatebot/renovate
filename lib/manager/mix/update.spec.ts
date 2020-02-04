@@ -3,7 +3,7 @@ import path from 'path';
 import { updateDependency } from '.';
 
 const sample = fs.readFileSync(
-  path.resolve(__dirname, './_fixtures/mix.exs'),
+  path.resolve(__dirname, './_fixtures__/mix.exs'),
   'utf-8'
 );
 

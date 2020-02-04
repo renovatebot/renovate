@@ -4,7 +4,7 @@ import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 import { Upgrade } from '../common';
 
-const sbtPath = resolve(__dirname, `./_fixtures/sample.sbt`);
+const sbtPath = resolve(__dirname, `./_fixtures__/sample.sbt`);
 const fileContent = readFileSync(sbtPath, 'utf8');
 
 describe('lib/manager/sbt/extract', () => {

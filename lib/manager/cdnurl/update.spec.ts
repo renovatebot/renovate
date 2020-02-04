@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { extractPackageFile, updateDependency } from '.';
 
 const content = readFileSync(
-  resolve(__dirname, `./_fixtures/sample.txt`),
+  resolve(__dirname, `./_fixtures__/sample.txt`),
   'utf8'
 );
 

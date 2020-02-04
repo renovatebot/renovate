@@ -2,11 +2,11 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const propertiesFile1 = readFileSync(
-  'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-1.properties',
+  'test/datasource/gradle-wrapper/_fixtures__/gradle-wrapper-1.properties',
   'utf8'
 );
 const propertiesFile2 = readFileSync(
-  'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',
+  'test/datasource/gradle-wrapper/_fixtures__/gradle-wrapper-2.properties',
   'utf8'
 );
 

@@ -2,23 +2,23 @@ import { readFileSync } from 'fs';
 import { extractLockFileEntries } from './locked-version';
 
 const railsGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures/Gemfile.rails.lock',
+  'lib/manager/bundler/_fixtures__/Gemfile.rails.lock',
   'utf8'
 );
 const webPackerGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures/Gemfile.webpacker.lock',
+  'lib/manager/bundler/_fixtures__/Gemfile.webpacker.lock',
   'utf8'
 );
 const mastodonGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures/Gemfile.mastodon.lock',
+  'lib/manager/bundler/_fixtures__/Gemfile.mastodon.lock',
   'utf8'
 );
 const rubyCIGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures/Gemfile.rubyci.lock',
+  'lib/manager/bundler/_fixtures__/Gemfile.rubyci.lock',
   'utf8'
 );
 const gitlabFossGemfileLock = readFileSync(
-  'lib/manager/bundler/_fixtures/Gemfile.gitlab-foss.lock',
+  'lib/manager/bundler/_fixtures__/Gemfile.gitlab-foss.lock',
   'utf8'
 );
 describe('/lib/manager/bundler/locked-version', () => {

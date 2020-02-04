@@ -4,12 +4,12 @@ import { resolve } from 'path';
 import { extractPackage } from './extract';
 
 const minimumContent = readFileSync(
-  resolve(__dirname, `./_fixtures/minimum.pom.xml`),
+  resolve(__dirname, `./_fixtures__/minimum.pom.xml`),
   'utf8'
 );
 
 const simpleContent = readFileSync(
-  resolve(__dirname, `./_fixtures/simple.pom.xml`),
+  resolve(__dirname, `./_fixtures__/simple.pom.xml`),
   'utf8'
 );
 

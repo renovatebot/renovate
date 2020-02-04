@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { updateDependency } from '.';
 
 const fileContent = readFileSync(
-  'lib/manager/pub/_fixtures/update.yaml',
+  'lib/manager/pub/_fixtures__/update.yaml',
   'utf8'
 );
 

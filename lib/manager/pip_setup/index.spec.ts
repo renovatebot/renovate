@@ -12,10 +12,10 @@ import * as _env from '../../util/exec/env';
 import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
 
-const packageFile = 'lib/manager/pip_setup/_fixtures/setup.py';
+const packageFile = 'lib/manager/pip_setup/_fixtures__/setup.py';
 const content = readFileSync(packageFile, 'utf8');
 
-const packageFileJson = 'lib/manager/pip_setup/_fixtures/setup.py.json';
+const packageFileJson = 'lib/manager/pip_setup/_fixtures__/setup.py.json';
 const jsonContent = readFileSync(packageFileJson, 'utf8');
 
 const config = {

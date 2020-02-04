@@ -2,18 +2,21 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { extractPackageFile } from './extract';
 
-const sbt = readFileSync(resolve(__dirname, `./_fixtures/sample.sbt`), 'utf8');
+const sbt = readFileSync(
+  resolve(__dirname, `./_fixtures__/sample.sbt`),
+  'utf8'
+);
 const sbtScalaVersionVariable = readFileSync(
-  resolve(__dirname, `./_fixtures/scala-version-variable.sbt`),
+  resolve(__dirname, `./_fixtures__/scala-version-variable.sbt`),
   'utf8'
 );
 const sbtMissingScalaVersion = readFileSync(
-  resolve(__dirname, `./_fixtures/missing-scala-version.sbt`),
+  resolve(__dirname, `./_fixtures__/missing-scala-version.sbt`),
   'utf8'
 );
 
 const sbtDependencyFile = readFileSync(
-  resolve(__dirname, `./_fixtures/dependency-file.scala`),
+  resolve(__dirname, `./_fixtures__/dependency-file.scala`),
   'utf8'
 );
 

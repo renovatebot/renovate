@@ -2,27 +2,27 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const requirements = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements1.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements1.txt',
   'utf8'
 );
 
 const requirements3 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements3.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements3.txt',
   'utf8'
 );
 
 const requirements4 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements4.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements4.txt',
   'utf8'
 );
 
 const setupPy1 = readFileSync(
-  'lib/manager/pip_setup/_fixtures/setup.py',
+  'lib/manager/pip_setup/_fixtures__/setup.py',
   'utf-8'
 );
 
 const setupPy2 = readFileSync(
-  'lib/manager/pip_setup/_fixtures/setup-2.py',
+  'lib/manager/pip_setup/_fixtures__/setup-2.py',
   'utf-8'
 );
 

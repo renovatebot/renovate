@@ -2,15 +2,15 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const cargo1toml = readFileSync(
-  'lib/manager/cargo/_fixtures/Cargo.1.toml',
+  'lib/manager/cargo/_fixtures__/Cargo.1.toml',
   'utf8'
 );
 const cargo4toml = readFileSync(
-  'lib/manager/cargo/_fixtures/Cargo.4.toml',
+  'lib/manager/cargo/_fixtures__/Cargo.4.toml',
   'utf8'
 );
 const cargo5toml = readFileSync(
-  'lib/manager/cargo/_fixtures/Cargo.5.toml',
+  'lib/manager/cargo/_fixtures__/Cargo.5.toml',
   'utf8'
 );
 

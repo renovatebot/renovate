@@ -2,11 +2,11 @@ import { readFileSync } from 'fs';
 import * as dcUpdate from './update';
 
 const yamlFile = readFileSync(
-  'lib/manager/circleci/_fixtures/config.yml',
+  'lib/manager/circleci/_fixtures__/config.yml',
   'utf8'
 );
 const yamlFile2 = readFileSync(
-  'lib/manager/circleci/_fixtures/config2.yml',
+  'lib/manager/circleci/_fixtures__/config2.yml',
   'utf8'
 );
 

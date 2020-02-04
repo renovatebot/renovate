@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const yamlFile = readFileSync(
-  'lib/manager/docker-compose/_fixtures/docker-compose.1.yml',
+  'lib/manager/docker-compose/_fixtures__/docker-compose.1.yml',
   'utf8'
 );
 

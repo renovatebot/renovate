@@ -8,5 +8,5 @@
     "types": ["node"]
   },
   "include": ["lib/**/*"],
-  "exclude": ["lib/**/*.spec.ts", "**/__mocks__/*"]
+  "exclude": ["lib/**/*.spec.ts", "**/__mocks__/**", "**/__fixtures__/**"]
 }

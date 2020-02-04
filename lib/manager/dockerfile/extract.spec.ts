@@ -1,7 +1,10 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
-const d1 = readFileSync('lib/manager/dockerfile/_fixtures/Dockerfile1', 'utf8');
+const d1 = readFileSync(
+  'lib/manager/dockerfile/_fixtures__/Dockerfile1',
+  'utf8'
+);
 
 describe('lib/manager/dockerfile/extract', () => {
   describe('extractPackageFile()', () => {

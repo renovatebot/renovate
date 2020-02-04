@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { extractPackageFile } from './extract';
 
 const droneYAML = readFileSync(
-  resolve('lib/manager/droneci/_fixtures/.drone.yml'),
+  resolve('lib/manager/droneci/_fixtures__/.drone.yml'),
   'utf8'
 );
 

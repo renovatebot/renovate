@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { updateDependency } from './update';
 
 function readFixture(fixture: string) {
-  return readFileSync(resolve(__dirname, `./_fixtures/${fixture}`), 'utf8');
+  return readFileSync(resolve(__dirname, `./_fixtures__/${fixture}`), 'utf8');
 }
 
 const input01Content = readFixture('package-1.js');

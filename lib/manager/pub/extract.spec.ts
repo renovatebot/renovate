@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from '.';
 
 const brokenYaml = readFileSync(
-  'lib/manager/pub/_fixtures/update.yaml',
+  'lib/manager/pub/_fixtures__/update.yaml',
   'utf8'
 );
 
 const packageFile = readFileSync(
-  'lib/manager/pub/_fixtures/extract.yaml',
+  'lib/manager/pub/_fixtures__/extract.yaml',
   'utf8'
 );
 

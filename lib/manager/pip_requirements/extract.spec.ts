@@ -2,30 +2,30 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const requirements1 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements1.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements1.txt',
   'utf8'
 );
 const requirements2 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements2.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements2.txt',
   'utf8'
 );
 const requirements3 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements3.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements3.txt',
   'utf8'
 );
 
 const requirements4 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements4.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements4.txt',
   'utf8'
 );
 
 const requirements5 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements5.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements5.txt',
   'utf8'
 );
 
 const requirements6 = readFileSync(
-  'lib/manager/pip_requirements/_fixtures/requirements6.txt',
+  'lib/manager/pip_requirements/_fixtures__/requirements6.txt',
   'utf8'
 );
 

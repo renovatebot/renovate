@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const railsGemfile = readFileSync(
-  'lib/manager/bundler/_fixtures/Gemfile.rails',
+  'lib/manager/bundler/_fixtures__/Gemfile.rails',
   'utf8'
 );
 

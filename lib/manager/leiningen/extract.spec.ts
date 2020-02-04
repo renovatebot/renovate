@@ -5,7 +5,7 @@ import { trimAtKey, extractFromVectors, extractPackageFile } from './extract';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 
 const leinProjectClj = readFileSync(
-  resolve(__dirname, `./_fixtures/project.clj`),
+  resolve(__dirname, `./_fixtures__/project.clj`),
   'utf8'
 );
 

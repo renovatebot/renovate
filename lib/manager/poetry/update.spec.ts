@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const pyproject1toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.1.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.1.toml',
   'utf8'
 );
 
 const pyproject2toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.2.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.2.toml',
   'utf8'
 );
 

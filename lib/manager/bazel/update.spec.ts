@@ -9,17 +9,17 @@ jest.mock('../../util/got');
 const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
 
 const content = readFileSync(
-  resolve('lib/manager/bazel/_fixtures/WORKSPACE1'),
+  resolve('lib/manager/bazel/_fixtures__/WORKSPACE1'),
   'utf8'
 );
 
 const contentContainerPull = readFileSync(
-  resolve('lib/manager/bazel/_fixtures/container_pull'),
+  resolve('lib/manager/bazel/_fixtures__/container_pull'),
   'utf8'
 );
 
 const fileWithBzlExtension = readFileSync(
-  'lib/manager/bazel/_fixtures/repositories.bzl',
+  'lib/manager/bazel/_fixtures__/repositories.bzl',
   'utf8'
 );
 

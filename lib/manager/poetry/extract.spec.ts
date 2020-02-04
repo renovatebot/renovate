@@ -2,42 +2,42 @@ import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
 const pyproject1toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.1.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.1.toml',
   'utf8'
 );
 
 const pyproject2toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.2.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.2.toml',
   'utf8'
 );
 
 const pyproject3toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.3.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.3.toml',
   'utf8'
 );
 
 const pyproject4toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.4.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.4.toml',
   'utf8'
 );
 
 const pyproject5toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.5.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.5.toml',
   'utf8'
 );
 
 const pyproject6toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.6.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.6.toml',
   'utf8'
 );
 
 const pyproject7toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.7.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.7.toml',
   'utf8'
 );
 
 const pyproject8toml = readFileSync(
-  'lib/manager/poetry/_fixtures/pyproject.8.toml',
+  'lib/manager/poetry/_fixtures__/pyproject.8.toml',
   'utf8'
 );
 

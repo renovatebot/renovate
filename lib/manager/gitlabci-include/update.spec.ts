@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const yamlFile = readFileSync(
-  'lib/manager/gitlabci-include/_fixtures/gitlab-ci.yaml',
+  'lib/manager/gitlabci-include/_fixtures__/gitlab-ci.yaml',
   'utf8'
 );
 
