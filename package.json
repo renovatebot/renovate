@@ -249,7 +249,8 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "lib/**/*.{js,ts}",
-      "!lib/**/*.d.ts"
+      "!lib/**/*.{d,spec}.ts",
+      "!lib/**/_fixtures/**/*.{js,ts}"
     ],
     "coverageReporters": [
       "html",
