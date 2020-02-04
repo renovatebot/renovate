@@ -6,6 +6,7 @@ dist
 coverage
 
 # don't lint test stuff
+lib/**/**/_fixtures
 test/**/**/_fixtures
 lib/types/**/*.d.ts
 **/__mocks__/**/*.ts
