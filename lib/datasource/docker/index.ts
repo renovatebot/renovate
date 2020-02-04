@@ -1,3 +1,7 @@
+/**
+ * @copyright 2020-present by Avid Technology, Inc.
+ */
+
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import URL from 'url';
@@ -421,7 +425,7 @@ async function getTags(
 }
 
 export function getConfigResponseBeforeRedirectHook(options: any): void {
-  if (options.search && options.search.indexOf('X-Amz-Algorithm') !== -1) {
+  if (options.search?.includes('X-Amz-Algorithm')) {
     // if there is no port in the redirect URL string, then delete it from the redirect options.
     // This can be evaluated for removal after upgrading to Got v10
     const portInUrl = options.href.split('/')[2].split(':')[1];
@@ -436,10 +440,8 @@ export function getConfigResponseBeforeRedirectHook(options: any): void {
   }
 
   if (
-    options.href &&
-    options.href.indexOf('blob.core.windows.net') !== -1 &&
-    options.headers &&
-    options.headers.authorization
+    options.href?.includes('blob.core.windows.net') &&
+    options.headers?.authorization
   ) {
     // docker registry is hosted on Azure blob, redirect url includes authentication.
     // eslint-disable-next-line no-param-reassign
