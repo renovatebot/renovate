@@ -14,7 +14,6 @@ import {
 } from '../../constants/error-messages';
 
 declare module 'fs-extra' {
-  // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
 }
 
