@@ -1,5 +1,10 @@
 import { DateTime } from 'luxon';
 
+import _ from 'lodash';
+import { readFile } from 'fs-extra';
+import is from '@sindresorhus/is';
+import minimatch from 'minimatch';
+import { join } from 'upath';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -30,6 +35,7 @@ import {
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
+import { exec } from '../../util/exec';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -320,6 +326,83 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
+
+    if (
+      global.trustLevel === 'high' &&
+      is.nonEmptyArray(config.allowedPostUpgradeCommands)
+    ) {
+      logger.debug(
+        {
+          tasks: config.postUpgradeTasks,
+          allowedCommands: config.allowedPostUpgradeCommands,
+        },
+        'Checking for post-upgrade tasks'
+      );
+      const commands = config.postUpgradeTasks.commands || [];
+      const fileFilters = config.postUpgradeTasks.fileFilters || [];
+
+      if (is.nonEmptyArray(commands)) {
+        for (const cmd of commands) {
+          if (
+            !_.some(config.allowedPostUpgradeCommands, (pattern: string) =>
+              cmd.match(pattern)
+            )
+          ) {
+            logger.warn(
+              {
+                cmd,
+                allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
+              },
+              'Post-upgrade task did not match any on allowed list'
+            );
+          } else {
+            logger.debug({ cmd }, 'Executing post-upgrade task');
+
+            const execResult = await exec(cmd, {
+              cwd: config.localDir,
+            });
+
+            logger.debug({ cmd, ...execResult }, 'Executed post-upgrade task');
+          }
+        }
+
+        const status = await platform.getRepoStatus();
+
+        for (const relativePath of status.modified.concat(status.not_added)) {
+          for (const pattern of fileFilters) {
+            if (minimatch(relativePath, pattern)) {
+              logger.debug(
+                { file: relativePath, pattern },
+                'Post-upgrade file saved'
+              );
+              const existingContent = await readFile(
+                join(config.localDir, relativePath)
+              );
+              config.updatedArtifacts.push({
+                name: relativePath,
+                contents: existingContent.toString(),
+              });
+            }
+          }
+        }
+
+        for (const relativePath of status.deleted || []) {
+          for (const pattern of fileFilters) {
+            if (minimatch(relativePath, pattern)) {
+              logger.debug(
+                { file: relativePath, pattern },
+                'Post-upgrade file removed'
+              );
+              config.updatedArtifacts.push({
+                name: '|delete|',
+                contents: relativePath,
+              });
+            }
+          }
+        }
+      }
+    }
+
     if (config.artifactErrors && config.artifactErrors.length) {
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);

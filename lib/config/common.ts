@@ -29,7 +29,14 @@ export interface RenovateSharedConfig {
   statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
+  allowedPostUpgradeCommands?: string[];
+  postUpgradeTasks?: PostUpgradeTasks;
 }
+
+export type PostUpgradeTasks = {
+  commands?: string[];
+  fileFilters?: string[];
+};
 
 type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig

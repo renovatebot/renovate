@@ -45,7 +45,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks';
 
   // used by tests
   relatedOptions?: string[];
@@ -102,6 +102,45 @@ export type RenovateOptions =
   | RenovateObjectOption;
 
 const options: RenovateOptions[] = [
+  {
+    name: 'allowedPostUpgradeCommands',
+    description:
+      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
+    type: 'array',
+    subType: 'string',
+    default: [],
+    admin: true,
+  },
+  {
+    name: 'postUpgradeTasks',
+    description:
+      'Post-upgrade tasks that are executed before a commit is made by Renovate',
+    type: 'object',
+    default: {
+      commands: [],
+      fileFilters: [],
+    },
+  },
+  {
+    name: 'commands',
+    description:
+      'A list of post-upgrade commands that are executed before a commit is made by Renovate',
+    type: 'array',
+    subType: 'string',
+    parent: 'postUpgradeTasks',
+    default: [],
+    cli: false,
+  },
+  {
+    name: 'fileFilters',
+    description:
+      'Files that match these glob patterns will be committed if they are present after running a post-upgrade task',
+    type: 'array',
+    subType: 'string',
+    parent: 'postUpgradeTasks',
+    default: [],
+    cli: false,
+  },
   {
     name: 'onboardingBranch',
     description:
