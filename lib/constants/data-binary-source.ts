@@ -1,5 +1,6 @@
 // Datasource
 export const DATASOURCE_CARGO = 'cargo';
+export const DATASOURCE_CDNJS = 'cdnjs';
 export const DATASOURCE_DART = 'dart';
 export const DATASOURCE_DOCKER = 'docker';
 export const DATASOURCE_GIT_SUBMODULES = 'gitSubmodules';
@@ -21,8 +22,3 @@ export const DATASOURCE_RUBY_VERSION = 'rubyVersion';
 export const DATASOURCE_SBT = 'sbt';
 export const DATASOURCE_TERRAFORM = 'terraform';
 export const DATASOURCE_TERRAFORM_PROVIDER = 'terraformProvider';
-
-// Binary Source
-export const BINARY_SOURCE_DOCKER = 'docker';
-export const BINARY_SOURCE_GLOBAL = 'global';
-export const BINARY_SOURCE_AUTO = 'auto';

@@ -1,11 +1,31 @@
 import { RenovateConfigStage } from './common';
 import {
+  VERSION_SCHEME_CARGO,
+  VERSION_SCHEME_COMPOSER,
+  VERSION_SCHEME_DOCKER,
+  VERSION_SCHEME_GIT,
+  VERSION_SCHEME_HEX,
+  VERSION_SCHEME_HASHICORP,
+  VERSION_SCHEME_IVY,
+  VERSION_SCHEME_LOOSE,
+  VERSION_SCHEME_MAVEN,
+  VERSION_SCHEME_NODE,
+  VERSION_SCHEME_NPM,
+  VERSION_SCHEME_NUGET,
+  VERSION_SCHEME_PEP440,
+  VERSION_SCHEME_POETRY,
+  VERSION_SCHEME_REGEX,
+  VERSION_SCHEME_RUBY,
+  VERSION_SCHEME_SEMVER,
+  VERSION_SCHEME_SWIFT,
+} from '../constants/version-schemes';
+import {
   PLATFORM_TYPE_AZURE,
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_BITBUCKET_SERVER,
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../constants/platfroms';
+} from '../constants/platforms';
 
 export interface RenovateOptionBase {
   admin?: boolean;
@@ -25,7 +45,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks';
 
   // used by tests
   relatedOptions?: string[];
@@ -82,6 +102,45 @@ export type RenovateOptions =
   | RenovateObjectOption;
 
 const options: RenovateOptions[] = [
+  {
+    name: 'allowedPostUpgradeCommands',
+    description:
+      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
+    type: 'array',
+    subType: 'string',
+    default: [],
+    admin: true,
+  },
+  {
+    name: 'postUpgradeTasks',
+    description:
+      'Post-upgrade tasks that are executed before a commit is made by Renovate',
+    type: 'object',
+    default: {
+      commands: [],
+      fileFilters: [],
+    },
+  },
+  {
+    name: 'commands',
+    description:
+      'A list of post-upgrade commands that are executed before a commit is made by Renovate',
+    type: 'array',
+    subType: 'string',
+    parent: 'postUpgradeTasks',
+    default: [],
+    cli: false,
+  },
+  {
+    name: 'fileFilters',
+    description:
+      'Files that match these glob patterns will be committed if they are present after running a post-upgrade task',
+    type: 'array',
+    subType: 'string',
+    parent: 'postUpgradeTasks',
+    default: [],
+    cli: false,
+  },
   {
     name: 'onboardingBranch',
     description:
@@ -195,6 +254,7 @@ const options: RenovateOptions[] = [
       'Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`',
     admin: true,
     type: 'string',
+    allowedValues: ['auto', 'global', 'docker'],
     default: 'auto',
   },
   {
@@ -600,26 +660,26 @@ const options: RenovateOptions[] = [
     description: 'Version scheme to use for filtering and comparisons',
     type: 'string',
     allowedValues: [
-      'cargo',
-      'composer',
-      'docker',
-      'git',
-      'hashicorp',
-      'hex',
-      'ivy',
-      'loose',
-      'maven',
-      'node',
-      'npm',
-      'nuget',
-      'pep440',
-      'poetry',
-      'regex',
-      'ruby',
-      'semver',
-      'swift',
+      VERSION_SCHEME_CARGO,
+      VERSION_SCHEME_COMPOSER,
+      VERSION_SCHEME_DOCKER,
+      VERSION_SCHEME_GIT,
+      VERSION_SCHEME_HASHICORP,
+      VERSION_SCHEME_HEX,
+      VERSION_SCHEME_IVY,
+      VERSION_SCHEME_LOOSE,
+      VERSION_SCHEME_MAVEN,
+      VERSION_SCHEME_NODE,
+      VERSION_SCHEME_NPM,
+      VERSION_SCHEME_NUGET,
+      VERSION_SCHEME_PEP440,
+      VERSION_SCHEME_POETRY,
+      VERSION_SCHEME_REGEX,
+      VERSION_SCHEME_RUBY,
+      VERSION_SCHEME_SEMVER,
+      VERSION_SCHEME_SWIFT,
     ],
-    default: 'semver',
+    default: VERSION_SCHEME_SEMVER,
     cli: false,
     env: false,
   },
@@ -1378,7 +1438,7 @@ const options: RenovateOptions[] = [
     default: {
       fileMatch: ['(^|/)package.json$'],
       rollbackPrs: true,
-      versionScheme: 'npm',
+      versionScheme: VERSION_SCHEME_NPM,
       prBodyDefinitions: {
         Change:
           '[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}](https://renovatebot.com/diffs/npm/{{{depNameEscaped}}}/{{{fromVersion}}}/{{{toVersion}}})',
@@ -1473,7 +1533,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)Gemfile$'],
-      versionScheme: 'ruby',
+      versionScheme: VERSION_SCHEME_RUBY,
     },
     mergeable: true,
   },
@@ -1484,7 +1544,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)\\.ruby-version$'],
-      versionScheme: 'ruby',
+      versionScheme: VERSION_SCHEME_RUBY,
     },
     mergeable: true,
     cli: false,
@@ -1498,7 +1558,7 @@ const options: RenovateOptions[] = [
       commitMessageTopic:
         'Terraform {{managerData.terraformDependencyType}} {{depNameShort}}',
       fileMatch: ['\\.tf$'],
-      versionScheme: 'hashicorp',
+      versionScheme: VERSION_SCHEME_HASHICORP,
     },
     mergeable: true,
   },
@@ -1509,7 +1569,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)mix\\.exs$'],
-      versionScheme: 'hex',
+      versionScheme: VERSION_SCHEME_HEX,
     },
     mergeable: true,
   },
@@ -1531,8 +1591,19 @@ const options: RenovateOptions[] = [
       commitMessageTopic: 'Rust crate {{depName}}',
       managerBranchPrefix: 'rust-',
       fileMatch: ['(^|/)Cargo.toml$'],
-      versionScheme: 'cargo',
+      versionScheme: VERSION_SCHEME_CARGO,
       rangeStrategy: 'bump',
+    },
+    mergeable: true,
+  },
+  {
+    name: 'cdnurl',
+    description: 'Configuration object for CDN assets',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      fileMatch: [],
+      versionScheme: VERSION_SCHEME_SEMVER,
     },
     mergeable: true,
   },
@@ -1566,7 +1637,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['^.travis.yml$'],
-      versionScheme: 'node',
+      versionScheme: VERSION_SCHEME_NODE,
     },
     mergeable: true,
     cli: false,
@@ -1578,7 +1649,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['^.nvmrc$'],
-      versionScheme: 'node',
+      versionScheme: VERSION_SCHEME_NODE,
     },
     mergeable: true,
     cli: false,
@@ -1590,7 +1661,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)pubspec\\.ya?ml$'],
-      versionScheme: 'npm',
+      versionScheme: VERSION_SCHEME_NPM,
     },
     mergeable: true,
     cli: false,
@@ -1601,7 +1672,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: 'docker',
+      versionScheme: VERSION_SCHEME_DOCKER,
       managerBranchPrefix: 'docker-',
       commitMessageTopic: '{{{depName}}} Docker tag',
       major: { enabled: false },
@@ -1695,6 +1766,21 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'helmfile',
+    description: 'Configuration object for helmfile helmfile.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      aliases: {
+        stable: 'https://kubernetes-charts.storage.googleapis.com/',
+      },
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)helmfile.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
     name: 'circleci',
     description:
       'Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.',
@@ -1753,7 +1839,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)([\\w-]*)composer.json$'],
-      versionScheme: 'composer',
+      versionScheme: VERSION_SCHEME_COMPOSER,
     },
     mergeable: true,
     cli: false,
@@ -1765,7 +1851,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       enabled: false,
-      versionScheme: 'git',
+      versionScheme: VERSION_SCHEME_GIT,
       fileMatch: ['(^|/).gitmodules$'],
     },
     mergeable: true,
@@ -1819,7 +1905,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: 'poetry',
+      versionScheme: VERSION_SCHEME_POETRY,
       fileMatch: ['(^|/)pyproject\\.toml$'],
     },
     mergeable: true,
@@ -1830,7 +1916,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: 'pep440',
+      versionScheme: VERSION_SCHEME_PEP440,
     },
     mergeable: true,
     cli: false,
@@ -1843,7 +1929,7 @@ const options: RenovateOptions[] = [
     default: {
       fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
       timeout: 300,
-      versionScheme: 'ivy',
+      versionScheme: VERSION_SCHEME_IVY,
     },
     mergeable: true,
     cli: false,
@@ -1856,7 +1942,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)project\\.clj$'],
-      versionScheme: 'maven',
+      versionScheme: VERSION_SCHEME_MAVEN,
     },
     mergeable: true,
     cli: false,
@@ -1869,7 +1955,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)deps\\.edn$'],
-      versionScheme: 'maven',
+      versionScheme: VERSION_SCHEME_MAVEN,
     },
     mergeable: true,
     cli: false,
@@ -1899,7 +1985,7 @@ const options: RenovateOptions[] = [
     default: {
       fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
       timeout: 600,
-      versionScheme: 'maven',
+      versionScheme: VERSION_SCHEME_MAVEN,
     },
     mergeable: true,
     cli: false,
@@ -1922,7 +2008,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['\\.pom\\.xml$', '(^|/)pom\\.xml$'],
-      versionScheme: 'maven',
+      versionScheme: VERSION_SCHEME_MAVEN,
     },
     mergeable: true,
     cli: false,
@@ -1966,7 +2052,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      fileMatch: ['\\.csproj$'],
+      fileMatch: ['\\.(?:cs|fs|vb)proj$'],
     },
     mergeable: true,
     cli: false,
@@ -2113,7 +2199,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       fileMatch: ['(^|/)Package\\.swift'],
-      versionScheme: 'swift',
+      versionScheme: VERSION_SCHEME_SWIFT,
       rangeStrategy: 'bump',
     },
     mergeable: true,

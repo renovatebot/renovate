@@ -1,42 +1,52 @@
+import { join } from 'path';
 import { hrtime } from 'process';
-import { promisify } from 'util';
-import {
-  exec as cpExec,
-  ExecOptions as ChildProcessExecOptions,
-} from 'child_process';
-import { dockerCmd, DockerOptions, setDockerConfig } from './docker';
+import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import { generateDockerCommand } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
+import {
+  BinarySource,
+  ExecConfig,
+  ExecResult,
+  RawExecOptions,
+  rawExec,
+  Opt,
+  DockerOptions,
+} from './common';
+import { RenovateConfig } from '../../config';
 
-let localDir;
+const execConfig: ExecConfig = {
+  binarySource: null,
+  dockerUser: null,
+  localDir: null,
+  cacheDir: null,
+};
 
-export function setExecConfig(config): void {
-  localDir = config.localDir;
-  setDockerConfig(config);
+export function setExecConfig(config: Partial<RenovateConfig>): void {
+  for (const key of Object.keys(execConfig)) {
+    const value = config[key];
+    execConfig[key] = value || null;
+  }
 }
-
-const pExec: (
-  cmd: string,
-  opts: ChildProcessExecOptions & { encoding: string }
-) => Promise<ExecResult> = promisify(cpExec);
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
-  extraEnv?: ExtraEnv | null | undefined;
-  docker?: DockerOptions | null | undefined;
-}
-
-export interface ExecResult {
-  stdout: string;
-  stderr: string;
+  subDirectory?: string;
+  extraEnv?: Opt<ExtraEnv>;
+  docker?: Opt<DockerOptions>;
 }
 
 function createChildEnv(
   env: NodeJS.ProcessEnv,
   extraEnv: ExtraEnv
 ): ExtraEnv<string> {
-  const extraEnvKeys = Object.keys(extraEnv || {});
+  const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
+    if (val === null) return false;
+    if (val === undefined) return false;
+    return true;
+  });
+  const extraEnvKeys = Object.keys(extraEnvEntries);
 
   const childEnv =
     env || extraEnv
@@ -61,22 +71,30 @@ function dockerEnvVars(
   childEnv: ExtraEnv<string>
 ): string[] {
   const extraEnvKeys = Object.keys(extraEnv || {});
-  return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
+  return extraEnvKeys.filter(
+    key => typeof childEnv[key] === 'string' && childEnv[key].length > 0
+  );
 }
 
 export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker } = opts;
-  const cwd = opts.cwd || localDir;
+  const { env, extraEnv, docker, subDirectory } = opts;
+  let cwd;
+  // istanbul ignore if
+  if (subDirectory) {
+    cwd = join(execConfig.localDir, subDirectory);
+  }
+  cwd = cwd || opts.cwd || execConfig.localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
+  delete execOptions.subDirectory;
 
-  const pExecOptions: ChildProcessExecOptions & { encoding: string } = {
+  const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',
     ...execOptions,
     env: childEnv,
@@ -84,28 +102,36 @@ export async function exec(
   };
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  if (docker) {
+  if (execConfig.binarySource === BinarySource.Docker && docker) {
+    logger.debug('Using docker to execute');
     const dockerOptions = {
       ...docker,
       cwd,
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    let singleCommand = commands.join(' && ');
-    singleCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
-    singleCommand = dockerCmd(singleCommand, dockerOptions);
-    commands = [singleCommand];
+    const dockerCommand = await generateDockerCommand(
+      commands,
+      dockerOptions,
+      execConfig
+    );
+    commands = [dockerCommand];
   }
 
   let res: ExecResult | null = null;
-  for (const pExecCommand of commands) {
+  for (const rawExecCommand of commands) {
     const startTime = hrtime();
-    res = await pExec(pExecCommand, pExecOptions);
+    res = await rawExec(rawExecCommand, rawExecOptions);
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (res) {
       logger.debug(
-        { cmd, seconds, stdout: res.stdout, stderr: res.stderr },
+        {
+          cmd: rawExecCommand,
+          seconds,
+          stdout: res.stdout,
+          stderr: res.stderr,
+        },
         'exec completed'
       );
     }

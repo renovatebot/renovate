@@ -12,13 +12,14 @@ function padZeroes(input: string): string {
 }
 
 function composer2npm(input: string): string {
-  if (npm.isVersion(input)) {
-    return input;
+  const cleanInput = input.replace(/^v/, '');
+  if (npm.isVersion(cleanInput)) {
+    return cleanInput;
   }
-  if (npm.isVersion(padZeroes(input))) {
-    return padZeroes(input);
+  if (npm.isVersion(padZeroes(cleanInput))) {
+    return padZeroes(cleanInput);
   }
-  let output = input;
+  let output = cleanInput;
   // ~4 to ^4 and ~4.1 to ^4.1
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
   // ~0.4 to >=0.4 <1

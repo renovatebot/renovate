@@ -1,6 +1,10 @@
 import * as releases from '../../../../lib/workers/pr/changelog/releases';
 import * as datasource from '../../../../lib/datasource';
 import { mocked } from '../../../util';
+import {
+  VERSION_SCHEME_DOCKER,
+  VERSION_SCHEME_NPM,
+} from '../../../../lib/constants/version-schemes';
 
 jest.mock('../../../../lib/datasource');
 
@@ -40,7 +44,7 @@ describe('workers/pr/changelog/releases', () => {
     });
     it('should contain only stable', async () => {
       const config = {
-        versionScheme: 'npm',
+        versionScheme: VERSION_SCHEME_NPM,
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
       };
@@ -50,7 +54,7 @@ describe('workers/pr/changelog/releases', () => {
     });
     it('should contain fromVersion unstable', async () => {
       const config = {
-        versionScheme: 'npm',
+        versionScheme: VERSION_SCHEME_NPM,
         fromVersion: '1.0.1-rc0',
         toVersion: '1.1.0',
       };
@@ -60,7 +64,7 @@ describe('workers/pr/changelog/releases', () => {
     });
     it('should contain toVersion unstable', async () => {
       const config = {
-        versionScheme: 'npm',
+        versionScheme: VERSION_SCHEME_NPM,
         fromVersion: '1.0.1',
         toVersion: '1.2.0-rc1',
       };
@@ -70,7 +74,7 @@ describe('workers/pr/changelog/releases', () => {
     });
     it('should contain both fromVersion toVersion unstable', async () => {
       const config = {
-        versionScheme: 'npm',
+        versionScheme: VERSION_SCHEME_NPM,
         fromVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc1',
       };
@@ -80,7 +84,7 @@ describe('workers/pr/changelog/releases', () => {
     });
     it('should valueToVersion', async () => {
       const config = {
-        versionScheme: 'docker',
+        versionScheme: VERSION_SCHEME_DOCKER,
         fromVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc0',
       };

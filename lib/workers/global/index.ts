@@ -12,7 +12,7 @@ import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
 import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
-import { setExecConfig } from '../../util/exec';
+import { setUtilConfig } from '../../util';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -77,7 +77,7 @@ export async function start(): Promise<0 | 1> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      setExecConfig(repoConfig);
+      setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach(rule => hostRules.add(rule));

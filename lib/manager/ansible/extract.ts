@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
+import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
 
 export default function extractPackageFile(
   content: string
@@ -22,7 +23,7 @@ export default function extractPackageFile(
         'Docker image inside ansible'
       );
       dep.managerData = { lineNumber };
-      dep.versionScheme = 'docker';
+      dep.versionScheme = VERSION_SCHEME_DOCKER;
       deps.push(dep);
     }
     lineNumber += 1;

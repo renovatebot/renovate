@@ -37,7 +37,6 @@ Object {
       "depType": "dev_dependencies",
     },
   ],
-  "manager": "pub",
   "packageFile": "pubspec.yaml",
 }
 `;

@@ -178,6 +178,20 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 
 ## cargo
 
+## cdnurl
+
+**Important**: This manager isn't aware of subresource integrity (SRI) hashes. It will search/replace any matching url it finds, without consideration for things such as script integrity hashes.
+
+To enable this manager, add the matching files to `cdnurl.fileMatch`. For example:
+
+```json
+{
+  "cdnurl": {
+    "fileMatch": ["\\.html?$"]
+  }
+}
+```
+
 ## circleci
 
 ## commitBody
@@ -481,6 +495,8 @@ image:
   tag: v1.0.0
   registry: registry.example.com # optional key, will default to "docker.io"
 ```
+
+## helmfile
 
 ## homebrew
 
@@ -786,7 +802,7 @@ See [Private npm module support](https://docs.renovatebot.com/private-modules) f
 
 ## nuget
 
-The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj`/`.fsproj`/`.vbproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj`/`.fsproj`/`.vbproj` format in order to be detected and supported by Renovate.
 
 ## nvm
 
@@ -1019,10 +1035,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-    "groupName" "Vue monorepo packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
+    }
+  ]
 }
 ```
 
@@ -1030,10 +1048,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
-    "groupName" "All renovate packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "groupName": "All renovate packages"
+    }
+  ]
 }
 ```
 
@@ -1092,6 +1112,33 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
 - `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+
+## postUpgradeTasks
+
+Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created. The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+
+This is only available on Renovate instances that have a `trustLevel` of 'high'. Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed. If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["tslint --fix"],
+    "fileFilters": ["yarn.lock", "**/*.js"]
+  }
+}
+```
+
+The `postUpdateTasks` configuration consists of two fields:
+
+### commands
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit it made
+
+### fileFilters
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
 
 ## prBodyColumns
 

@@ -3,6 +3,48 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "allowedPostUpgradeCommands": {
+      "description": "A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "postUpgradeTasks": {
+      "description": "Post-upgrade tasks that are executed before a commit is made by Renovate",
+      "type": "object",
+      "default": {
+        "commands": [],
+        "fileFilters": []
+      },
+      "$ref": "#",
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "commands": {
+                "description": "A list of post-upgrade commands that are executed before a commit is made by Renovate",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "fileFilters": {
+                "description": "Files that match these glob patterns will be committed if they are present after running a post-upgrade task",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              }
+            }
+          }
+        ]
+      }
+    },
     "onboardingBranch": {
       "description": "Change this value in order to override the default onboarding branch name.",
       "type": "string",
@@ -75,6 +117,7 @@
     "binarySource": {
       "description": "Where to source binaries like `npm` and `yarn` from, choices are `auto`, `global` and `docker`",
       "type": "string",
+      "enum": ["auto", "global", "docker"],
       "default": "auto"
     },
     "baseDir": {
@@ -998,6 +1041,15 @@
       },
       "$ref": "#"
     },
+    "cdnurl": {
+      "description": "Configuration object for CDN assets",
+      "type": "object",
+      "default": {
+        "fileMatch": [],
+        "versionScheme": "semver"
+      },
+      "$ref": "#"
+    },
     "supportPolicy": {
       "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)",
       "type": "array",
@@ -1119,6 +1171,18 @@
       "default": {
         "commitMessageTopic": "helm values {{depName}}",
         "fileMatch": ["(^|/)values.yaml$"]
+      },
+      "$ref": "#"
+    },
+    "helmfile": {
+      "description": "Configuration object for helmfile helmfile.yaml files.",
+      "type": "object",
+      "default": {
+        "aliases": {
+          "stable": "https://kubernetes-charts.storage.googleapis.com/"
+        },
+        "commitMessageTopic": "helm chart {{depName}}",
+        "fileMatch": ["(^|/)helmfile.yaml$"]
       },
       "$ref": "#"
     },
@@ -1317,7 +1381,7 @@
       "description": "Configuration object for C#/Nuget",
       "type": "object",
       "default": {
-        "fileMatch": ["\\.csproj$"]
+        "fileMatch": ["\\.(?:cs|fs|vb)proj$"]
       },
       "$ref": "#"
     },

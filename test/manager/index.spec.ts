@@ -1,12 +1,9 @@
 import * as manager from '../../lib/manager';
-import { MANAGER_DOCKERFILE } from '../../lib/constants/managers';
 
 describe('manager', () => {
   describe('get()', () => {
     it('gets something', () => {
-      expect(
-        manager.get(MANAGER_DOCKERFILE, 'extractPackageFile')
-      ).not.toBeNull();
+      expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
     });
   });
   describe('getLanguageList()', () => {
@@ -22,7 +19,7 @@ describe('manager', () => {
   describe('extractAllPackageFiles()', () => {
     it('returns null', () => {
       expect(
-        manager.extractAllPackageFiles(MANAGER_DOCKERFILE, {} as any, [])
+        manager.extractAllPackageFiles('dockerfile', {} as any, [])
       ).toBeNull();
     });
     it('returns non-null', () => {

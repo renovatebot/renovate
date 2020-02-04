@@ -6,7 +6,7 @@ import * as bitbucketServer from '../../lib/platform/bitbucket-server';
 import { PLATFORM_NOT_FOUND } from '../../lib/constants/error-messages';
 
 import * as platform from '../../lib/platform';
-import { PLATFORM_TYPE_BITBUCKET } from '../../lib/constants/platfroms';
+import { PLATFORM_TYPE_BITBUCKET } from '../../lib/constants/platforms';
 
 jest.unmock('../../lib/platform');
 

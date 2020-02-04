@@ -3,7 +3,7 @@ import { RenovateOptions } from '../../lib/config/definitions';
 import {
   PLATFORM_TYPE_BITBUCKET,
   PLATFORM_TYPE_GITLAB,
-} from '../../lib/constants/platfroms';
+} from '../../lib/constants/platforms';
 
 describe('config/env', () => {
   describe('.getConfig(env)', () => {
