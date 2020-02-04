@@ -148,6 +148,7 @@ export interface Upgrade<T = Record<string, any>>
   checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
+  dockerRepository?: string;
   downloadUrl?: string;
   localDir?: string;
   name?: string;
