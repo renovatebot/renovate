@@ -19,7 +19,7 @@ services:
     image: "node:10.0.0"
 
   db:
-    image: "postgres:9.4.0"
+    image: "postgres:9.6.16"
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
