@@ -40,7 +40,7 @@ require (
 	github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0
 	github.com/sirupsen/logrus v1.0.6
 	github.com/spf13/afero v1.1.1
-	github.com/spf13/cast v1.2.0
+	github.com/spf13/cast v1.3.1
 	github.com/spf13/jwalterweatherman v0.0.0-20180814060501-14d3d4c51834
 	github.com/spf13/pflag v1.0.2
 	github.com/spf13/viper v1.1.0
