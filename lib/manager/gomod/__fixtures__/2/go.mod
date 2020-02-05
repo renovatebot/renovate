@@ -54,7 +54,7 @@ require (
 	golang.org/x/crypto v0.0.0-20180808211826-de0752318171
 	golang.org/x/net v0.0.0-20180811021610-c39426892332
 	golang.org/x/sys v0.0.0-20180810173357-98c5dad5d1a0
-	golang.org/x/text v0.3.0
+	golang.org/x/text v0.3.2
 	"gopkg.in/src-d/go-billy.v4" v4.2.0
 	gopkg.in/src-d/go-git.v4 v4.0.0-20180807092216-43d17e14b714
 	gopkg.in/warnings.v0 v0.1.2
