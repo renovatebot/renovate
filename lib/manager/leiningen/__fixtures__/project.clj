@@ -184,7 +184,7 @@
              :1.5 {:dependencies [[org.clojure/clojure "1.5.0"]]}
              ;; activated by default
              :dev {:resource-paths ["dummy-data"]
-                   :dependencies [[clj-stacktrace "0.2.4"]]}
+                   :dependencies [[clj-stacktrace "0.2.8"]]}
              ;; activated automatically during uberjar
              :uberjar {:aot :all}
              ;; activated automatically in repl task
