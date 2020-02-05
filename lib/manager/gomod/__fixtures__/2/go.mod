@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc
 	github.com/hashicorp/go-version v1.0.0
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
-	github.com/heroku/rollrus v0.0.0-20180515183152-fc0cef2ff331
+	github.com/heroku/rollrus v0.1.1
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99
 	github.com/jesseduffield/go-getter v0.0.0-20180822080847-906e15686e63
 	github.com/jesseduffield/gocui v0.0.0-20180921065632-03e26ff3f1de
