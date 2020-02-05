@@ -49,7 +49,7 @@
   ;; Leiningen expects.
   ;; You can also strings like ["group-id/name" version] for instances
   ;; where the dependency name isn't a valid symbol literal.
-  :dependencies [[org.clojure/clojure,"1.3.0"]
+  :dependencies [[org.clojure/clojure,"1.10.1"]
                  [org.jclouds/jclouds "1.0" :classifier "jdk15"]
                  [net.sf.ehcache/ehcache "2.3.1" :extension "pom"]
                  [log4j "1.2.15" :exclusions [[javax.mail/mail :extension "jar"]
@@ -180,8 +180,8 @@
   ;; See `lein help profiles` for a detailed explanation.
   :profiles {:debug {:debug true
                      :injections [(prn (into {} (System/getProperties)))]}
-             :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.0"]]}
+             :1.4 {:dependencies [[org.clojure/clojure "1.10.1"]]}
+             :1.5 {:dependencies [[org.clojure/clojure "1.10.1"]]}
              ;; activated by default
              :dev {:resource-paths ["dummy-data"]
                    :dependencies [[clj-stacktrace "0.2.4"]]}

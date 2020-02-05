@@ -5,12 +5,12 @@
 
   :aliases {
     :1.9 {
-      :override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}
+      :override-deps {org.clojure/clojure {:mvn/version "1.10.1"}}
     }
 
     :1.10 {
       :override-deps {
-        org.clojure/clojure {:mvn/version "1.10.0"}
+        org.clojure/clojure {:mvn/version "1.10.1"}
       }
     }
 
