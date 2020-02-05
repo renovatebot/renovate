@@ -188,7 +188,7 @@
              ;; activated automatically during uberjar
              :uberjar {:aot :all}
              ;; activated automatically in repl task
-             :repl {:plugins [[cider/cider-nrepl "0.7.1"]]}}
+             :repl {:plugins [[cider/cider-nrepl "0.23.0"]]}}
   ;; Load these namespaces from within Leiningen to pick up hooks from them.
   :hooks [leiningen.hooks.difftest]
   ;; Apply these middleware functions from plugins to your project

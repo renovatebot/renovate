@@ -33,7 +33,7 @@
 
     :repl {
       :extra-deps {
-        cider/cider-nrepl           {:mvn/version "0.21.1"}
+        cider/cider-nrepl           {:mvn/version "0.23.0"}
         nrepl/nrepl                 {:mvn/version "0.6.0"}
         org.clojure/tools.namespace {:mvn/version "0.2.11"}
       }
