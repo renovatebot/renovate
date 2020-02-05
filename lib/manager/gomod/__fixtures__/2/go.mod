@@ -21,7 +21,7 @@ require (
 	github.com/jesseduffield/gocui v0.0.0-20180921065632-03e26ff3f1de
 	github.com/jesseduffield/termbox-go v0.0.0-20180919093808-1e272ff78dcb
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8
-	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
+	github.com/kardianos/osext 2bc1f35cddc0
 	github.com/kevinburke/ssh_config v0.0.0-20180317175531-9fc7bb800b55
 	github.com/magiconair/properties v1.8.0
 	github.com/mattn/go-colorable v0.0.9
