@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.0.0-20171218145408-d5fe4b57a186
 	github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001
 	github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc
-	github.com/hashicorp/go-version v1.0.0
+	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
 	github.com/heroku/rollrus v0.0.0-20180515183152-fc0cef2ff331
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99
