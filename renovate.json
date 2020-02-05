@@ -50,6 +50,10 @@
     {
       "packageNames": ["@types/jest"],
       "groupName": "jest monorepo"
+    },
+    {
+      paths: ["**/__fixtures__/**"],
+      "enabled": false
     }
   ]
 }
