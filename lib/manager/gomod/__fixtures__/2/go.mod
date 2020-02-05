@@ -8,7 +8,7 @@ require (
 	github.com/emirpasic/gods v1.9.0
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/go-ini/ini v1.38.2
+	github.com/go-ini/ini v1.52.0
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/hashicorp/go-cleanhttp v0.0.0-20171218145408-d5fe4b57a186
 	github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001
