@@ -76,7 +76,7 @@
   ;;  the version number from the parent.  This provides a simpler means of keeping
   ;;  common dependency versions in sync across a large number of clojure libraries.
   ;; For more info see ./doc/MANAGED_DEPS.md and https://github.com/achin/lein-parent
-  :managed-dependencies [[clj-time "0.12.0"]
+  :managed-dependencies [[clj-time "0.15.2"]
                          [me.raynes/fs "1.4.6"]]
 
   ;; What to do in the case of version conflicts. Defaults to :ranges, which
