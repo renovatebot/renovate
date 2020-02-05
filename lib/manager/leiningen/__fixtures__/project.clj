@@ -58,7 +58,7 @@
                                               com.sun.jmx/jmxri]]
                  ["net.3scale/3scale-api" "3.0.2"]
                  [org.lwjgl.lwjgl/lwjgl "2.8.5"]
-                 [org.lwjgl.lwjgl/lwjgl-platform "2.8.5"
+                 [org.lwjgl.lwjgl/lwjgl-platform "2.9.3"
                   :classifier "natives-osx"
                   ;; LWJGL stores natives in the root of the jar; this
                   ;; :native-prefix will extract them.
