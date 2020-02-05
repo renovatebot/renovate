@@ -52,7 +52,7 @@
       "groupName": "jest monorepo"
     },
     {
-      paths: ["**/__fixtures__/**"],
+      "paths": ["**/__fixtures__/**"],
       "enabled": false
     }
   ]
