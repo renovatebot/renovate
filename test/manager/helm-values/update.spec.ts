@@ -46,6 +46,22 @@ describe('lib/manager/helm-values/update', () => {
       expect(updateDependency(content, upgrade)).not.toBe(content);
       expect(updateDependency(content, upgrade)).toMatchSnapshot();
     });
+    it('survives null values of keys', () => {
+      const content = `
+      empty_key:
+      image:
+        repository: bitnami/postgres-exporter
+        tag: 0.7.0-debian-9-r12
+      `;
+      const upgrade = {
+        depName: 'bitnami/postgres-exporter',
+        currentValue: '0.7.0-debian-9-r12',
+        newValue: '0.8.0',
+        dockerRepository: 'bitnami/postgres-exporter',
+      };
+      expect(updateDependency(content, upgrade)).not.toBe(content);
+      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+    });
     it('upgrades dependency if newValue version value is repeated', () => {
       const content = `
       db:

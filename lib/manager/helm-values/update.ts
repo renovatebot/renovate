@@ -71,7 +71,7 @@ function updateDoc(
       return true;
     }
 
-    if (typeof parsedContent[key] === 'object') {
+    if (parsedContent[key] && typeof parsedContent[key] === 'object') {
       const foundMatch = updateDoc(
         parsedContent[key],
         dockerRepository,

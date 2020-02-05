@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/helm-values/update updateDependency() survives null values of keys 1`] = `
+"
+      empty_key:
+      image:
+        repository: bitnami/postgres-exporter
+        tag: 0.8.0
+"
+`;
+
 exports[`lib/manager/helm-values/update updateDependency() upgrades correct dependency if registry included 1`] = `
 "
       db:
