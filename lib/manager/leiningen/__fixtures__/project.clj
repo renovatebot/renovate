@@ -471,7 +471,7 @@
                   :executions ([:execution [:id "echodir"]
                                 [:goals ([:goal "run"])]
                                 [:phase "verify"]])}]
-                [org.apache.tomcat.maven/tomcat7-maven-plugin "2.1"]
+                [org.apache.tomcat.maven/tomcat7-maven-plugin "2.2"]
                 [com.google.appengine/appengine-maven-plugin "1.9.68"
                  ;; Use a list to pass any structure unaltered
                  (:configuration
