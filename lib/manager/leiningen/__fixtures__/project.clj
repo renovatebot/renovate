@@ -94,7 +94,7 @@
   ;; provide new tasks or hooks.
   :plugins [[lein-pprint "1.1.1"]
             [lein-assoc "0.1.0"]
-            [s3-wagon-private "1.1.1"]
+            [s3-wagon-private "1.3.3"]
             [lein-foo "0.0.1" :hooks false]
             [lein-bar "0.0.1" :middleware false]]
   ;; These repositories will be searched for :dependencies and
