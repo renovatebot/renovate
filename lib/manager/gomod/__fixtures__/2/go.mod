@@ -33,7 +33,7 @@ require (
 	github.com/mitchellh/mapstructure v0.0.0-20180715050151-f15292f7a699
 	github.com/nicksnyder/go-i18n v0.0.0-20180803040939-a16b91a3ba80
 	github.com/pelletier/go-buffruneio v0.2.0
-	github.com/pelletier/go-toml v1.2.0
+	github.com/pelletier/go-toml v1.6.0
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/sergi/go-diff v1.0.0
