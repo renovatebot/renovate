@@ -1,6 +1,4 @@
 import { DateTime } from 'luxon';
-
-import _ from 'lodash';
 import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
@@ -36,6 +34,7 @@ import {
 } from '../../constants/error-messages';
 import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
 import { exec } from '../../util/exec';
+import { regEx } from '../../util/regex';
 
 export type ProcessBranchResult =
   | 'already-existed'
@@ -344,8 +343,8 @@ export async function processBranch(
       if (is.nonEmptyArray(commands)) {
         for (const cmd of commands) {
           if (
-            !_.some(config.allowedPostUpgradeCommands, (pattern: string) =>
-              cmd.match(pattern)
+            !config.allowedPostUpgradeCommands.some(pattern =>
+              regEx(pattern).test(cmd)
             )
           ) {
             logger.warn(

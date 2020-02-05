@@ -117,7 +117,7 @@ function combineReposOnDuplicatedDependencies(
     accumulator.push(currentValue);
   } else {
     const nonExistingRepos = currentValue.repos.filter(
-      repo => existingDependency.repos.indexOf(repo) === -1
+      repo => !existingDependency.repos.includes(repo)
     );
     existingDependency.repos.push(...nonExistingRepos);
   }

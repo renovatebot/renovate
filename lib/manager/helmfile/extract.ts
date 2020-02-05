@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
 
 const isValidChartName = (name: string): boolean => {
-  return name.match(/[!@#$%^&*(),.?":{}/|<>A-Z]/) === null;
+  return !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
 };
 
 export function extractPackageFile(

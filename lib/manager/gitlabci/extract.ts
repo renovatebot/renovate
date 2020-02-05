@@ -7,7 +7,8 @@ function skipCommentLines(
   lineNumber: number
 ): { lineNumber: number; line: string } {
   let ln = lineNumber;
-  while (ln < lines.length - 1 && lines[ln].match(/^\s*#/)) {
+  const commentsRe = /^\s*#/;
+  while (ln < lines.length - 1 && commentsRe.test(lines[ln])) {
     ln += 1;
   }
   return { line: lines[ln], lineNumber: ln };
@@ -19,13 +20,13 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const imageMatch = line.match(/^\s*image:\s*'?"?([^\s]+|)'?"?\s*$/);
+      const imageMatch = /^\s*image:\s*'?"?([^\s]+|)'?"?\s*$/.exec(line);
       if (imageMatch) {
         switch (imageMatch[1]) {
           case '': {
             const imageNameLine = skipCommentLines(lines, lineNumber + 1);
-            const imageNameMatch = imageNameLine.line.match(
-              /^\s*name:\s*'?"?([^\s]+|)'?"?\s*$/
+            const imageNameMatch = /^\s*name:\s*'?"?([^\s]+|)'?"?\s*$/.exec(
+              imageNameLine.line
             );
 
             if (imageNameMatch) {
@@ -49,7 +50,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         }
       }
-      const services = line.match(/^\s*services:\s*$/);
+      const services = /^\s*services:\s*$/;
       if (services) {
         logger.trace(`Matched services on line ${lineNumber}`);
         let foundImage: boolean;
@@ -57,8 +58,8 @@ export function extractPackageFile(content: string): PackageFile | null {
           foundImage = false;
           const serviceImageLine = skipCommentLines(lines, lineNumber + 1);
           logger.trace(`serviceImageLine: "${serviceImageLine.line}"`);
-          const serviceImageMatch = serviceImageLine.line.match(
-            /^\s*-\s*'?"?([^\s'"]+)'?"?\s*$/
+          const serviceImageMatch = /^\s*-\s*'?"?([^\s'"]+)'?"?\s*$/.exec(
+            serviceImageLine.line
           );
           if (serviceImageMatch) {
             logger.trace('serviceImageMatch');

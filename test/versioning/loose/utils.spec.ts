@@ -22,7 +22,7 @@ describe('loose/utils', () => {
 
     do {
       Object.getOwnPropertyNames(o).forEach(prop => {
-        if (props.indexOf(prop) === -1) {
+        if (!props.includes(prop)) {
           props.push(prop);
         }
       });

@@ -12,10 +12,10 @@ jest.mock('../../lib/datasource/npm');
 const npmDatasource: any = _npm;
 
 describe('datasource/index', () => {
-  it('returns if digests are supported', async () => {
-    expect(
-      await datasource.supportsDigests({ datasource: DATASOURCE_GITHUB })
-    ).toBe(true);
+  it('returns if digests are supported', () => {
+    expect(datasource.supportsDigests({ datasource: DATASOURCE_GITHUB })).toBe(
+      true
+    );
   });
   it('returns null for no datasource', async () => {
     expect(

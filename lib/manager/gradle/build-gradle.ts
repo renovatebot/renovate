@@ -140,7 +140,7 @@ export function collectVersionVariables(
     ];
 
     for (const regex of regexes) {
-      const match = buildGradleContent.match(regex);
+      const match = regex.exec(buildGradleContent);
       if (match) {
         variables[`${dependency.group}:${dependency.name}`] = match[1];
       }
@@ -165,7 +165,7 @@ function updateVersionLiterals(
     ...moduleKotlinNamedArgumentVersionFormatMatch(dependency),
   ];
   for (const regex of regexes) {
-    if (buildGradleContent.match(regex)) {
+    if (regex.test(buildGradleContent)) {
       return buildGradleContent.replace(regex, `$1${newVersion}$2`);
     }
   }
@@ -184,7 +184,7 @@ function updateLocalVariables(
     ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
   ];
   for (const regex of regexes) {
-    const match = buildGradleContent.match(regex);
+    const match = regex.exec(buildGradleContent);
     if (match) {
       return buildGradleContent.replace(
         variableDefinitionFormatMatch(match[1]),
@@ -203,7 +203,7 @@ function updateGlobalVariables(
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = variableDefinitionFormatMatch(variable);
-    const match = buildGradleContent.match(regex);
+    const match = regex.exec(buildGradleContent);
     if (match) {
       return buildGradleContent.replace(
         variableDefinitionFormatMatch(variable),
@@ -224,7 +224,7 @@ function updateKotlinVariablesByExtra(
     const regex = new RegExp(
       `(val ${variable} by extra(?: {|\\()\\s*")(.*)("\\s*[})])`
     );
-    const match = buildGradleContent.match(regex);
+    const match = regex.exec(buildGradleContent);
     if (match) {
       return buildGradleContent.replace(regex, `$1${newVersion}$3`);
     }
@@ -240,7 +240,7 @@ function updatePropertyFileGlobalVariables(
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = new RegExp(`(${variable}\\s*=\\s*)(.*)`);
-    const match = buildGradleContent.match(regex);
+    const match = regex.exec(buildGradleContent);
     if (match) {
       return buildGradleContent.replace(regex, `$1${newVersion}`);
     }
@@ -262,9 +262,7 @@ export function updateGradleVersion(
       updateKotlinVariablesByExtra,
     ];
 
-    // eslint-disable-next-line guard-for-in
-    for (const updateFunctionIndex in updateFunctions) {
-      const updateFunction = updateFunctions[updateFunctionIndex];
+    for (const updateFunction of updateFunctions) {
       const gradleContentUpdated = updateFunction(
         dependency,
         buildGradleContent,

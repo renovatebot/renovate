@@ -106,14 +106,14 @@ export class Storage {
 
   private async _resetToBranch(branchName: string): Promise<void> {
     logger.debug(`resetToBranch(${branchName})`);
-    await this._git!.raw(['reset', '--hard']);
-    await this._git!.checkout(branchName);
-    await this._git!.raw(['reset', '--hard', 'origin/' + branchName]);
-    await this._git!.raw(['clean', '-fd']);
+    await this._git.raw(['reset', '--hard']);
+    await this._git.checkout(branchName);
+    await this._git.raw(['reset', '--hard', 'origin/' + branchName]);
+    await this._git.raw(['clean', '-fd']);
   }
 
   private async _cleanLocalBranches(): Promise<void> {
-    const existingBranches = (await this._git!.raw(['branch']))
+    const existingBranches = (await this._git.raw(['branch']))
       .split('\n')
       .map(branch => branch.trim())
       .filter(branch => branch.length)
@@ -203,7 +203,7 @@ export class Storage {
       }
     }
     try {
-      const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
+      const latestCommitDate = (await this._git.log({ n: 1 })).latest.date;
       logger.debug({ latestCommitDate }, 'latest commit');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
@@ -217,14 +217,14 @@ export class Storage {
       logger.debug('Git private key configured, but not being set');
     } else {
       logger.debug('No git private key present - commits will be unsigned');
-      await this._git!.raw(['config', 'commit.gpgsign', 'false']);
+      await this._git.raw(['config', 'commit.gpgsign', 'false']);
     }
 
     if (global.gitAuthor) {
       logger.info({ gitAuthor: global.gitAuthor }, 'Setting git author');
       try {
-        await this._git!.raw(['config', 'user.name', global.gitAuthor.name]);
-        await this._git!.raw(['config', 'user.email', global.gitAuthor.email]);
+        await this._git.raw(['config', 'user.name', global.gitAuthor.name]);
+        await this._git.raw(['config', 'user.email', global.gitAuthor.email]);
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
         logger.debug({ err }, 'Error setting git config');
@@ -232,20 +232,20 @@ export class Storage {
       }
     }
 
-    await determineBaseBranch(this._git!);
+    await determineBaseBranch(this._git);
   }
 
   // istanbul ignore next
   getRepoStatus(): Promise<StatusResult> {
-    return this._git!.status();
+    return this._git.status();
   }
 
   async createBranch(branchName: string, sha: string): Promise<void> {
     logger.debug(`createBranch(${branchName})`);
-    await this._git!.reset('hard');
-    await this._git!.raw(['clean', '-fd']);
-    await this._git!.checkout(['-B', branchName, sha]);
-    await this._git!.push('origin', branchName, { '--force': true });
+    await this._git.reset('hard');
+    await this._git.raw(['clean', '-fd']);
+    await this._git.checkout(['-B', branchName, sha]);
+    await this._git.push('origin', branchName, { '--force': true });
     this._config.branchExists[branchName] = true;
   }
 
@@ -256,13 +256,13 @@ export class Storage {
         'Cannot fetch commit for branch that does not exist: ' + branchName
       );
     }
-    const res = await this._git!.revparse(['origin/' + branchName]);
+    const res = await this._git.revparse(['origin/' + branchName]);
     return res.trim();
   }
 
   async getCommitMessages(): Promise<string[]> {
     logger.debug('getCommitMessages');
-    const res = await this._git!.log({
+    const res = await this._git.log({
       n: 10,
       format: { message: '%s' },
     });
@@ -279,12 +279,12 @@ export class Storage {
       try {
         if (branchName !== 'master') {
           this._config.baseBranchSha = (
-            await this._git!.raw(['rev-parse', 'origin/' + branchName])
+            await this._git.raw(['rev-parse', 'origin/' + branchName])
           ).trim();
         }
-        await this._git!.checkout([branchName, '-f']);
-        await this._git!.reset('hard');
-        const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
+        await this._git.checkout([branchName, '-f']);
+        await this._git.reset('hard');
+        const latestCommitDate = (await this._git.log({ n: 1 })).latest.date;
         logger.debug({ branchName, latestCommitDate }, 'latest commit');
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
@@ -309,7 +309,7 @@ export class Storage {
     this._config.branchPrefix = branchPrefix;
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
     try {
-      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+      await this._git.fetch(['origin', ref, '--depth=2', '--force']);
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       throw err;
@@ -323,7 +323,7 @@ export class Storage {
       return [];
     }
     const submodules = await this.getSubmodules();
-    const files: string = await this._git!.raw([
+    const files: string = await this._git.raw([
       'ls-tree',
       '-r',
       '--name-only',
@@ -343,7 +343,7 @@ export class Storage {
 
   async getSubmodules(): Promise<string[]> {
     return (
-      (await this._git!.raw([
+      (await this._git.raw([
         'config',
         '--file',
         '.gitmodules',
@@ -364,20 +364,20 @@ export class Storage {
     if (!branchName.startsWith(this._config.branchPrefix)) {
       // fetch the branch only if it's not part of the existing branchPrefix
       try {
-        await this._git!.raw([
+        await this._git.raw([
           'remote',
           'set-branches',
           '--add',
           'origin',
           branchName,
         ]);
-        await this._git!.fetch(['origin', branchName, '--depth=2']);
+        await this._git.fetch(['origin', branchName, '--depth=2']);
       } catch (err) {
         checkForPlatformFailure(err);
       }
     }
     try {
-      await this._git!.raw(['show-branch', 'origin/' + branchName]);
+      await this._git.raw(['show-branch', 'origin/' + branchName]);
       this._config.branchExists[branchName] = true;
       return true;
     } catch (err) {
@@ -388,7 +388,7 @@ export class Storage {
   }
 
   async getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
-    const branches = await this._git!.branch(['--remotes', '--verbose']);
+    const branches = await this._git.branch(['--remotes', '--verbose']);
     return branches.all
       .map(localName)
       .filter(branchName => branchName.startsWith(branchPrefix));
@@ -400,7 +400,7 @@ export class Storage {
         'Cannot check staleness for branch that does not exist: ' + branchName
       );
     }
-    const branches = await this._git!.branch([
+    const branches = await this._git.branch([
       '--remotes',
       '--verbose',
       '--contains',
@@ -410,12 +410,12 @@ export class Storage {
   }
 
   private async _deleteLocalBranch(branchName: string): Promise<void> {
-    await this._git!.branch(['-D', branchName]);
+    await this._git.branch(['-D', branchName]);
   }
 
   async deleteBranch(branchName: string): Promise<void> {
     try {
-      await this._git!.raw(['push', '--delete', 'origin', branchName]);
+      await this._git.raw(['push', '--delete', 'origin', branchName]);
       logger.debug({ branchName }, 'Deleted remote branch');
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
@@ -433,17 +433,17 @@ export class Storage {
   }
 
   async mergeBranch(branchName: string): Promise<void> {
-    await this._git!.reset('hard');
-    await this._git!.checkout(['-B', branchName, 'origin/' + branchName]);
-    await this._git!.checkout(this._config.baseBranch);
-    await this._git!.merge(['--ff-only', branchName]);
-    await this._git!.push('origin', this._config.baseBranch);
+    await this._git.reset('hard');
+    await this._git.checkout(['-B', branchName, 'origin/' + branchName]);
+    await this._git.checkout(this._config.baseBranch);
+    await this._git.merge(['--ff-only', branchName]);
+    await this._git.push('origin', this._config.baseBranch);
     limits.incrementLimit('prCommitsPerRunLimit');
   }
 
   async getBranchLastCommitTime(branchName: string): Promise<Date> {
     try {
-      const time = await this._git!.show([
+      const time = await this._git.show([
         '-s',
         '--format=%ai',
         'origin/' + branchName,
@@ -464,7 +464,7 @@ export class Storage {
       }
     }
     try {
-      const content = await this._git!.show([
+      const content = await this._git.show([
         'origin/' + (branchName || this._config.baseBranch) + ':' + filePath,
       ]);
       return content;
@@ -476,7 +476,7 @@ export class Storage {
 
   async hasDiff(branchName: string): Promise<boolean> {
     try {
-      return (await this._git!.diff(['HEAD', branchName])) !== '';
+      return (await this._git.diff(['HEAD', branchName])) !== '';
     } catch (err) {
       return true;
     }
@@ -490,22 +490,22 @@ export class Storage {
   }: CommitFilesConfig): Promise<void> {
     logger.debug(`Committing files to branch ${branchName}`);
     try {
-      await this._git!.reset('hard');
-      await this._git!.raw(['clean', '-fd']);
-      await this._git!.checkout(['-B', branchName, 'origin/' + parentBranch]);
+      await this._git.reset('hard');
+      await this._git.raw(['clean', '-fd']);
+      await this._git.checkout(['-B', branchName, 'origin/' + parentBranch]);
       const fileNames = [];
       const deleted = [];
       for (const file of files) {
         // istanbul ignore if
         if (file.name === '|delete|') {
           deleted.push(file.contents);
-        } else if (await isDirectory(join(this._cwd!, file.name))) {
+        } else if (await isDirectory(join(this._cwd, file.name))) {
           fileNames.push(file.name);
-          await this._git!.add(file.name);
+          await this._git.add(file.name);
         } else {
           fileNames.push(file.name);
           await fs.outputFile(
-            join(this._cwd!, file.name),
+            join(this._cwd, file.name),
             Buffer.from(file.contents)
           );
         }
@@ -514,18 +514,18 @@ export class Storage {
       if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
         fileNames.unshift('-f');
       }
-      if (fileNames.length) await this._git!.add(fileNames);
+      if (fileNames.length) await this._git.add(fileNames);
       if (deleted.length) {
         for (const f of deleted) {
           try {
-            await this._git!.rm([f]);
+            await this._git.rm([f]);
           } catch (err) /* istanbul ignore next */ {
             checkForPlatformFailure(err);
             logger.debug({ err }, 'Cannot delete ' + f);
           }
         }
       }
-      await this._git!.commit(message);
+      await this._git.commit(message);
       if (!(await this.hasDiff(`origin/${branchName}`))) {
         logger.info(
           { branchName, fileNames },
@@ -533,13 +533,13 @@ export class Storage {
         );
         return;
       }
-      await this._git!.push('origin', `${branchName}:${branchName}`, {
+      await this._git.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
         '-u': true,
       });
       // Fetch it after create
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+      await this._git.fetch(['origin', ref, '--depth=2', '--force']);
       this._config.branchExists[branchName] = true;
       limits.incrementLimit('prCommitsPerRunLimit');
     } catch (err) /* istanbul ignore next */ {

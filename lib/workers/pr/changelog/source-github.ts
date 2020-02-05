@@ -12,7 +12,7 @@ import {
 } from './common';
 import { Release } from '../../../datasource';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,

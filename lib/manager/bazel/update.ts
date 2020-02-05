@@ -19,7 +19,7 @@ function updateWithNewVersion(
 }
 
 function extractUrl(flattened: string): string[] | null {
-  const urlMatch = flattened.match(/url="(.*?)"/);
+  const urlMatch = /url="(.*?)"/.exec(flattened);
   if (!urlMatch) {
     logger.debug('Cannot locate urls in new definition');
     return null;
@@ -29,7 +29,7 @@ function extractUrl(flattened: string): string[] | null {
 
 function extractUrls(content: string): string[] | null {
   const flattened = content.replace(/\n/g, '').replace(/\s/g, '');
-  const urlsMatch = flattened.match(/urls?=\[.*?\]/);
+  const urlsMatch = /urls?=\[.*?\]/.exec(flattened);
   if (!urlsMatch) {
     return extractUrl(flattened);
   }
@@ -158,7 +158,7 @@ export async function updateDependency(
     }
     const existingDef = regEx(existingRegExStr);
     // istanbul ignore if
-    if (!fileContent.match(existingDef)) {
+    if (!existingDef.test(fileContent)) {
       logger.info('Cannot match existing string');
       return null;
     }

@@ -26,7 +26,7 @@ function noWhitespace(input: string): string {
 }
 
 function noLeadingAtSymbol(input: string): string {
-  return input.length && input[0] === '@' ? input.slice(1) : input;
+  return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
 async function addAssigneesReviewers(config, pr: Pr): Promise<void> {

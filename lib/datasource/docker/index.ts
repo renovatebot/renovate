@@ -43,7 +43,7 @@ export function getRegistryRepository(
   if (!registry || registry === 'docker.io') {
     registry = 'index.docker.io';
   }
-  if (!registry.match('^https?://')) {
+  if (!/^https?:\/\//.exec(registry)) {
     registry = `https://${registry}`;
   }
   const opts = hostRules.find({ hostType: 'docker', url: registry });
@@ -113,7 +113,7 @@ async function getAuthHeaders(
     } = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
-      const region = registry.match(ecrRegex)[1];
+      const [, region] = ecrRegex.exec(registry);
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };

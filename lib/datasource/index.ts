@@ -126,7 +126,7 @@ export async function getPkgReleases(
 }
 
 export function supportsDigests(config: DigestConfig): boolean {
-  return !!datasources[config.datasource].getDigest;
+  return 'getDigest' in datasources[config.datasource];
 }
 
 export function getDigest(

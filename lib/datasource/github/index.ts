@@ -9,7 +9,7 @@ import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;

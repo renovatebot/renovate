@@ -39,8 +39,8 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const terraformDependency = line.match(
-        /^(module|provider)\s+"([^"]+)"\s+{\s*$/
+      const terraformDependency = /^(module|provider)\s+"([^"]+)"\s+{\s*$/.exec(
+        line
       );
       if (terraformDependency) {
         logger.trace(`Matched ${terraformDependency[1]} on line ${lineNumber}`);
@@ -61,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           do {
             lineNumber += 1;
             line = lines[lineNumber];
-            const kvMatch = line.match(/^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/);
+            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
             if (kvMatch) {
               const [, key, value] = kvMatch;
               if (key === 'version') {
@@ -85,9 +85,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.managerData.terraformDependencyType ===
       TerraformDependencyTypes.module
     ) {
-      const githubRefMatch =
-        dep.source &&
-        dep.source.match(/github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/);
+      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.test(
+        dep.source
+      );
       /* eslint-disable no-param-reassign */
       if (githubRefMatch) {
         dep.depType = 'github';

@@ -1,7 +1,7 @@
 import { logger } from '../logger';
 
 export function isSkipComment(comment?: string): boolean {
-  if (comment && comment.match(/^(renovate|pyup):/)) {
+  if (/^(renovate|pyup):/.test(comment)) {
     const command = comment
       .split('#')[0]
       .split(':')[1]

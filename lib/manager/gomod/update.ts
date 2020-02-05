@@ -39,7 +39,7 @@ export function updateDependency(
         updateLineExp = new RegExp(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
       }
     }
-    if (!lineToChange.match(updateLineExp)) {
+    if (!updateLineExp.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }
@@ -79,7 +79,7 @@ export function updateDependency(
       ) {
         // If package has no version, pin to latest one.
         newLine = newLine.replace(depName, depName + '/v' + upgrade.newMajor);
-        if (upgrade.currentValue.match(/^v(0|1)\./)) {
+        if (/^v(0|1)\./.test(upgrade.currentValue)) {
           // Add version
           newLine = newLine.replace(
             updateLineExp,
