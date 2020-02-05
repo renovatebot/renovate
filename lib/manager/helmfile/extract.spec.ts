@@ -6,14 +6,14 @@ describe('lib/manager/helmfile/extract', () => {
       jest.resetAllMocks();
     });
 
-    it('returns null if no releases', async () => {
+    it('returns null if no releases', () => {
       const content = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -21,7 +21,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('do not crash on invalid helmfile.yaml', async () => {
+    it('do not crash on invalid helmfile.yaml', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -30,7 +30,7 @@ describe('lib/manager/helmfile/extract', () => {
       releases: [
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -38,7 +38,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('skip if repository details are not specified', async () => {
+    it('skip if repository details are not specified', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -49,7 +49,7 @@ describe('lib/manager/helmfile/extract', () => {
           chart: experimental/example
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -59,7 +59,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result.deps.every(dep => dep.skipReason));
     });
 
-    it('skip templetized release with invalid characters', async () => {
+    it('skip templetized release with invalid characters', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -73,7 +73,7 @@ describe('lib/manager/helmfile/extract', () => {
           chart: stable/example
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -82,7 +82,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result).toMatchSnapshot();
     });
 
-    it('skip local charts', async () => {
+    it('skip local charts', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -93,7 +93,7 @@ describe('lib/manager/helmfile/extract', () => {
           chart: ./charts/example
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -103,7 +103,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result.deps.every(dep => dep.skipReason));
     });
 
-    it('skip chart with unknown repository', async () => {
+    it('skip chart with unknown repository', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -114,7 +114,7 @@ describe('lib/manager/helmfile/extract', () => {
           chart: example
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -124,7 +124,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result.deps.every(dep => dep.skipReason));
     });
 
-    it('skip chart with special character in the name', async () => {
+    it('skip chart with special character in the name', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -138,7 +138,7 @@ describe('lib/manager/helmfile/extract', () => {
           chart: kiwigrid/example?example
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
@@ -148,7 +148,7 @@ describe('lib/manager/helmfile/extract', () => {
       expect(result.deps.every(dep => dep.skipReason));
     });
 
-    it('skip chart that does not have specified version', async () => {
+    it('skip chart that does not have specified version', () => {
       const content = `
       repositories:
         - name: kiwigrid
@@ -158,7 +158,7 @@ describe('lib/manager/helmfile/extract', () => {
           chart: stable/example
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
+      const result = extractPackageFile(content, fileName, {
         aliases: {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },

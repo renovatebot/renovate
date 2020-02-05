@@ -62,7 +62,7 @@ export async function updateArtifacts({
     try {
       // istanbul ignore else
       if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls as string[]) {
+        for (const regUrl of config.registryUrls) {
           if (regUrl) {
             const { host } = URL.parse(regUrl);
             const hostRule = hostRules.find({

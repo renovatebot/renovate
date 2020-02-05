@@ -11,8 +11,8 @@ export function updateDependency(
     logger.debug(`docker-compose.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    const imageLine = new RegExp(/^(\s*image:\s*'?"?)[^\s'"]+('?"?\s*)/);
-    if (!lineToChange.match(imageLine)) {
+    const imageLine = /^(\s*image:\s*'?"?)[^\s'"]+('?"?\s*)/;
+    if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }

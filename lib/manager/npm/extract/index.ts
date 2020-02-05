@@ -234,8 +234,8 @@ export async function extractPackageFile(
     const [githubOwner, githubRepo] = githubRepoSplit;
     const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/;
     if (
-      !githubOwner.match(githubValidRegex) ||
-      !githubRepo.match(githubValidRegex)
+      !githubValidRegex.test(githubOwner) ||
+      !githubValidRegex.test(githubRepo)
     ) {
       dep.skipReason = 'unknown-version';
       return dep;
@@ -247,8 +247,8 @@ export async function extractPackageFile(
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
-      depRefPart.match(/^[0-9a-f]{7}$/) ||
-      depRefPart.match(/^[0-9a-f]{40}$/)
+      /^[0-9a-f]{7}$/.test(depRefPart) ||
+      /^[0-9a-f]{40}$/.test(depRefPart)
     ) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;

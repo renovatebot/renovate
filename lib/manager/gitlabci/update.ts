@@ -11,10 +11,8 @@ export function updateDependency(
     const lines = currentFileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (['image', 'image-name'].includes(upgrade.depType)) {
-      const imageLine = new RegExp(
-        /^(\s*(?:image|name):\s*'?"?)[^\s'"]+('?"?\s*)$/
-      );
-      if (!lineToChange.match(imageLine)) {
+      const imageLine = /^(\s*(?:image|name):\s*'?"?)[^\s'"]+('?"?\s*)$/;
+      if (!imageLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }
@@ -26,8 +24,8 @@ export function updateDependency(
       lines[upgrade.managerData.lineNumber] = newLine;
       return lines.join('\n');
     }
-    const serviceLine = new RegExp(/^(\s*-\s*'?"?)[^\s'"]+('?"?\s*)$/);
-    if (!lineToChange.match(serviceLine)) {
+    const serviceLine = /^(\s*-\s*'?"?)[^\s'"]+('?"?\s*)$/;
+    if (!serviceLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }

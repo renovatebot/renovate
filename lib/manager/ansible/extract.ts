@@ -9,8 +9,9 @@ export default function extractPackageFile(
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;
+  const re = /^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/;
   for (const line of content.split('\n')) {
-    const match = line.match(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+    const match = re.exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom);

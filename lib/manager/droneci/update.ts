@@ -12,8 +12,8 @@ export function updateDependency(
     if (upgrade.depType === 'docker') {
       const newFrom = getNewFrom(upgrade);
       logger.debug(`droneci.updateDependency(): ${newFrom}`);
-      const imageLine = new RegExp(/^(\s* image:\s*'?"?)[^\s'"]+('?"?\s*)$/);
-      if (!lineToChange.match(imageLine)) {
+      const imageLine = /^(\s* image:\s*'?"?)[^\s'"]+('?"?\s*)$/;
+      if (!imageLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }

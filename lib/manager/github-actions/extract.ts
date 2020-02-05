@@ -11,10 +11,10 @@ export function extractPackageFile(content: string): PackageFile | null {
     // old github actions syntax will be deprecated on September 30, 2019
     // after that, the first line can be removed
     const match =
-      line.match(/^\s+uses = "docker:\/\/([^"]+)"\s*$/) ||
-      line.match(/^\s+uses: docker:\/\/([^"]+)\s*$/);
+      /^\s+uses = "docker:\/\/([^"]+)"\s*$/.exec(line) ||
+      /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
     if (match) {
-      const currentFrom = match[1];
+      const [, currentFrom] = match;
       const dep = getDep(currentFrom);
       logger.debug(
         {

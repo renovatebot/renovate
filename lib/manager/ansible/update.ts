@@ -13,7 +13,7 @@ export default function updateDependency(
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     const imageLine = regEx(`^(\\s*image:\\s*'?"?)[^\\s'"]+('?"?\\s*)$`);
-    if (!lineToChange.match(imageLine)) {
+    if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }

@@ -60,6 +60,7 @@ export async function getPkgReleases({
       return null;
     }
     // Filter empty lines (takes care of trailing \n)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     res = res.map(JSON.parse);
     if (res[0].name !== lookupName) {
       logger.warn(

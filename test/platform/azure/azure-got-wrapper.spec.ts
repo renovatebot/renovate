@@ -16,7 +16,7 @@ describe('platform/azure/azure-got-wrapper', () => {
       expect(azure.coreApi).toThrow('No token found for azure');
       expect(azure.policyApi).toThrow('No token found for azure');
     });
-    it('should set token and endpoint', async () => {
+    it('should set token and endpoint', () => {
       hostRules.add({
         hostType: 'azure',
         token: 'token',
@@ -24,7 +24,7 @@ describe('platform/azure/azure-got-wrapper', () => {
       });
       azure.setEndpoint('https://dev.azure.com/renovate12345');
 
-      const res = await azure.azureObj();
+      const res = azure.azureObj();
 
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;

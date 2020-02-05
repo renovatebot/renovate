@@ -2,7 +2,7 @@ import { detectMonorepos } from './monorepo';
 
 describe('manager/npm/extract', () => {
   describe('.extractPackageFile()', () => {
-    it('uses lerna package settings', async () => {
+    it('uses lerna package settings', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -18,12 +18,12 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
       expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
-    it('uses yarn workspaces package settings', async () => {
+    it('uses yarn workspaces package settings', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -41,12 +41,12 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
       expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
-    it('uses yarn workspaces package settings', async () => {
+    it('uses yarn workspaces package settings', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -62,7 +62,7 @@ describe('manager/npm/extract', () => {
           packageJsonName: '@org/b',
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });

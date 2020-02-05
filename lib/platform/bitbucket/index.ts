@@ -88,7 +88,7 @@ export async function initRepo({
   });
   config = {
     repository,
-    username: opts!.username,
+    username: opts.username,
     bbUseDefaultReviewers: bbUseDefaultReviewers !== false,
   } as any;
   let info: utils.RepoInfo;
@@ -136,7 +136,7 @@ export async function initRepo({
 
   const url = GitStorage.getUrl({
     protocol: 'https',
-    auth: `${opts!.username}:${opts!.password}`,
+    auth: `${opts.username}:${opts.password}`,
     hostname: 'bitbucket.org',
     repository,
   });
@@ -213,7 +213,7 @@ function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -829,6 +829,6 @@ export function cleanRepo(): void {
   config = {} as any;
 }
 
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
-  return [];
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
 }

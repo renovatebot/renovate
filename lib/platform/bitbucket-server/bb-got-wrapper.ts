@@ -31,6 +31,7 @@ for (const x of helpers) {
     get(url, { ...opts, method: x.toUpperCase() });
 }
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 api.setBaseUrl = (e: string): void => {
   baseUrl = e;
 };

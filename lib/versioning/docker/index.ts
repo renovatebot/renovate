@@ -6,6 +6,7 @@ function parse(version: string): any {
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
   const release = prefix.split('.').map(Number);
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   if (release.some(Number.isNaN)) {
     return null;
   }

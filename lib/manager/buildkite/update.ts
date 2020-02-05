@@ -12,7 +12,7 @@ export function updateDependency(
     const lines = currentFileContent.split('\n');
     const lineToChange = lines[lineIdx];
     const depLine = regEx(`^(\\s+[^#]+#)[^:]+(.*)$`);
-    if (!lineToChange.match(depLine)) {
+    if (!depLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }

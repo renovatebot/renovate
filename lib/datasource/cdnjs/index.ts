@@ -56,7 +56,7 @@ export async function getPkgReleases({
     const { assets, homepage, repository } = cdnjsResp;
 
     const releases = assets
-      .filter(({ files }) => files.indexOf(assetName) !== -1)
+      .filter(({ files }) => files.includes(assetName))
       .map(({ version }) => ({ version }));
 
     const result: ReleaseResult = { releases };
