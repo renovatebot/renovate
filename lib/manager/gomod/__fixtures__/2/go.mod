@@ -49,7 +49,7 @@ require (
 	github.com/stretchr/testify v1.2.2
 	github.com/stvp/roll v0.0.0-20170522205222-3627a5cbeaea
 	github.com/tcnksm/go-gitconfig v0.1.2
-	github.com/ulikunitz/xz v0.5.4
+	github.com/ulikunitz/xz v0.5.6
 	github.com/xanzy/ssh-agent v0.2.0
 	golang.org/x/crypto v0.0.0-20180808211826-de0752318171
 	golang.org/x/net v0.0.0-20180811021610-c39426892332
