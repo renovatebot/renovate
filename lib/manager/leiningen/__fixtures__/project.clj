@@ -92,7 +92,7 @@
                org.apache.poi/poi-ooxml]
   ;; Plugins are code that runs in Leiningen itself and usually
   ;; provide new tasks or hooks.
-  :plugins [[lein-pprint "1.1.1"]
+  :plugins [[lein-pprint "1.3.1"]
             [lein-assoc "0.1.0"]
             [s3-wagon-private "1.1.1"]
             [lein-foo "0.0.1" :hooks false]
