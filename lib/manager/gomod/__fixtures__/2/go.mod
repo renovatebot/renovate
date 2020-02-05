@@ -19,7 +19,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99
 	github.com/jesseduffield/go-getter v0.0.0-20180822080847-906e15686e63
 	github.com/jesseduffield/gocui v0.0.0-20180921065632-03e26ff3f1de
-	github.com/jesseduffield/termbox-go v0.0.0-20180919093808-1e272ff78dcb
+	github.com/jesseduffield/termbox-go 1d31d1faa3c9
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 	github.com/kevinburke/ssh_config v0.0.0-20180317175531-9fc7bb800b55
