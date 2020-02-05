@@ -6,8 +6,7 @@ module.exports = {
   extends: [
     'airbnb-typescript/base',
     'plugin:@typescript-eslint/recommended',
-    // TODO: enable in separate PR
-    // 'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
     'prettier',
     'prettier/@typescript-eslint',
@@ -71,6 +70,7 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 0,
         '@typescript-eslint/no-object-literal-type-assertion': 0,
         '@typescript-eslint/explicit-function-return-type': 0,
+        '@typescript-eslint/unbound-method': 0,
       },
     },
   ],
