@@ -41,7 +41,7 @@ allprojects {
     doLast {
         def project = ['project': project.name]
         output << project
-        def repos = (repositories + settings.pluginManagement.repositories)
+        def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
            .collect { "$it.url" }
            .findAll { !it.startsWith('file:') }
            .unique()
