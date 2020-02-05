@@ -36,7 +36,7 @@ require (
 	github.com/pelletier/go-toml v1.2.0
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0
-	github.com/sergi/go-diff v1.0.0
+	github.com/sergi/go-diff v1.1.0
 	github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0
 	github.com/sirupsen/logrus v1.0.6
 	github.com/spf13/afero v1.1.1
