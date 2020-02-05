@@ -39,7 +39,7 @@ export function updateDependency(
         updateLineExp = new RegExp(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
       }
     }
-    if (!updateLineExp.test(lineToChange)) {
+    if (updateLineExp && !updateLineExp.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }
