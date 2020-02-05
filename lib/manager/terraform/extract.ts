@@ -85,7 +85,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.managerData.terraformDependencyType ===
       TerraformDependencyTypes.module
     ) {
-      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.test(
+      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.exec(
         dep.source
       );
       /* eslint-disable no-param-reassign */

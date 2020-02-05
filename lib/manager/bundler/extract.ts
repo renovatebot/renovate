@@ -42,7 +42,7 @@ export async function extractPackageFile(
     let gemDelimiter: string;
     for (const delimiter of delimiters) {
       const gemMatchRegex = `^gem ${delimiter}([^${delimiter}]+)${delimiter}(,\\s+${delimiter}([^${delimiter}]+)${delimiter}){0,2}`;
-      if (regEx(gemMatchRegex)) {
+      if (regEx(gemMatchRegex).test(line)) {
         gemDelimiter = delimiter;
         gemMatch = gemMatch || regEx(gemMatchRegex).exec(line);
       }
@@ -68,7 +68,7 @@ export async function extractPackageFile(
       }
       res.deps.push(dep);
     }
-    const groupMatch = /^group\s+(.*?)\s+do/;
+    const groupMatch = /^group\s+(.*?)\s+do/.exec(line);
     if (groupMatch) {
       const depTypes = groupMatch[1]
         .split(',')
@@ -100,7 +100,7 @@ export async function extractPackageFile(
     for (const delimiter of delimiters) {
       const sourceBlockMatch = regEx(
         `^source\\s+${delimiter}(.*?)${delimiter}\\s+do`
-      );
+      ).exec(line);
       if (sourceBlockMatch) {
         const repositoryUrl = sourceBlockMatch[1];
         const sourceLineNumber = lineNumber;
@@ -132,7 +132,7 @@ export async function extractPackageFile(
         }
       }
     }
-    const platformsMatch = /^platforms\s+(.*?)\s+do/;
+    const platformsMatch = /^platforms\s+(.*?)\s+do/.test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -157,7 +157,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = /^if\s+(.*?)/;
+    const ifMatch = /^if\s+(.*?)/.test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';

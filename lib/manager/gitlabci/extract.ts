@@ -50,7 +50,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         }
       }
-      const services = /^\s*services:\s*$/;
+      const services = /^\s*services:\s*$/.test(line);
       if (services) {
         logger.trace(`Matched services on line ${lineNumber}`);
         let foundImage: boolean;

@@ -14,7 +14,7 @@ function toSemverRange(range: string): string {
       return `>=${version} <${nextMajor}`;
     }
   } else if (fromRange.test(range)) {
-    const [, version] = fromParam.exec(range);
+    const [, version] = fromRange.exec(range);
     if (semver.valid(version)) {
       return `>=${version}`;
     }
@@ -39,7 +39,7 @@ function getNewValue({ currentValue, toVersion }: NewValueConfig): string {
     return toVersion.replace(/^v/, '');
   }
   if (fromRange.test(currentValue)) {
-    const [, version] = fromParam.exec(currentValue);
+    const [, version] = fromRange.exec(currentValue);
     return currentValue.replace(version, toVersion);
   }
   if (binaryRange.test(currentValue)) {
