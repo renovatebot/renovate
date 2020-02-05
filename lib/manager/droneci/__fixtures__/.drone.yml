@@ -21,7 +21,7 @@ steps:
 
 services:
   - name: mysql
-    image: mysql:5.7.24
+    image: mysql:5.7.29
     ports:
       - 3306
 
