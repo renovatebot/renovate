@@ -39,6 +39,7 @@ export async function processRepo(
       );
       if (checkedRebaseAll) {
         config.masterIssueRebaseAllOpen = true;
+        /* eslint-enable no-param-reassign */
       }
     }
   }

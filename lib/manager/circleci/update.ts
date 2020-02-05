@@ -13,7 +13,7 @@ export function updateDependency(
       const newFrom = getNewFrom(upgrade);
       logger.debug(`circleci.updateDependency(): ${newFrom}`);
       const imageLine = new RegExp(/^(\s*- image:\s*'?"?)[^\s'"]+('?"?\s*)$/);
-      if (!imageLine.exec(lineToChange)) {
+      if (!imageLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }
@@ -27,7 +27,7 @@ export function updateDependency(
     }
     if (upgrade.depType === 'orb') {
       const orbLine = new RegExp(`^(\\s+${upgrade.depName}:\\s[^@]+@).+$`);
-      if (!orbLine.exec(lineToChange)) {
+      if (!orbLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }
