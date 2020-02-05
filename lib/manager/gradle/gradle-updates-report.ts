@@ -46,7 +46,7 @@ allprojects {
            .findAll { !it.startsWith('file:') }
            .unique()
         project.repositories = repos
-        def deps = (buildscript.configurations + configurations)
+        def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
           .collect { it.dependencies + it.dependencyConstraints }
           .flatten()
           .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
