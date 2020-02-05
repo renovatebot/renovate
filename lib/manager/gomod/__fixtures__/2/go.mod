@@ -6,7 +6,7 @@ require (
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21
 	github.com/davecgh/go-spew v1.1.0
 	github.com/emirpasic/gods v1.9.0
-	github.com/fatih/color v1.7.0
+	github.com/fatih/color v1.9.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-ini/ini v1.38.2
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
