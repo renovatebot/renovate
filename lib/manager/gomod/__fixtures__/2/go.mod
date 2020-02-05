@@ -38,7 +38,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/sergi/go-diff v1.0.0
 	github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0
-	github.com/sirupsen/logrus v1.0.6
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/afero v1.1.1
 	github.com/spf13/cast v1.2.0
 	github.com/spf13/jwalterweatherman v0.0.0-20180814060501-14d3d4c51834
