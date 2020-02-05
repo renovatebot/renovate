@@ -464,7 +464,7 @@
   :extensions [[org.apache.maven.wagon/wagon-webdav "1.0-beta-2"]
                [foo/bar-baz "1.0"]]
   ;; Plugins here will be propagated to the pom but not used by Leiningen.
-  :pom-plugins [[com.theoryinpractise/clojure-maven-plugin "1.3.13"
+  :pom-plugins [[com.theoryinpractise/clojure-maven-plugin "1.8.4"
                  ;; this section is optional, values have the same syntax as pom-addition
                  {:configuration [:sourceDirectories [:sourceDirectory "src"]]
                   :extensions "true"
