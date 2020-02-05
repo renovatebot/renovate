@@ -51,7 +51,7 @@ require (
 	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/ulikunitz/xz v0.5.4
 	github.com/xanzy/ssh-agent v0.2.0
-	golang.org/x/crypto v0.0.0-20180808211826-de0752318171
+	golang.org/x/crypto c9f3fb736b72
 	golang.org/x/net v0.0.0-20180811021610-c39426892332
 	golang.org/x/sys v0.0.0-20180810173357-98c5dad5d1a0
 	golang.org/x/text v0.3.0
