@@ -1,4 +1,4 @@
-import { updateDependency } from '../../../lib/manager/helm-values/update';
+import { updateDependency } from './update';
 
 describe('lib/manager/helm-values/update', () => {
   describe('updateDependency()', () => {
