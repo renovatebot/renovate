@@ -15,7 +15,7 @@ describe('manager/docker-compose/update', () => {
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).not.toEqual(yamlFile);
       expect(res.includes(upgrade.newDigest)).toBe(true);
     });
@@ -25,7 +25,7 @@ describe('manager/docker-compose/update', () => {
         depName: 'quay.io/something/redis',
         newValue: 'alpine',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).toEqual(yamlFile);
     });
     it('returns null if mismatch', () => {
@@ -33,11 +33,11 @@ describe('manager/docker-compose/update', () => {
         managerData: { lineNumber: 17 },
         newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).toBeNull();
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

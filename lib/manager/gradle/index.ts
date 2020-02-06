@@ -15,7 +15,12 @@ import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
-import { PackageFile, ExtractConfig, Upgrade } from '../common';
+import {
+  PackageFile,
+  ExtractConfig,
+  Upgrade,
+  UpdateDependencyConfig,
+} from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
@@ -161,10 +166,10 @@ function buildGradleDependency(config: Upgrade): GradleDependency {
   return { group: config.depGroup, name: config.name, version: config.version };
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   // prettier-ignore
   logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
 

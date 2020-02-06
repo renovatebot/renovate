@@ -1,15 +1,15 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { regEx } from '../../util/regex';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const lineIdx = upgrade.managerData.lineNumber - 1;
     logger.debug(`buildkite.updateDependency: ${upgrade.newValue}`);
-    const lines = currentFileContent.split('\n');
+    const lines = fileContent.split('\n');
     const lineToChange = lines[lineIdx];
     const depLine = regEx(`^(\\s+[^#]+#)[^:]+(.*)$`);
     if (!depLine.test(lineToChange)) {
@@ -19,7 +19,7 @@ export function updateDependency(
     const newLine = lineToChange.replace(depLine, `$1${upgrade.newValue}$2`);
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
     lines[lineIdx] = newLine;
     return lines.join('\n');

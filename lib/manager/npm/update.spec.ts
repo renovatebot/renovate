@@ -21,7 +21,10 @@ describe('workers/branch/package-json', () => {
         newValue: '0.22.1',
       };
       const outputContent = readFixture('outputs/011.json');
-      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toEqual(outputContent);
     });
     it('replaces a github dependency value', () => {
@@ -37,7 +40,10 @@ describe('workers/branch/package-json', () => {
           gulp: 'gulpjs/gulp#v4.0.0-alpha.2',
         },
       });
-      const res = npmUpdater.updateDependency(input, upgrade);
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
     });
     it('replaces a npm package alias', () => {
@@ -54,7 +60,10 @@ describe('workers/branch/package-json', () => {
           hapi: 'npm:@hapi/hapi@18.3.0',
         },
       });
-      const res = npmUpdater.updateDependency(input, upgrade);
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
     });
     it('replaces a github short hash', () => {
@@ -70,7 +79,10 @@ describe('workers/branch/package-json', () => {
           gulp: 'gulpjs/gulp#abcdef7',
         },
       });
-      const res = npmUpdater.updateDependency(input, upgrade);
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
     });
     it('replaces a github fully specified version', () => {
@@ -86,7 +98,10 @@ describe('workers/branch/package-json', () => {
           n: 'git+https://github.com/owner/n#v1.0.0',
         },
       });
-      const res = npmUpdater.updateDependency(input, upgrade);
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res.includes('v1.1.0')).toBe(true);
     });
@@ -96,7 +111,10 @@ describe('workers/branch/package-json', () => {
         depName: 'config',
         newValue: '1.22.0',
       };
-      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
     });
@@ -106,10 +124,10 @@ describe('workers/branch/package-json', () => {
         depName: 'config',
         newValue: '1.22.0',
       };
-      const testContent = npmUpdater.updateDependency(
-        input01GlobContent,
-        upgrade
-      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01GlobContent,
+        upgrade,
+      });
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
         '1.22.0'
@@ -122,7 +140,10 @@ describe('workers/branch/package-json', () => {
         newValue: '1.6.1',
       };
       const outputContent = readFixture('outputs/012.json');
-      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toEqual(outputContent);
     });
     it('replaces only the second instance of a value', () => {
@@ -132,7 +153,10 @@ describe('workers/branch/package-json', () => {
         newValue: '1.6.1',
       };
       const outputContent = readFixture('outputs/013.json');
-      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toEqual(outputContent);
     });
     it('handles the case where the desired version is already supported', () => {
@@ -141,7 +165,10 @@ describe('workers/branch/package-json', () => {
         depName: 'angular-touch',
         newValue: '1.5.8',
       };
-      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toEqual(input01Content);
     });
     it('returns null if throws error', () => {
@@ -150,7 +177,10 @@ describe('workers/branch/package-json', () => {
         depName: 'angular-touch-not',
         newValue: '1.5.8',
       };
-      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toBeNull();
     });
   });

@@ -35,7 +35,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.17.7',
     };
     fromStream.mockResolvedValueOnce('new_hash_value');
-    const newContent = await updateDependency(aide, upgrade);
+    const newContent = await updateDependency({
+      fileContent: aide,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(aide);
     expect(newContent).toMatchSnapshot();
@@ -55,7 +58,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('new_hash_value');
-    const newContent = await updateDependency(ibazel, upgrade);
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
@@ -75,7 +81,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockRejectedValueOnce('Request failed');
-    const newContent = await updateDependency(ibazel, upgrade);
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(ibazel);
   });
@@ -94,7 +103,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -116,7 +128,10 @@ describe('manager/homebrew/update', () => {
     fromStream
       .mockRejectedValueOnce('Request failed')
       .mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -138,7 +153,10 @@ describe('manager/homebrew/update', () => {
     fromStream
       .mockRejectedValueOnce('Request failed')
       .mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -165,7 +183,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -191,7 +212,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -218,7 +242,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -244,7 +271,10 @@ describe('manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
     fromStream.mockResolvedValueOnce('some_content');
-    const newContent = await updateDependency(content, upgrade);
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
   });
@@ -265,7 +295,10 @@ describe('manager/homebrew/update', () => {
     fromStream
       .mockRejectedValueOnce('Request failed.')
       .mockRejectedValueOnce('Request failed.');
-    const newContent = await updateDependency(aide, upgrade);
+    const newContent = await updateDependency({
+      fileContent: aide,
+      upgrade,
+    });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(aide);
     expect(newContent).toMatchSnapshot();

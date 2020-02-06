@@ -15,7 +15,10 @@ describe('manager/docker-compose/update', () => {
         depName: 'rack-cache',
         newValue: '~> 1.3',
       };
-      const res = updateDependency(railsGemfile, upgrade);
+      const res = updateDependency({
+        fileContent: railsGemfile,
+        upgrade,
+      });
       expect(res).not.toEqual(railsGemfile);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -26,7 +29,10 @@ describe('manager/docker-compose/update', () => {
         depName: 'rack-cache',
         newValue: '~> 1.2',
       };
-      const res = updateDependency(railsGemfile, upgrade);
+      const res = updateDependency({
+        fileContent: railsGemfile,
+        upgrade,
+      });
       expect(res).toEqual(railsGemfile);
     });
     it('returns null if mismatch', () => {
@@ -36,7 +42,10 @@ describe('manager/docker-compose/update', () => {
         depName: 'wrong',
         newValue: '~> 1.3',
       };
-      const res = updateDependency(railsGemfile, upgrade);
+      const res = updateDependency({
+        fileContent: railsGemfile,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('uses single quotes', () => {
@@ -46,11 +55,11 @@ describe('manager/docker-compose/update', () => {
         newValue: '~> 1.3',
       };
       const gemFile = `gem 'rack-cache', '~> 1.2'`;
-      const res = updateDependency(gemFile, upgrade);
+      const res = updateDependency({ fileContent: gemFile, upgrade });
       expect(res).toEqual(`gem 'rack-cache', '~> 1.3'`);
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

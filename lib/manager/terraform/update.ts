@@ -1,13 +1,13 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`terraform.updateDependency: ${upgrade.newValue}`);
-    const lines = currentFileContent.split('\n');
+    const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     let newLine = lineToChange;
     if (upgrade.depType === 'github') {
@@ -26,7 +26,7 @@ export function updateDependency(
     }
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');

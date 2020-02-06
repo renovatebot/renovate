@@ -7,25 +7,18 @@ import {
   VERSION_SCHEME_HEX,
   VERSION_SCHEME_HASHICORP,
   VERSION_SCHEME_IVY,
-  VERSION_SCHEME_LOOSE,
   VERSION_SCHEME_MAVEN,
   VERSION_SCHEME_NODE,
   VERSION_SCHEME_NPM,
-  VERSION_SCHEME_NUGET,
   VERSION_SCHEME_PEP440,
   VERSION_SCHEME_POETRY,
-  VERSION_SCHEME_REGEX,
   VERSION_SCHEME_RUBY,
   VERSION_SCHEME_SEMVER,
   VERSION_SCHEME_SWIFT,
 } from '../constants/version-schemes';
-import {
-  PLATFORM_TYPE_AZURE,
-  PLATFORM_TYPE_BITBUCKET,
-  PLATFORM_TYPE_BITBUCKET_SERVER,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../constants/platforms';
+import { getVersionSchemeList } from '../versioning';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { platformList } from '../platform';
 
 import * as manager from '../manager';
 
@@ -470,13 +463,7 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
-    allowedValues: [
-      PLATFORM_TYPE_AZURE,
-      PLATFORM_TYPE_BITBUCKET,
-      PLATFORM_TYPE_BITBUCKET_SERVER,
-      PLATFORM_TYPE_GITHUB,
-      PLATFORM_TYPE_GITLAB,
-    ],
+    allowedValues: platformList,
     default: PLATFORM_TYPE_GITHUB,
     admin: true,
   },
@@ -664,26 +651,7 @@ const options: RenovateOptions[] = [
     name: 'versionScheme',
     description: 'Version scheme to use for filtering and comparisons',
     type: 'string',
-    allowedValues: [
-      VERSION_SCHEME_CARGO,
-      VERSION_SCHEME_COMPOSER,
-      VERSION_SCHEME_DOCKER,
-      VERSION_SCHEME_GIT,
-      VERSION_SCHEME_HASHICORP,
-      VERSION_SCHEME_HEX,
-      VERSION_SCHEME_IVY,
-      VERSION_SCHEME_LOOSE,
-      VERSION_SCHEME_MAVEN,
-      VERSION_SCHEME_NODE,
-      VERSION_SCHEME_NPM,
-      VERSION_SCHEME_NUGET,
-      VERSION_SCHEME_PEP440,
-      VERSION_SCHEME_POETRY,
-      VERSION_SCHEME_REGEX,
-      VERSION_SCHEME_RUBY,
-      VERSION_SCHEME_SEMVER,
-      VERSION_SCHEME_SWIFT,
-    ],
+    allowedValues: getVersionSchemeList(),
     default: VERSION_SCHEME_SEMVER,
     cli: false,
     env: false,

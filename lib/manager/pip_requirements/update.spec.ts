@@ -34,13 +34,16 @@ describe('manager/pip_requirements/update', () => {
         managerData: { lineNumber: 2 },
         newValue: '==1.0.1',
       };
-      const res = updateDependency(requirements, upgrade);
+      const res = updateDependency({
+        fileContent: requirements,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
     it('replaces existing value with comment', () => {
@@ -49,7 +52,10 @@ describe('manager/pip_requirements/update', () => {
         managerData: { lineNumber: 3 },
         newValue: '==2.4.6',
       };
-      const res = updateDependency(requirements3, upgrade);
+      const res = updateDependency({
+        fileContent: requirements3,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements3);
       expect(res.includes(upgrade.newValue)).toBe(true);
@@ -61,7 +67,10 @@ describe('manager/pip_requirements/update', () => {
         managerData: { lineNumber: 1 },
         newValue: '==4.1.2',
       };
-      const res = updateDependency(requirements4, upgrade);
+      const res = updateDependency({
+        fileContent: requirements4,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements4);
       expect(res.includes(upgrade.newValue)).toBe(true);
@@ -72,7 +81,7 @@ describe('manager/pip_requirements/update', () => {
         managerData: { lineNumber: 64 },
         newValue: '>=2.11.0',
       };
-      const res = updateDependency(setupPy1, upgrade);
+      const res = updateDependency({ fileContent: setupPy1, upgrade });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(setupPy1);
       expect(res.includes(upgrade.newValue)).toBe(true);
@@ -83,7 +92,7 @@ describe('manager/pip_requirements/update', () => {
         managerData: { lineNumber: 60 },
         newValue: '==3.8.0',
       };
-      const res = updateDependency(setupPy2, upgrade);
+      const res = updateDependency({ fileContent: setupPy2, upgrade });
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(setupPy2);
       const expectedUpdate =

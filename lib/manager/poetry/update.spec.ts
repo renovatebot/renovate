@@ -20,7 +20,10 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject1toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).not.toEqual(pyproject1toml);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
@@ -32,7 +35,10 @@ describe('manager/poetry/update', () => {
         newValue: '0.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject1toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).toEqual(pyproject1toml);
     });
     it('replaces nested value', () => {
@@ -42,7 +48,10 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: true },
       };
-      const res = updateDependency(pyproject2toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject2toml,
+        upgrade,
+      });
       expect(res).not.toEqual(pyproject2toml);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
@@ -54,19 +63,25 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: true },
       };
-      const res = updateDependency(pyproject2toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject2toml,
+        upgrade,
+      });
       expect(res).not.toEqual(pyproject2toml);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
-    it('gracefully handles nested value for path dependency withou version field', () => {
+    it('gracefully handles nested value for path dependency without version field', () => {
       const upgrade = {
         depName: 'dep4',
         depType: 'dependencies',
         newValue: '1.0.0',
         managerData: { nestedVersion: true },
       };
-      const res = updateDependency(pyproject2toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('upgrades extras', () => {
@@ -76,7 +91,10 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject1toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).not.toEqual(pyproject1toml);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
@@ -88,13 +106,16 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject1toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).not.toEqual(pyproject1toml);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
     it('returns null if upgrade is null', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
     it('handles nonexistent depType gracefully', () => {
@@ -104,7 +125,10 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject1toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('handles nonexistent depType gracefully', () => {
@@ -114,7 +138,10 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject2toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject2toml,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('handles nonexistent depName gracefully', () => {
@@ -124,7 +151,10 @@ describe('manager/poetry/update', () => {
         newValue: '1.0.0',
         managerData: { nestedVersion: false },
       };
-      const res = updateDependency(pyproject1toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject1toml,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('handles nonexistent depName with nested value gracefully', () => {
@@ -134,7 +164,10 @@ describe('manager/poetry/update', () => {
         managerData: { nestedVersion: true },
         newValue: '1.0.0',
       };
-      const res = updateDependency(pyproject2toml, upgrade);
+      const res = updateDependency({
+        fileContent: pyproject2toml,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
   });

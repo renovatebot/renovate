@@ -38,6 +38,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -100,7 +101,7 @@ type PrList = Record<number, Pr>;
 let config: LocalRepoConfig = {} as any;
 
 const defaults = {
-  hostType: 'github',
+  hostType: PLATFORM_TYPE_GITHUB,
   endpoint: 'https://api.github.com/',
 };
 
@@ -248,7 +249,7 @@ export async function initRepo({
     api.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: 'github',
+    hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
   config.isGhe = !defaults.endpoint.startsWith('https://api.github.com');

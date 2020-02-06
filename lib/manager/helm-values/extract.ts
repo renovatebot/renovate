@@ -40,7 +40,7 @@ export function extractPackageFile(content: string): PackageFile {
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
-    const parsedContent = yaml.safeLoad(content);
+    const parsedContent = yaml.safeLoad(content, { json: true });
 
     logger.debug(
       { parsedContent },

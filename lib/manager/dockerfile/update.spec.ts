@@ -10,7 +10,7 @@ describe('manager/dockerfile/update', () => {
         newValue: '8.1-alpine',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('replaces existing value with suffix', () => {
@@ -26,7 +26,7 @@ describe('manager/dockerfile/update', () => {
         newValue: '8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('handles strange whitespace', () => {
@@ -43,7 +43,7 @@ describe('manager/dockerfile/update', () => {
 
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('returns null if mismatch', () => {
@@ -55,7 +55,7 @@ describe('manager/dockerfile/update', () => {
         newValue: '8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toBeNull();
     });
     it('returns unchanged', () => {
@@ -70,7 +70,7 @@ describe('manager/dockerfile/update', () => {
         depName: 'node',
         newValue: '8',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toBe(fileContent);
     });
     it('returns null on error', () => {
@@ -81,7 +81,7 @@ describe('manager/dockerfile/update', () => {
         newValue: '8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toBeNull();
     });
     it('handles similar FROM', () => {
@@ -103,8 +103,14 @@ describe('manager/dockerfile/update', () => {
         newValue: 'wheezy',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      let res = dockerfile.updateDependency(fileContent, upgrade1);
-      res = dockerfile.updateDependency(res, upgrade2);
+      let res = dockerfile.updateDependency({
+        fileContent,
+        upgrade: upgrade1,
+      });
+      res = dockerfile.updateDependency({
+        fileContent: res,
+        upgrade: upgrade2,
+      });
       expect(res).toMatchSnapshot();
       expect(res.includes('as stage-1')).toBe(true);
     });
@@ -120,7 +126,7 @@ describe('manager/dockerfile/update', () => {
         depName: 'gcr.io/k8s-skaffold/skaffold',
         newValue: 'v0.12.0',
       };
-      const res = dockerfile.updateDependency(fileContent, upgrade);
+      const res = dockerfile.updateDependency({ fileContent, upgrade });
       expect(res).toMatchSnapshot();
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
