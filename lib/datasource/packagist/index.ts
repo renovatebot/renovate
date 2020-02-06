@@ -9,12 +9,16 @@ import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
     json: true,
   };
-  const { username, password } = hostRules.find({ hostType: 'packagist', url });
+  const { username, password } = hostRules.find({
+    hostType: DATASOURCE_PACKAGIST,
+    url,
+  });
   if (username && password) {
     opts.auth = `${username}:${password}`;
   }

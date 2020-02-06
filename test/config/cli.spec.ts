@@ -1,6 +1,7 @@
 import * as cli from '../../lib/config/cli';
 import getArgv from './config/_fixtures/argv';
 import { RenovateOptions } from '../../lib/config/definitions';
+import { DATASOURCE_DOCKER } from '../../lib/constants/data-binary-source';
 
 describe('config/cli', () => {
   let argv: string[];
@@ -77,13 +78,13 @@ describe('config/cli', () => {
     });
     it('parses json lists correctly', () => {
       argv.push(
-        `--host-rules=[{"domainName":"docker.io","hostType":"docker","username":"user","password":"password"}]`
+        `--host-rules=[{"domainName":"docker.io","hostType":"${DATASOURCE_DOCKER}","username":"user","password":"password"}]`
       );
       expect(cli.getConfig(argv)).toEqual({
         hostRules: [
           {
             domainName: 'docker.io',
-            hostType: 'docker',
+            hostType: DATASOURCE_DOCKER,
             username: 'user',
             password: 'password',
           },
