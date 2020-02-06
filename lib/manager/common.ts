@@ -181,6 +181,7 @@ export interface UpdateArtifact {
   config: UpdateArtifactsConfig;
 }
 export interface ManagerApi {
+  defaultConfig: object;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
