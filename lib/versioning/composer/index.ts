@@ -11,8 +11,12 @@ function padZeroes(input: string): string {
   return sections.join('.');
 }
 
+function removeLeadingV(input: string): string {
+  return input.replace(/^v/i, '');
+}
+
 function composer2npm(input: string): string {
-  const cleanInput = input.replace(/^v/, '');
+  const cleanInput = removeLeadingV(input);
   if (npm.isVersion(cleanInput)) {
     return cleanInput;
   }
@@ -83,7 +87,7 @@ function getNewValue({
   } else if (
     npm.isVersion(padZeroes(toVersion)) &&
     npm.isValid(currentValue) &&
-    composer2npm(currentValue) === currentValue
+    composer2npm(currentValue) === removeLeadingV(currentValue)
   ) {
     newValue = npm.getNewValue({
       currentValue,
