@@ -4,6 +4,7 @@ import upath from 'upath';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
 
 import {
   init,
@@ -181,3 +182,9 @@ export function updateDependency({
 }
 
 export const language = LANGUAGE_JAVA;
+
+export const defaultConfig = {
+  fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
+  timeout: 600,
+  versionScheme: VERSION_SCHEME_MAVEN,
+};
