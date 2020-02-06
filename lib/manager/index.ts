@@ -10,7 +10,7 @@ import {
   Result,
   PackageUpdateResult,
 } from './common';
-
+import { RangeStrategy } from '../types';
 import {
   LANGUAGE_DART,
   LANGUAGE_DOCKER,
@@ -24,7 +24,6 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
-import { RangeStrategy } from '../versioning/common';
 
 const managerList = [];
 const managers: Record<string, ManagerApi> = {};

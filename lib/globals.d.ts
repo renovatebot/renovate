@@ -1,3 +1,7 @@
+/*
+ * This file should be removed in future.
+ */
+
 declare namespace Renovate {
   interface Cache {
     get<T = any>(namespace: string, key: string): Promise<T>;
