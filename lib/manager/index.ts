@@ -52,6 +52,12 @@ function loadManagers(): void {
       managerList.push(manager);
     }
   }
+
+  /* istanbul ignore if */
+  if (managerList.length === 0) {
+    logger.error(`Could not load manager modules.`);
+    process.exit(1);
+  }
 }
 loadManagers();
 
