@@ -30,7 +30,7 @@ import {
 import * as manager from '../manager';
 
 // TODO remove me when done
-export const getManagerList = (): string[] => manager.getManagerList();
+export const getManagers = (): any => manager.getManagers();
 
 export interface RenovateOptionBase {
   admin?: boolean;
