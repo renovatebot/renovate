@@ -1,5 +1,5 @@
 import { ReleaseType } from 'semver';
-import { RangeStrategy } from '../versioning';
+import { RangeStrategy } from '../versioning/common';
 import { ValidationMessage } from '../config/common';
 
 export type Result<T> = T | Promise<T>;

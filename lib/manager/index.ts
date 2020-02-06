@@ -24,15 +24,7 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
-
-type RangeStrategy =
-  | 'auto'
-  | 'bump'
-  | 'future'
-  | 'pin'
-  | 'replace'
-  | 'update-lockfile'
-  | 'widen';
+import { RangeStrategy } from '../versioning/common';
 
 const managerList = [];
 const managers: Record<string, ManagerApi> = {};

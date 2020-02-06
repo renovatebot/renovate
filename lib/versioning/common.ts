@@ -1,6 +1,6 @@
 import { SemVer, Range } from 'semver';
 
-type RangeStrategy =
+export type RangeStrategy =
   | 'auto'
   | 'bump'
   | 'future'

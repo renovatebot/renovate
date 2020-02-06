@@ -29,6 +29,9 @@ import {
 
 import * as manager from '../manager';
 
+// TODO remove me when done
+export const getManagerList = (): string[] => manager.getManagerList();
+
 export interface RenovateOptionBase {
   admin?: boolean;
 
