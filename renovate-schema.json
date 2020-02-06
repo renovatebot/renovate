@@ -1386,6 +1386,15 @@
       },
       "$ref": "#"
     },
+    "html": {
+      "description": "Configuration object for HTML files",
+      "type": "object",
+      "default": {
+        "fileMatch": [".html?$"],
+        "versionScheme": "semver"
+      },
+      "$ref": "#"
+    },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array",
