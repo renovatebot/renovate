@@ -41,7 +41,7 @@ describe('datasource/git-tags', () => {
         lookupName,
       });
       const result = versions.releases.map(x => x.version).sort();
-      expect(result).toEqual(['0.0.1', '0.0.2']);
+      expect(result).toEqual(['0.0.1', 'v0.0.2']);
     });
   });
 });

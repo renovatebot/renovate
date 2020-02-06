@@ -18,7 +18,6 @@ import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { VERSION_SCHEME_NODE } from '../../../constants/version-schemes';
-import { MANAGER_NPM } from '../../../constants/managers';
 import {
   DATASOURCE_GITHUB,
   DATASOURCE_NPM,
@@ -235,8 +234,8 @@ export async function extractPackageFile(
     const [githubOwner, githubRepo] = githubRepoSplit;
     const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/;
     if (
-      !githubOwner.match(githubValidRegex) ||
-      !githubRepo.match(githubValidRegex)
+      !githubValidRegex.test(githubOwner) ||
+      !githubValidRegex.test(githubRepo)
     ) {
       dep.skipReason = 'unknown-version';
       return dep;
@@ -248,8 +247,8 @@ export async function extractPackageFile(
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
-      depRefPart.match(/^[0-9a-f]{7}$/) ||
-      depRefPart.match(/^[0-9a-f]{40}$/)
+      /^[0-9a-f]{7}$/.test(depRefPart) ||
+      /^[0-9a-f]{40}$/.test(depRefPart)
     ) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
@@ -354,7 +353,6 @@ export async function extractAllPackageFiles(
       if (deps) {
         npmFiles.push({
           packageFile,
-          manager: MANAGER_NPM,
           ...deps,
         });
       }

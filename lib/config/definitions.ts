@@ -45,7 +45,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks';
 
   // used by tests
   relatedOptions?: string[];
@@ -102,6 +102,45 @@ export type RenovateOptions =
   | RenovateObjectOption;
 
 const options: RenovateOptions[] = [
+  {
+    name: 'allowedPostUpgradeCommands',
+    description:
+      'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
+    type: 'array',
+    subType: 'string',
+    default: [],
+    admin: true,
+  },
+  {
+    name: 'postUpgradeTasks',
+    description:
+      'Post-upgrade tasks that are executed before a commit is made by Renovate',
+    type: 'object',
+    default: {
+      commands: [],
+      fileFilters: [],
+    },
+  },
+  {
+    name: 'commands',
+    description:
+      'A list of post-upgrade commands that are executed before a commit is made by Renovate',
+    type: 'array',
+    subType: 'string',
+    parent: 'postUpgradeTasks',
+    default: [],
+    cli: false,
+  },
+  {
+    name: 'fileFilters',
+    description:
+      'Files that match these glob patterns will be committed if they are present after running a post-upgrade task',
+    type: 'array',
+    subType: 'string',
+    parent: 'postUpgradeTasks',
+    default: [],
+    cli: false,
+  },
   {
     name: 'onboardingBranch',
     description:
@@ -1558,6 +1597,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'cdnurl',
+    description: 'Configuration object for CDN assets',
+    stage: 'repository',
+    type: 'object',
+    default: {
+      fileMatch: [],
+      versionScheme: VERSION_SCHEME_SEMVER,
+    },
+    mergeable: true,
+  },
+  {
     name: 'supportPolicy',
     description:
       'Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)',
@@ -1699,6 +1749,33 @@ const options: RenovateOptions[] = [
       },
       commitMessageTopic: 'helm chart {{depName}}',
       fileMatch: ['(^|/)requirements.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'helm-values',
+    description: 'Configuration object for helm values.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      commitMessageTopic: 'helm values {{depName}}',
+      fileMatch: ['(^|/)values.yaml$'],
+    },
+    mergeable: true,
+    cli: false,
+  },
+  {
+    name: 'helmfile',
+    description: 'Configuration object for helmfile helmfile.yaml files.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      aliases: {
+        stable: 'https://kubernetes-charts.storage.googleapis.com/',
+      },
+      commitMessageTopic: 'helm chart {{depName}}',
+      fileMatch: ['(^|/)helmfile.yaml$'],
     },
     mergeable: true,
     cli: false,

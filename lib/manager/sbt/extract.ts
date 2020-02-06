@@ -253,7 +253,7 @@ function parseSbtLine(
   if (dep)
     deps.push({
       datasource: DATASOURCE_SBT,
-      registryUrls: registryUrls as string[],
+      registryUrls,
       ...dep,
     });
 

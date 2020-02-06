@@ -39,7 +39,7 @@ interface MavenProp {
 }
 
 function depFromNode(node: XmlElement): PackageDependency | null {
-  if (!node.valueWithPath) return null;
+  if (!('valueWithPath' in node)) return null;
   let groupId = node.valueWithPath('groupId');
   const artifactId = node.valueWithPath('artifactId');
   const currentValue = node.valueWithPath('version');
@@ -70,7 +70,7 @@ function deepExtract(
   result: PackageDependency[] = [],
   isRoot = true
 ): PackageDependency[] {
-  const dep = depFromNode(node as XmlElement);
+  const dep = depFromNode(node);
   if (dep && !isRoot) {
     result.push(dep);
   }
@@ -141,7 +141,7 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
   let parentFile = 'pom.xml';
   let parentDir = parentPath;
   const parentBasename = basename(parentPath);
-  if (parentBasename === 'pom.xml' || /\.pom\.xml$/.test(parentBasename)) {
+  if (parentBasename === 'pom.xml' || parentBasename.endsWith('.pom.xml')) {
     parentFile = parentBasename;
     parentDir = dirname(parentPath);
   }

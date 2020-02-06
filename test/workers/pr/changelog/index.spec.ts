@@ -3,6 +3,7 @@ import * as hostRules from '../../../../lib/util/host-rules';
 import {
   getChangeLogJSON,
   ChangeLogConfig,
+  ChangeLogError,
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
 import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platforms';
@@ -140,6 +141,14 @@ describe('workers/pr/changelog', () => {
           sourceUrl: 'http://example.com',
         })
       ).toBeNull();
+    });
+    it('handles missing Github token', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://github.com',
+        })
+      ).toEqual({ error: ChangeLogError.MissingGithubToken });
     });
     it('handles no releases', async () => {
       expect(

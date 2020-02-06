@@ -13,17 +13,17 @@ export function updateDependency(
   const oldVal = isVersion(currentValue) ? `"${currentValue}"` : currentValue;
   let newVal;
   if (fromParam.test(oldVal)) {
-    const [, version] = oldVal.match(fromParam);
+    const [, version] = fromParam.exec(oldVal);
     newVal = oldVal.replace(version, newValue);
   } else if (isVersion(newValue)) {
     newVal = `"${newValue}"`;
   } else {
     newVal = newValue;
   }
-  if (rightPart.indexOf(oldVal) === 0) {
+  if (rightPart.startsWith(oldVal)) {
     return leftPart + rightPart.replace(oldVal, newVal);
   }
-  if (rightPart.indexOf(newVal) === 0) {
+  if (rightPart.startsWith(newVal)) {
     return fileContent;
   }
   return null;

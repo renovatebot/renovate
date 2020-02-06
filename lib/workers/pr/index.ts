@@ -1,13 +1,13 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
-import { getChangeLogJSON } from './changelog';
+import { ChangeLogError, getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
-import { platform, BranchStatus, Pr } from '../../platform';
+import { BranchStatus, platform, Pr } from '../../platform';
 import { BranchConfig } from '../common';
 import {
-  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
@@ -26,7 +26,7 @@ function noWhitespace(input: string): string {
 }
 
 function noLeadingAtSymbol(input: string): string {
-  return input.length && input[0] === '@' ? input.slice(1) : input;
+  return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
 async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
@@ -217,19 +217,33 @@ export async function ensurePr(
     const logJSON = await getChangeLogJSON(upgrade);
 
     if (logJSON) {
-      upgrade.githubName = logJSON.project ? logJSON.project.github : undefined;
-      upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
-      upgrade.releases = [];
-      if (
-        upgrade.hasReleaseNotes &&
-        upgrade.githubName &&
-        !commitRepos.includes(upgrade.githubName)
-      ) {
-        commitRepos.push(upgrade.githubName);
-        logJSON.versions.forEach(version => {
-          const release = { ...version };
-          upgrade.releases.push(release);
-        });
+      if (typeof logJSON.error === 'undefined') {
+        if (logJSON.project) upgrade.githubName = logJSON.project.github;
+        upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
+        upgrade.releases = [];
+        if (
+          upgrade.hasReleaseNotes &&
+          upgrade.githubName &&
+          !commitRepos.includes(upgrade.githubName)
+        ) {
+          commitRepos.push(upgrade.githubName);
+          if (logJSON.versions) {
+            logJSON.versions.forEach(version => {
+              const release = { ...version };
+              upgrade.releases.push(release);
+            });
+          }
+        }
+      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+        upgrade.prBodyNotes = [
+          ...upgrade.prBodyNotes,
+          [
+            '\n',
+            ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
+            'To add credentials for github.com to your config, please see [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes).',
+            '\n',
+          ].join('\n'),
+        ];
       }
     }
     config.upgrades.push(upgrade);

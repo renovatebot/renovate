@@ -16,7 +16,7 @@ export function updateDependency(
       }
       newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
     } else if (upgrade.depType === 'terraform') {
-      if (!lineToChange.match(/version\s*=\s*"/)) {
+      if (!/version\s*=\s*"/.test(lineToChange)) {
         return null;
       }
       newLine = lineToChange.replace(

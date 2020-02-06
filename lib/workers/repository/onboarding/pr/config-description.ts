@@ -3,11 +3,6 @@ import { logger } from '../../../../logger';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
-import {
-  MANAGER_CIRCLE_CI,
-  MANAGER_DOCKER_COMPOSE,
-  MANAGER_DOCKERFILE,
-} from '../../../../constants/managers';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -38,22 +33,12 @@ export function getConfigDesc(
 ): string {
   logger.debug('getConfigDesc()');
   logger.trace({ config });
-  let descriptionArr = getDescriptionArray(config);
+  const descriptionArr = getDescriptionArray(config);
   if (!descriptionArr.length) {
     logger.debug('No config description found');
     return '';
   }
   logger.debug({ length: descriptionArr.length }, 'Found description array');
-  const enabledManagers = packageFiles ? Object.keys(packageFiles) : [];
-  if (
-    !(
-      enabledManagers.includes(MANAGER_DOCKERFILE) ||
-      enabledManagers.includes(MANAGER_CIRCLE_CI) ||
-      enabledManagers.includes(MANAGER_DOCKER_COMPOSE)
-    )
-  ) {
-    descriptionArr = descriptionArr.filter(val => !val.includes('Docker-only'));
-  }
   let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
   desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
   descriptionArr.forEach(d => {

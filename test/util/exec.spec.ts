@@ -371,13 +371,15 @@ describe(`Child process execution wrapper`, () => {
       return undefined;
     });
 
-    await exec(cmd as string, inOpts as ExecOptions);
+    await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);
   });
 
   it('Supports image prefetch', async () => {
+    process.env = processEnv;
+
     const actualCmd: string[] = [];
     cpExec.mockImplementation((execCmd, execOpts, callback) => {
       actualCmd.push(execCmd);

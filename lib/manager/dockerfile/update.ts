@@ -24,8 +24,8 @@ export function updateDependency(
     logger.debug(`docker.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[lineNumber];
-    const imageLine = new RegExp(/^(FROM |COPY --from=)/i);
-    if (!lineToChange.match(imageLine)) {
+    const imageLine = /^(FROM |COPY --from=)/i;
+    if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }

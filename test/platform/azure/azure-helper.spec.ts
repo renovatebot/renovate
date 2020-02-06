@@ -266,12 +266,12 @@ describe('platform/azure/helpers', () => {
   });
 
   describe('getProjectAndRepo', () => {
-    it('should return the object with same strings', async () => {
-      const res = await azureHelper.getProjectAndRepo('myRepoName');
+    it('should return the object with same strings', () => {
+      const res = azureHelper.getProjectAndRepo('myRepoName');
       expect(res).toMatchSnapshot();
     });
-    it('should return the object with project and repo', async () => {
-      const res = await azureHelper.getProjectAndRepo('prjName/myRepoName');
+    it('should return the object with project and repo', () => {
+      const res = azureHelper.getProjectAndRepo('prjName/myRepoName');
       expect(res).toMatchSnapshot();
     });
     it('should return an error', () => {

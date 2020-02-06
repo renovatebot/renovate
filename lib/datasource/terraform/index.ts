@@ -23,7 +23,7 @@ function getRegistryRepository(
   } else {
     registry = 'registry.terraform.io';
   }
-  if (!registry.match('^https?://')) {
+  if (!/^https?:\/\//.test(registry)) {
     registry = `https://${registry}`;
   }
   const repository = split.join('/');

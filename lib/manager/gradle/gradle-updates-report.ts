@@ -41,12 +41,12 @@ allprojects {
     doLast {
         def project = ['project': project.name]
         output << project
-        def repos = (repositories + settings.pluginManagement.repositories)
+        def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
            .collect { "$it.url" }
            .findAll { !it.startsWith('file:') }
            .unique()
         project.repositories = repos
-        def deps = (buildscript.configurations + configurations)
+        def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
           .collect { it.dependencies + it.dependencyConstraints }
           .flatten()
           .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
@@ -117,7 +117,7 @@ function combineReposOnDuplicatedDependencies(
     accumulator.push(currentValue);
   } else {
     const nonExistingRepos = currentValue.repos.filter(
-      repo => existingDependency.repos.indexOf(repo) === -1
+      repo => !existingDependency.repos.includes(repo)
     );
     existingDependency.repos.push(...nonExistingRepos);
   }

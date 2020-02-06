@@ -179,7 +179,7 @@ export async function initRepo({
     gitPrivateKey,
     repository,
     prVersions: new Map<number, number>(),
-    username: opts!.username,
+    username: opts.username,
   } as any;
 
   /* istanbul ignore else */
@@ -190,10 +190,10 @@ export async function initRepo({
 
   const { host, pathname } = url.parse(defaults.endpoint!);
   const gitUrl = GitStorage.getUrl({
-    protocol: defaults.endpoint!.split(':')[0] as any,
-    auth: `${opts!.username}:${opts!.password}`,
+    protocol: defaults.endpoint!.split(':')[0],
+    auth: `${opts.username}:${opts.password}`,
     host: `${host}${pathname}${
-      pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
     }scm`,
     repository,
   });
@@ -354,7 +354,7 @@ function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -676,27 +676,28 @@ export /* istanbul ignore next */ function ensureIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList(): Issue[] {
+export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
-  return [];
+  return Promise.resolve([]);
 }
 
 export /* istanbul ignore next */ function ensureIssueClosing(
   title: string
-): void {
+): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
   // BB Server doesnt have issues
+  return Promise.resolve();
 }
 
-// eslint-disable-next-line no-unused-vars
-export function addAssignees(iid: number, assignees: string[]): void {
+export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   logger.debug(`addAssignees(${iid}, ${assignees})`);
   // TODO: Needs implementation
   // Currently Renovate does "Create PR" and then "Add assignee" as a two-step process, with this being the second step.
   // BB Server doesnt support assignees
+  return Promise.resolve();
 }
 
 export async function addReviewers(
@@ -737,11 +738,11 @@ export async function addReviewers(
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-export function deleteLabel(issueNo: number, label: string): void {
+export function deleteLabel(issueNo: number, label: string): Promise<void> {
   logger.debug(`deleteLabel(${issueNo}, ${label})`);
   // TODO: Needs implementation
   // Only used for the "request Renovate to rebase a PR using a label" feature
+  return Promise.resolve();
 }
 
 type Comment = { text: string; id: number };
@@ -1084,7 +1085,7 @@ export function getCommitMessages(): Promise<string[]> {
   return config.storage.getCommitMessages();
 }
 
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   logger.debug(`getVulnerabilityAlerts()`);
-  return [];
+  return Promise.resolve([]);
 }
