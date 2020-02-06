@@ -11,7 +11,7 @@ export function updateDependency({
     logger.debug(`github-actions.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
-    const imageLine = new RegExp(/^(.+docker:\/\/)[^"]+("\s*)?$/);
+    const imageLine = /^(.+docker:\/\/)[^"]+("\s*)?$/;
     if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;

@@ -162,7 +162,6 @@ export interface Upgrade<T = Record<string, any>>
   toVersion?: string;
   updateType?: string;
   version?: string;
-  nestedVersion?: boolean;
 }
 
 export interface ArtifactError {
