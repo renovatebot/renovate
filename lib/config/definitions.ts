@@ -2228,3 +2228,7 @@ const options: RenovateOptions[] = [
 export function getOptions(): any {
   return options;
 }
+
+function loadManagerOptions(): void {}
+
+loadManagerOptions();
