@@ -1,4 +1,5 @@
 import * as _hostRules from '../../../lib/util/host-rules';
+import { PLATFORM_TYPE_AZURE } from '../../../lib/constants/platforms';
 
 describe('platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('../../../lib/platform/azure/azure-got-wrapper');
@@ -18,7 +19,7 @@ describe('platform/azure/azure-got-wrapper', () => {
     });
     it('should set token and endpoint', () => {
       hostRules.add({
-        hostType: 'azure',
+        hostType: PLATFORM_TYPE_AZURE,
         token: 'token',
         baseUrl: 'https://dev.azure.com/renovate12345',
       });
