@@ -257,5 +257,14 @@ describe('semver.getNewValue()', () => {
         toVersion: '3.7',
       })
     ).toEqual('3.7.*');
+
+    expect(
+      semver.getNewValue({
+        currentValue: 'v3.1.*',
+        rangeStrategy: 'replace',
+        fromVersion: '3.1.10',
+        toVersion: '3.2.0',
+      })
+    ).toEqual('v3.2.*'); // #5388
   });
 });
