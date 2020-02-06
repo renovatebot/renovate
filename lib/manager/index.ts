@@ -76,6 +76,7 @@ export const get = <T extends keyof ManagerApi>(
 ): ManagerApi[T] => managers[manager][name];
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Record<string, ManagerApi> => managers;
 
 export function extractAllPackageFiles(
   manager: string,
