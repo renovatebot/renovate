@@ -17,13 +17,8 @@ import {
   VERSION_SCHEME_SWIFT,
 } from '../constants/version-schemes';
 import { getVersionSchemeList } from '../versioning';
-import {
-  PLATFORM_TYPE_AZURE,
-  PLATFORM_TYPE_BITBUCKET,
-  PLATFORM_TYPE_BITBUCKET_SERVER,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../constants/platforms';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { platformList } from '../platform';
 
 export interface RenovateOptionBase {
   admin?: boolean;
@@ -463,13 +458,7 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
-    allowedValues: [
-      PLATFORM_TYPE_AZURE,
-      PLATFORM_TYPE_BITBUCKET,
-      PLATFORM_TYPE_BITBUCKET_SERVER,
-      PLATFORM_TYPE_GITHUB,
-      PLATFORM_TYPE_GITLAB,
-    ],
+    allowedValues: platformList,
     default: PLATFORM_TYPE_GITHUB,
     admin: true,
   },
