@@ -27,6 +27,8 @@ import {
   PLATFORM_TYPE_GITLAB,
 } from '../constants/platforms';
 
+import * as manager from '../manager';
+
 export interface RenovateOptionBase {
   admin?: boolean;
 
