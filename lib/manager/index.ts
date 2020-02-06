@@ -43,8 +43,8 @@ function loadManagers(): void {
     let module = null;
     try {
       module = require(`./${manager}`); // eslint-disable-line
-    } catch (e) /* istanbul ignore next */ {
-      logger.fatal(`Can not load manager "${manager}".`);
+    } catch (err) /* istanbul ignore next */ {
+      logger.fatal({ err }, `Can not load manager "${manager}".`);
       process.exit(1);
     }
 
