@@ -20,7 +20,10 @@ describe('manager/circleci/update', () => {
         newValue: '8.10.0',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile,
+        upgrade,
+      });
       expect(res).not.toEqual(yamlFile);
       expect(res.includes(upgrade.newDigest)).toBe(true);
     });
@@ -30,7 +33,10 @@ describe('manager/circleci/update', () => {
         depType: 'docker',
         depName: 'node',
       };
-      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile,
+        upgrade,
+      });
       expect(res).toEqual(yamlFile);
     });
     it('returns null if mismatch', () => {
@@ -41,11 +47,17 @@ describe('manager/circleci/update', () => {
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('returns null if error', () => {
-      const res = dcUpdate.updateDependency(null, null);
+      const res = dcUpdate.updateDependency({
+        fileContent: null,
+        upgrade: null,
+      });
       expect(res).toBeNull();
     });
     it('replaces orbs', () => {
@@ -56,7 +68,10 @@ describe('manager/circleci/update', () => {
         managerData: { lineNumber: 3 },
         newValue: '4.2.0',
       };
-      const res = dcUpdate.updateDependency(yamlFile2, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile2,
+        upgrade,
+      });
       expect(res).not.toEqual(yamlFile2);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -68,7 +83,10 @@ describe('manager/circleci/update', () => {
         managerData: { lineNumber: 3 },
         newValue: '4.1.0',
       };
-      const res = dcUpdate.updateDependency(yamlFile2, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile2,
+        upgrade,
+      });
       expect(res).toEqual(yamlFile2);
     });
     it('returns null for orb mismatch', () => {
@@ -79,7 +97,10 @@ describe('manager/circleci/update', () => {
         managerData: { lineNumber: 2 },
         newValue: '4.2.0',
       };
-      const res = dcUpdate.updateDependency(yamlFile2, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile2,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
     it('returns null for unknown depType', () => {
@@ -89,7 +110,10 @@ describe('manager/circleci/update', () => {
         managerData: { lineNumber: 3 },
         newValue: '4.2.0',
       };
-      const res = dcUpdate.updateDependency(yamlFile2, upgrade);
+      const res = dcUpdate.updateDependency({
+        fileContent: yamlFile2,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
   });

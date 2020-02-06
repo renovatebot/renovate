@@ -18,7 +18,7 @@ describe('manager/droneci/update', () => {
         newValue: '10.16.0',
         newDigest: 'sha256:new-node-hash',
       };
-      const res = updateDependency(droneYAML, upgrade);
+      const res = updateDependency({ fileContent: droneYAML, upgrade });
       expect(res).not.toEqual(droneYAML);
       expect(res.includes(upgrade.newDigest)).toBe(true);
     });
@@ -29,7 +29,7 @@ describe('manager/droneci/update', () => {
         depType: 'docker',
         depName: 'redis:alpine',
       };
-      const res = updateDependency(droneYAML, upgrade);
+      const res = updateDependency({ fileContent: droneYAML, upgrade });
       expect(res).toEqual(droneYAML);
     });
 
@@ -41,12 +41,12 @@ describe('manager/droneci/update', () => {
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(droneYAML, upgrade);
+      const res = updateDependency({ fileContent: droneYAML, upgrade });
       expect(res).toBeNull();
     });
 
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
 
@@ -57,7 +57,7 @@ describe('manager/droneci/update', () => {
         managerData: { lineNumber: 3 },
         newValue: '4.2.0',
       };
-      const res = updateDependency(droneYAML, upgrade);
+      const res = updateDependency({ fileContent: droneYAML, upgrade });
       expect(res).toBeNull();
     });
   });

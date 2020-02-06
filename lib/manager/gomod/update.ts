@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
@@ -15,7 +15,7 @@ export function updateDependency(
     if (depNameNoVersion.startsWith('gopkg.in')) {
       depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
     }
-    const lines = currentFileContent.split('\n');
+    const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
@@ -50,7 +50,7 @@ export function updateDependency(
         upgrade.currentDigest.length
       );
       if (lineToChange.includes(newDigestRightSized)) {
-        return currentFileContent;
+        return fileContent;
       }
       logger.debug(
         { depName, lineToChange, newDigestRightSized },
@@ -105,7 +105,7 @@ export function updateDependency(
     }
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');

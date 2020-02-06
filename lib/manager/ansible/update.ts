@@ -1,12 +1,12 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { regEx } from '../../util/regex';
 
-export default function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export default function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const newFrom = getNewFrom(upgrade);
     logger.debug(`ansible.updateDependency(): ${newFrom}`);

@@ -180,6 +180,12 @@ export interface UpdateArtifact {
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
+
+export interface UpdateDependencyConfig {
+  fileContent: string;
+  upgrade: Upgrade;
+}
+
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
@@ -206,8 +212,7 @@ export interface ManagerApi {
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency(
-    fileContent: string,
-    upgrade: Upgrade
+    updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
 

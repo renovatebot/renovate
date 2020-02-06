@@ -19,7 +19,7 @@ describe('manager/ansible/update', () => {
         newValue: '1.29.3',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(yamlFile1, upgrade);
+      const res = updateDependency({ fileContent: yamlFile1, upgrade });
       expect(res).not.toEqual(yamlFile1);
       expect(res.includes(upgrade.newDigest)).toBe(true);
     });
@@ -30,7 +30,7 @@ describe('manager/ansible/update', () => {
         newValue: '11.5.1',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(yamlFile2, upgrade);
+      const res = updateDependency({ fileContent: yamlFile2, upgrade });
       expect(res).not.toEqual(yamlFile2);
       expect(res.includes(upgrade.newDigest)).toBe(true);
     });
@@ -40,7 +40,7 @@ describe('manager/ansible/update', () => {
         depName: 'sameersbn/redis',
         newValue: '4.0.9-1',
       };
-      const res = updateDependency(yamlFile2, upgrade);
+      const res = updateDependency({ fileContent: yamlFile2, upgrade });
       expect(res).toEqual(yamlFile2);
     });
     it('returns null if mismatch', () => {
@@ -48,11 +48,11 @@ describe('manager/ansible/update', () => {
         managerData: { lineNumber: 52 },
         newFrom: 'registry:2.6.2@sha256:abcdefghijklmnop',
       };
-      const res = updateDependency(yamlFile2, upgrade);
+      const res = updateDependency({ fileContent: yamlFile2, upgrade });
       expect(res).toBeNull();
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

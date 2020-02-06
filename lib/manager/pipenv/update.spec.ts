@@ -14,7 +14,7 @@ describe('manager/pipenv/update', () => {
         newValue: '==1.0.1',
         depType: 'packages',
       };
-      const res = updateDependency(pipfile, upgrade);
+      const res = updateDependency({ fileContent: pipfile, upgrade });
       expect(res).not.toEqual(pipfile);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
@@ -25,7 +25,7 @@ describe('manager/pipenv/update', () => {
         newValue: '==0.3.1',
         depType: 'packages',
       };
-      const res = updateDependency(pipfile, upgrade);
+      const res = updateDependency({ fileContent: pipfile, upgrade });
       expect(res).toEqual(pipfile);
     });
     it('replaces nested value', () => {
@@ -35,7 +35,7 @@ describe('manager/pipenv/update', () => {
         depType: 'packages',
         managerData: { nestedVersion: true },
       };
-      const res = updateDependency(pipfile, upgrade);
+      const res = updateDependency({ fileContent: pipfile, upgrade });
       expect(res).not.toEqual(pipfile);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
@@ -46,13 +46,13 @@ describe('manager/pipenv/update', () => {
         newValue: '==0.2.0',
         depType: 'dev-packages',
       };
-      const res = updateDependency(pipfile, upgrade);
+      const res = updateDependency({ fileContent: pipfile, upgrade });
       expect(res).not.toEqual(pipfile);
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res).toMatchSnapshot();
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

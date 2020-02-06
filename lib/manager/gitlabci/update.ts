@@ -1,14 +1,14 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const newFrom = getNewFrom(upgrade);
-    const lines = currentFileContent.split('\n');
+    const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (['image', 'image-name'].includes(upgrade.depType)) {
       const imageLine = /^(\s*(?:image|name):\s*'?"?)[^\s'"]+('?"?\s*)$/;
@@ -19,7 +19,7 @@ export function updateDependency(
       const newLine = lineToChange.replace(imageLine, `$1${newFrom}$2`);
       if (newLine === lineToChange) {
         logger.debug('No changes necessary');
-        return currentFileContent;
+        return fileContent;
       }
       lines[upgrade.managerData.lineNumber] = newLine;
       return lines.join('\n');
@@ -32,7 +32,7 @@ export function updateDependency(
     const newLine = lineToChange.replace(serviceLine, `$1${newFrom}$2`);
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');

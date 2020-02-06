@@ -1,6 +1,6 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
@@ -21,10 +21,10 @@ async function getChecksum(url: string): Promise<string> {
   }
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
   try {
     logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');

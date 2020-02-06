@@ -14,7 +14,7 @@ describe('manager/gitlabci-include/update', () => {
         depName: 'mikebryant/include-source-example',
         newValue: '1.0.1',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).not.toEqual(yamlFile);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -24,11 +24,11 @@ describe('manager/gitlabci-include/update', () => {
         depName: 'mikebryant/include-source-example',
         newValue: '1.0.0',
       };
-      const res = updateDependency(yamlFile, upgrade);
+      const res = updateDependency({ fileContent: yamlFile, upgrade });
       expect(res).toEqual(yamlFile);
     });
     it('returns null if error', () => {
-      const res = updateDependency(null, null);
+      const res = updateDependency({ fileContent: null, upgrade: null });
       expect(res).toBeNull();
     });
   });

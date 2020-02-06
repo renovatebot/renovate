@@ -15,7 +15,7 @@ describe('manager/travis/update', () => {
         currentValue: ['8', '6', '4'],
         newValue: [6, 8],
       };
-      const res = updateDependency(content, upgrade);
+      const res = updateDependency({ fileContent: content, upgrade });
       expect(res).toMatchSnapshot();
     });
     it('falls back to 2 spaces', () => {
@@ -24,7 +24,10 @@ describe('manager/travis/update', () => {
         currentValue: [8, 6, 4],
         newValue: [6, 8],
       };
-      const res = updateDependency('hello: world', upgrade);
+      const res = updateDependency({
+        fileContent: 'hello: world',
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
     });
     it('it uses double quotes', () => {
@@ -33,7 +36,10 @@ describe('manager/travis/update', () => {
         currentValue: ['6'],
         newValue: [6, 8],
       };
-      const res = updateDependency('node_js:\n  - "6"\n', upgrade);
+      const res = updateDependency({
+        fileContent: 'node_js:\n  - "6"\n',
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
     });
     it('returns null if error', () => {
@@ -42,7 +48,7 @@ describe('manager/travis/update', () => {
         currentValue: [8, 6, 4],
         newValue: '6',
       };
-      const res = updateDependency(content, upgrade);
+      const res = updateDependency({ fileContent: content, upgrade });
       expect(res).toBeNull();
     });
   });
