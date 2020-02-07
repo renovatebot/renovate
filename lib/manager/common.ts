@@ -1,5 +1,5 @@
 import { ReleaseType } from 'semver';
-import { RangeStrategy } from '../versioning';
+import { RangeStrategy } from '../types';
 import { ValidationMessage } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
@@ -187,6 +187,7 @@ export interface UpdateDependencyConfig {
 }
 
 export interface ManagerApi {
+  defaultConfig: object;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 

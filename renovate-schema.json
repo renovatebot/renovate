@@ -29,7 +29,7 @@
       "default": []
     },
     "ansible": {
-      "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the ansible manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)tasks/[^/]+\\.ya?ml$"]
@@ -98,7 +98,7 @@
       "type": "string"
     },
     "bazel": {
-      "description": "Configuration object for bazel WORKSPACE renovation",
+      "description": "Configuration object for the bazel manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"]
@@ -132,7 +132,7 @@
       "default": "{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}"
     },
     "buildkite": {
-      "description": "Configuration object for buildkite pipeline renovation",
+      "description": "Configuration object for the buildkite manager",
       "type": "object",
       "default": {
         "fileMatch": ["buildkite\\.ya?ml", "\\.buildkite/.+\\.ya?ml$"],
@@ -148,7 +148,7 @@
       "enum": ["major", "minor", "patch"]
     },
     "bundler": {
-      "description": "Configuration object for bundler Gemfiles",
+      "description": "Configuration object for the bundler manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)Gemfile$"],
@@ -161,7 +161,7 @@
       "type": "string"
     },
     "cargo": {
-      "description": "Configuration object for Cargo crate renovation.",
+      "description": "Configuration object for the cargo manager",
       "type": "object",
       "default": {
         "commitMessageTopic": "Rust crate {{depName}}",
@@ -173,7 +173,7 @@
       "$ref": "#"
     },
     "cdnurl": {
-      "description": "Configuration object for CDN assets",
+      "description": "Configuration object for the cdnurl manager",
       "type": "object",
       "default": {
         "fileMatch": [],
@@ -182,7 +182,7 @@
       "$ref": "#"
     },
     "circleci": {
-      "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the circleci manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/).circleci/config.yml$"]
@@ -233,7 +233,7 @@
       "$ref": "#"
     },
     "composer": {
-      "description": "Configuration object for composer.json files",
+      "description": "Configuration object for the composer manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)composer.json$"],
@@ -247,7 +247,7 @@
       "default": true
     },
     "deps-edn": {
-      "description": "Configuration object for renovating Clojure CLI-based projects (deps.edn)",
+      "description": "Configuration object for the deps-edn manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)deps\\.edn$"],
@@ -307,7 +307,7 @@
       "$ref": "#"
     },
     "docker-compose": {
-      "description": "Configuration object for Docker Compose renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the docker-compose manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)docker-compose[^/]*\\.ya?ml$"]
@@ -324,7 +324,7 @@
       "type": "string"
     },
     "dockerfile": {
-      "description": "Configuration object for Dockerfile renovation",
+      "description": "Configuration object for the dockerfile manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"]
@@ -338,7 +338,7 @@
       "$ref": "#"
     },
     "droneci": {
-      "description": "Configuration object for DroneCI yml renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the droneci manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/).drone.yml$"]
@@ -418,7 +418,7 @@
       "default": false
     },
     "git-submodules": {
-      "description": "Configuration object for git submodule files",
+      "description": "Configuration object for the git-submodules manager",
       "type": "object",
       "default": {
         "enabled": false,
@@ -441,7 +441,7 @@
       "type": "string"
     },
     "github-actions": {
-      "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the github-actions manager",
       "type": "object",
       "default": {
         "fileMatch": [
@@ -453,7 +453,7 @@
       "$ref": "#"
     },
     "gitlabci": {
-      "description": "Configuration object for GitLab CI yml renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the gitlabci manager",
       "type": "object",
       "default": {
         "fileMatch": ["^\\.gitlab-ci\\.yml$"]
@@ -461,7 +461,7 @@
       "$ref": "#"
     },
     "gitlabci-include": {
-      "description": "Configuration object for GitLab CI yml renovation for include.",
+      "description": "Configuration object for the gitlabci-include manager",
       "type": "object",
       "default": {
         "fileMatch": ["^\\.gitlab-ci\\.yml$"]
@@ -477,7 +477,7 @@
       "$ref": "#"
     },
     "gomod": {
-      "description": "Configuration object for Go modules renovation",
+      "description": "Configuration object for the gomod manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)go.mod$"]
@@ -485,7 +485,7 @@
       "$ref": "#"
     },
     "gradle": {
-      "description": "Configuration object for build.gradle files",
+      "description": "Configuration object for the gradle manager",
       "type": "object",
       "default": {
         "fileMatch": ["\\.gradle(\\.kts)?$", "(^|/)gradle.properties$"],
@@ -495,7 +495,7 @@
       "$ref": "#"
     },
     "gradle-wrapper": {
-      "description": "Configuration object for gradle-wrapper.properties files",
+      "description": "Configuration object for the gradle-wrapper manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)gradle/wrapper/gradle-wrapper.properties$"]
@@ -522,7 +522,7 @@
       "default": null
     },
     "helm-requirements": {
-      "description": "Configuration object for helm requirements.yaml files.",
+      "description": "Configuration object for the helm-requirements manager",
       "type": "object",
       "default": {
         "aliases": {
@@ -534,7 +534,7 @@
       "$ref": "#"
     },
     "helm-values": {
-      "description": "Configuration object for helm values.yaml files.",
+      "description": "Configuration object for the helm-values manager",
       "type": "object",
       "default": {
         "commitMessageTopic": "helm values {{depName}}",
@@ -543,7 +543,7 @@
       "$ref": "#"
     },
     "helmfile": {
-      "description": "Configuration object for helmfile helmfile.yaml files.",
+      "description": "Configuration object for the helmfile manager",
       "type": "object",
       "default": {
         "aliases": {
@@ -555,7 +555,7 @@
       "$ref": "#"
     },
     "homebrew": {
-      "description": "Configuration object for homebrew",
+      "description": "Configuration object for the homebrew manager",
       "type": "object",
       "default": {
         "commitMessageTopic": "Homebrew Formula {{depName}}",
@@ -673,7 +673,7 @@
       "$ref": "#"
     },
     "kubernetes": {
-      "description": "Configuration object for Kubernetes renovation. Also inherits settings from `docker` object.",
+      "description": "Configuration object for the kubernetes manager",
       "type": "object",
       "default": {
         "fileMatch": []
@@ -693,7 +693,7 @@
       "default": true
     },
     "leiningen": {
-      "description": "Configuration object for renovating Clojure leiningen projects",
+      "description": "Configuration object for the leiningen manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)project\\.clj$"],
@@ -767,7 +767,7 @@
       "default": "Update Dependencies (Renovate Bot)"
     },
     "maven": {
-      "description": "Configuration object for when renovating Maven pom.xml files",
+      "description": "Configuration object for the maven manager",
       "type": "object",
       "default": {
         "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
@@ -776,7 +776,7 @@
       "$ref": "#"
     },
     "meteor": {
-      "description": "Configuration object for meteor package.js renovation",
+      "description": "Configuration object for the meteor manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)package.js$"]
@@ -790,7 +790,7 @@
       "$ref": "#"
     },
     "mix": {
-      "description": "Configuration object for Mix module renovation",
+      "description": "Configuration object for the mix manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)mix\\.exs$"],
@@ -810,7 +810,7 @@
       "$ref": "#"
     },
     "npm": {
-      "description": "Configuration object for npm package.json renovation",
+      "description": "Configuration object for the npm manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)package.json$"],
@@ -831,7 +831,7 @@
       "type": "string"
     },
     "nuget": {
-      "description": "Configuration object for C#/Nuget",
+      "description": "Configuration object for the nuget manager",
       "type": "object",
       "default": {
         "fileMatch": ["\\.(?:cs|fs|vb)proj$"]
@@ -839,7 +839,7 @@
       "$ref": "#"
     },
     "nvm": {
-      "description": "Configuration object for .nvmrc files",
+      "description": "Configuration object for the nvm manager",
       "type": "object",
       "default": {
         "fileMatch": ["^.nvmrc$"],
@@ -1033,7 +1033,7 @@
       "default": false
     },
     "pip_requirements": {
-      "description": "Configuration object for requirements.txt files",
+      "description": "Configuration object for the pip_requirements manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)requirements.(txt|pip)$"]
@@ -1041,7 +1041,7 @@
       "$ref": "#"
     },
     "pip_setup": {
-      "description": "Configuration object for setup.py files",
+      "description": "Configuration object for the pip_setup manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)setup.py$"]
@@ -1049,7 +1049,7 @@
       "$ref": "#"
     },
     "pipenv": {
-      "description": "Configuration object for Pipfile files",
+      "description": "Configuration object for the pipenv manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)Pipfile$"]
@@ -1063,7 +1063,7 @@
       "default": "github"
     },
     "poetry": {
-      "description": "Configuration object for pyproject.toml files",
+      "description": "Configuration object for the poetry manager",
       "type": "object",
       "default": {
         "versionScheme": "poetry",
@@ -1207,7 +1207,7 @@
       "default": true
     },
     "pub": {
-      "description": "Configuration object for when renovating Dart pubspec files",
+      "description": "Configuration object for the pub manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
@@ -1301,7 +1301,7 @@
       "$ref": "#"
     },
     "ruby-version": {
-      "description": "Configuration object for .ruby-version updating",
+      "description": "Configuration object for the ruby-version manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)\\.ruby-version$"],
@@ -1316,7 +1316,7 @@
       "$ref": "#"
     },
     "sbt": {
-      "description": "Configuration object for *.sbt files",
+      "description": "Configuration object for the sbt manager",
       "type": "object",
       "default": {
         "fileMatch": ["\\.sbt$", "project/[^/]*.scala$"],
@@ -1390,7 +1390,7 @@
       "default": ["deprecationWarningIssues"]
     },
     "swift": {
-      "description": "Configuration for Package.swift files",
+      "description": "Configuration object for the swift manager",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)Package\\.swift"],
@@ -1400,7 +1400,7 @@
       "$ref": "#"
     },
     "terraform": {
-      "description": "Configuration object for Terraform dependencies renovation",
+      "description": "Configuration object for the terraform manager",
       "type": "object",
       "default": {
         "commitMessageTopic": "Terraform {{managerData.terraformDependencyType}} {{depNameShort}}",
@@ -1418,7 +1418,7 @@
       "type": "string"
     },
     "travis": {
-      "description": "Configuration object for .travis.yml node version renovation",
+      "description": "Configuration object for the travis manager",
       "type": "object",
       "default": {
         "fileMatch": ["^.travis.yml$"],

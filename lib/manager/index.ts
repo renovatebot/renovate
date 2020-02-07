@@ -10,7 +10,7 @@ import {
   Result,
   PackageUpdateResult,
 } from './common';
-import { RangeStrategy } from '../versioning';
+import { RangeStrategy } from '../types';
 import {
   LANGUAGE_DART,
   LANGUAGE_DOCKER,
@@ -43,8 +43,8 @@ function loadManagers(): void {
     let module = null;
     try {
       module = require(`./${manager}`); // eslint-disable-line
-    } catch (e) /* istanbul ignore next */ {
-      logger.fatal(`Can not load manager "${manager}".`);
+    } catch (err) /* istanbul ignore next */ {
+      logger.fatal({ err }, `Can not load manager "${manager}".`);
       process.exit(1);
     }
 
@@ -76,6 +76,7 @@ export const get = <T extends keyof ManagerApi>(
 ): ManagerApi[T] => managers[manager][name];
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Record<string, ManagerApi> => managers;
 
 export function extractAllPackageFiles(
   manager: string,
