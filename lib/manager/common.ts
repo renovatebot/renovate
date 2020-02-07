@@ -148,6 +148,7 @@ export interface Upgrade<T = Record<string, any>>
   checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
+  dockerRepository?: string;
   downloadUrl?: string;
   localDir?: string;
   name?: string;
@@ -179,6 +180,12 @@ export interface UpdateArtifact {
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
+
+export interface UpdateDependencyConfig {
+  fileContent: string;
+  upgrade: Upgrade;
+}
+
 export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
@@ -205,8 +212,7 @@ export interface ManagerApi {
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency(
-    fileContent: string,
-    upgrade: Upgrade
+    updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
 

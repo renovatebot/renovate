@@ -93,7 +93,8 @@ async function getDependencyInfo(
 }
 
 function getLatestStableVersion(versions: string[]): string | null {
-  const stableVersions = versions.filter(mavenVersion.isStable);
+  const { isStable } = mavenVersion; // auto this bind
+  const stableVersions = versions.filter(isStable);
   if (stableVersions.length) {
     return stableVersions.reduce((latestVersion, version) =>
       compare(version, latestVersion) === 1 ? version : latestVersion

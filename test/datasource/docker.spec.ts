@@ -411,4 +411,88 @@ describe('api/docker', () => {
       expect(res).toBeNull();
     });
   });
+  describe('getConfigResponseBeforeRedirectHook', () => {
+    it('leaves a non-Amazon or Microsoft request unmodified', () => {
+      const emptyOpts = {};
+      docker.getConfigResponseBeforeRedirectHook(emptyOpts);
+      expect(emptyOpts).toEqual({});
+
+      const nonAmzOpts = {
+        search: 'my-search-string',
+      };
+      docker.getConfigResponseBeforeRedirectHook(nonAmzOpts);
+      expect(nonAmzOpts).toEqual({
+        search: 'my-search-string',
+      });
+
+      const nonMsOpts = {
+        href: 'https://myurl.com',
+      };
+      docker.getConfigResponseBeforeRedirectHook(nonMsOpts);
+      expect(nonMsOpts).toEqual({
+        href: 'https://myurl.com',
+      });
+    });
+
+    it('removes the authorization header for Azure requests', () => {
+      const href = 'https://myaccount.blob.core.windows.net/xyz';
+      const opts = {
+        href,
+      };
+      docker.getConfigResponseBeforeRedirectHook(opts);
+      expect(opts).toEqual({ href });
+
+      const optsWithHeadersNoAuth = {
+        href,
+        headers: {},
+      };
+      docker.getConfigResponseBeforeRedirectHook(opts);
+      expect(optsWithHeadersNoAuth).toEqual({
+        href,
+        headers: {},
+      });
+
+      const optsWithAuth = {
+        href,
+        headers: {
+          authorization: 'Bearer xyz',
+        },
+      };
+      docker.getConfigResponseBeforeRedirectHook(optsWithAuth);
+      expect(optsWithAuth.headers).toBeDefined();
+      expect(optsWithAuth.headers.authorization).not.toBeDefined();
+    });
+
+    it('removes the authorization header for Amazon requests', () => {
+      const href = 'https://amazon.com';
+      const search = 'X-Amz-Algorithm';
+      const authorization = 'Bearer xyz';
+      const opts = {
+        href,
+        search,
+        headers: {
+          authorization,
+        },
+      };
+      docker.getConfigResponseBeforeRedirectHook(opts);
+      expect(opts).toEqual({ search, href, headers: {} });
+    });
+
+    it('removes the port when not specified in URL', () => {
+      const href = 'https://amazon.com/xyz';
+      const search = 'X-Amz-Algorithm';
+      const authorization = 'Bearer xyz';
+      const port = 8080;
+      const opts = {
+        href,
+        search,
+        port,
+        headers: {
+          authorization,
+        },
+      };
+      docker.getConfigResponseBeforeRedirectHook(opts);
+      expect(opts).toEqual({ search, href, headers: {} });
+    });
+  });
 });

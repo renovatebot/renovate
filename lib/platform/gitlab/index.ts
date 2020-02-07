@@ -34,6 +34,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PR_STATUS_ALL, PR_STATUS_OPEN } from '../../constants/pull-requests';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_FAILURE,
@@ -56,7 +57,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: 'gitlab',
+  hostType: PLATFORM_TYPE_GITLAB,
   endpoint: 'https://gitlab.com/api/v4/',
 };
 
@@ -216,7 +217,7 @@ export async function initRepo({
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
       const { host, protocol } = URL.parse(defaults.endpoint);
       url = GitStorage.getUrl({
-        protocol: protocol!.slice(0, -1) as any,
+        protocol: protocol.slice(0, -1) as any,
         auth: 'oauth2:' + opts.token,
         host,
         repository,
@@ -794,9 +795,10 @@ export async function addAssignees(
   }
 }
 
-export function addReviewers(iid: number, reviewers: string[]): void {
+export function addReviewers(iid: number, reviewers: string[]): Promise<void> {
   logger.debug(`addReviewers('${iid}, '${reviewers})`);
   logger.warn('Unimplemented in GitLab: approvals');
+  return Promise.resolve();
 }
 
 export async function deleteLabel(
@@ -968,7 +970,7 @@ function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATUS_ALL) {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -993,6 +995,6 @@ export function getCommitMessages(): Promise<string[]> {
   return config.storage.getCommitMessages();
 }
 
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
-  return [];
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
 }

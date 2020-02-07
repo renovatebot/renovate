@@ -1,14 +1,10 @@
 import fs from 'fs-extra';
-import { GotApi, GotResponse } from '../../../lib/platform/common';
+import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../lib/constants/error-messages';
-import {
-  PR_STATUS_NOT_OPEN,
-  PR_STATUS_OPEN,
-} from '../../../lib/constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -183,7 +179,11 @@ describe('platform/github', () => {
     });
   });
 
-  function initRepo(args: { repository: string; token?: string }) {
+  function initRepo(args: {
+    repository: string;
+    token?: string;
+    forkMode?: boolean;
+  }) {
     // repo info
     api.get.mockImplementationOnce(
       () =>
@@ -206,6 +206,59 @@ describe('platform/github', () => {
       endpoint: 'https://github.com',
       repository: 'some/repo',
     } as any);
+  }
+
+  function forkInitRepo(args: any, repo?: string): Promise<RepoConfig> {
+    // repo info
+    api.get.mockImplementationOnce(
+      () =>
+        ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+            allow_rebase_merge: true,
+            allow_squash_merge: true,
+            allow_merge_commit: true,
+          },
+        } as any)
+    );
+    // api.getBranchCommit
+    api.get.mockImplementationOnce(
+      () =>
+        ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        } as any)
+    );
+    // api.getRepos
+    api.get.mockImplementationOnce(
+      () =>
+        ({
+          body: repo
+            ? [
+                {
+                  full_name: repo,
+                },
+              ]
+            : [],
+        } as any)
+    );
+    // api.getBranchCommit
+    api.post.mockImplementationOnce(() => {
+      return {
+        body: repo
+          ? {
+              full_name: repo,
+            }
+          : {},
+      } as any;
+    });
+    return github.initRepo(args);
   }
 
   describe('initRepo', () => {
@@ -261,49 +314,6 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should forks when forkMode', async () => {
-      function forkInitRepo(args: any) {
-        // repo info
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: {
-                owner: {
-                  login: 'theowner',
-                },
-                default_branch: 'master',
-                allow_rebase_merge: true,
-                allow_squash_merge: true,
-                allow_merge_commit: true,
-              },
-            } as any)
-        );
-        // api.getBranchCommit
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: {
-                object: {
-                  sha: '1234',
-                },
-              },
-            } as any)
-        );
-        // api.getRepos
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: [],
-            } as any)
-        );
-        // api.getBranchCommit
-        api.post.mockImplementationOnce(
-          () =>
-            ({
-              body: {},
-            } as any)
-        );
-        return github.initRepo(args);
-      }
       const config = await forkInitRepo({
         repository: 'some/repo',
         forkMode: true,
@@ -311,57 +321,13 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should update fork when forkMode', async () => {
-      function forkInitRepo(args: any) {
-        // repo info
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: {
-                owner: {
-                  login: 'theowner',
-                },
-                default_branch: 'master',
-                allow_rebase_merge: true,
-                allow_squash_merge: true,
-                allow_merge_commit: true,
-              },
-            } as any)
-        );
-        // api.getBranchCommit
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: {
-                object: {
-                  sha: '1234',
-                },
-              },
-            } as any)
-        );
-        // api.getRepos
-        api.get.mockImplementationOnce(
-          () =>
-            ({
-              body: [
-                {
-                  full_name: 'forked_repo',
-                },
-              ],
-            } as any)
-        );
-        // fork
-        api.post.mockImplementationOnce(
-          () =>
-            ({
-              body: { full_name: 'forked_repo' },
-            } as any)
-        );
-        return github.initRepo(args);
-      }
-      const config = await forkInitRepo({
-        repository: 'some/repo',
-        forkMode: true,
-      });
+      const config = await forkInitRepo(
+        {
+          repository: 'some/repo',
+          forkMode: true,
+        },
+        'forked_repo'
+      );
       expect(config).toMatchSnapshot();
     });
     it('should squash', async () => {
@@ -561,8 +527,13 @@ describe('platform/github', () => {
           ({
             body: [
               {
+                number: 90,
+                head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+                state: 'open',
+              },
+              {
                 number: 91,
-                head: { ref: 'somebranch' },
+                head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
                 state: 'open',
               },
             ],
@@ -579,7 +550,53 @@ describe('platform/github', () => {
               base: {
                 sha: '1234',
               },
-              head: { ref: 'somebranch' },
+              head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+              state: 'open',
+            },
+          } as any)
+      );
+      api.get.mockResolvedValue({ body: { object: { sha: '12345' } } } as any);
+      const pr = await github.getBranchPr('somebranch');
+      expect(api.get.mock.calls).toMatchSnapshot();
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return the PR object in fork mode', async () => {
+      await forkInitRepo(
+        {
+          repository: 'some/repo',
+          forkMode: true,
+        },
+        'forked/repo'
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: [
+              {
+                number: 90,
+                head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+                state: 'open',
+              },
+              {
+                number: 91,
+                head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+                state: 'open',
+              },
+            ],
+          } as any)
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              number: 90,
+              additions: 1,
+              deletions: 1,
+              commits: 1,
+              base: {
+                sha: '1234',
+              },
+              head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
               state: 'open',
             },
           } as any)
@@ -1448,7 +1465,7 @@ describe('platform/github', () => {
       } as any);
       const res = await github.findPr({
         branchName: 'branch-a',
-        state: PR_STATUS_NOT_OPEN,
+        state: '!open',
       });
       expect(res).toBeDefined();
     });
@@ -1473,7 +1490,7 @@ describe('platform/github', () => {
       res = await github.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATUS_OPEN,
+        state: 'open',
       });
       expect(res).toBeDefined();
       res = await github.findPr({ branchName: 'branch-b' });

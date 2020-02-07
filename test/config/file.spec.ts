@@ -23,7 +23,7 @@ describe('config/file', () => {
       expect(res.rangeStrategy).toEqual('bump');
     });
     it('informs user when error in parsing config.js', () => {
-      const configFile = path.resolve(__dirname, './config/_fixtures/file3.js');
+      const configFile = path.resolve(__dirname, './config/_fixtures/file3.ts');
       const fileContent = `module.exports = {
         "platform": "github",
         "token":"abcdef",
@@ -44,7 +44,7 @@ describe('config/file', () => {
     });
   });
   it('handles when invalid file location is provided', () => {
-    const configFile = path.resolve(__dirname, './config/_fixtures/file4.js');
+    const configFile = path.resolve(__dirname, './config/_fixtures/file4.ts');
     expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toStrictEqual(
       {}
     );

@@ -1,15 +1,15 @@
 import { processRepo } from '../../../../lib/workers/repository/process/index';
 import * as _extractUpdate from '../../../../lib/workers/repository/process/extract-update';
-import { mocked } from '../../../util';
+import { getConfig, mocked, RenovateConfig } from '../../../util';
 
 jest.mock('../../../../lib/workers/repository/process/extract-update');
 
 const extractAndUpdate = mocked(_extractUpdate).extractAndUpdate;
 
-let config;
+let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../config/config/_fixtures');
+  config = getConfig();
 });
 
 describe('workers/repository/process/index', () => {
