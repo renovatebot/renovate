@@ -32,6 +32,7 @@ async function createRenovateGradlePlugin(localDir: string): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
+import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import java.util.concurrent.ConcurrentLinkedQueue
 
 def output = new ConcurrentLinkedQueue<>();
@@ -42,8 +43,8 @@ allprojects {
         def project = ['project': project.name]
         output << project
         def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
+           .findAll { it instanceof UrlArtifactRepository && it.url.scheme ==~ /https?/ }
            .collect { "$it.url" }
-           .findAll { !it.startsWith('file:') }
            .unique()
         project.repositories = repos
         def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
