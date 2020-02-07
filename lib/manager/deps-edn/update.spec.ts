@@ -18,7 +18,7 @@ describe('manager/deps-edn/update', () => {
       newValue: `${dep.currentValue}-9999`,
     };
     const { currentValue, newValue } = upgrade;
-    const newFileContent = updateDependency(depsEdn, upgrade);
+    const newFileContent = updateDependency({ fileContent: depsEdn, upgrade });
     const cmpContent = depsEdn.replace(currentValue, newValue);
     expect(newFileContent).toEqual(cmpContent);
   });
