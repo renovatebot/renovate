@@ -1,0 +1,38 @@
+# from galaxy
+- src: yatesr.timezone
+  version: "0.1.0"
+
+# GitHub repo, accessible by http(s)
+- version: master
+  src: https://github.com/bennojoy/nginx
+  name: nginx_role
+
+# Git repo, accessible by git+http(s)
+- src: git+http://bitbucket.org/willthames/git-ansible-galaxy
+  version: "v1.4"
+
+# Git repo, accessible by git protocol
+- scm: git
+  src: git@gitlab.company.com:mygroup/ansible-base.git
+  version: "0.1"
+
+# include
+- include: <path_to_requirements>/webserver.yml
+
+# Test quotes
+- scm: "git"
+  src: 'git@gitlab.company.com:mygroup/ansible-base.git'
+  version: "0.14"
+
+# Test quotes
+- scm: "git"
+  src: "company.com:mygroup/ansible-base.git"
+  version: "0.14"
+
+# not fitting release
+- test: yatesr.timezone
+  version: "0.1.0"
+
+# not valid src string
+- src: timezone
+  version: "0.1.0"

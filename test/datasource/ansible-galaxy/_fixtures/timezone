@@ -1,0 +1,138 @@
+{
+    "count": 1,
+    "next": null,
+    "next_link": null,
+    "previous": null,
+    "previous_link": null,
+    "results": [
+        {
+            "id": 1429,
+            "url": "/api/v1/roles/1429/",
+            "related": {
+                "content_type": "/api/v1/content_types/11/",
+                "dependencies": "/api/v1/roles/1429/dependencies/",
+                "imports": "/api/v1/roles/1429/imports/"
+            },
+            "summary_fields": {
+                "content_type": {
+                    "id": 11,
+                    "name": "role",
+                    "description": "Role"
+                },
+                "dependencies": [],
+                "namespace": {
+                    "id": 2193,
+                    "name": "yatesr",
+                    "avatar_url": "https://avatars1.githubusercontent.com/u/3984903?v=4",
+                    "location": null,
+                    "company": null,
+                    "email": null,
+                    "html_url": "https://github.com/yatesr",
+                    "is_vendor": false
+                },
+                "platforms": [
+                    {
+                        "name": "Debian",
+                        "release": "jessie"
+                    },
+                    {
+                        "name": "Debian",
+                        "release": "squeeze"
+                    },
+                    {
+                        "name": "Debian",
+                        "release": "wheezy"
+                    },
+                    {
+                        "name": "EL",
+                        "release": "6"
+                    },
+                    {
+                        "name": "EL",
+                        "release": "7"
+                    },
+                    {
+                        "name": "Fedora",
+                        "release": "19"
+                    },
+                    {
+                        "name": "Fedora",
+                        "release": "20"
+                    },
+                    {
+                        "name": "Ubuntu",
+                        "release": "precise"
+                    },
+                    {
+                        "name": "Ubuntu",
+                        "release": "trusty"
+                    }
+                ],
+                "provider_namespace": {
+                    "id": 2174,
+                    "name": "yatesr"
+                },
+                "repository": {
+                    "id": 27861,
+                    "name": "timezone",
+                    "original_name": "ansible-timezone",
+                    "stargazers_count": 18,
+                    "watchers_count": 3,
+                    "forks_count": 15,
+                    "open_issues_count": 3,
+                    "travis_status_url": "",
+                    "travis_build_url": "",
+                    "format": "role",
+                    "deprecated": false,
+                    "community_score": null,
+                    "quality_score": 5.0,
+                    "community_survey_count": 0
+                },
+                "tags": [
+                    "system"
+                ],
+                "versions": [
+                    {
+                        "id": 7863,
+                        "name": "1.0.0",
+                        "release_date": "2015-11-17T00:43:42Z"
+                    },
+                    {
+                        "id": 38901,
+                        "name": "1.1.0",
+                        "release_date": "2017-09-25T00:27:37Z"
+                    },
+                    {
+                        "id": 107503,
+                        "name": "1.2.0",
+                        "release_date": "2019-10-28T01:40:43Z"
+                    }
+                ],
+                "videos": []
+            },
+            "created": "2014-08-21T17:01:14.940065Z",
+            "modified": "2019-10-28T01:51:11.167031Z",
+            "name": "timezone",
+            "role_type": "ANS",
+            "is_valid": true,
+            "min_ansible_version": "1.9",
+            "license": "license (Apache 2.0)",
+            "company": "",
+            "description": "Role for managing timezone.",
+            "travis_status_url": "",
+            "download_count": 871145,
+            "imported": "2019-10-27T21:51:11.157558-04:00",
+            "active": true,
+            "github_user": "yatesr",
+            "github_repo": "ansible-timezone",
+            "github_branch": "master",
+            "stargazers_count": 18,
+            "forks_count": 15,
+            "open_issues_count": 3,
+            "commit": "02845a002839261295b99f508d9ad989bc611cb7",
+            "commit_message": "Code quality with molecule, tox, and Travis. (#9)\n\n* Set role_name explicitly to avoid using repo name\r\n\r\n* Remove symlinks\r\n\r\nThe symlinks in this role do not play nicely with PBR, which is a\r\ndependency of Kayobe, a project that uses this role.\r\n\r\n* yam",
+            "commit_url": "https://api.github.com/repos/yatesr/ansible-timezone/git/commits/02845a002839261295b99f508d9ad989bc611cb7",
+            "issue_tracker_url": "https://github.com/yatesr/ansible-timezone/issues"
+        }
+    ]
+}
