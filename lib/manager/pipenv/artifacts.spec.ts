@@ -1,15 +1,15 @@
 import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import * as pipenv from '../../../lib/manager/pipenv/artifacts';
-import { platform as _platform } from '../../../lib/platform';
+import * as pipenv from './artifacts';
+import { platform as _platform } from '../../platform';
 import { mocked } from '../../../test/util';
-import { StatusResult } from '../../../lib/platform/git/storage';
+import { StatusResult } from '../../platform/git/storage';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as _env from '../../../lib/util/exec/env';
-import { BinarySource } from '../../../lib/util/exec/common';
-import { resetPrefetchedImages } from '../../../lib/util/exec/docker';
-import { setUtilConfig } from '../../../lib/util';
+import * as _env from '../../util/exec/env';
+import { BinarySource } from '../../util/exec/common';
+import { resetPrefetchedImages } from '../../util/exec/docker';
+import { setUtilConfig } from '../../util';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
