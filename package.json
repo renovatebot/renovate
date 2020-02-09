@@ -183,7 +183,7 @@
     "@types/jest": "25.1.2",
     "@types/js-yaml": "3.12.2",
     "@types/json5": "0.0.30",
-    "@types/later": "1.2.5",
+    "@types/later": "1.2.6",
     "@types/lodash": "4.14.149",
     "@types/luxon": "1.21.0",
     "@types/markdown-it": "0.0.9",
