@@ -11,7 +11,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 function getPreCommands(): string[] | null {
   const credentials = find({
-    hostType: 'github',
+    hostType: PLATFORM_TYPE_GITHUB,
     url: 'https://api.github.com/',
   });
   let preCommands = null;
