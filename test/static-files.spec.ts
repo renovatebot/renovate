@@ -2,7 +2,7 @@ import util from 'util';
 
 const glob = util.promisify(require('glob'));
 
-const ignoredExtensions = ['js', 'ts', 'md', 'pyc', 'DS_Store', 'map'];
+const ignoredExtensions = ['js', 'ts', 'md', 'pyc', 'DS_Store', 'map', 'snap'];
 
 function filterFiles(files: string[]): string[] {
   return files.filter(file =>
@@ -12,7 +12,11 @@ function filterFiles(files: string[]): string[] {
 
 async function getFiles(dir: string): Promise<string[]> {
   return filterFiles(
-    await glob(`${dir}/**/*`, { dot: true, nodir: true })
+    await glob(`${dir}/**/*`, {
+      dot: true,
+      nodir: true,
+      ignore: ['**/__fixtures__/**/*', '**/__mocks__/**/*'],
+    })
   ).map((file: string) => file.replace(`${dir}/`, ''));
 }
 

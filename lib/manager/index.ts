@@ -1,3 +1,6 @@
+import fs from 'fs';
+import { logger } from '../logger';
+
 import {
   ExtractConfig,
   ManagerApi,
@@ -7,7 +10,7 @@ import {
   Result,
   PackageUpdateResult,
 } from './common';
-import { RangeStrategy } from '../versioning';
+import { RangeStrategy } from '../types';
 import {
   LANGUAGE_DART,
   LANGUAGE_DOCKER,
@@ -21,92 +24,37 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
-import {
-  MANAGER_ANSIBLE,
-  MANAGER_BAZEL,
-  MANAGER_BUILDKITE,
-  MANAGER_BUNDLER,
-  MANAGER_CARGO,
-  MANAGER_CIRCLE_CI,
-  MANAGER_COMPOSER,
-  MANAGER_DEPS_EDN,
-  MANAGER_DOCKER_COMPOSE,
-  MANAGER_DOCKERFILE,
-  MANAGER_DRONE_CI,
-  MANAGER_GIT_SUBMODULES,
-  MANAGER_GITHUB_ACTIONS,
-  MANAGER_GITLAB_CI,
-  MANAGER_GITLAB_CI_INCLUDE,
-  MANAGER_GO_MOD,
-  MANAGER_GRADLE,
-  MANAGER_GRADLE_WRAPPER,
-  MANAGER_HELM_REQUIREMENTS,
-  MANAGER_HOMEBREW,
-  MANAGER_KUBERNETES,
-  MANAGER_LEININGEN,
-  MANAGER_MAVEN,
-  MANAGER_METEOR,
-  MANAGER_MIX,
-  MANAGER_NPM,
-  MANAGER_NUGET,
-  MANAGER_NVM,
-  MANAGER_PIP_REQUIREMENTS,
-  MANAGER_PIP_SETUP,
-  MANAGER_PIPENV,
-  MANAGER_POETRY,
-  MANAGER_PUB,
-  MANAGER_RUBY_VERSION,
-  MANAGER_SBT,
-  MANAGER_SWIFT,
-  MANAGER_TERRAFORM,
-  MANAGER_TRAVIS,
-} from '../constants/managers';
 
-const managerList = [
-  MANAGER_ANSIBLE,
-  MANAGER_BAZEL,
-  MANAGER_BUILDKITE,
-  MANAGER_BUNDLER,
-  MANAGER_CARGO,
-  MANAGER_CIRCLE_CI,
-  MANAGER_COMPOSER,
-  MANAGER_DEPS_EDN,
-  MANAGER_DOCKER_COMPOSE,
-  MANAGER_DOCKERFILE,
-  MANAGER_DRONE_CI,
-  MANAGER_GIT_SUBMODULES,
-  MANAGER_GITHUB_ACTIONS,
-  MANAGER_GITLAB_CI,
-  MANAGER_GITLAB_CI_INCLUDE,
-  MANAGER_GO_MOD,
-  MANAGER_GRADLE,
-  MANAGER_GRADLE_WRAPPER,
-  MANAGER_HELM_REQUIREMENTS,
-  MANAGER_HOMEBREW,
-  MANAGER_KUBERNETES,
-  MANAGER_LEININGEN,
-  MANAGER_MAVEN,
-  MANAGER_METEOR,
-  MANAGER_MIX,
-  MANAGER_NPM,
-  MANAGER_NUGET,
-  MANAGER_NVM,
-  MANAGER_PIP_REQUIREMENTS,
-  MANAGER_PIP_SETUP,
-  MANAGER_PIPENV,
-  MANAGER_POETRY,
-  MANAGER_PUB,
-  MANAGER_SBT,
-  MANAGER_SWIFT,
-  MANAGER_TERRAFORM,
-  MANAGER_TRAVIS,
-  MANAGER_RUBY_VERSION,
-];
-
+const managerList = [];
 const managers: Record<string, ManagerApi> = {};
-for (const manager of managerList) {
-  managers[manager] = require(`./${manager}`); // eslint-disable-line
+
+function isValidManagerModule(module: unknown): module is ManagerApi {
+  // TODO: check interface and fail-fast?
+  return !!module;
 }
+
+function loadManagers(): void {
+  const managerDirs = fs
+    .readdirSync(__dirname, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name)
+    .sort();
+  for (const manager of managerDirs) {
+    let module = null;
+    try {
+      module = require(`./${manager}`); // eslint-disable-line
+    } catch (err) /* istanbul ignore next */ {
+      logger.fatal({ err }, `Can not load manager "${manager}".`);
+      process.exit(1);
+    }
+
+    if (isValidManagerModule(module)) {
+      managers[manager] = module;
+      managerList.push(manager);
+    }
+  }
+}
+loadManagers();
 
 const languageList = [
   LANGUAGE_DART,
@@ -128,6 +76,7 @@ export const get = <T extends keyof ManagerApi>(
 ): ManagerApi[T] => managers[manager][name];
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Record<string, ManagerApi> => managers;
 
 export function extractAllPackageFiles(
   manager: string,

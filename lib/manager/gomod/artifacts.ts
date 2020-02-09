@@ -7,6 +7,7 @@ import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 export async function updateArtifacts({
   packageFileName: goModFileName,
@@ -53,7 +54,7 @@ export async function updateArtifacts({
       cmd += `-w "${cwd}" `;
       cmd += `renovate/go `;
       const credentials = find({
-        hostType: 'github',
+        hostType: PLATFORM_TYPE_GITHUB,
         url: 'https://api.github.com/',
       });
       if (credentials && credentials.token) {

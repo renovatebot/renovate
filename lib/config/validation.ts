@@ -138,9 +138,10 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
+              const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && subval.match(/^:timezone(.+)$/)) {
-                  const [, timezone] = subval.match(/^:timezone\((.+)\)$/);
+                if (is.string(subval) && tzRe.test(subval)) {
+                  const [, timezone] = tzRe.exec(subval);
                   const [validTimezone, errorMessage] = hasValidTimezone(
                     timezone
                   );
@@ -226,7 +227,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !(parentPath && parentPath.match(/p.*Rules\[\d+\]$/)) && // Inside a packageRule
+              !/p.*Rules\[\d+\]$/.test(parentPath) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({

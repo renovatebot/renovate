@@ -20,15 +20,15 @@ async function resolvePackageReleases(
     const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, x => {
         if (x === artifact) return true;
-        if (x.indexOf(`${artifact}_native`) === 0) return false;
-        if (x.indexOf(`${artifact}_sjs`) === 0) return false;
-        return x.indexOf(`${artifact}_`) === 0;
+        if (x.startsWith(`${artifact}_native`)) return false;
+        if (x.startsWith(`${artifact}_sjs`)) return false;
+        return x.startsWith(`${artifact}_`);
       });
     const artifactSubdirs = parseSubdirs(indexContent);
     let searchSubdirs = artifactSubdirs;
     if (
       scalaVersion &&
-      artifactSubdirs.indexOf(`${artifact}_${scalaVersion}`) !== -1
+      artifactSubdirs.includes(`${artifact}_${scalaVersion}`)
     ) {
       searchSubdirs = [`${artifact}_${scalaVersion}`];
     }
@@ -66,10 +66,9 @@ async function resolvePluginReleases(
     const releases: string[] = [];
     const scalaVersionItems = parse(indexContent);
     const scalaVersions = scalaVersionItems.map(x => x.replace(/^scala_/, ''));
-    const searchVersions =
-      scalaVersions.indexOf(scalaVersion) === -1
-        ? scalaVersions
-        : [scalaVersion];
+    const searchVersions = !scalaVersions.includes(scalaVersion)
+      ? scalaVersions
+      : [scalaVersion];
     for (const searchVersion of searchVersions) {
       const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
       const subRootContent = await downloadHttpProtocol(

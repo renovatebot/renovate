@@ -2,6 +2,7 @@ import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult } from '../common';
+import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
@@ -18,7 +19,9 @@ export async function getPkgReleases(
   try {
     let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
     do {
-      const pkgVersionsListRaw = await got(pkgUrlList, { hostType: 'nuget' });
+      const pkgVersionsListRaw = await got(pkgUrlList, {
+        hostType: DATASOURCE_NUGET,
+      });
       if (pkgVersionsListRaw.statusCode !== 200) {
         logger.debug(
           { dependency: pkgName, pkgVersionsListRaw },

@@ -3,6 +3,7 @@ import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
 
 import * as cargo from './cargo';
+import * as cdnjs from './cdnjs';
 import * as dart from './dart';
 import * as docker from './docker';
 import * as hex from './hex';
@@ -37,6 +38,7 @@ export * from './common';
 
 const datasources: Record<string, Datasource> = {
   cargo,
+  cdnjs,
   dart,
   docker,
   helm,
@@ -124,7 +126,7 @@ export async function getPkgReleases(
 }
 
 export function supportsDigests(config: DigestConfig): boolean {
-  return !!datasources[config.datasource].getDigest;
+  return 'getDigest' in datasources[config.datasource];
 }
 
 export function getDigest(

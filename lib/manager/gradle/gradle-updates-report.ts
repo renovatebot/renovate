@@ -32,6 +32,7 @@ async function createRenovateGradlePlugin(localDir: string): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
+import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import java.util.concurrent.ConcurrentLinkedQueue
 
 def output = new ConcurrentLinkedQueue<>();
@@ -41,12 +42,12 @@ allprojects {
     doLast {
         def project = ['project': project.name]
         output << project
-        def repos = (repositories + settings.pluginManagement.repositories)
+        def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
+           .findAll { it instanceof UrlArtifactRepository && it.url.scheme ==~ /https?/ }
            .collect { "$it.url" }
-           .findAll { !it.startsWith('file:') }
            .unique()
         project.repositories = repos
-        def deps = (buildscript.configurations + configurations)
+        def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
           .collect { it.dependencies + it.dependencyConstraints }
           .flatten()
           .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
@@ -117,7 +118,7 @@ function combineReposOnDuplicatedDependencies(
     accumulator.push(currentValue);
   } else {
     const nonExistingRepos = currentValue.repos.filter(
-      repo => existingDependency.repos.indexOf(repo) === -1
+      repo => !existingDependency.repos.includes(repo)
     );
     existingDependency.repos.push(...nonExistingRepos);
   }

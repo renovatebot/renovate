@@ -8,6 +8,11 @@ import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { platform } from '../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
+import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 
 export async function updateArtifacts({
   packageFileName,
@@ -40,7 +45,7 @@ export async function updateArtifacts({
     }
     const authJson = {};
     let credentials = hostRules.find({
-      hostType: 'github',
+      hostType: PLATFORM_TYPE_GITHUB,
       url: 'https://api.github.com/',
     });
     // istanbul ignore if
@@ -50,7 +55,7 @@ export async function updateArtifacts({
       };
     }
     credentials = hostRules.find({
-      hostType: 'gitlab',
+      hostType: PLATFORM_TYPE_GITLAB,
       url: 'https://gitlab.com/api/v4/',
     });
     // istanbul ignore if
@@ -62,11 +67,11 @@ export async function updateArtifacts({
     try {
       // istanbul ignore else
       if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls as string[]) {
+        for (const regUrl of config.registryUrls) {
           if (regUrl) {
             const { host } = URL.parse(regUrl);
             const hostRule = hostRules.find({
-              hostType: 'packagist',
+              hostType: DATASOURCE_PACKAGIST,
               url: regUrl,
             });
             // istanbul ignore else
@@ -96,6 +101,7 @@ export async function updateArtifacts({
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
     const execOptions: ExecOptions = {
+      cwd,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
       },

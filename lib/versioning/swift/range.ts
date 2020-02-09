@@ -8,25 +8,25 @@ const toRange = /^\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
 
 function toSemverRange(range: string): string {
   if (fromParam.test(range)) {
-    const [, version] = range.match(fromParam);
+    const [, version] = fromParam.exec(range);
     if (semver.valid(version)) {
       const nextMajor = `${semver.major(version) + 1}.0.0`;
       return `>=${version} <${nextMajor}`;
     }
   } else if (fromRange.test(range)) {
-    const [, version] = range.match(fromRange);
+    const [, version] = fromRange.exec(range);
     if (semver.valid(version)) {
       return `>=${version}`;
     }
   } else if (binaryRange.test(range)) {
-    const [, fromVersion, op, toVersion] = range.match(binaryRange);
+    const [, fromVersion, op, toVersion] = binaryRange.exec(range);
     if (semver.valid(fromVersion) && semver.valid(toVersion)) {
       return op === '..<'
         ? `>=${fromVersion} <${toVersion}`
         : `>=${fromVersion} <=${toVersion}`;
     }
   } else if (toRange.test(range)) {
-    const [, op, toVersion] = range.match(toRange);
+    const [, op, toVersion] = toRange.exec(range);
     if (semver.valid(toVersion)) {
       return op === '..<' ? `<${toVersion}` : `<=${toVersion}`;
     }
@@ -39,15 +39,15 @@ function getNewValue({ currentValue, toVersion }: NewValueConfig): string {
     return toVersion.replace(/^v/, '');
   }
   if (fromRange.test(currentValue)) {
-    const [, version] = currentValue.match(fromRange);
+    const [, version] = fromRange.exec(currentValue);
     return currentValue.replace(version, toVersion);
   }
   if (binaryRange.test(currentValue)) {
-    const [, , , version] = currentValue.match(binaryRange);
+    const [, , , version] = binaryRange.exec(currentValue);
     return currentValue.replace(version, toVersion);
   }
   if (toRange.test(currentValue)) {
-    const [, , version] = currentValue.match(toRange);
+    const [, , version] = toRange.exec(currentValue);
     return currentValue.replace(version, toVersion);
   }
   return currentValue;

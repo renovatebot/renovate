@@ -55,7 +55,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors[0].message.includes('ansible')).toBe(true);
     });
     it('included managers of the wrong type', async () => {
       const config = {

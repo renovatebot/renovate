@@ -23,6 +23,7 @@ import {
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -48,7 +49,7 @@ interface Config {
 let config: Config = {} as any;
 
 const defaults: any = {
-  hostType: 'azure',
+  hostType: PLATFORM_TYPE_AZURE,
 };
 
 export function initPlatform({
@@ -80,7 +81,7 @@ export async function getRepos(): Promise<string[]> {
   logger.info('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  return repos.map(repo => `${repo.project!.name}/${repo.name}`);
+  return repos.map(repo => `${repo.project.name}/${repo.name}`);
 }
 
 async function getBranchCommit(fullBranchName: string): Promise<string> {
@@ -89,7 +90,7 @@ async function getBranchCommit(fullBranchName: string): Promise<string> {
     config.repoId,
     azureHelper.getBranchNameWithoutRefsheadsPrefix(fullBranchName)!
   );
-  return commit.commit!.commitId;
+  return commit.commit.commitId;
 }
 
 export async function initRepo({
@@ -105,16 +106,16 @@ export async function initRepo({
   const names = azureHelper.getProjectAndRepo(repository);
   const repo = repos.filter(
     c =>
-      c.name!.toLowerCase() === names.repo.toLowerCase() &&
-      c.project!.name!.toLowerCase() === names.project.toLowerCase()
+      c.name.toLowerCase() === names.repo.toLowerCase() &&
+      c.project.name.toLowerCase() === names.project.toLowerCase()
   )[0];
   logger.debug({ repositoryDetails: repo }, 'Repository details');
-  config.repoId = repo.id!;
-  config.project = repo.project!.name;
+  config.repoId = repo.id;
+  config.project = repo.project.name;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
-  config.defaultBranch = repo.defaultBranch!.replace('refs/heads/', '');
+  config.defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.baseBranch = config.defaultBranch;
   logger.debug(`${repository} default branch = ${config.defaultBranch}`);
   config.baseCommitSHA = await getBranchCommit(config.baseBranch);
@@ -453,16 +454,17 @@ export async function createPr({
       pr.pullRequestId!
     );
   }
-  // TODO: fixme
-  await labels.forEach(async label => {
-    await azureApiGit.createPullRequestLabel(
-      {
-        name: label,
-      },
-      config.repoId,
-      pr.pullRequestId!
-    );
-  });
+  await Promise.all(
+    labels.map(label =>
+      azureApiGit.createPullRequestLabel(
+        {
+          name: label,
+        },
+        config.repoId,
+        pr.pullRequestId!
+      )
+    )
+  );
   pr.branchName = branchName;
   return azureHelper.getRenovatePRFormat(pr);
 }
@@ -512,7 +514,7 @@ export async function ensureCommentRemoval(
     let threadIdFound = null;
 
     threads.forEach(thread => {
-      if (thread.comments![0].content!.startsWith(`### ${topic}\n\n`)) {
+      if (thread.comments[0].content.startsWith(`### ${topic}\n\n`)) {
         threadIdFound = thread.id;
       }
     });
@@ -544,7 +546,7 @@ export function setBranchStatus({
 
 export async function mergePr(pr: number): Promise<void> {
   logger.info(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  await null;
+  await Promise.resolve();
 }
 
 export function getPrBody(input: string): string {
@@ -610,14 +612,14 @@ export async function addReviewers(
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter(c => c.id === config.repoId)[0];
-  const teams = await azureApiCore.getTeams(repo!.project!.id!);
+  const teams = await azureApiCore.getTeams(repo.project.id);
   const members = await Promise.all(
     teams.map(
       async t =>
         /* eslint-disable no-return-await */
         await azureApiCore.getTeamMembersWithExtendedProperties(
-          repo!.project!.id!,
-          t.id!
+          repo.project.id,
+          t.id
         )
     )
   );
@@ -627,11 +629,11 @@ export async function addReviewers(
     listMembers.forEach(m => {
       reviewers.forEach(r => {
         if (
-          r.toLowerCase() === m.identity!.displayName!.toLowerCase() ||
-          r.toLowerCase() === m.identity!.uniqueName!.toLowerCase()
+          r.toLowerCase() === m.identity.displayName.toLowerCase() ||
+          r.toLowerCase() === m.identity.uniqueName.toLowerCase()
         ) {
-          if (ids.filter(c => c.id === m.identity!.id).length === 0) {
-            ids.push({ id: m.identity!.id, name: r });
+          if (ids.filter(c => c.id === m.identity.id).length === 0) {
+            ids.push({ id: m.identity.id, name: r });
           }
         }
       });
@@ -640,7 +642,7 @@ export async function addReviewers(
 
   teams.forEach(t => {
     reviewers.forEach(r => {
-      if (r.toLowerCase() === t.name!.toLowerCase()) {
+      if (r.toLowerCase() === t.name.toLowerCase()) {
         if (ids.filter(c => c.id === t.id).length === 0) {
           ids.push({ id: t.id, name: r });
         }
@@ -678,8 +680,8 @@ export function getPrFiles(prNo: number): string[] {
   return [];
 }
 
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
-  return [];
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
 }
 
 export function cleanRepo(): void {
