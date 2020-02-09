@@ -8,6 +8,7 @@ import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';
 import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
+import { setUtilConfig } from '../../util';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -47,6 +48,7 @@ describe('manager/gradle', () => {
     platform.getFile.mockResolvedValue('some content');
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setUtilConfig(config);
   });
 
   describe('extractPackageFile', () => {
@@ -192,6 +194,7 @@ describe('manager/gradle', () => {
     });
 
     it('should use docker if required', async () => {
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
@@ -200,11 +203,11 @@ describe('manager/gradle', () => {
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
-      expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use docker even if gradlew is available', async () => {
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
@@ -214,7 +217,6 @@ describe('manager/gradle', () => {
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
-      expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
       expect(execSnapshots).toMatchSnapshot();
     });
   });
