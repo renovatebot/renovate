@@ -16,7 +16,7 @@ export function getRollbackUpdate(
   const { packageFile, versionScheme, depName, currentValue } = config;
   const version = versioning.get(versionScheme);
   // istanbul ignore if
-  if (!version.isLessThanRange) {
+  if (!('isLessThanRange' in version)) {
     logger.info(
       { versionScheme },
       'Current version scheme does not support isLessThanRange()'

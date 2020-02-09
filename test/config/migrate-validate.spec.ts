@@ -1,10 +1,10 @@
 import { migrateAndValidate } from '../../lib/config/migrate-validate';
-import { RenovateConfig } from '../../lib/config';
+import { getConfig, RenovateConfig } from '../util';
 
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('./config/_fixtures') };
+  config = getConfig();
 });
 
 describe('config/migrate-validate', () => {

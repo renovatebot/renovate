@@ -7,6 +7,7 @@ import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 function getPreCommands(): string[] | null {
   const credentials = find({

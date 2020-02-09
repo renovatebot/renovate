@@ -38,6 +38,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -100,7 +101,7 @@ type PrList = Record<number, Pr>;
 let config: LocalRepoConfig = {} as any;
 
 const defaults = {
-  hostType: 'github',
+  hostType: PLATFORM_TYPE_GITHUB,
   endpoint: 'https://api.github.com/',
 };
 
@@ -248,7 +249,7 @@ export async function initRepo({
     api.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: 'github',
+    hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
   config.isGhe = !defaults.endpoint.startsWith('https://api.github.com');
@@ -396,7 +397,7 @@ export async function initRepo({
       logger.info({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
     }
-    if (existingRepos.includes(config.repository!)) {
+    if (existingRepos.includes(config.repository)) {
       logger.info(
         { repository_fork: config.repository },
         'Found existing fork'
@@ -449,7 +450,7 @@ export async function initRepo({
     logger.debug('Using personal access token for git init');
     parsedEndpoint.auth = opts.token;
   }
-  parsedEndpoint.host = parsedEndpoint.host!.replace(
+  parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com'
   );
@@ -963,7 +964,7 @@ function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -1002,9 +1003,9 @@ export async function getPrList(): Promise<Pr[]> {
           pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
       })
     );
-    logger.debug(`Retrieved ${config.prList!.length} Pull Requests`);
+    logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
-  return config.prList!;
+  return config.prList;
 }
 
 export async function findPr({
@@ -1632,7 +1633,7 @@ export async function createPr({
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository!.split('/')[0]}:${branchName}`;
+  const head = `${config.repository.split('/')[0]}:${branchName}`;
   const options: any = {
     body: {
       title,

@@ -12,18 +12,16 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {
       const lineIdx = lineNumber - 1;
       const line = lines[lineIdx];
-      const pluginsSection = line.match(
-        /^(?<pluginsIndent>\s*)(-?\s*)plugins:/
-      );
+      const pluginsSection = /^(?<pluginsIndent>\s*)(-?\s*)plugins:/.exec(line);
       if (pluginsSection) {
         logger.trace(`Matched plugins on line ${lineNumber}`);
         isPluginsSection = true;
         pluginsIndent = pluginsSection.groups.pluginsIndent;
       } else if (isPluginsSection) {
         logger.debug(`serviceImageLine: "${line}"`);
-        const { currentIndent } = line.match(/^(?<currentIndent>\s*)/).groups;
-        const depLineMatch = line.match(
-          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/
+        const { currentIndent } = /^(?<currentIndent>\s*)/.exec(line).groups;
+        const depLineMatch = /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/.exec(
+          line
         );
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;

@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig, Upgrade } from '../common';
 
 export function updateAtPosition(
   fileContent: string,
@@ -24,10 +24,10 @@ export function updateAtPosition(
   return null;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   const offset = fileContent.indexOf('<');
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);

@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DATASOURCE_TERRAFORM } from '../../constants/data-binary-source';
 
 interface RegistryRepository {
   registry: string;
@@ -22,7 +23,7 @@ function getRegistryRepository(
   } else {
     registry = 'registry.terraform.io';
   }
-  if (!registry.match('^https?://')) {
+  if (!/^https?:\/\//.test(registry)) {
     registry = `https://${registry}`;
   }
   const repository = split.join('/');
@@ -70,7 +71,7 @@ export async function getPkgReleases({
     const res: TerraformRelease = (
       await got(pkgUrl, {
         json: true,
-        hostType: 'terraform',
+        hostType: DATASOURCE_TERRAFORM,
       })
     ).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;

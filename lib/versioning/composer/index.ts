@@ -11,8 +11,12 @@ function padZeroes(input: string): string {
   return sections.join('.');
 }
 
+function removeLeadingV(input: string): string {
+  return input.replace(/^v/i, '');
+}
+
 function composer2npm(input: string): string {
-  const cleanInput = input.replace(/^v/, '');
+  const cleanInput = removeLeadingV(input);
   if (npm.isVersion(cleanInput)) {
     return cleanInput;
   }
@@ -83,7 +87,7 @@ function getNewValue({
   } else if (
     npm.isVersion(padZeroes(toVersion)) &&
     npm.isValid(currentValue) &&
-    composer2npm(currentValue) === currentValue
+    composer2npm(currentValue) === removeLeadingV(currentValue)
   ) {
     newValue = npm.getNewValue({
       currentValue,
@@ -91,17 +95,17 @@ function getNewValue({
       fromVersion,
       toVersion: padZeroes(toVersion),
     });
-  } else if (currentValue.match(/^~(0\.[1-9][0-9]*)$/)) {
+  } else if (/^~(0\.[1-9][0-9]*)$/.test(currentValue)) {
     // handle ~0.4 case first
     if (toMajor === 0) {
       newValue = `~0.${toMinor}`;
     } else {
       newValue = `~${toMajor}.0`;
     }
-  } else if (currentValue.match(/^~([0-9]*)$/)) {
+  } else if (/^~([0-9]*)$/.test(currentValue)) {
     // handle ~4 case
     newValue = `~${toMajor}`;
-  } else if (currentValue.match(/^~([0-9]*(?:\.[0-9]*)?)$/)) {
+  } else if (/^~([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
     // handle ~4.1 case
     if (fromVersion && toMajor > getMajor(fromVersion)) {
       newValue = `~${toMajor}.0`;

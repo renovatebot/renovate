@@ -11,7 +11,7 @@ describe('platform/comments', () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
   async function mockedGet(path: string) {
-    const uri = URL.parse(path).pathname!;
+    const uri = URL.parse(path).pathname;
     let body = (responses as any)[uri];
     if (!body) {
       throw new Error('Missing request');

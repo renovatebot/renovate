@@ -1,13 +1,14 @@
 import _got from '../../../lib/util/got';
 import { api } from '../../../lib/platform/gitlab/gl-got-wrapper';
 import * as hostRules from '../../../lib/util/host-rules';
+import { PLATFORM_TYPE_GITLAB } from '../../../lib/constants/platforms';
 
 jest.mock('../../../lib/util/got');
 
 const got: any = _got;
 
 hostRules.add({
-  hostType: 'gitlab',
+  hostType: PLATFORM_TYPE_GITLAB,
   token: 'abc123',
 });
 
