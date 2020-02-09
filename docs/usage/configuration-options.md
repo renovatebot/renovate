@@ -178,6 +178,20 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 
 ## cargo
 
+## cdnurl
+
+**Important**: This manager isn't aware of subresource integrity (SRI) hashes. It will search/replace any matching url it finds, without consideration for things such as script integrity hashes.
+
+To enable this manager, add the matching files to `cdnurl.fileMatch`. For example:
+
+```json
+{
+  "cdnurl": {
+    "fileMatch": ["\\.html?$"]
+  }
+}
+```
+
 ## circleci
 
 ## commitBody
@@ -469,6 +483,21 @@ Note: you shouldn't usually need to configure this unless you really care about 
 
 Renovate supports updating Helm Chart references within `requirements.yaml` files. If your Helm charts make use of Aliases then you will need to configure an `aliases` object in your config to tell Renovate where to look for them.
 
+## helm-values
+
+Renovate supports updating of Docker dependencies within Helm Chart `values.yaml` files or other YAML
+files that use the same format (via `fileMatch` configuration). Updates are performed if the files
+follow the conventional format used in most of the `stable` Helm charts:
+
+```yaml
+image:
+  repository: 'some-docker/dependency'
+  tag: v1.0.0
+  registry: registry.example.com # optional key, will default to "docker.io"
+```
+
+## helmfile
+
 ## homebrew
 
 ## hostRules
@@ -687,7 +716,7 @@ By default, Renovate will use group names in Pull Request titles only when the P
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock` and `composer.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock` and `poetry.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -1006,10 +1035,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-    "groupName" "Vue monorepo packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
+    }
+  ]
 }
 ```
 
@@ -1017,10 +1048,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
-    "groupName" "All renovate packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "groupName": "All renovate packages"
+    }
+  ]
 }
 ```
 
@@ -1079,6 +1112,33 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
 - `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+
+## postUpgradeTasks
+
+Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created. The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+
+This is only available on Renovate instances that have a `trustLevel` of 'high'. Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed. If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["tslint --fix"],
+    "fileFilters": ["yarn.lock", "**/*.js"]
+  }
+}
+```
+
+The `postUpdateTasks` configuration consists of two fields:
+
+### commands
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit it made
+
+### fileFilters
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
 
 ## prBodyColumns
 

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import fs from 'fs-extra';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
@@ -13,9 +14,10 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
   newPackageFileContent,
+  config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
-  if (!is.nonEmptyArray(updatedDeps)) {
+  if (!is.nonEmptyArray(updatedDeps) && !config.isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');
     return null;
   }
@@ -36,9 +38,14 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
-    for (let i = 0; i < updatedDeps.length; i += 1) {
-      const dep = updatedDeps[i];
-      cmd.push(`poetry update --lock --no-interaction ${dep}`);
+    if (config.isLockFileMaintenance) {
+      await fs.remove(lockFileName);
+      cmd.push('poetry update --lock --no-interaction');
+    } else {
+      for (let i = 0; i < updatedDeps.length; i += 1) {
+        const dep = updatedDeps[i];
+        cmd.push(`poetry update --lock --no-interaction ${dep}`);
+      }
     }
     const execOptions: ExecOptions = {
       subDirectory,

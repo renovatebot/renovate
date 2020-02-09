@@ -1,7 +1,7 @@
 import { fromStream } from 'hasha';
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { regEx } from '../../util/regex';
 
 function updateWithNewVersion(
@@ -19,7 +19,7 @@ function updateWithNewVersion(
 }
 
 function extractUrl(flattened: string): string[] | null {
-  const urlMatch = flattened.match(/url="(.*?)"/);
+  const urlMatch = /url="(.*?)"/.exec(flattened);
   if (!urlMatch) {
     logger.debug('Cannot locate urls in new definition');
     return null;
@@ -29,7 +29,7 @@ function extractUrl(flattened: string): string[] | null {
 
 function extractUrls(content: string): string[] | null {
   const flattened = content.replace(/\n/g, '').replace(/\s/g, '');
-  const urlsMatch = flattened.match(/urls?=\[.*?\]/);
+  const urlsMatch = /urls?=\[.*?\]/.exec(flattened);
   if (!urlsMatch) {
     return extractUrl(flattened);
   }
@@ -81,10 +81,10 @@ function setNewHash(content: string, hash: string): string {
   return content.replace(/(sha256\s*=\s*)"[^"]+"/, `$1"${hash}"`);
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
   try {
     logger.debug(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
@@ -158,7 +158,7 @@ export async function updateDependency(
     }
     const existingDef = regEx(existingRegExStr);
     // istanbul ignore if
-    if (!fileContent.match(existingDef)) {
+    if (!existingDef.test(fileContent)) {
       logger.info('Cannot match existing string');
       return null;
     }

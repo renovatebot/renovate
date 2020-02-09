@@ -14,7 +14,7 @@ async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
     .filter(pr => pr.state === 'open')
     .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
-    .filter(pr => pr.title && pr.title.match(new RegExp('renovate', 'i')));
+    .filter(pr => new RegExp('renovate', 'i').test(pr.title));
 }
 
 async function getRenovateFiles(prNo: number): Promise<string[]> {

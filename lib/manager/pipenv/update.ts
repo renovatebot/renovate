@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
 // Return true if the match string is found at index in content
 function matchAt(content: string, index: number, match: string): boolean {
@@ -23,10 +23,10 @@ function replaceAt(
   );
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const { depType, depName, newValue, managerData = {} } = upgrade;
     const { nestedVersion } = managerData;

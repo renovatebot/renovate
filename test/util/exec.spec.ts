@@ -371,7 +371,7 @@ describe(`Child process execution wrapper`, () => {
       return undefined;
     });
 
-    await exec(cmd as string, inOpts as ExecOptions);
+    await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);

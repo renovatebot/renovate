@@ -28,13 +28,15 @@ export async function processRepo(
       const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
       const checked = issue.body.match(new RegExp(checkMatch, 'g'));
       if (checked && checked.length) {
+        const re = new RegExp(checkMatch);
         checked.forEach(check => {
-          const [, type, branchName] = check.match(new RegExp(checkMatch));
+          const [, type, branchName] = re.exec(check);
           config.masterIssueChecks[branchName] = type;
         });
       }
-      const checkAllMatch = ' - \\[x\\] <!-- rebase-all-open-prs -->';
-      const checkedRebaseAll = issue.body.match(new RegExp(checkAllMatch));
+      const checkedRebaseAll = issue.body.includes(
+        ' - [x] <!-- rebase-all-open-prs -->'
+      );
       if (checkedRebaseAll) {
         config.masterIssueRebaseAllOpen = true;
         /* eslint-enable no-param-reassign */

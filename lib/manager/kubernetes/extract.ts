@@ -8,13 +8,13 @@ export function extractPackageFile(content: string): PackageFile | null {
   let lineNumber = 0;
 
   const isKubernetesManifest =
-    content.match(/\s*apiVersion\s*:/) && content.match(/\s*kind\s*:/);
+    /\s*apiVersion\s*:/.test(content) && /\s*kind\s*:/.test(content);
   if (!isKubernetesManifest) {
     return null;
   }
 
   for (const line of content.split('\n')) {
-    const match = line.match(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+    const match = /^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom);
