@@ -75,7 +75,7 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: circleci/openjdk:8u242-node@sha256:e4b15a9635b8535b7eb9a91ce8c309ee71fb2bb66854fe03046ae75a247dfa0e
+      - image: amd64/node:10.19.0@sha256:06e80d0a45ea264fa69296cce992bc6f9c6956ff18f314c6211ba5b0db34e468
     steps:
       - test
   release:

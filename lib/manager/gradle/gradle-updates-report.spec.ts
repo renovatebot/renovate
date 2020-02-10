@@ -43,7 +43,6 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
       `generates a report for Gradle version %i`,
       async (gradleVersion: number) => {
         const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];
-
         if (
           javaVersion < supportedJavaVersions.min ||
           javaVersion > supportedJavaVersions.max
