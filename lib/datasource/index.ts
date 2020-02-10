@@ -1,30 +1,8 @@
+import fs from 'fs';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
 
-import * as cargo from './cargo';
-import * as cdnjs from './cdnjs';
-import * as dart from './dart';
-import * as docker from './docker';
-import * as hex from './hex';
-import * as github from './github';
-import * as gitlab from './gitlab';
-import * as gitTags from './git-tags';
-import * as gitSubmodules from './git-submodules';
-import * as go from './go';
-import * as gradleVersion from './gradle-version';
-import * as helm from './helm';
-import * as maven from './maven';
-import * as npm from './npm';
-import * as nuget from './nuget';
-import * as orb from './orb';
-import * as packagist from './packagist';
-import * as pypi from './pypi';
-import * as rubygems from './rubygems';
-import * as rubyVersion from './ruby-version';
-import * as sbt from './sbt';
-import * as terraform from './terraform';
-import * as terraformProvider from './terraform-provider';
 import {
   Datasource,
   PkgReleaseConfig,
@@ -36,31 +14,37 @@ import { VERSION_SCHEME_SEMVER } from '../constants/version-schemes';
 
 export * from './common';
 
-const datasources: Record<string, Datasource> = {
-  cargo,
-  cdnjs,
-  dart,
-  docker,
-  helm,
-  hex,
-  github,
-  gitlab,
-  gitTags,
-  gitSubmodules,
-  go,
-  gradleVersion,
-  maven,
-  npm,
-  nuget,
-  orb,
-  packagist,
-  pypi,
-  rubygems,
-  rubyVersion,
-  sbt,
-  terraform,
-  terraformProvider,
-};
+const datasources: Record<string, Datasource> = {};
+
+function isValidDatasourceModule(
+  datasourceName: string,
+  module: unknown
+): module is Datasource {
+  return !!module;
+}
+
+function loadDatasources(): void {
+  const datasourceDirs = fs
+    .readdirSync(__dirname, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name)
+    .sort();
+  for (const datasourceName of datasourceDirs) {
+    let module = null;
+    try {
+      module = require(`./${datasourceName}`); // eslint-disable-line
+    } catch (err) /* istanbul ignore next */ {
+      logger.fatal({ err }, `Can not load datasource "${datasourceName}".`);
+      process.exit(1);
+    }
+
+    if (isValidDatasourceModule(datasourceName, module)) {
+      datasources[datasourceName] = module;
+    }
+  }
+}
+
+loadDatasources();
 
 const cacheNamespace = 'datasource-releases';
 
