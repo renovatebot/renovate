@@ -14,3 +14,4 @@ renovate-0.0.0-semantic-release.tgz
 .eslintcache
 junit.xml
 /test-results
+renovate-schema.json
