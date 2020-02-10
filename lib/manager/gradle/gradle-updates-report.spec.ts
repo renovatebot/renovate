@@ -27,14 +27,11 @@ function parseJavaVersion(javaVersionOutput) {
 describe('lib/manager/gradle/gradle-updates-report', () => {
   let workingDir: DirectoryResult;
   let javaVersion: number;
-  const skipJava = process.env.NO_JAVA === 'true';
 
   beforeAll(async () => {
-    if (!skipJava) {
-      javaVersion = await exec('java -version').then(({ stderr }) =>
-        parseJavaVersion(stderr)
-      );
-    }
+    javaVersion = await exec('java -version').then(({ stderr }) =>
+      parseJavaVersion(stderr)
+    );
   });
 
   beforeEach(async () => {
@@ -42,13 +39,12 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
   });
 
   describe('createRenovateGradlePlugin', () => {
-    for (const gradleVersion of [5, 6]) {
-      const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];
-      // building functions and variable access are intentional
-      // eslint-disable-next-line no-loop-func
-      it(`generates a report for Gradle versiradlon ${gradleVersion}`, async () => {
+    it.each([[5], [6]])(
+      `generates a report for Gradle version %i`,
+      async (gradleVersion: number) => {
+        const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];
+
         if (
-          skipJava ||
           javaVersion < supportedJavaVersions.min ||
           javaVersion > supportedJavaVersions.max
         ) {
@@ -69,7 +65,8 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
             `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`
           )
         ).toMatchSnapshot();
-      }, 120000);
-    }
+      },
+      120000
+    );
   });
 });
