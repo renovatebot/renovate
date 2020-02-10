@@ -231,7 +231,7 @@ describe('manager/gradle', () => {
       );
       // prettier-ignore
       const upgrade = {
-        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8'
+        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8',
       };
       const buildGradleContentUpdated = manager.updateDependency({
         fileContent: buildGradleContent,
