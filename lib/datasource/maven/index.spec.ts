@@ -5,8 +5,7 @@ import * as datasource from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { VERSION_SCHEME_LOOSE } from '../../constants/version-schemes';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
-
-const hostRules = require('../../util/host-rules');
+import * as hostRules from '../../util/host-rules';
 
 const MYSQL_VERSIONS = [
   '6.0.5',
@@ -106,7 +105,7 @@ describe('datasource/maven', () => {
         lookupName: 'unknown:unknown',
         registryUrls: [
           's3://somewhere.s3.aws.amazon.com',
-          'file://lib/manger/maven/__fixtures__/repo1.maven.org/maven2/',
+          'file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/',
         ],
       });
       expect(releases).toBeNull();
@@ -117,8 +116,8 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'org.hamcrest:hamcrest-core',
         registryUrls: [
-          'file://lib/manger/maven/__fixtures__/repo1.maven.org/maven2/',
-          'file://lib/manger/maven/__fixtures__/custom_maven_repo/maven2/',
+          'file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/',
+          'file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/',
           's3://somewhere.s3.aws.amazon.com',
         ],
       });
@@ -140,8 +139,8 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
-          'file://lib/manger/maven/__fixtures__/repo1.maven.org/maven2/',
-          'file://lib/manger/maven/__fixtures__/custom_maven_repo/maven2/',
+          'file://lib/datasource/maven/__fixtures__/repo1.maven.org/maven2/',
+          'file://lib/datasource/maven/__fixtures__/custom_maven_repo/maven2/',
         ],
       });
       expect(releases.releases).toEqual(
@@ -274,7 +273,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         lookupName: 'io.realm:realm-gradle-plugin',
-        registryUrls: ['file://lib/manger/maven/__fixtures__/jcenter/'],
+        registryUrls: ['file://lib/datasource/maven/__fixtures__/jcenter/'],
       });
       expect(releases.sourceUrl).toEqual('https://github.com/realm/realm-java');
     });
