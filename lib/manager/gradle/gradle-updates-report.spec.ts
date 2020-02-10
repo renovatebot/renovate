@@ -27,6 +27,7 @@ function parseJavaVersion(javaVersionOutput) {
 describe('lib/manager/gradle/gradle-updates-report', () => {
   let workingDir: DirectoryResult;
   let javaVersion: number;
+  const skipJava = process.env.SKIP_JAVA_TESTS === 'true';
 
   beforeAll(async () => {
     javaVersion = await exec('java -version').then(({ stderr }) =>
@@ -39,7 +40,7 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
   });
 
   describe('createRenovateGradlePlugin', () => {
-    it.each([[5], [6]])(
+    (skipJava ? it.skip : it).each([[5], [6]])(
       `generates a report for Gradle version %i`,
       async (gradleVersion: number) => {
         const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];

@@ -55,7 +55,7 @@ commands:
           environment:
             JEST_JUNIT_OUTPUT_DIR: 'test-results/jest'
             JEST_JUNIT_OUTPUT_NAME: 'results.xml'
-            NO_JAVA: 'true'
+            SKIP_JAVA_TESTS: 'true'
 
       - store_test_results:
           path: test-results
