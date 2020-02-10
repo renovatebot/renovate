@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -61,7 +60,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             skipReason,
           };
           if (repo) {
-            dep.datasource = DATASOURCE_GITHUB;
+            dep.datasource = 'github';
             dep.lookupName = repo;
           }
           deps.push(dep);

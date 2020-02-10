@@ -5,7 +5,6 @@ import * as github from '../../lib/datasource/github';
 import _got from '../../lib/util/got';
 import * as _hostRules from '../../lib/util/host-rules';
 import { PLATFORM_FAILURE } from '../../lib/constants/error-messages';
-import { DATASOURCE_GITHUB } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
@@ -130,7 +129,7 @@ describe('datasource/github', () => {
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
-        datasource: DATASOURCE_GITHUB,
+        datasource: 'github',
         lookupName: 'some/dep',
         lookupType: 'releases',
       });
@@ -144,7 +143,7 @@ describe('datasource/github', () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
-        datasource: DATASOURCE_GITHUB,
+        datasource: 'github',
         lookupName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();

@@ -2,7 +2,6 @@ import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
 import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
-import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
 export function extractPackageFile(
   content: string,
@@ -38,7 +37,7 @@ export function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_NUGET,
+        datasource: 'nuget',
       };
       if (!isVersion(currentValue)) {
         dep.skipReason = 'not-version';

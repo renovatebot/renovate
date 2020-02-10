@@ -3,7 +3,6 @@ import fs from 'fs';
 import * as datasource from '../../lib/datasource';
 import { DATASOURCE_FAILURE } from '../../lib/constants/error-messages';
 import { VERSION_SCHEME_LOOSE } from '../../lib/constants/version-schemes';
-import { DATASOURCE_MAVEN } from '../../lib/constants/data-binary-source';
 
 const hostRules = require('../../lib/util/host-rules');
 
@@ -29,13 +28,13 @@ const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
 
 const config = {
   versionScheme: VERSION_SCHEME_LOOSE,
-  datasource: DATASOURCE_MAVEN,
+  datasource: 'maven',
 };
 
 describe('datasource/maven', () => {
   beforeEach(() => {
     hostRules.add({
-      hostType: DATASOURCE_MAVEN,
+      hostType: 'maven',
       hostName: 'frontend_for_private_s3_repository',
       username: 'username',
       password: 'password',

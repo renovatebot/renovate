@@ -4,7 +4,6 @@ import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 import { BinarySource } from '../../util/exec/common';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
@@ -140,7 +139,7 @@ export async function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_PYPI,
+        datasource: 'pypi',
       };
       return dep;
     })

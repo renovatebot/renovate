@@ -1,7 +1,6 @@
 import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
-import { DATASOURCE_PYPI } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/util/got');
 
@@ -42,7 +41,7 @@ describe('datasource/pypi', () => {
       got.mockReturnValueOnce({});
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           lookupName: 'something',
         })
       ).toBeNull();
@@ -53,7 +52,7 @@ describe('datasource/pypi', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           lookupName: 'something',
         })
       ).toBeNull();
@@ -64,7 +63,7 @@ describe('datasource/pypi', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           lookupName: 'azure-cli-monitor',
         })
       ).toMatchSnapshot();
@@ -78,7 +77,7 @@ describe('datasource/pypi', () => {
       };
       await datasource.getPkgReleases({
         ...config,
-        datasource: DATASOURCE_PYPI,
+        datasource: 'pypi',
         lookupName: 'azure-cli-monitor',
       });
       expect(got.mock.calls).toMatchSnapshot();
@@ -90,7 +89,7 @@ describe('datasource/pypi', () => {
       const pipIndexUrl = process.env.PIP_INDEX_URL;
       process.env.PIP_INDEX_URL = 'https://my.pypi.python/pypi/';
       await datasource.getPkgReleases({
-        datasource: DATASOURCE_PYPI,
+        datasource: 'pypi',
         lookupName: 'azure-cli-monitor',
       });
       expect(got.mock.calls).toMatchSnapshot();
@@ -111,7 +110,7 @@ describe('datasource/pypi', () => {
       };
       await datasource.getPkgReleases({
         ...config,
-        datasource: DATASOURCE_PYPI,
+        datasource: 'pypi',
         lookupName: 'azure-cli-monitor',
       });
       expect(got.mock.calls).toMatchSnapshot();
@@ -127,7 +126,7 @@ describe('datasource/pypi', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           lookupName: 'something',
         })
       ).toMatchSnapshot();
@@ -143,7 +142,7 @@ describe('datasource/pypi', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           lookupName: 'something',
         })
       ).toBeNull();
@@ -169,7 +168,7 @@ describe('datasource/pypi', () => {
       expect(
         await datasource.getPkgReleases({
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           lookupName: 'doit',
         })
       ).toMatchSnapshot();
@@ -185,7 +184,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           depName: 'dj-database-url',
         })
       ).toMatchSnapshot();
@@ -201,7 +200,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           depName: 'dj-database-url',
         })
       ).toMatchSnapshot();
@@ -217,7 +216,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           depName: 'image-collector',
         })
       ).toMatchSnapshot();
@@ -231,7 +230,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           depName: 'dj-database-url',
         })
       ).toBeNull();
@@ -247,7 +246,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           depName: 'dj-database-url',
         })
       ).toBeNull();
@@ -263,7 +262,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          datasource: DATASOURCE_PYPI,
+          datasource: 'pypi',
           depName: 'dj-database-url',
         })
       ).toEqual({ releases: [] });

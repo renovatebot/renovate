@@ -1,5 +1,4 @@
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
@@ -20,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = regex.exec(rest);
 
     deps.push({
-      datasource: DATASOURCE_CDNJS,
+      datasource: 'cdnjs',
       depName,
       lookupName: `${depName}/${asset}`,
       currentValue,

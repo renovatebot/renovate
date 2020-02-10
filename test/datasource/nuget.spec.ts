@@ -2,7 +2,6 @@ import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
 import * as _hostRules from '../../lib/util/host-rules';
-import { DATASOURCE_NUGET } from '../../lib/constants/data-binary-source';
 
 const hostRules: any = _hostRules;
 
@@ -60,12 +59,12 @@ const nugetIndexV3 = fs.readFileSync(
 );
 
 const configNoRegistryUrls = {
-  datasource: DATASOURCE_NUGET,
+  datasource: 'nuget',
   lookupName: 'nunit',
 };
 
 const configV3V2 = {
-  datasource: DATASOURCE_NUGET,
+  datasource: 'nuget',
   lookupName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
@@ -74,19 +73,19 @@ const configV3V2 = {
 };
 
 const configV2 = {
-  datasource: DATASOURCE_NUGET,
+  datasource: 'nuget',
   lookupName: 'nunit',
   registryUrls: ['https://www.nuget.org/api/v2/'],
 };
 
 const configV3 = {
-  datasource: DATASOURCE_NUGET,
+  datasource: 'nuget',
   lookupName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
 const configV3NotNugetOrg = {
-  datasource: DATASOURCE_NUGET,
+  datasource: 'nuget',
   lookupName: 'nunit',
   registryUrls: ['https://myprivatefeed/index.json'],
 };
@@ -102,7 +101,7 @@ describe('datasource/nuget', () => {
 
     it(`can't detect nuget feed version`, async () => {
       const config = {
-        datasource: DATASOURCE_NUGET,
+        datasource: 'nuget',
         lookupName: 'nunit',
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };

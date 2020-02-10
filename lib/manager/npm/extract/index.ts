@@ -18,10 +18,6 @@ import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { VERSION_SCHEME_NODE } from '../../../constants/version-schemes';
-import {
-  DATASOURCE_GITHUB,
-  DATASOURCE_NPM,
-} from '../../../constants/data-binary-source';
 
 export async function extractPackageFile(
   content: string,
@@ -156,14 +152,14 @@ export async function extractPackageFile(
     dep.currentValue = input.trim();
     if (depType === 'engines') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = 'github';
         dep.lookupName = 'nodejs/node';
         dep.versionScheme = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = 'npm';
         dep.commitMessageTopic = 'Yarn';
       } else if (depName === 'npm') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = 'npm';
         dep.commitMessageTopic = 'npm';
       } else {
         dep.skipReason = 'unknown-engines';
@@ -177,11 +173,11 @@ export async function extractPackageFile(
     // support for volta
     if (depType === 'volta') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = 'github';
         dep.lookupName = 'nodejs/node';
         dep.versionScheme = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = 'npm';
         dep.commitMessageTopic = 'Yarn';
       } else {
         dep.skipReason = 'unknown-volta';
@@ -211,7 +207,7 @@ export async function extractPackageFile(
       return dep;
     }
     if (isValid(dep.currentValue)) {
-      dep.datasource = DATASOURCE_NPM;
+      dep.datasource = 'npm';
       if (dep.currentValue === '*') {
         dep.skipReason = 'any-version';
       }
@@ -248,7 +244,7 @@ export async function extractPackageFile(
     if (isVersion(depRefPart)) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = 'github';
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
@@ -258,7 +254,7 @@ export async function extractPackageFile(
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
       dep.currentDigest = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = 'github';
       dep.lookupName = githubOwnerRepo;
     } else {
       dep.skipReason = 'unversioned-reference';

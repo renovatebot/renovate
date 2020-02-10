@@ -5,7 +5,6 @@ import { get } from '../../manager';
 import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -77,7 +76,7 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === existingContent &&
-        upgrade.datasource === DATASOURCE_GIT_SUBMODULES
+        upgrade.datasource === 'git-submodules'
       ) {
         updatedFileContents[packageFile] = newContent;
       }

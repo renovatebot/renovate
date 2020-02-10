@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_GO } from '../../constants/data-binary-source';
 
 function getDep(
   lineNumber: number,
@@ -30,7 +29,7 @@ function getDep(
     } else {
       dep.depNameShort = depName;
     }
-    dep.datasource = DATASOURCE_GO;
+    dep.datasource = 'go';
   }
   const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
   if (digestMatch) {

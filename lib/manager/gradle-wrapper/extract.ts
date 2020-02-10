@@ -2,7 +2,6 @@ import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
-import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
@@ -15,7 +14,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     );
     if (match) {
       const dependency: PackageDependency = {
-        datasource: DATASOURCE_GRADLE_VERSION,
+        datasource: 'gradle-version',
         depType: 'gradle-wrapper',
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),

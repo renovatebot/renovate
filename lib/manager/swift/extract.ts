@@ -1,6 +1,5 @@
 import { isValid } from '../../versioning/swift';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GIT_TAGS } from '../../constants/data-binary-source';
 
 const regExps = {
   wildcard: /^.*?/,
@@ -158,7 +157,7 @@ export function extractPackageFile(
     const depName = getDepName(lookupName);
     if (depName && currentValue && fileReplacePosition) {
       const dep: PackageDependency = {
-        datasource: DATASOURCE_GIT_TAGS,
+        datasource: 'git-tags',
         depName,
         lookupName,
         currentValue,

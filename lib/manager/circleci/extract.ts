@@ -2,7 +2,6 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
 import { VERSION_SCHEME_NPM } from '../../constants/version-schemes';
-import { DATASOURCE_ORB } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -30,7 +29,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               depName,
               currentValue,
               managerData: { lineNumber },
-              datasource: DATASOURCE_ORB,
+              datasource: 'orb',
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
               versionScheme: VERSION_SCHEME_NPM,

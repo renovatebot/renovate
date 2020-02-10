@@ -4,7 +4,6 @@ import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { isValid, isSingleVersion } from '../../versioning/pep440';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -67,7 +66,7 @@ export function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_PYPI,
+        datasource: 'pypi',
       };
       if (
         isValid(currentValue) &&

@@ -1,11 +1,6 @@
 import { logger } from '../../logger';
 import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
-import {
-  DATASOURCE_GITHUB,
-  DATASOURCE_TERRAFORM,
-  DATASOURCE_TERRAFORM_PROVIDER,
-} from '../../constants/data-binary-source';
 
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
@@ -94,7 +89,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.depName = 'github.com/' + githubRefMatch[2];
         dep.depNameShort = githubRefMatch[2];
         dep.currentValue = githubRefMatch[3];
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = 'github';
         dep.lookupName = githubRefMatch[2];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
@@ -109,7 +104,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.depName = moduleParts.join('/');
           dep.depNameShort = dep.depName;
           dep.managerData.lineNumber = dep.versionLine;
-          dep.datasource = DATASOURCE_TERRAFORM;
+          dep.datasource = 'terraform';
         }
         if (dep.managerData.lineNumber) {
           if (!isValid(dep.currentValue)) {
@@ -130,7 +125,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.depName = dep.moduleName;
       dep.depNameShort = dep.moduleName;
       dep.managerData.lineNumber = dep.versionLine;
-      dep.datasource = DATASOURCE_TERRAFORM_PROVIDER;
+      dep.datasource = 'terraform-provider';
       if (dep.managerData.lineNumber) {
         if (!isValid(dep.currentValue)) {
           dep.skipReason = 'unsupported-version';

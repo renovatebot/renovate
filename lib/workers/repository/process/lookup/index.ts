@@ -13,7 +13,6 @@ import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
 import { RenovateConfig } from '../../../../config';
 import { clone } from '../../../../util/clone';
-import { DATASOURCE_GIT_SUBMODULES } from '../../../../constants/data-binary-source';
 
 export interface LookupWarning {
   updateType: 'warning';
@@ -349,10 +348,7 @@ export async function lookupUpdates(
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
-    if (
-      config.currentDigest &&
-      config.datasource !== DATASOURCE_GIT_SUBMODULES
-    ) {
+    if (config.currentDigest && config.datasource !== 'git-submodules') {
       if (!config.digestOneAndOnly || !res.updates.length) {
         // digest update
         res.updates.push({
@@ -369,7 +365,7 @@ export async function lookupUpdates(
           newValue: config.currentValue,
         });
       }
-    } else if (config.datasource === DATASOURCE_GIT_SUBMODULES) {
+    } else if (config.datasource === 'git-submodules') {
       const dependency = clone(await getPkgReleases(config));
       res.updates.push({
         updateType: 'digest',

@@ -5,11 +5,6 @@ import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
 import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
-import {
-  DATASOURCE_DOCKER,
-  DATASOURCE_GITHUB,
-  DATASOURCE_GO,
-} from '../../constants/data-binary-source';
 
 interface UrlParsedResult {
   repo: string;
@@ -183,7 +178,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = 'github';
         dep.lookupName = repo;
         deps.push(dep);
       }
@@ -195,7 +190,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     ) {
       dep.depName = depName;
       dep.currentValue = currentValue || commit.substr(0, 7);
-      dep.datasource = DATASOURCE_GO;
+      dep.datasource = 'go';
       dep.lookupName = importpath;
       if (remote) {
         const remoteMatch = /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
@@ -228,7 +223,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else {
         dep.currentValue = parsedUrl.currentValue;
       }
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = 'github';
       dep.lookupName = dep.repo;
       dep.lookupType = 'releases';
       deps.push(dep);
@@ -243,7 +238,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.currentValue = currentValue;
       dep.depName = depName;
       dep.versionScheme = VERSION_SCHEME_DOCKER;
-      dep.datasource = DATASOURCE_DOCKER;
+      dep.datasource = 'docker';
       dep.lookupName = repository;
       deps.push(dep);
     } else {

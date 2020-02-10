@@ -3,7 +3,6 @@ import * as _npm from '../../../../lib/manager/npm';
 import * as lookup from '../../../../lib/workers/repository/process/lookup';
 import { getConfig, mocked, RenovateConfig } from '../../../util';
 import { ManagerApi } from '../../../../lib/manager/common';
-import { DATASOURCE_NPM } from '../../../../lib/constants/data-binary-source';
 
 const npm: ManagerApi = _npm;
 const lookupUpdates = mocked(lookup).lookupUpdates;
@@ -66,7 +65,7 @@ describe('workers/repository/process/fetch', () => {
             packageJsonType: 'app',
             deps: [
               {
-                datasource: DATASOURCE_NPM,
+                datasource: 'npm',
                 depName: 'aaa',
                 depType: 'devDependencies',
               },

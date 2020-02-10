@@ -2,14 +2,13 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult, PkgReleaseConfig } from '../common';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
 interface CdnjsAsset {
   version: string;
   files: string[];
 }
 
-const cacheNamespace = `datasource-${DATASOURCE_CDNJS}`;
+const cacheNamespace = `datasource-cdnjs`;
 const cacheMinutes = 60;
 
 interface CdnjsResponse {

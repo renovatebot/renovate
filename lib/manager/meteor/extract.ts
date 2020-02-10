@@ -1,6 +1,5 @@
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_NPM } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile | null {
   let deps: PackageDependency[] = [];
@@ -24,7 +23,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         return {
           depName,
           currentValue,
-          datasource: DATASOURCE_NPM,
+          datasource: 'npm',
         };
       })
       .filter(dep => dep.depName && dep.currentValue);

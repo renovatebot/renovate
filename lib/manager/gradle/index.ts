@@ -24,7 +24,6 @@ import {
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import { BinarySource } from '../../util/exec/common';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
@@ -143,7 +142,7 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        datasource: DATASOURCE_MAVEN,
+        datasource: 'maven',
         deps: dependencies,
       });
 

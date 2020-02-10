@@ -7,11 +7,6 @@ import {
   LANGUAGE_PYTHON,
 } from '../../lib/constants/languages';
 
-import {
-  DATASOURCE_DOCKER,
-  DATASOURCE_ORB,
-} from '../../lib/constants/data-binary-source';
-
 type TestConfig = Config & { x?: number; y?: number };
 
 describe('applyPackageRules()', () => {
@@ -263,14 +258,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          datasources: [DATASOURCE_ORB, DATASOURCE_DOCKER],
+          datasources: ['orb', 'docker'],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: DATASOURCE_ORB,
+      datasource: 'orb',
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -287,7 +282,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: DATASOURCE_ORB,
+      datasource: 'orb',
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -297,7 +292,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          datasources: [DATASOURCE_ORB],
+          datasources: ['orb'],
           x: 1,
         },
       ],

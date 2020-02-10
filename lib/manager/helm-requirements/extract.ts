@@ -5,7 +5,6 @@ import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
 import { platform } from '../../platform';
-import { DATASOURCE_HELM } from '../../constants/data-binary-source';
 
 export async function extractPackageFile(
   content: string,
@@ -78,7 +77,7 @@ export async function extractPackageFile(
   });
   const res = {
     deps,
-    datasource: DATASOURCE_HELM,
+    datasource: 'helm',
   };
   return res;
 }

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import _got from '../../lib/util/got';
 import * as datasource from '../../lib/datasource';
-import { DATASOURCE_GRADLE_VERSION } from '../../lib/constants/data-binary-source';
 
 jest.mock('../../lib/util/got');
 
@@ -17,7 +16,7 @@ describe('datasource/gradle', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       config = {
-        datasource: DATASOURCE_GRADLE_VERSION,
+        datasource: 'gradle-version',
       };
       jest.clearAllMocks();
       global.repoCache = {};
