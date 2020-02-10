@@ -27,11 +27,14 @@ function parseJavaVersion(javaVersionOutput) {
 describe('lib/manager/gradle/gradle-updates-report', () => {
   let workingDir: DirectoryResult;
   let javaVersion: number;
+  const skipJava = process.env.NO_JAVA === 'true';
 
   beforeAll(async () => {
-    javaVersion = await exec('java -version').then(({ stderr }) =>
-      parseJavaVersion(stderr)
-    );
+    if (!skipJava) {
+      javaVersion = await exec('java -version').then(({ stderr }) =>
+        parseJavaVersion(stderr)
+      );
+    }
   });
 
   beforeEach(async () => {
@@ -45,6 +48,7 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
       // eslint-disable-next-line no-loop-func
       it(`generates a report for Gradle versiradlon ${gradleVersion}`, async () => {
         if (
+          skipJava ||
           javaVersion < supportedJavaVersions.min ||
           javaVersion > supportedJavaVersions.max
         ) {
