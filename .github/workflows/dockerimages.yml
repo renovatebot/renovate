@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - chore/docker-cache
 
   pull_request:
 
@@ -60,7 +59,7 @@ jobs:
         run: docker image ls | grep renovate
 
       - name: Push the Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/chore/docker-cache'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
           docker buildx build \
