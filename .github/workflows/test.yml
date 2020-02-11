@@ -47,7 +47,7 @@ jobs:
 
       - name: Skip Java tests
         if: matrix.os != 'ubuntu-latest' || matrix.node-version != 12 || github.ref == 'refs/heads/master'
-        run: echo "::set-env name=FAIL_IF_NO_JAVA::false"
+        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
       - name: Init platform
         id: init

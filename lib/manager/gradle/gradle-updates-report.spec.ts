@@ -10,15 +10,15 @@ import {
 } from './gradle-updates-report';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
-const failIfNoJavaEnv = 'FAIL_IF_NO_JAVA';
+const failIfNoJavaEnv = 'CI';
 
 const gradleJavaVersionSupport = {
   5: { min: 8, max: 12 },
   6: { min: 8, max: 13 },
 };
 
-const enforceJava =
-  process.env[failIfNoJavaEnv] && process.env[failIfNoJavaEnv] !== 'false';
+const skipJava = process.env.SKIP_JAVA_TESTS === 'true';
+const enforceJava = process.env[failIfNoJavaEnv] === 'true' && !skipJava;
 
 function parseJavaVersion(javaVersionOutput: string) {
   const versionMatch = /version "(?:1\.)?(\d+)[\d._-]*"/.exec(
@@ -75,7 +75,7 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
         throw Error(
           `This test needs a Java version between ${supportedJavaVersions.min} and ${supportedJavaVersions.max}. The current Java version is ${javaVersion} and ${failIfNoJavaEnv} is set!`
         );
-      (!gradleSupportsThisJavaVersion ? it.skip : it)(
+      (!gradleSupportsThisJavaVersion || skipJava ? it.skip : it)(
         `generates a report for Gradle version ${gradleVersion}`,
         // the function creation is correct and intended
         // eslint-disable-next-line no-loop-func
