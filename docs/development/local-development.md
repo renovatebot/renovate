@@ -22,7 +22,7 @@ For local development some dependencies are required:
 - yarn `^1.17.0`
 - c++ compiler
 - python `^2.7` with `mock` library
-- java between `8` and `11` (or set env `SKIP_JAVA_TESTS` to `true`)
+- java between `8` and `12` (or set env `SKIP_JAVA_TESTS` to `true`)
 
 Python 2.7 is required in development in order to support installing with `node-gyp`, which does not yet support Python 3. `mock` is used by Renovate in production and is now part of the Python standard library, but only from 3.3 onwards.
 
