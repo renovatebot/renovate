@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: [slim] #[latest, slim]
+        tag: [latest, slim]
 
     env:
       DOCKERFILE: Dockerfile.${{ matrix.tag }}
