@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/kustomize/extract extractPackageFile() extracts http dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "v2.0.0",
+    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
+    "source": "git@github.com:kubernetes-sigs/kustomize.git",
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "depName": "https://github.com/moredhel/remote-kustomize.git",
+    "source": "https://github.com/moredhel/remote-kustomize.git",
+  },
+]
+`;
+
+exports[`lib/manager/kustomize/extract extractPackageFile() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "currentValue": "v2.0.0",
+    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
+    "source": "git@github.com:kubernetes-sigs/kustomize.git",
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "depName": "https://github.com/moredhel/remote-kustomize.git",
+    "source": "https://github.com/moredhel/remote-kustomize.git",
+  },
+]
+`;
+
+exports[`lib/manager/kustomize/extract extractPackageFile() extracts ssh dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "depName": "git@github.com:moredhel/remote-kustomize.git",
+    "source": "git@github.com:moredhel/remote-kustomize.git",
+  },
+]
+`;
+
+exports[`lib/manager/kustomize/extract extractPackageFile() extracts ssh dependency with a subdir 1`] = `
+Array [
+  Object {
+    "currentValue": "v2.0.0",
+    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
+    "source": "git@github.com:kubernetes-sigs/kustomize.git",
+  },
+]
+`;
