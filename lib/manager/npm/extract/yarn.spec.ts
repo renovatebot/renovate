@@ -13,7 +13,7 @@ describe('manager/npm/extract/yarn', () => {
     });
     it('extracts', async () => {
       const plocktest1Lock = readFileSync(
-        'test/config/npm/_fixtures/plocktest1/yarn.lock',
+        'lib/manager/npm/__fixtures__/plocktest1/yarn.lock',
         'utf8'
       );
       platform.getFile.mockReturnValueOnce(plocktest1Lock);

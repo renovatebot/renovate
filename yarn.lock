@@ -1387,10 +1387,10 @@
     "@types/istanbul-lib-coverage" "*"
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@25.1.1":
-  version "25.1.1"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-25.1.1.tgz#dcf65a8ee315b91ad39c0d358ae0ddc5602ab0e9"
-  integrity sha512-bKSZJYZJLzwaoVYNN4W3A0RvKNYsrLm5tsuXaMlfYDxKf4gY2sFrMYneCugNQWGg1gjPW+FHBwNrwPzEi4sIsw==
+"@types/jest@25.1.2":
+  version "25.1.2"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-25.1.2.tgz#1c4c8770c27906c7d8def5d2033df9dbd39f60da"
+  integrity sha512-EsPIgEsonlXmYV7GzUqcvORsSS9Gqxw/OvkGwHfAdpjduNRxMlhsav0O5Kb0zijc/eXSO/uW6SJt9nwull8AUQ==
   dependencies:
     jest-diff "^25.1.0"
     pretty-format "^25.1.0"
@@ -1410,10 +1410,10 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.30.tgz#44cb52f32a809734ca562e685c6473b5754a7818"
   integrity sha512-sqm9g7mHlPY/43fcSNrCYfOeX9zkTTK+euO5E6+CVijSMm5tTjkVdwdqRkY3ljjIAf8679vps5jKUoJBCLsMDA==
 
-"@types/later@1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@types/later/-/later-1.2.5.tgz#56297f82ea0002549159219d75844a9380ad18bd"
-  integrity sha512-oROpXZfXR+6uQyz4wBs2gZYxvZJ5Zp+iSEJWrIWgvipSnzLcHCpR9br4XUqRBPFS1EP971JlnWfXhr5so5E1sg==
+"@types/later@1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@types/later/-/later-1.2.6.tgz#8ea70d292e5fb880039a7ed13da19a24c9e35a56"
+  integrity sha512-a+wmsrP4FJCOt3xq+bjMkNloUtk7O7MnjYGTa6HxANSHRRPxcfhougk5+pl5B9Qr/w7cC7a4Ku9LM8frizr2Lw==
 
 "@types/linkify-it@*":
   version "2.1.0"
@@ -1964,10 +1964,10 @@ aws-sdk-mock@4.5.0:
     sinon "^7.3.2"
     traverse "^0.6.6"
 
-aws-sdk@2.610.0, aws-sdk@^2.483.0:
-  version "2.610.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.610.0.tgz#a8633204bed83df763095824f8110ced4a717d2a"
-  integrity sha512-kqcoCTKjbxrUo2KeLQR2Jw6l4PvkbHXSDk8KqF2hXcpHibiOcMXZZPVe9X+s90RC/B2+qU95M7FImp9ByMcw7A==
+aws-sdk@2.614.0, aws-sdk@^2.483.0:
+  version "2.614.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.614.0.tgz#e954824c1b9e566691a24ed8491ebf1d68350d37"
+  integrity sha512-o7utaxDMo9ri1VyPKw8Kcmpy5uZOqMeok2cgur70iZ94zsLIRnHKrBv1wMBbyRGuUbfJRq76HGAS9QxdiSqQHw==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -5373,10 +5373,10 @@ jest-serializer@^25.1.0:
   resolved "https://registry.yarnpkg.com/jest-serializer/-/jest-serializer-25.1.0.tgz#73096ba90e07d19dec4a0c1dd89c355e2f129e5d"
   integrity sha512-20Wkq5j7o84kssBwvyuJ7Xhn7hdPeTXndnwIblKDR2/sy1SUm6rWWiG9kSCgJPIfkDScJCIsTtOKdlzfIHOfKA==
 
-jest-silent-reporter@0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/jest-silent-reporter/-/jest-silent-reporter-0.1.2.tgz#9d797c0b509e1def16647a07daf25f014c50b333"
-  integrity sha512-w/qc9NvWqdX0vZv6TUG4EE15d72+JxQJYh+3hqq8cTi3BnfBOtwNtL3T6TwkZSy/sfc3REW5niz0eSBPTIvWnA==
+jest-silent-reporter@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/jest-silent-reporter/-/jest-silent-reporter-0.2.1.tgz#554dd62b800989cdbcfba22bf30a1c0db6ad289c"
+  integrity sha512-nEO3oOFHtEXFjlRCbJOlvEWA7ZHyyyvMsU4WHuAhinYBOI4PiX1EIbsZfQZ/cxHcYliHBU9zY8bPxMPdBGksYw==
   dependencies:
     chalk "^2.3.1"
     jest-util "^24.0.0"
@@ -6629,10 +6629,10 @@ node-gyp@^5.0.2, node-gyp@^5.0.7:
     tar "^4.4.12"
     which "^1.3.1"
 
-node-html-parser@1.1.19:
-  version "1.1.19"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.1.19.tgz#551ddbea531433d849da98a31d7421c96f9df318"
-  integrity sha512-X7spStiBKw9HQfUdBpT8v4MZf2x4qCLu9w31meeqM9Egpne2B78bxZjC4b1ie6NgFMvyY1qdgjI9+scieXmkeA==
+node-html-parser@1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.2.4.tgz#bff5b403da3c5061d189e922aafb193c8e1f6f92"
+  integrity sha512-qHwPdGyGr9pOZBoSgUOuNPG20QYZVN00lFcxKQgjPUODSxVH7obQeLVVawa3B4cfSNtLIeczSzoy/xYA8XG5WQ==
   dependencies:
     he "1.1.1"
 
@@ -10073,10 +10073,10 @@ yargs@13.3.0, yargs@^11.0.0, yargs@^13.2.4, yargs@^15.0.0, yargs@^15.0.1:
     y18n "^4.0.0"
     yargs-parser "^13.1.1"
 
-yarn@1.21.1:
-  version "1.21.1"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.1.tgz#1d5da01a9a03492dc4a5957befc1fd12da83d89c"
-  integrity sha512-dQgmJv676X/NQczpbiDtc2hsE/pppGDJAzwlRiADMTvFzYbdxPj2WO4PcNyriSt2c4jsCMpt8UFRKHUozt21GQ==
+yarn@1.22.0:
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.0.tgz#acf82906e36bcccd1ccab1cfb73b87509667c881"
+  integrity sha512-KMHP/Jq53jZKTY9iTUt3dIVl/be6UPs2INo96+BnZHLKxYNTfwMmlgHTaMWyGZoO74RI4AIFvnWhYrXq2USJkg==
 
 yawn-yaml@1.5.0:
   version "1.5.0"

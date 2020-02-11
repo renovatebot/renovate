@@ -22,6 +22,6 @@ async function getFiles(dir: string): Promise<string[]> {
 
 describe('static-files', () => {
   it('has same static files in lib and dist', async () => {
-    expect(await getFiles('lib')).toEqual(await getFiles('dist'));
+    expect(await getFiles('dist')).toEqual(await getFiles('lib'));
   });
 });

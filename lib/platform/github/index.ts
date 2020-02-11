@@ -974,11 +974,17 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    const res = await api.get(
-      `repos/${config.parentRepo ||
-        config.repository}/pulls?per_page=100&state=all`,
-      { paginate: true }
-    );
+    let res;
+    try {
+      res = await api.get(
+        `repos/${config.parentRepo ||
+          config.repository}/pulls?per_page=100&state=all`,
+        { paginate: true }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.info({ err }, 'getPrList err');
+      throw new Error('platform-failure');
+    }
     config.prList = res.body.map(
       (pr: {
         number: number;

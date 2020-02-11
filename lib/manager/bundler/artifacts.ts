@@ -1,3 +1,4 @@
+import upath from 'upath';
 import {
   getSiblingFileName,
   readLocalFile,
@@ -124,8 +125,9 @@ export async function updateArtifacts(
       'ruby --version',
       `gem install bundler${bundlerVersion} --no-document`,
     ];
-
+    const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
     const execOptions: ExecOptions = {
+      cwd,
       docker: {
         image: 'renovate/ruby',
         tag: await getDockerTag(updateArtifact),

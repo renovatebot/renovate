@@ -28,6 +28,38 @@ Array [
 ]
 `;
 
+exports[`lib/manager/gitsubmodules/extract extractPackageFile() extract name path mismatch 1`] = `
+Array [
+  Object {
+    "currentDigest": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "currentValue": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "depName": "deps/renovate",
+    "registryUrls": Array [
+      "https://github.com/renovatebot/renovate.git",
+      "master",
+    ],
+  },
+  Object {
+    "currentDigest": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "currentValue": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "depName": "deps/renovate-pro",
+    "registryUrls": Array [
+      "https://github.com/renovatebot/pro.git",
+      "master",
+    ],
+  },
+  Object {
+    "currentDigest": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "currentValue": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "depName": "deps/renovate-config",
+    "registryUrls": Array [
+      "https://github.com/renovatebot/renovate-config.git",
+      "master",
+    ],
+  },
+]
+`;
+
 exports[`lib/manager/gitsubmodules/extract extractPackageFile() extract relative URL 1`] = `
 Array [
   Object {
