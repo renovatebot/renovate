@@ -22,12 +22,12 @@ For local development some dependencies are required:
 - yarn `^1.17.0`
 - c++ compiler
 - python `^2.7` with `mock` library
-- java between `8` and `12` (or set env `SKIP_JAVA_TESTS` to `true`)
+- java between `8` and `12`
 
 Python 2.7 is required in development in order to support installing with `node-gyp`, which does not yet support Python 3. `mock` is used by Renovate in production and is now part of the Python standard library, but only from 3.3 onwards.
 
 Java is required to execute Gradle in tests.
-You can skip these tests locally by setting the environment variable `SKIP_JAVA_TESTS` to `true`.
+If you don’t have Java installed, the respective tests will be skipped.
 
 _Linux_
 
