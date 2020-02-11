@@ -15,15 +15,19 @@ and `exports`. We will transpile them to `commonjs` on build.
 
 #### Prerequisites
 
-For local development some dependencies are required.
+For local development some dependencies are required:
 
 - git
 - nodejs `^10.13.0 || ^12.0.0`
 - yarn `^1.17.0`
 - c++ compiler
 - python `^2.7` with `mock` library
+- java between `8` and `11` (or set env `SKIP_JAVA_TESTS` to `true`)
 
 Python 2.7 is required in development in order to support installing with `node-gyp`, which does not yet support Python 3. `mock` is used by Renovate in production and is now part of the Python standard library, but only from 3.3 onwards.
+
+Java is required to execute Gradle in tests.
+You can skip these tests locally by setting the environment variable `SKIP_JAVA_TESTS` to `true`.
 
 _Linux_
 
@@ -34,8 +38,10 @@ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
-sudo apt-get install -y git python-minimal build-essential nodejs yarn
+sudo apt-get install -y git python-minimal build-essential nodejs yarn openjdk-11-jdk
 ```
+
+You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
 _Windows_
 
@@ -46,11 +52,11 @@ The following steps work to set up a brand new Windows 10 installation for devel
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
 - Install `mock` for Python:
-
   - `curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py`
   - `python get-pip.py`
   - `rm get-pip.py`
   - `python -m pip install mock`
+- Install [Java](https://docs.oracle.com/en/java/javase/12/install/installation-jdk-microsoft-windows-platforms.html)
 
   Verify you have everything installed with appropriate versions, e.g.:
 
@@ -65,6 +71,10 @@ The following steps work to set up a brand new Windows 10 installation for devel
   Python 2.7.16
   PS C:\Windows\system32> python -c "import mock; print(mock.__version__)"
   3.0.5
+  PS C:\Windows\system32> java -version
+  openjdk version "11.0.6" 2020-01-14
+  OpenJDK Runtime Environment 18.9 (build 11.0.6+10)
+  OpenJDK 64-Bit Server VM 18.9 (build 11.0.6+10, mixed mode)
   ```
 
 #### Fork and Clone
