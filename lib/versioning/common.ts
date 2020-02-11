@@ -1,13 +1,10 @@
 import { SemVer, Range } from 'semver';
+import { RangeStrategy as _RangeStrategy } from '../types';
 
-export type RangeStrategy =
-  | 'auto'
-  | 'bump'
-  | 'future'
-  | 'pin'
-  | 'replace'
-  | 'update-lockfile'
-  | 'widen';
+/**
+ * @deprecated import from `lib/types`
+ */
+export type RangeStrategy = _RangeStrategy;
 
 export interface NewValueConfig {
   currentValue: string;

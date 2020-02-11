@@ -27,8 +27,8 @@ export function extractPackageFile(
      * so we don't include it in the extracting regexp
      */
 
-    const match = line.match(
-      /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/
+    const match = /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/.exec(
+      line
     );
     if (match) {
       const depName = match[1];

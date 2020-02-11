@@ -1,0 +1,648 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gradle extractPackageFile should configure the renovate report plugin 1`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should execute gradlew when available 1`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return empty if renovate report is invalid 1`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return empty if there are no dependencies 1`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 1`] = `
+Array [
+  Object {
+    "cmd": "gradle --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle dependencies 1`] = `
+Array [
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "%scala-version%",
+        "depGroup": "org.scala-lang",
+        "depName": "org.scala-lang:scala-library",
+        "name": "scala-library",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "3.9.0",
+        "datasource": "sbt",
+        "depGroup": "com.typesafe.scala-logging",
+        "depName": "com.typesafe.scala-logging:scala-logging",
+        "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "build.gradle",
+  },
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "%scala-version%",
+        "depGroup": "org.scala-lang",
+        "depName": "org.scala-lang:scala-library",
+        "name": "scala-library",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "3.9.0",
+        "datasource": "sbt",
+        "depGroup": "com.typesafe.scala-logging",
+        "depName": "com.typesafe.scala-logging:scala-logging",
+        "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "subproject/build.gradle",
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle dependencies 2`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 1`] = `
+Array [
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "%scala-version%",
+        "depGroup": "org.scala-lang",
+        "depName": "org.scala-lang:scala-library",
+        "name": "scala-library",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "3.9.0",
+        "datasource": "sbt",
+        "depGroup": "com.typesafe.scala-logging",
+        "depName": "com.typesafe.scala-logging:scala-logging",
+        "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "foo/build.gradle",
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir/foo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle.kts dependencies 1`] = `
+Array [
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "%scala-version%",
+        "depGroup": "org.scala-lang",
+        "depName": "org.scala-lang:scala-library",
+        "name": "scala-library",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "3.9.0",
+        "datasource": "sbt",
+        "depGroup": "com.typesafe.scala-logging",
+        "depName": "com.typesafe.scala-logging:scala-logging",
+        "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "build.gradle.kts",
+  },
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "%scala-version%",
+        "depGroup": "org.scala-lang",
+        "depName": "org.scala-lang:scala-library",
+        "name": "scala-library",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "3.9.0",
+        "datasource": "sbt",
+        "depGroup": "com.typesafe.scala-logging",
+        "depName": "com.typesafe.scala-logging:scala-logging",
+        "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "subproject/build.gradle.kts",
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return gradle.kts dependencies 2`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should return null and gradle should not be executed if no root build.gradle 1`] = `Array []`;
+
+exports[`manager/gradle extractPackageFile should run gradlew through \`sh\` when available but not executable 1`] = `
+Array [
+  Object {
+    "cmd": "sh gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 1`] = `[Error: registry-failure]`;
+
+exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 2`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
+Array [
+  Object {
+    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": null,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should use docker if required 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/gradle",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should use repositories only for current project 1`] = `
+Array [
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+        ],
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+    ],
+    "packageFile": "build.gradle",
+  },
+]
+`;
+
+exports[`manager/gradle extractPackageFile should use repositories only for current project 2`] = `
+Array [
+  Object {
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle updateDependency should update an existing module dependency 1`] = `Array []`;
+
+exports[`manager/gradle updateDependency should update an existing plugin dependency 1`] = `Array []`;
+
+exports[`manager/gradle updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;

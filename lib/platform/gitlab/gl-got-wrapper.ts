@@ -4,8 +4,9 @@ import { GotApi, GotResponse } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 
-const hostType = 'gitlab';
+const hostType = PLATFORM_TYPE_GITLAB;
 let baseUrl = 'https://gitlab.com/api/v4/';
 
 async function get(path: string, options: any): Promise<GotResponse> {
@@ -65,6 +66,7 @@ for (const x of helpers) {
     get(url, { ...opts, method: x.toUpperCase() });
 }
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 api.setBaseUrl = (e: string): void => {
   baseUrl = e;
 };
