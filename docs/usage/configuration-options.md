@@ -869,7 +869,7 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`.
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`:
 
 ```json
 {
@@ -1041,6 +1041,18 @@ Use this field if you want to have one or more package names patterns in your pa
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ### paths
+
+Renovate will match `paths` against both a partial string match or a minimatch glob pattern. If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+
+```
+  "paths": ["+(package.json)"],
+```
+
+The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
+
+```
+  "paths": ["package.json"],
+```
 
 ### sourceUrlPrefixes
 
