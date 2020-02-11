@@ -108,19 +108,7 @@ export async function getDependency(
   try {
     const raw = await got(pkgUrl, {
       json: true,
-      retry: {
-        errorCodes: [
-          'ECONNRESET',
-          'ETIMEDOUT',
-          'ECONNRESET',
-          'EADDRINUSE',
-          'ECONNREFUSED',
-          'EPIPE',
-          'ENOTFOUND',
-          'ENETUNREACH',
-          'EAI_AGAIN',
-        ],
-      },
+      retry: 5,
       headers,
     });
     const res = raw.body;
