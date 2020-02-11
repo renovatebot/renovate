@@ -65,10 +65,9 @@ jobs:
           pip --version
 
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - name: Cache Yarn packages
+        id: yarn_cache_packages
         uses: actions/cache@v1
         with:
           path: ${{ steps.init.outputs.yarn_cache }}
@@ -85,12 +84,22 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-yarn-
 
       - name: Cache pip packages
+        id: pip_cache_packages
         uses: actions/cache@v1
         with:
           path: ${{ steps.init.outputs.pip_cache }}
           key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.python-version }}-pip-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Clear pip cache
+        if: steps.pip_cache_packages.outputs.cache-hit != 'true'
+        run: rm -rf ${{ steps.init.outputs.pip_cache }}
 
       - name: Installing dependencies
         shell: bash
