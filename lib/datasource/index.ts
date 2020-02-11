@@ -40,6 +40,9 @@ function loadDatasources(): void {
 
     if (isValidDatasourceModule(datasourceName, module)) {
       datasources[datasourceName] = module;
+    } /* istanbul ignore next */ else {
+      logger.fatal(`Datasource module "${datasourceName}" is invalid.`);
+      process.exit(1);
     }
   }
 }
