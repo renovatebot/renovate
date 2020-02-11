@@ -31,7 +31,7 @@ export interface File {
   /**
    * file contents
    */
-  contents: string;
+  contents: string | Buffer;
 }
 
 interface StorageConfig {
@@ -504,10 +504,14 @@ export class Storage {
           await this._git.add(file.name);
         } else {
           fileNames.push(file.name);
-          await fs.outputFile(
-            join(this._cwd, file.name),
-            Buffer.from(file.contents)
-          );
+          let contents;
+          // istanbul ignore else
+          if (typeof file.contents === 'string') {
+            contents = Buffer.from(file.contents);
+          } else {
+            contents = file.contents;
+          }
+          await fs.outputFile(join(this._cwd, file.name), contents);
         }
       }
       // istanbul ignore if
