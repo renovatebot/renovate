@@ -2,8 +2,8 @@ import fs from 'fs';
 import { join, normalizeTrim } from 'upath';
 
 function relatePath(here: string, there: string): string {
-  const thereParts = normalizeTrim(there).split('/');
-  const hereParts = normalizeTrim(here).split('/');
+  const thereParts = normalizeTrim(there).split(/[\\/]/);
+  const hereParts = normalizeTrim(here).split(/[\\/]/);
 
   let idx = 0;
   while (
