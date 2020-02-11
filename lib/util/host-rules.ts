@@ -164,6 +164,10 @@ export function hosts({ hostType }: { hostType: string }): string[] {
     .filter(Boolean);
 }
 
+export function findAll({ hostType }: { hostType: string }): HostRule[] {
+  return hostRules.filter(rule => rule.hostType === hostType);
+}
+
 export function clear(): void {
   hostRules = [];
   sanitize.clear();

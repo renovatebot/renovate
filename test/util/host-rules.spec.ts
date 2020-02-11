@@ -1,4 +1,4 @@
-import { add, find, clear, hosts } from '../../lib/util/host-rules';
+import { add, find, findAll, clear, hosts } from '../../lib/util/host-rules';
 import { DATASOURCE_NUGET } from '../../lib/constants/data-binary-source';
 import { PLATFORM_TYPE_AZURE } from '../../lib/constants/platforms';
 
@@ -146,6 +146,23 @@ describe('util/host-rules', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
+    });
+  });
+  describe('findAll()', () => {
+    it('warns and returns empty for bad search', () => {
+      expect(findAll({ abc: 'def' } as any)).toEqual([]);
+    });
+    it('needs exact host matches', () => {
+      const hostRule = {
+        hostType: 'nuget',
+        hostName: 'nuget.org',
+        username: 'root',
+        password: 'p4$$w0rd',
+        token: undefined,
+      };
+      add(hostRule);
+      expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
+      expect(findAll({ hostType: 'nuget' })[0]).toEqual(hostRule);
     });
   });
 });
