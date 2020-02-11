@@ -44,10 +44,10 @@ jobs:
         run: |
           docker buildx build \
             --platform ${PLATFORM} \
-            --output "type=docker" \
-            --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
-            --tag renovate \
-            --file ./${DOCKERFILE} .
+            --output=type=docker \
+            --cache-from=${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --tag=renovate \
+            --file=./${DOCKERFILE} .
       - name: Test the Docker image
         run: |
           docker run --rm -t renovate --version
@@ -63,7 +63,7 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/chore/docker-cache'
 
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     strategy:
       matrix:
@@ -92,8 +92,8 @@ jobs:
         run: |
           docker buildx build \
             --platform ${PLATFORM} \
-            --output "type=docker" \
-            --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
-            --cache-to ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
-            --tag renovate \
-            --file ./${DOCKERFILE} .
+            --output=type=registry \
+            --cache-from=${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --cache-to=${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --tag=${CACHE_IMAGE}:test-${{ matrix.tag }} \
+            --file=./${DOCKERFILE} .
