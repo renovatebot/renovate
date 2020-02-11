@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: [latest, slim]
+        tag: [slim] #[latest, slim]
 
     env:
       DOCKERFILE: Dockerfile.${{ matrix.tag }}
@@ -45,9 +45,9 @@ jobs:
           docker buildx build \
             --platform ${PLATFORM} \
             --output "type=docker" \
-            --cache-from $(CACHE_IMAGE):cache-${{ matrix.tag }} \
+            --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
             --tag renovate \
-            --file ./$(DOCKERFILE) .
+            --file ./${DOCKERFILE} .
 
       - name: Test the Docker image
         run: |
@@ -70,7 +70,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: [latest, slim]
+        tag: [slim] #[latest, slim]
 
     env:
       DOCKERFILE: Dockerfile.${{ matrix.tag }}
@@ -95,6 +95,6 @@ jobs:
         run: |
           docker buildx build \
             --platform ${PLATFORM} \
-            --cache-from $(CACHE_IMAGE):cache-${{ matrix.tag }} \
-            --cache-to $(CACHE_IMAGE):cache-${{ matrix.tag }} \
-            --file ./$(DOCKERFILE) .
+            --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --cache-to ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --file ./${DOCKERFILE} .
