@@ -95,6 +95,8 @@ jobs:
         run: |
           docker buildx build \
             --platform ${PLATFORM} \
+            --output "type=docker" \
             --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
             --cache-to ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --tag ${IMAGE} \
             --file ./${DOCKERFILE} .
