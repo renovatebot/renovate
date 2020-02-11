@@ -47,7 +47,7 @@ jobs:
 
       - name: Skip Java tests
         if: matrix.os != 'ubuntu-latest' || matrix.node-version != 12 || github.ref == 'refs/heads/master'
-        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
+        run: echo "::set-env name=FAIL_IF_NO_JAVA::false"
 
       - name: Init platform
         id: init
@@ -63,6 +63,7 @@ jobs:
           python --version
           yarn --version
           pip --version
+          java -version
 
       - uses: actions/checkout@v2
 
@@ -122,8 +123,6 @@ jobs:
 
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
-        env:
-          FAIL_IF_NO_JAVA: 'true'
 
       - name: E2E Test
         run: yarn test-e2e
