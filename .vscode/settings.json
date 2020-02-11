@@ -14,5 +14,6 @@
   },
   "files.associations": {
     "Dockerfile.*": "dockerfile"
-  }
+  },
+  "omnisharp.autoStart": false
 }

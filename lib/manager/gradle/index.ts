@@ -27,7 +27,7 @@ import { LANGUAGE_JAVA } from '../../constants/languages';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import { BinarySource } from '../../util/exec/common';
 
-const GRADLE_DEPENDENCY_REPORT_OPTIONS =
+export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
