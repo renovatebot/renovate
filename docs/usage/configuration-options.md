@@ -869,13 +869,13 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use a negative pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`.
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`.
 
 ```json
 {
   "packageRules": [
     {
-      "paths": ["!**/package.json"],
+      "paths": ["+(package.json)"],
       "masterIssueApproval": true
     }
   ]
