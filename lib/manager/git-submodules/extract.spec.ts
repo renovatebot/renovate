@@ -46,7 +46,7 @@ describe('lib/manager/gitsubmodules/extract', () => {
     it('extract name path mismatch', async () => {
       const res = await extractPackageFile('', '.gitmodules.5', { localDir });
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res.deps).toHaveLength(3);
     });
   });
 });
