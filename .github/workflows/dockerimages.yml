@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: [latest, slim]
+        tag: [slim] #[latest, slim]
 
     env:
       DOCKERFILE: Dockerfile.${{ matrix.tag }}
@@ -40,21 +40,21 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      # - name: Build the Docker image
-      #   run: |
-      #     docker buildx build \
-      #       --platform ${PLATFORM} \
-      #       --output "type=docker" \
-      #       --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
-      #       --tag renovate \
-      #       --file ./${DOCKERFILE} .
-      # - name: Test the Docker image
-      #   run: |
-      #     docker run --rm -t renovate --version
-      # - name: Image history
-      #   run: docker history renovate
-      # - name: Image size
-      #   run: docker image ls | grep renovate
+      - name: Build the Docker image
+        run: |
+          docker buildx build \
+            --platform ${PLATFORM} \
+            --output "type=docker" \
+            --cache-from ${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --tag renovate \
+            --file ./${DOCKERFILE} .
+      - name: Test the Docker image
+        run: |
+          docker run --rm -t renovate --version
+      - name: Image history
+        run: docker history renovate
+      - name: Image size
+        run: docker image ls | grep renovate
 
   push:
     name: Release push
@@ -67,7 +67,7 @@ jobs:
 
     strategy:
       matrix:
-        tag: [slim] #[latest, slim]
+        tag: [latest, slim]
 
     env:
       DOCKERFILE: Dockerfile.${{ matrix.tag }}
