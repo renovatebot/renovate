@@ -1,11 +1,9 @@
-name: Docker Images CI
+name: Release CI
 
 on:
   push:
-    branches:
-      - master
-
-  pull_request:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 env:
   PLATFORM: linux/amd64
@@ -13,11 +11,10 @@ env:
   DOCKER_REPO: renovate/cache-test
 
 jobs:
-  build:
-    name: Build image
+  docker-release:
     runs-on: ubuntu-latest
 
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     strategy:
       matrix:
@@ -59,14 +56,44 @@ jobs:
       - name: Image size
         run: docker image ls | grep renovate
 
+      - name: Generate tags
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+
+          # Tag base
+          tags="${DOCKER_REPO}:${DOCKER_TAG}"
+          echo "Tagging ${DOCKER_REPO}:${DOCKER_TAG}"
+
+          SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)?$"
+
+          if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
+            echo Not a semver tag - skipping
+            exit 1
+          fi
+
+          major=${BASH_REMATCH[1]}
+          minor=${BASH_REMATCH[2]}
+          patch=${BASH_REMATCH[3]}
+          slim=${DOCKER_TAG#latest}
+          slim=${slim:+-}${slim}
+
+
+          # Tag for versions additional
+          for tag in {"${major}${slim}","${major}.${minor}${slim}","${major}.${minor}.${patch}${slim}"}; do
+            echo "Tagging ${DOCKER_REPO}:${tag}"
+            tags+=",${DOCKER_REPO}:${tag}"
+          done
+
+          echo "::set-env name=TAGS::${tags}"
+
       - name: Push the Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
           docker buildx build \
             --platform ${PLATFORM} \
             --output=type=registry \
             --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --cache-to=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --tag=${DOCKER_REPO}:test-${DOCKER_TAG} \
+            --tag=${TAGS} \
             --file=./${DOCKER_FILE} .
