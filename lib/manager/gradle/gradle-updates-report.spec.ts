@@ -1,6 +1,7 @@
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { spawnSync, SpawnSyncReturns } from 'child_process';
 import { exec } from '../../util/exec';
 import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
 import {
@@ -26,58 +27,65 @@ function parseJavaVersion(javaVersionOutput: string) {
   return 0;
 }
 
+function determineJavaVersion(): number {
+  let error;
+  let javaVersionCommand: SpawnSyncReturns<string>;
+  try {
+    javaVersionCommand = spawnSync('java', ['-version'], {
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+  } catch (e) {
+    error = e;
+  }
+  if (error)
+    throw Error(
+      `This test suite needs Java. Please provide Java or set the environment variable ${skipJavaTestsEnv} to true.
+Output of java -version:
+${error}`
+    );
+  return parseJavaVersion(javaVersionCommand.stderr);
+}
+
 describe('lib/manager/gradle/gradle-updates-report', () => {
   let workingDir: DirectoryResult;
-  let javaVersion: number;
+  const javaVersion = determineJavaVersion();
   const skipJava = process.env[skipJavaTestsEnv] !== undefined;
-
-  beforeAll(async () => {
-    javaVersion = await exec('java -version')
-      .then(({ stderr }) => parseJavaVersion(stderr))
-      .catch(reason => {
-        throw Error(
-          `This test suite needs Java. Please provide Java or set the environment variable ${skipJavaTestsEnv} to true.
-Output of java -version:
-${reason}`
-        );
-      });
-  });
 
   beforeEach(async () => {
     workingDir = await tmp.dir({ unsafeCleanup: true });
   });
 
   describe('createRenovateGradlePlugin', () => {
-    (skipJava ? it.skip : it).each([[5], [6]])(
-      `generates a report for Gradle version %i`,
-      async (gradleVersion: number) => {
-        const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];
-        if (
-          javaVersion < supportedJavaVersions.min ||
-          javaVersion > supportedJavaVersions.max
-        ) {
-          throw Error(
-            `This test needs a Java version between ${supportedJavaVersions.min} and ${supportedJavaVersions.max}`
+    for (const gradleVersion of [5, 6]) {
+      const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];
+      const gradleSupportsThisJavaVersion =
+        javaVersion >= supportedJavaVersions.min &&
+        javaVersion <= supportedJavaVersions.max;
+      (skipJava || !gradleSupportsThisJavaVersion ? it.skip : it)(
+        `generates a report for Gradle version ${gradleVersion}`,
+        // the function creation is correct and intended
+        // eslint-disable-next-line no-loop-func
+        async () => {
+          await fs.copy(`${fixtures}/minimal-project`, workingDir.path);
+          await fs.copy(
+            `${fixtures}/gradle-wrappers/${gradleVersion}`,
+            workingDir.path
           );
-        }
-        await fs.copy(`${fixtures}/minimal-project`, workingDir.path);
-        await fs.copy(
-          `${fixtures}/gradle-wrappers/${gradleVersion}`,
-          workingDir.path
-        );
-        await createRenovateGradlePlugin(workingDir.path);
+          await createRenovateGradlePlugin(workingDir.path);
 
-        const gradlew = path.join(workingDir.path, 'gradlew');
-        await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
-          cwd: workingDir.path,
-        });
-        expect(
-          fs.readJSONSync(
-            `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`
-          )
-        ).toMatchSnapshot();
-      },
-      120000
-    );
+          const gradlew = path.join(workingDir.path, 'gradlew');
+          await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
+            cwd: workingDir.path,
+          });
+          expect(
+            fs.readJSONSync(
+              `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`
+            )
+          ).toMatchSnapshot();
+        },
+        120000
+      );
+    }
   });
 });
