@@ -30,7 +30,7 @@ function loadDatasources(): void {
     .map(dirent => dirent.name)
     .sort();
   for (const datasourceName of datasourceDirs) {
-    const module = require(`./${datasourceName}`);
+    const module = require(`./${datasourceName}`); // eslint-disable-line
     if (isValidDatasourceModule(datasourceName, module)) {
       datasources[datasourceName] = module;
     } /* istanbul ignore next */ else {
