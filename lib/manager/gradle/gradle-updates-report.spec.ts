@@ -1,5 +1,6 @@
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as fs from 'fs-extra';
+import * as path from 'path';
 import { exec } from '../../util/exec';
 import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
 import {
@@ -66,7 +67,8 @@ ${reason}`
         );
         await createRenovateGradlePlugin(workingDir.path);
 
-        await exec(`gradlew ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
+        const gradlew = path.join(workingDir.path, 'gradlew');
+        await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
           cwd: workingDir.path,
         });
         expect(
