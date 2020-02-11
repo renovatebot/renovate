@@ -28,6 +28,7 @@ function loadDatasources(): void {
     .readdirSync(__dirname, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name)
+    .filter(name => !name.startsWith('__'))
     .sort();
   for (const datasourceName of datasourceDirs) {
     const module = require(`./${datasourceName}`); // eslint-disable-line
