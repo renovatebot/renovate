@@ -10,12 +10,15 @@ import {
 } from './gradle-updates-report';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
-const skipJavaTestsEnv = 'SKIP_JAVA_TESTS';
+const failIfNoJavaEnv = 'FAIL_IF_NO_JAVA';
 
 const gradleJavaVersionSupport = {
   5: { min: 8, max: 12 },
   6: { min: 8, max: 13 },
 };
+
+const enforceJava =
+  process.env[failIfNoJavaEnv] && process.env[failIfNoJavaEnv] !== 'false';
 
 function parseJavaVersion(javaVersionOutput: string) {
   const versionMatch = /version "(?:1\.)?(\d+)[\d._-]*"/.exec(
@@ -24,12 +27,16 @@ function parseJavaVersion(javaVersionOutput: string) {
   if (versionMatch !== null && versionMatch.length === 2) {
     return parseInt(versionMatch[1], 10);
   }
+  if (enforceJava)
+    throw Error(`This test suite needs Java and ${failIfNoJavaEnv} is set. However, we cannot parse the Java version.
+The output of java -version was:
+${javaVersionOutput}`);
   return 0;
 }
 
 function determineJavaVersion(): number {
-  let error;
   let javaVersionCommand: SpawnSyncReturns<string>;
+  let error: Error;
   try {
     javaVersionCommand = spawnSync('java', ['-version'], {
       encoding: 'utf8',
@@ -38,19 +45,21 @@ function determineJavaVersion(): number {
   } catch (e) {
     error = e;
   }
-  if (error)
+  if (javaVersionCommand.error) error = javaVersionCommand.error;
+  if (error) {
+    if (!enforceJava) return 0;
     throw Error(
-      `This test suite needs Java. Please provide Java or set the environment variable ${skipJavaTestsEnv} to true.
-Output of java -version:
+      `This test suite needs Java and ${failIfNoJavaEnv} is set.
+Result of java -version:
 ${error}`
     );
+  }
   return parseJavaVersion(javaVersionCommand.stderr);
 }
 
 describe('lib/manager/gradle/gradle-updates-report', () => {
   let workingDir: DirectoryResult;
   const javaVersion = determineJavaVersion();
-  const skipJava = process.env[skipJavaTestsEnv] !== undefined;
 
   beforeEach(async () => {
     workingDir = await tmp.dir({ unsafeCleanup: true });
@@ -62,7 +71,11 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
       const gradleSupportsThisJavaVersion =
         javaVersion >= supportedJavaVersions.min &&
         javaVersion <= supportedJavaVersions.max;
-      (skipJava || !gradleSupportsThisJavaVersion ? it.skip : it)(
+      if (!gradleSupportsThisJavaVersion && enforceJava)
+        throw Error(
+          `This test needs a Java version between ${supportedJavaVersions.min} and ${supportedJavaVersions.max}. The current Java version is ${javaVersion} and ${failIfNoJavaEnv} is set!`
+        );
+      (!gradleSupportsThisJavaVersion ? it.skip : it)(
         `generates a report for Gradle version ${gradleVersion}`,
         // the function creation is correct and intended
         // eslint-disable-next-line no-loop-func

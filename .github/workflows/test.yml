@@ -122,6 +122,8 @@ jobs:
 
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
+        env:
+          FAIL_IF_NO_JAVA: 'true'
 
       - name: E2E Test
         run: yarn test-e2e
