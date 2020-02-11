@@ -1,9 +1,9 @@
 import { join } from 'path';
-import { writeFile, exists, readFile } from 'fs-extra';
+import { exists, readFile, writeFile } from 'fs-extra';
 import { logger } from '../../logger';
 import { DATASOURCE_SBT } from '../../constants/data-binary-source';
 
-const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
+export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
 interface GradleProject {
   project: string;
@@ -28,11 +28,13 @@ export interface BuildDependency {
   registryUrls?: string[];
 }
 
-async function createRenovateGradlePlugin(localDir: string): Promise<void> {
+export async function createRenovateGradlePlugin(
+  localDir: string
+): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
-import java.net.URI
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import java.util.concurrent.ConcurrentLinkedQueue
 
 def output = new ConcurrentLinkedQueue<>();
@@ -40,19 +42,21 @@ def output = new ConcurrentLinkedQueue<>();
 allprojects {
   tasks.register("renovate") {
     doLast {
-        def project = ['project': project.name]
-        output << project
-        def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
-           .findAll { it instanceof URI && it.url.scheme ==~ /https?/ }
-           .collect { "$it.url" }
-           .unique()
-        project.repositories = repos
-        def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
-          .collect { it.dependencies + it.dependencyConstraints }
-          .flatten()
-          .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
-          .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
-        project.dependencies = deps
+      def project = ['project': project.name]
+      output << project
+
+      def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
+        .findAll { it instanceof MavenArtifactRepository && it.url.scheme ==~ /https?/ }
+        .collect { "$it.url" }
+        .unique()
+      project.repositories = repos
+
+      def deps = (buildscript.configurations + configurations + settings.buildscript.configurations)
+        .collect { it.dependencies + it.dependencyConstraints }
+        .flatten()
+        .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
+        .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
+      project.dependencies = deps
     }
   }
 }
@@ -61,7 +65,7 @@ gradle.buildFinished {
    def outputFile = new File('${GRADLE_DEPENDENCY_REPORT_FILENAME}')
    def json = JsonOutput.toJson(output)
    outputFile.write json
-}  `;
+}`;
   const gradleInitFile = join(localDir, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
@@ -137,7 +141,7 @@ function buildDependency(
   };
 }
 
-async function extractDependenciesFromUpdatesReport(
+export async function extractDependenciesFromUpdatesReport(
   localDir: string
 ): Promise<BuildDependency[]> {
   const gradleProjectConfigurations = await readGradleReport(localDir);
@@ -165,9 +169,3 @@ async function extractDependenciesFromUpdatesReport(
       return dep;
     });
 }
-
-export {
-  extractDependenciesFromUpdatesReport,
-  createRenovateGradlePlugin,
-  GRADLE_DEPENDENCY_REPORT_FILENAME,
-};
