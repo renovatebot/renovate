@@ -30,19 +30,11 @@ function loadDatasources(): void {
     .map(dirent => dirent.name)
     .sort();
   for (const datasourceName of datasourceDirs) {
-    let module = null;
-    try {
-      module = require(`./${datasourceName}`); // eslint-disable-line
-    } catch (err) /* istanbul ignore next */ {
-      logger.fatal({ err }, `Can not load datasource "${datasourceName}".`);
-      process.exit(1);
-    }
-
+    const module = require(`./${datasourceName}`);
     if (isValidDatasourceModule(datasourceName, module)) {
       datasources[datasourceName] = module;
     } /* istanbul ignore next */ else {
-      logger.fatal(`Datasource module "${datasourceName}" is invalid.`);
-      process.exit(1);
+      throw new Error(`Datasource module "${datasourceName}" is invalid.`);
     }
   }
 }
