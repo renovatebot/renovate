@@ -4,7 +4,6 @@ import URL from 'url';
 
 import { ManagerConfig, PackageFile } from '../common';
 import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
-import { filter } from 'minimatch';
 
 type GitModule = {
   name: string;
