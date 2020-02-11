@@ -8,6 +8,7 @@ import {
 } from './gradle-updates-report';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
+const skipJavaTestsEnv = 'SKIP_JAVA_TESTS';
 
 const gradleJavaVersionSupport = {
   5: { min: 8, max: 12 },
@@ -27,12 +28,18 @@ function parseJavaVersion(javaVersionOutput) {
 describe('lib/manager/gradle/gradle-updates-report', () => {
   let workingDir: DirectoryResult;
   let javaVersion: number;
-  const skipJava = process.env.SKIP_JAVA_TESTS === 'true';
+  const skipJava = process.env[skipJavaTestsEnv] !== undefined;
 
   beforeAll(async () => {
-    javaVersion = await exec('java -version').then(({ stderr }) =>
-      parseJavaVersion(stderr)
-    );
+    javaVersion = await exec('java -version')
+      .then(({ stderr }) => parseJavaVersion(stderr))
+      .catch(reason => {
+        throw Error(
+          `This test suite needs Java. Please provide Java or set the environment variable ${skipJavaTestsEnv} to true.
+Output of java -version:
+${reason}`
+        );
+      });
   });
 
   beforeEach(async () => {
@@ -48,7 +55,9 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
           javaVersion < supportedJavaVersions.min ||
           javaVersion > supportedJavaVersions.max
         ) {
-          return;
+          throw Error(
+            `This test needs a Java version between ${supportedJavaVersions.min} and ${supportedJavaVersions.max}`
+          );
         }
         await fs.copy(`${fixtures}/minimal-project`, workingDir.path);
         await fs.copy(
@@ -57,7 +66,7 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
         );
         await createRenovateGradlePlugin(workingDir.path);
 
-        await exec(`./gradlew ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
+        await exec(`gradlew ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
           cwd: workingDir.path,
         });
         expect(
