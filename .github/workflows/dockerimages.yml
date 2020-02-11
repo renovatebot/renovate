@@ -63,7 +63,7 @@ jobs:
     name: Release push
     runs-on: ubuntu-latest
 
-    needs: test
+    needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/chore/docker-cache'
 
     timeout-minutes: 10
