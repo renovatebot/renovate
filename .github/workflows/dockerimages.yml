@@ -10,7 +10,7 @@ on:
 
 env:
   PLATFORM: linux/amd64
-  CACHE_IMAGE: renovate/cache-test
+  DOCKER_REPO: renovate/cache-test
 
 jobs:
   build:
@@ -24,13 +24,14 @@ jobs:
         tag: [latest, slim]
 
     env:
-      DOCKERFILE: Dockerfile.${{ matrix.tag }}
+      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
+      DOCKER_TAG: ${{ matrix.tag }}
 
     steps:
-      - name: Init env for other tags
+      - name: Overwrite env for latest tag
         if: matrix.tag == 'latest'
         run: |
-          echo "::set-env name=DOCKERFILE::Dockerfile"
+          echo "::set-env name=DOCKER_FILE::Dockerfile"
 
       - name: Set up Docker Buildx
         id: buildx
@@ -45,55 +46,27 @@ jobs:
           docker buildx build \
             --platform ${PLATFORM} \
             --output=type=docker \
-            --cache-from=${CACHE_IMAGE}:cache-${{ matrix.tag }} \
+            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
             --tag=renovate \
-            --file=./${DOCKERFILE} .
+            --file=./${DOCKER_FILE} .
+
       - name: Test the Docker image
         run: |
           docker run --rm -t renovate --version
+
       - name: Image history
         run: docker history renovate
       - name: Image size
         run: docker image ls | grep renovate
 
-  push:
-    name: Release push
-    runs-on: ubuntu-latest
-
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/chore/docker-cache'
-
-    timeout-minutes: 20
-
-    strategy:
-      matrix:
-        tag: [latest, slim]
-
-    env:
-      DOCKERFILE: Dockerfile.${{ matrix.tag }}
-
-    steps:
-      - name: Init env for other tags
-        if: matrix.tag == 'latest'
+      - name: Push the Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/chore/docker-cache'
         run: |
-          echo "::set-env name=DOCKERFILE::Dockerfile"
-
-      - name: Set up Docker Buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: v0.3.1
-
-      - uses: actions/checkout@v2
-
-      - name: Log into registry
-        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
-
-      - name: Build the Docker image
-        run: |
+          echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
           docker buildx build \
             --platform ${PLATFORM} \
             --output=type=registry \
-            --cache-from=${CACHE_IMAGE}:cache-${{ matrix.tag }} \
-            --cache-to=${CACHE_IMAGE}:cache-${{ matrix.tag }} \
-            --tag=${CACHE_IMAGE}:test-${{ matrix.tag }} \
-            --file=./${DOCKERFILE} .
+            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
+            --cache-to=${DOCKER_REPO}:cache-${DOCKER_TAG} \
+            --tag=${DOCKER_REPO}:test-${DOCKER_TAG} \
+            --file=./${DOCKER_FILE} .
