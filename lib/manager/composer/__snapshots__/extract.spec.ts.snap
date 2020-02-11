@@ -549,7 +549,7 @@ Object {
     },
     Object {
       "currentValue": "dev-trunk",
-      "datasource": "gitTags",
+      "datasource": "git-tags",
       "depName": "awesome/vcs",
       "depType": "require",
       "lockedVersion": "1.1.0",
@@ -558,7 +558,7 @@ Object {
     },
     Object {
       "currentValue": ">=7.0.2",
-      "datasource": "gitTags",
+      "datasource": "git-tags",
       "depName": "awesome/git",
       "depType": "require",
       "lockedVersion": "1.2.0",
@@ -621,7 +621,7 @@ Object {
     },
     Object {
       "currentValue": "dev-trunk",
-      "datasource": "gitTags",
+      "datasource": "git-tags",
       "depName": "awesome/vcs",
       "depType": "require",
       "lookupName": "https://my-vcs.example/my-vcs-repo",
@@ -629,7 +629,7 @@ Object {
     },
     Object {
       "currentValue": ">=7.0.2",
-      "datasource": "gitTags",
+      "datasource": "git-tags",
       "depName": "awesome/git",
       "depType": "require",
       "lookupName": "https://my-git.example/my-git-repo",

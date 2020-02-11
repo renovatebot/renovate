@@ -183,7 +183,7 @@ Object {
     },
     Object {
       "currentValue": "1.36.1",
-      "datasource": "terraformProvider",
+      "datasource": "terraform-provider",
       "depName": "azurerm",
       "depNameShort": "azurerm",
       "depType": "terraform",
@@ -195,7 +195,7 @@ Object {
     },
     Object {
       "currentValue": "=2.4",
-      "datasource": "terraformProvider",
+      "datasource": "terraform-provider",
       "depName": "gitlab",
       "depNameShort": "gitlab",
       "depType": "terraform",
@@ -207,7 +207,7 @@ Object {
     },
     Object {
       "currentValue": "=1.3",
-      "datasource": "terraformProvider",
+      "datasource": "terraform-provider",
       "depName": "gitlab",
       "depNameShort": "gitlab",
       "depType": "terraform",
@@ -218,7 +218,7 @@ Object {
       "moduleName": "gitlab",
     },
     Object {
-      "datasource": "terraformProvider",
+      "datasource": "terraform-provider",
       "depName": "helm",
       "depNameShort": "helm",
       "depType": "terraform",
@@ -231,7 +231,7 @@ Object {
     },
     Object {
       "currentValue": "V1.9",
-      "datasource": "terraformProvider",
+      "datasource": "terraform-provider",
       "depName": "newrelic",
       "depNameShort": "newrelic",
       "depType": "terraform",
