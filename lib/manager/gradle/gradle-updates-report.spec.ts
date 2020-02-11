@@ -16,7 +16,7 @@ const gradleJavaVersionSupport = {
   6: { min: 8, max: 13 },
 };
 
-function parseJavaVersion(javaVersionOutput) {
+function parseJavaVersion(javaVersionOutput: string) {
   const versionMatch = /version "(?:1\.)?(\d+)[\d._-]*"/.exec(
     javaVersionOutput
   );
