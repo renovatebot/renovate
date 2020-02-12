@@ -122,7 +122,7 @@ async function get(
 ): Promise<GotResponse> {
   let result = null;
 
-  const opts = {
+  const opts: GotJSONOptions = {
     hostType,
     prefixUrl: baseUrl,
     responseType: 'json',
@@ -131,7 +131,7 @@ async function get(
   const method = opts.method || 'get';
   if (method.toLowerCase() === 'post' && path === 'graphql') {
     // GitHub Enterprise uses unversioned graphql path
-    opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
+    opts.prefixUrl = opts.prefixUrl.toString().replace('/v3/', '/');
   }
   logger.trace(`${method.toUpperCase()} ${path}`);
   try {
@@ -149,13 +149,13 @@ async function get(
       }
     }
     result = await got(path, opts);
-    if (opts.paginate) {
+    if (options.paginate) {
       // Check if result is paginated
-      const pageLimit = opts.pageLimit || 10;
+      const pageLimit = options.pageLimit || 10;
       const linkHeader = parseLinkHeader(result.headers.link as string);
       if (linkHeader && linkHeader.next && linkHeader.last) {
         let lastPage = +linkHeader.last.page;
-        if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
+        if (!process.env.RENOVATE_PAGINATE_ALL && options.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
         const pageNumbers = Array.from(
@@ -187,7 +187,8 @@ async function get(
         }
       } else if (okToRetry) {
         logger.info('Retrying graphql query');
-        opts.body = opts.body.replace('first: 100', 'first: 25');
+        // TODO: fix type
+        opts.body = (opts.body as string).replace('first: 100', 'first: 25');
         return get(path, opts, !okToRetry);
       }
     }
