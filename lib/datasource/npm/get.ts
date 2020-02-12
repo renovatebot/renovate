@@ -42,7 +42,8 @@ export interface NpmDependency extends ReleaseResult {
 }
 
 export async function getDependency(
-  name: string
+  name: string,
+  retries = 3
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${name})`);
 
@@ -111,6 +112,10 @@ export async function getDependency(
       retry: 5,
       headers,
     });
+    // istanbul ignore if
+    if (retries < 3) {
+      logger.info({ retries }, 'Successfully recovered ECONNRESET');
+    }
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
     const returnedName = res.name ? res.name : res._id || '';
@@ -223,6 +228,11 @@ export async function getDependency(
       return null;
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
+      // istanbul ignore if
+      if (err.code === 'ECONNRESET' && retries > 1) {
+        logger.info({ regUrl }, 'Retrying npm ECONNRESET');
+        return getDependency(name, retries - 1);
+      }
       logger.warn(
         {
           err,
