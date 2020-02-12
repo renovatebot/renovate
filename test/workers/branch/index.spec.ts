@@ -17,9 +17,9 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../lib/constants/error-messages';
 import {
-  PR_STATUS_CLOSED,
-  PR_STATUS_MERGED,
-  PR_STATUS_OPEN,
+  PR_STATE_CLOSED,
+  PR_STATE_MERGED,
+  PR_STATE_OPEN,
 } from '../../../lib/constants/pull-requests';
 import { BRANCH_STATUS_PENDING } from '../../../lib/constants/branch-constants';
 import { StatusResult } from '../../../lib/platform/git/storage';
@@ -113,7 +113,7 @@ describe('workers/branch', () => {
       config.updateNotScheduled = true;
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         isModified: false,
       } as never);
       await branchWorker.processBranch(config);
@@ -124,7 +124,7 @@ describe('workers/branch', () => {
       config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATUS_CLOSED,
+        state: PR_STATE_CLOSED,
       } as never);
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
@@ -135,7 +135,7 @@ describe('workers/branch', () => {
       config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATUS_CLOSED,
+        state: PR_STATE_CLOSED,
       });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
@@ -145,7 +145,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATUS_CLOSED,
+        state: PR_STATE_CLOSED,
       });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
@@ -155,7 +155,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATUS_MERGED,
+        state: PR_STATE_MERGED,
       });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
@@ -164,7 +164,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATUS_MERGED,
+        state: PR_STATE_MERGED,
         isModified: true,
       } as never);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -175,7 +175,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         isModified: true,
         labels: ['rebase'],
       } as never);
@@ -186,7 +186,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         isModified: true,
       } as never);
       const res = await branchWorker.processBranch(config);
@@ -196,7 +196,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         isModified: false,
         targetBranch: 'v6',
       } as never);
@@ -433,7 +433,7 @@ describe('workers/branch', () => {
     it('closed pr (dry run)', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
-        state: PR_STATUS_CLOSED,
+        state: PR_STATE_CLOSED,
       });
       expect(
         await branchWorker.processBranch({ ...config, dryRun: true })
@@ -443,7 +443,7 @@ describe('workers/branch', () => {
     it('branch pr no rebase (dry run)', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         isModified: true,
       } as never);
       expect(
@@ -463,7 +463,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       } as never);
@@ -494,7 +494,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       } as never);
@@ -522,7 +522,7 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       } as never);

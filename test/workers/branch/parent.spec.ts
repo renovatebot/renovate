@@ -2,13 +2,13 @@ import { getParentBranch } from '../../../lib/workers/branch/parent';
 import { platform } from '../../util';
 import { RenovateConfig } from '../../../lib/config';
 import { Pr } from '../../../lib/platform';
-import { PR_STATUS_OPEN } from '../../../lib/constants/pull-requests';
+import { PR_STATE_OPEN } from '../../../lib/constants/pull-requests';
 
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
     const pr: Pr = {
       branchName: 'master',
-      state: PR_STATUS_OPEN,
+      state: PR_STATE_OPEN,
       title: 'any',
     };
     let config: RenovateConfig;

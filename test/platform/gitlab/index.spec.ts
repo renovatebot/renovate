@@ -7,8 +7,8 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../lib/constants/error-messages';
 import {
-  PR_STATUS_NOT_OPEN,
-  PR_STATUS_OPEN,
+  PR_STATE_NOT_OPEN,
+  PR_STATE_OPEN,
 } from '../../../lib/constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
@@ -866,7 +866,7 @@ describe('platform/gitlab', () => {
       );
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        state: PR_STATUS_NOT_OPEN,
+        state: PR_STATE_NOT_OPEN,
       });
       expect(res).toBeDefined();
     });
@@ -887,7 +887,7 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATUS_OPEN,
+        state: PR_STATE_OPEN,
       });
       expect(res).toBeDefined();
     });

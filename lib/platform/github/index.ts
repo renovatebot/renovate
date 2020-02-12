@@ -45,9 +45,9 @@ import {
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
 import {
-  PR_STATUS_ALL,
-  PR_STATUS_CLOSED,
-  PR_STATUS_OPEN,
+  PR_STATE_ALL,
+  PR_STATE_CLOSED,
+  PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 
 const defaultConfigFile = configFileNames[0];
@@ -761,7 +761,7 @@ async function getOpenPrs(): Promise<PrList> {
       for (const pr of res.data.repository.pullRequests.nodes) {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = PR_STATUS_OPEN;
+        pr.state = PR_STATE_OPEN;
         pr.branchName = pr.headRefName;
         const branchName = pr.branchName;
         const prNo = pr.number;
@@ -876,7 +876,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   }
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === PR_STATUS_OPEN) {
+  if (pr.state === PR_STATE_OPEN) {
     pr.isModified = true;
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
@@ -966,7 +966,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATUS_ALL) {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -999,7 +999,7 @@ export async function getPrList(): Promise<Pr[]> {
         sha: pr.head.sha,
         title: pr.title,
         state:
-          pr.state === PR_STATUS_CLOSED && pr.merged_at && pr.merged_at.length
+          pr.state === PR_STATE_CLOSED && pr.merged_at && pr.merged_at.length
             ? /* istanbul ignore next */ 'merged'
             : pr.state,
         createdAt: pr.created_at,
@@ -1016,7 +1016,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATUS_ALL,
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -1038,7 +1038,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATUS_OPEN,
+    state: PR_STATE_OPEN,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }

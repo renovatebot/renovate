@@ -4,7 +4,7 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
-import { PR_STATUS_OPEN } from '../../../constants/pull-requests';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import {
   BRANCH_STATUS_FAILURE,
@@ -13,7 +13,7 @@ import {
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
-    .filter(pr => pr.state === PR_STATUS_OPEN)
+    .filter(pr => pr.state === PR_STATE_OPEN)
     .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
     .filter(pr => new RegExp('renovate', 'i').test(pr.title));
 }

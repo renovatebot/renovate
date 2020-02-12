@@ -3,7 +3,7 @@ import { platform } from '../../../../platform';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
-import { PR_STATUS_NOT_OPEN } from '../../../../constants/pull-requests';
+import { PR_STATE_NOT_OPEN } from '../../../../constants/pull-requests';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
@@ -39,7 +39,7 @@ const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
   platform.findPr({
     branchName: config.onboardingBranch,
     prTitle: config.onboardingPrTitle,
-    state: PR_STATUS_NOT_OPEN,
+    state: PR_STATE_NOT_OPEN,
   });
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {

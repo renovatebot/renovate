@@ -27,7 +27,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PR_STATUS_ALL, PR_STATUS_OPEN } from '../../constants/pull-requests';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_FAILURE,
@@ -307,7 +307,7 @@ export async function getPr(
 
   pr.version = updatePrVersion(pr.number, pr.version);
 
-  if (pr.state === PR_STATUS_OPEN) {
+  if (pr.state === PR_STATE_OPEN) {
     const mergeRes = await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
       { useCache: !refreshCache }
@@ -352,7 +352,7 @@ export async function getPr(
 // TODO: coverage
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATUS_ALL) {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -400,7 +400,7 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATUS_ALL,
+  state = PR_STATE_ALL,
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
@@ -422,7 +422,7 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATUS_OPEN,
+    state: PR_STATE_OPEN,
   });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }

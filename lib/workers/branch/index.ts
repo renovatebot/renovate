@@ -33,9 +33,9 @@ import {
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import {
-  PR_STATUS_CLOSED,
-  PR_STATUS_MERGED,
-  PR_STATUS_OPEN,
+  CLOSED,
+  PR_STATE_MERGED,
+  PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
 import { exec } from '../../util/exec';
@@ -104,7 +104,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      if (existingPr.state === PR_STATUS_CLOSED) {
+      if (existingPr.state === PR_STATE_CLOSED) {
         const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
@@ -137,7 +137,7 @@ export async function processBranch(
             await platform.deleteBranch(config.branchName);
           }
         }
-      } else if (existingPr.state === PR_STATUS_MERGED) {
+      } else if (existingPr.state === PR_STATE_MERGED) {
         logger.info(
           { pr: existingPr.number },
           'Merged PR is blocking this branch'
@@ -169,7 +169,7 @@ export async function processBranch(
       logger.debug('Checking if PR has been edited');
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== PR_STATUS_OPEN) {
+        if (branchPr.state !== PR_STATE_OPEN) {
           logger.info(
             'PR has been closed or merged since this run started - aborting'
           );
