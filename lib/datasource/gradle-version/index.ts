@@ -29,7 +29,7 @@ export async function getPkgReleases({
     versionsUrls.map(async url => {
       try {
         const response: GradleRelease = await got(url, {
-          json: true,
+          responseType: 'json',
         });
         const releases = response.body
           .filter(release => !release.snapshot && !release.nightly)

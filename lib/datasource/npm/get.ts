@@ -110,7 +110,7 @@ export async function getDependency(
   try {
     const useCache = retries === 3; // Disable cache if we're retrying
     const opts: GotJSONOptions = {
-      json: true,
+      responseType: 'json',
       retry: 5,
       headers,
       useCache,

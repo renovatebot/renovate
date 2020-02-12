@@ -1,11 +1,9 @@
+import got from 'got';
 import cacheGet from './cache-get';
 import renovateAgent from './renovate-agent';
 import hostRules from './host-rules';
 import auth from './auth';
 import { instance } from './stats';
-import { mergeInstances } from './util';
-
-export * from './common';
 
 /*
  * This is the default got instance for Renovate.
@@ -14,7 +12,7 @@ export * from './common';
  *
  * Important: always put the renovateAgent one last, to make sure the correct user agent is used
  */
-export const api = mergeInstances(
+export const api = got.extend(
   cacheGet,
   renovateAgent,
   hostRules,

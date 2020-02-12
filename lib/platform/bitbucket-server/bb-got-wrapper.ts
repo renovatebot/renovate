@@ -13,7 +13,7 @@ function get(
   const url = URL.resolve(baseUrl, path);
   const opts: GotApiOptions & GotJSONOptions = {
     hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
-    json: true,
+    responseType: 'json',
     ...options,
   };
   opts.headers = {

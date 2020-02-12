@@ -112,7 +112,7 @@ async function getAuthHeaders(
     const opts: hostRules.HostRule & {
       headers?: Record<string, string>;
     } = hostRules.find({ hostType: DATASOURCE_DOCKER, url: apiCheckUrl });
-    opts.json = true;
+    opts.responseType = 'json';
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);
       const auth = await getECRAuthToken(region, opts);
@@ -361,7 +361,10 @@ async function getTags(
     }
     let page = 1;
     do {
-      const res = await got<{ tags: string[] }>(url, { json: true, headers });
+      const res = await got<{ tags: string[] }>(url, {
+        responseType: 'json',
+        headers,
+      });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
       url =

@@ -28,7 +28,7 @@ export async function getPkgReleases({
   const hexUrl = `https://hex.pm/api/packages/${depName}`;
   try {
     const response = await got(hexUrl, {
-      json: true,
+      responseType: 'json',
       hostType: DATASOURCE_HEX,
     });
 

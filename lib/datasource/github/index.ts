@@ -20,7 +20,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
         ? 'application/vnd.github.machine-man-preview+json'
         : 'application/vnd.github.v3+json',
     },
-    json: true,
+    responseType: 'json',
     hostType: DATASOURCE_GITHUB,
   };
   let res: { body: { content: string } };

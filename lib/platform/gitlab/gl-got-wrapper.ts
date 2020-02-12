@@ -12,8 +12,8 @@ let baseUrl = 'https://gitlab.com/api/v4/';
 async function get(path: string, options: any): Promise<GotResponse> {
   const opts = {
     hostType,
-    baseUrl,
-    json: true,
+    prefixUrl: baseUrl,
+    responseType: 'json',
     ...options,
   };
   try {

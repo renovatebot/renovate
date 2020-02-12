@@ -70,7 +70,7 @@ export async function getPkgReleases({
   try {
     const res: TerraformRelease = (
       await got(pkgUrl, {
-        json: true,
+        responseType: 'json',
         hostType: DATASOURCE_TERRAFORM,
       })
     ).body;

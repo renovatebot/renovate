@@ -44,7 +44,7 @@ export async function getPkgReleases({
   const url = `https://api.cdnjs.com/libraries/${depName}?fields=homepage,repository,assets`;
 
   try {
-    const res = await got(url, { json: true });
+    const res = await got(url, { responseType: 'json' });
 
     const cdnjsResp: CdnjsResponse = res.body;
 

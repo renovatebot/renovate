@@ -1,5 +1,5 @@
+import got, { CancelableRequest } from 'got';
 import { logger } from '../../logger';
-import { create } from './util';
 
 interface HostStats {
   median?: number;
@@ -33,16 +33,26 @@ export const printStats = (): void => {
   logger.debug({ hostStats }, 'Host request stats (milliseconds)');
 };
 
-export const instance = create({
-  options: {},
-  handler: (options, next) => {
-    const start = new Date();
-    const nextPromise = next(options);
-    nextPromise.on('response', () => {
-      const elapsed = new Date().getTime() - start.getTime();
-      stats[options.hostname] = stats[options.hostname] || [];
-      stats[options.hostname].push(elapsed);
-    });
-    return nextPromise;
-  },
+export const instance = got.extend({
+  handlers: [
+    (options, next) => {
+      const nextPromise = next(options);
+      const { hostname } = options;
+
+      (nextPromise as CancelableRequest<unknown>).on(
+        'response',
+        ({ timings }) => {
+          const elapsed = timings.response - timings.start;
+
+          if (hostname in stats) {
+            stats[hostname].push(elapsed);
+          } else {
+            stats[hostname] = [elapsed];
+          }
+        }
+      );
+
+      return nextPromise;
+    },
+  ],
 });

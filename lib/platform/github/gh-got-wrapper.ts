@@ -126,8 +126,8 @@ async function get(
 
   const opts = {
     hostType,
-    baseUrl,
-    json: true,
+    prefixUrl: baseUrl,
+    responseType: 'json',
     ...options,
   };
   const method = opts.method || 'get';

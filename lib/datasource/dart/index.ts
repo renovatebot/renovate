@@ -22,7 +22,7 @@ export async function getPkgReleases({
   } = null;
   try {
     raw = await got(pkgUrl, {
-      json: true,
+      responseType: 'json',
     });
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {

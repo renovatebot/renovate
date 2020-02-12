@@ -29,7 +29,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
 
   try {
     const servicesIndexRaw = await got(url, {
-      json: true,
+      responseType: 'json',
       hostType: DATASOURCE_NUGET,
     });
     if (servicesIndexRaw.statusCode !== 200) {
@@ -78,7 +78,7 @@ export async function getPkgReleases(
   };
   try {
     const pkgUrlListRaw = await got(queryUrl, {
-      json: true,
+      responseType: 'json',
       hostType: DATASOURCE_NUGET,
     });
     if (pkgUrlListRaw.statusCode !== 200) {

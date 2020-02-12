@@ -37,8 +37,8 @@ async function getDependency(
   const lookupUrl = url.resolve(hostUrl, `${depName}/json`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const rep = await got(url.parse(lookupUrl), {
-      json: true,
+    const rep = await got(lookupUrl, {
+      responseType: 'json',
       hostType: DATASOURCE_PYPI,
     });
     const dep = rep && rep.body;

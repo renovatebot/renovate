@@ -8,9 +8,9 @@ async function get(
   options: GotApiOptions & GotJSONOptions
 ): Promise<GotResponse> {
   const opts: GotApiOptions & GotJSONOptions = {
-    json: true,
+    responseType: 'json',
     hostType: PLATFORM_TYPE_BITBUCKET,
-    baseUrl: 'https://api.bitbucket.org/',
+    prefixUrl: 'https://api.bitbucket.org/',
     ...options,
   };
   const res = await got(path, opts);

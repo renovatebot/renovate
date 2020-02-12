@@ -41,16 +41,21 @@ const getHeaders = (): OutgoingHttpHeaders => {
 };
 
 const fetch = async ({ dependency, registry, path }): Promise<any> => {
-  const json = true;
+  const responseType = 'json';
 
   const retry = { retries: retriable() };
-  const headers = getHeaders();
+  const headers: any = getHeaders();
 
   const name = `${path}/${dependency}.json`;
   const baseUrl = registry;
 
   logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
-  const response = (await got(name, { retry, json, baseUrl, headers })) || {
+  const response = (await got(name, {
+    retry,
+    responseType,
+    prefixUrl: baseUrl,
+    headers,
+  })) || {
     body: undefined,
   };
 

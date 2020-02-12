@@ -5,7 +5,7 @@ import { getHostType, getBaseUrl, dispatchError } from './gh-got-wrapper';
 const accept = 'application/vnd.github.merge-info-preview+json';
 
 const gqlOpts: GotJSONOptions = {
-  json: true,
+  responseType: 'json',
   method: 'POST',
   headers: {
     accept,
@@ -28,8 +28,8 @@ async function get<T = unknown>(
   const options: GotJSONOptions = {
     ...gqlOpts,
     hostType: getHostType(),
-    baseUrl: (getBaseUrl() || '').replace('/v3/', '/'), // GitHub Enterprise uses unversioned graphql path
-    body: { query },
+    prefixUrl: (getBaseUrl() || '').replace('/v3/', '/'), // GitHub Enterprise uses unversioned graphql path
+    json: { query },
   };
 
   if (global.appMode) {

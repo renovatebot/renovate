@@ -13,14 +13,15 @@ import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
-    json: true,
+    responseType: 'json',
   };
   const { username, password } = hostRules.find({
     hostType: DATASOURCE_PACKAGIST,
     url,
   });
   if (username && password) {
-    opts.auth = `${username}:${password}`;
+    opts.username = username;
+    opts.password = password;
   }
   return opts;
 }
@@ -225,7 +226,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
   const res = (
     await got(pkgUrl, {
-      json: true,
+      responseType: 'json',
       retry: 5,
     })
   ).body.packages[name];
