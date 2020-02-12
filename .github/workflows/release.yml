@@ -41,8 +41,8 @@ jobs:
       - name: Build the Docker image
         run: |
           docker buildx build \
-            --platform ${PLATFORM} \
-            --output=type=docker \
+            --platform=${PLATFORM} \
+            --load \
             --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
             --tag=renovate \
             --file=./${DOCKER_FILE} .
@@ -56,44 +56,10 @@ jobs:
       - name: Image size
         run: docker image ls | grep renovate
 
+      - name: Docker registry login
+        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
+
       - name: Generate tags
-        run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-
-          # Tag base
-          tags="${DOCKER_REPO}:${DOCKER_TAG}"
-          echo "Tagging ${DOCKER_REPO}:${DOCKER_TAG}"
-
-          SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)?$"
-
-          if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
-            echo Not a semver tag - skipping
-            exit 1
-          fi
-
-          major=${BASH_REMATCH[1]}
-          minor=${BASH_REMATCH[2]}
-          patch=${BASH_REMATCH[3]}
-          slim=${DOCKER_TAG#latest}
-          slim=${slim:+-}${slim}
-
-
-          # Tag for versions additional
-          for tag in {"${major}${slim}","${major}.${minor}${slim}","${major}.${minor}.${patch}${slim}"}; do
-            echo "Tagging ${DOCKER_REPO}:${tag}"
-            tags+=",${DOCKER_REPO}:${tag}"
-          done
-
-          echo "::set-env name=TAGS::${tags}"
-
-      - name: Push the Docker image
-        run: |
-          echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
-          docker buildx build \
-            --platform ${PLATFORM} \
-            --output=type=registry \
-            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --tag=${TAGS} \
-            --file=./${DOCKER_FILE} .
+        env:
+          REF: ${{ github.ref }}
+        run: ./.github/workflows/release-docker.sh
