@@ -234,7 +234,7 @@ export async function getDependency(
     if (regUrl.startsWith('https://registry.npmjs.org')) {
       // istanbul ignore if
       if (err.code === 'ECONNRESET' && retries > 1) {
-        logger.info({ regUrl }, 'Retrying npm ECONNRESET');
+        logger.info({ pkgUrl }, 'Retrying npm ECONNRESET');
         await delay(5000);
         return getDependency(name, retries - 1);
       }
