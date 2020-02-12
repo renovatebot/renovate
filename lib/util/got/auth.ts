@@ -13,7 +13,7 @@ export default got.extend({
       if (options.auth || options.headers.authorization) {
         return next(options);
       }
-      if (options.context.token) {
+      if (options.context?.token) {
         logger.trace(
           { hostname: options.hostname },
           'Converting token to Bearer auth'

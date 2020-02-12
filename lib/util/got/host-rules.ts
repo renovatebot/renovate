@@ -20,7 +20,7 @@ export default got.extend({
       if (
         options.headers.authorization ||
         options.auth ||
-        options.context.token
+        options.context?.token
       ) {
         logger.trace('Authorization already set for host: ' + options.hostname);
       } else if (password) {
@@ -32,7 +32,7 @@ export default got.extend({
         logger.trace(
           'Applying Bearer authentication for host ' + options.hostname
         );
-        options.context.token = token;
+        options.context = { ...options.context, token };
       }
       if (timeout) {
         options.timeout = { request: timeout };

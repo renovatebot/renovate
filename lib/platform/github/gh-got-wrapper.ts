@@ -87,7 +87,7 @@ export function dispatchError(
     const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
     logger.info(
       {
-        token: maskToken(opts.context.token),
+        token: maskToken(opts.context?.token),
         err,
       },
       'GitHub failure: Bad credentials'

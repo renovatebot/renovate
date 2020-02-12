@@ -24,7 +24,10 @@ export default got.extend({
               JSON.stringify({ href: options.href, headers: options.headers })
           )
           .digest('hex');
-        if (!global.repoCache[cacheKey] || options.context.useCache === false) {
+        if (
+          !global.repoCache[cacheKey] ||
+          options.context?.useCache === false
+        ) {
           global.repoCache[cacheKey] = next(options);
         }
         return global.repoCache[cacheKey].then(response => ({
