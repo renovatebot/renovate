@@ -5,6 +5,8 @@ import hostRules from './host-rules';
 import auth from './auth';
 import { instance } from './stats';
 
+export * from './types';
+
 /*
  * This is the default got instance for Renovate.
  *  - Set the user agent to be Renovate

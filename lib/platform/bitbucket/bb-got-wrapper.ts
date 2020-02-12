@@ -1,5 +1,4 @@
-import { GotJSONOptions } from 'got';
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 import { GotApi, GotApiOptions, GotResponse } from '../common';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 

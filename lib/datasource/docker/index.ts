@@ -7,10 +7,10 @@ import hasha from 'hasha';
 import URL from 'url';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
-import { OutgoingHttpHeaders } from 'http';
 import AWS from 'aws-sdk';
+import { Options } from 'got';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotHeaders } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
@@ -62,7 +62,7 @@ export function getRegistryRepository(
 
 function getECRAuthToken(
   region: string,
-  opts: hostRules.HostRule
+  opts: Options
 ): Promise<string | null> {
   const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
   if (opts.username && opts.password) {
@@ -98,7 +98,7 @@ function getECRAuthToken(
 async function getAuthHeaders(
   registry: string,
   repository: string
-): Promise<OutgoingHttpHeaders | null> {
+): Promise<GotHeaders | null> {
   try {
     const apiCheckUrl = `${registry}/v2/`;
     const apiCheckResponse = await got(apiCheckUrl, { throwHttpErrors: false });
@@ -109,9 +109,11 @@ async function getAuthHeaders(
       apiCheckResponse.headers['www-authenticate']
     );
 
-    const opts: hostRules.HostRule & {
-      headers?: Record<string, string>;
-    } = hostRules.find({ hostType: DATASOURCE_DOCKER, url: apiCheckUrl });
+    // TODO: fix types
+    const opts: any = hostRules.find({
+      hostType: DATASOURCE_DOCKER,
+      url: apiCheckUrl,
+    });
     opts.responseType = 'json';
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);
@@ -139,7 +141,9 @@ async function getAuthHeaders(
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
-    const authResponse = (await got(authUrl, opts)).body;
+    const authResponse = (
+      await got<{ token?: string; access_token?: string }>(authUrl, opts)
+    ).body;
 
     const token = authResponse.token || authResponse.access_token;
     // istanbul ignore if
@@ -455,7 +459,7 @@ export function getConfigResponseBeforeRedirectHook(options: any): void {
 
 export function getConfigResponse(
   url: string,
-  headers: OutgoingHttpHeaders
+  headers: GotHeaders
 ): Promise<GotResponse> {
   return got(url, {
     headers,

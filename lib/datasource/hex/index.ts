@@ -27,12 +27,12 @@ export async function getPkgReleases({
   const depName = lookupName.split(':')[0];
   const hexUrl = `https://hex.pm/api/packages/${depName}`;
   try {
-    const response = await got(hexUrl, {
+    const response = await got<HexRelease>(hexUrl, {
       responseType: 'json',
-      hostType: DATASOURCE_HEX,
+      context: { hostType: DATASOURCE_HEX },
     });
 
-    const hexRelease: HexRelease = response.body;
+    const hexRelease = response.body;
 
     if (!hexRelease) {
       logger.warn({ depName }, `Invalid response body`);

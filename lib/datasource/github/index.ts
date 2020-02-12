@@ -6,7 +6,7 @@ import {
   DigestConfig,
 } from '../common';
 import { logger } from '../../logger';
-import got, { GotJSONOptions } from '../../util/got';
+import got, { GotJSONOptions, GotResponse } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
@@ -21,11 +21,11 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
         : 'application/vnd.github.v3+json',
     },
     responseType: 'json',
-    hostType: DATASOURCE_GITHUB,
+    context: { hostType: DATASOURCE_GITHUB },
   };
-  let res: { body: { content: string } };
+  let res: GotResponse<{ content: string }>;
   try {
-    res = await got(url, opts);
+    res = await got<{ content: string }>(url, opts);
   } catch (err) {
     if (err.message === PLATFORM_FAILURE) {
       throw err;

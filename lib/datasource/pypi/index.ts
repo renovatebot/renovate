@@ -3,7 +3,7 @@ import url from 'url';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
@@ -37,10 +37,11 @@ async function getDependency(
   const lookupUrl = url.resolve(hostUrl, `${depName}/json`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const rep = await got(lookupUrl, {
+    // TODO: fix type
+    const rep = await got<any>(lookupUrl, {
       responseType: 'json',
       hostType: DATASOURCE_PYPI,
-    });
+    } as GotJSONOptions);
     const dep = rep && rep.body;
     if (!dep) {
       logger.debug({ dependency: depName }, 'pip package not found');
@@ -116,8 +117,9 @@ async function getSimpleDependency(
   const lookupUrl = url.resolve(hostUrl, `${depName}`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const response = await got<string>(url.parse(lookupUrl), {
-      hostType: DATASOURCE_PYPI,
+    // TODO: fix me
+    const response = await got<string>(url.parse(lookupUrl)?.toString(), {
+      context: { hostType: DATASOURCE_PYPI },
     });
     const dep = response && response.body;
     if (!dep) {

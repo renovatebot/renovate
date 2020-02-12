@@ -34,10 +34,10 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformProvider = (
-      await got(pkgUrl, {
+    const res = (
+      await got<TerraformProvider>(pkgUrl, {
         responseType: 'json',
-        hostType: DATASOURCE_TERRAFORM,
+        context: { hostType: DATASOURCE_TERRAFORM },
       })
     ).body;
     // Simplify response before caching and returning

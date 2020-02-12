@@ -37,6 +37,8 @@ module.exports = {
     'prefer-template': 0,
     'no-underscore-dangle': 0,
 
+    'import/no-unresolved': [2, { ignore: ['^type-fest$'] }],
+
     // Makes no sense to allow type inferrence for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
       'error',

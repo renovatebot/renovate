@@ -30,9 +30,7 @@ type GotRequestError<E = unknown, T = unknown> = GotError & {
   headers?: Record<string, T>;
 };
 
-type GotRequestOptions = GotJSONOptions & {
-  token?: string;
-};
+type GotRequestOptions = GotJSONOptions;
 
 export function dispatchError(
   err: GotRequestError,
@@ -89,7 +87,7 @@ export function dispatchError(
     const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
     logger.info(
       {
-        token: maskToken(opts.token),
+        token: maskToken(opts.context.token),
         err,
       },
       'GitHub failure: Bad credentials'

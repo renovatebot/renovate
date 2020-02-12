@@ -1,4 +1,5 @@
 import { OutgoingHttpHeaders } from 'http';
+import { RetryOptions } from 'got/dist/source';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { maskToken } from '../../util/mask';
@@ -43,7 +44,8 @@ const getHeaders = (): OutgoingHttpHeaders => {
 const fetch = async ({ dependency, registry, path }): Promise<any> => {
   const responseType = 'json';
 
-  const retry = { retries: retriable() };
+  // TODO: fix me
+  const retry: RetryOptions = { retries: retriable() };
   const headers: any = getHeaders();
 
   const name = `${path}/${dependency}.json`;

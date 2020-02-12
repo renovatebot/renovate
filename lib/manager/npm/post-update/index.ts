@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import upath from 'upath';
-// eslint-disable-next-line import/no-unresolved
 import { PackageJson } from 'type-fest';
 import { logger } from '../../../logger';
 import * as npm from './npm';

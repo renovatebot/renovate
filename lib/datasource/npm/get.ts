@@ -4,10 +4,9 @@ import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
 import isBase64 from 'validator/lib/isBase64';
-import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got, { GotJSONOptions } from '../../util/got';
+import got, { GotJSONOptions, GotHeaders } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
@@ -77,7 +76,7 @@ export async function getDependency(
     return cachedResult;
   }
   const authInfo = registryAuthToken(regUrl, { npmrc });
-  const headers: OutgoingHttpHeaders = {};
+  const headers: GotHeaders = {};
 
   if (authInfo && authInfo.type && authInfo.token) {
     // istanbul ignore if
@@ -113,9 +112,10 @@ export async function getDependency(
       responseType: 'json',
       retry: 5,
       headers,
-      useCache,
+      context: { useCache },
     };
-    const raw = await got(pkgUrl, opts);
+    // TODO: fix type
+    const raw = await got<any>(pkgUrl, opts);
     // istanbul ignore if
     if (retries < 3) {
       logger.info({ retries }, 'Successfully recovered ECONNRESET');

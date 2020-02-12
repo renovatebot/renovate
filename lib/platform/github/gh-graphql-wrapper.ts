@@ -27,7 +27,7 @@ async function get<T = unknown>(
   const path = 'graphql';
   const options: GotJSONOptions = {
     ...gqlOpts,
-    hostType: getHostType(),
+    context: { hostType: getHostType() },
     prefixUrl: (getBaseUrl() || '').replace('/v3/', '/'), // GitHub Enterprise uses unversioned graphql path
     json: { query },
   };

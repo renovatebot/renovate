@@ -1,4 +1,4 @@
-import got from 'got';
+import { HTTPError } from 'got';
 import { logger } from '../../logger';
 import {
   UNAUTHORIZED,
@@ -32,18 +32,17 @@ const getErrorMessage = (status: number): string => {
   }
 };
 
-// TODO: workaround because got does not export HTTPError, should be moved to `lib/util/got`
-export type HTTPError = InstanceType<got.GotInstance['HTTPError']>;
-
-export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
-  _?: number,
+// TODO: fix me
+export default (numberOfRetries = NUMBER_OF_RETRIES): any => (
+  _?: any,
   err?: Partial<HTTPError>
 ): number => {
   if (numberOfRetries === 0) {
     return 0;
   }
 
-  const { headers, statusCode } = err;
+  const { response, statusCode } = err;
+  const { headers } = response;
 
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
   const isBanned = [TOO_MANY_REQUEST, SERVICE_UNAVAILABLE].includes(statusCode);

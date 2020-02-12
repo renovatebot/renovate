@@ -1,7 +1,7 @@
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotResponse } from '../../util/got';
 import { ReleaseResult } from '../common';
 import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
@@ -28,9 +28,10 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   }
 
   try {
-    const servicesIndexRaw = await got(url, {
+    // TODO: fix types
+    const servicesIndexRaw = await got<{ resources: any[] }>(url, {
       responseType: 'json',
-      hostType: DATASOURCE_NUGET,
+      context: { hostType: DATASOURCE_NUGET },
     });
     if (servicesIndexRaw.statusCode !== 200) {
       logger.debug(
@@ -77,9 +78,10 @@ export async function getPkgReleases(
     releases: [],
   };
   try {
-    const pkgUrlListRaw = await got(queryUrl, {
+    // TODO: fix types
+    const pkgUrlListRaw = await got<{ data: any[] }>(queryUrl, {
       responseType: 'json',
-      hostType: DATASOURCE_NUGET,
+      context: { hostType: DATASOURCE_NUGET },
     });
     if (pkgUrlListRaw.statusCode !== 200) {
       logger.debug(
@@ -118,9 +120,11 @@ export async function getPkgReleases(
       }
       if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
         const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
-        let metaresult: { body: string };
+        let metaresult: GotResponse<string>;
         try {
-          metaresult = await got(nugetOrgApi, { hostType: DATASOURCE_NUGET });
+          metaresult = await got(nugetOrgApi, {
+            context: { hostType: DATASOURCE_NUGET },
+          });
         } catch (err) /* istanbul ignore next */ {
           logger.debug(
             `Cannot fetch metadata for ${pkgName} using popped version ${lastVersion}`

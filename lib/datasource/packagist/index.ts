@@ -48,7 +48,7 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
   try {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
-    const res: PackageMeta = (await got(url, opts)).body;
+    const res = (await got<PackageMeta>(url, opts)).body;
     const meta: RegistryMeta = {};
     meta.packages = res.packages;
     if (res.includes) {
@@ -108,7 +108,7 @@ async function getPackagistFile(
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
   if (opts.auth || (opts.headers && opts.headers.authorization)) {
-    return (await got(regUrl + '/' + fileName, opts)).body;
+    return (await got<PackagistFile>(regUrl + '/' + fileName, opts)).body;
   }
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
@@ -118,7 +118,7 @@ async function getPackagistFile(
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
   }
-  const res = (await got(regUrl + '/' + fileName, opts)).body;
+  const res = (await got<PackagistFile>(regUrl + '/' + fileName, opts)).body;
   const cacheMinutes = 1440; // 1 day
   await renovateCache.set(
     cacheNamespace,
@@ -224,8 +224,9 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
+  // TODO: fix types
   const res = (
-    await got(pkgUrl, {
+    await got<any>(pkgUrl, {
       responseType: 'json',
       retry: 5,
     })
@@ -277,7 +278,8 @@ async function packageLookup(
         .replace('%hash%', providerPackages[name])
     );
     const opts = getHostOpts(regUrl);
-    const versions = (await got(pkgUrl, opts)).body.packages[name];
+    // TODO: fix types
+    const versions = (await got<any>(pkgUrl, opts)).body.packages[name];
     const dep = extractDepReleases(versions);
     dep.name = name;
     logger.trace({ dep }, 'dep');

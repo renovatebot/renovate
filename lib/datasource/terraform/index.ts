@@ -68,10 +68,10 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformRelease = (
-      await got(pkgUrl, {
+    const res = (
+      await got<TerraformRelease>(pkgUrl, {
         responseType: 'json',
-        hostType: DATASOURCE_TERRAFORM,
+        context: { hostType: DATASOURCE_TERRAFORM },
       })
     ).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;

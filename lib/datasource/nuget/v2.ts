@@ -20,7 +20,7 @@ export async function getPkgReleases(
     let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
     do {
       const pkgVersionsListRaw = await got(pkgUrlList, {
-        hostType: DATASOURCE_NUGET,
+        context: { hostType: DATASOURCE_NUGET },
       });
       if (pkgVersionsListRaw.statusCode !== 200) {
         logger.debug(

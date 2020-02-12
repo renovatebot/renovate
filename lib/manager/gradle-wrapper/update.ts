@@ -9,7 +9,7 @@ function replaceType(url: string): string {
 async function getChecksum(url: string): Promise<string> {
   try {
     const response = await got(url);
-    return response.body as string;
+    return response.body;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.info('Gradle checksum lookup failure: not found');

@@ -1,5 +1,5 @@
-import got from 'got';
 import Git from 'simple-git/promise';
+import { GotResponse as Response } from '../util/got';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
 
@@ -14,7 +14,10 @@ export interface GotApiOptions {
   body?: any;
 }
 
-export type GotResponse<T extends object = any> = got.Response<T>;
+/**
+ * @deprecated use GotResponse from `util/got`
+ */
+export type GotResponse<T extends object = any> = Response<T>;
 
 export interface GotApi<TOptions extends object = any> {
   get<T extends object = any>(

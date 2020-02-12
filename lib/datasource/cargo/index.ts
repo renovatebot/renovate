@@ -41,7 +41,7 @@ export async function getPkgReleases({
   const crateUrl = baseUrl + path;
   try {
     let res: any = await got(crateUrl, {
-      hostType: DATASOURCE_CARGO,
+      context: { hostType: DATASOURCE_CARGO },
     });
     if (!res || !res.body) {
       logger.warn(

@@ -43,7 +43,7 @@ export async function downloadHttpProtocol(
   let raw: { body: string };
   try {
     raw = await got(pkgUrl, {
-      hostType,
+      context: { hostType },
       hooks: {
         beforeRedirect: [
           (options: any): void => {

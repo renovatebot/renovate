@@ -33,12 +33,12 @@ async function getDatasource(name: string): Promise<DataSource | null> {
   try {
     const res = (
       await got(pkgUrl, {
-        hostType: DATASOURCE_GO,
+        context: { hostType: DATASOURCE_GO },
       })
     ).body;
-    const sourceMatch = res.match(
-      regEx(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
-    );
+    const sourceMatch = regEx(
+      `<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`
+    ).exec(res);
     if (sourceMatch) {
       const [, goSourceUrl] = sourceMatch;
       logger.debug({ depName: name, goSourceUrl }, 'Go lookup source url');

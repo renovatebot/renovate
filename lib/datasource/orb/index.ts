@@ -34,8 +34,8 @@ export async function getPkgReleases({
     variables: {},
   };
   try {
-    const res: OrbRelease = (
-      await got.post(url, {
+    const res = (
+      await got.post<{ data: { orb: OrbRelease } }>(url, {
         json: body,
         responseType: 'json',
         retry: 5,
