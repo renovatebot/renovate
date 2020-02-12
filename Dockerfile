@@ -107,7 +107,7 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 RUN apt-get update && apt-get install -y php-cli php-mbstring && \
     rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_VERSION=1.8.6
+ENV COMPOSER_VERSION=1.9.3
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 

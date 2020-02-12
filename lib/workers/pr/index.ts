@@ -471,7 +471,10 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
       return false;
     }
     if (requiredStatusChecks && pr.canMerge !== true) {
-      logger.info('PR is not ready for merge');
+      logger.info(
+        { canMergeReason: pr.canMergeReason },
+        'PR is not ready for merge'
+      );
       return false;
     }
     const branchStatus = await platform.getBranchStatus(

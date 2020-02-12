@@ -5,6 +5,8 @@ module.exports = {
   },
   extends: [
     'airbnb-typescript/base',
+    // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
+    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
@@ -29,7 +31,6 @@ module.exports = {
 
     // other rules
     'import/prefer-default-export': 0, // no benefit
-    'require-await': 'error',
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
     'prefer-destructuring': 0,
