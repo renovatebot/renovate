@@ -231,6 +231,7 @@ export async function getDependency(
       // istanbul ignore if
       if (err.code === 'ECONNRESET' && retries > 1) {
         logger.info({ regUrl }, 'Retrying npm ECONNRESET');
+        await delay(5000);
         return getDependency(name, retries - 1);
       }
       logger.warn(
