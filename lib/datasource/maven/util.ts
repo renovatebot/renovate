@@ -31,7 +31,9 @@ function isPermissionsIssue(err: { statusCode: number }): boolean {
 }
 
 function isConnectionError(err: { code: string }): boolean {
-  return err.code === 'ECONNREFUSED';
+  return (
+    err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || err.code === 'ECONNREFUSED'
+  );
 }
 
 export async function downloadHttpProtocol(
