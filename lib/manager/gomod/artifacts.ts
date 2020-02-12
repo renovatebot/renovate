@@ -55,7 +55,7 @@ export async function updateArtifacts({
     await writeLocalFile(goModFileName, massagedGoMod);
     const cmd = 'go';
     const execOptions: ExecOptions = {
-      cwd: join(config.localDir, dirname(goModFileName)),
+      cwdFile: goModFileName,
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
