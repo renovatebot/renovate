@@ -1,7 +1,7 @@
 import _simpleGit from 'simple-git/promise';
 import { getPkgReleases, getDigest } from '.';
 
-jest.mock('simple-git/promise.js');
+jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
 const lookupName = 'https://github.com/example/example.git';
