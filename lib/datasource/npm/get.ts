@@ -1,3 +1,4 @@
+import delay from 'delay';
 import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
@@ -6,7 +7,7 @@ import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { Release, ReleaseResult } from '../common';
@@ -107,11 +108,14 @@ export async function getDependency(
   headers['Cache-Control'] = 'no-cache';
 
   try {
-    const raw = await got(pkgUrl, {
+    const useCache = retries === 3; // Disable cache if we're retrying
+    const opts: GotJSONOptions = {
       json: true,
       retry: 5,
       headers,
-    });
+      useCache,
+    };
+    const raw = await got(pkgUrl, opts);
     // istanbul ignore if
     if (retries < 3) {
       logger.info({ retries }, 'Successfully recovered ECONNRESET');
