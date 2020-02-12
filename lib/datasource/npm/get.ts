@@ -223,7 +223,16 @@ export async function getDependency(
       return null;
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
-      logger.warn({ err, regUrl, depName: name }, 'npm registry failure');
+      logger.warn(
+        {
+          err,
+          errorCodes: err.gotOptions?.retry?.errorCodes,
+          statusCodes: err.gotOptions?.retry?.statusCodes,
+          regUrl,
+          depName: name,
+        },
+        'npm registry failure'
+      );
       throw new Error(DATASOURCE_FAILURE);
     }
     // istanbul ignore next
