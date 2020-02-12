@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 
+Error.stackTraceLimit = 20;
+
 // TODO: remove any type
 export default function errSerializer(err: any): any {
   const response = {
