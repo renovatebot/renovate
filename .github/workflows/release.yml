@@ -62,4 +62,4 @@ jobs:
       - name: Generate tags
         env:
           REF: ${{ github.ref }}
-        run: ./.github/workflows/docker-release.sh
+        run: ./.github/workflows/release-docker.sh
