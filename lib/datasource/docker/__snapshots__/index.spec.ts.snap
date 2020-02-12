@@ -15,7 +15,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -24,7 +24,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "authorization": "Bearer some-token ",
         },
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -103,7 +103,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -112,7 +112,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "authorization": "Bearer some-token ",
         },
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -191,7 +191,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -200,7 +200,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "authorization": "Bearer some-token ",
         },
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -277,7 +277,7 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
       "https://registry.company.com/v2/node/tags/list?n=10000",
       Object {
         "headers": Object {},
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
@@ -325,14 +325,14 @@ Array [
     "https://registry.company.com/v2/node/tags/list?n=10000",
     Object {
       "headers": Object {},
-      "json": true,
+      "responseType": "json",
     },
   ],
   Array [
     "https://api.github.com/user/9287/repos?page=3&per_page=100",
     Object {
       "headers": Object {},
-      "json": true,
+      "responseType": "json",
     },
   ],
   Array [
@@ -365,7 +365,7 @@ exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/tags/list?n=1000",
       Object {
         "headers": Object {},
-        "json": true,
+        "responseType": "json",
       },
     ],
     Array [
