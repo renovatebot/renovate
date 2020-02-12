@@ -106,7 +106,7 @@ export async function extractPackageFile(
         const sourceLineNumber = lineNumber;
         let sourceContent = '';
         let sourceLine = '';
-        while (lineNumber < lines.length && sourceLine !== 'end') {
+        while (lineNumber < lines.length && sourceLine.trim() !== 'end') {
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if

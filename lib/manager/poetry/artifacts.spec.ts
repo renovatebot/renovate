@@ -116,4 +116,21 @@ describe('.updateArtifacts()', () => {
       })
     ).toMatchSnapshot();
   });
+  it('returns updated poetry.lock when doing lockfile maintenance', async () => {
+    fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });

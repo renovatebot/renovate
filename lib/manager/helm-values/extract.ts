@@ -37,24 +37,23 @@ function findDependencies(
 }
 
 export function extractPackageFile(content: string): PackageFile {
+  let parsedContent;
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
-    const parsedContent = yaml.safeLoad(content, { json: true });
-
-    logger.debug(
-      { parsedContent },
-      'Trying to find dependencies in helm-values'
-    );
+    parsedContent = yaml.safeLoad(content, { json: true });
+  } catch (err) {
+    logger.info({ err }, 'Failed to parse helm-values YAML');
+    return null;
+  }
+  try {
     const deps = findDependencies(parsedContent, []);
-
     if (deps.length) {
       logger.debug({ deps }, 'Found dependencies in helm-values');
       return { deps };
     }
-  } catch (err) {
-    logger.error({ err }, 'Failed to parse helm-values file');
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error parsing helm-values parsed content');
   }
-
   return null;
 }

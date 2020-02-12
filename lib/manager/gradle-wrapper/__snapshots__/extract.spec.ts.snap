@@ -4,7 +4,7 @@ exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts all ve
 Array [
   Object {
     "currentValue": "4.10.3",
-    "datasource": "gradleVersion",
+    "datasource": "gradle-version",
     "depName": "gradle",
     "depType": "gradle-wrapper",
     "managerData": Object {
@@ -21,7 +21,7 @@ exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts bin ve
 Array [
   Object {
     "currentValue": "4.8.0",
-    "datasource": "gradleVersion",
+    "datasource": "gradle-version",
     "depName": "gradle",
     "depType": "gradle-wrapper",
     "managerData": Object {

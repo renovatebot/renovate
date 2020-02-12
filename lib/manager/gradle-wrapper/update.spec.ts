@@ -7,7 +7,7 @@ jest.mock('../../util/got');
 const got: jest.Mock<any> = _got as any;
 
 const propertiesFile2 = fs.readFileSync(
-  'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',
+  'lib/manager/gradle-wrapper/__fixtures__/gradle-wrapper-2.properties',
   'utf8'
 );
 

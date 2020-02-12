@@ -5,6 +5,11 @@ import URL from 'url';
 import { ManagerConfig, PackageFile } from '../common';
 import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
 
+type GitModule = {
+  name: string;
+  path: string;
+};
+
 async function getUrl(
   git: Git.SimpleGit,
   gitModulesPath: string,
@@ -43,15 +48,11 @@ async function getBranch(
   ).trim();
 }
 
-export default async function extractPackageFile(
-  content: string,
-  fileName: string,
-  config: ManagerConfig
-): Promise<PackageFile | null> {
-  const git = Git(config.localDir);
-  const gitModulesPath = upath.join(config.localDir, fileName);
-
-  const depNames = (
+async function getModules(
+  git: Git.SimpleGit,
+  gitModulesPath: string
+): Promise<GitModule[]> {
+  const modules = (
     (await git.raw([
       'config',
       '--file',
@@ -61,22 +62,42 @@ export default async function extractPackageFile(
     ])) || ''
   )
     .trim()
-    .split(/[\n\s]/)
-    .filter((_e: string, i: number) => i % 2);
+    .split(/\n/)
+    .filter(s => !!s);
+
+  const res: GitModule[] = [];
+
+  for (const line of modules) {
+    const [, name, path] = line.split(/submodule\.(.+?)\.path\s(.+)/);
+    res.push({ name, path });
+  }
+
+  return res;
+}
+
+export default async function extractPackageFile(
+  content: string,
+  fileName: string,
+  config: ManagerConfig
+): Promise<PackageFile | null> {
+  const git = Git(config.localDir);
+  const gitModulesPath = upath.join(config.localDir, fileName);
+
+  const depNames = await getModules(git, gitModulesPath);
 
   if (!depNames.length) {
     return null;
   }
 
   const deps = await Promise.all(
-    depNames.map(async depName => {
-      const currentValue = (await git.subModule(['status', depName]))
+    depNames.map(async ({ name, path }) => {
+      const [currentValue] = (await git.subModule(['status', path]))
         .trim()
-        .split(/[+\s]/)[0];
-      const submoduleBranch = await getBranch(gitModulesPath, depName);
-      const subModuleUrl = await getUrl(git, gitModulesPath, depName);
+        .split(/[+\s]/);
+      const submoduleBranch = await getBranch(gitModulesPath, name);
+      const subModuleUrl = await getUrl(git, gitModulesPath, name);
       return {
-        depName,
+        depName: path,
         registryUrls: [subModuleUrl, submoduleBranch],
         currentValue,
         currentDigest: currentValue,

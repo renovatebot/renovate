@@ -1,0 +1,65 @@
+name: Release CI
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  PLATFORM: linux/amd64
+  # TODO: Replace with renovate/renovate
+  DOCKER_REPO: renovate/cache-test
+
+jobs:
+  docker-release:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        tag: [latest, slim]
+
+    env:
+      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
+      DOCKER_TAG: ${{ matrix.tag }}
+
+    steps:
+      - name: Overwrite env for latest tag
+        if: matrix.tag == 'latest'
+        run: |
+          echo "::set-env name=DOCKER_FILE::Dockerfile"
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: v0.3.1
+
+      - uses: actions/checkout@v2
+
+      - name: Build the Docker image
+        run: |
+          docker buildx build \
+            --platform=${PLATFORM} \
+            --load \
+            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
+            --tag=renovate \
+            --file=./${DOCKER_FILE} .
+
+      - name: Test the Docker image
+        run: |
+          docker run --rm -t renovate --version
+
+      - name: Image history
+        run: docker history renovate
+      - name: Image size
+        run: docker image ls | grep renovate
+
+      - name: Docker registry login
+        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
+
+      - name: Generate tags
+        env:
+          REF: ${{ github.ref }}
+        run: ./.github/workflows/release-docker.sh

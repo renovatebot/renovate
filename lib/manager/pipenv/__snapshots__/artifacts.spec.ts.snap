@@ -58,7 +58,13 @@ Array [
 exports[`.updateArtifacts() supports docker mode 1`] = `
 Array [
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e LC_ALL -e LANG -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv pipenv lock",
+    "cmd": "docker pull renovate/pipenv",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv bash -l -c \\"pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

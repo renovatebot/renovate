@@ -791,7 +791,8 @@ export async function addAssignees(
       logger.error({ iid, assignees }, 'Failed to add multiple assignees');
     }
   } catch (err) {
-    logger.error({ iid, assignees }, 'Failed to add assignees');
+    logger.debug({ err }, 'addAssignees error');
+    logger.warn({ iid, assignees }, 'Failed to add assignees');
   }
 }
 
