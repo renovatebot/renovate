@@ -1,20 +1,20 @@
 import fs from 'fs';
 
-import _got from '../../lib/util/got';
-import { getPkgReleases } from '../../lib/datasource/ansible-galaxy';
+import _got from '../../util/got';
+import { getPkgReleases } from './index';
 
 const got: any = _got;
 
 const res1 = fs.readFileSync(
-  'test/datasource/ansible-galaxy/_fixtures/timezone',
+  'lib/datasource/ansible-galaxy/__fixtures__/timezone',
   'utf8'
 );
 const empty = fs.readFileSync(
-  'test/datasource/ansible-galaxy/_fixtures/empty',
+  'lib/datasource/ansible-galaxy/__fixtures__/empty',
   'utf8'
 );
 
-jest.mock('../../lib/util/got');
+jest.mock('../../util/got');
 
 describe('datasource/ansible-galaxy', () => {
   describe('getPkgReleases', () => {
