@@ -56,6 +56,10 @@ export interface Datasource {
 export class DatasourceError extends Error {
   err: Error;
 
+  datasource?: string;
+
+  lookupName?: string;
+
   constructor(err: Error) {
     super(DATASOURCE_FAILURE);
     this.err = err;

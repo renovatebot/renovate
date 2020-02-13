@@ -92,6 +92,8 @@ export async function getPkgReleases(
   } catch (e) /* istanbul ignore next */ {
     if (e instanceof DatasourceError) {
       logger.warn({ datasource, lookupName, err: e.err }, 'Datasource failure');
+      e.datasource = datasource;
+      e.lookupName = lookupName;
     }
     throw e;
   }
