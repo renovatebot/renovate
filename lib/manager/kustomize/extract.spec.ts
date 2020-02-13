@@ -32,7 +32,7 @@ describe('lib/manager/kustomize/extract', () => {
       expect(extractPackageFile(nonKustomize)).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(kustomizeHTTP);
+      const res = extractPackageFile(kustomizeWithLocal);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
@@ -49,11 +49,9 @@ describe('lib/manager/kustomize/extract', () => {
     it('extracts http dependency', () => {
       const res = extractPackageFile(kustomizeHTTP);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
-      expect(res.deps[1].source).toEqual(
-        'https://github.com/moredhel/remote-kustomize.git'
-      );
-      expect(res.deps[1].currentValue).toEqual('v0.0.1');
+      expect(res.deps).toHaveLength(1);
+      expect(res.deps[0].source).toEqual('github.com/user/repo');
+      expect(res.deps[0].currentValue).toEqual('v0.0.1');
     });
 
     it('ignores non-Kubernetes empty files', () => {

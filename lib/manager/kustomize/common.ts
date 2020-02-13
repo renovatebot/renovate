@@ -8,34 +8,38 @@ interface Kustomize {
   bases: string[];
 }
 
-// see if there is a version that can be tracked
-const versionMatch = /(.*)\?ref=(.*)\s*$/;
+// extract the version from the url
+const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
 
-// extract the source from a base
-const matchSource = /(https:\/\/.*|.+@.+:.*\.git)/;
+// extract the url from the base of a url with a subdir
+const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
 
 export function extractBase(base: string): PackageFile | null {
-  const isTrackable = versionMatch.exec(base);
-  if (isTrackable) {
-    const root = isTrackable[1];
-    const currentValue = isTrackable[2];
-    const rawSource = matchSource.exec(root);
-    if (rawSource) {
-      const source = rawSource[1];
-      return {
-        datasource: DATASOURCE_GIT_TAGS,
-        depName: root,
-        lookupName: source,
-        source,
-        currentValue,
-      };
+  const basenameVersion = versionMatch.exec(base);
+  if (basenameVersion) {
+    const currentValue = basenameVersion.groups.version;
+    const root = basenameVersion.groups.basename;
+
+    const urlResult = extractUrl.exec(root);
+    var url = root;
+    // if a match, then there was a subdir, update
+    if (urlResult && !url.startsWith('http')) {
+      url = urlResult.groups.url;
     }
+
+    return {
+      datasource: DATASOURCE_GIT_TAGS,
+      depName: root,
+      lookupName: url,
+      source: url,
+      currentValue,
+    };
   }
 
   return null;
 }
 
-export function extractBases(content: string): Kustomize | null {
+export function parseKustomize(content: string): Kustomize | null {
   var pkg = null;
   try {
     pkg = safeLoad(content);

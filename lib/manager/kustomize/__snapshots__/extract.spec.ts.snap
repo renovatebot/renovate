@@ -3,14 +3,11 @@
 exports[`lib/manager/kustomize/extract extractPackageFile() extracts http dependency 1`] = `
 Array [
   Object {
-    "currentValue": "v2.0.0",
-    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
-    "source": "git@github.com:kubernetes-sigs/kustomize.git",
-  },
-  Object {
     "currentValue": "v0.0.1",
-    "depName": "https://github.com/moredhel/remote-kustomize.git",
-    "source": "https://github.com/moredhel/remote-kustomize.git",
+    "datasource": "gitTags",
+    "depName": "github.com/user/repo//deploy",
+    "lookupName": "github.com/user/repo",
+    "source": "github.com/user/repo",
   },
 ]
 `;
@@ -18,14 +15,18 @@ Array [
 exports[`lib/manager/kustomize/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "currentValue": "v2.0.0",
-    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
-    "source": "git@github.com:kubernetes-sigs/kustomize.git",
+    "currentValue": "v0.0.1",
+    "datasource": "gitTags",
+    "depName": "https://moredhel/remote-kustomize.git",
+    "lookupName": "https://moredhel/remote-kustomize.git",
+    "source": "https://moredhel/remote-kustomize.git",
   },
   Object {
     "currentValue": "v0.0.1",
-    "depName": "https://github.com/moredhel/remote-kustomize.git",
-    "source": "https://github.com/moredhel/remote-kustomize.git",
+    "datasource": "gitTags",
+    "depName": "https://moredhel/remote-kustomize.git//deploy",
+    "lookupName": "https://moredhel/remote-kustomize.git//deploy",
+    "source": "https://moredhel/remote-kustomize.git//deploy",
   },
 ]
 `;
@@ -34,7 +35,9 @@ exports[`lib/manager/kustomize/extract extractPackageFile() extracts ssh depende
 Array [
   Object {
     "currentValue": "v0.0.1",
+    "datasource": "gitTags",
     "depName": "git@github.com:moredhel/remote-kustomize.git",
+    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
     "source": "git@github.com:moredhel/remote-kustomize.git",
   },
 ]
@@ -44,7 +47,9 @@ exports[`lib/manager/kustomize/extract extractPackageFile() extracts ssh depende
 Array [
   Object {
     "currentValue": "v2.0.0",
+    "datasource": "gitTags",
     "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
+    "lookupName": "git@github.com:kubernetes-sigs/kustomize.git",
     "source": "git@github.com:kubernetes-sigs/kustomize.git",
   },
 ]

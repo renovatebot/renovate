@@ -73,8 +73,8 @@ describe('manager/kustomize/update', () => {
     });
     it('replaces existing value if quoted', () => {
       const upgrade = {
-        source: 'https://github.com/moredhel/remote-kustomize.git',
-        depName: 'https://github.com/moredhel/remote-kustomize.git',
+        source: 'github.com/user/repo//deploy',
+        depName: 'github.com/user/repo',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
       };
