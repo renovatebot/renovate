@@ -62,6 +62,8 @@ export class DatasourceError extends Error {
 
   constructor(err: Error) {
     super(DATASOURCE_FAILURE);
+    // Set the prototype explicitly: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, DatasourceError.prototype);
     this.err = err;
   }
 }
