@@ -6,6 +6,11 @@ const kustomizeGitSSHBase = readFileSync(
   'utf8'
 );
 
+const kustomizeEmpty = readFileSync(
+  'lib/manager/kustomize/__fixtures__/kustomizeEmpty.yaml',
+  'utf8'
+);
+
 const kustomizeGitSSHSubdir = readFileSync(
   'lib/manager/kustomize/__fixtures__/gitSubdir.yaml',
   'utf8'
@@ -53,9 +58,17 @@ describe('lib/manager/kustomize/extract', () => {
       expect(res.deps[0].source).toEqual('github.com/user/repo');
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
     });
-
     it('ignores non-Kubernetes empty files', () => {
       expect(extractPackageFile('')).toBeNull();
     });
+    it('does nothing with kustomize empty kustomize files', () => {
+      expect(extractPackageFile(kustomizeEmpty)).toBeNull();
+    });
+  });
+});
+
+describe('lib/manager/kustomize/extract', () => {
+  it('should fail', () => {
+    expect(true).toEqual(false);
   });
 });

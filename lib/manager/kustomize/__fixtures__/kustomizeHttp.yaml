@@ -8,11 +8,3 @@ namespace: testing-namespace
 
 resources:
 - deployment.yaml
-
-images:
-- name: moredhel/renovate-test-1
-  newTag: v0.0.1
-- name: moredhel/renovate-test-3
-  newTag: v0.0.1
-- name: moredhel/renovate-test-2
-  newTag: v0.0.1
