@@ -4,8 +4,7 @@ import got from '../../util/got';
 import { maskToken } from '../../util/mask';
 import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
-import { ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, ReleaseResult } from '../common';
 import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
 
 const INFO_PATH = '/api/v1/gems';
@@ -31,7 +30,7 @@ const processError = ({ err, ...rest }): null => {
       break;
     default:
       logger.debug(data, 'RubyGems lookup failure');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
   }
   return null;
 };

@@ -5,6 +5,7 @@ import * as versioning from '../versioning';
 
 import {
   Datasource,
+  DatasourceError,
   PkgReleaseConfig,
   Release,
   ReleaseResult,
@@ -80,10 +81,22 @@ function getRawReleases(
 export async function getPkgReleases(
   config: PkgReleaseConfig
 ): Promise<ReleaseResult | null> {
-  const res = await getRawReleases({
-    ...config,
-    lookupName: config.lookupName || config.depName,
-  });
+  const { datasource } = config;
+  const lookupName = config.lookupName || config.depName;
+  let res;
+  try {
+    res = await getRawReleases({
+      ...config,
+      lookupName,
+    });
+  } catch (e) /* istanbul ignore next */ {
+    if (e instanceof DatasourceError) {
+      logger.warn({ datasource, lookupName, err: e.err }, 'Datasource failure');
+      e.datasource = datasource;
+      e.lookupName = lookupName;
+    }
+    throw e;
+  }
   if (!res) {
     return res;
   }

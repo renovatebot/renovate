@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, ReleaseResult, PkgReleaseConfig } from '../common';
 import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
 interface CdnjsAsset {
@@ -74,8 +73,7 @@ export async function getPkgReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `CDNJS registry failure`);
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
 
     if (err.statusCode === 401) {

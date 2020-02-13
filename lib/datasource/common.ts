@@ -1,3 +1,5 @@
+import { DATASOURCE_FAILURE } from '../constants/error-messages';
+
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -49,4 +51,17 @@ export interface Datasource {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getPreset?(packageName: string, presetName?: string): Promise<Preset>;
   getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
+}
+
+export class DatasourceError extends Error {
+  err: Error;
+
+  datasource?: string;
+
+  lookupName?: string;
+
+  constructor(err: Error) {
+    super(DATASOURCE_FAILURE);
+    this.err = err;
+  }
 }
