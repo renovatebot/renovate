@@ -56,7 +56,7 @@ The following steps work to set up a brand new Windows 10 installation for devel
   - `python get-pip.py`
   - `rm get-pip.py`
   - `python -m pip install mock`
-- Install [Java](https://adoptopenjdk.net/?variant=openjdk11)
+- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
   Verify you have everything installed with appropriate versions, e.g.:
 
