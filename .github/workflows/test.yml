@@ -41,13 +41,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Set up Java ${{ matrix.java-version }}
-        if: matrix.node-version == 12
+        if: matrix.node-version == 12 && github.ref != 'refs/heads/master'
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java-version }}
 
       - name: Skip Java tests
-        if: matrix.node-version != 12
+        if: matrix.node-version != 12 || github.ref == 'refs/heads/master'
         run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
       - name: Init platform
