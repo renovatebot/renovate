@@ -19,7 +19,7 @@ function getRelease(
   );
 }
 
-describe('api/npm', () => {
+describe('datasource/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
