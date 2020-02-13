@@ -745,22 +745,27 @@ export async function createPr({
     reviewers,
   };
 
-  const prInfo = (
-    await api.post(`/2.0/repositories/${config.repository}/pullrequests`, {
-      body,
-    })
-  ).body;
-  // TODO: fix types
-  const pr: Pr = {
-    number: prInfo.id,
-    displayNumber: `Pull Request #${prInfo.id}`,
-    isModified: false,
-  } as any;
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
+  try {
+    const prInfo = (
+      await api.post(`/2.0/repositories/${config.repository}/pullrequests`, {
+        body,
+      })
+    ).body;
+    // TODO: fix types
+    const pr: Pr = {
+      number: prInfo.id,
+      displayNumber: `Pull Request #${prInfo.id}`,
+      isModified: false,
+    } as any;
+    // istanbul ignore if
+    if (config.prList) {
+      config.prList.push(pr);
+    }
+    return pr;
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error creating pull request');
+    throw err;
   }
-  return pr;
 }
 
 interface Reviewer {
