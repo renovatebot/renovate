@@ -296,7 +296,7 @@ interface ArtifactError {
 
 interface UpdatedArtifcats {
   name: string;
-  contents: string;
+  contents: string | Buffer;
 }
 
 export interface WriteExistingFilesResult {
@@ -479,7 +479,7 @@ export async function getAdditionalFiles(
                   const localModified = upath.join(config.localDir, f);
                   updatedArtifacts.push({
                     name: f,
-                    contents: await fs.readFile(localModified, 'utf-8'),
+                    contents: await fs.readFile(localModified),
                   });
                 }
               }

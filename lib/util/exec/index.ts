@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { generateDockerCommand } from './docker';
@@ -32,7 +32,7 @@ export function setExecConfig(config: Partial<RenovateConfig>): void {
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
-  subDirectory?: string;
+  cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
 }
@@ -80,11 +80,11 @@ export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker, subDirectory } = opts;
+  const { env, extraEnv, docker, cwdFile } = opts;
   let cwd;
   // istanbul ignore if
-  if (subDirectory) {
-    cwd = join(execConfig.localDir, subDirectory);
+  if (cwdFile) {
+    cwd = join(execConfig.localDir, dirname(cwdFile));
   }
   cwd = cwd || opts.cwd || execConfig.localDir;
   const childEnv = createChildEnv(env, extraEnv);
@@ -92,7 +92,7 @@ export async function exec(
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
-  delete execOptions.subDirectory;
+  delete execOptions.cwdFile;
 
   const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',

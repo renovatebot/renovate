@@ -5,7 +5,7 @@ import { CommitFilesConfig } from './git/storage';
 
 export interface FileData {
   name: string;
-  contents: string;
+  contents: string | Buffer;
 }
 
 export interface GotApiOptions {
