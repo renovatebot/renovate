@@ -1,5 +1,5 @@
 import { PackageFile, PackageDependency } from '../common';
-import { extractBase, parseKustomize } from './common';
+import { extractBase, extractImage, parseKustomize } from './common';
 import { getDep } from '../dockerfile/extract';
 import { logger } from '../../logger';
 
@@ -22,6 +22,12 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the image tags
+  for (const image of pkg.images) {
+    const dep = extractImage(image);
+    if (dep) {
+      deps.push(dep);
+    }
+  }
 
   if (!deps.length) {
     return null;

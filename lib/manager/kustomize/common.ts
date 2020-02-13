@@ -1,4 +1,7 @@
-import { DATASOURCE_GIT_TAGS } from '../../constants/data-binary-source';
+import {
+  DATASOURCE_GIT_TAGS,
+  DATASOURCE_DOCKER,
+} from '../../constants/data-binary-source';
 import { PackageFile, PackageDependency } from '../common';
 import { logger } from '../../logger';
 import { safeLoad } from 'js-yaml';
@@ -39,6 +42,25 @@ export function extractBase(base: string): PackageFile | null {
   return null;
 }
 
+interface Image {
+  name: string;
+  newTag: string;
+}
+
+export function extractImage(image: Image): PackageFile | null {
+  if (image && image.name && image.newTag) {
+    return {
+      datasource: DATASOURCE_DOCKER,
+      depName: image.name,
+      lookupName: image.name,
+      source: image.name,
+      currentValue: image.newTag,
+    };
+  }
+
+  return null;
+}
+
 export function parseKustomize(content: string): Kustomize | null {
   var pkg = null;
   try {
@@ -56,9 +78,8 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  if (!pkg.bases) {
-    return null;
-  }
+  pkg.bases = pkg.bases || [];
+  pkg.images = pkg.images || [];
 
   return pkg;
 }
