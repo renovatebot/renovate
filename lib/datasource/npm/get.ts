@@ -10,8 +10,7 @@ import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
-import { Release, ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, Release, ReleaseResult } from '../common';
 import { DATASOURCE_NPM } from '../../constants/data-binary-source';
 
 let memcache = {};
@@ -238,17 +237,7 @@ export async function getDependency(
         await delay(5000);
         return getDependency(name, retries - 1);
       }
-      logger.warn(
-        {
-          err,
-          errorCodes: err.gotOptions?.retry?.errorCodes,
-          statusCodes: err.gotOptions?.retry?.statusCodes,
-          regUrl,
-          depName: name,
-        },
-        'npm registry failure'
-      );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     // istanbul ignore next
     return null;

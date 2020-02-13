@@ -7,8 +7,7 @@ import { logger } from '../../logger';
 
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
 function getHostOpts(url: string): GotJSONOptions {
@@ -293,8 +292,7 @@ async function packageLookup(
       (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') &&
       err.host === 'packagist.org'
     ) {
-      logger.info('Packagist.org timeout');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');
     return null;
