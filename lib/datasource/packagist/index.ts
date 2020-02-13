@@ -288,11 +288,13 @@ async function packageLookup(
       });
       return null;
     }
-    if (
-      (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') &&
-      err.host === 'packagist.org'
-    ) {
-      throw new DatasourceError(err);
+    if (err.host === 'packagist.org') {
+      if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
+        throw new DatasourceError(err);
+      }
+      if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+        throw new DatasourceError(err);
+      }
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');
     return null;
