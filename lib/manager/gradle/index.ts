@@ -100,6 +100,14 @@ async function executeGradle(
       );
       return;
     }
+    // istanbul ignore if
+    if (err.message.includes("Could not get unknown property 'classesDir'")) {
+      logger.warn(
+        { message: err.message },
+        'Gradle extraction failed due to incompatibility. Gradle will be skipped.'
+      );
+      return;
+    }
     logger.warn({ err, cmd }, 'Gradle run failed');
     logger.info('Aborting Renovate due to Gradle lookup errors');
     const error = new DatasourceError(err);
