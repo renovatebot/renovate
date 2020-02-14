@@ -89,6 +89,7 @@ async function executeGradle(
       logger.warn('Gradle resolution error');
       return;
     }
+    // istanbul ignore if
     if (err.message.includes('FAILURE: Build failed with an exception.')) {
       logger.info({ message: err.message }, 'Gradle extraction failed');
       return;
