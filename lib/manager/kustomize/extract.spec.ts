@@ -66,9 +66,3 @@ describe('lib/manager/kustomize/extract', () => {
     });
   });
 });
-
-describe('lib/manager/kustomize/extract', () => {
-  it('should fail', () => {
-    expect(true).toEqual(false);
-  });
-});
