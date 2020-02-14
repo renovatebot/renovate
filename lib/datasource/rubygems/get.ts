@@ -4,7 +4,7 @@ import got from '../../util/got';
 import { maskToken } from '../../util/mask';
 import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
-import { DatasourceError, ReleaseResult } from '../common';
+import { ReleaseResult } from '../common';
 import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
 
 const INFO_PATH = '/api/v1/gems';
@@ -12,7 +12,7 @@ const VERSIONS_PATH = '/api/v1/versions';
 
 // istanbul ignore next
 const processError = ({ err, ...rest }): null => {
-  const { statusCode, headers = {} } = err;
+  const { code, statusCode, headers = {} } = err;
   const data = {
     ...rest,
     err,
@@ -20,17 +20,12 @@ const processError = ({ err, ...rest }): null => {
     token: maskToken(headers.authorization) || 'none',
   };
 
-  switch (statusCode) {
-    case NOT_FOUND:
-      logger.info(data, 'RubyGems lookup failure: not found');
-      break;
-    case FORBIDDEN:
-    case UNAUTHORIZED:
-      logger.info(data, 'RubyGems lookup failure: authentication failed');
-      break;
-    default:
-      logger.debug(data, 'RubyGems lookup failure');
-      throw new DatasourceError(err);
+  if (code === 'ENOTFOUND' || statusCode === NOT_FOUND) {
+    logger.info(data, 'RubyGems lookup failure: not found');
+  } else if (statusCode === FORBIDDEN || statusCode === UNAUTHORIZED) {
+    logger.info(data, 'RubyGems lookup failure: authentication failed');
+  } else {
+    logger.info(data, 'RubyGems lookup failure: unknown reason');
   }
   return null;
 };
