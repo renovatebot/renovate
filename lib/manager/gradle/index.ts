@@ -84,7 +84,7 @@ async function executeGradle(
       error.datasource = 'gradle';
       throw error;
     }
-    logger.info({ errMessage: err.message }, 'Gradle extraction failed');
+    logger.warn({ errMessage: err.message }, 'Gradle extraction failed');
     return;
   }
   logger.debug(stdout + stderr);
