@@ -172,7 +172,7 @@
     "@babel/preset-typescript": "7.8.3",
     "@types/bunyan": "1.8.6",
     "@types/cacache": "12.0.1",
-    "@types/chai": "4.2.8",
+    "@types/chai": "4.2.9",
     "@types/clean-git-ref": "2.0.0",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "8.0.1",
