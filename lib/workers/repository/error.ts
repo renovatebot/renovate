@@ -116,7 +116,7 @@ export default async function handleError(
     return err.message;
   }
   if (err.message === DATASOURCE_FAILURE) {
-    logger.info('Registry error - skipping');
+    logger.info({ err }, 'Registry error - skipping');
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }
