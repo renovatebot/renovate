@@ -90,8 +90,14 @@ async function executeGradle(
       return;
     }
     // istanbul ignore if
-    if (err.message.includes('FAILURE: Build failed with an exception.')) {
-      logger.info({ message: err.message }, 'Gradle extraction failed');
+    if (
+      err.message.includes('Could not read script') ||
+      err.message.includes('No such file or directory')
+    ) {
+      logger.warn(
+        { message: err.message },
+        'Gradle extraction failed due to missing file. Gradle will be skipped.'
+      );
       return;
     }
     logger.warn({ err, cmd }, 'Gradle run failed');
