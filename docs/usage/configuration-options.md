@@ -692,6 +692,17 @@ Or if it's just a single file then something like this:
 }
 ```
 
+## kustomize
+
+Use this configuration for shared config across kustomize repositories.
+
+This package will manage two parts of the kustomization.yaml file:
+
+1. [remote bases](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md)
+2. [image tags](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/image.md)
+
+There are some restrictions currently to the implementation which ar discussed in more detail in [./kustomize.md](./kustomize.md).
+
 ## labels
 
 By default, Renovate won't add any labels to its PRs. If you want Renovate to do so then define a `labels` array of one or more label strings. If you want the same label(s) for every PR then you can configure it at the top level of config. However you can also fully override them on a per-package basis.
