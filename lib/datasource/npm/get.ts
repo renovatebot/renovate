@@ -232,10 +232,16 @@ export async function getDependency(
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
       // istanbul ignore if
-      if (err.code === 'ECONNRESET' && retries > 1) {
+      if (
+        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        retries > 0
+      ) {
         logger.info({ pkgUrl }, 'Retrying npm ECONNRESET');
         await delay(5000);
         return getDependency(name, retries - 1);
+      }
+      if (err.name === 'ParseError') {
+        err.body = 'err.body deleted by Renovate';
       }
       throw new DatasourceError(err);
     }
