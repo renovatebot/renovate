@@ -240,7 +240,8 @@ export async function getDependency(
         await delay(5000);
         return getDependency(name, retries - 1);
       }
-      if (err.name === 'ParseError') {
+      // istanbul ignore if
+      if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }
       throw new DatasourceError(err);
