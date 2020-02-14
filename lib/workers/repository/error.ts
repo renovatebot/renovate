@@ -29,6 +29,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
+import { DatasourceError } from '../../datasource/common';
 
 export default async function handleError(
   config: RenovateConfig,
@@ -103,6 +104,15 @@ export default async function handleError(
     delete config.branchList; // eslint-disable-line no-param-reassign
     logger.info({ error: err }, 'Repository has invalid config');
     await raiseConfigWarningIssue(config, err);
+    return err.message;
+  }
+  if (err instanceof DatasourceError) {
+    logger.warn(
+      { datasource: err.datasource, lookupName: err.lookupName, err: err.err },
+      'Datasource failure'
+    );
+    logger.info('Registry error - skipping');
+    delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }
   if (err.message === DATASOURCE_FAILURE) {

@@ -12,10 +12,8 @@ import * as hostRules from '../../../util/host-rules';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
 import { platform } from '../../../platform';
-import {
-  SYSTEM_INSUFFICIENT_DISK_SPACE,
-  DATASOURCE_FAILURE,
-} from '../../../constants/error-messages';
+import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import { DatasourceError } from '../../../datasource/common';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
@@ -386,7 +384,10 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'npm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(DATASOURCE_FAILURE);
+            const err = new Error(
+              'lock file failed for the dependency being updated - skipping branch creation'
+            );
+            throw new DatasourceError(err);
           }
         }
       }
@@ -438,7 +439,11 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'yarn' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(DATASOURCE_FAILURE);
+            throw new DatasourceError(
+              new Error(
+                'lock file failed for the dependency being updated - skipping branch creation'
+              )
+            );
           }
           /* eslint-enable no-useless-escape */
         }
@@ -524,7 +529,11 @@ export async function getAdditionalFiles(
               { dependency: upgrade.depName, type: 'pnpm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new Error(DATASOURCE_FAILURE);
+            throw new DatasourceError(
+              Error(
+                'lock file failed for the dependency being updated - skipping branch creation'
+              )
+            );
           }
         }
       }
@@ -593,7 +602,11 @@ export async function getAdditionalFiles(
             { dependency: upgrade.depName, type: 'yarn' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
-          throw new Error(DATASOURCE_FAILURE);
+          throw new DatasourceError(
+            Error(
+              'lock file failed for the dependency being updated - skipping branch creation'
+            )
+          );
         }
         /* eslint-enable no-useless-escape */
         if (
@@ -605,7 +618,11 @@ export async function getAdditionalFiles(
             { dependency: upgrade.depName, type: 'npm' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
-          throw new Error(DATASOURCE_FAILURE);
+          throw new DatasourceError(
+            Error(
+              'lock file failed for the dependency being updated - skipping branch creation'
+            )
+          );
         }
       }
       artifactErrors.push({
