@@ -78,41 +78,14 @@ async function executeGradle(
   try {
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
-  } catch (err) {
-    // istanbul ignore if
+  } catch (err) /* istanbul ignore next */ {
     if (err.code === TIMEOUT_CODE) {
-      logger.warn({ err }, ' Process killed. Possibly gradle timed out.');
+      const error = new DatasourceError(err);
+      error.datasource = 'gradle';
+      throw error;
     }
-    // istanbul ignore if
-    if (err.message.includes('Could not resolve all files for configuration')) {
-      logger.debug({ err }, 'Gradle error');
-      logger.warn('Gradle resolution error');
-      return;
-    }
-    // istanbul ignore if
-    if (
-      err.message.includes('Could not read script') ||
-      err.message.includes('No such file or directory')
-    ) {
-      logger.warn(
-        { message: err.message },
-        'Gradle extraction failed due to missing file. Gradle will be skipped.'
-      );
-      return;
-    }
-    // istanbul ignore if
-    if (err.message.includes("Could not get unknown property 'classesDir'")) {
-      logger.warn(
-        { message: err.message },
-        'Gradle extraction failed due to incompatibility. Gradle will be skipped.'
-      );
-      return;
-    }
-    logger.warn({ err, cmd }, 'Gradle run failed');
-    logger.info('Aborting Renovate due to Gradle lookup errors');
-    const error = new DatasourceError(err);
-    error.datasource = 'gradle';
-    throw error;
+    logger.info({ errMessage: err.message }, 'Gradle extraction failed');
+    return;
   }
   logger.debug(stdout + stderr);
   logger.info('Gradle report complete');
