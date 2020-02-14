@@ -89,6 +89,10 @@ async function executeGradle(
       logger.warn('Gradle resolution error');
       return;
     }
+    if (err.message.includes('FAILURE: Build failed with an exception.')) {
+      logger.info({ message: err.message }, 'Gradle extraction failed');
+      return;
+    }
     logger.warn({ err, cmd }, 'Gradle run failed');
     logger.info('Aborting Renovate due to Gradle lookup errors');
     const error = new DatasourceError(err);
