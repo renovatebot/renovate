@@ -20,7 +20,7 @@ function getPreCommands(): string[] | null {
       ? `x-access-token:${credentials.token}`
       : credentials.token;
     preCommands = [
-      `git config --global url.\\\\"https://${token}@github.com/\\\\".insteadOf \\\\"https://github.com/\\\\"`,
+      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ];
   }
   return preCommands;

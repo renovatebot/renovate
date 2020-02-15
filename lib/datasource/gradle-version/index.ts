@@ -53,7 +53,11 @@ export async function getPkgReleases({
         if (!(err.statusCode === 404 || err.code === 'ENOTFOUND')) {
           logger.warn({ err }, 'Gradle release lookup failure: Unknown error');
         }
-        throw new DatasourceError(err);
+        // istanbul ignore if
+        if (err.host === 'services.gradle.org') {
+          throw new DatasourceError(err);
+        }
+        return null;
       }
     })
   );

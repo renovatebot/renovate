@@ -16,7 +16,7 @@ export function hasValidTimezone(
   timezone: string
 ): [boolean] | [boolean, string] {
   if (!moment.tz.zone(timezone)) {
-    return [false, `Invalid timezone: ${timezone}`];
+    return [false, `Invalid schedule: Unsupported timezone ${timezone}`];
   }
   return [true];
 }
@@ -39,12 +39,12 @@ export function hasValidSchedule(
     );
     const parsedSchedule = later.parse.text(massagedText);
     if (parsedSchedule.error !== -1) {
-      message = `Failed to parse schedule "${scheduleText}"`;
+      message = `Invalid schedule: Failed to parse "${scheduleText}"`;
       // It failed to parse
       return true;
     }
     if (parsedSchedule.schedules.some(s => s.m)) {
-      message = `Schedule "${scheduleText}" should not specify minutes`;
+      message = `Invalid schedule: "${scheduleText}" should not specify minutes`;
       return true;
     }
     if (
@@ -52,7 +52,7 @@ export function hasValidSchedule(
         s => s.M || s.d !== undefined || s.D || s.t_a !== undefined || s.t_b
       )
     ) {
-      message = `Schedule "${scheduleText}" has no months, days of week or time of day`;
+      message = `Invalid schedule: "${scheduleText}" has no months, days of week or time of day`;
       return true;
     }
     // It must be OK

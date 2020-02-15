@@ -561,7 +561,10 @@ async function getLabels(
       );
       logger.debug({ err });
     } else {
-      logger.warn({ err }, 'Unknown error getting Docker labels');
+      logger.warn(
+        { registry, dockerRepository: repository, tag, err },
+        'Unknown error getting Docker labels'
+      );
     }
     return {};
   }

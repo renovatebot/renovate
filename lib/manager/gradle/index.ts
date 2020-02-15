@@ -78,22 +78,14 @@ async function executeGradle(
   try {
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
-  } catch (err) {
-    // istanbul ignore if
+  } catch (err) /* istanbul ignore next */ {
     if (err.code === TIMEOUT_CODE) {
-      logger.warn({ err }, ' Process killed. Possibly gradle timed out.');
+      const error = new DatasourceError(err);
+      error.datasource = 'gradle';
+      throw error;
     }
-    // istanbul ignore if
-    if (err.message.includes('Could not resolve all files for configuration')) {
-      logger.debug({ err }, 'Gradle error');
-      logger.warn('Gradle resolution error');
-      return;
-    }
-    logger.warn({ err, cmd }, 'Gradle run failed');
-    logger.info('Aborting Renovate due to Gradle lookup errors');
-    const error = new DatasourceError(err);
-    error.datasource = 'gradle';
-    throw error;
+    logger.warn({ errMessage: err.message }, 'Gradle extraction failed');
+    return;
   }
   logger.debug(stdout + stderr);
   logger.info('Gradle report complete');
