@@ -44,8 +44,7 @@ const getHeaders = (): OutgoingHttpHeaders => {
 const fetch = async ({ dependency, registry, path }): Promise<any> => {
   const responseType = 'json';
 
-  // TODO: fix me
-  const retry: RetryOptions = { retries: retriable() };
+  const retry: RetryOptions = { calculateDelay: retriable() };
   const headers: any = getHeaders();
 
   const name = `${path}/${dependency}.json`;

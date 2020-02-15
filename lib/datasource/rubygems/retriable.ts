@@ -1,4 +1,10 @@
-import { HTTPError } from 'got';
+import {
+  RetryFunction,
+  RetryObject,
+  HTTPError,
+  ParseError,
+  MaxRedirectsError,
+} from 'got';
 import { logger } from '../../logger';
 import {
   UNAUTHORIZED,
@@ -32,17 +38,22 @@ const getErrorMessage = (status: number): string => {
   }
 };
 
-// TODO: fix me
-export default (numberOfRetries = NUMBER_OF_RETRIES): any => (
-  _?: any,
-  err?: Partial<HTTPError>
-): number => {
-  if (numberOfRetries === 0) {
+const isErrorWithResponse = (
+  error: RetryObject['error']
+): error is HTTPError | ParseError | MaxRedirectsError =>
+  error instanceof HTTPError ||
+  error instanceof ParseError ||
+  error instanceof MaxRedirectsError;
+
+export default (numberOfRetries = NUMBER_OF_RETRIES): RetryFunction => ({
+  error,
+}): number => {
+  if (numberOfRetries === 0 || !isErrorWithResponse(error)) {
     return 0;
   }
 
-  const { response, statusCode } = err;
-  const { headers } = response;
+  const { response } = error;
+  const { headers, statusCode } = response;
 
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
   const isBanned = [TOO_MANY_REQUEST, SERVICE_UNAVAILABLE].includes(statusCode);
