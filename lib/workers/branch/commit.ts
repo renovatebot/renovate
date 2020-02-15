@@ -20,7 +20,7 @@ export async function commitFilesToBranch(
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(f => {
-      const filename = f.name === '|delete|' ? f.contents : f.name;
+      const filename = f.name === '|delete|' ? f.contents.toString() : f.name;
       const matchesExcludePaths = config.excludeCommitPaths.some(path =>
         minimatch(filename, path, { dot: true })
       );

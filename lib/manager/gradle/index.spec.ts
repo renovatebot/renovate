@@ -91,15 +91,6 @@ describe('manager/gradle', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
 
-    it('should throw registry failure if gradle execution fails', async () => {
-      const execSnapshots = mockExecAll(exec, new Error());
-
-      await expect(
-        manager.extractAllPackageFiles(config, ['build.gradle'])
-      ).rejects.toMatchSnapshot();
-      expect(execSnapshots).toMatchSnapshot();
-    });
-
     it('should return empty if there is no dependency report', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 

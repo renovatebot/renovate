@@ -24,6 +24,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [10, 12]
         python-version: [3.8]
+        java-version: [11]
         exclude:
           - os: windows-latest
             node-version: 10
@@ -39,14 +40,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up Java 11
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12 && github.ref != 'refs/heads/master'
+      - name: Set up Java ${{ matrix.java-version }}
+        if: matrix.node-version == 12 && github.ref != 'refs/heads/master'
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: ${{ matrix.java-version }}
 
       - name: Skip Java tests
-        if: matrix.os != 'ubuntu-latest' || matrix.node-version != 12 || github.ref == 'refs/heads/master'
+        if: matrix.node-version != 12 || github.ref == 'refs/heads/master'
         run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
       - name: Init platform

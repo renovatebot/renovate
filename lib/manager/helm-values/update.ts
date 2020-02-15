@@ -1,6 +1,6 @@
 import YAWN from 'yawn-yaml/cjs';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import {
   matchesHelmValuesDockerHeuristic,
   HelmDockerImageDependency,
@@ -87,10 +87,10 @@ function updateDoc(
   return false;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   if (
     !upgrade ||
     !upgrade.depName ||

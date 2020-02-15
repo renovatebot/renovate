@@ -41,11 +41,11 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
+    "message": "Invalid schedule: \`Invalid schedule: \\"every 15 mins every weekday\\" should not specify minutes\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "extends: Invalid timezone: Europe/Brussel",
+    "message": "extends: Invalid schedule: Unsupported timezone Europe/Brussel",
   },
   Object {
     "depName": "Configuration Error",
@@ -57,7 +57,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "timezone: Invalid timezone: Asia",
+    "message": "timezone: Invalid schedule: Unsupported timezone Asia",
   },
 ]
 `;
