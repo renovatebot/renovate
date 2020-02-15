@@ -13,7 +13,7 @@ const allResponse: any = fs.readFileSync(
 
 let config: datasource.PkgReleaseConfig = {};
 
-describe('datasource/gradle', () => {
+describe('datasource/gradle-version', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       config = {
@@ -22,39 +22,6 @@ describe('datasource/gradle', () => {
       jest.clearAllMocks();
       global.repoCache = {};
       return global.renovateCache.rmAll();
-    });
-
-    it('throws for empty result', async () => {
-      got.mockReturnValueOnce({ body: {} });
-      await expect(
-        datasource.getPkgReleases({
-          ...config,
-        })
-      ).rejects.toThrow();
-    });
-
-    it('throws for 404', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      await expect(
-        datasource.getPkgReleases({
-          ...config,
-        })
-      ).rejects.toThrow();
-    });
-
-    it('throws for unknown error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
-      await expect(
-        datasource.getPkgReleases({
-          ...config,
-        })
-      ).rejects.toThrow();
     });
 
     it('processes real data', async () => {
