@@ -495,7 +495,7 @@ async function getLabels(
     // istanbul ignore if
     if (manifest.schemaVersion !== 2) {
       logger.debug(
-        { registry, dockerRepository: repository, tag, manifest },
+        { registry, dockerRepository: repository, tag },
         'Manifest schema version is not 2'
       );
       return {};
