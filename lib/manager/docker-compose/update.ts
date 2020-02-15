@@ -1,11 +1,11 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   try {
     const newFrom = getNewFrom(upgrade);
     logger.debug(`docker-compose.updateDependency(): ${newFrom}`);

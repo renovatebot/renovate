@@ -1,7 +1,7 @@
 import _simpleGit from 'simple-git/promise';
 import extractPackageFile from './extract';
 
-jest.mock('simple-git/promise.js');
+jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 const Git = jest.requireActual('simple-git/promise');
 
@@ -41,6 +41,12 @@ describe('lib/manager/gitsubmodules/extract', () => {
       const res = await extractPackageFile('', '.gitmodules.4', { localDir });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
+    });
+
+    it('extract name path mismatch', async () => {
+      const res = await extractPackageFile('', '.gitmodules.5', { localDir });
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(3);
     });
   });
 });

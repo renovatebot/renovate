@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { logger } from '../../logger';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`travis.updateDependency(): ${upgrade.newValue}`);
     const indent = detectIndent(fileContent).indent || '  ';

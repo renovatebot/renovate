@@ -1,4 +1,4 @@
-import url from 'url';
+import url, { URLSearchParams } from 'url';
 import delay from 'delay';
 
 import { api } from './bb-got-wrapper';
@@ -21,6 +21,7 @@ import {
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
+import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -63,7 +64,7 @@ interface BbsConfig {
 let config: BbsConfig = {} as any;
 
 const defaults: any = {
-  hostType: 'bitbucket-server',
+  hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
 };
 
 /* istanbul ignore next */

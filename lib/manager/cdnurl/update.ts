@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   const { depName, currentValue, newValue, managerData } = upgrade;
   const { fileReplacePosition } = managerData;
   const leftPart = fileContent.slice(0, fileReplacePosition);

@@ -12,9 +12,9 @@ import AWS from 'aws-sdk';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -46,7 +46,7 @@ export function getRegistryRepository(
   if (!/^https?:\/\//.exec(registry)) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ hostType: 'docker', url: registry });
+  const opts = hostRules.find({ hostType: DATASOURCE_DOCKER, url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
@@ -110,7 +110,7 @@ async function getAuthHeaders(
 
     const opts: hostRules.HostRule & {
       headers?: Record<string, string>;
-    } = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
+    } = hostRules.find({ hostType: DATASOURCE_DOCKER, url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);
@@ -167,17 +167,13 @@ async function getAuthHeaders(
       return null;
     }
     if (err.name === 'RequestError' && registry.endsWith('docker.io')) {
-      logger.debug({ err }, 'err');
-      logger.info('Docker registry error: RequestError');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.statusCode === 429 && registry.endsWith('docker.io')) {
-      logger.warn({ err }, 'docker registry failure: too many requests');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.warn({ err }, 'docker registry failure: internal error');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -217,7 +213,7 @@ async function getManifestResponse(
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     if (err.statusCode === 401) {
@@ -241,20 +237,10 @@ async function getManifestResponse(
       return null;
     }
     if (err.statusCode === 429 && registry.endsWith('docker.io')) {
-      logger.warn({ err }, 'docker registry failure: too many requests');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.info(
-        {
-          err,
-          registry,
-          dockerRepository: repository,
-          tag,
-        },
-        'docker registry failure: internal error'
-      );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.info(
@@ -318,7 +304,7 @@ export async function getDigest(
     await renovateCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     logger.info(
@@ -373,7 +359,7 @@ async function getTags(
     await renovateCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     logger.debug(
@@ -400,14 +386,14 @@ async function getTags(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
       );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: internal error'
       );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.info(
@@ -537,7 +523,7 @@ async function getLabels(
     await renovateCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     if (err.statusCode === 401) {
@@ -575,7 +561,10 @@ async function getLabels(
       );
       logger.debug({ err });
     } else {
-      logger.warn({ err }, 'Unknown error getting Docker labels');
+      logger.warn(
+        { registry, dockerRepository: repository, tag, err },
+        'Unknown error getting Docker labels'
+      );
     }
     return {};
   }

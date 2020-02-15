@@ -172,7 +172,10 @@ describe('lib/manager/swift', () => {
         const { deps } = extractPackageFile(content);
         const [dep] = deps;
         const upgrade = { ...dep, newValue };
-        const updated = updateDependency(content, upgrade);
+        const updated = updateDependency({
+          fileContent: content,
+          upgrade,
+        });
         expect(updated).toEqual(result);
       });
     });
@@ -185,7 +188,10 @@ describe('lib/manager/swift', () => {
       const [dep] = deps;
       const upgrade = { ...dep, newValue };
       const replaced = content.replace(currentValue, newValue);
-      const updated = updateDependency(replaced, upgrade);
+      const updated = updateDependency({
+        fileContent: replaced,
+        upgrade,
+      });
       expect(updated).toBe(replaced);
     });
     it('returns null if content is different', () => {
@@ -197,7 +203,7 @@ describe('lib/manager/swift', () => {
       const [dep] = deps;
       const upgrade = { ...dep, newValue };
       const replaced = content.replace(currentValue, '1.2.5');
-      expect(updateDependency(replaced, upgrade)).toBe(null);
+      expect(updateDependency({ fileContent: replaced, upgrade })).toBe(null);
     });
   });
 });

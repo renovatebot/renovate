@@ -87,7 +87,7 @@ async function fetchManagerPackagerFileUpdates(
   const queue = pFile.deps.map(dep => (): Promise<void> =>
     fetchDepUpdates(packageFileConfig, dep)
   );
-  await pAll(queue, { concurrency: 10 });
+  await pAll(queue, { concurrency: 5 });
 }
 
 async function fetchManagerUpdates(

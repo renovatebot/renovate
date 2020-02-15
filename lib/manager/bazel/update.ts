@@ -1,7 +1,7 @@
 import { fromStream } from 'hasha';
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { regEx } from '../../util/regex';
 
 function updateWithNewVersion(
@@ -81,10 +81,10 @@ function setNewHash(content: string, hash: string): string {
   return content.replace(/(sha256\s*=\s*)"[^"]+"/, `$1"${hash}"`);
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
   try {
     logger.debug(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`

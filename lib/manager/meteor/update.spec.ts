@@ -17,7 +17,10 @@ describe('workers/branch/package-js', () => {
         currentValue: '0.1.19',
         newValue: '0.22.1',
       };
-      const testContent = updateDependency(input01Content, upgrade);
+      const testContent = updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toMatchSnapshot();
     });
     it('handles alternative quotes and white space', () => {
@@ -26,7 +29,10 @@ describe('workers/branch/package-js', () => {
         currentValue: '0.1.19',
         newValue: '0.22.1',
       };
-      const testContent = updateDependency(input02Content, upgrade);
+      const testContent = updateDependency({
+        fileContent: input02Content,
+        upgrade,
+      });
       expect(testContent).toMatchSnapshot();
     });
     it('handles the case where the desired version is already supported', () => {
@@ -35,7 +41,10 @@ describe('workers/branch/package-js', () => {
         currentValue: '0.2.0',
         newValue: '0.2.0',
       };
-      const testContent = updateDependency(input01Content, upgrade);
+      const testContent = updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
       expect(testContent).toEqual(input01Content);
     });
   });

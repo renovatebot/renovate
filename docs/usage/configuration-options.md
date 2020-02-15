@@ -45,6 +45,10 @@ Alias values must be properly formatted URIs.
 
 Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
 
+## ansible-galaxy
+
+Add configuration here if you want to enable or disable something in particular for Ansible requirements files. Includes and webserver based dependencies in requirement files are not supported at this moment.
+
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renvoate will instead always assign reviewers and assignees for automerging PRs at time of creation.
@@ -483,6 +487,19 @@ Note: you shouldn't usually need to configure this unless you really care about 
 
 Renovate supports updating Helm Chart references within `requirements.yaml` files. If your Helm charts make use of Aliases then you will need to configure an `aliases` object in your config to tell Renovate where to look for them.
 
+## helm-values
+
+Renovate supports updating of Docker dependencies within Helm Chart `values.yaml` files or other YAML
+files that use the same format (via `fileMatch` configuration). Updates are performed if the files
+follow the conventional format used in most of the `stable` Helm charts:
+
+```yaml
+image:
+  repository: 'some-docker/dependency'
+  tag: v1.0.0
+  registry: registry.example.com # optional key, will default to "docker.io"
+```
+
 ## helmfile
 
 ## homebrew
@@ -707,7 +724,7 @@ By default, Renovate will use group names in Pull Request titles only when the P
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock` and `composer.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock` and `poetry.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -855,6 +872,19 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
     {
       "paths": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
+    }
+  ]
+}
+```
+
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "paths": ["+(package.json)"],
+      "masterIssueApproval": true
     }
   ]
 }
@@ -1019,6 +1049,18 @@ Use this field if you want to have one or more package names patterns in your pa
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ### paths
+
+Renovate will match `paths` against both a partial string match or a minimatch glob pattern. If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+
+```
+  "paths": ["+(package.json)"],
+```
+
+The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
+
+```
+  "paths": ["package.json"],
+```
 
 ### sourceUrlPrefixes
 

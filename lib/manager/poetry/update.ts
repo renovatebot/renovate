@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { PoetryFile } from './types';
 
 // TODO: Maybe factor out common code from pipenv.updateDependency and poetry.updateDependency
@@ -30,10 +30,10 @@ function replaceAt(
   );
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade<{ nestedVersion?: boolean }>
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return null;

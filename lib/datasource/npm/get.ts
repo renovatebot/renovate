@@ -1,3 +1,4 @@
+import delay from 'delay';
 import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
@@ -6,11 +7,10 @@ import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
-import { Release, ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, Release, ReleaseResult } from '../common';
 import { DATASOURCE_NPM } from '../../constants/data-binary-source';
 
 let memcache = {};
@@ -42,7 +42,8 @@ export interface NpmDependency extends ReleaseResult {
 }
 
 export async function getDependency(
-  name: string
+  name: string,
+  retries = 3
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${name})`);
 
@@ -106,23 +107,18 @@ export async function getDependency(
   headers['Cache-Control'] = 'no-cache';
 
   try {
-    const raw = await got(pkgUrl, {
+    const useCache = retries === 3; // Disable cache if we're retrying
+    const opts: GotJSONOptions = {
       json: true,
-      retry: {
-        errorCodes: [
-          'ECONNRESET',
-          'ETIMEDOUT',
-          'ECONNRESET',
-          'EADDRINUSE',
-          'ECONNREFUSED',
-          'EPIPE',
-          'ENOTFOUND',
-          'ENETUNREACH',
-          'EAI_AGAIN',
-        ],
-      },
+      retry: 5,
       headers,
-    });
+      useCache,
+    };
+    const raw = await got(pkgUrl, opts);
+    // istanbul ignore if
+    if (retries < 3) {
+      logger.info({ pkgUrl, retries }, 'Recovered from npm error');
+    }
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
     const returnedName = res.name ? res.name : res._id || '';
@@ -235,8 +231,20 @@ export async function getDependency(
       return null;
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
-      logger.warn({ err, regUrl, depName: name }, 'npm registry failure');
-      throw new Error(DATASOURCE_FAILURE);
+      // istanbul ignore if
+      if (
+        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        retries > 0
+      ) {
+        logger.info({ pkgUrl, errName: err.name }, 'Retrying npm error');
+        await delay(5000);
+        return getDependency(name, retries - 1);
+      }
+      // istanbul ignore if
+      if (err.name === 'ParseError' && err.body) {
+        err.body = 'err.body deleted by Renovate';
+      }
+      throw new DatasourceError(err);
     }
     // istanbul ignore next
     return null;

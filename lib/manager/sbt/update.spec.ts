@@ -13,17 +13,17 @@ describe('lib/manager/sbt/extract', () => {
       const { deps } = extractPackageFile(fileContent);
       const upgrade: Upgrade = deps.shift();
       upgrade.newValue = upgrade.currentValue;
-      const newFileContent = updateDependency(fileContent, upgrade);
+      const newFileContent = updateDependency({ fileContent, upgrade });
       expect(newFileContent).toBe(fileContent);
     });
     it('returns null if content has been updated somewhere', () => {
       const { deps } = extractPackageFile(fileContent);
       const upgrade: Upgrade = deps.shift();
       upgrade.newValue = '0.1.1';
-      const newFileContent = updateDependency(
-        fileContent.replace('0.0.1', '0.1.0'),
-        upgrade
-      );
+      const newFileContent = updateDependency({
+        fileContent: fileContent.replace('0.0.1', '0.1.0'),
+        upgrade,
+      });
       expect(newFileContent).toBeNull();
     });
     it('updates old deps to newer ones', () => {
@@ -38,7 +38,7 @@ describe('lib/manager/sbt/extract', () => {
       });
       upgrades.forEach(upgrade => {
         const { currentValue, newValue } = upgrade;
-        const newFileContent = updateDependency(fileContent, upgrade);
+        const newFileContent = updateDependency({ fileContent, upgrade });
         const cmpContent = fileContent.replace(currentValue, newValue);
         expect(newFileContent).toEqual(cmpContent);
       });

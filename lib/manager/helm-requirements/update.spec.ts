@@ -1,6 +1,6 @@
 import { updateDependency } from './update';
 
-describe('lib/manager/helm/extract', () => {
+describe('lib/manager/helm-requirements/update', () => {
   describe('updateDependency()', () => {
     it('returns the same fileContent for undefined upgrade', () => {
       const content = `
@@ -14,7 +14,7 @@ describe('lib/manager/helm/extract', () => {
       `;
       const upgrade = undefined;
 
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent: content, upgrade })).toBe(content);
     });
     it('returns the same fileContent for invalid requirements.yaml file', () => {
       const content = `
@@ -25,7 +25,7 @@ describe('lib/manager/helm/extract', () => {
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent: content, upgrade })).toBe(content);
     });
     it('returns the same fileContent for empty upgrade', () => {
       const content = `
@@ -38,7 +38,7 @@ describe('lib/manager/helm/extract', () => {
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
       const upgrade = {};
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent: content, upgrade })).toBe(content);
     });
     it('upgrades dependency if valid upgrade', () => {
       const content = `
@@ -55,8 +55,12 @@ describe('lib/manager/helm/extract', () => {
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
-      expect(updateDependency(content, upgrade)).not.toBe(content);
-      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+      expect(updateDependency({ fileContent: content, upgrade })).not.toBe(
+        content
+      );
+      expect(
+        updateDependency({ fileContent: content, upgrade })
+      ).toMatchSnapshot();
     });
     it('upgrades dependency if version field comes before name field', () => {
       const content = `
@@ -73,8 +77,12 @@ describe('lib/manager/helm/extract', () => {
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
-      expect(updateDependency(content, upgrade)).not.toBe(content);
-      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+      expect(updateDependency({ fileContent: content, upgrade })).not.toBe(
+        content
+      );
+      expect(
+        updateDependency({ fileContent: content, upgrade })
+      ).toMatchSnapshot();
     });
     it('upgrades dependency if newValue version value is repeated', () => {
       const content = `
@@ -91,8 +99,12 @@ describe('lib/manager/helm/extract', () => {
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
-      expect(updateDependency(content, upgrade)).not.toBe(content);
-      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+      expect(updateDependency({ fileContent: content, upgrade })).not.toBe(
+        content
+      );
+      expect(
+        updateDependency({ fileContent: content, upgrade })
+      ).toMatchSnapshot();
     });
   });
 });

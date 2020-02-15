@@ -1,0 +1,11 @@
+plugins {
+  id 'java'
+}
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  implementation 'org.apache.commons:commons-collections4:4.4'
+}

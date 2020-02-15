@@ -7,7 +7,7 @@ jest.mock('../../util/got');
 const got: jest.Mock<any> = _got as any;
 
 const propertiesFile2 = fs.readFileSync(
-  'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',
+  'lib/manager/gradle-wrapper/__fixtures__/gradle-wrapper-2.properties',
   'utf8'
 );
 
@@ -36,7 +36,10 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockReturnValueOnce({
         body: checksum,
       });
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        upgrade,
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).not.toEqual(propertiesFile2);
@@ -66,7 +69,10 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockReturnValueOnce({
         body: checksum,
       });
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        upgrade,
+      });
       expect(res).toEqual(propertiesFile2);
     });
 
@@ -86,7 +92,10 @@ describe('manager/gradle-wrapper/update', () => {
       got.mockRejectedValueOnce({
         statusCode: 404,
       });
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
 
@@ -104,12 +113,18 @@ describe('manager/gradle-wrapper/update', () => {
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip.sha256',
       };
       got.mockRejectedValueOnce(new Error());
-      const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFile2,
+        upgrade,
+      });
       expect(res).toBeNull();
     });
 
     it('returns null if error', async () => {
-      const res = await dcUpdate.updateDependency(null, null);
+      const res = await dcUpdate.updateDependency({
+        fileContent: null,
+        upgrade: null,
+      });
       expect(res).toBeNull();
     });
   });

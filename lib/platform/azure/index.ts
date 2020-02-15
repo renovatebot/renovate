@@ -23,6 +23,7 @@ import {
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -48,7 +49,7 @@ interface Config {
 let config: Config = {} as any;
 
 const defaults: any = {
-  hostType: 'azure',
+  hostType: PLATFORM_TYPE_AZURE,
 };
 
 export function initPlatform({

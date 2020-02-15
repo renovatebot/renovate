@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const csProj = readFileSync(
-  'test/datasource/nuget/_fixtures/sample.csproj',
+  'lib/manager/nuget/__fixtures__/sample.csproj',
   'utf8'
 );
 
@@ -13,7 +13,7 @@ describe('manager/nuget/update', () => {
         managerData: { lineNumber: 13 },
         newVersion: '5.0.0',
       };
-      const res = updateDependency(csProj, upgrade);
+      const res = updateDependency({ fileContent: csProj, upgrade });
       expect(res).not.toEqual(csProj);
     });
     it('replaces left boundary value', () => {
@@ -23,7 +23,7 @@ describe('manager/nuget/update', () => {
           managerData: { lineNumber: i },
           newVersion: i + '.2.1',
         };
-        res = updateDependency(res, upgrade);
+        res = updateDependency({ fileContent: res, upgrade });
       }
       expect(res).toMatchSnapshot();
     });
@@ -32,11 +32,14 @@ describe('manager/nuget/update', () => {
         managerData: { lineNumber: 13 },
         newVersion: '4.1.0',
       };
-      const res = updateDependency(csProj, upgrade);
+      const res = updateDependency({ fileContent: csProj, upgrade });
       expect(res).toEqual(csProj);
     });
     it('returns null on errors', () => {
-      const res = updateDependency(csProj, null);
+      const res = updateDependency({
+        fileContent: csProj,
+        upgrade: null,
+      });
       expect(res).toBeNull();
     });
   });

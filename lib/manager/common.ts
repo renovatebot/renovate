@@ -1,5 +1,5 @@
 import { ReleaseType } from 'semver';
-import { RangeStrategy } from '../versioning';
+import { RangeStrategy } from '../types';
 import { ValidationMessage } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
@@ -148,6 +148,7 @@ export interface Upgrade<T = Record<string, any>>
   checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
+  dockerRepository?: string;
   downloadUrl?: string;
   localDir?: string;
   name?: string;
@@ -179,7 +180,14 @@ export interface UpdateArtifact {
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
+
+export interface UpdateDependencyConfig {
+  fileContent: string;
+  upgrade: Upgrade;
+}
+
 export interface ManagerApi {
+  defaultConfig: object;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
@@ -205,8 +213,7 @@ export interface ManagerApi {
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency(
-    fileContent: string,
-    upgrade: Upgrade
+    updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
 

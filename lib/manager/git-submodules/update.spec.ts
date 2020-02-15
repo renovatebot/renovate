@@ -3,7 +3,7 @@ import { dir } from 'tmp-promise';
 
 import updateDependency from './update';
 
-jest.mock('simple-git/promise.js');
+jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
 describe('manager/git-submodules/update', () => {
@@ -14,7 +14,10 @@ describe('manager/git-submodules/update', () => {
           throw new Error();
         },
       });
-      const update = await updateDependency('', {});
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade: {},
+      });
       expect(update).toBeNull();
     });
     it('returns content on update', async () => {
@@ -24,7 +27,10 @@ describe('manager/git-submodules/update', () => {
           return Promise.resolve();
         },
       });
-      const update = await updateDependency('', { localDir: tmpDir.path });
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade: { localDir: tmpDir.path },
+      });
       expect(update).toEqual('');
     });
   });

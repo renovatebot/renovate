@@ -15,7 +15,7 @@ describe('lib/manager/mix/update', () => {
         managerData: { lineNumber: 18 },
         newValue: '~> 0.8.2',
       };
-      const res = updateDependency(sample, upgrade);
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).not.toEqual(sample);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -25,7 +25,7 @@ describe('lib/manager/mix/update', () => {
         managerData: { lineNumber: 18 },
         newValue: '~> 0.8.1',
       };
-      const res = updateDependency(sample, upgrade);
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).toEqual(sample);
     });
     it('returns null if wrong line', () => {
@@ -34,7 +34,7 @@ describe('lib/manager/mix/update', () => {
         managerData: { lineNumber: 19 },
         newValue: '~> 0.8.2',
       };
-      const res = updateDependency(sample, upgrade);
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).toBeNull();
     });
     it('returns null for unsupported depType', () => {
@@ -43,7 +43,7 @@ describe('lib/manager/mix/update', () => {
         managerData: { lineNumber: 19 },
         newValue: '~> 0.8.2',
       };
-      const res = updateDependency(sample, upgrade);
+      const res = updateDependency({ fileContent: sample, upgrade });
       expect(res).toBeNull();
     });
   });

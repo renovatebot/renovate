@@ -1,4 +1,4 @@
-FROM amd64/node:10.18.1@sha256:647d112e796fcbe9b0262092d7903784f0230714b13409efe090a477f1555227 AS tsbuild
+FROM amd64/node:10.19.0@sha256:06e80d0a45ea264fa69296cce992bc6f9c6956ff18f314c6211ba5b0db34e468 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -107,7 +107,7 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 RUN apt-get update && apt-get install -y php-cli php-mbstring && \
     rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_VERSION=1.8.6
+ENV COMPOSER_VERSION=1.9.3
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 

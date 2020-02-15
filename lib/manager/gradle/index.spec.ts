@@ -8,6 +8,7 @@ import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';
 import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
+import { setUtilConfig } from '../../util';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -26,7 +27,7 @@ const config = {
 };
 
 const updatesDependenciesReport = fsReal.readFileSync(
-  'test/datasource/gradle/_fixtures/updatesReport.json',
+  'lib/manager/gradle/__fixtures__/updatesReport.json',
   'utf8'
 );
 
@@ -47,6 +48,7 @@ describe('manager/gradle', () => {
     platform.getFile.mockResolvedValue('some content');
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setUtilConfig(config);
   });
 
   describe('extractPackageFile', () => {
@@ -77,7 +79,7 @@ describe('manager/gradle', () => {
 
       fs.readFile.mockResolvedValue(
         fsReal.readFileSync(
-          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
+          'lib/manager/gradle/__fixtures__/updatesReportEmpty.json',
           'utf8'
         ) as any
       );
@@ -86,15 +88,6 @@ describe('manager/gradle', () => {
       ]);
 
       expect(dependencies).toEqual([]);
-      expect(execSnapshots).toMatchSnapshot();
-    });
-
-    it('should throw registry failure if gradle execution fails', async () => {
-      const execSnapshots = mockExecAll(exec, new Error());
-
-      await expect(
-        manager.extractAllPackageFiles(config, ['build.gradle'])
-      ).rejects.toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -129,7 +122,7 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const multiProjectUpdatesReport = fsReal.readFileSync(
-        'test/datasource/gradle/_fixtures/MultiProjectUpdatesReport.json',
+        'lib/manager/gradle/__fixtures__/MultiProjectUpdatesReport.json',
         'utf8'
       );
       fs.readFile.mockResolvedValue(multiProjectUpdatesReport as any);
@@ -192,6 +185,7 @@ describe('manager/gradle', () => {
     });
 
     it('should use docker if required', async () => {
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
@@ -200,11 +194,11 @@ describe('manager/gradle', () => {
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
-      expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use docker even if gradlew is available', async () => {
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
@@ -214,7 +208,6 @@ describe('manager/gradle', () => {
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
-      expect(exec.mock.calls[0][0].includes('docker run')).toBe(true);
       expect(execSnapshots).toMatchSnapshot();
     });
   });
@@ -224,17 +217,17 @@ describe('manager/gradle', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const buildGradleContent = fsReal.readFileSync(
-        'test/datasource/gradle/_fixtures/build.gradle.example1',
+        'lib/manager/gradle/__fixtures__/build.gradle.example1',
         'utf8'
       );
       // prettier-ignore
       const upgrade = {
-        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8'
+        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8',
       };
-      const buildGradleContentUpdated = manager.updateDependency(
-        buildGradleContent,
-        upgrade
-      );
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
 
       expect(buildGradleContent).not.toMatch('cglib:cglib-nodep:3.2.8');
 
@@ -258,10 +251,10 @@ describe('manager/gradle', () => {
         version: '0.20.0',
         newValue: '0.21.0',
       };
-      const buildGradleContentUpdated = manager.updateDependency(
-        buildGradleContent,
-        upgrade
-      );
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
 
       expect(buildGradleContent).not.toMatch(
         'id "com.github.ben-manes.versions" version "0.21.0"'
@@ -291,10 +284,10 @@ describe('manager/gradle', () => {
         version: '0.20.0',
         newValue: '0.21.0',
       };
-      const buildGradleContentUpdated = manager.updateDependency(
-        buildGradleContent,
-        upgrade
-      );
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
 
       expect(buildGradleContent).not.toMatch(
         'id("com.github.ben-manes.versions") version "0.21.0"'

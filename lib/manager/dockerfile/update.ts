@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig, Upgrade } from '../common';
 
 export function getNewFrom(upgrade: Upgrade): string {
   const { depName, newValue, newDigest } = upgrade;
@@ -13,10 +13,10 @@ export function getNewFrom(upgrade: Upgrade): string {
   return newFrom;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const { lineNumber, fromSuffix } = upgrade.managerData;
     let { fromPrefix } = upgrade.managerData;

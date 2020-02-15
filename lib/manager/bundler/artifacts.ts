@@ -124,8 +124,8 @@ export async function updateArtifacts(
       'ruby --version',
       `gem install bundler${bundlerVersion} --no-document`,
     ];
-
     const execOptions: ExecOptions = {
+      cwdFile: packageFileName,
       docker: {
         image: 'renovate/ruby',
         tag: await getDockerTag(updateArtifact),
