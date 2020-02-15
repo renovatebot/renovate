@@ -560,6 +560,11 @@ async function getLabels(
         'Timeout when attempting to connect to docker registry'
       );
       logger.debug({ err });
+    } else if (err.host === 'quay.io' && err.statusCode === 400) {
+      // istanbul ignore next
+      logger.debug(
+        'Ignoring quay.io errors until they fully support v2 schema'
+      );
     } else {
       logger.warn(
         { registry, dockerRepository: repository, tag, err },
