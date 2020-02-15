@@ -1,6 +1,5 @@
 export const LANGUAGE_DART = 'dart';
 export const LANGUAGE_DOCKER = 'docker';
-export const LANGUAGE_KUSTOMIZE = 'kustomize';
 export const LANGUAGE_DOT_NET = 'dotnet';
 export const LANGUAGE_ELIXIR = 'elixir';
 export const LANGUAGE_GOLANG = 'golang';
