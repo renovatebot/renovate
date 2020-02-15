@@ -1545,7 +1545,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'object',
     default: {
-      fileMatch: ['.html?$'],
+      fileMatch: ['\\.html?$'],
       versionScheme: VERSION_SCHEME_SEMVER,
     },
     mergeable: true,
