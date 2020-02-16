@@ -1540,17 +1540,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'html',
-    description: 'Configuration object for HTML files',
-    stage: 'repository',
-    type: 'object',
-    default: {
-      fileMatch: ['\\.html?$'],
-      versionScheme: VERSION_SCHEME_SEMVER,
-    },
-    mergeable: true,
-  },
-  {
     name: 'hostRules',
     description: 'Host rules/configuration including credentials',
     type: 'array',
