@@ -251,6 +251,15 @@ export async function getPrList(): Promise<Pr[]> {
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
+
+    // get commit info to work out if the pr is modified
+    for (let i = 0; i < prs.length; i += 1) {
+      prs[i].commits = await azureApiGit.getPullRequestCommits(
+        config.repoId,
+        prs[i].pullRequestId
+      );
+    }
+
     config.prList = prs.map(azureHelper.getRenovatePRFormat);
     logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
