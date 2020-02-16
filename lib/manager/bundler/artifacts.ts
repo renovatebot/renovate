@@ -118,8 +118,18 @@ export async function updateArtifacts(
 
     const cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
 
+    let bundlerVersion = '';
     const { bundler } = compatibility;
-    const bundlerVersion = bundler && isValid(bundler) ? ` -v ${bundler}` : '';
+    if (bundler) {
+      if (isValid(bundler)) {
+        logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
+        bundlerVersion = ` -v ${bundler}`;
+      } else {
+        logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
+      }
+    } else {
+      logger.debug('No bundler version constraint found - will use latest');
+    }
     const preCommands = [
       'ruby --version',
       `gem install bundler${bundlerVersion} --no-document`,
