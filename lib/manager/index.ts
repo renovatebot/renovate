@@ -1,6 +1,3 @@
-import fs from 'fs';
-import { logger } from '../logger';
-
 import {
   ExtractConfig,
   ManagerApi,
@@ -24,37 +21,11 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
+import { loadModules } from '../util/modules';
 
-const managerList = [];
-const managers: Record<string, ManagerApi> = {};
+const managers = loadModules<ManagerApi>(__dirname);
 
-function isValidManagerModule(module: unknown): module is ManagerApi {
-  // TODO: check interface and fail-fast?
-  return !!module;
-}
-
-function loadManagers(): void {
-  const managerDirs = fs
-    .readdirSync(__dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .sort();
-  for (const manager of managerDirs) {
-    let module = null;
-    try {
-      module = require(`./${manager}`); // eslint-disable-line
-    } catch (err) /* istanbul ignore next */ {
-      logger.fatal({ err }, `Can not load manager "${manager}".`);
-      process.exit(1);
-    }
-
-    if (isValidManagerModule(module)) {
-      managers[manager] = module;
-      managerList.push(manager);
-    }
-  }
-}
-loadManagers();
+const managerList = Object.keys(managers);
 
 const languageList = [
   LANGUAGE_DART,
