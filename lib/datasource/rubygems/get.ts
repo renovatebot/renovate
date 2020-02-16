@@ -1,7 +1,7 @@
 import { OutgoingHttpHeaders } from 'http';
 import { RetryOptions } from 'got/dist/source';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotHeaders } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
