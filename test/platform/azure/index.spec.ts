@@ -215,6 +215,7 @@ describe('platform/azure', () => {
                   state: 'open',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
