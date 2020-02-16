@@ -45,7 +45,7 @@ const fetch = async ({ dependency, registry, path }): Promise<any> => {
   const responseType = 'json';
 
   const retry: RetryOptions = { calculateDelay: retriable() };
-  const headers: any = getHeaders();
+  const headers: GotHeaders = getHeaders();
 
   const name = `${path}/${dependency}.json`;
   const baseUrl = registry;
