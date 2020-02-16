@@ -22,8 +22,27 @@ import {
   LANGUAGE_RUST,
 } from '../constants/languages';
 import { loadModules } from '../util/modules';
+import { logger } from '../logger';
 
-const managers = loadModules<ManagerApi>(__dirname);
+// istanbul ignore next
+function validateManager(manager): boolean {
+  if (!manager.defaultConfig) {
+    logger.fatal(`manager is missing defaultConfig`);
+    return false;
+  }
+  if (!manager.updateDependency) {
+    logger.fatal(`manager is missing updateDependency`);
+    return false;
+  }
+  if (!manager.extractPackageFile && !manager.extractAllPackageFiles) {
+    logger.fatal(
+      `manager must support extractPackageFile or extractAllPackageFiles`
+    );
+  }
+  return true;
+}
+
+const managers = loadModules<ManagerApi>(__dirname, validateManager);
 
 const managerList = Object.keys(managers);
 

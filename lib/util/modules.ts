@@ -22,7 +22,7 @@ function relatePath(here: string, there: string): string {
 
 export function loadModules<T>(
   dirname: string,
-  validate?: (x: unknown) => x is T
+  validate?: (x: unknown) => boolean
 ): Record<string, T> {
   const result: Record<string, T> = {};
 
