@@ -42,7 +42,31 @@ Array [
 ]
 `;
 
-exports[`platform/azure ensureComment add comment 1`] = `
+exports[`platform/azure ensureComment adds comment if missing 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure ensureComment does nothing if comment exists and is the same 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure ensureComment updates comment if missing 1`] = `
 Array [
   Array [],
   Array [],

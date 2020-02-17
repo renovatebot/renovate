@@ -492,7 +492,7 @@ export async function ensureComment({
 }: EnsureCommentConfig): Promise<void> {
   logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const header = topic ? `### ${topic}\n\n` : '';
-  const body = `${topic}${sanitize(content)}`;
+  const body = `${header}${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
 
   const threads = await azureApiGit.getThreads(config.repoId, number);

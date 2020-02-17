@@ -617,17 +617,99 @@ describe('platform/azure', () => {
   });
 
   describe('ensureComment', () => {
-    it('add comment', async () => {
+    it('adds comment if missing', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
             createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: 'end-user comment', id: 1 }],
+                id: 2,
+              },
+            ]),
           } as any)
       );
       await azure.ensureComment({
         number: 42,
         topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+    });
+    it('updates comment if missing', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: 'end-user comment', id: 1 }],
+                id: 3,
+              },
+              {
+                comments: [
+                  { content: '### some-subject\n\nsome\ncontent', id: 2 },
+                ],
+                id: 4,
+              },
+            ]),
+            updateComment: jest.fn(() => ({ id: 123 })),
+          } as any)
+      );
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\nnew\ncontent',
+      });
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+    });
+    it('does nothing if comment exists and is the same', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: 'end-user comment', id: 1 }],
+                id: 3,
+              },
+              {
+                comments: [
+                  { content: '### some-subject\n\nsome\ncontent', id: 2 },
+                ],
+                id: 4,
+              },
+            ]),
+          } as any)
+      );
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+    });
+    it('does nothing if comment exists and is the same when there is no topic', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: 'some\ncontent', id: 2 }],
+                id: 4,
+              },
+            ]),
+          } as any)
+      );
+      await azure.ensureComment({
+        number: 42,
+        topic: null,
         content: 'some\ncontent',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
@@ -679,6 +761,7 @@ describe('platform/azure', () => {
         () =>
           ({
             createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn(() => []),
           } as any)
       );
       await azure.addAssignees(123, ['test@bonjour.fr']);
