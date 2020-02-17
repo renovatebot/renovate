@@ -191,10 +191,9 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
     pr.isConflicted = true;
   }
 
-  pr.isModified =
-    Boolean(azurePr.commits) &&
-    azurePr.commits[0].author.name !==
-      azurePr.commits[azurePr.commits.length - 1].author.name;
+  // value is updated later to be correct for
+  // specific pr's after filtering, for performance
+  pr.isModified = false;
 
   return pr;
 }

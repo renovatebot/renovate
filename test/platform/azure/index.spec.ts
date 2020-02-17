@@ -479,14 +479,57 @@ describe('platform/azure', () => {
             getPullRequestLabels: jest
               .fn()
               .mockReturnValue([{ active: true, name: 'renovate' }]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: jest.fn().mockReturnValue([
+              {
+                author: {
+                  name: 'renovate',
+                },
+              },
+            ]),
           } as any)
       );
       azureHelper.getRenovatePRFormat.mockImplementation(
         () =>
           ({
             pullRequestId: 1234,
-            labels: ['renovate'],
+          } as any)
+      );
+      const pr = await azure.getPr(1234);
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return a pr thats been modified', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1234,
+                },
+              ]),
+            getPullRequestLabels: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: jest.fn().mockReturnValue([
+              {
+                author: {
+                  name: 'renovate',
+                },
+              },
+              {
+                author: {
+                  name: 'end user',
+                },
+              },
+            ]),
+          } as any)
+      );
+      azureHelper.getRenovatePRFormat.mockImplementation(
+        () =>
+          ({
+            pullRequestId: 1234,
+            isModified: false,
           } as any)
       );
       const pr = await azure.getPr(1234);
