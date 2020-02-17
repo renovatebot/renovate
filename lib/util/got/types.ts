@@ -1,5 +1,17 @@
-import { NormalizedOptions, Options, Response as _Response } from 'got';
+import {
+  NormalizedOptions,
+  Options,
+  Response as _Response,
+  GotError,
+} from 'got';
 import { Merge } from 'type-fest';
+
+// TODO: remove when code is refactord
+Object.defineProperty(GotError.prototype, 'statusCode', {
+  get: function statusCode() {
+    return this.response?.statusCode;
+  },
+});
 
 export type GotResponse<T> = _Response<T>;
 
