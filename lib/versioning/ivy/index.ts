@@ -7,6 +7,11 @@ import {
 } from './parse';
 import { VersioningApi } from '../common';
 
+export const displayName = 'Ivy';
+export const urls = ['https://ant.apache.org/ivy/'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const {
   equals,
   getMajor,

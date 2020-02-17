@@ -3,6 +3,11 @@ import { major, minor } from 'semver';
 import { api as npm } from '../npm';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const displayName = 'Poetry';
+export const urls = ['https://python-poetry.org/docs/versions/'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function notEmpty(s: string): boolean {
   return s !== '';
 }

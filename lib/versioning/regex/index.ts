@@ -4,6 +4,10 @@ import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { regEx } from '../../util/regex';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
+export const displayName = 'Regular Expression';
+export const urls = [];
+export const supportsRanges = false;
+
 export interface RegExpVersion extends GenericVersion {
   /** prereleases are treated in the standard semver manner, if present */
   prerelease: string;

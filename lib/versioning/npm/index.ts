@@ -3,6 +3,16 @@ import { is as isStable } from 'semver-stable';
 import { getNewValue } from './range';
 import { VersioningApi } from '../common';
 
+export const displayName = 'npm';
+export const urls = [
+  'https://semver.org/',
+  'https://www.npmjs.com/package/semver',
+  'https://docs.npmjs.com/about-semantic-versioning',
+  'https://semver.npmjs.com/',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const {
   compare: sortVersions,
   maxSatisfying: maxSatisfyingVersion,

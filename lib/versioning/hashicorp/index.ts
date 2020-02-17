@@ -1,6 +1,13 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const displayName = 'Hashicorp';
+export const urls = [
+  'https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function hashicorp2npm(input: string): string {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2
   return input.replace(/~>(\s*\d+\.\d+$)/, '^$1').replace(',', '');

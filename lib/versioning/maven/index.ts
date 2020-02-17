@@ -14,6 +14,15 @@ import {
 } from './compare';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const displayName = 'Maven';
+export const urls = [
+  'https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification',
+  'https://octopus.com/blog/maven-versioning-explained',
+  'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 function matches(a: string, b: string): boolean {

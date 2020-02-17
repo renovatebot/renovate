@@ -13,6 +13,15 @@ import { parse as parseRange, ltr } from './range';
 import { isSingleOperator, isValidOperator } from './operator';
 import { pin, bump, replace } from './strategies';
 
+export const displayName = 'Ruby';
+export const urls = [
+  'https://guides.rubygems.org/patterns/',
+  'https://bundler.io/v1.5/gemfile.html',
+  'https://www.devalot.com/articles/2012/04/gem-versions.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') return version.replace(/^v/, '');
   return version;

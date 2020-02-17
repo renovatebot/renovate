@@ -1,6 +1,10 @@
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
+export const displayName = 'git';
+export const urls = ['https://git-scm.com/'];
+export const supportsRanges = false;
+
 const parse = (version: string): any => ({ release: [parseInt(version, 10)] });
 
 const isCompatible = (version: string, range: string): boolean => true;
