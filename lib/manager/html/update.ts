@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { PackageDependency, Upgrade } from '../common';
+import { PackageDependency, UpdateDependencyConfig } from '../common';
 import { extractDep } from './extract';
 import * as cdnjs from '../../datasource/cdnjs';
 import got from '../../util/got';
@@ -37,10 +37,10 @@ async function fetchNewHash(
   return result;
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string> {
   const { currentValue, newValue, managerData } = upgrade;
   const { tagPosition, tagLength } = managerData;
   const leftPart = fileContent.slice(0, tagPosition);
