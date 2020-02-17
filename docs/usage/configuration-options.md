@@ -45,6 +45,10 @@ Alias values must be properly formatted URIs.
 
 Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
 
+## ansible-galaxy
+
+Add configuration here if you want to enable or disable something in particular for Ansible requirements files. Includes and webserver based dependencies in requirement files are not supported at this moment.
+
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renvoate will instead always assign reviewers and assignees for automerging PRs at time of creation.
@@ -521,6 +525,10 @@ Example for configuring `docker` auth:
   ]
 }
 ```
+
+## html
+
+Supports subresource integrity (SRI) hashes.
 
 ### baseUrl
 

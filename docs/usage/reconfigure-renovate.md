@@ -23,3 +23,5 @@ Perhaps you really liked the interactive PR and want to see it again. In that ca
 2.  Delete your Renovate config (e.g. `renovate.json`) from your base branch
 
 This will be enough to trick Renovate into thinking that the repository was _never_ onboarded and it will trigger a new Configure Renovate PR again. Any existing Renovate PRs in progress may be closed, however.
+
+Be aware that re-onboarding via the interactive PR is currently not supported for Bitbucket Server or Azure DevOps since they do not allow editing or removing merged PRs.

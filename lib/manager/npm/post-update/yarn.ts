@@ -4,11 +4,9 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
-import {
-  SYSTEM_INSUFFICIENT_DISK_SPACE,
-  DATASOURCE_FAILURE,
-} from '../../../constants/error-messages';
+import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { BinarySource } from '../../../util/exec/common';
+import { DatasourceError } from '../../../datasource';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -179,7 +177,7 @@ export async function generateLockFile(
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new Error(DATASOURCE_FAILURE);
+        throw new DatasourceError(err);
       }
     }
     return { error: true, stderr: err.stderr };

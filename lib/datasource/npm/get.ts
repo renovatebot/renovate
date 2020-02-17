@@ -10,8 +10,7 @@ import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
-import { Release, ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, Release, ReleaseResult } from '../common';
 import { DATASOURCE_NPM } from '../../constants/data-binary-source';
 
 let memcache = {};
@@ -114,11 +113,12 @@ export async function getDependency(
       retry: 5,
       headers,
       useCache,
+      readableHighWaterMark: 1024 * 1024 * 10, // https://github.com/sindresorhus/got/issues/1062#issuecomment-586580036
     };
     const raw = await got(pkgUrl, opts);
     // istanbul ignore if
     if (retries < 3) {
-      logger.info({ retries }, 'Successfully recovered ECONNRESET');
+      logger.info({ pkgUrl, retries }, 'Recovered from npm error');
     }
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
@@ -233,22 +233,19 @@ export async function getDependency(
     }
     if (regUrl.startsWith('https://registry.npmjs.org')) {
       // istanbul ignore if
-      if (err.code === 'ECONNRESET' && retries > 1) {
-        logger.info({ pkgUrl }, 'Retrying npm ECONNRESET');
+      if (
+        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        retries > 0
+      ) {
+        logger.info({ pkgUrl, errName: err.name }, 'Retrying npm error');
         await delay(5000);
         return getDependency(name, retries - 1);
       }
-      logger.warn(
-        {
-          err,
-          errorCodes: err.gotOptions?.retry?.errorCodes,
-          statusCodes: err.gotOptions?.retry?.statusCodes,
-          regUrl,
-          depName: name,
-        },
-        'npm registry failure'
-      );
-      throw new Error(DATASOURCE_FAILURE);
+      // istanbul ignore if
+      if (err.name === 'ParseError' && err.body) {
+        err.body = 'err.body deleted by Renovate';
+      }
+      throw new DatasourceError(err);
     }
     // istanbul ignore next
     return null;

@@ -1,7 +1,6 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, ReleaseResult } from '../common';
 
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
@@ -24,10 +23,11 @@ async function updateRubyGemsVersions(): Promise<void> {
     newLines = (await got(url, options)).body;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode !== 416) {
-      logger.warn({ err }, 'Rubygems error - resetting cache');
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(
+        new Error('Rubygems fetch error - need to reset cache')
+      );
     }
     logger.debug('Rubygems: No update');
     lastSync = new Date();

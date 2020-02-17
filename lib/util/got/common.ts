@@ -5,6 +5,7 @@ export interface Options {
   hostType?: string;
   search?: string;
   useCache?: boolean;
+  readableHighWaterMark?: number;
 }
 
 export type GotJSONOptions = Options & got.GotJSONOptions;

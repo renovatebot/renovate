@@ -3,7 +3,6 @@ import upath from 'upath';
 
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
 
 import {
@@ -26,6 +25,7 @@ import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import { BinarySource } from '../../util/exec/common';
+import { DatasourceError } from '../../datasource';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -78,20 +78,14 @@ async function executeGradle(
   try {
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
-  } catch (err) {
-    // istanbul ignore if
+  } catch (err) /* istanbul ignore next */ {
     if (err.code === TIMEOUT_CODE) {
-      logger.warn({ err }, ' Process killed. Possibly gradle timed out.');
+      const error = new DatasourceError(err);
+      error.datasource = 'gradle';
+      throw error;
     }
-    // istanbul ignore if
-    if (err.message.includes('Could not resolve all files for configuration')) {
-      logger.debug({ err }, 'Gradle error');
-      logger.warn('Gradle resolution error');
-      return;
-    }
-    logger.warn({ err, cmd }, 'Gradle run failed');
-    logger.info('Aborting Renovate due to Gradle lookup errors');
-    throw new Error(DATASOURCE_FAILURE);
+    logger.warn({ errMessage: err.message }, 'Gradle extraction failed');
+    return;
   }
   logger.debug(stdout + stderr);
   logger.info('Gradle report complete');
@@ -158,7 +152,11 @@ export async function extractAllPackageFiles(
 }
 
 function buildGradleDependency(config: Upgrade): GradleDependency {
-  return { group: config.depGroup, name: config.name, version: config.version };
+  return {
+    group: config.depGroup,
+    name: config.name,
+    version: config.currentValue,
+  };
 }
 
 export function updateDependency({
@@ -166,7 +164,7 @@ export function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): string {
   // prettier-ignore
-  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
+  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
 
   return updateGradleVersion(
     fileContent,
