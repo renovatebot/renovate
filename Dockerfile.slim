@@ -50,7 +50,7 @@ FROM base as final
 # required for install
 USER root
 
-# The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5377), so update it to the latest stable version
+# The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
 RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24 && \
     apt-get update && \
