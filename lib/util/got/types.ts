@@ -12,6 +12,11 @@ Object.defineProperty(GotError.prototype, 'statusCode', {
     return this.response?.statusCode;
   },
 });
+Object.defineProperty(GotError.prototype, 'code', {
+  get: function code() {
+    return this.response?.code;
+  },
+});
 
 export type GotResponse<T> = _Response<T>;
 
