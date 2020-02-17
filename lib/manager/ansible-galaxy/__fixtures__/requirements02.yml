@@ -1,0 +1,6 @@
+# from galaxy
+- src: yatesr.timezone
+  version: "0.1.0"
+- scm: git
+  src: git@gitlab.company.com:mygroup/ansible-base.git
+  version: "0.1"

@@ -1,10 +1,7 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  _fileContent: string,
-  upgrade: Upgrade
-): string {
+export function updateDependency({ upgrade }: UpdateDependencyConfig): string {
   logger.debug(`ruby-version.updateDependency(): ${upgrade.newValue}`);
   return `${upgrade.newValue}\n`;
 }

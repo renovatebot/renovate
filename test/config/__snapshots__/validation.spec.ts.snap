@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/validation validateConfig(config) catches invalid handlebars templates 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid handlebars template in config path: commitMessage",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {
@@ -32,11 +41,11 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
+    "message": "Invalid schedule: \`Invalid schedule: \\"every 15 mins every weekday\\" should not specify minutes\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "extends: Invalid timezone: Europe/Brussel",
+    "message": "extends: Invalid schedule: Unsupported timezone Europe/Brussel",
   },
   Object {
     "depName": "Configuration Error",
@@ -48,7 +57,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "timezone: Invalid timezone: Asia",
+    "message": "timezone: Invalid schedule: Unsupported timezone Asia",
   },
 ]
 `;
@@ -77,17 +86,6 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "packageRules: Managers should be type of List. You have included string.",
-  },
-]
-`;
-
-exports[`config/validation validateConfig(config) included unsupported manager 1`] = `
-Array [
-  Object {
-    "depName": "Configuration Error",
-    "message": "packageRules:
-        You have included an unsupported manager in a package rule. Your list: foo.
-        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, circleci, composer, deps-edn, docker-compose, dockerfile, droneci, git-submodules, github-actions, gitlabci, gitlabci-include, gomod, gradle, gradle-wrapper, helm-requirements, homebrew, kubernetes, leiningen, maven, meteor, mix, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, poetry, pub, sbt, swift, terraform, travis, ruby-version).",
   },
 ]
 `;

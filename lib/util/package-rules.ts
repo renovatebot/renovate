@@ -146,7 +146,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
             ? '.*'
             : packagePattern
         );
-        if (depName && depName.match(packageRegex)) {
+        if (packageRegex.test(depName)) {
           logger.trace(`${depName} matches against ${packageRegex}`);
           isMatch = true;
         }
@@ -170,7 +170,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
       const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
       );
-      if (depName && depName.match(packageRegex)) {
+      if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${packageRegex}`);
         isMatch = true;
       }

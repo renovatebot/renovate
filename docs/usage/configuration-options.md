@@ -45,6 +45,10 @@ Alias values must be properly formatted URIs.
 
 Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
 
+## ansible-galaxy
+
+Add configuration here if you want to enable or disable something in particular for Ansible requirements files. Includes and webserver based dependencies in requirement files are not supported at this moment.
+
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renvoate will instead always assign reviewers and assignees for automerging PRs at time of creation.
@@ -177,6 +181,20 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 ## bundler
 
 ## cargo
+
+## cdnurl
+
+**Important**: This manager isn't aware of subresource integrity (SRI) hashes. It will search/replace any matching url it finds, without consideration for things such as script integrity hashes.
+
+To enable this manager, add the matching files to `cdnurl.fileMatch`. For example:
+
+```json
+{
+  "cdnurl": {
+    "fileMatch": ["\\.html?$"]
+  }
+}
+```
 
 ## circleci
 
@@ -469,6 +487,21 @@ Note: you shouldn't usually need to configure this unless you really care about 
 
 Renovate supports updating Helm Chart references within `requirements.yaml` files. If your Helm charts make use of Aliases then you will need to configure an `aliases` object in your config to tell Renovate where to look for them.
 
+## helm-values
+
+Renovate supports updating of Docker dependencies within Helm Chart `values.yaml` files or other YAML
+files that use the same format (via `fileMatch` configuration). Updates are performed if the files
+follow the conventional format used in most of the `stable` Helm charts:
+
+```yaml
+image:
+  repository: 'some-docker/dependency'
+  tag: v1.0.0
+  registry: registry.example.com # optional key, will default to "docker.io"
+```
+
+## helmfile
+
 ## homebrew
 
 ## hostRules
@@ -492,6 +525,10 @@ Example for configuring `docker` auth:
   ]
 }
 ```
+
+## html
+
+Supports subresource integrity (SRI) hashes.
 
 ### baseUrl
 
@@ -687,7 +724,7 @@ By default, Renovate will use group names in Pull Request titles only when the P
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock` and `composer.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock` and `poetry.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -773,7 +810,7 @@ See [Private npm module support](https://docs.renovatebot.com/private-modules) f
 
 ## nuget
 
-The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj`/`.fsproj`/`.vbproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj`/`.fsproj`/`.vbproj` format in order to be detected and supported by Renovate.
 
 ## nvm
 
@@ -835,6 +872,19 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
     {
       "paths": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
+    }
+  ]
+}
+```
+
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "paths": ["+(package.json)"],
+      "masterIssueApproval": true
     }
   ]
 }
@@ -1000,16 +1050,30 @@ The above will configure `rangeStrategy` to `replace` for any package starting w
 
 ### paths
 
+Renovate will match `paths` against both a partial string match or a minimatch glob pattern. If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+
+```
+  "paths": ["+(package.json)"],
+```
+
+The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
+
+```
+  "paths": ["package.json"],
+```
+
 ### sourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-    "groupName" "Vue monorepo packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
+    }
+  ]
 }
 ```
 
@@ -1017,10 +1081,12 @@ Here's an example of where you use this to group together all packages from the 
 
 ```json
 {
-  "packageRules": [{
-    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
-    "groupName" "All renovate packages"
-  }]
+  "packageRules": [
+    {
+      "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+      "groupName": "All renovate packages"
+    }
+  ]
 }
 ```
 
@@ -1079,6 +1145,33 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
 - `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+
+## postUpgradeTasks
+
+Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created. The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+
+This is only available on Renovate instances that have a `trustLevel` of 'high'. Each command must match at least one of the patterns defined in `allowedPostUpgradeTasks` in order to be executed. If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["tslint --fix"],
+    "fileFilters": ["yarn.lock", "**/*.js"]
+  }
+}
+```
+
+The `postUpdateTasks` configuration consists of two fields:
+
+### commands
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit it made
+
+### fileFilters
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
 
 ## prBodyColumns
 

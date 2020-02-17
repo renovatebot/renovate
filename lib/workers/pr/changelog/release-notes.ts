@@ -6,7 +6,7 @@ import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import { ChangeLogResult, ChangeLogNotes } from './common';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);

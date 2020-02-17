@@ -170,15 +170,76 @@ Object {
     "sha": "1234",
   },
   "branchName": "somebranch",
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Pull Request #91",
   "head": Object {
     "ref": "somebranch",
+    "repo": Object {
+      "full_name": "some/repo",
+    },
   },
   "isModified": false,
   "isStale": true,
   "number": 91,
+  "sha": undefined,
+  "state": "open",
+}
+`;
+
+exports[`platform/github getBranchPr(branchName) should return the PR object in fork mode 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "user/repos?per_page=100",
+    Object {
+      "paginate": true,
+      "token": "abc123",
+    },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/pulls/90",
+  ],
+  Array [
+    "repos/forked/repo/git/refs/heads/master",
+  ],
+]
+`;
+
+exports[`platform/github getBranchPr(branchName) should return the PR object in fork mode 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "branchName": "somebranch",
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Pull Request #90",
+  "head": Object {
+    "ref": "somebranch",
+    "repo": Object {
+      "full_name": "other/repo",
+    },
+  },
+  "isModified": false,
+  "isStale": true,
+  "number": 90,
   "sha": undefined,
   "state": "open",
 }
@@ -211,6 +272,7 @@ exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = 
 Object {
   "branchName": "renovate/jest-monorepo",
   "canMerge": false,
+  "canMergeReason": "mergeStateStatus = DIRTY",
   "displayNumber": "Pull Request #2500",
   "isConflicted": true,
   "isModified": false,
@@ -241,6 +303,8 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
@@ -276,6 +340,8 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
@@ -293,6 +359,8 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
@@ -310,6 +378,8 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
@@ -327,6 +397,8 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
@@ -344,6 +416,8 @@ Object {
     "sha": "1234",
   },
   "branchName": undefined,
+  "canMerge": false,
+  "canMergeReason": "mergeable = undefined",
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,

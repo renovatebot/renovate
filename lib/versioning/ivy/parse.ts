@@ -23,7 +23,7 @@ function parseDynamicRevision(str: string): Revision {
   }
 
   const SUBREV_REGEX = /\.\+$/;
-  if (SUBREV_REGEX.test(str)) {
+  if (str.endsWith('.+')) {
     const value = str.replace(SUBREV_REGEX, '');
     if (isSingleVersion(value)) {
       return {

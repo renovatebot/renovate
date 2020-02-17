@@ -1,4 +1,4 @@
-FROM amd64/node:10.18.1@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6 AS tsbuild
+FROM amd64/node:10.19.0@sha256:06e80d0a45ea264fa69296cce992bc6f9c6956ff18f314c6211ba5b0db34e468 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -24,11 +24,17 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && \
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils openssh-client bsdtar build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
+RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24 && \
+    apt-get update && \
+    apt-get -y install git && \
     rm -rf /var/lib/apt/lists/*
 
 ## Gradle
-
 RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-headless gradle && \
     rm -rf /var/lib/apt/lists/*
 
@@ -107,7 +113,7 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 RUN apt-get update && apt-get install -y php-cli php-mbstring && \
     rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_VERSION=1.8.6
+ENV COMPOSER_VERSION=1.9.3
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 

@@ -1,5 +1,5 @@
+import fs from 'fs';
 import { logger } from '../logger';
-import { getOptions } from '../config/definitions';
 import {
   VersioningApi,
   VersioningApiConstructor,
@@ -8,14 +8,26 @@ import {
 
 export * from './common';
 
-const supportedSchemes = getOptions().find(
-  option => option.name === 'versionScheme'
-).allowedValues;
-
 const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
 
-for (const scheme of supportedSchemes) {
-  schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
+const versionSchemeList: string[] = [];
+
+export const getVersionSchemeList = (): string[] => versionSchemeList;
+
+const versionSchemes = fs
+  .readdirSync(__dirname, { withFileTypes: true })
+  .filter(dirent => dirent.isDirectory())
+  .map(dirent => dirent.name)
+  .sort();
+
+for (const scheme of versionSchemes) {
+  try {
+    schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
+    versionSchemeList.push(scheme);
+  } catch (err) /* istanbul ignore next */ {
+    logger.fatal({ err }, `Can not load version scheme "${scheme}".`);
+    process.exit(1);
+  }
 }
 
 export function get(versionScheme: string): VersioningApi {

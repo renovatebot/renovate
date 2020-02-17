@@ -8,7 +8,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const match = line.match(/^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+      const match = /^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);

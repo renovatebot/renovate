@@ -4,10 +4,16 @@ import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
+import {
+  ChangeLogConfig,
+  ChangeLogError,
+  ChangeLogRelease,
+  ChangeLogResult,
+} from './common';
 import { Release } from '../../../datasource';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,
@@ -63,11 +69,22 @@ export async function getChangeLogJSON({
     ? 'https://api.github.com/'
     : sourceUrl;
   const config = hostRules.find({
-    hostType: 'github',
+    hostType: PLATFORM_TYPE_GITHUB,
     url,
   });
   if (!config.token) {
-    logger.debug('Repository URL does not match any known hosts');
+    // istanbul ignore if
+    if (sourceUrl.includes('github.com')) {
+      logger.warn(
+        { manager, depName, sourceUrl },
+        'No github.com token has been configured. Skipping release notes retrieval'
+      );
+      return { error: ChangeLogError.MissingGithubToken };
+    }
+    logger.info(
+      { manager, depName, sourceUrl },
+      'Repository URL does not match any known hosts - skipping changelog retrieval'
+    );
     return null;
   }
   const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')

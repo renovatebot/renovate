@@ -1,7 +1,12 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import {
+  DatasourceError,
+  PkgReleaseConfig,
+  ReleaseResult,
+  Release,
+} from '../common';
+import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
 
 export async function getPkgReleases({
   lookupName,
@@ -40,7 +45,7 @@ export async function getPkgReleases({
   const crateUrl = baseUrl + path;
   try {
     let res: any = await got(crateUrl, {
-      hostType: 'cargo',
+      hostType: DATASOURCE_CARGO,
     });
     if (!res || !res.body) {
       logger.warn(
@@ -60,6 +65,7 @@ export async function getPkgReleases({
       return null;
     }
     // Filter empty lines (takes care of trailing \n)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     res = res.map(JSON.parse);
     if (res[0].name !== lookupName) {
       logger.warn(
@@ -101,8 +107,7 @@ export async function getPkgReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `cargo crates.io registry failure`);
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     logger.warn(
       { err, lookupName },

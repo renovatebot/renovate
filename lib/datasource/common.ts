@@ -1,3 +1,5 @@
+import { DATASOURCE_FAILURE } from '../constants/error-messages';
+
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -49,4 +51,19 @@ export interface Datasource {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getPreset?(packageName: string, presetName?: string): Promise<Preset>;
   getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
+}
+
+export class DatasourceError extends Error {
+  err: Error;
+
+  datasource?: string;
+
+  lookupName?: string;
+
+  constructor(err: Error) {
+    super(DATASOURCE_FAILURE);
+    // Set the prototype explicitly: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, DatasourceError.prototype);
+    this.err = err;
+  }
 }

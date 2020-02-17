@@ -2,63 +2,20 @@ import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
 
-import * as cargo from './cargo';
-import * as dart from './dart';
-import * as docker from './docker';
-import * as hex from './hex';
-import * as github from './github';
-import * as gitlab from './gitlab';
-import * as gitTags from './git-tags';
-import * as gitSubmodules from './git-submodules';
-import * as go from './go';
-import * as gradleVersion from './gradle-version';
-import * as helm from './helm';
-import * as maven from './maven';
-import * as npm from './npm';
-import * as nuget from './nuget';
-import * as orb from './orb';
-import * as packagist from './packagist';
-import * as pypi from './pypi';
-import * as rubygems from './rubygems';
-import * as rubyVersion from './ruby-version';
-import * as sbt from './sbt';
-import * as terraform from './terraform';
-import * as terraformProvider from './terraform-provider';
 import {
   Datasource,
+  DatasourceError,
   PkgReleaseConfig,
   Release,
   ReleaseResult,
   DigestConfig,
 } from './common';
 import { VERSION_SCHEME_SEMVER } from '../constants/version-schemes';
+import { loadModules } from '../util/modules';
 
 export * from './common';
 
-const datasources: Record<string, Datasource> = {
-  cargo,
-  dart,
-  docker,
-  helm,
-  hex,
-  github,
-  gitlab,
-  gitTags,
-  gitSubmodules,
-  go,
-  gradleVersion,
-  maven,
-  npm,
-  nuget,
-  orb,
-  packagist,
-  pypi,
-  rubygems,
-  rubyVersion,
-  sbt,
-  terraform,
-  terraformProvider,
-};
+const datasources = loadModules<Datasource>(__dirname);
 
 const cacheNamespace = 'datasource-releases';
 
@@ -98,10 +55,21 @@ function getRawReleases(
 export async function getPkgReleases(
   config: PkgReleaseConfig
 ): Promise<ReleaseResult | null> {
-  const res = await getRawReleases({
-    ...config,
-    lookupName: config.lookupName || config.depName,
-  });
+  const { datasource } = config;
+  const lookupName = config.lookupName || config.depName;
+  let res;
+  try {
+    res = await getRawReleases({
+      ...config,
+      lookupName,
+    });
+  } catch (e) /* istanbul ignore next */ {
+    if (e instanceof DatasourceError) {
+      e.datasource = datasource;
+      e.lookupName = lookupName;
+    }
+    throw e;
+  }
   if (!res) {
     return res;
   }
@@ -124,7 +92,7 @@ export async function getPkgReleases(
 }
 
 export function supportsDigests(config: DigestConfig): boolean {
-  return !!datasources[config.datasource].getDigest;
+  return 'getDigest' in datasources[config.datasource];
 }
 
 export function getDigest(

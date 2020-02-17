@@ -77,6 +77,12 @@ describe('semver.maxSatisfyingVersion()', () => {
     ).toBe('4.2.0');
     expect(
       semver.maxSatisfyingVersion(
+        ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
+        '~4'
+      )
+    ).toBe('4.2.0');
+    expect(
+      semver.maxSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~0.4'
       )
@@ -88,6 +94,12 @@ describe('semver.minSatisfyingVersion()', () => {
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
+        '~4'
+      )
+    ).toBe('4.0.0');
+    expect(
+      semver.minSatisfyingVersion(
+        ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
         '~4'
       )
     ).toBe('4.0.0');
@@ -245,5 +257,14 @@ describe('semver.getNewValue()', () => {
         toVersion: '3.7',
       })
     ).toEqual('3.7.*');
+
+    expect(
+      semver.getNewValue({
+        currentValue: 'v3.1.*',
+        rangeStrategy: 'replace',
+        fromVersion: '3.1.10',
+        toVersion: '3.2.0',
+      })
+    ).toEqual('v3.2.*'); // #5388
   });
 });
