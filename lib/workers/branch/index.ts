@@ -33,7 +33,7 @@ import {
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import {
-  CLOSED,
+  PR_STATE_CLOSED,
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
