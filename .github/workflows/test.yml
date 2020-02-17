@@ -100,7 +100,7 @@ jobs:
 
       - name: Clear pip cache
         if: steps.pip_cache_packages.outputs.cache-hit != 'true'
-        run: rm -rf ${{ steps.init.outputs.pip_cache }}
+        run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
 
       - name: Installing dependencies
         shell: bash
