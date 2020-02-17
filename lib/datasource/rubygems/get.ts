@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import { RetryOptions } from 'got/dist/source';
 import { logger } from '../../logger';
 import got, { GotHeaders } from '../../util/got';
@@ -31,7 +30,7 @@ const processError = ({ err, ...rest }): null => {
   return null;
 };
 
-const getHeaders = (): OutgoingHttpHeaders => {
+const getHeaders = (): GotHeaders => {
   return { hostType: DATASOURCE_RUBYGEMS };
 };
 
@@ -39,7 +38,7 @@ const fetch = async ({ dependency, registry, path }): Promise<any> => {
   const responseType = 'json';
 
   const retry: RetryOptions = { calculateDelay: retriable() };
-  const headers: GotHeaders = getHeaders();
+  const headers = getHeaders();
 
   const name = `${path}/${dependency}.json`;
   const baseUrl = registry;
