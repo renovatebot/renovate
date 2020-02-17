@@ -42,6 +42,9 @@ Object {
   "minor": Object {
     "automerge": true,
   },
+  "node": Object {
+    "versioning": "node",
+  },
   "nvmrc": Object {
     "packageRules": Array [
       Object {
@@ -83,6 +86,12 @@ Object {
       "packagePatterns": Array [
         "ang",
       ],
+    },
+    Object {
+      "packageNames": Array [
+        "guava",
+      ],
+      "versioning": "maven",
     },
     Object {
       "depTypeList": Array [
