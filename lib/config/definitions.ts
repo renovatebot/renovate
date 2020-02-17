@@ -305,7 +305,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration to use in onboarding PRs',
     stage: 'repository',
     type: 'object',
-    default: {},
+    default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
     admin: true,
     mergeable: true,
   },

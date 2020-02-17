@@ -20,6 +20,14 @@ describe('workers/repository/onboarding/branch', () => {
       config.isFork = true;
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
+    it('has default onboarding config', async () => {
+      platform.getFileList.mockResolvedValue(['package.json']);
+      platform.getFile.mockResolvedValue('{}');
+      await checkOnboardingBranch(config);
+      expect(
+        platform.commitFilesToBranch.mock.calls[0][0].files[0].contents
+      ).toMatchSnapshot();
+    });
     it('handles skipped onboarding combined with requireConfig = false', async () => {
       config.requireConfig = false;
       config.onboarding = false;
