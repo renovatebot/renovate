@@ -1,8 +1,8 @@
 import url from 'url';
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
+import { DatasourceError } from '../common';
 
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
   return (
@@ -74,7 +74,7 @@ export async function downloadHttpProtocol(
     } else if (isTemporalError(err)) {
       logger.info({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
-        throw new Error(DATASOURCE_FAILURE);
+        throw new DatasourceError(err);
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next

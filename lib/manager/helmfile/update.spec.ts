@@ -3,7 +3,7 @@ import { updateDependency } from './update';
 describe('lib/manager/helmfile/extract', () => {
   describe('updateDependency()', () => {
     it('returns the same fileContent for undefined upgrade', () => {
-      const content = `
+      const fileContent = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
@@ -14,11 +14,11 @@ describe('lib/manager/helmfile/extract', () => {
       `;
       const upgrade = undefined;
 
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent, upgrade })).toBe(fileContent);
     });
 
     it('returns the same fileContent for invalid helmfile.yaml file', () => {
-      const content = `
+      const fileContent = `
        Invalid helmfile.yaml content.
       `;
       const upgrade = {
@@ -26,11 +26,11 @@ describe('lib/manager/helmfile/extract', () => {
         newValue: '5.3.0',
         repository: 'https://kiwigrid.github.io',
       };
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent, upgrade })).toBe(fileContent);
     });
 
     it('returns the same fileContent for empty upgrade', () => {
-      const content = `
+      const fileContent = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
@@ -40,11 +40,11 @@ describe('lib/manager/helmfile/extract', () => {
           chart: kiwigrid/fluentd-elasticsearch
       `;
       const upgrade = {};
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent, upgrade })).toBe(fileContent);
     });
 
     it('upgrades dependency if valid upgrade', () => {
-      const content = `
+      const fileContent = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
@@ -58,12 +58,12 @@ describe('lib/manager/helmfile/extract', () => {
         newValue: '5.3.1',
         repository: 'https://kiwigrid.github.io',
       };
-      expect(updateDependency(content, upgrade)).not.toBe(content);
-      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+      expect(updateDependency({ fileContent, upgrade })).not.toBe(fileContent);
+      expect(updateDependency({ fileContent, upgrade })).toMatchSnapshot();
     });
 
     it('upgrades dependency if version field comes before name field', () => {
-      const content = `
+      const fileContent = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
@@ -77,12 +77,12 @@ describe('lib/manager/helmfile/extract', () => {
         newValue: '5.3.1',
         repository: 'https://kiwigrid.github.io',
       };
-      expect(updateDependency(content, upgrade)).not.toBe(content);
-      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+      expect(updateDependency({ fileContent, upgrade })).not.toBe(fileContent);
+      expect(updateDependency({ fileContent, upgrade })).toMatchSnapshot();
     });
 
     it('upgrades dependency if chart is repeated', () => {
-      const content = `
+      const fileContent = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
@@ -105,12 +105,12 @@ describe('lib/manager/helmfile/extract', () => {
         newValue: '5.3.1',
         repository: 'https://kiwigrid.github.io',
       };
-      expect(updateDependency(content, upgrade)).not.toBe(content);
-      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+      expect(updateDependency({ fileContent, upgrade })).not.toBe(fileContent);
+      expect(updateDependency({ fileContent, upgrade })).toMatchSnapshot();
     });
 
     it('Not fail if same version in multiple package', () => {
-      const content = `
+      const fileContent = `
       repositories:
         - name: kiwigrid
           url: https://kiwigrid.github.io
@@ -131,7 +131,7 @@ describe('lib/manager/helmfile/extract', () => {
         newValue: '5.3.1',
         repository: 'https://kiwigrid.github.io',
       };
-      expect(updateDependency(content, upgrade)).toBe(content);
+      expect(updateDependency({ fileContent, upgrade })).toBe(fileContent);
     });
   });
 });

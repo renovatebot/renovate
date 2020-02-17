@@ -1,46 +1,21 @@
-import fs from 'fs';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as versioning from '../versioning';
 
 import {
   Datasource,
+  DatasourceError,
   PkgReleaseConfig,
   Release,
   ReleaseResult,
   DigestConfig,
 } from './common';
 import { VERSION_SCHEME_SEMVER } from '../constants/version-schemes';
+import { loadModules } from '../util/modules';
 
 export * from './common';
 
-const datasources: Record<string, Datasource> = {};
-
-function isValidDatasourceModule(
-  datasourceName: string,
-  module: unknown
-): module is Datasource {
-  return !!module;
-}
-
-function loadDatasources(): void {
-  const datasourceDirs = fs
-    .readdirSync(__dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => !name.startsWith('__'))
-    .sort();
-  for (const datasourceName of datasourceDirs) {
-    const module = require(`./${datasourceName}`); // eslint-disable-line
-    if (isValidDatasourceModule(datasourceName, module)) {
-      datasources[datasourceName] = module;
-    } /* istanbul ignore next */ else {
-      throw new Error(`Datasource module "${datasourceName}" is invalid.`);
-    }
-  }
-}
-
-loadDatasources();
+const datasources = loadModules<Datasource>(__dirname);
 
 const cacheNamespace = 'datasource-releases';
 
@@ -80,10 +55,21 @@ function getRawReleases(
 export async function getPkgReleases(
   config: PkgReleaseConfig
 ): Promise<ReleaseResult | null> {
-  const res = await getRawReleases({
-    ...config,
-    lookupName: config.lookupName || config.depName,
-  });
+  const { datasource } = config;
+  const lookupName = config.lookupName || config.depName;
+  let res;
+  try {
+    res = await getRawReleases({
+      ...config,
+      lookupName,
+    });
+  } catch (e) /* istanbul ignore next */ {
+    if (e instanceof DatasourceError) {
+      e.datasource = datasource;
+      e.lookupName = lookupName;
+    }
+    throw e;
+  }
   if (!res) {
     return res;
   }

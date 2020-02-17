@@ -1,4 +1,5 @@
 // Datasource
+export const DATASOURCE_ANSIBLE_GALAXY = 'ansible-galaxy';
 export const DATASOURCE_CARGO = 'cargo';
 export const DATASOURCE_CDNJS = 'cdnjs';
 export const DATASOURCE_DART = 'dart';

@@ -29,5 +29,6 @@ export type GotJSONOptions = Merge<
   GotOptions,
   {
     responseType: 'json';
+    readableHighWaterMark?: number;
   }
 >;

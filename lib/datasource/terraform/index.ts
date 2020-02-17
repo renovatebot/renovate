@@ -56,7 +56,10 @@ export async function getPkgReleases({
     lookupName,
     registryUrls
   );
-  logger.debug({ registry, repository }, 'terraform.getDependencies()');
+  logger.debug(
+    { registry, terraformRepository: repository },
+    'terraform.getDependencies()'
+  );
   const cacheNamespace = 'terraform';
   const pkgUrl = `${registry}/v1/modules/${repository}`;
   const cachedResult = await renovateCache.get<ReleaseResult>(
