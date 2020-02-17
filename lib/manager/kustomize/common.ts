@@ -1,14 +1,20 @@
+import { safeLoad } from 'js-yaml';
 import {
   DATASOURCE_GIT_TAGS,
   DATASOURCE_DOCKER,
 } from '../../constants/data-binary-source';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency } from '../common';
 import { logger } from '../../logger';
-import { safeLoad } from 'js-yaml';
+
+interface Image {
+  name: string;
+  newTag: string;
+}
 
 interface Kustomize {
   kind: string;
   bases: string[];
+  images: Image[];
 }
 
 // extract the version from the url
@@ -17,14 +23,14 @@ const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
 // extract the url from the base of a url with a subdir
 const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
 
-export function extractBase(base: string): PackageFile | null {
+export function extractBase(base: string): PackageDependency | null {
   const basenameVersion = versionMatch.exec(base);
   if (basenameVersion) {
     const currentValue = basenameVersion.groups.version;
     const root = basenameVersion.groups.basename;
 
     const urlResult = extractUrl.exec(root);
-    var url = root;
+    let url = root;
     // if a match, then there was a subdir, update
     if (urlResult && !url.startsWith('http')) {
       url = urlResult.groups.url;
@@ -32,7 +38,9 @@ export function extractBase(base: string): PackageFile | null {
 
     return {
       datasource: DATASOURCE_GIT_TAGS,
-      depName: root,
+      depType: DATASOURCE_GIT_TAGS,
+      depName: url,
+      depNameShort: root,
       lookupName: url,
       source: url,
       currentValue,
@@ -42,15 +50,11 @@ export function extractBase(base: string): PackageFile | null {
   return null;
 }
 
-interface Image {
-  name: string;
-  newTag: string;
-}
-
-export function extractImage(image: Image): PackageFile | null {
+export function extractImage(image: Image): PackageDependency | null {
   if (image && image.name && image.newTag) {
     return {
       datasource: DATASOURCE_DOCKER,
+      depType: DATASOURCE_DOCKER,
       depName: image.name,
       lookupName: image.name,
       source: image.name,
@@ -62,7 +66,7 @@ export function extractImage(image: Image): PackageFile | null {
 }
 
 export function parseKustomize(content: string): Kustomize | null {
-  var pkg = null;
+  let pkg = null;
   try {
     pkg = safeLoad(content);
   } catch (e) {

@@ -3,10 +3,7 @@ import {
   DATASOURCE_DOCKER,
 } from '../../constants/data-binary-source';
 import { logger } from '../../logger';
-import { getNewFrom } from '../dockerfile/update';
 import { UpdateDependencyConfig } from '../common';
-import { extractBases } from './common';
-import { safeDump } from 'js-yaml';
 
 function updateBase({
   fileContent,
@@ -17,11 +14,11 @@ function updateBase({
       return fileContent;
     }
 
-    var lines = fileContent.split('\n');
+    const lines = fileContent.split('\n');
 
-    for (var i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i += 1) {
       const line = lines[i];
-      if (line.includes(upgrade.source)) {
+      if (line.includes(upgrade.depName)) {
         const newLine = line.replace(upgrade.currentValue, upgrade.newValue);
         lines[i] = newLine;
       }
@@ -39,15 +36,15 @@ function updateImageTag({
   upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    var lines = fileContent.split('\n');
+    const lines = fileContent.split('\n');
 
-    var prev_line = lines[0];
-    for (var i = 0; i < lines.length; i++) {
+    let prev_line = lines[0];
+    for (let i = 0; i < lines.length; i += 1) {
       const line = lines[i];
 
       // we found a match
       if (line.includes(`name: ${upgrade.depName}`)) {
-        var x = /^(\s+)?- name:.*$/.exec(line);
+        const x = /^(\s+)?- name:.*$/.exec(line);
         // check if we are at the beginning of the list
         if (x) {
           lines[i + 1] = lines[i + 1].replace(
@@ -80,13 +77,13 @@ export function updateDependency({
     return fileContent;
   }
 
-  if (upgrade.datasource === DATASOURCE_GIT_TAGS) {
+  if (upgrade.depType === DATASOURCE_GIT_TAGS) {
     return updateBase({ fileContent, upgrade });
-  } else if (upgrade.datasource === DATASOURCE_DOCKER) {
+  }
+  if (upgrade.depType === DATASOURCE_DOCKER) {
     return updateImageTag({ fileContent, upgrade });
     process.exit(120);
-  } else {
-    logger.fatal(upgrade);
-    process.exit(127);
   }
+  logger.warn(`datasource type not supported ${upgrade.depType}`);
+  return fileContent;
 }

@@ -1,14 +1,12 @@
 import { PackageFile, PackageDependency } from '../common';
 import { extractBase, extractImage, parseKustomize } from './common';
-import { getDep } from '../dockerfile/extract';
 import { logger } from '../../logger';
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('kustomize.extractPackageFile()');
-  let deps: PackageDependency[] = [];
-  let lineNumber = 0;
+  const deps: PackageDependency[] = [];
 
-  let pkg = parseKustomize(content);
+  const pkg = parseKustomize(content);
   if (!pkg) {
     return null;
   }

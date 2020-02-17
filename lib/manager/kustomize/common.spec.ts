@@ -65,7 +65,7 @@ describe('manager/kustomize/common', () => {
       expect(pkg).toEqual(null);
     });
     it('should correctly extract a default image', () => {
-      var sample = {
+      const sample = {
         depName: 'node',
         source: 'node',
         datasource: DATASOURCE_DOCKER,
@@ -79,7 +79,7 @@ describe('manager/kustomize/common', () => {
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract an image in a repo', () => {
-      var sample = {
+      const sample = {
         depName: 'test/node',
         source: 'test/node',
         datasource: DATASOURCE_DOCKER,
@@ -93,7 +93,7 @@ describe('manager/kustomize/common', () => {
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract from a different registry', () => {
-      var sample = {
+      const sample = {
         depName: 'quay.io/repo/image',
         source: 'quay.io/repo/image',
         datasource: DATASOURCE_DOCKER,
@@ -107,7 +107,7 @@ describe('manager/kustomize/common', () => {
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract from a different port', () => {
-      var sample = {
+      const sample = {
         depName: 'localhost:5000/repo/image',
         source: 'localhost:5000/repo/image',
         datasource: DATASOURCE_DOCKER,
@@ -121,7 +121,7 @@ describe('manager/kustomize/common', () => {
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract from a multi-depth registry', () => {
-      var sample = {
+      const sample = {
         depName: 'localhost:5000/repo/image/service',
         source: 'localhost:5000/repo/image/service',
         datasource: DATASOURCE_DOCKER,

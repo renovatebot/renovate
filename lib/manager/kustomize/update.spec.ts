@@ -1,8 +1,8 @@
+import { readFileSync } from 'fs';
 import {
   DATASOURCE_GIT_TAGS,
   DATASOURCE_DOCKER,
 } from '../../constants/data-binary-source';
-import { readFileSync } from 'fs';
 import { updateDependency } from './update';
 
 const dockerImages = readFileSync(
@@ -22,16 +22,6 @@ const kustomizeGitSSHSubdir = readFileSync(
 
 const kustomizeHTTP = readFileSync(
   'lib/manager/kustomize/__fixtures__/kustomizeHttp.yaml',
-  'utf8'
-);
-
-const kustomizeWithLocal = readFileSync(
-  'lib/manager/kustomize/__fixtures__/kustomizeWithLocal.yaml',
-  'utf8'
-);
-
-const nonKustomize = readFileSync(
-  'lib/manager/kustomize/__fixtures__/service.yaml',
   'utf8'
 );
 
