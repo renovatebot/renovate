@@ -38,6 +38,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
@@ -75,6 +76,7 @@ interface LocalRepoConfig {
   storage: GitStorage;
   parentRepo: string;
   baseCommitSHA: string | null;
+  forkMode?: boolean;
   forkToken?: string;
   closedPrList: PrList | null;
   openPrList: PrList | null;
@@ -99,7 +101,7 @@ type PrList = Record<number, Pr>;
 let config: LocalRepoConfig = {} as any;
 
 const defaults = {
-  hostType: 'github',
+  hostType: PLATFORM_TYPE_GITHUB,
   endpoint: 'https://api.github.com/',
 };
 
@@ -247,7 +249,7 @@ export async function initRepo({
     api.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: 'github',
+    hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
   config.isGhe = !defaults.endpoint.startsWith('https://api.github.com');
@@ -367,6 +369,8 @@ export async function initRepo({
   config.prList = null;
   config.openPrList = null;
   config.closedPrList = null;
+
+  config.forkMode = !!forkMode;
   if (forkMode) {
     logger.info('Bot is in forkMode');
     config.forkToken = forkToken;
@@ -393,7 +397,7 @@ export async function initRepo({
       logger.info({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
     }
-    if (existingRepos.includes(config.repository!)) {
+    if (existingRepos.includes(config.repository)) {
       logger.info(
         { repository_fork: config.repository },
         'Found existing fork'
@@ -446,7 +450,7 @@ export async function initRepo({
     logger.debug('Using personal access token for git init');
     parsedEndpoint.auth = opts.token;
   }
-  parsedEndpoint.host = parsedEndpoint.host!.replace(
+  parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com'
   );
@@ -763,8 +767,16 @@ async function getOpenPrs(): Promise<PrList> {
         const canMergeStates = ['BEHIND', 'CLEAN'];
         const hasNegativeReview =
           pr.reviews && pr.reviews.nodes && pr.reviews.nodes.length > 0;
-        pr.canMerge =
-          canMergeStates.includes(pr.mergeStateStatus) && !hasNegativeReview;
+        // istanbul ignore if
+        if (hasNegativeReview) {
+          pr.canMerge = false;
+          pr.canMergeReason = `hasNegativeReview`;
+        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = false;
+          pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
+        } else {
+          pr.canMerge = true;
+        }
         // https://developer.github.com/v4/enum/mergestatestatus
         if (pr.mergeStateStatus === 'DIRTY') {
           pr.isConflicted = true;
@@ -873,6 +885,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
       pr.canMerge = true;
+    } else {
+      pr.canMerge = false;
+      pr.canMergeReason = `mergeable = ${pr.mergeable}`;
     }
     if (pr.mergeable_state === 'dirty') {
       logger.debug({ prNo }, 'PR state is dirty so unmergeable');
@@ -960,7 +975,7 @@ function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -970,11 +985,17 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    const res = await api.get(
-      `repos/${config.parentRepo ||
-        config.repository}/pulls?per_page=100&state=all`,
-      { paginate: true }
-    );
+    let res;
+    try {
+      res = await api.get(
+        `repos/${config.parentRepo ||
+          config.repository}/pulls?per_page=100&state=all`,
+        { paginate: true }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.info({ err }, 'getPrList err');
+      throw new Error('platform-failure');
+    }
     config.prList = res.body.map(
       (pr: {
         number: number;
@@ -999,9 +1020,9 @@ export async function getPrList(): Promise<Pr[]> {
           pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
       })
     );
-    logger.debug(`Retrieved ${config.prList!.length} Pull Requests`);
+    logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
-  return config.prList!;
+  return config.prList;
 }
 
 export async function findPr({
@@ -1015,7 +1036,8 @@ export async function findPr({
     p =>
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
+      matchesState(p.state, state) &&
+      (config.forkMode || config.repository === p.sourceRepo) // #5188
   );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
@@ -1628,7 +1650,7 @@ export async function createPr({
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository!.split('/')[0]}:${branchName}`;
+  const head = `${config.repository.split('/')[0]}:${branchName}`;
   const options: any = {
     body: {
       title,

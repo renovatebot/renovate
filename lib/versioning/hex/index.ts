@@ -59,7 +59,7 @@ const getNewValue = ({
     toVersion,
   });
   newSemver = npm2hex(newSemver);
-  if (currentValue.match(/~>\s*(\d+\.\d+)$/)) {
+  if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
     newSemver = newSemver.replace(
       /\^\s*(\d+\.\d+(\.\d)?)/,
       (_str, p1) => '~> ' + p1.slice(0, -2)

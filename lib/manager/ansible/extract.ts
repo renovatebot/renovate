@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
 
 export default function extractPackageFile({
   fileContent,
@@ -12,8 +13,9 @@ export default function extractPackageFile({
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;
+  const re = /^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/;
   for (const line of fileContent.split('\n')) {
-    const match = line.match(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+    const match = re.exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom);
@@ -26,7 +28,7 @@ export default function extractPackageFile({
         'Docker image inside ansible'
       );
       dep.managerData = { lineNumber };
-      dep.versionScheme = 'docker';
+      dep.versionScheme = VERSION_SCHEME_DOCKER;
       deps.push(dep);
     }
     lineNumber += 1;

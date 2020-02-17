@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
 import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
@@ -15,8 +16,8 @@ export function extractPackageFile({
 
   let lineNumber = 0;
   for (const line of lines) {
-    const match = line.match(
-      /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/
+    const match = /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/.exec(
+      line
     );
     if (match) {
       const dependency: PackageDependency = {
@@ -25,12 +26,12 @@ export function extractPackageFile({
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),
         managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: 'semver',
+        versionScheme: VERSION_SCHEME_SEMVER,
       };
 
       let shaLineNumber = 0;
       for (const shaLine of lines) {
-        const shaMatch = shaLine.match(/^distributionSha256Sum=((\w){64}).*$/);
+        const shaMatch = /^distributionSha256Sum=((\w){64}).*$/.test(shaLine);
         if (shaMatch) {
           dependency.managerData.checksumLineNumber = shaLineNumber;
           break;

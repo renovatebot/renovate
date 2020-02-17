@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { CargoConfig, CargoSection } from './types';
 
 // Return true if the match string is found at index in content
@@ -24,10 +24,10 @@ function replaceAt(
   );
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade<{ nestedVersion?: boolean }>
-): string {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return fileContent;

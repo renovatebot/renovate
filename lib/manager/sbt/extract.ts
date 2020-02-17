@@ -1,6 +1,7 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
 import { get } from '../../versioning';
+import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
 import { DATASOURCE_SBT } from '../../constants/data-binary-source';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
@@ -28,7 +29,7 @@ const getScalaVersion = (str: string): string =>
 const normalizeScalaVersion = (str: string): string => {
   // istanbul ignore if
   if (!str) return str;
-  const versioning = get('maven');
+  const versioning = get(VERSION_SCHEME_MAVEN);
   if (versioning.isVersion(str)) {
     // Do not normalize unstable versions
     if (!versioning.isStable(str)) return str;
@@ -252,7 +253,7 @@ function parseSbtLine(
   if (dep)
     deps.push({
       datasource: DATASOURCE_SBT,
-      registryUrls: registryUrls as string[],
+      registryUrls,
       ...dep,
     });
 

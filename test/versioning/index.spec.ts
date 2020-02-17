@@ -4,6 +4,7 @@ import {
   GenericVersioningApi,
   GenericVersion,
 } from '../../lib/versioning/loose/generic';
+import { VERSION_SCHEME_SEMVER } from '../../lib/constants/version-schemes';
 
 const supportedSchemes = getOptions().find(
   option => option.name === 'versionScheme'
@@ -15,8 +16,12 @@ describe('versioning.get(versionScheme)', () => {
   });
 
   it('should fallback to semver', () => {
-    expect(versioning.get(undefined)).toBe(versioning.get('semver'));
-    expect(versioning.get('unknown')).toBe(versioning.get('semver'));
+    expect(versioning.get(undefined)).toBe(
+      versioning.get(VERSION_SCHEME_SEMVER)
+    );
+    expect(versioning.get('unknown')).toBe(
+      versioning.get(VERSION_SCHEME_SEMVER)
+    );
   });
 
   it('should accept config', () => {
@@ -36,7 +41,7 @@ describe('versioning.get(versionScheme)', () => {
       'toString',
       'valueOf',
     ];
-    const npmApi = Object.keys(versioning.get('semver'))
+    const npmApi = Object.keys(versioning.get(VERSION_SCHEME_SEMVER))
       .filter(val => !optionalFunctions.includes(val))
       .sort();
 
@@ -46,7 +51,7 @@ describe('versioning.get(versionScheme)', () => {
 
       do {
         Object.getOwnPropertyNames(o).forEach(prop => {
-          if (props.indexOf(prop) === -1) {
+          if (!props.includes(prop)) {
             props.push(prop);
           }
         });

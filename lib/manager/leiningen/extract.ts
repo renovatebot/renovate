@@ -19,7 +19,7 @@ export function trimAtKey(str: string, kwName: string): string | null {
 }
 
 export function expandDepName(name: string): string {
-  return name.indexOf('/') === -1 ? `${name}:${name}` : name.replace('/', ':');
+  return !name.includes('/') ? `${name}:${name}` : name.replace('/', ':');
 }
 
 export interface ExtractContext {
@@ -32,7 +32,7 @@ export function extractFromVectors(
   offset = 0,
   ctx: ExtractContext = {}
 ): PackageDependency[] {
-  if (str.indexOf('[') !== 0) return [];
+  if (!str.startsWith('[')) return [];
   let balance = 0;
   const result: PackageDependency[] = [];
   let idx = 0;

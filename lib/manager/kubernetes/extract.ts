@@ -14,13 +14,13 @@ export function extractPackageFile({
   let lineNumber = 0;
 
   const isKubernetesManifest =
-    fileContent.match(/\s*apiVersion\s*:/) && fileContent.match(/\s*kind\s*:/);
+    /\s*apiVersion\s*:/.test(fileContent) && /\s*kind\s*:/.test(fileContent);
   if (!isKubernetesManifest) {
     return null;
   }
 
   for (const line of fileContent.split('\n')) {
-    const match = line.match(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+    const match = /^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom);

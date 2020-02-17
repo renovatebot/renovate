@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
 
 export function extractPackageFile({
   fileContent,
@@ -16,10 +17,10 @@ export function extractPackageFile({
     // old github actions syntax will be deprecated on September 30, 2019
     // after that, the first line can be removed
     const match =
-      line.match(/^\s+uses = "docker:\/\/([^"]+)"\s*$/) ||
-      line.match(/^\s+uses: docker:\/\/([^"]+)\s*$/);
+      /^\s+uses = "docker:\/\/([^"]+)"\s*$/.exec(line) ||
+      /^\s+uses: docker:\/\/([^"]+)\s*$/.exec(line);
     if (match) {
-      const currentFrom = match[1];
+      const [, currentFrom] = match;
       const dep = getDep(currentFrom);
       logger.debug(
         {
@@ -30,7 +31,7 @@ export function extractPackageFile({
         'Docker image inside GitHub Actions'
       );
       dep.managerData = { lineNumber };
-      dep.versionScheme = 'docker';
+      dep.versionScheme = VERSION_SCHEME_DOCKER;
       deps.push(dep);
     }
     lineNumber += 1;

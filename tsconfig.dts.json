@@ -3,8 +3,6 @@
   "compilerOptions": {
     "isolatedModules": false,
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "allowJs": false,
-    "checkJs": false
+    "emitDeclarationOnly": true
   }
 }

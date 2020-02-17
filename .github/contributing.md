@@ -25,9 +25,9 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 ## Slack collaboration with maintainers
 
-We won't lie - sometimes the codebase can be a challenge to navigate. We don't want you spending an hour trying to work out something that might take us a minute to explain.
+Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor. We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
-For that reason, we host a Slack channel dedicated to helping anyone who's working on PRs for Renovate. It's strictly developers-only and not intended for general support, so please email support@renovatebot.com to ask to be added.
+For that reason, we have a Slack channel dedicated to helping anyone who's working on Pull Requests for Renovate. Please email rhys@renovatebot.com and simply mention that you need an invitation to the channel.
 
 ## Legal
 

@@ -5,6 +5,7 @@ import {
   PackageFile,
   ExtractPackageFileConfig,
 } from '../common';
+import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
 import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
@@ -13,7 +14,7 @@ export function extractPackageFile({
   config = {},
 }: ExtractPackageFileConfig): PackageFile {
   logger.trace(`nuget.extractPackageFile(${fileName})`);
-  const { isVersion } = get(config.versionScheme || 'semver');
+  const { isVersion } = get(config.versionScheme || VERSION_SCHEME_SEMVER);
   const deps: PackageDependency[] = [];
 
   let lineNumber = 0;
@@ -30,8 +31,8 @@ export function extractPackageFile({
      * so we don't include it in the extracting regexp
      */
 
-    const match = line.match(
-      /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/
+    const match = /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/.exec(
+      line
     );
     if (match) {
       const depName = match[1];

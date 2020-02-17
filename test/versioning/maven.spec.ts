@@ -58,6 +58,8 @@ describe('versioning/maven/compare', () => {
     expect(compare('v0.0-1552', '0.0-1552')).toEqual(0);
     expect(compare('v0.0.1', '0.0.1')).toEqual(0);
     expect(compare('5.0.7', '5.0.7.RELEASE')).toEqual(0);
+    expect(compare('Hoxton.RELEASE', 'hoxton')).toEqual(0);
+    expect(compare('Hoxton.SR1', 'hoxton.sr-1')).toEqual(0);
   });
   it('returns less than', () => {
     expect(compare('1', '1.1')).toEqual(-1);
@@ -78,6 +80,7 @@ describe('versioning/maven/compare', () => {
     expect(compare('0.0.1', '999')).toEqual(-1);
     expect(compare('1.3-RC1-groovy-2.5', '1.3-groovy-2.5')).toEqual(-1);
     expect(compare('1-abc', '1-xyz')).toEqual(-1);
+    expect(compare('Hoxton.RELEASE', 'Hoxton.SR1')).toEqual(-1);
   });
   it('returns greater than', () => {
     expect(compare('1.1', '1')).toEqual(1);
@@ -98,6 +101,7 @@ describe('versioning/maven/compare', () => {
     expect(compare('999', '0.0.1')).toEqual(1);
     expect(compare('1.3-groovy-2.5', '1.3-RC1-groovy-2.5')).toEqual(1);
     expect(compare('1-xyz', '1-abc')).toEqual(1);
+    expect(compare('Hoxton.SR1', 'Hoxton.RELEASE')).toEqual(1);
   });
 
   const invalidRanges = [
@@ -297,6 +301,9 @@ describe('versioning/maven/index', () => {
     expect(isStable('1-ga-1')).toBe(true);
     expect(isStable('1.3-groovy-2.5')).toBe(true);
     expect(isStable('1.3-RC1-groovy-2.5')).toBe(false);
+    expect(isStable('Hoxton.RELEASE')).toBe(true);
+    expect(isStable('Hoxton.SR')).toBe(true);
+    expect(isStable('Hoxton.SR1')).toBe(true);
   });
   it('returns major version', () => {
     expect(getMajor('')).toBeNull();

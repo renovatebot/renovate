@@ -5,7 +5,7 @@ import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
 import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
-import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platfroms';
+import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platforms';
 
 let config: RenovateConfig;
 beforeEach(() => {

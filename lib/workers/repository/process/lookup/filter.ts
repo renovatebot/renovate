@@ -3,6 +3,7 @@ import { logger } from '../../../../logger';
 import * as versioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { VERSION_SCHEME_NPM } from '../../../../constants/version-schemes';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -58,7 +59,10 @@ export function filterVersions(
       filteredVersions = filteredVersions.filter(v =>
         version.matches(v, allowedVersions)
       );
-    } else if (versionScheme !== 'npm' && semver.validRange(allowedVersions)) {
+    } else if (
+      versionScheme !== VERSION_SCHEME_NPM &&
+      semver.validRange(allowedVersions)
+    ) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions'

@@ -33,6 +33,7 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_FAILURE,
@@ -55,7 +56,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: 'gitlab',
+  hostType: PLATFORM_TYPE_GITLAB,
   endpoint: 'https://gitlab.com/api/v4/',
 };
 
@@ -208,11 +209,14 @@ export async function initRepo({
       url: defaults.endpoint,
     });
     let url: string;
-    if (res.body.http_url_to_repo === null) {
+    if (
+      process.env.GITLAB_IGNORE_REPO_URL ||
+      res.body.http_url_to_repo === null
+    ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
       const { host, protocol } = URL.parse(defaults.endpoint);
       url = GitStorage.getUrl({
-        protocol: protocol!.slice(0, -1) as any,
+        protocol: protocol.slice(0, -1) as any,
         auth: 'oauth2:' + opts.token,
         host,
         repository,
@@ -786,13 +790,15 @@ export async function addAssignees(
       logger.error({ iid, assignees }, 'Failed to add multiple assignees');
     }
   } catch (err) {
-    logger.error({ iid, assignees }, 'Failed to add assignees');
+    logger.debug({ err }, 'addAssignees error');
+    logger.warn({ iid, assignees }, 'Failed to add assignees');
   }
 }
 
-export function addReviewers(iid: number, reviewers: string[]): void {
+export function addReviewers(iid: number, reviewers: string[]): Promise<void> {
   logger.debug(`addReviewers('${iid}, '${reviewers})`);
   logger.warn('Unimplemented in GitLab: approvals');
+  return Promise.resolve();
 }
 
 export async function deleteLabel(
@@ -964,7 +970,7 @@ function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -989,6 +995,6 @@ export function getCommitMessages(): Promise<string[]> {
   return config.storage.getCommitMessages();
 }
 
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
-  return [];
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
 }

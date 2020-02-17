@@ -17,7 +17,7 @@ import {
 import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { MANAGER_NPM } from '../../../constants/managers';
+import { VERSION_SCHEME_NODE } from '../../../constants/version-schemes';
 import {
   DATASOURCE_GITHUB,
   DATASOURCE_NPM,
@@ -115,9 +115,14 @@ export async function extractPackageFile(
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
-  const lernaJson = JSON.parse(
-    await platform.getFile(join(dirname(fileName), 'lerna.json'))
-  );
+  let lernaJson;
+  try {
+    lernaJson = JSON.parse(
+      await platform.getFile(join(dirname(fileName), 'lerna.json'))
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Could not parse lerna.json');
+  }
   if (lernaJson) {
     lernaDir = dirname(fileName);
     lernaPackages = lernaJson.packages;
@@ -153,7 +158,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = 'nodejs/node';
-        dep.versionScheme = 'node';
+        dep.versionScheme = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
         dep.datasource = DATASOURCE_NPM;
         dep.commitMessageTopic = 'Yarn';
@@ -174,7 +179,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = 'nodejs/node';
-        dep.versionScheme = 'node';
+        dep.versionScheme = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
         dep.datasource = DATASOURCE_NPM;
         dep.commitMessageTopic = 'Yarn';
@@ -234,8 +239,8 @@ export async function extractPackageFile(
     const [githubOwner, githubRepo] = githubRepoSplit;
     const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/;
     if (
-      !githubOwner.match(githubValidRegex) ||
-      !githubRepo.match(githubValidRegex)
+      !githubValidRegex.test(githubOwner) ||
+      !githubValidRegex.test(githubRepo)
     ) {
       dep.skipReason = 'unknown-version';
       return dep;
@@ -247,8 +252,8 @@ export async function extractPackageFile(
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
-      depRefPart.match(/^[0-9a-f]{7}$/) ||
-      depRefPart.match(/^[0-9a-f]{40}$/)
+      /^[0-9a-f]{7}$/.test(depRefPart) ||
+      /^[0-9a-f]{40}$/.test(depRefPart)
     ) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
@@ -353,7 +358,6 @@ export async function extractAllPackageFiles(
       if (deps) {
         npmFiles.push({
           packageFile,
-          manager: MANAGER_NPM,
           ...deps,
         });
       }

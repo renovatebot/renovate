@@ -10,7 +10,7 @@ export function extractPackageFile({
   fileContent,
 }: ExtractPackageFileConfig): PackageFile | null {
   let deps: PackageDependency[] = [];
-  const npmDepends = fileContent.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
+  const npmDepends = /\nNpm\.depends\({([\s\S]*?)}\);/.exec(fileContent);
   if (!npmDepends) {
     return null;
   }

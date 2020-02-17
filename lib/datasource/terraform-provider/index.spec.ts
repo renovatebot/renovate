@@ -1,0 +1,66 @@
+import fs from 'fs';
+import _got from '../../util/got';
+import * as datasource from '..';
+import { DATASOURCE_TERRAFORM_PROVIDER } from '../../constants/data-binary-source';
+
+jest.mock('../../util/got');
+
+const got: any = _got;
+
+const consulData: any = fs.readFileSync(
+  'lib/datasource/terraform-provider/__fixtures__/azurerm-provider.json'
+);
+
+describe('datasource/terraform', () => {
+  describe('getPkgReleases', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      global.repoCache = {};
+      return global.renovateCache.rmAll();
+    });
+    it('returns null for empty result', async () => {
+      got.mockReturnValueOnce({ body: {} });
+      expect(
+        await datasource.getPkgReleases({
+          datasource: DATASOURCE_TERRAFORM_PROVIDER,
+          lookupName: 'azurerm',
+        })
+      ).toBeNull();
+    });
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      expect(
+        await datasource.getPkgReleases({
+          datasource: DATASOURCE_TERRAFORM_PROVIDER,
+          lookupName: 'azurerm',
+        })
+      ).toBeNull();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await datasource.getPkgReleases({
+          datasource: DATASOURCE_TERRAFORM_PROVIDER,
+          lookupName: 'azurerm',
+        })
+      ).toBeNull();
+    });
+    it('processes real data', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(consulData),
+      });
+      const res = await datasource.getPkgReleases({
+        datasource: DATASOURCE_TERRAFORM_PROVIDER,
+        lookupName: 'azurerm',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+  });
+});

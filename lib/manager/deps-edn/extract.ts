@@ -14,7 +14,7 @@ export function extractPackageFile({
 
   const regex = /([^{\s,]*)[\s,]*{[\s,]*:mvn\/version[\s,]+"([^"]+)"[\s,]*}/;
   let rest = fileContent;
-  let match = rest.match(regex);
+  let match = regex.exec(rest);
   let offset = 0;
   while (match) {
     const [wholeSubstr, depName, currentValue] = match;
@@ -23,7 +23,7 @@ export function extractPackageFile({
 
     offset += match.index + wholeSubstr.length;
     rest = fileContent.slice(offset);
-    match = rest.match(regex);
+    match = regex.exec(rest);
 
     deps.push({
       datasource: DATASOURCE_MAVEN,

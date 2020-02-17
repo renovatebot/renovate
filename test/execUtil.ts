@@ -71,6 +71,8 @@ const basicEnvMock = {
   NO_PROXY: 'localhost',
   HOME: '/home/user',
   PATH: '/tmp/path',
+  LANG: 'en_US.UTF-8',
+  LC_ALL: 'en_US',
 };
 
 const fullEnvMock = {

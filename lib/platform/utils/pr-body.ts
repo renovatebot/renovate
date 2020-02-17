@@ -1,10 +1,10 @@
+const re = new RegExp(`### Release Notes.*### Renovate configuration`, 'ms');
+
 export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
   }
-  const releaseNotesMatch = input.match(
-    new RegExp(`### Release Notes.*### Renovate configuration`, 'ms')
-  );
+  const releaseNotesMatch = re.exec(input);
   if (releaseNotesMatch) {
     const divider = `</details>\n\n---\n\n### Renovate configuration`;
     const [releaseNotes] = releaseNotesMatch;

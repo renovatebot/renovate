@@ -55,6 +55,7 @@ commands:
           environment:
             JEST_JUNIT_OUTPUT_DIR: 'test-results/jest'
             JEST_JUNIT_OUTPUT_NAME: 'results.xml'
+            SKIP_JAVA_TESTS: 'true'
 
       - store_test_results:
           path: test-results
@@ -74,12 +75,12 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.18.1@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6
+      - image: amd64/node:10.19.0@sha256:06e80d0a45ea264fa69296cce992bc6f9c6956ff18f314c6211ba5b0db34e468
     steps:
       - test
   release:
     docker:
-      - image: amd64/node:10.18.1@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6
+      - image: amd64/node:10.19.0@sha256:06e80d0a45ea264fa69296cce992bc6f9c6956ff18f314c6211ba5b0db34e468
     steps:
       - checkout
       - restore_cache:

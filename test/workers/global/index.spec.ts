@@ -6,7 +6,8 @@ import * as _limits from '../../../lib/workers/global/limits';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../../../lib/constants/platfroms';
+} from '../../../lib/constants/platforms';
+import { DATASOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
 
 jest.mock('../../../lib/workers/repository');
 
@@ -45,7 +46,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: 'docker',
+          hostType: DATASOURCE_DOCKER,
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',
@@ -65,7 +66,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: 'docker',
+          hostType: DATASOURCE_DOCKER,
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',

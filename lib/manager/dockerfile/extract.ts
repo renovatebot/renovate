@@ -53,7 +53,7 @@ export function extractPackageFile({
   const stageNames: string[] = [];
   let lineNumber = 0;
   for (const fromLine of fileContent.split('\n')) {
-    const fromMatch = fromLine.match(/^FROM /i);
+    const fromMatch = /^FROM /i.test(fromLine);
     if (fromMatch) {
       logger.trace({ lineNumber, fromLine }, 'FROM line');
       const [fromPrefix, currentFrom, ...fromRest] = fromLine.match(/\S+/g);
@@ -85,9 +85,9 @@ export function extractPackageFile({
       }
     }
 
-    const copyFromMatch = fromLine.match(/^(COPY --from=)([^\s]+)\s+(.*)$/i);
+    const copyFromMatch = /^(COPY --from=)([^\s]+)\s+(.*)$/i.exec(fromLine);
     if (copyFromMatch) {
-      const [fromPrefix, currentFrom, fromSuffix] = copyFromMatch.slice(1);
+      const [, fromPrefix, currentFrom, fromSuffix] = copyFromMatch;
       logger.trace({ lineNumber, fromLine }, 'COPY --from line');
       if (stageNames.includes(currentFrom)) {
         logger.debug({ currentFrom }, 'Skipping alias COPY --from');

@@ -7,5 +7,6 @@
     "inlineSources": true,
     "types": ["node"]
   },
-  "include": ["lib/**/*"]
+  "include": ["lib/**/*"],
+  "exclude": ["lib/**/*.spec.ts", "**/__mocks__/**", "**/__fixtures__/**"]
 }

@@ -1,11 +1,11 @@
 import Git from 'simple-git/promise';
 
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export default async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export default async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
   const git = Git(upgrade.localDir);
 
   try {

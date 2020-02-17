@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import * as handlebars from 'handlebars';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -67,6 +68,25 @@ export async function validateConfig(
           message: getDeprecationMessage(key),
         });
       }
+      const templateKeys = [
+        'branchName',
+        'commitBody',
+        'commitMessage',
+        'prTitle',
+        'semanticCommitScope',
+      ];
+      if (templateKeys.includes(key) && val) {
+        try {
+          let res = handlebars.compile(val)(config);
+          res = handlebars.compile(res)(config);
+          res = handlebars.compile(res)(config);
+        } catch (err) {
+          errors.push({
+            depName: 'Configuration Error',
+            message: `Invalid handlebars template in config path: ${currentPath}`,
+          });
+        }
+      }
       if (!optionTypes[key]) {
         errors.push({
           depName: 'Configuration Error',
@@ -118,9 +138,10 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
+              const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && subval.match(/^:timezone(.+)$/)) {
-                  const [, timezone] = subval.match(/^:timezone\((.+)\)$/);
+                if (is.string(subval) && tzRe.test(subval)) {
+                  const [, timezone] = tzRe.exec(subval);
                   const [validTimezone, errorMessage] = hasValidTimezone(
                     timezone
                   );
@@ -206,7 +227,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !(parentPath && parentPath.match(/p.*Rules\[\d+\]$/)) && // Inside a packageRule
+              !/p.*Rules\[\d+\]$/.test(parentPath) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({

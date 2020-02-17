@@ -4,6 +4,7 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
+import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
 import {
   DATASOURCE_DOCKER,
   DATASOURCE_GITHUB,
@@ -119,48 +120,48 @@ export function extractPackageFile(content: string): PackageFile | null {
     let digest: string;
     let repository: string;
     let registry: string;
-    let match = def.match(/name\s*=\s*"([^"]+)"/);
+    let match = /name\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, depName] = match;
     }
-    match = def.match(/digest\s*=\s*"([^"]+)"/);
+    match = /digest\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, digest] = match;
     }
-    match = def.match(/registry\s*=\s*"([^"]+)"/);
+    match = /registry\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, registry] = match;
     }
-    match = def.match(/repository\s*=\s*"([^"]+)"/);
+    match = /repository\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, repository] = match;
     }
-    match = def.match(/remote\s*=\s*"([^"]+)"/);
+    match = /remote\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, remote] = match;
     }
-    match = def.match(/tag\s*=\s*"([^"]+)"/);
+    match = /tag\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, currentValue] = match;
     }
-    match = def.match(/url\s*=\s*"([^"]+)"/);
+    match = /url\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, url] = match;
     }
-    match = def.match(/urls\s*=\s*\[\s*"([^\]]+)",?\s*\]/);
+    match = /urls\s*=\s*\[\s*"([^\]]+)",?\s*\]/.exec(def);
     if (match) {
       const urls = match[1].replace(/\s/g, '').split('","');
       url = urls.find(parseUrl);
     }
-    match = def.match(/commit\s*=\s*"([^"]+)"/);
+    match = /commit\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, commit] = match;
     }
-    match = def.match(/sha256\s*=\s*"([^"]+)"/);
+    match = /sha256\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, sha256] = match;
     }
-    match = def.match(/importpath\s*=\s*"([^"]+)"/);
+    match = /importpath\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, importpath] = match;
     }
@@ -197,8 +198,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.datasource = DATASOURCE_GO;
       dep.lookupName = importpath;
       if (remote) {
-        const remoteMatch = remote.match(
-          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/
+        const remoteMatch = /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
+          remote
         );
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
@@ -222,7 +223,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const parsedUrl = parseUrl(url);
       dep.depName = depName;
       dep.repo = parsedUrl.repo;
-      if (parsedUrl.currentValue.match(/^[a-f0-9]{40}$/i)) {
+      if (/^[a-f0-9]{40}$/i.test(parsedUrl.currentValue)) {
         dep.currentDigest = parsedUrl.currentValue;
       } else {
         dep.currentValue = parsedUrl.currentValue;
@@ -241,8 +242,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.currentDigest = digest;
       dep.currentValue = currentValue;
       dep.depName = depName;
+      dep.versionScheme = VERSION_SCHEME_DOCKER;
       dep.datasource = DATASOURCE_DOCKER;
-      dep.versionScheme = 'docker';
       dep.lookupName = repository;
       deps.push(dep);
     } else {

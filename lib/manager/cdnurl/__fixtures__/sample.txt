@@ -1,0 +1,16 @@
+
+https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.6.1/prop-types.min.js
+//cdnjs.cloudflare.com/ajax/libs/react/16.3.2/umd/react.production.min.js
+https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.3.2/umd/react-dom.production.min.js
+https://unpkg.com/babel-standalone@6.26.0/babel.js
+https://cdnjs.cloudflare.com/ajax/libs/react-transition-group/2.2.1/react-transition-group.min.js
+https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js
+https://cdnjs.cloudflare.com/ajax/libs/react-popper/0.10.4/umd/react-popper.min.js
+https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js
+https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js
+https://cdnjs.cloudflare.com/ajax/libs/react-markdown/4.0.6/react-markdown.js
+https://unpkg.com/react-router-dom@4.3.1/umd/react-router-dom.min.js
+https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js
+https://unpkg.com/bootstrap/dist/css/bootstrap.min.css
+
+https://cdnjs.cloudflare.com/ajax/libs/axios/

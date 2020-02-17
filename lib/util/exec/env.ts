@@ -1,4 +1,13 @@
-const basicEnvVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'HOME', 'PATH'];
+const basicEnvVars = [
+  'HTTP_PROXY',
+  'HTTPS_PROXY',
+  'NO_PROXY',
+  'HOME',
+  'PATH',
+  'LC_ALL',
+  'LANG',
+  'DOCKER_HOST',
+];
 
 export function getChildProcessEnv(
   customEnvVars: string[] = []

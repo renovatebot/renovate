@@ -5,6 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
+import { VERSION_SCHEME_NPM } from '../../constants/version-schemes';
 import { DATASOURCE_ORB } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
@@ -15,7 +16,7 @@ export function extractPackageFile({
     const lines = fileContent.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const orbs = line.match(/^\s*orbs:\s*$/);
+      const orbs = /^\s*orbs:\s*$/.exec(line);
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
         let foundOrb: boolean;
@@ -23,7 +24,7 @@ export function extractPackageFile({
           foundOrb = false;
           const orbLine = lines[lineNumber + 1];
           logger.trace(`orbLine: "${orbLine}"`);
-          const orbMatch = orbLine.match(/^\s+([^:]+):\s(.+)$/);
+          const orbMatch = /^\s+([^:]+):\s(.+)$/.exec(orbLine);
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrb = true;
@@ -38,14 +39,14 @@ export function extractPackageFile({
               datasource: DATASOURCE_ORB,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: 'npm',
+              versionScheme: VERSION_SCHEME_NPM,
               rangeStrategy: 'pin',
             };
             deps.push(dep);
           }
         } while (foundOrb);
       }
-      const match = line.match(/^\s*- image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+      const match = /^\s*- image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);

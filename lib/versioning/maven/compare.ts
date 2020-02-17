@@ -101,7 +101,8 @@ function isNull(token: Token): boolean {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   );
 }
 
@@ -192,7 +193,8 @@ export function qualifierType(token: Token): number {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   ) {
     return QualifierTypes.Release;
   }
@@ -290,12 +292,12 @@ function parseRange(rangeStr: string): any {
           rightBracket: ']',
         });
         interval = emptyInterval();
-      } else if (subStr[0] === '[') {
+      } else if (subStr.startsWith('[')) {
         const ver = subStr.slice(1);
         interval.leftType = INCLUDING_POINT;
         interval.leftValue = ver;
         interval.leftBracket = '[';
-      } else if (subStr[0] === '(' || subStr[0] === ']') {
+      } else if (subStr.startsWith('(') || subStr.startsWith(']')) {
         const ver = subStr.slice(1);
         interval.leftType = EXCLUDING_POINT;
         interval.leftValue = ver;
@@ -303,18 +305,18 @@ function parseRange(rangeStr: string): any {
       } else {
         result = null;
       }
-    } else if (/]$/.test(subStr)) {
+    } else if (subStr.endsWith(']')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = INCLUDING_POINT;
       interval.rightValue = ver;
       interval.rightBracket = ']';
       result.push(interval);
       interval = emptyInterval();
-    } else if (/\)$/.test(subStr) || /\[$/.test(subStr)) {
+    } else if (subStr.endsWith(')') || subStr.endsWith('[')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = EXCLUDING_POINT;
       interval.rightValue = ver;
-      interval.rightBracket = /\)$/.test(subStr) ? ')' : '[';
+      interval.rightBracket = subStr.endsWith(')') ? ')' : '[';
       result.push(interval);
       interval = emptyInterval();
     } else {
