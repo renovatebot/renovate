@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform/common';
+import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
@@ -1054,7 +1054,7 @@ describe('platform/github', () => {
                   },
                   {
                     number: 1,
-                    state: 'open',
+                    state: 'closed',
                     title: 'title-1',
                   },
                 ],
