@@ -44,33 +44,53 @@ Array [
 
 exports[`platform/azure ensureComment adds comment if missing 1`] = `
 Array [
-  Array [],
-  Array [],
-  Array [],
+  Array [
+    Object {
+      "comments": Array [
+        Object {
+          "commentType": 1,
+          "content": "### some-subject
+
+some
+content",
+          "parentCommentId": 0,
+        },
+      ],
+      "status": 1,
+    },
+    "1",
+    42,
+  ],
 ]
 `;
 
-exports[`platform/azure ensureComment does nothing if comment exists and is the same 1`] = `
-Array [
-  Array [],
-  Array [],
-  Array [],
-]
-`;
+exports[`platform/azure ensureComment adds comment if missing 2`] = `Array []`;
 
-exports[`platform/azure ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `
-Array [
-  Array [],
-  Array [],
-  Array [],
-]
-`;
+exports[`platform/azure ensureComment does nothing if comment exists and is the same 1`] = `Array []`;
 
-exports[`platform/azure ensureComment updates comment if missing 1`] = `
+exports[`platform/azure ensureComment does nothing if comment exists and is the same 2`] = `Array []`;
+
+exports[`platform/azure ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `Array []`;
+
+exports[`platform/azure ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `Array []`;
+
+exports[`platform/azure ensureComment updates comment if missing 1`] = `Array []`;
+
+exports[`platform/azure ensureComment updates comment if missing 2`] = `
 Array [
-  Array [],
-  Array [],
-  Array [],
+  Array [
+    Object {
+      "content": "### some-subject
+
+some
+new
+content",
+    },
+    "1",
+    42,
+    4,
+    2,
+  ],
 ]
 `;
 
@@ -158,16 +178,25 @@ Object {
 
 exports[`platform/azure updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
-  Array [],
-  Array [],
-  Array [],
+  Array [
+    Object {
+      "description": undefined,
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
 ]
 `;
 
 exports[`platform/azure updatePr(prNo, title, body) should update the PR without description 1`] = `
 Array [
-  Array [],
-  Array [],
-  Array [],
+  Array [
+    Object {
+      "title": "The New Title - autoclose",
+    },
+    "1",
+    1234,
+  ],
 ]
 `;
