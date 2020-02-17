@@ -264,8 +264,8 @@ function getNewNpmValue(config: NewValueConfig): string | null {
   return newSemver ? npm2poetry(newSemver) : null;
 }
 
-const isNpmRange = x => !npm.isSingleVersion(x);
-const isPep440Range = x => !pep440.isSingleVersion(x);
+const isNpmRange = (x: string): boolean => !npm.isSingleVersion(x);
+const isPep440Range = (x: string): boolean => !pep440.isSingleVersion(x);
 
 function getNewValue(newValueConfig: NewValueConfig): string {
   const { currentValue, rangeStrategy } = newValueConfig;

@@ -60,14 +60,14 @@ describe('isSingleVersion', () => {
 
 describe('Satisfying versions', () => {
   describe.each(sample.minMaxSample)('minSatisfyingVersion', sampleElem => {
-    const { versionList, range, min, max } = sampleElem;
+    const { versionList, range, min } = sampleElem;
     it(range, () => {
       expect(pep440.minSatisfyingVersion(versionList, range)).toBe(min);
     });
   });
 
   describe.each(sample.minMaxSample)('maxSatisfyingVersion', sampleElem => {
-    const { versionList, range, min, max } = sampleElem;
+    const { versionList, range, max } = sampleElem;
     it(range, () => {
       expect(pep440.maxSatisfyingVersion(versionList, range)).toBe(max);
     });

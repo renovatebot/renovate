@@ -1,5 +1,5 @@
 import { api as poetry } from '../../lib/versioning/poetry';
-import { getNewValueTestSuite, NewValueTestConfig } from './common';
+import { getNewValueTestSuite } from './common';
 import { sample } from './poetry.data';
 
 describe('isValid', () => {
@@ -57,14 +57,14 @@ describe('semver.isLessThanRange()', () => {
 
 describe('Satisfying versions', () => {
   describe.each(sample.minMaxSample)('minSatisfyingVersion', sampleElem => {
-    const { versionList, range, min, max } = sampleElem;
+    const { versionList, range, min } = sampleElem;
     it(range, () => {
       expect(poetry.minSatisfyingVersion(versionList, range)).toBe(min);
     });
   });
 
   describe.each(sample.minMaxSample)('maxSatisfyingVersion', sampleElem => {
-    const { versionList, range, min, max } = sampleElem;
+    const { versionList, range, max } = sampleElem;
     it(range, () => {
       expect(poetry.maxSatisfyingVersion(versionList, range)).toBe(max);
     });
