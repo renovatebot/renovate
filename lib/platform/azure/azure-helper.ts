@@ -192,7 +192,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
   }
 
   pr.isModified =
-    azurePr.commits &&
+    Boolean(azurePr.commits) &&
     azurePr.commits[0].author.name !==
       azurePr.commits[azurePr.commits.length - 1].author.name;
 

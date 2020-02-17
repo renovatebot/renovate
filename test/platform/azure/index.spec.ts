@@ -252,6 +252,7 @@ describe('platform/azure', () => {
                   state: 'closed',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -288,6 +289,7 @@ describe('platform/azure', () => {
                   state: 'closed',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -324,6 +326,7 @@ describe('platform/azure', () => {
                   state: 'closed',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -388,6 +391,7 @@ describe('platform/azure', () => {
                   status: 2,
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementation(
@@ -475,6 +479,7 @@ describe('platform/azure', () => {
             getPullRequestLabels: jest
               .fn()
               .mockReturnValue([{ active: true, name: 'renovate' }]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getRenovatePRFormat.mockImplementation(
