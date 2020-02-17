@@ -4,7 +4,6 @@ import {
   DATASOURCE_DOCKER,
 } from '../../constants/data-binary-source';
 import { PackageDependency } from '../common';
-import { logger } from '../../logger';
 
 interface Image {
   name: string;
@@ -39,8 +38,7 @@ export function extractBase(base: string): PackageDependency | null {
     return {
       datasource: DATASOURCE_GIT_TAGS,
       depType: DATASOURCE_GIT_TAGS,
-      depName: url,
-      depNameShort: root,
+      depName: root,
       lookupName: url,
       source: url,
       currentValue,
@@ -69,8 +67,7 @@ export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
     pkg = safeLoad(content);
-  } catch (e) {
-    logger.trace('kustomize.extractBases(): skipping, invalid yaml');
+  } catch (e) /* istanbul ignore next */ {
     return null;
   }
 

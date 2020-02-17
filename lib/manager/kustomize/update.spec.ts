@@ -27,14 +27,44 @@ const kustomizeHTTP = readFileSync(
 
 describe('manager/kustomize/update', () => {
   describe('updateDependency', () => {
-    it('properly replaces a remote base with a subpath', () => {
+    it('should return null if no file is passed in', () => {
+      const res = updateDependency({
+        fileContent: null,
+        upgrade: { depType: DATASOURCE_DOCKER },
+      });
+      expect(res).toBeNull();
+
+      const res2 = updateDependency({
+        fileContent: null,
+        upgrade: { depType: DATASOURCE_GIT_TAGS },
+      });
+      expect(res2).toBeNull();
+    });
+    it('returns the default file if depType is not supported', () => {
       const upgrade = {
         source: 'git@github.com:kubernetes-sigs/kustomize.git',
+        lookupName: 'git@github.com:kubernetes-sigs/kustomize.git',
         depName:
           'git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld',
         currentValue: 'v2.0.0',
         newValue: 'v2.0.1',
-        datasource: DATASOURCE_GIT_TAGS,
+        depType: 'invalid-deptype',
+      };
+      const res = updateDependency({
+        fileContent: kustomizeGitSSHSubdir,
+        upgrade,
+      });
+      expect(res).toEqual(kustomizeGitSSHSubdir);
+    });
+    it('properly replaces a remote base with a subpath', () => {
+      const upgrade = {
+        source: 'git@github.com:kubernetes-sigs/kustomize.git',
+        lookupName: 'git@github.com:kubernetes-sigs/kustomize.git',
+        depName:
+          'git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld',
+        currentValue: 'v2.0.0',
+        newValue: 'v2.0.1',
+        depType: DATASOURCE_GIT_TAGS,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHSubdir,
@@ -49,7 +79,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/remote-kustomize.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
-        datasource: DATASOURCE_GIT_TAGS,
+        depType: DATASOURCE_GIT_TAGS,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHBase,
@@ -64,7 +94,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/remote-kustomize.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
-        datasource: DATASOURCE_GIT_TAGS,
+        depType: DATASOURCE_GIT_TAGS,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHBase,
@@ -79,7 +109,7 @@ describe('manager/kustomize/update', () => {
         depName: 'github.com/user/repo',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
-        datasource: DATASOURCE_GIT_TAGS,
+        depType: DATASOURCE_GIT_TAGS,
       };
       const res = updateDependency({ fileContent: kustomizeHTTP, upgrade });
       expect(res).not.toEqual(kustomizeGitSSHBase);
@@ -90,7 +120,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/remote-kustomize.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.1',
-        datasource: DATASOURCE_GIT_TAGS,
+        depType: DATASOURCE_GIT_TAGS,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHBase,
@@ -104,7 +134,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/invalid-repo.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.1',
-        datasource: DATASOURCE_GIT_TAGS,
+        depType: DATASOURCE_GIT_TAGS,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHSubdir,
@@ -130,7 +160,7 @@ describe('manager/kustomize/update/image', () => {
       depName: 'node',
       currentValue: 'v0.1.0',
       newValue: 'v0.1.1',
-      datasource: DATASOURCE_DOCKER,
+      depType: DATASOURCE_DOCKER,
     };
     const res = updateDependency({ fileContent: dockerImages, upgrade });
     expect(res.includes(upgrade.newValue)).toBe(true);
@@ -140,7 +170,7 @@ describe('manager/kustomize/update/image', () => {
       depName: 'group/instance',
       currentValue: 'v0.0.1',
       newValue: 'v1.1.1',
-      datasource: DATASOURCE_DOCKER,
+      depType: DATASOURCE_DOCKER,
     };
     const res = updateDependency({ fileContent: dockerImages, upgrade });
     expect(res.includes(upgrade.newValue)).toBe(true);
@@ -150,7 +180,7 @@ describe('manager/kustomize/update/image', () => {
       depName: 'gitlab.com/org/suborg/image',
       currentValue: 'v0.0.3',
       newValue: 'v1.1.3',
-      datasource: DATASOURCE_DOCKER,
+      depType: DATASOURCE_DOCKER,
     };
     const res = updateDependency({ fileContent: dockerImages, upgrade });
     expect(res.includes(upgrade.newValue)).toBe(true);

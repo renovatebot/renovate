@@ -10,10 +10,6 @@ function updateBase({
   upgrade,
 }: UpdateDependencyConfig): string | null {
   try {
-    if (!fileContent || !upgrade) {
-      return fileContent;
-    }
-
     const lines = fileContent.split('\n');
 
     for (let i = 0; i < lines.length; i += 1) {
@@ -25,8 +21,7 @@ function updateBase({
     }
 
     return lines.join('\n');
-  } catch (err) {
-    logger.info({ err }, 'Error setting new Kustomize value');
+  } catch (err) /* istanbul ignore next */ {
     return null;
   }
 }
@@ -64,7 +59,7 @@ function updateImageTag({
     }
 
     return lines.join('\n');
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     return null;
   }
 }
@@ -82,7 +77,6 @@ export function updateDependency({
   }
   if (upgrade.depType === DATASOURCE_DOCKER) {
     return updateImageTag({ fileContent, upgrade });
-    process.exit(120);
   }
   logger.warn(`datasource type not supported ${upgrade.depType}`);
   return fileContent;

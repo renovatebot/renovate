@@ -31,6 +31,11 @@ const nonKustomize = readFileSync(
   'utf8'
 );
 
+const gitImages = readFileSync(
+  'lib/manager/kustomize/__fixtures__/gitImages.yaml',
+  'utf8'
+);
+
 describe('lib/manager/kustomize/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for non kustomize kubernetes files', () => {
@@ -57,6 +62,13 @@ describe('lib/manager/kustomize/extract', () => {
       expect(res.deps).toHaveLength(1);
       expect(res.deps[0].source).toEqual('github.com/user/repo');
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
+    });
+    it('should extract out image versions', () => {
+      const res = extractPackageFile(gitImages);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(4);
+      expect(res.deps[0].currentValue).toEqual('v0.1.0');
+      expect(res.deps[1].currentValue).toEqual('v0.0.1');
     });
     it('ignores non-Kubernetes empty files', () => {
       expect(extractPackageFile('')).toBeNull();
