@@ -9,6 +9,6 @@ export const language = LANGUAGE_PYTHON;
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
-  versionScheme: VERSION_SCHEME_POETRY,
+  versioning: VERSION_SCHEME_POETRY,
   fileMatch: ['(^|/)pyproject\\.toml$'],
 };

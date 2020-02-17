@@ -6,5 +6,5 @@ export { extractPackageFile, updateDependency };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)deps\\.edn$'],
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: VERSION_SCHEME_MAVEN,
 };

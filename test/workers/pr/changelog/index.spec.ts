@@ -17,7 +17,7 @@ const ghGot = mocked(api).get;
 const upgrade: ChangeLogConfig = {
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
-  versionScheme: VERSION_SCHEME_SEMVER,
+  versioning: VERSION_SCHEME_SEMVER,
   fromVersion: '1.0.0',
   toVersion: '3.0.0',
   sourceUrl: 'https://github.com/chalk/chalk',

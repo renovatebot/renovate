@@ -7,5 +7,5 @@ export const defaultConfig = {
   commitMessageTopic:
     'Terraform {{managerData.terraformDependencyType}} {{depNameShort}}',
   fileMatch: ['\\.tf$'],
-  versionScheme: VERSION_SCHEME_HASHICORP,
+  versioning: VERSION_SCHEME_HASHICORP,
 };

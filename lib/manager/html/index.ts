@@ -6,5 +6,5 @@ export { extractPackageFile, updateDependency };
 
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
-  versionScheme: VERSION_SCHEME_SEMVER,
+  versioning: VERSION_SCHEME_SEMVER,
 };

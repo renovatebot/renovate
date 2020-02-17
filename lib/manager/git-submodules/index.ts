@@ -6,6 +6,6 @@ export { default as updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   enabled: false,
-  versionScheme: VERSION_SCHEME_GIT,
+  versioning: VERSION_SCHEME_GIT,
   fileMatch: ['(^|/).gitmodules$'],
 };

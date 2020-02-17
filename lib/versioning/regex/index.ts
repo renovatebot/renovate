@@ -55,7 +55,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       const error = new Error(CONFIG_VALIDATION);
       error.configFile = new_config;
       error.validationError =
-        'regex versionScheme needs at least one major, minor or patch group defined';
+        'regex versioning needs at least one major, minor or patch group defined';
       throw error;
     }
 

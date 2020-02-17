@@ -10,7 +10,7 @@ export function extractPackageFile(
   config: ExtractConfig = {}
 ): PackageFile {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
-  const { isVersion } = get(config.versionScheme || VERSION_SCHEME_SEMVER);
+  const { isVersion } = get(config.versioning || VERSION_SCHEME_SEMVER);
   const deps: PackageDependency[] = [];
 
   let lineNumber = 0;

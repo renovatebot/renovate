@@ -33,7 +33,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               datasource: DATASOURCE_ORB,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: VERSION_SCHEME_NPM,
+              versioning: VERSION_SCHEME_NPM,
               rangeStrategy: 'pin',
             };
             deps.push(dep);

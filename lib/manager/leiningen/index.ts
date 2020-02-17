@@ -5,5 +5,5 @@ export { updateDependency } from './update';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)project\\.clj$'],
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: VERSION_SCHEME_MAVEN,
 };

@@ -158,7 +158,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = 'nodejs/node';
-        dep.versionScheme = VERSION_SCHEME_NODE;
+        dep.versioning = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
         dep.datasource = DATASOURCE_NPM;
         dep.commitMessageTopic = 'Yarn';
@@ -179,7 +179,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = 'nodejs/node';
-        dep.versionScheme = VERSION_SCHEME_NODE;
+        dep.versioning = VERSION_SCHEME_NODE;
       } else if (depName === 'yarn') {
         dep.datasource = DATASOURCE_NPM;
         dep.commitMessageTopic = 'Yarn';

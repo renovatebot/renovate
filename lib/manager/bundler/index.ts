@@ -22,5 +22,5 @@ export {
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Gemfile$'],
-  versionScheme: VERSION_SCHEME_RUBY,
+  versioning: VERSION_SCHEME_RUBY,
 };

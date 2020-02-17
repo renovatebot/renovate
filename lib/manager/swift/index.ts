@@ -5,6 +5,6 @@ export { updateDependency } from './update';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Package\\.swift'],
-  versionScheme: VERSION_SCHEME_SWIFT,
+  versioning: VERSION_SCHEME_SWIFT,
   rangeStrategy: 'bump',
 };

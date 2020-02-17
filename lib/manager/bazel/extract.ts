@@ -242,7 +242,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.currentDigest = digest;
       dep.currentValue = currentValue;
       dep.depName = depName;
-      dep.versionScheme = VERSION_SCHEME_DOCKER;
+      dep.versioning = VERSION_SCHEME_DOCKER;
       dep.datasource = DATASOURCE_DOCKER;
       dep.lookupName = repository;
       deps.push(dep);

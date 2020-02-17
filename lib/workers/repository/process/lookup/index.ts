@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { getRollbackUpdate, RollbackConfig } from './rollback';
 import { getRangeStrategy } from '../../../../manager';
 import { filterVersions, FilterConfig } from './filter';
@@ -56,8 +56,8 @@ function getType(
   fromVersion: string,
   toVersion: string
 ): string {
-  const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = versioning.get(versionScheme);
+  const { versioning, rangeStrategy, currentValue } = config;
+  const version = allVersioning.get(versioning);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
     return 'bump';
   }
@@ -82,8 +82,8 @@ function getFromVersion(
   latestVersion: string,
   allVersions: string[]
 ): string | null {
-  const { currentValue, lockedVersion, versionScheme } = config;
-  const version = versioning.get(versionScheme);
+  const { currentValue, lockedVersion, versioning } = config;
+  const version = allVersioning.get(versioning);
   if (version.isVersion(currentValue)) {
     return currentValue;
   }
@@ -134,7 +134,7 @@ export async function lookupUpdates(
 ): Promise<UpdateResult> {
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = versioning.get(config.versionScheme);
+  const version = allVersioning.get(config.versioning);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
   if (version.isValid(currentValue)) {
     const dependency = clone(await getPkgReleases(config));

@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         'Docker image inside GitHub Actions'
       );
       dep.managerData = { lineNumber };
-      dep.versionScheme = VERSION_SCHEME_DOCKER;
+      dep.versioning = VERSION_SCHEME_DOCKER;
       deps.push(dep);
     }
     lineNumber += 1;

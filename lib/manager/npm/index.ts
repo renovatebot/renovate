@@ -11,7 +11,7 @@ export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   fileMatch: ['(^|/)package.json$'],
   rollbackPrs: true,
-  versionScheme: VERSION_SCHEME_NPM,
+  versioning: VERSION_SCHEME_NPM,
   prBodyDefinitions: {
     Change:
       '[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}](https://renovatebot.com/diffs/npm/{{{depNameEscaped}}}/{{{fromVersion}}}/{{{toVersion}}})',

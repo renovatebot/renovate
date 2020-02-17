@@ -4,7 +4,7 @@ import {
   VERSION_SCHEME_PEP440,
   VERSION_SCHEME_SEMVER,
 } from '../constants/version-schemes';
-import { getVersionSchemeList } from '../versioning';
+import { getVersioningList } from '../versioning';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { platformList } from '../platform';
 
@@ -633,10 +633,10 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'versionScheme',
-    description: 'Version scheme to use for filtering and comparisons',
+    name: 'versioning',
+    description: 'versioning to use for filtering and comparisons',
     type: 'string',
-    allowedValues: getVersionSchemeList(),
+    allowedValues: getVersioningList(),
     default: VERSION_SCHEME_SEMVER,
     cli: false,
     env: false,
@@ -1462,7 +1462,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: VERSION_SCHEME_DOCKER,
+      versioning: VERSION_SCHEME_DOCKER,
       managerBranchPrefix: 'docker-',
       commitMessageTopic: '{{{depName}}} Docker tag',
       major: { enabled: false },
@@ -1508,7 +1508,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: VERSION_SCHEME_PEP440,
+      versioning: VERSION_SCHEME_PEP440,
     },
     mergeable: true,
     cli: false,

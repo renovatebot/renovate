@@ -30,7 +30,7 @@ describe('datasource/packagist', () => {
       hostRules.hosts = jest.fn(() => []);
       global.repoCache = {};
       config = {
-        versionScheme: VERSION_SCHEME_COMPOSER,
+        versioning: VERSION_SCHEME_COMPOSER,
         datasource: DATASOURCE_PACKAGIST,
         registryUrls: [
           'https://composer.renovatebot.com',

@@ -8,5 +8,5 @@ export const language = LANGUAGE_JAVA;
 
 export const defaultConfig = {
   fileMatch: ['\\.pom\\.xml$', '(^|/)pom\\.xml$'],
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: VERSION_SCHEME_MAVEN,
 };

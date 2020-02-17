@@ -6,5 +6,5 @@ export { updateDependency } from './update';
 export const defaultConfig = {
   fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
   timeout: 300,
-  versionScheme: VERSION_SCHEME_IVY,
+  versioning: VERSION_SCHEME_IVY,
 };

@@ -14,6 +14,6 @@ export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
   managerBranchPrefix: 'rust-',
   fileMatch: ['(^|/)Cargo.toml$'],
-  versionScheme: VERSION_SCHEME_CARGO,
+  versioning: VERSION_SCHEME_CARGO,
   rangeStrategy: 'bump',
 };

@@ -10,7 +10,7 @@ Array [
     "managerData": Object {
       "lineNumber": 4,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -20,7 +20,7 @@ Array [
     "managerData": Object {
       "lineNumber": 11,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -30,7 +30,7 @@ Array [
     "managerData": Object {
       "lineNumber": 23,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -40,7 +40,7 @@ Array [
     "managerData": Object {
       "lineNumber": 40,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -50,7 +50,7 @@ Array [
     "managerData": Object {
       "lineNumber": 52,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -60,7 +60,7 @@ Array [
     "managerData": Object {
       "lineNumber": 64,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -70,7 +70,7 @@ Array [
     "managerData": Object {
       "lineNumber": 76,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -80,7 +80,7 @@ Array [
     "managerData": Object {
       "lineNumber": 83,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -90,7 +90,7 @@ Array [
     "managerData": Object {
       "lineNumber": 96,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
 ]
 `;
@@ -105,7 +105,7 @@ Array [
     "managerData": Object {
       "lineNumber": 8,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -115,7 +115,7 @@ Array [
     "managerData": Object {
       "lineNumber": 30,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -125,7 +125,7 @@ Array [
     "managerData": Object {
       "lineNumber": 38,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -135,7 +135,7 @@ Array [
     "managerData": Object {
       "lineNumber": 43,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
 ]
 `;

@@ -23,7 +23,7 @@ export interface ExtractConfig extends ManagerConfig {
   ignoreNpmrcFile?: boolean;
 
   skipInstalls?: boolean;
-  versionScheme?: string;
+  versioning?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
@@ -104,7 +104,7 @@ export interface Package<T> extends ManagerData<T> {
   lookupName?: string;
   repo?: string;
   target?: string;
-  versionScheme?: string;
+  versioning?: string;
 
   // npm manager
   bumpVersion?: ReleaseType | string;

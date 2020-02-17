@@ -1,6 +1,6 @@
 import * as semver from 'semver';
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { VERSION_SCHEME_NPM } from '../../../../constants/version-schemes';
@@ -12,7 +12,7 @@ export interface FilterConfig {
   ignoreDeprecated?: boolean;
   ignoreUnstable?: boolean;
   respectLatest?: boolean;
-  versionScheme: string;
+  versioning: string;
 }
 
 export function filterVersions(
@@ -23,13 +23,13 @@ export function filterVersions(
   releases: Release[]
 ): string[] {
   const {
-    versionScheme,
+    versioning,
     ignoreUnstable,
     ignoreDeprecated,
     respectLatest,
     allowedVersions,
   } = config;
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   if (!fromVersion) {
     return [];
   }
@@ -60,7 +60,7 @@ export function filterVersions(
         version.matches(v, allowedVersions)
       );
     } else if (
-      versionScheme !== VERSION_SCHEME_NPM &&
+      versioning !== VERSION_SCHEME_NPM &&
       semver.validRange(allowedVersions)
     ) {
       logger.debug(

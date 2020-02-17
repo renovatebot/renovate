@@ -10,43 +10,43 @@ export * from './common';
 
 const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
 
-const versionSchemeList: string[] = [];
+const versioningList: string[] = [];
 
-export const getVersionSchemeList = (): string[] => versionSchemeList;
+export const getVersioningList = (): string[] => versioningList;
 
-const versionSchemes = fs
+const versionings = fs
   .readdirSync(__dirname, { withFileTypes: true })
   .filter(dirent => dirent.isDirectory())
   .map(dirent => dirent.name)
   .sort();
 
-for (const scheme of versionSchemes) {
+for (const scheme of versionings) {
   try {
     schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
-    versionSchemeList.push(scheme);
+    versioningList.push(scheme);
   } catch (err) /* istanbul ignore next */ {
-    logger.fatal({ err }, `Can not load version scheme "${scheme}".`);
+    logger.fatal({ err }, `Can not load versioning "${scheme}".`);
     process.exit(1);
   }
 }
 
-export function get(versionScheme: string): VersioningApi {
-  if (!versionScheme) {
-    logger.debug('Missing versionScheme');
+export function get(versioning: string): VersioningApi {
+  if (!versioning) {
+    logger.debug('Missing versioning');
     return schemes.semver as VersioningApi;
   }
   let schemeName: string;
   let schemeConfig: string;
-  if (versionScheme.includes(':')) {
-    const versionSplit = versionScheme.split(':');
+  if (versioning.includes(':')) {
+    const versionSplit = versioning.split(':');
     schemeName = versionSplit.shift();
     schemeConfig = versionSplit.join(':');
   } else {
-    schemeName = versionScheme;
+    schemeName = versioning;
   }
   const scheme = schemes[schemeName];
   if (!scheme) {
-    logger.warn({ versionScheme }, 'Unknown version scheme');
+    logger.warn({ versioning }, 'Unknown versioning');
     return schemes.semver as VersioningApi;
   }
   // istanbul ignore if: needs an implementation

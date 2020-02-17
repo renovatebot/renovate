@@ -24,7 +24,7 @@ export default function extractPackageFile(
         'Docker image inside ansible'
       );
       dep.managerData = { lineNumber };
-      dep.versionScheme = VERSION_SCHEME_DOCKER;
+      dep.versioning = VERSION_SCHEME_DOCKER;
       deps.push(dep);
     }
     lineNumber += 1;

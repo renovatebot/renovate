@@ -178,5 +178,5 @@ export const language = LANGUAGE_JAVA;
 export const defaultConfig = {
   fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
   timeout: 600,
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: VERSION_SCHEME_MAVEN,
 };

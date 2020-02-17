@@ -101,7 +101,7 @@ describe('datasource/sbt', () => {
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
-          versionScheme: VERSION_SCHEME_IVY,
+          versioning: VERSION_SCHEME_IVY,
           datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
@@ -109,7 +109,7 @@ describe('datasource/sbt', () => {
       ).toEqual(null);
       expect(
         await getPkgReleases({
-          versionScheme: VERSION_SCHEME_IVY,
+          versioning: VERSION_SCHEME_IVY,
           datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalaz',
           depType: 'plugin',
@@ -120,7 +120,7 @@ describe('datasource/sbt', () => {
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
-          versionScheme: VERSION_SCHEME_IVY,
+          versioning: VERSION_SCHEME_IVY,
           datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
@@ -138,7 +138,7 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          versionScheme: VERSION_SCHEME_IVY,
+          versioning: VERSION_SCHEME_IVY,
           datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
@@ -154,7 +154,7 @@ describe('datasource/sbt', () => {
     it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({
-          versionScheme: VERSION_SCHEME_IVY,
+          versioning: VERSION_SCHEME_IVY,
           datasource: DATASOURCE_SBT,
           lookupName: 'org.foundweekends:sbt-bintray',
           depType: 'plugin',
@@ -170,7 +170,7 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          versionScheme: VERSION_SCHEME_IVY,
+          versioning: VERSION_SCHEME_IVY,
           datasource: DATASOURCE_SBT,
           lookupName: 'org.foundweekends:sbt-bintray_2.12',
           depType: 'plugin',

@@ -20,7 +20,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),
         managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: VERSION_SCHEME_SEMVER,
+        versioning: VERSION_SCHEME_SEMVER,
       };
 
       let shaLineNumber = 0;

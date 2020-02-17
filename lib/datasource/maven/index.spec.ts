@@ -34,7 +34,7 @@ const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
 );
 
 const config = {
-  versionScheme: VERSION_SCHEME_LOOSE,
+  versioning: VERSION_SCHEME_LOOSE,
   datasource: DATASOURCE_MAVEN,
 };
 

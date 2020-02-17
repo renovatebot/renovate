@@ -9,5 +9,5 @@ export const language = LANGUAGE_NODE;
 
 export const defaultConfig = {
   fileMatch: ['^.travis.yml$'],
-  versionScheme: VERSION_SCHEME_NODE,
+  versioning: VERSION_SCHEME_NODE,
 };

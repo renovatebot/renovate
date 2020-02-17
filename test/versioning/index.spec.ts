@@ -1,4 +1,4 @@
-import * as versioning from '../../lib/versioning';
+import * as allVersioning from '../../lib/versioning';
 import { getOptions } from '../../lib/config/definitions';
 import {
   GenericVersioningApi,
@@ -7,25 +7,25 @@ import {
 import { VERSION_SCHEME_SEMVER } from '../../lib/constants/version-schemes';
 
 const supportedSchemes = getOptions().find(
-  option => option.name === 'versionScheme'
+  option => option.name === 'versioning'
 ).allowedValues;
 
-describe('versioning.get(versionScheme)', () => {
+describe('allVersioning.get(versioning)', () => {
   it('has api', () => {
-    expect(Object.keys(versioning.get('semver')).sort()).toMatchSnapshot();
+    expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
   });
 
   it('should fallback to semver', () => {
-    expect(versioning.get(undefined)).toBe(
-      versioning.get(VERSION_SCHEME_SEMVER)
+    expect(allVersioning.get(undefined)).toBe(
+      allVersioning.get(VERSION_SCHEME_SEMVER)
     );
-    expect(versioning.get('unknown')).toBe(
-      versioning.get(VERSION_SCHEME_SEMVER)
+    expect(allVersioning.get('unknown')).toBe(
+      allVersioning.get(VERSION_SCHEME_SEMVER)
     );
   });
 
   it('should accept config', () => {
-    expect(versioning.get('semver:test')).toBeDefined();
+    expect(allVersioning.get('semver:test')).toBeDefined();
   });
 
   describe('should return the same interface', () => {
@@ -41,7 +41,7 @@ describe('versioning.get(versionScheme)', () => {
       'toString',
       'valueOf',
     ];
-    const npmApi = Object.keys(versioning.get(VERSION_SCHEME_SEMVER))
+    const npmApi = Object.keys(allVersioning.get(VERSION_SCHEME_SEMVER))
       .filter(val => !optionalFunctions.includes(val))
       .sort();
 
@@ -63,7 +63,9 @@ describe('versioning.get(versionScheme)', () => {
 
     for (const supportedScheme of supportedSchemes) {
       it(supportedScheme, () => {
-        const schemeKeys = getAllPropertyNames(versioning.get(supportedScheme))
+        const schemeKeys = getAllPropertyNames(
+          allVersioning.get(supportedScheme)
+        )
           .filter(
             val => !optionalFunctions.includes(val) && !val.startsWith('_')
           )
@@ -73,10 +75,10 @@ describe('versioning.get(versionScheme)', () => {
 
         const apiOrCtor = require('../../lib/versioning/' + supportedScheme)
           .api;
-        if (versioning.isVersioningApiConstructor(apiOrCtor)) return;
+        if (allVersioning.isVersioningApiConstructor(apiOrCtor)) return;
 
         expect(Object.keys(apiOrCtor).sort()).toEqual(
-          Object.keys(versioning.get(supportedScheme)).sort()
+          Object.keys(allVersioning.get(supportedScheme)).sort()
         );
       });
     }
