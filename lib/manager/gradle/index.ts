@@ -152,7 +152,11 @@ export async function extractAllPackageFiles(
 }
 
 function buildGradleDependency(config: Upgrade): GradleDependency {
-  return { group: config.depGroup, name: config.name, version: config.version };
+  return {
+    group: config.depGroup,
+    name: config.name,
+    version: config.currentValue,
+  };
 }
 
 export function updateDependency({
@@ -160,7 +164,7 @@ export function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): string {
   // prettier-ignore
-  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
+  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
 
   return updateGradleVersion(
     fileContent,
