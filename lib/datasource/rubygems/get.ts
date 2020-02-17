@@ -1,8 +1,6 @@
-import { RetryOptions } from 'got/dist/source';
 import { logger } from '../../logger';
 import got, { GotHeaders } from '../../util/got';
 import { maskToken } from '../../util/mask';
-import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
 import { ReleaseResult } from '../common';
 import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
@@ -37,7 +35,6 @@ const getHeaders = (): GotHeaders => {
 const fetch = async ({ dependency, registry, path }): Promise<any> => {
   const responseType = 'json';
 
-  const retry: RetryOptions = { calculateDelay: retriable() };
   const headers = getHeaders();
 
   const name = `${path}/${dependency}.json`;
@@ -45,7 +42,6 @@ const fetch = async ({ dependency, registry, path }): Promise<any> => {
 
   logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
   const response = (await got(name, {
-    retry,
     responseType,
     prefixUrl: baseUrl,
     headers,
