@@ -8,7 +8,10 @@ import {
 
 export * from './common';
 
-const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
+const allVersioning: Record<
+  string,
+  VersioningApi | VersioningApiConstructor
+> = {};
 
 const versioningList: string[] = [];
 
@@ -20,12 +23,12 @@ const versionings = fs
   .map(dirent => dirent.name)
   .sort();
 
-for (const scheme of versionings) {
+for (const versioning of versionings) {
   try {
-    schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
-    versioningList.push(scheme);
+    allVersioning[versioning] = require('./' + versioning).api; // eslint-disable-line
+    versioningList.push(versioning);
   } catch (err) /* istanbul ignore next */ {
-    logger.fatal({ err }, `Can not load versioning "${scheme}".`);
+    logger.fatal({ err }, `Can not load versioning "${versioning}".`);
     process.exit(1);
   }
 }
@@ -33,26 +36,26 @@ for (const scheme of versionings) {
 export function get(versioning: string): VersioningApi {
   if (!versioning) {
     logger.debug('Missing versioning');
-    return schemes.semver as VersioningApi;
+    return allVersioning.semver as VersioningApi;
   }
-  let schemeName: string;
-  let schemeConfig: string;
+  let versioningName: string;
+  let versioningConfig: string;
   if (versioning.includes(':')) {
     const versionSplit = versioning.split(':');
-    schemeName = versionSplit.shift();
-    schemeConfig = versionSplit.join(':');
+    versioningName = versionSplit.shift();
+    versioningConfig = versionSplit.join(':');
   } else {
-    schemeName = versioning;
+    versioningName = versioning;
   }
-  const scheme = schemes[schemeName];
-  if (!scheme) {
+  const theVersioning = allVersioning[versioningName];
+  if (!theVersioning) {
     logger.warn({ versioning }, 'Unknown versioning');
-    return schemes.semver as VersioningApi;
+    return allVersioning.semver as VersioningApi;
   }
   // istanbul ignore if: needs an implementation
-  if (isVersioningApiConstructor(scheme)) {
+  if (isVersioningApiConstructor(theVersioning)) {
     // eslint-disable-next-line new-cap
-    return new scheme(schemeConfig);
+    return new theVersioning(versioningConfig);
   }
-  return scheme;
+  return theVersioning;
 }

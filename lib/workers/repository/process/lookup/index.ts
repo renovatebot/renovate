@@ -172,7 +172,7 @@ export async function lookupUpdates(
       res.dockerRepository = dependency.dockerRepository;
     }
     const { latestVersion, releases } = dependency;
-    // Filter out any results from datasource that don't comply with our versioning scheme
+    // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases
       .map(release => release.version)
       .filter(v => version.isVersion(v));
