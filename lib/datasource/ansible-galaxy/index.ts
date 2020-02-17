@@ -35,7 +35,7 @@ export async function getPkgReleases({
 
   try {
     let res: any = await got(galaxyAPIUrl, {
-      hostType: 'ansible-galaxy',
+      context: { hostType: 'ansible-galaxy' },
     });
     if (!res || !res.body) {
       logger.warn(
