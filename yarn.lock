@@ -7330,10 +7330,10 @@ parent-module@^1.0.0:
   dependencies:
     callsites "^3.0.0"
 
-parse-diff@0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/parse-diff/-/parse-diff-0.6.0.tgz#baacd256351b744031e27e445898e0854c3dff5b"
-  integrity sha512-mBWyN71+ZbwTwqWpwxkOIy2qEi5mT3EGMeFGLqAtDqj6t1zlLyIkPkEwROSQ7ZdTuvaebFURAMKEZH9fOg4f1Q==
+parse-diff@0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/parse-diff/-/parse-diff-0.7.0.tgz#f11128d3aa02381b46ebc8320b470c2c327e67dc"
+  integrity sha512-88ar4IU2Fx+KgiyvVul0Y+YprMArTgLscO0nEKaEvWvhzRSSYefdf1M9PUmpx1pu5crUoVl2QNDMqjxfCeKptQ==
 
 parse-entities@^1.0.2, parse-entities@^1.1.0:
   version "1.2.2"
