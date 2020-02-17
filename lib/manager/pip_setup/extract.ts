@@ -101,7 +101,7 @@ export async function extractSetupFile(
 export async function extractPackageFile({
   fileContent,
   fileName,
-  config = {},
+  config,
 }: ExtractPackageFileConfig): Promise<PackageFile | null> {
   logger.debug('pip_setup.extractPackageFile()');
   let setup: PythonSetup;
