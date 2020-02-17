@@ -1,6 +1,7 @@
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
+export const id = 'docker';
 export const displayName = 'Docker';
 export const urls = [
   'https://docs.docker.com/engine/reference/commandline/tag/',

@@ -4,6 +4,7 @@ import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { regEx } from '../../util/regex';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
+export const id = 'regex';
 export const displayName = 'Regular Expression';
 export const urls = [];
 export const supportsRanges = false;

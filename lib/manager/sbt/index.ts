@@ -1,4 +1,4 @@
-import { VERSION_SCHEME_IVY } from '../../constants/version-schemes';
+import * as ivyVersioning from '../../versioning/ivy';
 
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
@@ -6,5 +6,5 @@ export { updateDependency } from './update';
 export const defaultConfig = {
   fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
   timeout: 300,
-  versioning: VERSION_SCHEME_IVY,
+  versioning: ivyVersioning.id,
 };

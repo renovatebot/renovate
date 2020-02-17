@@ -4,7 +4,7 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
-import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
+import * as dockerVersioning from '../../versioning/docker';
 import {
   DATASOURCE_DOCKER,
   DATASOURCE_GITHUB,
@@ -242,7 +242,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.currentDigest = digest;
       dep.currentValue = currentValue;
       dep.depName = depName;
-      dep.versioning = VERSION_SCHEME_DOCKER;
+      dep.versioning = dockerVersioning.id;
       dep.datasource = DATASOURCE_DOCKER;
       dep.lookupName = repository;
       deps.push(dep);

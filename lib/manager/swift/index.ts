@@ -1,10 +1,10 @@
-import { VERSION_SCHEME_SWIFT } from '../../constants/version-schemes';
+import * as swiftVersioning from '../../versioning/swift';
 
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Package\\.swift'],
-  versioning: VERSION_SCHEME_SWIFT,
+  versioning: swiftVersioning.id,
   rangeStrategy: 'bump',
 };

@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
-import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
+import * as semverVersioning from '../../versioning/semver';
 import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
 export function extractPackageFile(
@@ -10,7 +10,7 @@ export function extractPackageFile(
   config: ExtractConfig = {}
 ): PackageFile {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
-  const { isVersion } = get(config.versioning || VERSION_SCHEME_SEMVER);
+  const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
   let lineNumber = 0;

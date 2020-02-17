@@ -1,5 +1,5 @@
 import { LANGUAGE_ELIXIR } from '../../constants/languages';
-import { VERSION_SCHEME_HEX } from '../../constants/version-schemes';
+import * as hexVersioning from '../../versioning/hex';
 
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
@@ -9,5 +9,5 @@ export const language = LANGUAGE_ELIXIR;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)mix\\.exs$'],
-  versioning: VERSION_SCHEME_HEX,
+  versioning: hexVersioning.id,
 };

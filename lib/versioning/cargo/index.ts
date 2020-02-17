@@ -1,6 +1,7 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'cargo';
 export const displayName = 'Cargo';
 export const urls = [
   'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',

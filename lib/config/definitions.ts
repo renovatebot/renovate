@@ -1,9 +1,7 @@
 import { RenovateConfigStage } from './common';
-import {
-  VERSION_SCHEME_DOCKER,
-  VERSION_SCHEME_PEP440,
-  VERSION_SCHEME_SEMVER,
-} from '../constants/version-schemes';
+import * as dockerVersioning from '../versioning/docker';
+import * as pep440Versioning from '../versioning/pep440';
+import * as semverVersioning from '../versioning/semver';
 import { getVersioningList } from '../versioning';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { platformList } from '../platform';
@@ -637,7 +635,7 @@ const options: RenovateOptions[] = [
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
     allowedValues: getVersioningList(),
-    default: VERSION_SCHEME_SEMVER,
+    default: semverVersioning.id,
     cli: false,
     env: false,
   },
@@ -1462,7 +1460,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versioning: VERSION_SCHEME_DOCKER,
+      versioning: dockerVersioning.id,
       managerBranchPrefix: 'docker-',
       commitMessageTopic: '{{{depName}}} Docker tag',
       major: { enabled: false },
@@ -1508,7 +1506,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versioning: VERSION_SCHEME_PEP440,
+      versioning: pep440Versioning.id,
     },
     mergeable: true,
     cli: false,

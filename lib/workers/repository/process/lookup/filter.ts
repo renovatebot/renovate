@@ -3,7 +3,7 @@ import { logger } from '../../../../logger';
 import * as allVersioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import { VERSION_SCHEME_NPM } from '../../../../constants/version-schemes';
+import * as npmVersioning from '../../../../versioning/npm';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -60,7 +60,7 @@ export function filterVersions(
         version.matches(v, allowedVersions)
       );
     } else if (
-      versioning !== VERSION_SCHEME_NPM &&
+      versioning !== npmVersioning.id &&
       semver.validRange(allowedVersions)
     ) {
       logger.debug(

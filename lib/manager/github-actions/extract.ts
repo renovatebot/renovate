@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
-import { VERSION_SCHEME_DOCKER } from '../../constants/version-schemes';
+import * as dockerVersioning from '../../versioning/docker';
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.debug('github-actions.extractPackageFile()');
@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         'Docker image inside GitHub Actions'
       );
       dep.managerData = { lineNumber };
-      dep.versioning = VERSION_SCHEME_DOCKER;
+      dep.versioning = dockerVersioning.id;
       deps.push(dep);
     }
     lineNumber += 1;

@@ -4,7 +4,7 @@ import {
   GenericVersioningApi,
   GenericVersion,
 } from '../../lib/versioning/loose/generic';
-import { VERSION_SCHEME_SEMVER } from '../../lib/constants/version-schemes';
+import * as semverVersioning from '../../lib/versioning/semver';
 
 const supportedSchemes = getOptions().find(
   option => option.name === 'versioning'
@@ -17,10 +17,10 @@ describe('allVersioning.get(versioning)', () => {
 
   it('should fallback to semver', () => {
     expect(allVersioning.get(undefined)).toBe(
-      allVersioning.get(VERSION_SCHEME_SEMVER)
+      allVersioning.get(semverVersioning.id)
     );
     expect(allVersioning.get('unknown')).toBe(
-      allVersioning.get(VERSION_SCHEME_SEMVER)
+      allVersioning.get(semverVersioning.id)
     );
   });
 
@@ -41,7 +41,7 @@ describe('allVersioning.get(versioning)', () => {
       'toString',
       'valueOf',
     ];
-    const npmApi = Object.keys(allVersioning.get(VERSION_SCHEME_SEMVER))
+    const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter(val => !optionalFunctions.includes(val))
       .sort();
 

@@ -1,6 +1,7 @@
 import npm, { isVersion, isValid } from '../npm';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const id = 'node';
 export const displayName = 'Node.js';
 export const urls = [];
 export const supportsRanges = false;

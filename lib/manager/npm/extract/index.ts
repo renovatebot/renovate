@@ -17,7 +17,7 @@ import {
 import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { VERSION_SCHEME_NODE } from '../../../constants/version-schemes';
+import * as nodeVersioning from '../../../versioning/node';
 import {
   DATASOURCE_GITHUB,
   DATASOURCE_NPM,
@@ -158,7 +158,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = 'nodejs/node';
-        dep.versioning = VERSION_SCHEME_NODE;
+        dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
         dep.datasource = DATASOURCE_NPM;
         dep.commitMessageTopic = 'Yarn';
@@ -179,7 +179,7 @@ export async function extractPackageFile(
       if (depName === 'node') {
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = 'nodejs/node';
-        dep.versioning = VERSION_SCHEME_NODE;
+        dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
         dep.datasource = DATASOURCE_NPM;
         dep.commitMessageTopic = 'Yarn';

@@ -10,7 +10,7 @@ import {
   ReleaseResult,
   DigestConfig,
 } from './common';
-import { VERSION_SCHEME_SEMVER } from '../constants/version-schemes';
+import * as semverVersioning from '../versioning/semver';
 import { loadModules } from '../util/modules';
 
 export * from './common';
@@ -74,7 +74,7 @@ export async function getPkgReleases(
     return res;
   }
   const versioning =
-    config && config.versioning ? config.versioning : VERSION_SCHEME_SEMVER;
+    config && config.versioning ? config.versioning : semverVersioning.id;
   // Filter by versioning
   const version = allVersioning.get(versioning);
   // Return a sorted list of valid Versions

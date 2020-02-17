@@ -3,6 +3,7 @@ import { major, minor } from 'semver';
 import { api as npm } from '../npm';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const id = 'poetry';
 export const displayName = 'Poetry';
 export const urls = ['https://python-poetry.org/docs/versions/'];
 export const supportsRanges = true;

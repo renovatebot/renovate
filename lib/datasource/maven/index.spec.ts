@@ -3,7 +3,7 @@ import fs from 'fs';
 import { resolve } from 'path';
 import * as datasource from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { VERSION_SCHEME_LOOSE } from '../../constants/version-schemes';
+import * as looseVersioning from '../../versioning/loose';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import * as hostRules from '../../util/host-rules';
 
@@ -34,7 +34,7 @@ const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
 );
 
 const config = {
-  versioning: VERSION_SCHEME_LOOSE,
+  versioning: looseVersioning.id,
   datasource: DATASOURCE_MAVEN,
 };
 

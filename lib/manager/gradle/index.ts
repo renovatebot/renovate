@@ -3,7 +3,7 @@ import upath from 'upath';
 
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
+import * as mavenVersioning from '../../versioning/maven';
 
 import {
   init,
@@ -178,5 +178,5 @@ export const language = LANGUAGE_JAVA;
 export const defaultConfig = {
   fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
   timeout: 600,
-  versioning: VERSION_SCHEME_MAVEN,
+  versioning: mavenVersioning.id,
 };

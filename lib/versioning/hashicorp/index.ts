@@ -1,6 +1,7 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'hashicorp';
 export const displayName = 'Hashicorp';
 export const urls = [
   'https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version',

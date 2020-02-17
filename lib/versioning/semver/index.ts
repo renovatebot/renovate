@@ -2,6 +2,7 @@ import semver from 'semver';
 import stable from 'semver-stable';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const id = 'semver';
 export const displayName = 'Semantic';
 export const urls = ['https://semver.org/'];
 export const supportsRanges = false;

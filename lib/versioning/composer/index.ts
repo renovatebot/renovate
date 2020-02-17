@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'composer';
 export const displayName = 'Composer';
 export const urls = [
   'https://getcomposer.org/doc/articles/versions.md',
