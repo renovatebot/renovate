@@ -14,7 +14,7 @@ import { configFileNames } from '../../../config/app-strings';
 import { platform } from '../../../platform';
 import {
   CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
+  PLATFORM_FAILURE,
 } from '../../../constants/error-messages';
 
 // Check for repository config
@@ -57,7 +57,7 @@ export async function mergeRenovateConfig(
     // istanbul ignore if
     if (renovateConfig === null) {
       logger.warn('Fetching renovate config returns null');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new Error(PLATFORM_FAILURE);
     }
     // istanbul ignore if
     if (!renovateConfig.length) {

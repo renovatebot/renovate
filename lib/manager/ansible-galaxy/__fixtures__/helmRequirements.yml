@@ -1,0 +1,13 @@
+dependencies:
+  - name: etcd
+    version: 0.6.2
+    repository: https://kubernetes-charts-incubator.storage.googleapis.com/
+    condition: etcd.deployChart
+  - name: zookeeper
+    version: 1.0.0
+    repository: https://kubernetes-charts-incubator.storage.googleapis.com/
+    condition: zookeeper.deployChart
+  - name: consul
+    version: 3.6.1
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    condition: consul.deployChart

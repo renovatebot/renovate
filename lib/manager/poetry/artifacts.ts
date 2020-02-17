@@ -5,7 +5,6 @@ import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
   getSiblingFileName,
-  getSubDirectory,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
@@ -21,7 +20,6 @@ export async function updateArtifacts({
     logger.debug('No updated poetry deps - returning null');
     return null;
   }
-  const subDirectory = getSubDirectory(packageFileName);
   // Try poetry.lock first
   let lockFileName = getSiblingFileName(packageFileName, 'poetry.lock');
   let existingLockFileContent = await readLocalFile(lockFileName);
@@ -48,7 +46,7 @@ export async function updateArtifacts({
       }
     }
     const execOptions: ExecOptions = {
-      subDirectory,
+      cwdFile: packageFileName,
       docker: { image: 'renovate/poetry' },
     };
     await exec(cmd, execOptions);

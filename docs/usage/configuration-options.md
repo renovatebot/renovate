@@ -427,6 +427,10 @@ Example for configuring `docker` auth:
 }
 ```
 
+## html
+
+Supports subresource integrity (SRI) hashes.
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host. For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.

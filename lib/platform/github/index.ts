@@ -767,8 +767,16 @@ async function getOpenPrs(): Promise<PrList> {
         const canMergeStates = ['BEHIND', 'CLEAN'];
         const hasNegativeReview =
           pr.reviews && pr.reviews.nodes && pr.reviews.nodes.length > 0;
-        pr.canMerge =
-          canMergeStates.includes(pr.mergeStateStatus) && !hasNegativeReview;
+        // istanbul ignore if
+        if (hasNegativeReview) {
+          pr.canMerge = false;
+          pr.canMergeReason = `hasNegativeReview`;
+        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.canMerge = false;
+          pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
+        } else {
+          pr.canMerge = true;
+        }
         // https://developer.github.com/v4/enum/mergestatestatus
         if (pr.mergeStateStatus === 'DIRTY') {
           pr.isConflicted = true;
@@ -877,6 +885,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
       pr.canMerge = true;
+    } else {
+      pr.canMerge = false;
+      pr.canMergeReason = `mergeable = ${pr.mergeable}`;
     }
     if (pr.mergeable_state === 'dirty') {
       logger.debug({ prNo }, 'PR state is dirty so unmergeable');

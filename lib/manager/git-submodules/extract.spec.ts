@@ -1,7 +1,7 @@
 import _simpleGit from 'simple-git/promise';
 import extractPackageFile from './extract';
 
-jest.mock('simple-git/promise.js');
+jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 const Git = jest.requireActual('simple-git/promise');
 

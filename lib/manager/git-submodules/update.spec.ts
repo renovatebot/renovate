@@ -3,7 +3,7 @@ import { dir } from 'tmp-promise';
 
 import updateDependency from './update';
 
-jest.mock('simple-git/promise.js');
+jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
 describe('manager/git-submodules/update', () => {
