@@ -514,6 +514,51 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
   });
 
+  it('should replace a external groovy map variable assigned to a specific dependency', () => {
+    const gradleFile =
+      'runtime (  "mysql:mysql-connector-java:${versions.mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+    const mysqlDependency = {
+      group: 'mysql',
+      depGroup: 'mysql',
+      name: 'mysql-connector-java',
+      version: '6.0.5',
+    };
+    collectVersionVariables([mysqlDependency], gradleFile);
+
+    const gradleWithVersionFile = 'ext.versions = [ mysqlVersion: "6.0.5" ]';
+    const updatedGradleFile = updateGradleVersion(
+      gradleWithVersionFile,
+      mysqlDependency,
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      'ext.versions = [ mysqlVersion: "7.0.0" ]'
+    );
+  });
+
+  it('should replace a external groovy map nested variable assigned to a specific dependency', () => {
+    const gradleFile =
+      'runtime (  "mysql:mysql-connector-java:${versions.nested.mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+    const mysqlDependency = {
+      group: 'mysql',
+      depGroup: 'mysql',
+      name: 'mysql-connector-java',
+      version: '6.0.5',
+    };
+    collectVersionVariables([mysqlDependency], gradleFile);
+
+    const gradleWithVersionFile =
+      'ext.versions = [ nested: [ mysqlVersion: "6.0.5" ] ]';
+    const updatedGradleFile = updateGradleVersion(
+      gradleWithVersionFile,
+      mysqlDependency,
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      'ext.versions = [ nested: [ mysqlVersion: "7.0.0" ] ]'
+    );
+  });
+
   it('should replace a external property variable assigned to a specific dependency', () => {
     const gradleFile =
       'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
