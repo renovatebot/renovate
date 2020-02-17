@@ -40,7 +40,9 @@ describe('config/migration', () => {
         ignoreNodeModules: true,
         node: {
           enabled: true,
-          versionScheme: 'node',
+        },
+        poetry: {
+          versionScheme: 'pep440',
         },
         meteor: true,
         autodiscover: 'true' as never,

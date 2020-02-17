@@ -42,9 +42,6 @@ Object {
   "minor": Object {
     "automerge": true,
   },
-  "node": Object {
-    "versioning": "node",
-  },
   "nvmrc": Object {
     "packageRules": Array [
       Object {
@@ -129,6 +126,9 @@ Object {
     "automerge": true,
   },
   "platform": "github",
+  "poetry": Object {
+    "versioning": "pep440",
+  },
   "postUpdateOptions": Array [
     "gomodTidy",
   ],
