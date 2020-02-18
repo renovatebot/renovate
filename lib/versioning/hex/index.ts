@@ -1,6 +1,12 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'hex';
+export const displayName = 'Hex';
+export const urls = ['https://hexdocs.pm/elixir/Version.html'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function hex2npm(input: string): string {
   return input
     .replace(/~>\s*(\d+\.\d+)$/, '^$1')

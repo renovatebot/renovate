@@ -1,9 +1,9 @@
-import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
+import * as mavenVersioning from '../../versioning/maven';
 
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)project\\.clj$'],
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: mavenVersioning.id,
 };

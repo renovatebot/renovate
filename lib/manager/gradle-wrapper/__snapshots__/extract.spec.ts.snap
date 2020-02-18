@@ -12,7 +12,7 @@ Array [
       "gradleWrapperType": "all",
       "lineNumber": 5,
     },
-    "versionScheme": "semver",
+    "versioning": "semver",
   },
 ]
 `;
@@ -28,7 +28,7 @@ Array [
       "gradleWrapperType": "bin",
       "lineNumber": 4,
     },
-    "versionScheme": "semver",
+    "versioning": "semver",
   },
 ]
 `;

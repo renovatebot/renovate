@@ -17,7 +17,7 @@ Object {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react",
-      "lookupName": "react/umd",
+      "lookupName": "react/umd/react.production.min.js",
       "managerData": Object {
         "tagLength": 129,
         "tagPosition": 339,
@@ -27,7 +27,7 @@ Object {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react-dom",
-      "lookupName": "react-dom/umd",
+      "lookupName": "react-dom/umd/react-dom.production.min.js",
       "managerData": Object {
         "tagLength": 137,
         "tagPosition": 482,
@@ -47,7 +47,7 @@ Object {
       "currentValue": "1.14.3",
       "datasource": "cdnjs",
       "depName": "popper.js",
-      "lookupName": "popper.js/umd",
+      "lookupName": "popper.js/umd/popper.min.js",
       "managerData": Object {
         "tagLength": 123,
         "tagPosition": 1145,
@@ -57,7 +57,7 @@ Object {
       "currentValue": "0.10.4",
       "datasource": "cdnjs",
       "depName": "react-popper",
-      "lookupName": "react-popper/umd",
+      "lookupName": "react-popper/umd/react-popper.min.js",
       "managerData": Object {
         "tagLength": 132,
         "tagPosition": 1282,

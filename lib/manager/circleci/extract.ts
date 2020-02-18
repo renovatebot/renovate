@@ -5,7 +5,7 @@ import {
   PackageDependency,
   ExtractPackageFileConfig,
 } from '../common';
-import { VERSION_SCHEME_NPM } from '../../constants/version-schemes';
+import * as npmVersioning from '../../versioning/npm';
 import { DATASOURCE_ORB } from '../../constants/data-binary-source';
 
 export function extractPackageFile({
@@ -39,7 +39,7 @@ export function extractPackageFile({
               datasource: DATASOURCE_ORB,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: VERSION_SCHEME_NPM,
+              versioning: npmVersioning.id,
               rangeStrategy: 'pin',
             };
             deps.push(dep);

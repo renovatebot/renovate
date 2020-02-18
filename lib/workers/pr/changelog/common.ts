@@ -50,6 +50,6 @@ export interface ChangeLogConfig {
   releases: Release[];
   sourceUrl?: string;
   toVersion: string;
-  versionScheme: string;
+  versioning: string;
   changeLogError?: ChangeLogError;
 }

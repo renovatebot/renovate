@@ -90,9 +90,18 @@ exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null
 
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
+  "isModified": false,
   "labels": Array [
     "renovate",
   ],
+  "pullRequestId": 1234,
+}
+`;
+
+exports[`platform/azure getPr(prNo) should return a pr thats been modified 1`] = `
+Object {
+  "isModified": true,
+  "labels": Array [],
   "pullRequestId": 1234,
 }
 `;
