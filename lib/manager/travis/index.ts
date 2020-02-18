@@ -1,5 +1,5 @@
 import { LANGUAGE_NODE } from '../../constants/languages';
-import { VERSION_SCHEME_NODE } from '../../constants/version-schemes';
+import * as nodeVersioning from '../../versioning/node';
 
 export { extractPackageFile } from './extract';
 export { getPackageUpdates } from './package';
@@ -9,5 +9,5 @@ export const language = LANGUAGE_NODE;
 
 export const defaultConfig = {
   fileMatch: ['^.travis.yml$'],
-  versionScheme: VERSION_SCHEME_NODE,
+  versioning: nodeVersioning.id,
 };

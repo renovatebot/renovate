@@ -251,6 +251,7 @@ export async function getPrList(): Promise<Pr[]> {
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
+
     config.prList = prs.map(azureHelper.getRenovatePRFormat);
     logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
@@ -279,6 +280,15 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter(label => label.active)
     .map(label => label.name);
+
+  const commits = await azureApiGit.getPullRequestCommits(
+    config.repoId,
+    pullRequestId
+  );
+  azurePr.isModified =
+    commits.length > 0 &&
+    commits[0].author.name !== commits[commits.length - 1].author.name;
+
   return azurePr;
 }
 

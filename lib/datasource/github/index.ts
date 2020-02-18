@@ -162,7 +162,7 @@ export async function getDigest(
 /**
  * github.getPkgReleases
  *
- * This function can be used to fetch releases with a customisable version scheme (e.g. semver) and with either tags or releases.
+ * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with either tags or releases.
  *
  * This function will:
  *  - Fetch all tags or releases (depending on configuration)

@@ -92,7 +92,7 @@ Object {
         "enabled": false,
       },
       "prettyDepType": "engine",
-      "versionScheme": "node",
+      "versioning": "node",
     },
     Object {
       "commitMessageTopic": "npm",
@@ -351,7 +351,7 @@ Object {
         "enabled": false,
       },
       "prettyDepType": "engine",
-      "versionScheme": "node",
+      "versioning": "node",
     },
     Object {
       "commitMessageTopic": "Node.js",
@@ -364,7 +364,7 @@ Object {
         "enabled": false,
       },
       "prettyDepType": "volta",
-      "versionScheme": "node",
+      "versioning": "node",
     },
     Object {
       "commitMessageTopic": "Yarn",
@@ -413,7 +413,7 @@ Object {
         "enabled": false,
       },
       "prettyDepType": "engine",
-      "versionScheme": "node",
+      "versioning": "node",
     },
     Object {
       "commitMessageTopic": "Node.js",
@@ -426,7 +426,7 @@ Object {
         "enabled": false,
       },
       "prettyDepType": "volta",
-      "versionScheme": "node",
+      "versioning": "node",
     },
     Object {
       "commitMessageTopic": "Yarn",

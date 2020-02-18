@@ -28,10 +28,10 @@ export type ReleaseConfig = PkgReleaseConfig & {
 export async function getReleases(
   config: ReleaseConfig
 ): Promise<Release[] | null> {
-  const { versionScheme, fromVersion, toVersion, depName, datasource } = config;
+  const { versioning, fromVersion, toVersion, depName, datasource } = config;
   try {
     const pkgReleases = (await getPkgReleases(config)).releases;
-    const version = get(versionScheme);
+    const version = get(versioning);
 
     const releases = pkgReleases
       .filter(release => version.isCompatible(release.version, fromVersion))

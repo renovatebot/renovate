@@ -11,7 +11,7 @@ export interface PkgReleaseConfig extends Config {
   depType?: string;
   lookupType?: string;
   npmrc?: string;
-  versionScheme?: string;
+  versioning?: string;
 }
 
 export type DigestConfig = Config;
