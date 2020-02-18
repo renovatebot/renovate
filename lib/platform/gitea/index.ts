@@ -602,7 +602,17 @@ const platform: Platform = {
     const regex = /^diff --git a\/.+ b\/(.+)$/gm;
     const pr = await helper.getPR(config.repository, prNo);
     const diff = (await api.get(pr.diff_url)).body as string;
-    return Array.from(diff.matchAll(regex)).map(m => m[1]);
+
+    const changedFiles: string[] = [];
+    let match: string[];
+    do {
+      match = regex.exec(diff);
+      if (match) {
+        changedFiles.push(match[1]);
+      }
+    } while (match);
+
+    return changedFiles;
   },
 
   getIssueList(): Promise<Issue[]> {
