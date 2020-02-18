@@ -46,6 +46,7 @@ Array [
       "nestedVersion": false,
     },
     "skipReason": "path-dependency",
+    "versioning": "pep440",
   },
   Object {
     "currentValue": "^0.8.3",
@@ -183,6 +184,7 @@ Array [
       "nestedVersion": false,
     },
     "skipReason": "multiple-constraint-dep",
+    "versioning": "pep440",
   },
 ]
 `;

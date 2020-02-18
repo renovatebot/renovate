@@ -1,5 +1,6 @@
 import { parse } from 'toml';
 import { isValid } from '../../versioning/poetry';
+import * as pep440 from '../../versioning/pep440';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { PoetryFile, PoetrySection } from './types';
@@ -49,6 +50,7 @@ function extractFromSection(
       managerData: { nestedVersion },
       datasource: DATASOURCE_PYPI,
     };
+    if (pep440.isValid(currentValue)) dep.versioning = 'pep440';
     if (skipReason) {
       dep.skipReason = skipReason;
     } else if (!isValid(dep.currentValue)) {
