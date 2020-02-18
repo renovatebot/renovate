@@ -1,163 +1,80 @@
 import pep440 from '../../lib/versioning/pep440';
+import { getNewValueTestSuite } from './common';
+import { sample } from './pep440.data';
 
-describe('pep440.isValid(input)', () => {
-  it('should return null for irregular versions', () => {
-    expect(pep440.isValid('17.04.0')).toBeFalsy();
+describe('isValid', () => {
+  const goodSample = [
+    ...sample.singleVersions,
+    ...sample.exactVersions,
+    ...sample.ranges,
+  ];
+  describe.each(goodSample)('Good values', input => {
+    it(input, () => {
+      expect(pep440.isValid(input)).toBeTruthy();
+    });
   });
-  it('should support simple pep440', () => {
-    expect(pep440.isValid('==1.2.3')).toBeTruthy();
-  });
-  it('should support pep440 with RC', () => {
-    expect(pep440.isValid('==1.2.3rc0')).toBeTruthy();
-  });
-  it('should support ranges', () => {
-    expect(pep440.isValid('~=1.2.3')).toBeTruthy();
-    expect(pep440.isValid('==1.2.*')).toBeTruthy();
-    expect(pep440.isValid('>1.2.3')).toBeTruthy();
-  });
-  it('should reject github repositories', () => {
-    expect(pep440.isValid('renovatebot/renovate')).toBeFalsy();
-    expect(pep440.isValid('renovatebot/renovate#master')).toBeFalsy();
-    expect(
-      pep440.isValid('https://github.com/renovatebot/renovate.git')
-    ).toBeFalsy();
+
+  const badSample = sample.invalidInputs;
+  describe.each(badSample)('Bad values', input => {
+    it(input, () => {
+      expect(pep440.isValid(input)).toBeFalsy();
+    });
   });
 });
 
-describe('pep440.isStable(version)', () => {
-  it('returns correct value', () => {
-    expect(pep440.isStable('1.2.3')).toBeTruthy();
-    expect(pep440.isStable('1.2.3rc0')).toBeFalsy();
+describe('isStable', () => {
+  const goodSample = sample.stableSingle;
+  describe.each(goodSample)('Good values', input => {
+    it(input, () => {
+      expect(pep440.isStable(input)).toBeTruthy();
+    });
   });
-  it('returns false when version invalid', () => {
-    expect(pep440.isStable('not_version')).toBeFalsy();
+
+  const badSample = [
+    ...sample.unstableSingle,
+    ...sample.unstableExact,
+    ...sample.stableExact, // ?
+  ];
+  describe.each(badSample)('Bad values', input => {
+    it(input, () => {
+      expect(pep440.isStable(input)).toBeFalsy();
+    });
   });
 });
 
-describe('pep440.isSingleVersion()', () => {
-  it('returns true if naked version', () => {
-    expect(pep440.isSingleVersion('1.2.3')).toBeTruthy();
-    expect(pep440.isSingleVersion('1.2.3rc0')).toBeTruthy();
+describe('isSingleVersion', () => {
+  const goodSample = [...sample.singleVersions, ...sample.exactVersions];
+  describe.each(goodSample)('Good values', input => {
+    it(input, () => {
+      expect(pep440.isSingleVersion(input)).toBeTruthy();
+    });
   });
-  it('returns true if double equals', () => {
-    expect(pep440.isSingleVersion('==1.2.3')).toBeTruthy();
-    expect(pep440.isSingleVersion('==1.2')).toBeTruthy();
-    expect(pep440.isSingleVersion('== 1.2.3')).toBeTruthy();
-  });
-  it('returns false when not version', () => {
-    expect(pep440.isSingleVersion('==1.*')).toBeFalsy();
+
+  const badSample = [...sample.invalidInputs, ...sample.ranges];
+  describe.each(badSample)('Bad values', input => {
+    it(input, () => {
+      expect(pep440.isSingleVersion(input)).toBeFalsy();
+    });
   });
 });
 
-const versions = [
-  '0.9.4',
-  '1.0.0',
-  '1.1.5',
-  '1.2.1',
-  '1.2.2',
-  '1.2.3',
-  '1.3.4',
-  '2.0.3',
-];
-
-describe('pep440.maxSatisfyingVersion(versions, range)', () => {
-  it('returns correct value', () => {
-    expect(pep440.maxSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.3');
+describe('Satisfying versions', () => {
+  describe.each(sample.minMaxSample)('minSatisfyingVersion', sampleElem => {
+    const { versionList, range, min } = sampleElem;
+    it(range, () => {
+      expect(pep440.minSatisfyingVersion(versionList, range)).toBe(min);
+    });
   });
-  it('returns null when none found', () => {
-    expect(pep440.maxSatisfyingVersion(versions, '~=2.1')).toBeNull();
+
+  describe.each(sample.minMaxSample)('maxSatisfyingVersion', sampleElem => {
+    const { versionList, range, max } = sampleElem;
+    it(range, () => {
+      expect(pep440.maxSatisfyingVersion(versionList, range)).toBe(max);
+    });
   });
 });
 
-describe('pep440.minSatisfyingVersion(versions, range)', () => {
-  it('returns correct value', () => {
-    expect(pep440.minSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.1');
-  });
-  it('returns null when none found', () => {
-    expect(pep440.minSatisfyingVersion(versions, '~=2.1')).toBeNull();
-  });
-});
-
-describe('pep440.getNewValue()', () => {
-  const { getNewValue } = pep440;
-
-  // cases: [currentValue, expectedBump]
-  [
-    // simple cases
-    ['==1.0.3', '==1.2.3'],
-    ['>=1.2.0', '>=1.2.3'],
-    ['~=1.2.0', '~=1.2.3'],
-    ['~=1.0.3', '~=1.2.3'],
-
-    // glob
-    ['==1.2.*', '==1.2.*'],
-    ['==1.0.*', '==1.2.*'],
-
-    // future versions guard
-    ['<1.2.2.3', '<1.2.4.0'],
-    ['<1.2.3', '<1.2.4'],
-    ['<1.2', '<1.3'],
-    ['<1', '<2'],
-    ['<2.0.0', '<2.0.0'],
-
-    // minimum version guard
-    ['>0.9.8', '>0.9.8'],
-    // rollback
-    ['>2.0.0', '>=1.2.3'],
-    ['>=2.0.0', '>=1.2.3'],
-
-    // complex ranges
-    ['~=1.1.0, !=1.1.1', '~=1.2.3, !=1.1.1'],
-    ['~=1.1.0,!=1.1.1', '~=1.2.3,!=1.1.1'],
-
-    // invalid & not supported
-    [' ', ' '],
-    ['invalid', null],
-    ['===1.0.3', null],
-    // impossible
-    ['!=1.2.3', null],
-  ].forEach(([currentValue, expectedBump]) => {
-    const bumped = getNewValue({
-      currentValue,
-      rangeStrategy: 'bump',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
-    });
-    it(`bumps '${currentValue}' to '${expectedBump}'`, () => {
-      expect(bumped).toBe(expectedBump);
-    });
-
-    const replaced = getNewValue({
-      currentValue,
-      rangeStrategy: 'replace',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
-    });
-    const needReplace = pep440.matches('1.2.3', currentValue);
-    const expectedReplace = needReplace ? currentValue : bumped;
-    it(`replaces '${currentValue}' to '${expectedReplace}'`, () => {
-      expect(replaced).toBe(expectedReplace);
-    });
-
-    const pinned = getNewValue({
-      currentValue,
-      rangeStrategy: 'pin',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
-    });
-    const expectedPin = '==1.2.3';
-    it(`pins '${currentValue}' to '${expectedPin}'`, () => {
-      expect(pinned).toBe(expectedPin);
-    });
-  });
-
-  it('guards against unsupported rangeStrategy', () => {
-    const invalid = getNewValue({
-      currentValue: '==1.0.0',
-      rangeStrategy: 'update-lockfile',
-      fromVersion: '1.0.0',
-      toVersion: '1.2.3',
-    });
-    expect(invalid).toEqual('==1.2.3');
-  });
-});
+describe.each(sample.getNewValueTestCases)(
+  'getNewValue',
+  getNewValueTestSuite(pep440.getNewValue)
+);
