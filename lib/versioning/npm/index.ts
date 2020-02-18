@@ -3,6 +3,7 @@ import { is as isStable } from 'semver-stable';
 import { getNewValue } from './range';
 import { VersioningApi } from '../common';
 
+export const id = 'npm';
 export const displayName = 'npm';
 export const urls = [
   'https://semver.org/',

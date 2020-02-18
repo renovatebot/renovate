@@ -3,6 +3,7 @@ import stable from 'semver-stable';
 import { toSemverRange, getNewValue } from './range';
 import { VersioningApi } from '../common';
 
+export const id = 'swift';
 export const displayName = 'Swift';
 export const urls = ['https://swift.org/package-manager/'];
 export const supportsRanges = true;

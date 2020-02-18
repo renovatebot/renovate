@@ -85,6 +85,12 @@ Object {
       ],
     },
     Object {
+      "packageNames": Array [
+        "guava",
+      ],
+      "versioning": "maven",
+    },
+    Object {
       "depTypeList": Array [
         "peerDependencies",
       ],
@@ -120,6 +126,9 @@ Object {
     "automerge": true,
   },
   "platform": "github",
+  "poetry": Object {
+    "versioning": "pep440",
+  },
   "postUpdateOptions": Array [
     "gomodTidy",
   ],

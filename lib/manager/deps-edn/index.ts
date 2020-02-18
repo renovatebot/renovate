@@ -1,4 +1,4 @@
-import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
+import * as mavenVersioning from '../../versioning/maven';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
@@ -6,5 +6,5 @@ export { extractPackageFile, updateDependency };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)deps\\.edn$'],
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: mavenVersioning.id,
 };

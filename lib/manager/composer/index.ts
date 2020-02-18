@@ -3,7 +3,7 @@ import { updateDependency } from '../npm/update';
 import { updateArtifacts } from './artifacts';
 import { getRangeStrategy } from './range';
 import { LANGUAGE_PHP } from '../../constants/languages';
-import { VERSION_SCHEME_COMPOSER } from '../../constants/version-schemes';
+import * as composerVersioning from '../../versioning/composer';
 
 const language = LANGUAGE_PHP;
 export const supportsLockFileMaintenance = true;
@@ -18,5 +18,5 @@ export {
 
 export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)composer.json$'],
-  versionScheme: VERSION_SCHEME_COMPOSER,
+  versioning: composerVersioning.id,
 };

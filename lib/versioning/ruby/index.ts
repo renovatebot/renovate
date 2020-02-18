@@ -13,6 +13,7 @@ import { parse as parseRange, ltr } from './range';
 import { isSingleOperator, isValidOperator } from './operator';
 import { pin, bump, replace } from './strategies';
 
+export const id = 'ruby';
 export const displayName = 'Ruby';
 export const urls = [
   'https://guides.rubygems.org/patterns/',

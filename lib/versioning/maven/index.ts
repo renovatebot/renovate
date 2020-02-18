@@ -14,6 +14,7 @@ import {
 } from './compare';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const id = 'maven';
 export const displayName = 'Maven';
 export const urls = [
   'https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification',

@@ -4,6 +4,7 @@ import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { regEx } from '../../util/regex';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
+export const id = 'regex';
 export const displayName = 'Regular Expression';
 export const urls = [];
 export const supportsRanges = false;
@@ -35,7 +36,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<prerelease>.*))?$')
   // * emulates the "docker" configuration:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<compatibility>.*))?$')
-  // * matches the versioning scheme used by the Python images on DockerHub:
+  // * matches the versioning approach used by the Python images on DockerHub:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$');
   private _config: RegExp = null;
 
@@ -55,7 +56,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       const error = new Error(CONFIG_VALIDATION);
       error.configFile = new_config;
       error.validationError =
-        'regex versionScheme needs at least one major, minor or patch group defined';
+        'regex versioning needs at least one major, minor or patch group defined';
       throw error;
     }
 
