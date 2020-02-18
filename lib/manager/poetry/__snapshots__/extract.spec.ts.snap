@@ -88,6 +88,7 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "versioning": "pep440",
   },
   Object {
     "currentValue": "0.0.0",
@@ -97,6 +98,7 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "versioning": "pep440",
   },
   Object {
     "currentValue": "^0.6.0",

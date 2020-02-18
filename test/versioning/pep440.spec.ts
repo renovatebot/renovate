@@ -1,9 +1,6 @@
 import pep440 from '../../lib/versioning/pep440';
 
 describe('pep440.isValid(input)', () => {
-  it('should return null for irregular versions', () => {
-    expect(pep440.isValid('17.04.0')).toBeFalsy();
-  });
   it('should support simple pep440', () => {
     expect(pep440.isValid('==1.2.3')).toBeTruthy();
   });
@@ -159,5 +156,15 @@ describe('pep440.getNewValue()', () => {
       toVersion: '1.2.3',
     });
     expect(invalid).toEqual('==1.2.3');
+  });
+
+  it('updates versions without ==', () => {
+    const invalid = getNewValue({
+      currentValue: '1.0.0',
+      rangeStrategy: 'auto',
+      fromVersion: '1.0.0',
+      toVersion: '1.2.3',
+    });
+    expect(invalid).toEqual('1.2.3');
   });
 });

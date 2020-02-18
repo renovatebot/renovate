@@ -45,7 +45,8 @@ export function getNewValue({
   if (rangeStrategy === 'pin') {
     return '==' + toVersion;
   }
-  const ranges: Range[] = parseRange(currentValue);
+  const ranges: Range[] =
+    parseRange(currentValue) || parseRange(`==${currentValue}`);
   if (!ranges) {
     logger.warn('Invalid currentValue: ' + currentValue);
     return null;
@@ -147,6 +148,10 @@ export function getNewValue({
       'pep440: failed to calcuate newValue'
     );
     return null;
+  }
+
+  if (parseVersion(currentValue) && !currentValue.startsWith('==')) {
+    result = result.replace(/^==/, '');
   }
 
   return result;
