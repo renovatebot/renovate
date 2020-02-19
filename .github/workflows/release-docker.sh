@@ -1,34 +1,32 @@
 #!/bin/bash
 set -e
 
-PLATFORM=${PLATFORM-linux/amd64}
 DOCKER_REPO=${DOCKER_REPO-renovate/cache-test}
-DOCKER_TAG=${DOCKER_TAG-slim}
 
-# Strip git ref prefix from version
-VERSION=${REF#refs/tags/}
+VERSION=${1}
+GIT_HASH=${2}
 
 SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)?$"
 
 if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
-  echo Not a semver tag - skipping: ${REF#refs/tags/}
+  echo Not a semver tag - skipping: ${VERSION}
   exit 1
 fi
 
 major=${BASH_REMATCH[1]}
 minor=${BASH_REMATCH[2]}
 patch=${BASH_REMATCH[3]}
-slim=${DOCKER_TAG#latest}
-slim=${slim:+-}${slim}
 
-ARGS=(--platform=${PLATFORM} --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} --push --tag=${DOCKER_REPO}:${DOCKER_TAG})
+docker push ${DOCKER_REPO}:latest
+docker push ${DOCKER_REPO}:slim
+
 
 # Tag for versions additional
-for tag in {"${major}${slim}","${major}.${minor}${slim}","${major}.${minor}.${patch}${slim}"}; do
-  ARGS+=(--tag ${DOCKER_REPO}:${tag})
+for tag in {"${major}","${major}.${minor}","${major}.${minor}.${patch}"}; do
+  echo "Tagging ${DOCKER_REPO}:$tag"
+  docker tag ${DOCKER_REPO}:latest ${DOCKER_REPO}:${tag}
+  docker push ${DOCKER_REPO}:${tag}
+  docker tag ${DOCKER_REPO}:slim ${DOCKER_REPO}:${tag}-slim
+  docker push ${DOCKER_REPO}:${tag}-slim
 done
 
-ARGS+=(--file=./${DOCKER_FILE} .)
-
-set -x
-docker buildx build "${ARGS[@]}"
