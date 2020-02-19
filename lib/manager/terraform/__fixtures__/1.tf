@@ -135,3 +135,7 @@ module "foobar" {
 module "gittags" {
   source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
 }
+
+module "gittags_badversion" {
+  source = "git::https://bitbucket.com/hashicorp/example?ref=next"
+}
