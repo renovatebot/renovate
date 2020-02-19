@@ -131,7 +131,7 @@ jobs:
     name: release
     needs: test
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
 
     # tests shouldn't nee more than 10 min
     timeout-minutes: 15
