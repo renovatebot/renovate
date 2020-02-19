@@ -16,8 +16,8 @@ jobs:
     name: semantic-release
     runs-on: ubuntu-latest
 
-    # tests shouldn't nee more than 10 min
-    timeout-minutes: 15
+    # release shouldn't need more than 30 min
+    timeout-minutes: 30
 
     steps:
       - name: Set up Node.js
