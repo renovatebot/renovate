@@ -56,8 +56,8 @@ export function extractPackageFile(content: string): PackageFile | null {
         };
         if (tfDepType === TerraformDependencyTypes.unknown) {
           /* istanbul ignore next */ logger.trace(
-          `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
-        );
+            `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
+          );
         } else {
           do {
             lineNumber += 1;
