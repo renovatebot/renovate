@@ -183,8 +183,8 @@ RUN poetry config virtualenvs.in-project false
 
 COPY package.json .
 
-COPY --from=tsbuild dist dist
-COPY --from=tsbuild node_modules node_modules
+COPY --from=tsbuild /usr/src/app/dist dist
+COPY --from=tsbuild /usr/src/app/node_modules node_modules
 COPY bin bin
 COPY data data
 
