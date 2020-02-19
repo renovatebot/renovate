@@ -81,6 +81,9 @@ jobs:
         with:
           version: v0.3.1
 
+      - name: Docker registry login
+        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
+
       - name: Build the full Docker image
         run: |
           docker buildx build \
@@ -100,9 +103,6 @@ jobs:
             --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
             --tag=${DOCKER_REPO}:slim \
             --file=./Dockerfile.slim .
-
-      - name: Docker registry login
-        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
       - run: yarn semantic-release
         env:
