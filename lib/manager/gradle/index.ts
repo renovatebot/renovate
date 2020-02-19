@@ -3,7 +3,7 @@ import upath from 'upath';
 
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
+import * as mavenVersioning from '../../versioning/maven';
 
 import {
   init,
@@ -152,7 +152,11 @@ export async function extractAllPackageFiles(
 }
 
 function buildGradleDependency(config: Upgrade): GradleDependency {
-  return { group: config.depGroup, name: config.name, version: config.version };
+  return {
+    group: config.depGroup,
+    name: config.name,
+    version: config.currentValue,
+  };
 }
 
 export function updateDependency({
@@ -160,7 +164,7 @@ export function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): string {
   // prettier-ignore
-  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
+  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
 
   return updateGradleVersion(
     fileContent,
@@ -174,5 +178,5 @@ export const language = LANGUAGE_JAVA;
 export const defaultConfig = {
   fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
   timeout: 600,
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: mavenVersioning.id,
 };

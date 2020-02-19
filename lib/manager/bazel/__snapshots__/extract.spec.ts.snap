@@ -19,7 +19,7 @@ Array [
           tag=\\"v1.0.0-alpha31.cli-migrations\\"
         )",
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
 ]
 `;

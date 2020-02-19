@@ -3,6 +3,17 @@ import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'composer';
+export const displayName = 'Composer';
+export const urls = [
+  'https://getcomposer.org/doc/articles/versions.md',
+  'https://packagist.org/packages/composer/semver',
+  'https://madewithlove.be/tilde-and-caret-constraints/',
+  'https://semver.mwl.be',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function padZeroes(input: string): string {
   const sections = input.split('.');
   while (sections.length < 3) {

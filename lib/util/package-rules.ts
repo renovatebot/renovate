@@ -1,12 +1,12 @@
 import minimatch from 'minimatch';
 import { logger } from '../logger';
-import * as versioning from '../versioning';
+import * as allVersioning from '../versioning';
 import { mergeChildConfig, PackageRule, UpdateType } from '../config';
 import { regEx } from './regex';
 
 // TODO: move to `../config`
 export interface Config extends Record<string, any> {
-  versionScheme?: string;
+  versioning?: string;
   packageFile?: string;
   depType?: string;
   depTypes?: string[];
@@ -26,7 +26,7 @@ export interface Config extends Record<string, any> {
 
 function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
-    versionScheme,
+    versioning,
     packageFile,
     depType,
     depTypes,
@@ -190,7 +190,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     positiveMatch = true;
   }
   if (matchCurrentVersion) {
-    const version = versioning.get(versionScheme);
+    const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;

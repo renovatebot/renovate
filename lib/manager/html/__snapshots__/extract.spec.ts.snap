@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/html/extract extractPackageFile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "15.6.1",
+      "datasource": "cdnjs",
+      "depName": "prop-types",
+      "fileReplacePosition": 201,
+      "lookupName": "prop-types/prop-types.min.js",
+      "managerData": Object {
+        "tagLength": 124,
+      },
+    },
+    Object {
+      "currentValue": "16.3.2",
+      "datasource": "cdnjs",
+      "depName": "react",
+      "fileReplacePosition": 339,
+      "lookupName": "react/umd/react.production.min.js",
+      "managerData": Object {
+        "tagLength": 129,
+      },
+    },
+    Object {
+      "currentValue": "16.3.2",
+      "datasource": "cdnjs",
+      "depName": "react-dom",
+      "fileReplacePosition": 482,
+      "lookupName": "react-dom/umd/react-dom.production.min.js",
+      "managerData": Object {
+        "tagLength": 137,
+      },
+    },
+    Object {
+      "currentValue": "2.2.1",
+      "datasource": "cdnjs",
+      "depName": "react-transition-group",
+      "fileReplacePosition": 984,
+      "lookupName": "react-transition-group/react-transition-group.min.js",
+      "managerData": Object {
+        "tagLength": 147,
+      },
+    },
+    Object {
+      "currentValue": "1.14.3",
+      "datasource": "cdnjs",
+      "depName": "popper.js",
+      "fileReplacePosition": 1145,
+      "lookupName": "popper.js/umd/popper.min.js",
+      "managerData": Object {
+        "tagLength": 123,
+      },
+    },
+    Object {
+      "currentValue": "0.10.4",
+      "datasource": "cdnjs",
+      "depName": "react-popper",
+      "fileReplacePosition": 1282,
+      "lookupName": "react-popper/umd/react-popper.min.js",
+      "managerData": Object {
+        "tagLength": 132,
+      },
+    },
+    Object {
+      "currentValue": "7.1.0",
+      "datasource": "cdnjs",
+      "depName": "reactstrap",
+      "fileReplacePosition": 1452,
+      "lookupName": "reactstrap/reactstrap.min.js",
+      "managerData": Object {
+        "tagLength": 88,
+      },
+    },
+    Object {
+      "currentValue": "4.3.1",
+      "datasource": "cdnjs",
+      "depName": "react-router",
+      "fileReplacePosition": 1554,
+      "lookupName": "react-router/react-router.min.js",
+      "managerData": Object {
+        "tagLength": 93,
+      },
+    },
+    Object {
+      "currentValue": "4.0.6",
+      "datasource": "cdnjs",
+      "depName": "react-markdown",
+      "fileReplacePosition": 1663,
+      "lookupName": "react-markdown/react-markdown.js",
+      "managerData": Object {
+        "tagLength": 92,
+      },
+    },
+    Object {
+      "currentValue": "0.18.0",
+      "datasource": "cdnjs",
+      "depName": "axios",
+      "fileReplacePosition": 1866,
+      "lookupName": "axios/axios.min.js",
+      "managerData": Object {
+        "tagLength": 179,
+      },
+    },
+  ],
+}
+`;

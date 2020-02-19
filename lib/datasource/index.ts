@@ -1,7 +1,6 @@
-import fs from 'fs';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
-import * as versioning from '../versioning';
+import * as allVersioning from '../versioning';
 
 import {
   Datasource,
@@ -11,37 +10,15 @@ import {
   ReleaseResult,
   DigestConfig,
 } from './common';
-import { VERSION_SCHEME_SEMVER } from '../constants/version-schemes';
+import * as semverVersioning from '../versioning/semver';
+import { loadModules } from '../util/modules';
 
 export * from './common';
 
-const datasources: Record<string, Datasource> = {};
-
-function isValidDatasourceModule(
-  datasourceName: string,
-  module: unknown
-): module is Datasource {
-  return !!module;
-}
-
-function loadDatasources(): void {
-  const datasourceDirs = fs
-    .readdirSync(__dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => !name.startsWith('__'))
-    .sort();
-  for (const datasourceName of datasourceDirs) {
-    const module = require(`./${datasourceName}`); // eslint-disable-line
-    if (isValidDatasourceModule(datasourceName, module)) {
-      datasources[datasourceName] = module;
-    } /* istanbul ignore next */ else {
-      throw new Error(`Datasource module "${datasourceName}" is invalid.`);
-    }
-  }
-}
-
-loadDatasources();
+const datasources = loadModules<Datasource>(__dirname);
+export const getDatasources = (): Record<string, Datasource> => datasources;
+const datasourceList = Object.keys(datasources);
+export const getDatasourceList = (): string[] => datasourceList;
 
 const cacheNamespace = 'datasource-releases';
 
@@ -99,12 +76,10 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
-  const versionScheme =
-    config && config.versionScheme
-      ? config.versionScheme
-      : VERSION_SCHEME_SEMVER;
-  // Filter by version scheme
-  const version = versioning.get(versionScheme);
+  const versioning =
+    config && config.versioning ? config.versioning : semverVersioning.id;
+  // Filter by versioning
+  const version = allVersioning.get(versioning);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);

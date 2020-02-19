@@ -1,6 +1,11 @@
 import * as generic from './generic';
 import { VersioningApi } from '../common';
 
+export const id = 'loose';
+export const displayName = 'Loose';
+export const urls = [];
+export const supportsRanges = false;
+
 const pattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
 
 function parse(version: string): any {

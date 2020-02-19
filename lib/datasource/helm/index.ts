@@ -22,6 +22,14 @@ export async function getRepositoryData(
     }
   } catch (err) {
     // istanbul ignore if
+    if (err.code === 'ERR_INVALID_URL') {
+      logger.info(
+        { helmRepository: repository },
+        'helm repository is not a valid URL - skipping'
+      );
+      return null;
+    }
+    // istanbul ignore if
     if (err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN') {
       logger.info({ err }, 'Could not connect to helm repository');
       return null;
@@ -41,7 +49,10 @@ export async function getRepositoryData(
       logger.info({ repository }, 'Unsupported protocol');
       return null;
     }
-    logger.warn({ err }, `${repository} lookup failure: Unknown error`);
+    logger.warn(
+      { err },
+      `helm datasource ${repository} lookup failure: Unknown error`
+    );
     return null;
   }
   try {

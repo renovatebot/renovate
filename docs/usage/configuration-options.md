@@ -575,6 +575,10 @@ Use this figure to adjust the timeout for queries. The default is 60s, which is 
 }
 ```
 
+## html
+
+Supports subresource integrity (SRI) hashes.
+
 ## ignoreDeprecated
 
 By default, Renovate won't update a dependency version to a deprecated release unless the current version was _itself_ deprecated. The goal of this is to make sure you don't upgrade from a non-deprecated version to a deprecated one just because it's higher than the current version.
@@ -1600,25 +1604,11 @@ When schedules are in use, it generally means "no updates". However there are ca
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
 
-## versionScheme
+## versioning
 
-Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "versioning". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
 
-By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
-
-For the `regex` `versionScheme`, will accept a regex string after a colon, for example:
-
-```json
-{
-  "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$"
-}
-```
-
-The valid capture groups for the `regex` `versionScheme` are:
-
-- `major`, `minor`, and `patch`: at least one of these must be provided. When determining whether a package has updated, these values will be compared in the standard semantic versioning fashion. If any of these fields are omitted, they will be treated as if they were `0` -- in this way, you can describe versioning schemes with up to three incrementing values.
-- `prerelease`: this value, if captured, will mark a given release as a prerelease (eg. unstable). If this value is captured and you have configured `"ignoreUnstable": true`, the given release will be skipped.
-- `compatibility`: this value defines the "build compatibility" of a given dependency. A proposed Renovate update will never change the specified compatibility value. For example, if you are pinning to `1.2.3-linux` (and `linux` is captured as the compatbility value), Renovate will not update you to `1.2.4-osx`.
+By exposing `versioning` to config, it allows you to override the default versioning for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
 ## vulnerabilityAlerts
 

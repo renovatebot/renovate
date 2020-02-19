@@ -1,6 +1,3 @@
-import fs from 'fs';
-import { logger } from '../logger';
-
 import {
   ExtractConfig,
   ManagerApi,
@@ -24,37 +21,30 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
+import { loadModules } from '../util/modules';
+import { logger } from '../logger';
 
-const managerList = [];
-const managers: Record<string, ManagerApi> = {};
-
-function isValidManagerModule(module: unknown): module is ManagerApi {
-  // TODO: check interface and fail-fast?
-  return !!module;
-}
-
-function loadManagers(): void {
-  const managerDirs = fs
-    .readdirSync(__dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .sort();
-  for (const manager of managerDirs) {
-    let module = null;
-    try {
-      module = require(`./${manager}`); // eslint-disable-line
-    } catch (err) /* istanbul ignore next */ {
-      logger.fatal({ err }, `Can not load manager "${manager}".`);
-      process.exit(1);
-    }
-
-    if (isValidManagerModule(module)) {
-      managers[manager] = module;
-      managerList.push(manager);
-    }
+// istanbul ignore next
+function validateManager(manager): boolean {
+  if (!manager.defaultConfig) {
+    logger.fatal(`manager is missing defaultConfig`);
+    return false;
   }
+  if (!manager.updateDependency) {
+    logger.fatal(`manager is missing updateDependency`);
+    return false;
+  }
+  if (!manager.extractPackageFile && !manager.extractAllPackageFiles) {
+    logger.fatal(
+      `manager must support extractPackageFile or extractAllPackageFiles`
+    );
+  }
+  return true;
 }
-loadManagers();
+
+const managers = loadModules<ManagerApi>(__dirname, validateManager);
+
+const managerList = Object.keys(managers);
 
 const languageList = [
   LANGUAGE_DART,

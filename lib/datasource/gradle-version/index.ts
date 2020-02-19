@@ -48,24 +48,25 @@ export async function getPkgReleases({
             checksumUrl: release.checksumUrl,
           }));
         return releases;
-      } catch (err) {
-        logger.debug({ err });
-        if (!(err.statusCode === 404 || err.code === 'ENOTFOUND')) {
-          logger.warn({ err }, 'Gradle release lookup failure: Unknown error');
-        }
+      } catch (err) /* istanbul ignore next */ {
         // istanbul ignore if
         if (err.host === 'services.gradle.org') {
           throw new DatasourceError(err);
         }
+        logger.debug({ err }, 'gradle-version err');
         return null;
       }
     })
   );
 
-  const gradle: ReleaseResult = {
-    releases: Array.prototype.concat.apply([], allReleases),
+  const res: ReleaseResult = {
+    releases: Array.prototype.concat.apply([], allReleases).filter(Boolean),
     homepage: 'https://gradle.org',
     sourceUrl: 'https://github.com/gradle/gradle',
   };
-  return gradle;
+  if (res.releases.length) {
+    return res;
+  }
+  // istanbul ignore next
+  return null;
 }

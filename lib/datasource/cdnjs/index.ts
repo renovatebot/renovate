@@ -3,21 +3,26 @@ import got from '../../util/got';
 import { DatasourceError, ReleaseResult, PkgReleaseConfig } from '../common';
 import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
-interface CdnjsAsset {
+export interface CdnjsAsset {
   version: string;
   files: string[];
+  sri?: Record<string, string>;
 }
 
 const cacheNamespace = `datasource-${DATASOURCE_CDNJS}`;
 const cacheMinutes = 60;
 
-interface CdnjsResponse {
+export interface CdnjsResponse {
   homepage?: string;
   repository?: {
     type: 'git' | unknown;
     url?: string;
   };
   assets?: CdnjsAsset[];
+}
+
+export function depUrl(depName: string): string {
+  return `https://api.cdnjs.com/libraries/${depName}?fields=homepage,repository,assets`;
 }
 
 export async function getPkgReleases({
@@ -40,7 +45,7 @@ export async function getPkgReleases({
   // istanbul ignore if
   if (cachedResult) return cachedResult;
 
-  const url = `https://api.cdnjs.com/libraries/${depName}?fields=homepage,repository,assets`;
+  const url = depUrl(depName);
 
   try {
     const res = await got(url, { json: true });

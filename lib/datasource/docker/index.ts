@@ -495,7 +495,7 @@ async function getLabels(
     // istanbul ignore if
     if (manifest.schemaVersion !== 2) {
       logger.debug(
-        { registry, dockerRepository: repository, tag, manifest },
+        { registry, dockerRepository: repository, tag },
         'Manifest schema version is not 2'
       );
       return {};
@@ -560,6 +560,11 @@ async function getLabels(
         'Timeout when attempting to connect to docker registry'
       );
       logger.debug({ err });
+    } else if (registry === 'https://quay.io') {
+      // istanbul ignore next
+      logger.debug(
+        'Ignoring quay.io errors until they fully support v2 schema'
+      );
     } else {
       logger.warn(
         { registry, dockerRepository: repository, tag, err },

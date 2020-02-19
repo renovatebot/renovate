@@ -123,6 +123,13 @@ function variableDefinitionFormatMatch(variable: string): RegExp {
   return new RegExp(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
 }
 
+function variableMapDefinitionFormatMatch(
+  variable: string,
+  version: string
+): RegExp {
+  return new RegExp(`(${variable}\\s*:\\s*?["'])(${version})(["'])`);
+}
+
 export function collectVersionVariables(
   dependencies: BuildDependency[],
   buildGradleContent: string
@@ -214,6 +221,36 @@ function updateGlobalVariables(
   return null;
 }
 
+function updateGlobalMapVariables(
+  dependency: GradleDependency,
+  buildGradleContent: string,
+  newVersion: string
+): string | null {
+  let variable = variables[`${dependency.group}:${dependency.name}`];
+  if (variable) {
+    while (variable && variable.split('.').length > 0) {
+      const regex = variableMapDefinitionFormatMatch(
+        variable,
+        dependency.version
+      );
+      const match = regex.exec(buildGradleContent);
+      if (match) {
+        return buildGradleContent.replace(
+          variableMapDefinitionFormatMatch(variable, dependency.version),
+          `$1${newVersion}$3`
+        );
+      }
+
+      // Remove first path segment of variable and try again
+      variable = variable
+        .split('.')
+        .splice(1)
+        .join('.');
+    }
+  }
+  return null;
+}
+
 function updateKotlinVariablesByExtra(
   dependency: GradleDependency,
   buildGradleContent: string,
@@ -258,6 +295,7 @@ export function updateGradleVersion(
       updateVersionLiterals,
       updateLocalVariables,
       updateGlobalVariables,
+      updateGlobalMapVariables,
       updatePropertyFileGlobalVariables,
       updateKotlinVariablesByExtra,
     ];
