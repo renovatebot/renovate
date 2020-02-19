@@ -9,3 +9,4 @@ Currently supported platforms are:
 - Bitbucket Server
 - GitHub (github.com, GitHub Enterprise)
 - GitLab (gitlab.com, self-hosted)
+- Gitea (gitea.com, self-hosted)
