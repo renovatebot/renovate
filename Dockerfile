@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
 
-ENV NODE_VERSION 10.16.0
+ENV NODE_VERSION 10.19.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
