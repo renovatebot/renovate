@@ -9,8 +9,8 @@ on:
 
 env:
   PLATFORM: linux/amd64
-  # TODO: Replace with renovate/renovate
-  DOCKER_REPO: renovate/cache-test
+  DOCKER_CACHE_TAG: _cache
+  DOCKER_REPO: renovate/renovate
 
 jobs:
   build:
@@ -46,7 +46,7 @@ jobs:
           docker buildx build \
             --platform ${PLATFORM} \
             --output=type=docker \
-            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
+            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
             --tag=renovate \
             --file=./${DOCKER_FILE} .
 
@@ -59,14 +59,14 @@ jobs:
       - name: Image size
         run: docker image ls | grep renovate
 
-      - name: Push the Docker image
+      - name: Push the Docker image cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
           docker buildx build \
             --platform ${PLATFORM} \
-            --output=type=registry \
-            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --cache-to=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --tag=${DOCKER_REPO}:test-${DOCKER_TAG} \
+            --output=type=docker \
+            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
+            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
+            --tag=renovate \
             --file=./${DOCKER_FILE} .

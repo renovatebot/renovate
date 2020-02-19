@@ -7,8 +7,8 @@ on:
 
 env:
   PLATFORM: linux/amd64
-  # TODO: Replace with renovate/renovate
-  DOCKER_REPO: renovate/cache-test
+  DOCKER_CACHE_TAG: _cache
+  DOCKER_REPO: renovate/renovate
 
 jobs:
   docker-release:
@@ -43,7 +43,7 @@ jobs:
           docker buildx build \
             --platform=${PLATFORM} \
             --load \
-            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
+            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
             --tag=renovate \
             --file=./${DOCKER_FILE} .
 
