@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
 import {
+  DATASOURCE_GIT_TAGS,
   DATASOURCE_GITHUB,
   DATASOURCE_TERRAFORM,
   DATASOURCE_TERRAFORM_PROVIDER,
@@ -55,8 +56,8 @@ export function extractPackageFile(content: string): PackageFile | null {
         };
         if (tfDepType === TerraformDependencyTypes.unknown) {
           /* istanbul ignore next */ logger.trace(
-            `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
-          );
+          `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
+        );
         } else {
           do {
             lineNumber += 1;
@@ -88,6 +89,10 @@ export function extractPackageFile(content: string): PackageFile | null {
       const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.exec(
         dep.source
       );
+      // Regex would need to be updated to support ssh://
+      const gitTagsRefMatch = /git::(http|https:\/\/(.*.*\/(.*\/.*)))(?:|\/\/.*)\?ref=(.*)$/.exec(
+        dep.source
+      );
       /* eslint-disable no-param-reassign */
       if (githubRefMatch) {
         dep.depType = 'github';
@@ -96,6 +101,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.currentValue = githubRefMatch[3];
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = githubRefMatch[2];
+        dep.managerData.lineNumber = dep.sourceLine;
+        if (!isVersion(dep.currentValue)) {
+          dep.skipReason = 'unsupported-version';
+        }
+      } else if (gitTagsRefMatch) {
+        dep.depType = 'gitTags';
+        dep.depName = gitTagsRefMatch[2].replace('.git', '');
+        dep.depNameShort = gitTagsRefMatch[3].replace('.git', '');
+        dep.currentValue = gitTagsRefMatch[4];
+        dep.datasource = DATASOURCE_GIT_TAGS;
+        dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = 'unsupported-version';

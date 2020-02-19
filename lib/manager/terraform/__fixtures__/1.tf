@@ -1,14 +1,14 @@
 module "foo" {
-  source  = "github.com/hashicorp/example?ref=v1.0.0"
+  source = "github.com/hashicorp/example?ref=v1.0.0"
 }
 
 module "bar" {
-  source  = "github.com/hashicorp/example?ref=next"
+  source = "github.com/hashicorp/example?ref=next"
 }
 
 module "consul" {
-  source    = "hashicorp/consul/aws"
-  version   = "0.1.0"
+  source  = "hashicorp/consul/aws"
+  version = "0.1.0"
 }
 
 module "container_definition" {
@@ -16,17 +16,17 @@ module "container_definition" {
   name           = "hello"
   image          = "tutum/hello-world"
   mem_soft_limit = 256
-  port_mappings  = [{
+  port_mappings = [{
     containerPort = 80
     hostPort      = 80
   }]
 }
 
 module "task_definition" {
-  source                = "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0"
-  name                  = "mytask"
+  source = "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0"
+  name   = "mytask"
   container_definitions = [
-    "${module.container_definition.json}"]
+  "${module.container_definition.json}"]
 }
 module "consul" {
   source = "git@github.com:hashicorp/example.git?ref=v2.0.0"
@@ -43,15 +43,15 @@ module "web_server_sg" {
 }
 
 module "vote_service_sg" {
-  source = "terraform-aws-modules/security-group/aws"
+  source  = "terraform-aws-modules/security-group/aws"
   version = "<= 2.4.0"
 
   name        = "user-service"
   description = "Security group for user-service with custom ports open within VPC, and PostgreSQL publicly open"
   vpc_id      = "vpc-12345678"
 
-  ingress_cidr_blocks      = ["10.10.0.0/16"]
-  ingress_rules            = ["https-443-tcp"]
+  ingress_cidr_blocks = ["10.10.0.0/16"]
+  ingress_rules       = ["https-443-tcp"]
   ingress_with_cidr_blocks = [
     {
       from_port   = 8080
@@ -68,22 +68,22 @@ module "vote_service_sg" {
 }
 
 module "consul" {
-  source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
+  source  = "app.terraform.io/example-corp/k8s-cluster/azurerm"
   version = "~> 1.1.0"
 }
 
 module "consul2" {
-  source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
+  source  = "app.terraform.io/example-corp/k8s-cluster/azurerm"
   version = "~> 1.1"
 }
 
 module "consul3" {
-  source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
+  source  = "app.terraform.io/example-corp/k8s-cluster/azurerm"
   version = "~~ 1.1"
 }
 
 module "consul3" {
-  source = "hashicorp/consul/aws"
+  source  = "hashicorp/consul/aws"
   version = ">= 1.0.0, <= 2.0.0"
 }
 
@@ -101,13 +101,13 @@ provider "azurerm" {
 }
 
 provider "gitlab" {
-  alias = "main"
+  alias   = "main"
   version = "=2.4"
 }
 
 provider "gitlab" {
-    token = "${var.gitlab_token}"
-    version = "=1.3"
+  token   = "${var.gitlab_token}"
+  version = "=1.3"
 }
 
 provider "helm" {
@@ -126,4 +126,12 @@ provider "newrelic" {
   version = "V1.9"
 
   api_key = "${var.newrelic_api_key}"
+}
+
+module "foobar" {
+  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+}
+
+module "gittags" {
+  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
 }

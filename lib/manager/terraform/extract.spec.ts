@@ -19,15 +19,15 @@ describe('lib/manager/terraform/extract', () => {
     it('extracts', () => {
       const res = extractPackageFile(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(19);
-      expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(7);
+      expect(res.deps).toHaveLength(21);
+      expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(8);
       expect(
         res.deps.filter(
           dep =>
             dep.managerData.terraformDependencyType ===
             TerraformDependencyTypes.module
         )
-      ).toHaveLength(14);
+      ).toHaveLength(16);
       expect(
         res.deps.filter(
           dep =>
