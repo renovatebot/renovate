@@ -45,6 +45,7 @@ describe('workers/repository/process/lookup', () => {
     config.rangeStrategy = 'replace';
     global.repoCache = {};
     jest.resetAllMocks();
+    nock.cleanAll();
   });
 
   describe('.lookupUpdates()', () => {

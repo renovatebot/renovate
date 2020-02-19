@@ -46,6 +46,7 @@ describe('datasource/maven', () => {
       username: 'username',
       password: 'password',
     });
+    nock.cleanAll();
     nock.disableNetConnect();
     nock('http://central.maven.org')
       .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
@@ -173,9 +174,11 @@ describe('datasource/maven', () => {
     });
 
     it('should throw registry-failure if maven-central fails', async () => {
+      nock.cleanAll();
+      nock.disableNetConnect();
       nock('http://central.maven.org')
         .get('/maven2/org/artifact/maven-metadata.xml')
-        .times(4)
+        .times(10)
         .reply(503);
 
       expect.assertions(1);
