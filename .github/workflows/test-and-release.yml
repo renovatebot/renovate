@@ -22,7 +22,7 @@ jobs:
       max-parallel: 6
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [10, 12]
+        node-version: [12]
         python-version: [3.8]
         java-version: [11]
         exclude:
