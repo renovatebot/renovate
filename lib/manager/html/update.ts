@@ -47,6 +47,11 @@ export async function updateDependency({
   const tagPart = fileContent.slice(tagPosition, tagPosition + tagLength);
   const rightPart = fileContent.slice(tagPosition + tagLength);
   const dep = extractDep(tagPart);
+  /* istanbul ignore if */
+  if (!dep) {
+    logger.warn(`Could not upgrade html`);
+    return null;
+  }
   if (dep.currentValue === newValue) {
     return fileContent;
   }
