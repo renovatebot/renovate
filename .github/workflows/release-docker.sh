@@ -21,7 +21,7 @@ patch=${BASH_REMATCH[3]}
 slim=${DOCKER_TAG#latest}
 slim=${slim:+-}${slim}
 
-ARGS=(--platform=${PLATFORM} --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} --push --tag=${DOCKER_REPO}:${DOCKER_TAG})
+ARGS=(--platform=${PLATFORM} --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} --push --tag=${DOCKER_REPO}:${DOCKER_TAG})
 
 # Tag for versions additional
 for tag in {"${major}${slim}","${major}.${minor}${slim}","${major}.${minor}.${patch}${slim}"}; do
