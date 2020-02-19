@@ -2,33 +2,78 @@ name: Release CI
 
 on:
   push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - master
 
 env:
   PLATFORM: linux/amd64
   DOCKER_CACHE_TAG: _cache
   DOCKER_REPO: renovate/renovate
+  SKIP_JAVA_TESTS: true
 
 jobs:
-  docker-release:
+  semantic-release:
+    name: semantic-release
     runs-on: ubuntu-latest
 
+    # release shouldn't need more than 30 min
     timeout-minutes: 30
 
-    strategy:
-      matrix:
-        tag: [latest, slim]
-
-    env:
-      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
-      DOCKER_TAG: ${{ matrix.tag }}
-
     steps:
-      - name: Overwrite env for latest tag
-        if: matrix.tag == 'latest'
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Init platform
+        id: init
+        shell: bash
         run: |
-          echo "::set-env name=DOCKER_FILE::Dockerfile"
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name  'Renovate Bot'
+          node --version
+          python --version
+          yarn --version
+          pip --version
+
+      - uses: actions/checkout@v2
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: v1-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          yarn install --frozen-lockfile --link-duplicates
+          pip install --user -r requirements.txt
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test schema
+        run: yarn test-schema
+
+      - name: Type check
+        run: yarn type-check
+
+      - name: Build
+        run: yarn build
+
+      - name: Unit tests
+        run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
 
       - name: Set up Docker Buildx
         id: buildx
@@ -36,30 +81,30 @@ jobs:
         with:
           version: v0.3.1
 
-      - uses: actions/checkout@v2
-
-      - name: Build the Docker image
+      - name: Build the full Docker image
         run: |
           docker buildx build \
             --platform=${PLATFORM} \
             --load \
-            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
-            --tag=renovate \
-            --file=./${DOCKER_FILE} .
+            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
+            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
+            --tag=${DOCKER_REPO}:latest \
+            --file=./Dockerfile .
 
-      - name: Test the Docker image
+      - name: Build the slim Docker image
         run: |
-          docker run --rm -t renovate --version
-
-      - name: Image history
-        run: docker history renovate
-      - name: Image size
-        run: docker image ls | grep renovate
+          docker buildx build \
+            --platform=${PLATFORM} \
+            --load \
+            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
+            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
+            --tag=${DOCKER_REPO}:slim \
+            --file=./Dockerfile.slim .
 
       - name: Docker registry login
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
-      - name: Generate tags
+      - run: yarn semantic-release
         env:
-          REF: ${{ github.ref }}
-        run: ./.github/workflows/release-docker.sh
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
