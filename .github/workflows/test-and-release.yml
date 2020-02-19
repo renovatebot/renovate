@@ -126,3 +126,56 @@ jobs:
 
       - name: E2E Test
         run: yarn test-e2e
+
+  release:
+    name: release
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+
+    # tests shouldn't nee more than 10 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Init platform
+        id: init
+        shell: bash
+        run: |
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name  'Renovate Bot'
+          node --version
+          yarn --version
+
+      - uses: actions/checkout@v2
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: v1-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            v1-${{ runner.os }}-yarn_cache-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ matrix.node-version }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-yarn-
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - run: yarn semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
