@@ -1,20 +1,20 @@
 import { join } from 'upath';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import { platform as _platform } from '../../../lib/platform';
-import { updateArtifacts } from '../../../lib/manager/cocoapods';
-import * as _datasource from '../../../lib/datasource/docker';
-import { mocked } from '../../util';
-import { envMock, mockExecAll } from '../../execUtil';
-import * as _env from '../../../lib/util/exec/env';
-import { setExecConfig } from '../../../lib/util/exec';
-import { BinarySource } from '../../../lib/util/exec/common';
+import { platform as _platform } from '../../platform';
+import { updateArtifacts } from '.';
+import * as _datasource from '../../datasource/docker';
+import { mocked } from '../../../test/util';
+import { envMock, mockExecAll } from '../../../test/execUtil';
+import * as _env from '../../util/exec/env';
+import { setExecConfig } from '../../util/exec';
+import { BinarySource } from '../../util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../lib/util/exec/env');
-jest.mock('../../../lib/platform');
-jest.mock('../../../lib/datasource/docker');
+jest.mock('../../util/exec/env');
+jest.mock('../../platform');
+jest.mock('../../datasource/docker');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;

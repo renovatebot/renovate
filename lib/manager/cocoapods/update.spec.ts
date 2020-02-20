@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { updateDependency } from '../../../lib/manager/cocoapods';
+import { updateDependency } from '.';
 
 const simplePodfile = fs.readFileSync(
-  path.resolve(__dirname, './_fixtures/Podfile.simple'),
+  path.resolve(__dirname, './__fixtures__/Podfile.simple'),
   'utf-8'
 );
 

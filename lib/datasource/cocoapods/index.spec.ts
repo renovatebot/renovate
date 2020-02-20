@@ -1,12 +1,11 @@
-import { api as _api } from '../../lib/platform/github/gh-got-wrapper';
-
-import { getPkgReleases } from '../../lib/datasource/cocoapods';
-import { mocked } from '../util';
-import { GotResponse } from '../../lib/platform';
+import { api as _api } from '../../platform/github/gh-got-wrapper';
+import { getPkgReleases } from '.';
+import { mocked } from '../../../test/util';
+import { GotResponse } from '../../platform';
 
 const api = mocked(_api);
 
-jest.mock('../../lib/platform/github/gh-got-wrapper');
+jest.mock('../../platform/github/gh-got-wrapper');
 
 const config = {
   lookupName: 'foo',
