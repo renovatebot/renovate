@@ -90,6 +90,7 @@ export interface PackageFile<T = Record<string, any>>
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
+  autoUpdate?: boolean;
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -138,6 +139,8 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   sourceLine?: number;
   updates?: PackageUpdateResult[];
   versionLine?: number;
+  replaceString?: string;
+  depIndex?: number;
 }
 
 export interface Upgrade<T = Record<string, any>>

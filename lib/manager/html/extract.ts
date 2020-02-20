@@ -4,18 +4,26 @@ import { cloudflareUrlRegex } from '../cdnurl/extract';
 
 const regex = /<\s*(script|link)\s+[^>]*?\/?>/i;
 
+const integrityRegex = /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/;
+
 export function extractDep(tag: string): PackageDependency | null {
   const match = cloudflareUrlRegex.exec(tag);
-  if (match) {
-    const { depName, currentValue, asset } = match.groups;
-    return {
-      datasource: DATASOURCE_CDNJS,
-      depName,
-      lookupName: `${depName}/${asset}`,
-      currentValue,
-    };
+  if (!match) {
+    return null;
   }
-  return null;
+  const { depName, currentValue, asset } = match.groups;
+  const dep: PackageDependency = {
+    datasource: DATASOURCE_CDNJS,
+    depName,
+    lookupName: `${depName}/${asset}`,
+    currentValue,
+    pinDigests: false,
+  };
+  const integrityMatch = integrityRegex.exec(tag);
+  if (integrityMatch) {
+    dep.currentDigest = integrityMatch.groups.currentDigest;
+  }
+  return dep;
 }
 
 export function extractPackageFile(content: string): PackageFile {
@@ -24,6 +32,7 @@ export function extractPackageFile(content: string): PackageFile {
   let rest = content;
   let match = regex.exec(rest);
   let offset = 0;
+  let depIndex = 0;
   while (match) {
     const [tag] = match;
     const tagLength = tag.length;
@@ -37,11 +46,14 @@ export function extractPackageFile(content: string): PackageFile {
     if (dep) {
       deps.push({
         ...dep,
+        depIndex,
         fileReplacePosition,
         managerData: { tagLength },
+        replaceString: tag,
       });
+      depIndex += 1;
     }
   }
 
-  return { deps };
+  return { deps, autoUpdate: true };
 }
