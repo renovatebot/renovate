@@ -38,6 +38,7 @@ import {
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
 import * as helper from './gitea-helper';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 
 type GiteaRenovateConfig = {
   endpoint: string;
@@ -112,7 +113,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
 }
 
 function matchesState(actual: string, expected: string): boolean {
-  if (expected === 'all') {
+  if (expected === PR_STATE_ALL) {
     return true;
   }
   if (expected.startsWith('!')) {
@@ -483,7 +484,7 @@ const platform: Platform = {
   async findPr({
     branchName,
     prTitle: title,
-    state = 'all',
+    state = PR_STATE_ALL,
   }: FindPRConfig): Promise<Pr> {
     logger.debug(`findPr(${branchName}, ${title}, ${state})`);
     const prList = await platform.getPrList();
@@ -548,7 +549,7 @@ const platform: Platform = {
         config.prList = null;
         const pr = await platform.findPr({
           branchName,
-          state: 'open',
+          state: PR_STATE_OPEN,
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
@@ -809,7 +810,7 @@ const platform: Platform = {
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
     logger.debug(`getBranchPr(${branchName})`);
-    const pr = await platform.findPr({ branchName, state: 'open' });
+    const pr = await platform.findPr({ branchName, state: PR_STATE_OPEN });
     return pr ? platform.getPr(pr.number) : null;
   },
 

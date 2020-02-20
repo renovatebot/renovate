@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform';
+import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
