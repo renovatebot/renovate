@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { updateDependency } from '.';
 
-const simplePodfile = fs.readFileSync(
+const fileContent = fs.readFileSync(
   path.resolve(__dirname, './__fixtures__/Podfile.simple'),
   'utf-8'
 );
@@ -16,8 +16,8 @@ describe('lib/manager/cocoapods/update', () => {
         currentValue: '1.2.3',
         newValue: '2.0.0',
       };
-      const res = updateDependency(simplePodfile, upgrade);
-      expect(res).not.toEqual(simplePodfile);
+      const res = updateDependency({ fileContent, upgrade });
+      expect(res).not.toEqual(fileContent);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns same content', () => {
@@ -27,9 +27,9 @@ describe('lib/manager/cocoapods/update', () => {
         currentValue: '1.2.3',
         newValue: '1.2.3',
       };
-      const res = updateDependency(simplePodfile, upgrade);
-      expect(res).toEqual(simplePodfile);
-      expect(res).toBe(simplePodfile);
+      const res = updateDependency({ fileContent, upgrade });
+      expect(res).toEqual(fileContent);
+      expect(res).toBe(fileContent);
     });
     it('returns null', () => {
       const upgrade = {
@@ -38,7 +38,7 @@ describe('lib/manager/cocoapods/update', () => {
         currentValue: '1.2.3',
         newValue: '2.0.0',
       };
-      const res = updateDependency(simplePodfile, upgrade);
+      const res = updateDependency({ fileContent, upgrade });
       expect(res).toBeNull();
     });
   });
