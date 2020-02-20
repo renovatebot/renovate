@@ -45,6 +45,51 @@ Array [
 ]
 `;
 
+exports[`platform has a list of supported methods for gitea 1`] = `
+Array [
+  "addAssignees",
+  "addReviewers",
+  "branchExists",
+  "cleanRepo",
+  "commitFilesToBranch",
+  "createPr",
+  "deleteBranch",
+  "deleteLabel",
+  "ensureComment",
+  "ensureCommentRemoval",
+  "ensureIssue",
+  "ensureIssueClosing",
+  "findIssue",
+  "findPr",
+  "getAllRenovateBranches",
+  "getBranchLastCommitTime",
+  "getBranchPr",
+  "getBranchStatus",
+  "getBranchStatusCheck",
+  "getCommitMessages",
+  "getFile",
+  "getFileList",
+  "getIssueList",
+  "getPr",
+  "getPrBody",
+  "getPrFiles",
+  "getPrList",
+  "getRepoForceRebase",
+  "getRepoStatus",
+  "getRepos",
+  "getVulnerabilityAlerts",
+  "initPlatform",
+  "initRepo",
+  "isBranchStale",
+  "mergeBranch",
+  "mergePr",
+  "setBaseBranch",
+  "setBranchPrefix",
+  "setBranchStatus",
+  "updatePr",
+]
+`;
+
 exports[`platform has a list of supported methods for github 1`] = `
 Array [
   "addAssignees",

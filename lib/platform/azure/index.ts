@@ -256,6 +256,7 @@ export async function getPrList(): Promise<Pr[]> {
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
+
     config.prList = prs.map(azureHelper.getRenovatePRFormat);
     logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
@@ -284,6 +285,15 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter(label => label.active)
     .map(label => label.name);
+
+  const commits = await azureApiGit.getPullRequestCommits(
+    config.repoId,
+    pullRequestId
+  );
+  azurePr.isModified =
+    commits.length > 0 &&
+    commits[0].author.name !== commits[commits.length - 1].author.name;
+
   return azurePr;
 }
 export async function findPr({
@@ -498,16 +508,59 @@ export async function ensureComment({
   content,
 }: EnsureCommentConfig): Promise<void> {
   logger.debug(`ensureComment(${number}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${sanitize(content)}`;
+  const header = topic ? `### ${topic}\n\n` : '';
+  const body = `${header}${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
-  await azureApiGit.createThread(
-    {
-      comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
-      status: 1,
-    },
-    config.repoId,
-    number
-  );
+
+  const threads = await azureApiGit.getThreads(config.repoId, number);
+  let threadIdFound = null;
+  let commentIdFound = null;
+  let commentNeedsUpdating = false;
+  threads.forEach(thread => {
+    const firstCommentContent = thread.comments[0].content;
+    if (
+      (topic && firstCommentContent.startsWith(header)) ||
+      (!topic && firstCommentContent === body)
+    ) {
+      threadIdFound = thread.id;
+      commentIdFound = thread.comments[0].id;
+      commentNeedsUpdating = firstCommentContent !== body;
+    }
+  });
+
+  if (!threadIdFound) {
+    await azureApiGit.createThread(
+      {
+        comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
+        status: 1,
+      },
+      config.repoId,
+      number
+    );
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment added'
+    );
+  } else if (commentNeedsUpdating) {
+    await azureApiGit.updateComment(
+      {
+        content: body,
+      },
+      config.repoId,
+      number,
+      threadIdFound,
+      commentIdFound
+    );
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment updated'
+    );
+  } else {
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment is already update-to-date'
+    );
+  }
 }
 
 export async function ensureCommentRemoval(

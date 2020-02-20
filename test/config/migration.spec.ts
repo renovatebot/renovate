@@ -41,6 +41,9 @@ describe('config/migration', () => {
         node: {
           enabled: true,
         },
+        poetry: {
+          versionScheme: 'pep440',
+        },
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,
@@ -71,6 +74,10 @@ describe('config/migration', () => {
             packageName: 'angular',
             packagePattern: 'ang',
             enabled: false,
+          },
+          {
+            packageNames: ['guava'],
+            versionScheme: 'maven',
           },
         ],
         exposeEnv: true,
@@ -112,7 +119,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig.packageRules).toHaveLength(7);
+      expect(migratedConfig.packageRules).toHaveLength(8);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
     it('migrates before and after schedules', () => {

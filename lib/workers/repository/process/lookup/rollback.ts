@@ -1,25 +1,25 @@
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { LookupUpdate } from './common';
 
 export interface RollbackConfig {
   currentValue?: string;
   depName?: string;
   packageFile: string;
-  versionScheme: string;
+  versioning: string;
 }
 
 export function getRollbackUpdate(
   config: RollbackConfig,
   versions: string[]
 ): LookupUpdate {
-  const { packageFile, versionScheme, depName, currentValue } = config;
-  const version = versioning.get(versionScheme);
+  const { packageFile, versioning, depName, currentValue } = config;
+  const version = allVersioning.get(versioning);
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
     logger.info(
-      { versionScheme },
-      'Current version scheme does not support isLessThanRange()'
+      { versioning },
+      'Current versioning does not support isLessThanRange()'
     );
     return null;
   }

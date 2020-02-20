@@ -1,0 +1,30 @@
+{
+  "branch": "master",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/github",
+    "@semantic-release/npm",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./.github/workflows/release-docker.sh ${nextRelease.version} ${nextRelease.gitHead}"
+      }
+    ]
+  ],
+  "analyzeCommits": {
+    "preset": "angular",
+    "releaseRules": [
+      {
+        "type": "docs",
+        "scope": "readme.md",
+        "release": "patch"
+      },
+      {
+        "type": "build",
+        "release": "patch"
+      }
+    ]
+  },
+  "tagFormat": "${version}"
+}

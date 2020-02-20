@@ -15,6 +15,11 @@ export function updateDependency({
         return null;
       }
       newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
+    } else if (upgrade.depType === 'gitTags') {
+      if (!lineToChange.includes(upgrade.depNameShort)) {
+        return null;
+      }
+      newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
     } else if (upgrade.depType === 'terraform') {
       if (!/version\s*=\s*"/.test(lineToChange)) {
         return null;

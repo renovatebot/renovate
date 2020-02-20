@@ -41,12 +41,20 @@ export async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): Promise<string> {
-  const { currentValue, newValue, managerData } = upgrade;
-  const { tagPosition, tagLength } = managerData;
-  const leftPart = fileContent.slice(0, tagPosition);
-  const tagPart = fileContent.slice(tagPosition, tagPosition + tagLength);
-  const rightPart = fileContent.slice(tagPosition + tagLength);
+  const { currentValue, fileReplacePosition, newValue, managerData } = upgrade;
+  const { tagLength } = managerData;
+  const leftPart = fileContent.slice(0, fileReplacePosition);
+  const tagPart = fileContent.slice(
+    fileReplacePosition,
+    fileReplacePosition + tagLength
+  );
+  const rightPart = fileContent.slice(fileReplacePosition + tagLength);
   const dep = extractDep(tagPart);
+  /* istanbul ignore if */
+  if (!dep) {
+    logger.warn(`Could not upgrade html`);
+    return null;
+  }
   if (dep.currentValue === newValue) {
     return fileContent;
   }

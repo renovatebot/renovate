@@ -1,5 +1,6 @@
 import * as github from '../../lib/platform/github';
 import * as gitlab from '../../lib/platform/gitlab';
+import * as gitea from '../../lib/platform/gitea';
 import * as azure from '../../lib/platform/azure';
 import * as bitbucket from '../../lib/platform/bitbucket';
 import * as bitbucketServer from '../../lib/platform/bitbucket-server';
@@ -50,6 +51,11 @@ describe('platform', () => {
     expect(gitlabMethods).toMatchSnapshot();
   });
 
+  it('has a list of supported methods for gitea', () => {
+    const giteaMethods = Object.keys(gitea).sort();
+    expect(giteaMethods).toMatchSnapshot();
+  });
+
   it('has a list of supported methods for azure', () => {
     const azureMethods = Object.keys(azure).sort();
     expect(azureMethods).toMatchSnapshot();
@@ -59,6 +65,12 @@ describe('platform', () => {
     const githubMethods = Object.keys(github).sort();
     const gitlabMethods = Object.keys(gitlab).sort();
     expect(githubMethods).toMatchObject(gitlabMethods);
+  });
+
+  it('has same API for github and gitea', () => {
+    const githubMethods = Object.keys(github).sort();
+    const giteaMethods = Object.keys(gitea).sort();
+    expect(githubMethods).toMatchObject(giteaMethods);
   });
 
   it('has same API for github and azure', () => {

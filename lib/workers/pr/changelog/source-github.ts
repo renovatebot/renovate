@@ -2,7 +2,7 @@ import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
-import * as versioning from '../../../versioning';
+import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
 import {
   ChangeLogConfig,
@@ -17,7 +17,7 @@ const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,
-  versionScheme: string,
+  versioning: string,
   repository: string
 ): Promise<string[]> {
   let url = endpoint
@@ -50,7 +50,7 @@ async function getTags(
 
 export async function getChangeLogJSON({
   endpoint,
-  versionScheme,
+  versioning,
   fromVersion,
   toVersion,
   sourceUrl,
@@ -62,7 +62,7 @@ export async function getChangeLogJSON({
     logger.debug('No release notes for @types');
     return null;
   }
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   const githubBaseURL = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
@@ -113,7 +113,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versionScheme, repository);
+      tags = await getTags(endpoint, versioning, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags

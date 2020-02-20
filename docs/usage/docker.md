@@ -27,7 +27,7 @@ Renovate by default will preserve the precision of Docker images. For example if
 
 Although suffixes in semver indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `12.2.0-alpine`. Renovate defaults to assuming suffixes indicate compatibility so will never _change_ it. e.g. `12.1.0-alpine` might get updated to `12.1.1-alpine` but never `12.1.1` or `12.1.1-stretch`.
 
-If this behaviour does not suit a particular package you have, Renovate allows you to customize the `versionScheme` in use. For example, if you have a Docker image `foo/bar` that sticks to semver versioning and you need Renovate to understand that suffixes indicate pre-releases versions and not compatibility, then you could configure this package rule:
+If this behaviour does not suit a particular package you have, Renovate allows you to customize the `versioning` in use. For example, if you have a Docker image `foo/bar` that sticks to semver versioning and you need Renovate to understand that suffixes indicate pre-releases versions and not compatibility, then you could configure this package rule:
 
 ```json
 {
@@ -35,7 +35,7 @@ If this behaviour does not suit a particular package you have, Renovate allows y
     {
       "datasources": ["docker"],
       "packageNames": ["foo/bar"],
-      "versionScheme": "semver"
+      "versioning": "semver"
     }
   ]
 }
@@ -49,15 +49,15 @@ Another example is the official `python` image, which follows `pep440` versionin
     {
       "datasources": ["docker"],
       "packageNames": ["python"],
-      "versionScheme": "pep440"
+      "versioning": "pep440"
     }
   ]
 }
 ```
 
-If traditional versioning doesn't work, consider using Renovate's built-in `loose` `versionScheme`. It essentially just does a best effort sort of versions, regardless of whether they contain letters or digits.
+If traditional versioning doesn't work, consider using Renovate's built-in `loose` `versioning`. It essentially just does a best effort sort of versions, regardless of whether they contain letters or digits.
 
-Finally, if you use a Docker image that follows a versioning approach not captured by one of our existing version schemes, and which `loose` sorts incorrectly, you could see if the `regex` `versionScheme` can work. It uses regex capture group syntax to let you specify which part of the version string is major, minor, patch, pre-release, or compatibility. See the docs for `versionScheme` for documentation/examples of `regex` versioning in action.
+Finally, if you use a Docker image that follows a versioning approach not captured by one of our existing versionings, and which `loose` sorts incorrectly, you could see if the `regex` `versioning` can work. It uses regex capture group syntax to let you specify which part of the version string is major, minor, patch, pre-release, or compatibility. See the docs for `versioning` for documentation/examples of `regex` versioning in action.
 
 ## Digest Pinning
 
