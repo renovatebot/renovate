@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { parseLine } from './extract';
 
 function lineContainsDep(line: string, dep: string): boolean {
@@ -7,10 +7,10 @@ function lineContainsDep(line: string, dep: string): boolean {
   return dep === depName;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   const { currentValue, managerData, depName, newValue } = upgrade;
 
   // istanbul ignore if
