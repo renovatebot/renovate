@@ -25,7 +25,7 @@ export interface ParsedLine {
 export function parseLine(line: string): ParsedLine {
   const result: ParsedLine = {};
   for (const regex of Object.values(regexMappings)) {
-    const match = line.replace(/#.*$/, '').match(regex);
+    const match = regex.exec(line.replace(/#.*$/, ''));
     if (match && match.groups) {
       Object.assign(result, match.groups);
     }
@@ -48,8 +48,8 @@ export function parseLine(line: string): ParsedLine {
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
   if (git && git.startsWith('https://github.com/')) {
-    const githubMatch = git.match(
-      /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/
+    const githubMatch = /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(
+      git
     );
     const { account, repo } = (githubMatch && githubMatch.groups) || {};
     if (account && repo) {

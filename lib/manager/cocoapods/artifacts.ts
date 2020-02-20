@@ -28,7 +28,7 @@ async function getImageTag(
         versioning.matches(version, constraint)
       );
     }
-    versions = versions.sort(versioning.sortVersions);
+    versions = versions.sort((a, b) => versioning.sortVersions(a, b));
 
     if (constraint && versions.length) {
       result = versions[versions.length - 1];
@@ -90,8 +90,8 @@ export async function updateArtifacts({
     return null;
   }
 
-  const match = existingLockFileContent.match(
-    /^COCOAPODS: (?<cocoapodsVersion>.*)$/m
+  const match = new RegExp(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
+    existingLockFileContent
   );
   const cocoapodsVersion =
     match && match.groups ? match.groups.cocoapodsVersion : null;

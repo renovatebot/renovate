@@ -66,7 +66,7 @@ async function getReleasesFromGithub(
   registryUrl: string,
   useShard = false
 ): Promise<ReleaseResult | null> {
-  const match = registryUrl.match(githubRegex);
+  const match = githubRegex.exec(registryUrl);
   const { account, repo } = (match && match.groups) || {};
   const opts = { account, repo, useShard };
   const url = releasesGithubUrl(lookupName, opts);
@@ -111,7 +111,7 @@ async function getReleasesFromCDN(
 const defaultCDN = 'https://cdn.cocoapods.org';
 
 function isDefaultRepo(url: string): boolean {
-  const match = url.match(githubRegex);
+  const match = githubRegex.exec(url);
   if (match) {
     const { account, repo } = match.groups || {};
     return (
@@ -153,7 +153,7 @@ export async function getPkgReleases(
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(registryUrl)) registryUrl = defaultCDN;
 
-    if (registryUrl.match(githubRegex)) {
+    if (githubRegex.exec(registryUrl)) {
       result = await getReleasesFromGithub(podName, registryUrl);
     } else {
       result = await getReleasesFromCDN(podName, registryUrl);
