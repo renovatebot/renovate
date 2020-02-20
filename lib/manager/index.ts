@@ -30,7 +30,7 @@ function validateManager(manager): boolean {
     logger.fatal(`manager is missing defaultConfig`);
     return false;
   }
-  if (!manager.updateDependency) {
+  if (!manager.updateDependency && !manager.autoUpdate) {
     logger.fatal(`manager is missing updateDependency`);
     return false;
   }

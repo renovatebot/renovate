@@ -1,8 +1,9 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 import * as semverVersioning from '../../versioning/semver';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile };
+
+export const autoUpdate = true;
 
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
