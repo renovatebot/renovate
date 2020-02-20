@@ -2,106 +2,105 @@
 
 exports[`manager/html/extract extractPackageFile 1`] = `
 Object {
+  "autoUpdate": true,
   "deps": Array [
     Object {
       "currentValue": "15.6.1",
       "datasource": "cdnjs",
+      "depIndex": 0,
       "depName": "prop-types",
-      "fileReplacePosition": 201,
       "lookupName": "prop-types/prop-types.min.js",
-      "managerData": Object {
-        "tagLength": 124,
-      },
+      "pinDigests": false,
+      "replaceString": "<script type=\\"text/javascript\\"
+            src=\\"https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.6.1/prop-types.min.js\\">",
     },
     Object {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
+      "depIndex": 1,
       "depName": "react",
-      "fileReplacePosition": 339,
       "lookupName": "react/umd/react.production.min.js",
-      "managerData": Object {
-        "tagLength": 129,
-      },
+      "pinDigests": false,
+      "replaceString": "<script type=\\"text/javascript\\"
+            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react/16.3.2/umd/react.production.min.js\\">",
     },
     Object {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
+      "depIndex": 2,
       "depName": "react-dom",
-      "fileReplacePosition": 482,
       "lookupName": "react-dom/umd/react-dom.production.min.js",
-      "managerData": Object {
-        "tagLength": 137,
-      },
+      "pinDigests": false,
+      "replaceString": "<script type=\\"text/javascript\\"
+            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.3.2/umd/react-dom.production.min.js\\">",
     },
     Object {
       "currentValue": "2.2.1",
       "datasource": "cdnjs",
+      "depIndex": 3,
       "depName": "react-transition-group",
-      "fileReplacePosition": 984,
       "lookupName": "react-transition-group/react-transition-group.min.js",
-      "managerData": Object {
-        "tagLength": 147,
-      },
+      "pinDigests": false,
+      "replaceString": "<script type=\\"text/javascript\\"
+            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-transition-group/2.2.1/react-transition-group.min.js\\">",
     },
     Object {
       "currentValue": "1.14.3",
       "datasource": "cdnjs",
+      "depIndex": 4,
       "depName": "popper.js",
-      "fileReplacePosition": 1145,
       "lookupName": "popper.js/umd/popper.min.js",
-      "managerData": Object {
-        "tagLength": 123,
-      },
+      "pinDigests": false,
+      "replaceString": "<script type=\\"text/javascript\\"
+            src=\\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js\\">",
     },
     Object {
       "currentValue": "0.10.4",
       "datasource": "cdnjs",
+      "depIndex": 5,
       "depName": "react-popper",
-      "fileReplacePosition": 1282,
       "lookupName": "react-popper/umd/react-popper.min.js",
-      "managerData": Object {
-        "tagLength": 132,
-      },
+      "pinDigests": false,
+      "replaceString": "<script type=\\"text/javascript\\"
+            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-popper/0.10.4/umd/react-popper.min.js\\">",
     },
     Object {
       "currentValue": "7.1.0",
       "datasource": "cdnjs",
+      "depIndex": 6,
       "depName": "reactstrap",
-      "fileReplacePosition": 1452,
       "lookupName": "reactstrap/reactstrap.min.js",
-      "managerData": Object {
-        "tagLength": 88,
-      },
+      "pinDigests": false,
+      "replaceString": "<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js\\">",
     },
     Object {
       "currentValue": "4.3.1",
       "datasource": "cdnjs",
+      "depIndex": 7,
       "depName": "react-router",
-      "fileReplacePosition": 1554,
       "lookupName": "react-router/react-router.min.js",
-      "managerData": Object {
-        "tagLength": 93,
-      },
+      "pinDigests": false,
+      "replaceString": "<script src=\\" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js\\">",
     },
     Object {
       "currentValue": "4.0.6",
       "datasource": "cdnjs",
+      "depIndex": 8,
       "depName": "react-markdown",
-      "fileReplacePosition": 1663,
       "lookupName": "react-markdown/react-markdown.js",
-      "managerData": Object {
-        "tagLength": 92,
-      },
+      "pinDigests": false,
+      "replaceString": "<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-markdown/4.0.6/react-markdown.js\\">",
     },
     Object {
+      "currentDigest": "sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=",
       "currentValue": "0.18.0",
       "datasource": "cdnjs",
+      "depIndex": 9,
       "depName": "axios",
-      "fileReplacePosition": 1866,
       "lookupName": "axios/axios.min.js",
-      "managerData": Object {
-        "tagLength": 179,
-      },
+      "pinDigests": false,
+      "replaceString": "<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js\\"
+            integrity=\\"sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=\\" crossorigin=\\"anonymous\\">",
     },
   ],
 }

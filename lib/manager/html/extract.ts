@@ -28,32 +28,24 @@ export function extractDep(tag: string): PackageDependency | null {
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
-
   let rest = content;
   let match = regex.exec(rest);
   let offset = 0;
   let depIndex = 0;
   while (match) {
     const [tag] = match;
-    const tagLength = tag.length;
-    const fileReplacePosition = offset + match.index;
-
     offset += match.index + tag.length;
     rest = content.slice(offset);
     match = regex.exec(rest);
-
     const dep = extractDep(tag);
     if (dep) {
       deps.push({
         ...dep,
         depIndex,
-        fileReplacePosition,
-        managerData: { tagLength },
         replaceString: tag,
       });
       depIndex += 1;
     }
   }
-
   return { deps, autoUpdate: true };
 }
