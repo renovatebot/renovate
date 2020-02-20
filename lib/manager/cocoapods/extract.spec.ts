@@ -3,12 +3,12 @@ import path from 'path';
 import { extractPackageFile } from '.';
 
 const simplePodfile = fs.readFileSync(
-  path.resolve(__dirname, './_fixtures/Podfile.simple'),
+  path.resolve(__dirname, './__fixtures__/Podfile.simple'),
   'utf-8'
 );
 
 const complexPodfile = fs.readFileSync(
-  path.resolve(__dirname, './_fixtures/Podfile.complex'),
+  path.resolve(__dirname, './__fixtures__/Podfile.complex'),
   'utf-8'
 );
 
