@@ -90,7 +90,7 @@ export interface PackageFile<T = Record<string, any>>
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
-  autoUpdate?: boolean;
+  autoReplace?: boolean;
 }
 
 export interface Package<T> extends ManagerData<T> {

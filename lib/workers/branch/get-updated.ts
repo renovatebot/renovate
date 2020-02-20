@@ -6,13 +6,7 @@ import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
-import {
-  checkBranchDepsMatchBaseDeps,
-  confirmIfDepUpdated,
-  matchAt,
-  replaceAt,
-  doAutoUpdate,
-} from './autoupdate';
+import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -32,7 +26,7 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { autoUpdate, manager, packageFile, depName } = upgrade;
+    const { autoReplace, manager, packageFile, depName } = upgrade;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -51,8 +45,8 @@ export async function getUpdatedPackageFiles(
           parentBranch: undefined,
         });
       }
-      if (autoUpdate) {
-        const res = await doAutoUpdate(upgrade, existingContent, parentBranch);
+      if (autoReplace) {
+        const res = await doAutoReplace(upgrade, existingContent, parentBranch);
         if (res) {
           if (res === existingContent) {
             logger.debug('No content changed');
@@ -67,7 +61,7 @@ export async function getUpdatedPackageFiles(
             parentBranch: undefined,
           });
         }
-        logger.error('Could not autoUpdate');
+        logger.error('Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = existingContent;

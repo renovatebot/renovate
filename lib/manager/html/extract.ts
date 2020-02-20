@@ -47,5 +47,5 @@ export function extractPackageFile(content: string): PackageFile {
       depIndex += 1;
     }
   }
-  return { deps, autoUpdate: true };
+  return { deps, autoReplace: true };
 }

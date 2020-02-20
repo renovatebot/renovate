@@ -2,7 +2,7 @@
 
 exports[`manager/html/extract extractPackageFile 1`] = `
 Object {
-  "autoUpdate": true,
+  "autoReplace": true,
   "deps": Array [
     Object {
       "currentValue": "15.6.1",

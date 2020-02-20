@@ -91,7 +91,7 @@ export async function checkBranchDepsMatchBaseDeps(
   }
 }
 
-export async function doAutoUpdate(
+export async function doAutoReplace(
   upgrade,
   existingContent: string,
   parentBranch: string | null
@@ -147,6 +147,6 @@ export async function doAutoUpdate(
       }
     }
   }
-  logger.warn('Could not autoupdate');
+  logger.warn('Could not autoReplace');
   throw new Error(WORKER_FILE_UPDATE_FAILED);
 }
