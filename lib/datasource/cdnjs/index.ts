@@ -25,6 +25,27 @@ export function depUrl(depName: string): string {
   return `https://api.cdnjs.com/libraries/${depName}?fields=homepage,repository,assets`;
 }
 
+export async function getDigest(
+  { lookupName }: PkgReleaseConfig,
+  newValue?: string
+): Promise<string | null> {
+  let result = null;
+  const depName = lookupName.split('/')[0];
+  const url = depUrl(depName);
+  const assetName = lookupName.replace(`${depName}/`, '');
+  let res = null;
+  try {
+    res = await got(url, { json: true });
+  } catch (e) /* istanbul ignore next */ {
+    return null;
+  }
+  const assets: CdnjsAsset[] = res.body && res.body.assets;
+  const asset = assets && assets.find(({ version }) => version === newValue);
+  const hash = asset && asset.sri && asset.sri[assetName];
+  if (hash) result = hash;
+  return result;
+}
+
 export async function getPkgReleases({
   lookupName,
 }: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
