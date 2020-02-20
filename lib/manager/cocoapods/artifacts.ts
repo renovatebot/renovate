@@ -2,11 +2,12 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import { hrtime } from 'process';
 import { platform } from '../../platform';
-import { exec, ExecOptions, ExecResult } from '../../util/exec';
+import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { getPkgReleases } from '../../datasource/docker';
 import { get as getVersioning } from '../../versioning';
+import { readLocalFile } from '../../util/fs';
 
 async function getImageTag(
   lookupName: string,
@@ -62,13 +63,11 @@ export async function updateArtifacts({
   }
 
   const packageFileAbsolutePath = upath.join(config.localDir, packageFileName);
-  const cwd = upath.dirname(packageFileAbsolutePath);
 
   const lockFileName = upath.join(
     upath.dirname(packageFileName),
     'Podfile.lock'
   );
-  const lockFileAbsolutePath = upath.join(cwd, 'Podfile.lock');
 
   try {
     await fs.outputFile(packageFileAbsolutePath, newPackageFileContent);
@@ -103,80 +102,18 @@ export async function updateArtifacts({
       tag: await getImageTag('renovate/cocoapods', 'ruby', cocoapodsVersion),
     },
   };
-
-  const startTime = hrtime();
-  let execResult: ExecResult | null = null;
-  let execError: Error | null = null;
-  /* istanbul ignore next */
-  try {
-    execResult = await exec(cmd, execOptions);
-  } catch (err) {
-    execError = err;
-  }
-
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
-  logger.info({ seconds, type: 'Podfile.lock' }, 'Updated lockfile');
-  logger.debug(`Returning updated lockfile: ${lockFileName}`);
-
-  let newPodfileLockContent: string | null = null;
-  try {
-    newPodfileLockContent = await fs.readFile(lockFileAbsolutePath, 'utf8');
-  } catch (readError) {
-    const err = execError || readError;
-    logger.warn(
-      { err, message: err.message },
-      `Failed to update lockfile: ${lockFileName}`
-    );
-
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
-  }
-
-  if (newPodfileLockContent === existingLockFileContent) {
-    if (execError) {
-      const err = execError;
-      logger.warn(
-        { err, message: err.message },
-        `Failed to update lockfile: ${lockFileName}`
-      );
-
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: err.message,
-          },
-        },
-      ];
-    }
-
-    if (execResult && execResult.stderr) {
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: execResult.stderr,
-          },
-        },
-      ];
-    }
-
-    logger.debug(`${lockFileName} is unchanged`);
+  await exec(cmd, execOptions);
+  const status = await platform.getRepoStatus();
+  if (!status.modified.includes(lockFileName)) {
     return null;
   }
-
+  logger.debug('Returning updated Gemfile.lock');
+  const lockFileContent = await readLocalFile(lockFileName);
   return [
     {
       file: {
         name: lockFileName,
-        contents: newPodfileLockContent,
+        contents: lockFileContent,
       },
     },
   ];
