@@ -1,4 +1,5 @@
 import * as _hostRules from '../../../lib/util/host-rules';
+import { PLATFORM_TYPE_AZURE } from '../../../lib/constants/platforms';
 
 describe('platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('../../../lib/platform/azure/azure-got-wrapper');
@@ -16,15 +17,15 @@ describe('platform/azure/azure-got-wrapper', () => {
       expect(azure.coreApi).toThrow('No token found for azure');
       expect(azure.policyApi).toThrow('No token found for azure');
     });
-    it('should set token and endpoint', async () => {
+    it('should set token and endpoint', () => {
       hostRules.add({
-        hostType: 'azure',
+        hostType: PLATFORM_TYPE_AZURE,
         token: 'token',
         baseUrl: 'https://dev.azure.com/renovate12345',
       });
       azure.setEndpoint('https://dev.azure.com/renovate12345');
 
-      const res = await azure.azureObj();
+      const res = azure.azureObj();
 
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;

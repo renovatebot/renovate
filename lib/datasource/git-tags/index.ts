@@ -36,7 +36,7 @@ export async function getPkgReleases({
     const result: ReleaseResult = {
       sourceUrl,
       releases: tags.map(tag => ({
-        version: semver.isValid(tag),
+        version: tag,
         gitRef: tag,
       })),
     };

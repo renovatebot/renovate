@@ -41,9 +41,8 @@ export function getMatchingFiles(
   let matchedFiles = [];
   for (const fileMatch of fileMatchList) {
     logger.debug(`Using file match: ${fileMatch} for manager ${manager}`);
-    matchedFiles = matchedFiles.concat(
-      fileList.filter(file => file.match(new RegExp(fileMatch)))
-    );
+    const re = new RegExp(fileMatch);
+    matchedFiles = matchedFiles.concat(fileList.filter(file => re.test(file)));
   }
   // filter out duplicates
   return [...new Set(matchedFiles)];

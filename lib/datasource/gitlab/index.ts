@@ -3,7 +3,7 @@ import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
 import { PkgReleaseConfig, ReleaseResult, Preset } from '../common';
 
-const glGot = api.get;
+const { get: glGot } = api;
 
 const GitLabApiUrl = 'https://gitlab.com/api/v4/projects';
 

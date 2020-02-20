@@ -3,8 +3,11 @@ import * as hostRules from '../../../../lib/util/host-rules';
 import {
   getChangeLogJSON,
   ChangeLogConfig,
+  ChangeLogError,
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
+import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platforms';
+import * as semverVersioning from '../../../../lib/versioning/semver';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
@@ -14,7 +17,7 @@ const ghGot = mocked(api).get;
 const upgrade: ChangeLogConfig = {
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
-  versionScheme: 'semver',
+  versioning: semverVersioning.id,
   fromVersion: '1.0.0',
   toVersion: '3.0.0',
   sourceUrl: 'https://github.com/chalk/chalk',
@@ -38,7 +41,7 @@ describe('workers/pr/changelog', () => {
       ghGot.mockClear();
       hostRules.clear();
       hostRules.add({
-        hostType: 'github',
+        hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://api.github.com/',
         token: 'abc',
       });
@@ -139,6 +142,14 @@ describe('workers/pr/changelog', () => {
         })
       ).toBeNull();
     });
+    it('handles missing Github token', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://github.com',
+        })
+      ).toEqual({ error: ChangeLogError.MissingGithubToken });
+    });
     it('handles no releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -157,7 +168,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: 'github',
+        hostType: PLATFORM_TYPE_GITHUB,
         token: 'super_secret',
         baseUrl: 'https://github-enterprise.example.com/',
       });
@@ -170,7 +181,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: 'github',
+        hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://github-enterprise.example.com/',
         token: 'abc',
       });

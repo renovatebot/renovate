@@ -9,7 +9,7 @@ export type PrBodyUpgrade = LookupUpdate &
     depName?: string;
     depNameLinked?: string;
     references?: string;
-    versionScheme: string;
+    versioning: string;
     stabilityDays?: number;
   };
 

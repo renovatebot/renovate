@@ -173,6 +173,10 @@ export function migrateConfig(
             migratedConfig.extends[i] = 'config:js-lib';
           }
         }
+      } else if (key === 'versionScheme') {
+        isMigrated = true;
+        migratedConfig.versioning = val;
+        delete migratedConfig.versionScheme;
       } else if (
         key === 'automergeType' &&
         is.string(val) &&

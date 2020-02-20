@@ -14,7 +14,7 @@ const parse = (range: string): Range => {
 
   const value = (range || '').trim();
 
-  const match = value.match(regExp);
+  const match = regExp.exec(value);
   if (match) {
     const { version = null, operator = null, delimiter = ' ' } = match.groups;
     return { version, operator, delimiter };

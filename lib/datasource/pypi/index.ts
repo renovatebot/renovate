@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
 function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
@@ -38,7 +39,7 @@ async function getDependency(
     const dependency: ReleaseResult = { releases: null };
     const rep = await got(url.parse(lookupUrl), {
       json: true,
-      hostType: 'pypi',
+      hostType: DATASOURCE_PYPI,
     });
     const dep = rep && rep.body;
     if (!dep) {
@@ -85,10 +86,12 @@ function extractVersionFromLinkText(
   text: string,
   depName: string
 ): string | null {
-  const prefix = `${depName}-`;
-  const suffix = '.tar.gz';
-  if (text.startsWith(prefix) && text.endsWith(suffix)) {
-    return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+  const srcPrefixes = [`${depName}-`, `${depName.replace(/-/g, '_')}-`];
+  for (const prefix of srcPrefixes) {
+    const suffix = '.tar.gz';
+    if (text.startsWith(prefix) && text.endsWith(suffix)) {
+      return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+    }
   }
 
   // pep-0427 wheel packages
@@ -114,7 +117,7 @@ async function getSimpleDependency(
   try {
     const dependency: ReleaseResult = { releases: null };
     const response = await got<string>(url.parse(lookupUrl), {
-      hostType: 'pypi',
+      hostType: DATASOURCE_PYPI,
     });
     const dep = response && response.body;
     if (!dep) {

@@ -11,6 +11,14 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
     });
+    it('catches invalid handlebars templates', async () => {
+      const config = {
+        commitMessage: '{{{something}}',
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
     it('returns nested errors', async () => {
       /** @type any */
       const config = {
@@ -47,7 +55,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors[0].message.includes('ansible')).toBe(true);
     });
     it('included managers of the wrong type', async () => {
       const config = {

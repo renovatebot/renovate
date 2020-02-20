@@ -4,7 +4,7 @@ import { DATASOURCE_NPM } from '../../constants/data-binary-source';
 
 export function extractPackageFile(content: string): PackageFile | null {
   let deps: PackageDependency[] = [];
-  const npmDepends = content.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
+  const npmDepends = /\nNpm\.depends\({([\s\S]*?)}\);/.exec(content);
   if (!npmDepends) {
     return null;
   }

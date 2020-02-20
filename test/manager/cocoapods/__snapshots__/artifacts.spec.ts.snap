@@ -22,6 +22,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -65,6 +67,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -76,6 +80,12 @@ Array [
 exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `
 Array [
   Object {
+    "cmd": "docker pull renovate/cocoapods:1.2.4",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
     "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
@@ -84,6 +94,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -103,6 +115,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -128,6 +142,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -160,6 +176,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -190,6 +208,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
@@ -212,6 +232,12 @@ Array [
 exports[`.updateArtifacts() returns updated Podfile 2`] = `
 Array [
   Object {
+    "cmd": "docker pull renovate/cocoapods:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
     "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
@@ -220,6 +246,8 @@ Array [
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },

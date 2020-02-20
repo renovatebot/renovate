@@ -1,17 +1,20 @@
+import fs from 'fs';
 import URL from 'url';
 import addrs from 'email-addresses';
 import * as hostRules from '../util/host-rules';
 import { logger } from '../logger';
 import { Platform } from './common';
 import { RenovateConfig } from '../config/common';
-import { getOptions } from '../config/definitions';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 
 export * from './common';
 
-const supportedPlatforms = getOptions().find(
-  option => option.name === 'platform'
-).allowedValues;
+export const platformList = fs
+  .readdirSync(__dirname, { withFileTypes: true })
+  .filter(dirent => dirent.isDirectory())
+  .map(dirent => dirent.name)
+  .filter(name => name !== 'git' && name !== 'utils') // TODO: should be cleaner
+  .sort();
 
 let _platform: Platform;
 
@@ -28,9 +31,9 @@ const handler: ProxyHandler<Platform> = {
 export const platform = new Proxy<Platform>({} as any, handler);
 
 export async function setPlatformApi(name: string): Promise<void> {
-  if (!supportedPlatforms.includes(name))
+  if (!platformList.includes(name))
     throw new Error(
-      `Init: Platform "${name}" not found. Must be one of: ${supportedPlatforms.join(
+      `Init: Platform "${name}" not found. Must be one of: ${platformList.join(
         ', '
       )}`
     );

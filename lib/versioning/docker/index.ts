@@ -1,11 +1,19 @@
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
+export const id = 'docker';
+export const displayName = 'Docker';
+export const urls = [
+  'https://docs.docker.com/engine/reference/commandline/tag/',
+];
+export const supportsRanges = false;
+
 function parse(version: string): any {
   const versionPieces = version.replace(/^v/, '').split('-');
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
   const release = prefix.split('.').map(Number);
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   if (release.some(Number.isNaN)) {
     return null;
   }

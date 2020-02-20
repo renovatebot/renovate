@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import { PackageFile, PackageDependency } from '../common';
+import * as dockerVersioning from '../../versioning/docker';
 
 export default function extractPackageFile(
   content: string
@@ -8,8 +9,9 @@ export default function extractPackageFile(
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
   let lineNumber = 0;
+  const re = /^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/;
   for (const line of content.split('\n')) {
-    const match = line.match(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+    const match = re.exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom);
@@ -22,7 +24,7 @@ export default function extractPackageFile(
         'Docker image inside ansible'
       );
       dep.managerData = { lineNumber };
-      dep.versionScheme = 'docker';
+      dep.versioning = dockerVersioning.id;
       deps.push(dep);
     }
     lineNumber += 1;

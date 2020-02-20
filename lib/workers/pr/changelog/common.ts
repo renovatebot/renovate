@@ -30,10 +30,15 @@ export interface ChangeLogProject {
   repository: string;
 }
 
+export enum ChangeLogError {
+  MissingGithubToken = 1,
+}
+
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;
-  project: ChangeLogProject;
-  versions: ChangeLogRelease[];
+  project?: ChangeLogProject;
+  versions?: ChangeLogRelease[];
+  error?: ChangeLogError;
 }
 
 export interface ChangeLogConfig {
@@ -45,5 +50,6 @@ export interface ChangeLogConfig {
   releases: Release[];
   sourceUrl?: string;
   toVersion: string;
-  versionScheme: string;
+  versioning: string;
+  changeLogError?: ChangeLogError;
 }

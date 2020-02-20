@@ -1,13 +1,18 @@
+import { dirname, join } from 'path';
 import { hrtime } from 'process';
-import { promisify } from 'util';
-import {
-  exec as cpExec,
-  ExecOptions as ChildProcessExecOptions,
-} from 'child_process';
-import { dockerCmd } from './docker';
+import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import { generateDockerCommand } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
-import { BinarySource, DockerOptions, ExecConfig, Opt } from './common';
+import {
+  BinarySource,
+  ExecConfig,
+  ExecResult,
+  RawExecOptions,
+  rawExec,
+  Opt,
+  DockerOptions,
+} from './common';
 import { RenovateConfig } from '../../config';
 
 const execConfig: ExecConfig = {
@@ -24,28 +29,24 @@ export function setExecConfig(config: Partial<RenovateConfig>): void {
   }
 }
 
-const pExec: (
-  cmd: string,
-  opts: ChildProcessExecOptions & { encoding: string }
-) => Promise<ExecResult> = promisify(cpExec);
-
 type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
+  cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
-}
-
-export interface ExecResult {
-  stdout: string;
-  stderr: string;
 }
 
 function createChildEnv(
   env: NodeJS.ProcessEnv,
   extraEnv: ExtraEnv
 ): ExtraEnv<string> {
-  const extraEnvKeys = Object.keys(extraEnv || {});
+  const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
+    if (val === null) return false;
+    if (val === undefined) return false;
+    return true;
+  });
+  const extraEnvKeys = Object.keys(extraEnvEntries);
 
   const childEnv =
     env || extraEnv
@@ -70,22 +71,30 @@ function dockerEnvVars(
   childEnv: ExtraEnv<string>
 ): string[] {
   const extraEnvKeys = Object.keys(extraEnv || {});
-  return extraEnvKeys.filter(key => typeof childEnv[key] !== 'undefined');
+  return extraEnvKeys.filter(
+    key => typeof childEnv[key] === 'string' && childEnv[key].length > 0
+  );
 }
 
 export async function exec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
-  const { env, extraEnv, docker } = opts;
-  const cwd = opts.cwd || execConfig.localDir;
+  const { env, extraEnv, docker, cwdFile } = opts;
+  let cwd;
+  // istanbul ignore if
+  if (cwdFile) {
+    cwd = join(execConfig.localDir, dirname(cwdFile));
+  }
+  cwd = cwd || opts.cwd || execConfig.localDir;
   const childEnv = createChildEnv(env, extraEnv);
 
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
+  delete execOptions.cwdFile;
 
-  const pExecOptions: ChildProcessExecOptions & { encoding: string } = {
+  const rawExecOptions: RawExecOptions = {
     encoding: 'utf-8',
     ...execOptions,
     env: childEnv,
@@ -101,21 +110,28 @@ export async function exec(
       envVars: dockerEnvVars(extraEnv, childEnv),
     };
 
-    let singleCommand = commands.join(' && ');
-    singleCommand = `bash -l -c "${singleCommand.replace(/"/g, '\\"')}"`;
-    singleCommand = dockerCmd(singleCommand, dockerOptions, execConfig);
-    commands = [singleCommand];
+    const dockerCommand = await generateDockerCommand(
+      commands,
+      dockerOptions,
+      execConfig
+    );
+    commands = [dockerCommand];
   }
 
   let res: ExecResult | null = null;
-  for (const pExecCommand of commands) {
+  for (const rawExecCommand of commands) {
     const startTime = hrtime();
-    res = await pExec(pExecCommand, pExecOptions);
+    res = await rawExec(rawExecCommand, rawExecOptions);
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (res) {
       logger.debug(
-        { cmd: pExecCommand, seconds, stdout: res.stdout, stderr: res.stderr },
+        {
+          cmd: rawExecCommand,
+          seconds,
+          stdout: res.stdout,
+          stderr: res.stderr,
+        },
         'exec completed'
       );
     }

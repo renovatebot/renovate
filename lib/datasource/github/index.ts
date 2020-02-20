@@ -8,8 +8,9 @@ import {
 import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
@@ -20,7 +21,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
         : 'application/vnd.github.v3+json',
     },
     json: true,
-    hostType: 'github',
+    hostType: DATASOURCE_GITHUB,
   };
   let res: { body: { content: string } };
   try {
@@ -161,7 +162,7 @@ export async function getDigest(
 /**
  * github.getPkgReleases
  *
- * This function can be used to fetch releases with a customisable version scheme (e.g. semver) and with either tags or releases.
+ * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with either tags or releases.
  *
  * This function will:
  *  - Fetch all tags or releases (depending on configuration)

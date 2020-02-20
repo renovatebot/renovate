@@ -48,7 +48,7 @@ const searchLabels = {
   exactVersion: EXACT_VERSION,
 };
 
-function searchKeysForState(state): string[] {
+function searchKeysForState(state): (keyof typeof regExps)[] {
   switch (state) {
     case 'dependencies':
       return [SPACE, COLON, WILDCARD];
@@ -102,7 +102,7 @@ function getMatch(str: string, state: string): MatchResult | null {
     const key = keys[i];
     const regex = regExps[key];
     const label = searchLabels[key];
-    const match = str.match(regex);
+    const match = regex.exec(str);
     if (match) {
       const idx = match.index;
       const substr = match[0];

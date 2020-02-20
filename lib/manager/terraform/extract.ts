@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
 import {
+  DATASOURCE_GIT_TAGS,
   DATASOURCE_GITHUB,
   DATASOURCE_TERRAFORM,
   DATASOURCE_TERRAFORM_PROVIDER,
@@ -39,8 +40,8 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const terraformDependency = line.match(
-        /^(module|provider)\s+"([^"]+)"\s+{\s*$/
+      const terraformDependency = /^(module|provider)\s+"([^"]+)"\s+{\s*$/.exec(
+        line
       );
       if (terraformDependency) {
         logger.trace(`Matched ${terraformDependency[1]} on line ${lineNumber}`);
@@ -61,7 +62,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           do {
             lineNumber += 1;
             line = lines[lineNumber];
-            const kvMatch = line.match(/^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/);
+            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
             if (kvMatch) {
               const [, key, value] = kvMatch;
               if (key === 'version') {
@@ -85,9 +86,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.managerData.terraformDependencyType ===
       TerraformDependencyTypes.module
     ) {
-      const githubRefMatch =
-        dep.source &&
-        dep.source.match(/github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/);
+      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.exec(
+        dep.source
+      );
+      // Regex would need to be updated to support ssh://
+      const gitTagsRefMatch = /git::(http|https:\/\/(.*.*\/(.*\/.*)))(?:|\/\/.*)\?ref=(.*)$/.exec(
+        dep.source
+      );
       /* eslint-disable no-param-reassign */
       if (githubRefMatch) {
         dep.depType = 'github';
@@ -96,6 +101,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.currentValue = githubRefMatch[3];
         dep.datasource = DATASOURCE_GITHUB;
         dep.lookupName = githubRefMatch[2];
+        dep.managerData.lineNumber = dep.sourceLine;
+        if (!isVersion(dep.currentValue)) {
+          dep.skipReason = 'unsupported-version';
+        }
+      } else if (gitTagsRefMatch) {
+        dep.depType = 'gitTags';
+        dep.depName = gitTagsRefMatch[2].replace('.git', '');
+        dep.depNameShort = gitTagsRefMatch[3].replace('.git', '');
+        dep.currentValue = gitTagsRefMatch[4];
+        dep.datasource = DATASOURCE_GIT_TAGS;
+        dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = 'unsupported-version';

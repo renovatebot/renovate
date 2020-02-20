@@ -1,26 +1,31 @@
-import * as versioning from '../../lib/versioning';
+import * as allVersioning from '../../lib/versioning';
 import { getOptions } from '../../lib/config/definitions';
 import {
   GenericVersioningApi,
   GenericVersion,
 } from '../../lib/versioning/loose/generic';
+import * as semverVersioning from '../../lib/versioning/semver';
 
 const supportedSchemes = getOptions().find(
-  option => option.name === 'versionScheme'
+  option => option.name === 'versioning'
 ).allowedValues;
 
-describe('versioning.get(versionScheme)', () => {
+describe('allVersioning.get(versioning)', () => {
   it('has api', () => {
-    expect(Object.keys(versioning.get('semver')).sort()).toMatchSnapshot();
+    expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
   });
 
   it('should fallback to semver', () => {
-    expect(versioning.get(undefined)).toBe(versioning.get('semver'));
-    expect(versioning.get('unknown')).toBe(versioning.get('semver'));
+    expect(allVersioning.get(undefined)).toBe(
+      allVersioning.get(semverVersioning.id)
+    );
+    expect(allVersioning.get('unknown')).toBe(
+      allVersioning.get(semverVersioning.id)
+    );
   });
 
   it('should accept config', () => {
-    expect(versioning.get('semver:test')).toBeDefined();
+    expect(allVersioning.get('semver:test')).toBeDefined();
   });
 
   describe('should return the same interface', () => {
@@ -36,7 +41,7 @@ describe('versioning.get(versionScheme)', () => {
       'toString',
       'valueOf',
     ];
-    const npmApi = Object.keys(versioning.get('semver'))
+    const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter(val => !optionalFunctions.includes(val))
       .sort();
 
@@ -46,7 +51,7 @@ describe('versioning.get(versionScheme)', () => {
 
       do {
         Object.getOwnPropertyNames(o).forEach(prop => {
-          if (props.indexOf(prop) === -1) {
+          if (!props.includes(prop)) {
             props.push(prop);
           }
         });
@@ -58,7 +63,9 @@ describe('versioning.get(versionScheme)', () => {
 
     for (const supportedScheme of supportedSchemes) {
       it(supportedScheme, () => {
-        const schemeKeys = getAllPropertyNames(versioning.get(supportedScheme))
+        const schemeKeys = getAllPropertyNames(
+          allVersioning.get(supportedScheme)
+        )
           .filter(
             val => !optionalFunctions.includes(val) && !val.startsWith('_')
           )
@@ -68,10 +75,10 @@ describe('versioning.get(versionScheme)', () => {
 
         const apiOrCtor = require('../../lib/versioning/' + supportedScheme)
           .api;
-        if (versioning.isVersioningApiConstructor(apiOrCtor)) return;
+        if (allVersioning.isVersioningApiConstructor(apiOrCtor)) return;
 
         expect(Object.keys(apiOrCtor).sort()).toEqual(
-          Object.keys(versioning.get(supportedScheme)).sort()
+          Object.keys(allVersioning.get(supportedScheme)).sort()
         );
       });
     }

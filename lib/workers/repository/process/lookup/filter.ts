@@ -1,8 +1,9 @@
 import * as semver from 'semver';
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import * as npmVersioning from '../../../../versioning/npm';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -11,7 +12,7 @@ export interface FilterConfig {
   ignoreDeprecated?: boolean;
   ignoreUnstable?: boolean;
   respectLatest?: boolean;
-  versionScheme: string;
+  versioning: string;
 }
 
 export function filterVersions(
@@ -22,13 +23,13 @@ export function filterVersions(
   releases: Release[]
 ): string[] {
   const {
-    versionScheme,
+    versioning,
     ignoreUnstable,
     ignoreDeprecated,
     respectLatest,
     allowedVersions,
   } = config;
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   if (!fromVersion) {
     return [];
   }
@@ -58,7 +59,10 @@ export function filterVersions(
       filteredVersions = filteredVersions.filter(v =>
         version.matches(v, allowedVersions)
       );
-    } else if (versionScheme !== 'npm' && semver.validRange(allowedVersions)) {
+    } else if (
+      versioning !== npmVersioning.id &&
+      semver.validRange(allowedVersions)
+    ) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions'

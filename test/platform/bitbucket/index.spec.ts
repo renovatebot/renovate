@@ -56,7 +56,7 @@ describe('platform/bitbucket', () => {
   });
 
   async function mockedGet(path: string) {
-    let body = (responses as any)[URL.parse(path).pathname!] || { values: [] };
+    let body = (responses as any)[URL.parse(path).pathname] || { values: [] };
     if (typeof body === 'function') {
       body = await body();
     }

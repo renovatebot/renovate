@@ -76,13 +76,13 @@ export function parsePreset(input: string): ParsedPreset {
       .map(elem => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
-  if (str[0] === ':') {
+  if (str.startsWith(':')) {
     // default namespace
     packageName = 'renovate-config-default';
     presetName = str.slice(1);
-  } else if (str[0] === '@') {
+  } else if (str.startsWith('@')) {
     // scoped namespace
-    [, packageName] = str.match(/(@.*?)(:|$)/);
+    [, packageName] = /(@.*?)(:|$)/.exec(str);
     str = str.slice(packageName.length);
     if (!packageName.includes('/')) {
       packageName += '/renovate-config';
@@ -94,7 +94,7 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else {
     // non-scoped namespace
-    [, packageName] = str.match(/(.*?)(:|$)/);
+    [, packageName] = /(.*?)(:|$)/.exec(str);
     presetName = str.slice(packageName.length + 1);
     if (
       datasource === DATASOURCE_NPM &&

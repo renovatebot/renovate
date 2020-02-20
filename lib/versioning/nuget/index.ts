@@ -1,6 +1,13 @@
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
+export const id = 'nuget';
+export const displayName = 'NuGet';
+export const urls = [
+  'https://docs.microsoft.com/en-us/nuget/concepts/package-versioning',
+];
+export const supportsRanges = false;
+
 const pattern = /^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/;
 
 function parse(version: string): any {

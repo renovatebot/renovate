@@ -1,6 +1,7 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
+import * as semverVersioning from '../../versioning/semver';
 import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
@@ -9,8 +10,8 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
   let lineNumber = 0;
   for (const line of lines) {
-    const match = line.match(
-      /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/
+    const match = /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/.exec(
+      line
     );
     if (match) {
       const dependency: PackageDependency = {
@@ -19,12 +20,12 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),
         managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: 'semver',
+        versioning: semverVersioning.id,
       };
 
       let shaLineNumber = 0;
       for (const shaLine of lines) {
-        const shaMatch = shaLine.match(/^distributionSha256Sum=((\w){64}).*$/);
+        const shaMatch = /^distributionSha256Sum=((\w){64}).*$/.test(shaLine);
         if (shaMatch) {
           dependency.managerData.checksumLineNumber = shaLineNumber;
           break;

@@ -5,7 +5,7 @@ import { CommitFilesConfig } from './git/storage';
 
 export interface FileData {
   name: string;
-  contents: string;
+  contents: string | Buffer;
 }
 
 export interface GotApiOptions {
@@ -178,7 +178,7 @@ export interface Platform {
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  setBaseBranch(baseBranch: string): Promise<void>;
+  setBaseBranch(baseBranch?: string): Promise<void>;
   commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;

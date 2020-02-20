@@ -34,7 +34,7 @@ async function makeRequest<T = unknown>(
   try {
     const resp = await api.get(url, { json });
     if (resp && resp.body) {
-      return resp.body as any;
+      return resp.body;
     }
   } catch (err) {
     const errorData = { lookupName, err };
