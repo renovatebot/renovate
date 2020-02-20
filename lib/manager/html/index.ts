@@ -7,4 +7,7 @@ export { extractPackageFile, updateDependency };
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
   versioning: semverVersioning.id,
+  digest: {
+    enabled: false,
+  },
 };
