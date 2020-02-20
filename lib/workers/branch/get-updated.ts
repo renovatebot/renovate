@@ -46,6 +46,7 @@ export async function getUpdatedPackageFiles(
         });
       }
       if (autoReplace) {
+        logger.debug('autoReplace');
         const res = await doAutoReplace(upgrade, existingContent, parentBranch);
         if (res) {
           if (res === existingContent) {

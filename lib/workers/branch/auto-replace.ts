@@ -55,7 +55,7 @@ export async function confirmIfDepUpdated(
         dep => dep.depName === depName && dep.lookupName === lookupName
       );
     }
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
   if (
@@ -85,7 +85,7 @@ export async function checkBranchDepsMatchBaseDeps(
       upgrade
     );
     return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.warn('Failed to parse branchContent');
     return false;
   }
@@ -115,38 +115,42 @@ export async function doAutoReplace(
     currentDigest,
     newDigest,
   } = upgrade;
-  let newString = replaceString;
-  do {
-    newString = newString.replace(currentValue, newValue);
-  } while (newString.includes(currentValue));
-  if (currentDigest) {
+  try {
+    let newString = replaceString;
     do {
-      newString = newString.replace(currentDigest, newDigest);
-    } while (newString.includes(currentDigest));
-  }
-  let searchIndex = existingContent.indexOf(replaceString);
-  if (searchIndex === -1) {
-    logger.error('Cannot find replaceString in current file content');
-    throw new Error(WORKER_FILE_UPDATE_FAILED);
-  }
-  logger.debug(`Starting search at index ${searchIndex}`);
-  // Iterate through the rest of the file
-  for (; searchIndex < existingContent.length; searchIndex += 1) {
-    // First check if we have a hit for the old version
-    if (matchAt(existingContent, searchIndex, replaceString)) {
-      logger.debug(`Found match at index ${searchIndex}`);
-      // Now test if the result matches
-      const testContent = replaceAt(
-        existingContent,
-        searchIndex,
-        replaceString,
-        newString
-      );
-      if (await confirmIfDepUpdated(upgrade, testContent)) {
-        return testContent;
+      newString = newString.replace(currentValue, newValue);
+    } while (newString.includes(currentValue));
+    if (currentDigest) {
+      do {
+        newString = newString.replace(currentDigest, newDigest);
+      } while (newString.includes(currentDigest));
+    }
+    let searchIndex = existingContent.indexOf(replaceString);
+    if (searchIndex === -1) {
+      logger.error('Cannot find replaceString in current file content');
+      throw new Error(WORKER_FILE_UPDATE_FAILED);
+    }
+    logger.debug(`Starting search at index ${searchIndex}`);
+    // Iterate through the rest of the file
+    for (; searchIndex < existingContent.length; searchIndex += 1) {
+      // First check if we have a hit for the old version
+      if (matchAt(existingContent, searchIndex, replaceString)) {
+        logger.debug(`Found match at index ${searchIndex}`);
+        // Now test if the result matches
+        const testContent = replaceAt(
+          existingContent,
+          searchIndex,
+          replaceString,
+          newString
+        );
+        if (await confirmIfDepUpdated(upgrade, testContent)) {
+          return testContent;
+        }
       }
     }
+  } catch (err) {
+    logger.debug({ err }, 'doAutoReplace error');
   }
-  logger.warn('Could not autoReplace');
+  logger.error('Could not autoReplace');
   throw new Error(WORKER_FILE_UPDATE_FAILED);
 }
