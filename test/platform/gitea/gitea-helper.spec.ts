@@ -7,6 +7,7 @@ import {
 } from '../../../lib/platform/gitea/gitea-got-wrapper';
 import * as ght from '../../../lib/platform/gitea/gitea-helper';
 import { PRSearchParams } from '../../../lib/platform/gitea/gitea-helper';
+import { PR_STATE_CLOSED } from '../../../lib/constants/pull-requests';
 
 describe('platform/gitea/gitea-helper', () => {
   let helper: typeof import('../../../lib/platform/gitea/gitea-helper');
@@ -409,7 +410,7 @@ describe('platform/gitea/gitea-helper', () => {
       );
 
       const res = await helper.updatePR(mockRepo.full_name, mockPR.number, {
-        state: 'closed',
+        state: PR_STATE_CLOSED,
         title: 'new-title',
         body: 'new-body',
         assignees: [otherMockUser.username],
