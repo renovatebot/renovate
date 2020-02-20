@@ -1,6 +1,5 @@
 import upath from 'upath';
 import fs from 'fs-extra';
-import { hrtime } from 'process';
 import { platform } from '../../platform';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
