@@ -23,6 +23,7 @@
     "jest-silent": "cross-env NODE_ENV=test yarn jest --reporters jest-silent-reporter",
     "lint": "run-s eslint prettier",
     "lint-fix": "run-s eslint-fix prettier-fix",
+    "prepare": "babel-node --extensions \".ts,.js\" -- tools/prepare.ts",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
@@ -267,11 +268,11 @@
         "statements": 100
       }
     },
-    "setupFiles": [
-      "./test/globals.ts"
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/globals.ts"
     ],
     "snapshotSerializers": [
-      "./test/newline-snapshot-serializer.ts"
+      "<rootDir>/test/newline-snapshot-serializer.ts"
     ],
     "transform": {
       "^.+\\.(j|t)s$": "babel-jest"
