@@ -45,5 +45,5 @@ export function extractPackageFile(content: string): PackageFile {
       });
     }
   }
-  return { deps, autoReplace: true, pinDigests: false };
+  return { deps, autoReplace: true };
 }

@@ -91,7 +91,6 @@ export interface PackageFile<T = Record<string, any>>
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   autoReplace?: boolean;
-  pinDigests?: boolean;
 }
 
 export interface Package<T> extends ManagerData<T> {

@@ -103,6 +103,5 @@ Object {
       "lookupName": "axios/axios.min.js",
     },
   ],
-  "pinDigests": false,
 }
 `;
