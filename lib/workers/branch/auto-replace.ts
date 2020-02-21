@@ -2,30 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-
-// Return true if the match string is found at index in content
-export function matchAt(
-  content: string,
-  index: number,
-  match: string
-): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-export function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
+import { matchAt, replaceAt } from '../../util/string';
 
 export async function confirmIfDepUpdated(
   upgrade,
