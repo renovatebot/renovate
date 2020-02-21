@@ -41,8 +41,6 @@ function patchJest() {
 
     const mod = require(moduleName);
     const forbidden = ['http', 'https'];
-    const warned = this._warned = this._warned || Object.create(null);
-
 
     const set = (
       target,
@@ -52,10 +50,6 @@ function patchJest() {
     ) => {
       if (target !== mod || typeof value !== 'function' || value._isMockFunction || forbidden.some(s => s === moduleName))
         return Reflect.set(target, property, value, receiver);
-      if (!warned[moduleName + '_' + property]){
-        console.warn('Patching module not allowed', moduleName, property);
-        warned[moduleName + '_' + property] = true;
-      }
       return true;
     };
 
