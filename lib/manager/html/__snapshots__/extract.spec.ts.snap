@@ -2,7 +2,6 @@
 
 exports[`manager/html/extract extractPackageFile 1`] = `
 Object {
-  "autoReplace": true,
   "deps": Array [
     Object {
       "autoReplaceData": Object {
