@@ -30,6 +30,7 @@ USER ubuntu
 
 COPY package.json .
 COPY yarn.lock .
+COPY tools tools
 RUN yarn install --frozen-lockfile
 
 COPY lib lib

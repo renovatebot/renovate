@@ -111,12 +111,15 @@ jobs:
           pip install --user -r requirements.txt
 
       - name: Lint
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
         run: yarn lint
 
       - name: Test schema
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
         run: yarn test-schema
 
       - name: Type check
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
         run: yarn type-check
 
       - name: Build

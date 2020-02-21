@@ -18,11 +18,12 @@
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
     "eslint": "eslint --ext .js,.ts lib/ test/",
     "eslint-fix": "eslint --ext .js,.ts --fix lib/ test/",
-    "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
-    "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/jest/bin/jest.js",
+    "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --expose-gc node_modules/jest/bin/jest.js",
+    "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --expose-gc --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "cross-env NODE_ENV=test yarn jest --reporters jest-silent-reporter",
     "lint": "run-s eslint prettier",
     "lint-fix": "run-s eslint-fix prettier-fix",
+    "prepare": "node tools/prepare.js",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
@@ -267,11 +268,11 @@
         "statements": 100
       }
     },
-    "setupFiles": [
-      "./test/globals.ts"
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/globals.ts"
     ],
     "snapshotSerializers": [
-      "./test/newline-snapshot-serializer.ts"
+      "<rootDir>/test/newline-snapshot-serializer.ts"
     ],
     "transform": {
       "^.+\\.(j|t)s$": "babel-jest"
