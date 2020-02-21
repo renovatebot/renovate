@@ -27,7 +27,7 @@ export function extractPackageFile(content: string): PackageFile {
   while (match) {
     const [tag] = match;
     const tagLength = tag.length;
-    const tagPosition = offset + match.index;
+    const fileReplacePosition = offset + match.index;
 
     offset += match.index + tag.length;
     rest = content.slice(offset);
@@ -37,7 +37,8 @@ export function extractPackageFile(content: string): PackageFile {
     if (dep) {
       deps.push({
         ...dep,
-        managerData: { tagLength, tagPosition },
+        fileReplacePosition,
+        managerData: { tagLength },
       });
     }
   }

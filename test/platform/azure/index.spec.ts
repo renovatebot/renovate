@@ -642,44 +642,123 @@ describe('platform/azure', () => {
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = jest.fn();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            updatePullRequest: jest.fn(),
+            updatePullRequest,
           } as any)
       );
       await azure.updatePr(1234, 'The New Title', 'Hello world again');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
 
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = jest.fn();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            updatePullRequest: jest.fn(),
+            updatePullRequest,
           } as any)
       );
       await azure.updatePr(1234, 'The New Title - autoclose');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
   });
 
   describe('ensureComment', () => {
-    it('add comment', async () => {
+    it('adds comment if missing', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            createThread: jest.fn(() => [{ id: 123 }]),
-          } as any)
-      );
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 2,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
       await azure.ensureComment({
         number: 42,
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+    });
+    it('updates comment if missing', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 3,
+          },
+          {
+            comments: [{ content: '### some-subject\n\nsome\ncontent', id: 2 }],
+            id: 4,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\nnew\ncontent',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+    });
+    it('does nothing if comment exists and is the same', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 3,
+          },
+          {
+            comments: [{ content: '### some-subject\n\nsome\ncontent', id: 2 }],
+            id: 4,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+    });
+    it('does nothing if comment exists and is the same when there is no topic', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'some\ncontent', id: 2 }],
+            id: 4,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'some\ncontent',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
   });
 
@@ -728,6 +807,7 @@ describe('platform/azure', () => {
         () =>
           ({
             createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn(() => []),
           } as any)
       );
       await azure.addAssignees(123, ['test@bonjour.fr']);

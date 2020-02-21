@@ -242,6 +242,43 @@ Object {
       "moduleName": "newrelic",
       "skipReason": "unsupported-version",
     },
+    Object {
+      "managerData": Object {
+        "terraformDependencyType": "module",
+      },
+      "moduleName": "foobar",
+      "skipReason": "no-version",
+      "source": "https://bitbucket.com/hashicorp/example?ref=v1.0.0",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+      "managerData": Object {
+        "lineNumber": 135,
+        "terraformDependencyType": "module",
+      },
+      "moduleName": "gittags",
+      "source": "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0",
+    },
+    Object {
+      "currentValue": "next",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+      "managerData": Object {
+        "lineNumber": 139,
+        "terraformDependencyType": "module",
+      },
+      "moduleName": "gittags_badversion",
+      "skipReason": "unsupported-version",
+      "source": "git::https://bitbucket.com/hashicorp/example?ref=next",
+    },
   ],
 }
 `;

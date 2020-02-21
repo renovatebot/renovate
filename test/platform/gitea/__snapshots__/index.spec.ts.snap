@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gitea createPr should use base branch by default 1`] = `
+Object {
+  "body": "pr-body",
+  "branchName": "pr-branch",
+  "canMerge": true,
+  "closedAt": "2017-12-28T12:17:48Z",
+  "createdAt": "2014-04-01T05:14:20Z",
+  "displayNumber": "Pull Request #42",
+  "isConflicted": false,
+  "isModified": undefined,
+  "isStale": undefined,
+  "number": 42,
+  "sha": "0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "targetBranch": "devel",
+  "title": "pr-title",
+}
+`;
+
+exports[`platform/gitea createPr should use default branch if requested 1`] = `
+Object {
+  "body": "pr-body",
+  "branchName": "pr-branch",
+  "canMerge": true,
+  "closedAt": "2017-12-28T12:17:48Z",
+  "createdAt": "2014-04-01T05:14:20Z",
+  "displayNumber": "Pull Request #42",
+  "isConflicted": false,
+  "isModified": undefined,
+  "isStale": undefined,
+  "number": 42,
+  "sha": "0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "pr-title",
+}
+`;
+
+exports[`platform/gitea getPr should fallback to direct fetching if cache fails 1`] = `
+Object {
+  "body": "some random pull request",
+  "branchName": "some-head-ref",
+  "canMerge": true,
+  "closedAt": null,
+  "createdAt": "2015-03-22T20:36:16Z",
+  "displayNumber": "Pull Request #1",
+  "isConflicted": false,
+  "isModified": true,
+  "isStale": false,
+  "number": 1,
+  "sha": "some-head-sha",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "targetBranch": "some-base-ref",
+  "title": "Some PR",
+}
+`;
+
+exports[`platform/gitea getPr should return enriched pull request which exists 1`] = `
+Object {
+  "body": "other random pull request",
+  "branchName": "other-head-ref",
+  "canMerge": true,
+  "closedAt": "2016-01-09T10:03:21Z",
+  "createdAt": "2011-08-18T22:30:38Z",
+  "displayNumber": "Pull Request #2",
+  "isConflicted": false,
+  "isModified": false,
+  "isStale": false,
+  "number": 2,
+  "sha": "other-head-sha",
+  "sourceRepo": "some/repo",
+  "state": "closed",
+  "targetBranch": "other-base-ref",
+  "title": "Other PR",
+}
+`;
+
+exports[`platform/gitea getPrList should return list of pull requests 1`] = `
+Array [
+  Object {
+    "body": "some random pull request",
+    "branchName": "some-head-ref",
+    "canMerge": true,
+    "closedAt": null,
+    "createdAt": "2015-03-22T20:36:16Z",
+    "displayNumber": "Pull Request #1",
+    "isConflicted": false,
+    "isModified": undefined,
+    "isStale": undefined,
+    "number": 1,
+    "sha": "some-head-sha",
+    "sourceRepo": "some/repo",
+    "state": "open",
+    "targetBranch": "some-base-ref",
+    "title": "Some PR",
+  },
+  Object {
+    "body": "other random pull request",
+    "branchName": "other-head-ref",
+    "canMerge": true,
+    "closedAt": "2016-01-09T10:03:21Z",
+    "createdAt": "2011-08-18T22:30:38Z",
+    "displayNumber": "Pull Request #2",
+    "isConflicted": false,
+    "isModified": undefined,
+    "isStale": undefined,
+    "number": 2,
+    "sha": "other-head-sha",
+    "sourceRepo": "some/repo",
+    "state": "closed",
+    "targetBranch": "other-base-ref",
+    "title": "Other PR",
+  },
+]
+`;
+
+exports[`platform/gitea getRepos should return an array of repos 1`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`platform/gitea initPlatform() should support custom endpoint 1`] = `
+Object {
+  "endpoint": "https://gitea.renovatebot.com/",
+  "gitAuthor": "Renovate Bot <renovate@example.com>",
+}
+`;
+
+exports[`platform/gitea initPlatform() should support default endpoint 1`] = `
+Object {
+  "endpoint": "https://gitea.com/api/v1/",
+  "gitAuthor": "Renovate Bot <renovate@example.com>",
+}
+`;
+
+exports[`platform/gitea initPlatform() should use username as author name if full name is missing 1`] = `
+Object {
+  "endpoint": "https://gitea.com/api/v1/",
+  "gitAuthor": "renovate <renovate@example.com>",
+}
+`;
+
+exports[`platform/gitea initRepo should fall back to merge method "merge" 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`platform/gitea initRepo should fall back to merge method "rebase-merge" 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`platform/gitea initRepo should fall back to merge method "squash" 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;

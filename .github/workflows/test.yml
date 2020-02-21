@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - 'renovate/**'
 
   pull_request:
 

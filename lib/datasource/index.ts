@@ -16,6 +16,9 @@ import { loadModules } from '../util/modules';
 export * from './common';
 
 const datasources = loadModules<Datasource>(__dirname);
+export const getDatasources = (): Record<string, Datasource> => datasources;
+const datasourceList = Object.keys(datasources);
+export const getDatasourceList = (): string[] => datasourceList;
 
 const cacheNamespace = 'datasource-releases';
 
