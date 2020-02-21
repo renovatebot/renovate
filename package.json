@@ -176,7 +176,7 @@
     "@types/chai": "4.2.9",
     "@types/clean-git-ref": "2.0.0",
     "@types/convert-hrtime": "2.0.0",
-    "@types/fs-extra": "8.0.1",
+    "@types/fs-extra": "8.1.0",
     "@types/github-url-from-git": "1.5.0",
     "@types/global-agent": "2.1.0",
     "@types/got": "9.6.9",
