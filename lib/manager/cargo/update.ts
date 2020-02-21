@@ -3,26 +3,7 @@ import { parse } from 'toml';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
 import { CargoConfig, CargoSection } from './types';
-
-// Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
+import { matchAt, replaceAt } from '../../util/string';
 
 export function updateDependency({
   fileContent,
