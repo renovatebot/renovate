@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
@@ -11,11 +10,9 @@ export async function confirmIfDepUpdated(
   const {
     manager,
     packageFile,
-    depIndex,
-    depName,
-    lookupName,
     newValue,
     newDigest,
+    autoReplaceData,
   } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade;
@@ -25,13 +22,7 @@ export async function confirmIfDepUpdated(
       packageFile,
       upgrade
     );
-    if (!is.undefined(depIndex)) {
-      newUpgrade = newExtract.deps[depIndex];
-    } else {
-      newUpgrade = newExtract.deps.find(
-        dep => dep.depName === depName && dep.lookupName === lookupName
-      );
-    }
+    newUpgrade = newExtract.deps[autoReplaceData.depIndex];
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
@@ -86,12 +77,13 @@ export async function doAutoReplace(
     return existingContent;
   }
   const {
-    replaceString,
     currentValue,
     newValue,
     currentDigest,
     newDigest,
+    autoReplaceData,
   } = upgrade;
+  const { replaceString } = autoReplaceData;
   try {
     let newString = replaceString;
     do {

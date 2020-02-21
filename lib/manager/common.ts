@@ -120,6 +120,11 @@ export interface Package<T> extends ManagerData<T> {
   prettyDepType?: any;
 }
 
+export interface AutoReplaceData {
+  replaceString: string;
+  depIndex?: number;
+}
+
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
@@ -139,8 +144,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   sourceLine?: number;
   updates?: PackageUpdateResult[];
   versionLine?: number;
-  replaceString?: string;
-  depIndex?: number;
+  autoReplaceData?: AutoReplaceData;
 }
 
 export interface Upgrade<T = Record<string, any>>

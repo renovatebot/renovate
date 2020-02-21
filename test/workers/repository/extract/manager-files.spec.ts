@@ -39,7 +39,8 @@ describe('workers/repository/extract/manager-files', () => {
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       platform.getFile.mockResolvedValue('some content');
       dockerfile.extractPackageFile = jest.fn(() => ({
-        some: 'result',
+        autoReplace: true,
+        deps: [{}, { autoReplaceData: { replaceString: 'abc' } }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toMatchSnapshot();

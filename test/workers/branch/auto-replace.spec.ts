@@ -52,8 +52,10 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
-      upgrade.depIndex = 0;
-      upgrade.replaceString = script;
+      upgrade.autoReplaceData = {
+        depIndex: 0,
+        replaceString: script,
+      };
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();
     });
@@ -66,8 +68,10 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
-      upgrade.depIndex = 0;
-      upgrade.replaceString = script;
+      upgrade.autoReplaceData = {
+        depIndex: 0,
+        replaceString: script,
+      };
       parentBranch = 'something';
       const srcAlreadyUpdated = src.replace('7.1.0', '7.1.1');
       const res = await doAutoReplace(upgrade, srcAlreadyUpdated, parentBranch);
@@ -82,8 +86,10 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
-      upgrade.depIndex = 0;
-      upgrade.replaceString = script;
+      upgrade.autoReplaceData = {
+        depIndex: 0,
+        replaceString: script,
+      };
       await expect(
         doAutoReplace(upgrade, 'wrong source', parentBranch)
       ).rejects.toThrow();
@@ -100,8 +106,10 @@ describe('workers/branch/auto-replace', () => {
         'sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx';
       upgrade.newValue = '0.11.1';
       upgrade.newDigest = 'sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-      upgrade.depIndex = 0;
-      upgrade.replaceString = script;
+      upgrade.autoReplaceData = {
+        depIndex: 0,
+        replaceString: script,
+      };
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();
     });

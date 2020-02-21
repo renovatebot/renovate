@@ -31,20 +31,19 @@ export function extractPackageFile(content: string): PackageFile {
   let rest = content;
   let match = regex.exec(rest);
   let offset = 0;
-  let depIndex = 0;
   while (match) {
-    const [tag] = match;
-    offset += match.index + tag.length;
+    const [replaceString] = match;
+    offset += match.index + replaceString.length;
     rest = content.slice(offset);
     match = regex.exec(rest);
-    const dep = extractDep(tag);
+    const dep = extractDep(replaceString);
     if (dep) {
       deps.push({
         ...dep,
-        depIndex,
-        replaceString: tag,
+        autoReplaceData: {
+          replaceString,
+        },
       });
-      depIndex += 1;
     }
   }
   return { deps, autoReplace: true };
