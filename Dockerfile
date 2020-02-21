@@ -24,7 +24,8 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils openssh-client bsdtar build-essential && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gpg curl wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
 # The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
@@ -34,9 +35,14 @@ RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src 
     apt-get -y install git && \
     rm -rf /var/lib/apt/lists/*
 
-## Gradle
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-headless gradle && \
-    rm -rf /var/lib/apt/lists/*
+## Gradle (needs java-jre, installed above)
+ENV GRADLE_VERSION 6.2
+
+RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
+    unzip -q -d /opt/ gradle-$GRADLE_VERSION-bin.zip && \
+    rm -f gradle-$GRADLE_VERSION-bin.zip && \
+    mv /opt/gradle-$GRADLE_VERSION /opt/gradle && \
+    ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
 ## Node.js
 
