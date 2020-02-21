@@ -13,7 +13,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "prop-types",
       "lookupName": "prop-types/prop-types.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -24,7 +23,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "react",
       "lookupName": "react/umd/react.production.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -35,7 +33,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "react-dom",
       "lookupName": "react-dom/umd/react-dom.production.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -46,7 +43,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "react-transition-group",
       "lookupName": "react-transition-group/react-transition-group.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -57,7 +53,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "popper.js",
       "lookupName": "popper.js/umd/popper.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -68,7 +63,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "react-popper",
       "lookupName": "react-popper/umd/react-popper.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -78,7 +72,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "reactstrap",
       "lookupName": "reactstrap/reactstrap.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -88,7 +81,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "react-router",
       "lookupName": "react-router/react-router.min.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -98,7 +90,6 @@ Object {
       "datasource": "cdnjs",
       "depName": "react-markdown",
       "lookupName": "react-markdown/react-markdown.js",
-      "pinDigests": false,
     },
     Object {
       "autoReplaceData": Object {
@@ -110,8 +101,8 @@ Object {
       "datasource": "cdnjs",
       "depName": "axios",
       "lookupName": "axios/axios.min.js",
-      "pinDigests": false,
     },
   ],
+  "pinDigests": false,
 }
 `;
