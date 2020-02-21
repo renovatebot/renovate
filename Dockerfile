@@ -25,7 +25,7 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gpg curl wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless && \
+    apt-get install -y --no-install-recommends gpg curl wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless dirmngr && \
     rm -rf /var/lib/apt/lists/*
 
 # The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
