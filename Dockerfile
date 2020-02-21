@@ -2,6 +2,7 @@ FROM amd64/node:10.19.0@sha256:2903bbe55db122b227b20c445d1c06e2b1c44b6a0dcfab927
 
 COPY package.json .
 COPY yarn.lock .
+COPY tools tools
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
