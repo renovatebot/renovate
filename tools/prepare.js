@@ -1,10 +1,12 @@
-import shell from 'shelljs';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const shell = require('shelljs');
+const { existsSync, readFileSync, writeFileSync } = require('fs');
 
 const force = process.argv.some(s => s === '--force' || s === '-f');
 const restore = process.argv.some(s => s === '--restore' || s === '-r');
 
-function patchJest(): void {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function patchJest() {
   const file = 'node_modules/jest-runtime/build/index.js';
   if (existsSync(`${file}.bak`)) {
     if (!force) {

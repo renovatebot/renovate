@@ -23,7 +23,7 @@
     "jest-silent": "cross-env NODE_ENV=test yarn jest --reporters jest-silent-reporter",
     "lint": "run-s eslint prettier",
     "lint-fix": "run-s eslint-fix prettier-fix",
-    "prepare": "babel-node --extensions \".ts,.js\" -- tools/prepare.ts",
+    "prepare": "node tools/prepare.js",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
