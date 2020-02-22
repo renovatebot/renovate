@@ -1,8 +1,9 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 import * as semverVersioning from '../../versioning/semver';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile };
+
+export const autoReplace = true;
 
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
@@ -10,4 +11,5 @@ export const defaultConfig = {
   digest: {
     enabled: false,
   },
+  pinDigests: false,
 };

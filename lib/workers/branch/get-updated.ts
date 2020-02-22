@@ -6,6 +6,7 @@ import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
+import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -19,12 +20,13 @@ export async function getUpdatedPackageFiles(
 ): Promise<PackageFilesResult> {
   logger.debug('manager.getUpdatedPackageFiles()');
   logger.trace({ config });
+  const { parentBranch } = config;
   const updatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { manager, packageFile, depName } = upgrade;
+    const { autoReplace, manager, packageFile, depName } = upgrade;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -42,6 +44,26 @@ export async function getUpdatedPackageFiles(
           ...config,
           parentBranch: undefined,
         });
+      }
+      if (autoReplace) {
+        logger.debug('autoReplace');
+        const res = await doAutoReplace(upgrade, existingContent, parentBranch);
+        if (res) {
+          if (res === existingContent) {
+            logger.debug('No content changed');
+          } else {
+            logger.debug('Contents updated');
+            updatedFileContents[packageFile] = res;
+          }
+          continue; // eslint-disable-line no-continue
+        } else if (parentBranch) {
+          return getUpdatedPackageFiles({
+            ...config,
+            parentBranch: undefined,
+          });
+        }
+        logger.error('Could not autoReplace');
+        throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = existingContent;
       const updateDependency = get(manager, 'updateDependency');
