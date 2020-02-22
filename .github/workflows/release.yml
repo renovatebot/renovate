@@ -87,8 +87,11 @@ jobs:
       - name: Build the Docker images
         run: |
           docker buildx bake \
-            --file docker/bake.hcl
-            --set settings.args.SHA=${{github.sha}}
+            --file docker/bake.hcl \
+            --set settings.args.SHA=${{github.sha}} \
+            --set latest.cache-to=renovate/renovate:_cache-latest \
+            --set slim.cache-to=renovate/renovate:_cache-slim \
+            default
 
       - run: yarn semantic-release
         env:

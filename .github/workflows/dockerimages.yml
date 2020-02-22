@@ -32,8 +32,9 @@ jobs:
       - name: Build the Docker images
         run: |
           docker buildx bake \
-            --file docker/bake.hcl
-            --set settings.args.SHA=${{github.sha}}
+            --file docker/bake.hcl \
+            --set settings.args.SHA=${{github.sha}} \
+            default
 
       - name: Test the Docker images
         run: |
