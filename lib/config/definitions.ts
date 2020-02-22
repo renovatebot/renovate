@@ -601,15 +601,6 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'engines',
-    description: 'Configuration specifically for `package.json`>`engines`',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
     name: 'aliases',
     description: 'Aliases for registries, package manager specific',
     type: 'object',

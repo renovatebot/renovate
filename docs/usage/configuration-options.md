@@ -350,10 +350,6 @@ Example:
 
 See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
 
-## engines
-
-Extend this if you wish to configure rules specifically for `engines` definitions. Renovate extracts and updates `node`, `npm` and `yarn` fields within.
-
 ## excludeCommitPaths
 
 Warning: Advanced use!

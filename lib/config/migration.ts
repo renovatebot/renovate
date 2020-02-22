@@ -46,6 +46,7 @@ export function migrateConfig(
     const depTypes = [
       'dependencies',
       'devDependencies',
+      'engines',
       'optionalDependencies',
       'peerDependencies',
     ];
