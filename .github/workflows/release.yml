@@ -84,31 +84,11 @@ jobs:
       - name: Docker registry login
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
-      - name: Build the full Docker image
+      - name: Build the Docker images
         run: |
-          docker buildx build \
-            --platform=${PLATFORM} \
-            --load \
-            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
-            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest,mode=max \
-            --tag=${DOCKER_REPO}:latest \
-            --build-arg SHA=${{github.sha}} \
-            --build-arg IMAGE=latest \
-            --target final \
-            --file=./Dockerfile .
-
-      - name: Build the slim Docker image
-        run: |
-          docker buildx build \
-            --platform=${PLATFORM} \
-            --load \
-            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
-            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim,mode=max \
-            --tag=${DOCKER_REPO}:slim \
-            --build-arg SHA=${{github.sha}} \
-            --build-arg IMAGE=slim \
-            --target final \
-            --file=./Dockerfile .
+          docker buildx bake \
+            --file docker/bake.hcl
+            --set settings.args.SHA=${{github.sha}}
 
       - run: yarn semantic-release
         env:
