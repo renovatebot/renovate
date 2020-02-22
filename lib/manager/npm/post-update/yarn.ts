@@ -23,8 +23,8 @@ export async function generateLockFile(
   const { binarySource } = config;
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
-  let stdout: string;
-  let stderr: string;
+  let stdout = '';
+  let stderr = '';
   let cmd: string;
   try {
     try {
