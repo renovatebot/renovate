@@ -287,12 +287,10 @@ const platform: Platform = {
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
       try {
-        if (!renovateConfig) {
-          renovateConfig = await retrieveDefaultConfig(
-            config.repository,
-            config.defaultBranch
-          );
-        }
+        renovateConfig = await retrieveDefaultConfig(
+          config.repository,
+          config.defaultBranch
+        );
       } catch (err) {
         // Do nothing
       }
