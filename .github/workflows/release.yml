@@ -84,11 +84,10 @@ jobs:
       - name: Docker registry login
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
-      - name: Build the Docker images
+      - name: Build the Docker images cache
         run: |
           docker buildx bake \
             --file docker/bake.hcl \
-            --set settings.args.SHA=${{github.sha}} \
             --set latest.cache-to=renovate/renovate:_cache-latest \
             --set slim.cache-to=renovate/renovate:_cache-slim \
             default
@@ -97,3 +96,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SHA: ${{github.sha}}

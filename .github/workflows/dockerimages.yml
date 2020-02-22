@@ -33,7 +33,7 @@ jobs:
         run: |
           docker buildx bake \
             --file docker/bake.hcl \
-            --set settings.args.SHA=${{github.sha}} \
+            --set settings.output=type=docker \
             default
 
       - name: Test the Docker images

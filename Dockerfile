@@ -8,9 +8,7 @@ LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" \
       org.opencontainers.image.url="https://renovatebot.com" \
-      org.opencontainers.image.licenses="AGPL-3.0-only" \
-# TODO: org.opencontainers.image.version="$VERSION" \
-      org.opencontainers.image.revision="$SHA"
+      org.opencontainers.image.licenses="AGPL-3.0-only"
 
 USER root
 WORKDIR /usr/src/app/
