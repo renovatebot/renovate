@@ -42,12 +42,6 @@ RUN yarn install --production --frozen-lockfile
 #============
 FROM base as final-base
 
-ENV APP_ROOT=/usr/src/app
-ENV HOME=/home/ubuntu
-
-RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
-    chmod -R g=u ${APP_ROOT} ${HOME}
-
 # The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
 RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24 && \
