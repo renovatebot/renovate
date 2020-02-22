@@ -38,7 +38,7 @@ RUN yarn build:docker
 RUN yarn install --production --frozen-lockfile
 
 
-# Final-abse image
+# Final-base image
 #============
 FROM base as final-base
 
@@ -54,7 +54,7 @@ RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src 
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-ENV DOCKER_VERSION=19.03.1
+ENV DOCKER_VERSION=19.03.5
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
     && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
