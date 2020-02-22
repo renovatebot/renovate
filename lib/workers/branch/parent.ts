@@ -43,8 +43,8 @@ export async function getParentBranch(
   }
 
   if (
-    config.rebaseStalePrs ||
-    (config.rebaseStalePrs === null && (await platform.getRepoForceRebase())) ||
+    config.rebaseWhen === 'behind-base-branch' ||
+    (config.rebaseWhen === 'auto' && (await platform.getRepoForceRebase())) ||
     (config.automerge && config.automergeType === 'branch')
   ) {
     const isBranchStale = await platform.isBranchStale(branchName);
@@ -66,8 +66,8 @@ export async function getParentBranch(
 
     if (!pr.isModified) {
       logger.info(`Branch is not mergeable and needs rebasing`);
-      if (!config.rebaseConflictedPrs) {
-        logger.info('rebaseConflictedPrs is disabled');
+      if (config.rebaseWhen === 'never') {
+        logger.info('Rebasing disabled by config');
         return { parentBranch: branchName, isModified: false };
       }
       // Setting parentBranch back to undefined means that we'll use the default branch

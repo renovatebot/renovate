@@ -42,8 +42,10 @@ export async function getPrConfigDescription(
   }
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
-  if (config.rebaseStalePrs) {
-    prBody += 'Whenever PR is stale';
+  if (config.rebaseWhen === 'behind-base-branch') {
+    prBody += 'Whenever PR falls behind the base branch';
+  } else if (config.rebaseWhen === 'never') {
+    prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';
   }

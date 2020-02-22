@@ -18,7 +18,7 @@ export interface RenovateSharedConfig {
   platform?: string;
   productLinks?: Record<string, string>;
   prPriority?: number;
-  rebaseStalePrs?: boolean;
+  rebaseWhen?: string;
   recreateClosed?: boolean;
   requiredStatusChecks?: string[];
   schedule?: string[];

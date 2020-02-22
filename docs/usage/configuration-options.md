@@ -1331,19 +1331,20 @@ For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0`
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
 
-## rebaseConflictedPrs
-
-This field defaults to `true` which means Renovate will rebase whenever there is a merge conflict with the master branch. However, this default behavior may result in costing a lot of CI cycles. If you wish to disable auto-rebasing in case of merge conflicts with the master branch, configure it's value to `false`.
-
 ## rebaseLabel
 
-On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is `"rebase"` however you can configure it to anything you want by changing this `rebaseLabel` field.
+On supported platforms it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is `"rebase"` however you can configure it to anything you want by changing this `rebaseLabel` field.
 
-## rebaseStalePrs
+## rebaseWhen
 
-This field defaults to `null` because it has the potential to create a lot of noise and additional builds to your repository. If you enable it to `true`, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+Possible values and meanings:
 
-If you configure it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
+- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch.
+- `never`: Renovate will never rebase the branch.
+- `conflicted`: Renovate will rebase only if the branch is conflicted.
+- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch.
+
+Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
 
 ## recreateClosed
 
