@@ -329,7 +329,7 @@ Object {
     },
   ],
   "prCreation": "immediate",
-  "rebaseStalePrs": true,
+  "rebaseWhen": "behind-base-branch",
   "requiredStatusChecks": Array [],
   "respectLatest": true,
   "schedule": Array [

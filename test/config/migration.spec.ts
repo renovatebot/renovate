@@ -42,8 +42,18 @@ describe('config/migration', () => {
           enabled: true,
         },
         poetry: {
+          rebaseStalePrs: true,
           versionScheme: 'pep440',
         },
+        pipenv: {
+          rebaseStalePrs: false,
+          rebaseConflictedPrs: true,
+        },
+        pip_setup: {
+          rebaseConflictedPrs: false,
+        },
+        rebaseStalePrs: null,
+        rebaseConflictedPrs: true,
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,

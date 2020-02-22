@@ -981,7 +981,7 @@ const options: RenovateOptions[] = [
     default: {
       unpublishSafe: false,
       recreateClosed: true,
-      rebaseStalePrs: true,
+      rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
       commitMessageAction: 'Pin',
@@ -1041,16 +1041,11 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'rebaseConflictedPrs',
-    description: 'Auto-rebase when there is conflict in PRs',
-    type: 'boolean',
-    default: true,
-  },
-  {
-    name: 'rebaseStalePrs',
-    description: 'Rebase any PRs that are not up-to-date with the base branch',
-    type: 'boolean',
-    default: null,
+    name: 'rebaseWhen',
+    description: 'Control when Renovate decides to rebase an existing branch',
+    type: 'string',
+    allowedValues: ['auto', 'never', 'conflicted', 'behind-base-branch'],
+    default: 'auto',
   },
   {
     name: 'rebaseLabel',
