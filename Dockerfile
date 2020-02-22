@@ -1,14 +1,19 @@
+ARG IMAGE=latest
+
 # Base image
 #============
 FROM renovate/yarn:1.22.0@sha256:22cfbb7ecd47655a905c01fe3f2fcb3ac34839dd6d42d81eeb437c80475483ea AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
-LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
+LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" \
+      org.opencontainers.image.url="https://renovatebot.com" \
+      org.opencontainers.image.licenses="AGPL-3.0-only" \
+# TODO: org.opencontainers.image.version="$VERSION" \
+      org.opencontainers.image.revision="$SHA"
 
 USER root
 WORKDIR /usr/src/app/
-RUN chown -R ubuntu:ubuntu /usr/src/app
 
 # Build image
 #============
@@ -33,23 +38,15 @@ RUN yarn build:docker
 RUN yarn install --production --frozen-lockfile
 
 
-# Final image
+# Final-abse image
 #============
-FROM base as final
+FROM base as final-base
 
 ENV APP_ROOT=/usr/src/app
 ENV HOME=/home/ubuntu
 
 RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
-  chmod -R g=u ${APP_ROOT} ${HOME}
-
-
-# required for install
-USER root
-
-RUN apt-get update && \
-    apt-get install -y gpg curl wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless dirmngr && \
-    rm -rf /var/lib/apt/lists/*
+    chmod -R g=u ${APP_ROOT} ${HOME}
 
 # The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
 RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
@@ -57,6 +54,33 @@ RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src 
     apt-get update && \
     apt-get -y install git && \
     rm -rf /var/lib/apt/lists/*
+
+# Docker client and group
+
+RUN groupadd -g 999 docker
+RUN usermod -aG docker ubuntu
+
+ENV DOCKER_VERSION=19.03.1
+
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
+    && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
+    -C /usr/local/bin docker/docker \
+    && rm docker-${DOCKER_VERSION}.tgz
+
+# Slim image
+#============
+FROM final-base as slim
+
+ENV RENOVATE_BINARY_SOURCE=docker
+
+# Full image
+#============
+FROM final-base as latest
+
+RUN apt-get update && \
+    apt-get install -y gpg wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless dirmngr && \
+    rm -rf /var/lib/apt/lists/*
+
 
 ## Gradle (needs java-jre, installed above)
 ENV GRADLE_VERSION 6.2
@@ -138,17 +162,6 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
-# Docker client and group
-
-RUN groupadd -g 999 docker
-RUN usermod -aG docker ubuntu
-
-ENV DOCKER_VERSION=19.03.1
-
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
-  && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
-  -C /usr/local/bin docker/docker \
-  && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
 
@@ -186,6 +199,9 @@ ENV PATH="${HOME}/.poetry/bin:$PATH"
 RUN poetry config virtualenvs.in-project false
 
 # Renovate
+#=========
+FROM $IMAGE as final
+
 
 COPY package.json .
 

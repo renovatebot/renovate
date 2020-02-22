@@ -25,15 +25,9 @@ jobs:
         tag: [latest, slim]
 
     env:
-      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
       DOCKER_TAG: ${{ matrix.tag }}
 
     steps:
-      - name: Overwrite env for latest tag
-        if: matrix.tag == 'latest'
-        run: |
-          echo "::set-env name=DOCKER_FILE::Dockerfile"
-
       - name: Set up Docker Buildx
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
@@ -49,7 +43,10 @@ jobs:
             --output=type=docker \
             --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
             --tag=renovate \
-            --file=./${DOCKER_FILE} .
+            --build-arg IMAGE=${DOCKER_TAG} \
+            --build-arg SHA=${{github.sha}} \
+            --target final \
+            --file=./Dockerfile .
 
       - name: Test the Docker image
         run: |

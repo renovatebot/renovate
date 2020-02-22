@@ -90,8 +90,11 @@ jobs:
             --platform=${PLATFORM} \
             --load \
             --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
-            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
+            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest,mode=max \
             --tag=${DOCKER_REPO}:latest \
+            --build-arg SHA=${{github.sha}} \
+            --build-arg IMAGE=latest \
+            --target final \
             --file=./Dockerfile .
 
       - name: Build the slim Docker image
@@ -100,9 +103,12 @@ jobs:
             --platform=${PLATFORM} \
             --load \
             --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
-            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
+            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim,mode=max \
             --tag=${DOCKER_REPO}:slim \
-            --file=./Dockerfile.slim .
+            --build-arg SHA=${{github.sha}} \
+            --build-arg IMAGE=slim \
+            --target final \
+            --file=./Dockerfile .
 
       - run: yarn semantic-release
         env:
