@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   extractAllPackageFiles,
   extractPackageFile,
@@ -24,7 +25,7 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   fileList = filterIgnoredFiles(fileList, ignorePaths);
   const matchedFiles = getMatchingFiles(fileList, manager, config.fileMatch);
   // istanbul ignore else
-  if (matchedFiles && matchedFiles.length) {
+  if (is.nonEmptyArray(matchedFiles)) {
     logger.debug(
       `Matched ${
         matchedFiles.length

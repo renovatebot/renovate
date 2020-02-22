@@ -425,13 +425,13 @@ export function getConfigResponseBeforeRedirectHook(options: any): void {
     delete options.headers.authorization;
   }
 
-  if (
-    options.href?.includes('blob.core.windows.net') &&
-    options.headers?.authorization
-  ) {
-    // docker registry is hosted on Azure blob, redirect url includes authentication.
-    // eslint-disable-next-line no-param-reassign
-    delete options.headers.authorization;
+  if (options.href && options.headers?.authorization) {
+    const { host } = URL.parse(options.href);
+    if (host && host.endsWith('blob.core.windows.net')) {
+      // docker registry is hosted on Azure blob, redirect url includes authentication.
+      // eslint-disable-next-line no-param-reassign
+      delete options.headers.authorization;
+    }
   }
 }
 
