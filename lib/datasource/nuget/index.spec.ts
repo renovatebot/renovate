@@ -1,8 +1,7 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import * as datasource from '..';
+import * as nuget from '.';
 import * as _hostRules from '../../util/host-rules';
-import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
 
 const hostRules: any = _hostRules;
 
@@ -60,12 +59,10 @@ const nugetIndexV3 = fs.readFileSync(
 );
 
 const configNoRegistryUrls = {
-  datasource: DATASOURCE_NUGET,
   lookupName: 'nunit',
 };
 
 const configV3V2 = {
-  datasource: DATASOURCE_NUGET,
   lookupName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
@@ -74,19 +71,16 @@ const configV3V2 = {
 };
 
 const configV2 = {
-  datasource: DATASOURCE_NUGET,
   lookupName: 'nunit',
   registryUrls: ['https://www.nuget.org/api/v2/'],
 };
 
 const configV3 = {
-  datasource: DATASOURCE_NUGET,
   lookupName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
 const configV3NotNugetOrg = {
-  datasource: DATASOURCE_NUGET,
   lookupName: 'nunit',
   registryUrls: ['https://myprivatefeed/index.json'],
 };
@@ -102,20 +96,19 @@ describe('datasource/nuget', () => {
 
     it(`can't detect nuget feed version`, async () => {
       const config = {
-        datasource: DATASOURCE_NUGET,
         lookupName: 'nunit',
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };
 
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...config,
         })
       ).toBeNull();
     });
 
     it('queries the default nuget feed if no registries are supplied', async () => {
-      await datasource.getPkgReleases({
+      await nuget.getPkgReleases({
         ...configNoRegistryUrls,
       });
       expect(got.mock.calls[0][0]).toEqual(
@@ -131,7 +124,7 @@ describe('datasource/nuget', () => {
       got.mockReturnValueOnce({
         statusCode: 500,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3,
       });
 
@@ -146,7 +139,7 @@ describe('datasource/nuget', () => {
         body: JSON.parse('{"totalHits": 0}'),
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3,
       });
 
@@ -156,7 +149,7 @@ describe('datasource/nuget', () => {
     it('returns null for empty result (v3v2)', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3V2,
         })
       ).toBeNull();
@@ -164,7 +157,7 @@ describe('datasource/nuget', () => {
     it('returns null for empty result (v2)', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV2,
         })
       ).toBeNull();
@@ -172,7 +165,7 @@ describe('datasource/nuget', () => {
     it('returns null for empty result (v3)', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -185,7 +178,7 @@ describe('datasource/nuget', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3V2,
         })
       ).toBeNull();
@@ -197,7 +190,7 @@ describe('datasource/nuget', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -209,7 +202,7 @@ describe('datasource/nuget', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV2,
         })
       ).toBeNull();
@@ -220,7 +213,7 @@ describe('datasource/nuget', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3V2,
         })
       ).toBeNull();
@@ -230,7 +223,7 @@ describe('datasource/nuget', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -244,7 +237,7 @@ describe('datasource/nuget', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -254,7 +247,7 @@ describe('datasource/nuget', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await nuget.getPkgReleases({
           ...configV2,
         })
       ).toBeNull();
@@ -272,7 +265,7 @@ describe('datasource/nuget', () => {
         body: pkgInfoV3FromNuget,
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3,
       });
       expect(res).not.toBeNull();
@@ -288,7 +281,7 @@ describe('datasource/nuget', () => {
         body: JSON.parse(pkgListV3),
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
@@ -304,7 +297,7 @@ describe('datasource/nuget', () => {
         body: JSON.parse(pkgListV3),
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3NotNugetOrg,
         lookupName: 'nun',
       });
@@ -319,7 +312,7 @@ describe('datasource/nuget', () => {
         body: JSON.parse(pkgListV3WithoutProkjectUrl),
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
@@ -335,7 +328,7 @@ describe('datasource/nuget', () => {
         body: JSON.parse(pkgListV3NoGitHubProjectUrl),
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
@@ -346,7 +339,7 @@ describe('datasource/nuget', () => {
         body: pkgListV2,
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
@@ -358,7 +351,7 @@ describe('datasource/nuget', () => {
         body: pkgListV2NoRelease,
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV2,
       });
       expect(res).toBeNull();
@@ -368,7 +361,7 @@ describe('datasource/nuget', () => {
         body: pkgListV2WithoutProjectUrl,
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
@@ -380,7 +373,7 @@ describe('datasource/nuget', () => {
         body: pkgListV2NoGitHubProjectUrl,
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
@@ -395,7 +388,7 @@ describe('datasource/nuget', () => {
         body: pkgListV2Page2of2,
         statusCode: 200,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await nuget.getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
