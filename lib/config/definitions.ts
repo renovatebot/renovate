@@ -929,6 +929,28 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementName',
+    description:
+      'The name of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    default: '',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementVersion',
+    description:
+      'The version of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    default: '',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
