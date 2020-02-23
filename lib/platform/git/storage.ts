@@ -487,7 +487,7 @@ export class Storage {
     files,
     message,
     parentBranch = this._config.baseBranch,
-  }: CommitFilesConfig): Promise<void> {
+  }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
     try {
       await this._git.reset('hard');
@@ -529,13 +529,14 @@ export class Storage {
           }
         }
       }
-      await this._git.commit(message);
+      const commitRes = await this._git.commit(message);
+      const commit = commitRes?.commit || 'unknown';
       if (!(await this.hasDiff(`origin/${branchName}`))) {
         logger.info(
           { branchName, fileNames },
           'No file changes detected. Skipping commit'
         );
-        return;
+        return null;
       }
       await this._git.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
@@ -546,6 +547,7 @@ export class Storage {
       await this._git.fetch(['origin', ref, '--depth=2', '--force']);
       this._config.branchExists[branchName] = true;
       limits.incrementLimit('prCommitsPerRunLimit');
+      return commit;
     } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');

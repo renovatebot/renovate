@@ -15,7 +15,7 @@ export type CommitConfig = RenovateConfig & {
 
 export async function commitFilesToBranch(
   config: CommitConfig
-): Promise<boolean> {
+): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
@@ -31,25 +31,21 @@ export async function commitFilesToBranch(
       return true;
     });
   }
-  if (is.nonEmptyArray(updatedFiles)) {
-    logger.debug(`${updatedFiles.length} file(s) to commit`);
-
-    // istanbul ignore if
-    if (config.dryRun) {
-      logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
-    } else {
-      // API will know whether to create new branch or not
-      await platform.commitFilesToBranch({
-        branchName: config.branchName,
-        files: updatedFiles,
-        message: config.commitMessage,
-        parentBranch: config.baseBranch || undefined,
-      });
-      logger.info({ branch: config.branchName }, `files committed`);
-    }
-  } else {
+  if (!is.nonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
-    return false;
+    return null;
   }
-  return true;
+  logger.debug(`${updatedFiles.length} file(s) to commit`);
+  // istanbul ignore if
+  if (config.dryRun) {
+    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    return null;
+  }
+  // API will know whether to create new branch or not
+  return platform.commitFilesToBranch({
+    branchName: config.branchName,
+    files: updatedFiles,
+    message: config.commitMessage,
+    parentBranch: config.baseBranch || undefined,
+  });
 }

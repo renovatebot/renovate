@@ -421,10 +421,10 @@ export async function processBranch(
       }
     }
 
-    config.committedFiles = await commitFilesToBranch(config);
+    const commit = await commitFilesToBranch(config);
+    // TODO: Remove lockFileMaintenance rule?
     if (
       config.updateType === 'lockFileMaintenance' &&
-      !config.committedFiles &&
       !config.parentBranch &&
       branchExists
     ) {
@@ -438,10 +438,13 @@ export async function processBranch(
       }
       return 'done';
     }
-    if (!(config.committedFiles || branchExists)) {
+    if (!commit && !branchExists) {
       return 'no-work';
     }
-
+    if (commit) {
+      const action = branchExists ? 'updated' : 'created';
+      logger.info({ commit }, `Branch ${action}`);
+    }
     // Set branch statuses
     await setStability(config);
     await setUnpublishable(config);

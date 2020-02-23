@@ -568,7 +568,7 @@ export function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,

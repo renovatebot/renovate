@@ -438,7 +438,7 @@ export async function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
       {
@@ -451,7 +451,7 @@ export async function commitFilesToBranch({
       2
     )})`
   );
-  await config.storage.commitFilesToBranch({
+  const commit = config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
@@ -462,6 +462,7 @@ export async function commitFilesToBranch({
   await delay(1000);
   // refresh cache
   await getBranchPr(branchName, true);
+  return commit;
 }
 
 export function getFile(filePath: string, branchName: string): Promise<string> {
