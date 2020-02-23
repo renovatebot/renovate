@@ -24,6 +24,7 @@ const metaFields = [
   'dependency',
   'dependencies',
   'branch',
+  'logContext',
 ];
 
 const levels: Record<number, string> = {
