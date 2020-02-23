@@ -147,6 +147,7 @@
     "semver": "7.1.1",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
+    "shortid": "2.2.15",
     "simple-git": "1.131.0",
     "slugify": "1.3.6",
     "toml": "3.0.0",
