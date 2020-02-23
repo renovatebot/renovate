@@ -1,9 +1,8 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import * as datasource from '..';
+import * as packagist from '.';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
-import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
@@ -23,7 +22,7 @@ const mailchimpJson: any = fs.readFileSync(
 
 describe('datasource/packagist', () => {
   describe('getPkgReleases', () => {
-    let config: datasource.PkgReleaseConfig;
+    let config: any;
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.find = jest.fn(input => input);
@@ -31,7 +30,6 @@ describe('datasource/packagist', () => {
       global.repoCache = {};
       config = {
         versioning: composerVersioning.id,
-        datasource: DATASOURCE_PACKAGIST,
         registryUrls: [
           'https://composer.renovatebot.com',
           'https://packagist.org',
@@ -41,10 +39,9 @@ describe('datasource/packagist', () => {
     });
     it('supports custom registries', async () => {
       config = {
-        datasource: DATASOURCE_PACKAGIST,
         registryUrls: ['https://composer.renovatebot.com'],
       };
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'something/one',
       });
@@ -64,7 +61,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: packagesOnly,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'vendor/package-name',
       });
@@ -76,7 +73,7 @@ describe('datasource/packagist', () => {
           code: 'ETIMEDOUT',
         })
       );
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'vendor/package-name2',
       });
@@ -88,7 +85,7 @@ describe('datasource/packagist', () => {
           statusCode: 403,
         })
       );
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'vendor/package-name',
       });
@@ -101,7 +98,7 @@ describe('datasource/packagist', () => {
           url: 'https://some.registry/packages.json',
         })
       );
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'drewm/mailchip-api',
       });
@@ -126,7 +123,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(includesJson),
       });
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'guzzlehttp/guzzle',
       });
@@ -165,7 +162,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'wpackagist-plugin/1beyt',
       });
@@ -204,7 +201,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases({
+      const res = await packagist.getPkgReleases({
         ...config,
         lookupName: 'some/other',
       });
@@ -216,7 +213,7 @@ describe('datasource/packagist', () => {
       });
       config.registryUrls = ['https://packagist.org'];
       expect(
-        await datasource.getPkgReleases({
+        await packagist.getPkgReleases({
           ...config,
           lookupName: 'drewm/mailchimp-api',
         })
@@ -228,7 +225,7 @@ describe('datasource/packagist', () => {
       });
       config.registryUrls = [];
       expect(
-        await datasource.getPkgReleases({
+        await packagist.getPkgReleases({
           ...config,
           lookupName: 'drewm/mailchimp-api',
         })

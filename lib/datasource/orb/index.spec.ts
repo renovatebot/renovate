@@ -1,6 +1,5 @@
 import _got from '../../util/got';
-import * as datasource from '..';
-import { DATASOURCE_ORB } from '../../constants/data-binary-source';
+import * as datasource from '.';
 
 jest.mock('../../util/got');
 
@@ -38,7 +37,6 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -47,7 +45,6 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({ body: { data: {} } });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
@@ -60,7 +57,6 @@ describe('datasource/orb', () => {
       );
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -71,7 +67,6 @@ describe('datasource/orb', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          datasource: DATASOURCE_ORB,
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -81,7 +76,6 @@ describe('datasource/orb', () => {
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
-        datasource: DATASOURCE_ORB,
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
@@ -93,7 +87,6 @@ describe('datasource/orb', () => {
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
-        datasource: DATASOURCE_ORB,
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();

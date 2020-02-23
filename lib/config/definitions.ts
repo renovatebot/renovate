@@ -290,6 +290,13 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'debug',
   },
+  {
+    name: 'logContext',
+    description: 'Add a global or per-repo log context to each log entry.',
+    stage: 'global',
+    type: 'string',
+    default: null,
+  },
   // Onboarding
   {
     name: 'onboarding',

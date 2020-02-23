@@ -1,6 +1,8 @@
 import _fs from 'fs-extra';
 import {
   logger,
+  setContext,
+  getContext,
   setMeta,
   addMeta,
   removeMeta,
@@ -18,6 +20,10 @@ const fs: any = _fs;
 describe('logger', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
+  });
+  it('sets and gets context', () => {
+    setContext('abc123');
+    expect(getContext()).toEqual('abc123');
   });
   it('supports logging with metadata', () => {
     logger.debug({ some: 'meta' }, 'some meta');
