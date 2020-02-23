@@ -1399,5 +1399,17 @@ describe('workers/repository/process/lookup/index', () => {
       // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
+
+    it('handles replacements', async () => {
+      config.currentValue = '1.4.1';
+      config.depName = 'q';
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'r';
+      config.replacementVersion = '2.0.0';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
   });
 });
