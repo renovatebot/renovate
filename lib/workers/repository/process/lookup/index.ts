@@ -70,6 +70,13 @@ export async function lookupUpdates(
     if (dependency.deprecationMessage) {
       logger.debug({ dependency: depName }, 'Found deprecationMessage');
       res.deprecationMessage = dependency.deprecationMessage;
+      if (dependency.replacementName && dependency.replacementVersion) {
+        res.updates.push({
+          updateType: 'replacement',
+          newName: dependency.replacementName,
+          newValue: dependency.replacementVersion,
+        });
+      }
     }
     res.sourceUrl = dependency?.sourceUrl;
     if (dependency.sourceDirectory) {

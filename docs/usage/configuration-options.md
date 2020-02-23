@@ -2010,6 +2010,14 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
+### replacementName
+
+Valid in `packageRules`
+
+### replacementVersion
+
+Valid in `packageRules`
+
 ## requiredStatusChecks
 
 Currently Renovate's default behavior is to only automerge if every status check has succeeded.

@@ -897,6 +897,26 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementName',
+    description: '',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementVersion',
+    description: '',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',

@@ -208,6 +208,19 @@ export function getDefaultVersioning(datasourceName: string): string {
   return datasource.defaultVersioning || 'semver';
 }
 
+function applyReplacements(
+  dep: ReleaseResult,
+  config: GetReleasesInternalConfig
+): ReleaseResult {
+  if (config.replacementName && config.replacementVersion) {
+    const ret = clone(dep);
+    ret.replacementName = config.replacementName;
+    ret.replacementVersion = config.replacementVersion;
+    return ret;
+  }
+  return dep;
+}
+
 async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
@@ -245,6 +258,7 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
+  dep = applyReplacements(dep, config);
   return dep;
 }
 
