@@ -45,9 +45,11 @@ describe('datasource/cdnjs', () => {
       jest.clearAllMocks();
       return global.renovateCache.rmAll();
     });
-    it('returns null for empty result', async () => {
+    it('throws for empty result', async () => {
       got.mockResolvedValueOnce(null);
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      await expect(
+        getPkgReleases({ lookupName: 'foo/bar' })
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('returns null for missing fields', async () => {
       got.mockResolvedValueOnce({});
@@ -77,7 +79,9 @@ describe('datasource/cdnjs', () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      await expect(
+        getPkgReleases({ lookupName: 'foo/bar' })
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('returns null with wrong auth token', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });
