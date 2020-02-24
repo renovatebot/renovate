@@ -41,6 +41,7 @@ import {
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
 
+type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
@@ -53,6 +54,7 @@ let config: {
   prList: any[];
   issueList: any[];
   optimizeForDisabled: boolean;
+  mergeMethod: MergeMethod;
 } = {} as any;
 
 const defaults = {
@@ -137,6 +139,7 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.gitPrivateKey = gitPrivateKey;
   config.localDir = localDir;
+
   let res: GotResponse<{
     archived: boolean;
     mirror: boolean;
@@ -146,6 +149,7 @@ export async function initRepo({
     forked_from_project: boolean;
     repository_access_level: 'disabled' | 'private' | 'enabled';
     merge_requests_access_level: 'disabled' | 'private' | 'enabled';
+    merge_method: MergeMethod;
   }>;
   try {
     res = await api.get(`projects/${config.repository}`);
@@ -198,6 +202,7 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
+    config.mergeMethod = res.body.merge_method;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
@@ -259,8 +264,8 @@ export async function initRepo({
   return repoConfig;
 }
 
-export function getRepoForceRebase(): boolean {
-  return false;
+export function getRepoForceRebase(): Promise<boolean> {
+  return Promise.resolve(config?.mergeMethod !== 'merge');
 }
 
 export async function setBaseBranch(
