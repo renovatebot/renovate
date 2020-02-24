@@ -166,10 +166,12 @@ async function getAuthHeaders(
       logger.debug({ err });
       return null;
     }
-    if (err.name === 'RequestError' && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new DatasourceError(err);
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
@@ -236,7 +238,8 @@ async function getManifestResponse(
       );
       return null;
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
@@ -381,7 +384,8 @@ async function getTags(
       );
       return null;
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
@@ -427,7 +431,8 @@ export function getConfigResponseBeforeRedirectHook(options: any): void {
 
   if (options.href && options.headers?.authorization) {
     const { host } = URL.parse(options.href);
-    if (host && host.endsWith('blob.core.windows.net')) {
+    // prettier-ignore
+    if (host && host.endsWith('blob.core.windows.net')) { // lgtm [js/incomplete-url-substring-sanitization]
       // docker registry is hosted on Azure blob, redirect url includes authentication.
       // eslint-disable-next-line no-param-reassign
       delete options.headers.authorization;
