@@ -88,7 +88,7 @@ async function executeGradle(
     return;
   }
   logger.debug(stdout + stderr);
-  logger.info('Gradle report complete');
+  logger.debug('Gradle report complete');
 }
 
 export async function extractAllPackageFiles(
@@ -117,7 +117,7 @@ export async function extractAllPackageFiles(
     logger.warn('No root build.gradle nor build.gradle.kts found - skipping');
     return null;
   }
-  logger.info('Extracting dependencies from all gradle files');
+  logger.debug('Extracting dependencies from all gradle files');
 
   const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
 
@@ -144,7 +144,7 @@ export async function extractAllPackageFiles(
       collectVersionVariables(dependencies, content);
     } else {
       // istanbul ignore next
-      logger.info({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
 

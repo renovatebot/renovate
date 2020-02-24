@@ -24,7 +24,7 @@ export function updateDependency({
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new Kubernetes value');
+    logger.debug({ err }, 'Error setting new Kubernetes value');
     return null;
   }
 }

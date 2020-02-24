@@ -20,7 +20,7 @@ export function updateDependency({
       oldVersion = parsedContents[depType][depName];
     }
     if (oldVersion === newValue) {
-      logger.info('Version is already updated');
+      logger.debug('Version is already updated');
       return fileContent;
     }
     if (nestedVersion) {
@@ -54,7 +54,7 @@ export function updateDependency({
     }
     // istanbul ignore if
     if (!newFileContent) {
-      logger.info(
+      logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
         'Warning: updateDependency error'
       );
@@ -62,7 +62,7 @@ export function updateDependency({
     }
     return newFileContent;
   } catch (err) {
-    logger.info({ err }, 'Error setting new package version');
+    logger.debug({ err }, 'Error setting new package version');
     return null;
   }
 }

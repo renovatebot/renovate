@@ -123,7 +123,7 @@ export async function initPlatform({
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
   } else {
-    logger.info('Using default github endpoint: ' + defaults.endpoint);
+    logger.debug('Using default github endpoint: ' + defaults.endpoint);
   }
   let gitAuthor: string;
   let renovateUsername: string;
@@ -157,7 +157,7 @@ export async function initPlatform({
     );
     gitAuthor = undefined;
   }
-  logger.info('Authenticated as GitHub user: ' + renovateUsername);
+  logger.debug('Authenticated as GitHub user: ' + renovateUsername);
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
     gitAuthor,
@@ -168,7 +168,7 @@ export async function initPlatform({
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering GitHub repositories');
+  logger.debug('Autodiscovering GitHub repositories');
   try {
     const res = await api.get('user/repos?per_page=100', { paginate: true });
     return res.body.map((repo: { full_name: string }) => repo.full_name);
@@ -285,14 +285,14 @@ export async function initRepo({
       }
     }
     if (res.body.full_name && res.body.full_name !== repository) {
-      logger.info(
+      logger.debug(
         { repository, this_repository: res.body.full_name },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);
     }
     if (res.body.archived) {
-      logger.info(
+      logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
@@ -333,7 +333,7 @@ export async function initRepo({
       config.mergeMethod = 'merge';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
-      logger.info('Could not find allowed merge methods for repo');
+      logger.debug('Could not find allowed merge methods for repo');
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Caught initRepo error');
@@ -361,7 +361,7 @@ export async function initRepo({
     if (err.message === 'Response code 451 (Unavailable for Legal Reasons)') {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    logger.info({ err }, 'Unknown GitHub initRepo error');
+    logger.debug({ err }, 'Unknown GitHub initRepo error');
     throw err;
   }
   // This shouldn't be necessary, but occasional strange errors happened until it was added
@@ -372,7 +372,7 @@ export async function initRepo({
 
   config.forkMode = !!forkMode;
   if (forkMode) {
-    logger.info('Bot is in forkMode');
+    logger.debug('Bot is in forkMode');
     config.forkToken = forkToken;
     // Save parent SHA then delete
     const parentSha = await getBaseCommitSHA();
@@ -394,11 +394,11 @@ export async function initRepo({
         })
       ).body.full_name;
     } catch (err) /* istanbul ignore next */ {
-      logger.info({ err }, 'Error forking repository');
+      logger.debug({ err }, 'Error forking repository');
       throw new Error(REPOSITORY_CANNOT_FORK);
     }
     if (existingRepos.includes(config.repository)) {
-      logger.info(
+      logger.debug(
         { repository_fork: config.repository },
         'Found existing fork'
       );
@@ -432,7 +432,7 @@ export async function initRepo({
         }
       }
     } else {
-      logger.info({ repository_fork: config.repository }, 'Created fork');
+      logger.debug({ repository_fork: config.repository }, 'Created fork');
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
     }
@@ -582,7 +582,7 @@ export function getRepoStatus(): Promise<StatusResult> {
 // istanbul ignore next
 export function mergeBranch(branchName: string): Promise<void> {
   if (config.pushProtection) {
-    logger.info(
+    logger.debug(
       { branch: branchName },
       'Branch protection: Attempting to merge branch when push protection is enabled'
     );
@@ -645,7 +645,7 @@ async function getClosedPrs(): Promise<PrList> {
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!res.data) {
-        logger.info(
+        logger.debug(
           { query, res },
           'No graphql res.data, returning empty list'
         );
@@ -750,7 +750,7 @@ async function getOpenPrs(): Promise<PrList> {
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!res.data) {
-        logger.info({ query, res }, 'No graphql res.data');
+        logger.debug({ query, res }, 'No graphql res.data');
         return {};
       }
       for (const pr of res.data.repository.pullRequests.nodes) {
@@ -865,7 +865,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     logger.debug('Returning from graphql closed PR list');
     return closedPr;
   }
-  logger.info(
+  logger.debug(
     { prNo },
     'PR not found in open or closed PRs list - trying to fetch it directly'
   );
@@ -993,7 +993,7 @@ export async function getPrList(): Promise<Pr[]> {
         { paginate: true }
       );
     } catch (err) /* istanbul ignore next */ {
-      logger.info({ err }, 'getPrList err');
+      logger.debug({ err }, 'getPrList err');
       throw new Error('platform-failure');
     }
     config.prList = res.body.map(
@@ -1096,12 +1096,12 @@ export async function getBranchStatus(
     commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      logger.info(
+      logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted'
       );
       throw new Error(REPOSITORY_CHANGED);
     }
-    logger.info('Unknown error when checking branch status');
+    logger.debug('Unknown error when checking branch status');
     throw err;
   }
   logger.debug(
@@ -1141,7 +1141,7 @@ export async function getBranchStatus(
         err.statusCode === 403 ||
         err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
       ) {
-        logger.info('No permission to view check runs');
+        logger.debug('No permission to view check runs');
       } else {
         logger.warn({ err }, 'Error retrieving check runs');
       }
@@ -1190,7 +1190,7 @@ export async function getBranchStatusCheck(
     return null;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      logger.info('Commit not found when checking statuses');
+      logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
@@ -1206,14 +1206,14 @@ export async function setBranchStatus({
 }: BranchStatusConfig): Promise<void> {
   // istanbul ignore if
   if (config.parentRepo) {
-    logger.info('Cannot set branch status when in forking mode');
+    logger.debug('Cannot set branch status when in forking mode');
     return;
   }
   const existingStatus = await getBranchStatusCheck(branchName, context);
   if (existingStatus === state) {
     return;
   }
-  logger.info({ branch: branchName, context, state }, 'Setting branch status');
+  logger.debug({ branch: branchName, context, state }, 'Setting branch status');
   try {
     const branchCommit = await config.storage.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
@@ -1231,7 +1231,7 @@ export async function setBranchStatus({
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ err }, 'Caught error setting branch status - aborting');
+    logger.debug({ err }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
 }
@@ -1360,7 +1360,7 @@ export async function ensureIssue({
           return null;
         }
         if (shouldReOpen) {
-          logger.info('Reopening previously closed issue');
+          logger.debug('Reopening previously closed issue');
         }
         issue = issues[issues.length - 1];
       }
@@ -1378,11 +1378,11 @@ export async function ensureIssue({
         )
       ).body.body;
       if (issueBody === body && issue.state === 'open') {
-        logger.info('Issue is open and up to date - nothing to do');
+        logger.debug('Issue is open and up to date - nothing to do');
         return null;
       }
       if (shouldReOpen) {
-        logger.info('Patching issue');
+        logger.debug('Patching issue');
         await api.patch(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
@@ -1391,7 +1391,7 @@ export async function ensureIssue({
             body: { body, state: 'open' },
           }
         );
-        logger.info('Issue updated');
+        logger.debug('Issue updated');
         return 'updated';
       }
     }
@@ -1401,7 +1401,7 @@ export async function ensureIssue({
         body,
       },
     });
-    logger.info('Issue created');
+    logger.debug('Issue created');
     // reset issueList so that it will be fetched again as-needed
     delete config.issueList;
     return 'created';
@@ -1411,7 +1411,7 @@ export async function ensureIssue({
       err.body.message &&
       err.body.message.startsWith('Issues are disabled for this repo')
     ) {
-      logger.info(
+      logger.debug(
         `Issues are disabled, so could not create issue: ${err.message}`
       );
     } else {
@@ -1427,7 +1427,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
       await closeIssue(issue.number);
-      logger.info({ number: issue.number }, 'Issue closed');
+      logger.debug({ number: issue.number }, 'Issue closed');
     }
   }
 }
@@ -1586,13 +1586,13 @@ export async function ensureComment({
     }
     if (!commentId) {
       await addComment(number, body);
-      logger.info(
+      logger.debug(
         { repository: config.repository, issueNo: number, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
       await editComment(commentId, body);
-      logger.info(
+      logger.debug(
         { repository: config.repository, issueNo: number },
         'Comment updated'
       );
@@ -1607,7 +1607,7 @@ export async function ensureComment({
     if (
       err.message === 'Unable to create comment because issue is locked. (403)'
     ) {
-      logger.info('Issue is locked - cannot add comment');
+      logger.debug('Issue is locked - cannot add comment');
     } else {
       logger.warn({ err }, 'Error ensuring comment');
     }
@@ -1746,7 +1746,7 @@ export async function mergePr(
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
   if (config.isGhe && config.pushProtection) {
-    logger.info(
+    logger.debug(
       { branch: branchName, prNo },
       'Branch protection: Cannot automerge PR when push protection is enabled'
     );
@@ -1764,7 +1764,7 @@ export async function mergePr(
       (review: { state: string }) => review.state === 'APPROVED'
     );
     if (!isApproved) {
-      logger.info(
+      logger.debug(
         { branch: branchName, prNo },
         'Branch protection: Cannot automerge PR until there is an approving review'
       );
@@ -1788,7 +1788,7 @@ export async function mergePr(
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
         // istanbul ignore next
-        logger.info(
+        logger.debug(
           { response: err.response ? err.response.body : undefined },
           'GitHub blocking PR merge -- will keep trying'
         );
@@ -1905,13 +1905,13 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         (edge: { node: any }) => edge.node
       );
       if (alerts.length) {
-        logger.info({ alerts }, 'Found GitHub vulnerability alerts');
+        logger.debug({ alerts }, 'Found GitHub vulnerability alerts');
       }
     } else {
       logger.debug('Cannot read vulnerability alerts');
     }
   } catch (err) {
-    logger.info({ err }, 'Error retrieving vulnerability alerts');
+    logger.debug({ err }, 'Error retrieving vulnerability alerts');
   }
   return alerts;
 }

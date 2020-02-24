@@ -42,7 +42,7 @@ export function updateDependency({
     logger.error('Unknown circleci depType');
     return null;
   } catch (err) {
-    logger.info({ err }, 'Error setting new CircleCI image value');
+    logger.debug({ err }, 'Error setting new CircleCI image value');
     return null;
   }
 }

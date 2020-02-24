@@ -49,13 +49,13 @@ export async function initPlatform(
   const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
   if (config && config.gitAuthor) {
-    logger.info(`Using configured gitAuthor (${config.gitAuthor})`);
+    logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
   } else if (!(platformInfo && platformInfo.gitAuthor)) {
-    logger.info('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
+    logger.debug('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
     gitAuthor = 'Renovate Bot <bot@renovateapp.com>';
   } /* istanbul ignore next */ else {
-    logger.info('Using platform gitAuthor: ' + platformInfo.gitAuthor);
+    logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;
   }
   let gitAuthorParsed: addrs.ParsedMailbox | null = null;

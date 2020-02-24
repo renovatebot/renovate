@@ -70,7 +70,7 @@ function extractFromSection(
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
         if (!packageMatches) {
-          logger.info(
+          logger.debug(
             `Skipping dependency with malformed package name "${depName}".`
           );
           skipReason = 'invalid-name';

@@ -21,11 +21,11 @@ const processError = ({ err, ...rest }): null => {
   };
 
   if (code === 'ENOTFOUND' || statusCode === NOT_FOUND) {
-    logger.info(data, 'RubyGems lookup failure: not found');
+    logger.debug(data, 'RubyGems lookup failure: not found');
   } else if (statusCode === FORBIDDEN || statusCode === UNAUTHORIZED) {
-    logger.info(data, 'RubyGems lookup failure: authentication failed');
+    logger.debug(data, 'RubyGems lookup failure: authentication failed');
   } else {
-    logger.info(data, 'RubyGems lookup failure: unknown reason');
+    logger.debug(data, 'RubyGems lookup failure: unknown reason');
   }
   return null;
 };

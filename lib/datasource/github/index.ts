@@ -58,7 +58,7 @@ export async function getPreset(
         throw err;
       }
       if (err.message === 'dep not found') {
-        logger.info('default.json preset not found - trying renovate.json');
+        logger.debug('default.json preset not found - trying renovate.json');
         return fetchJSONFile(pkgName, 'renovate.json');
       }
       throw err;
@@ -96,7 +96,7 @@ async function getTagCommit(
       logger.warn({ res }, 'Unknown git tag refs type');
     }
   } catch (err) {
-    logger.info(
+    logger.debug(
       { githubRepo, err },
       'Error getting tag commit from GitHub repo'
     );
@@ -141,7 +141,7 @@ export async function getDigest(
     const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
     digest = (await ghGot(url)).body[0].sha;
   } catch (err) {
-    logger.info(
+    logger.debug(
       { githubRepo, err },
       'Error getting latest commit from GitHub repo'
     );
@@ -208,7 +208,7 @@ export async function getPkgReleases({
       ).body.map(o => o.name);
     }
   } catch (err) {
-    logger.info({ repo, err }, 'Error retrieving from github');
+    logger.debug({ repo, err }, 'Error retrieving from github');
   }
   if (!versions) {
     return null;

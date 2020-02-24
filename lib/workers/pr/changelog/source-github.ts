@@ -37,7 +37,7 @@ async function getTags(
 
     return tags.map(tag => tag.name).filter(Boolean);
   } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Github tags');
+    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });
     // istanbul ignore if
     if (err.message && err.message.includes('Bad credentials')) {
@@ -81,7 +81,7 @@ export async function getChangeLogJSON({
       );
       return { error: ChangeLogError.MissingGithubToken };
     }
-    logger.info(
+    logger.debug(
       { manager, depName, sourceUrl },
       'Repository URL does not match any known hosts - skipping changelog retrieval'
     );
@@ -92,7 +92,7 @@ export async function getChangeLogJSON({
     : endpoint; // TODO FIX
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
-    logger.info({ sourceUrl }, 'Invalid github URL found');
+    logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
   if (!(releases && releases.length)) {

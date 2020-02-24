@@ -95,13 +95,13 @@ export async function ensureComment({
     }
     if (!commentId) {
       await addComment(config, prNo, body);
-      logger.info(
+      logger.debug(
         { repository: config.repository, prNo, topic },
         'Comment added'
       );
     } else if (commentNeedsUpdating) {
       await editComment(config, prNo, commentId, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment updated');
+      logger.debug({ repository: config.repository, prNo }, 'Comment updated');
     } else {
       logger.debug('Comment is already update-to-date');
     }

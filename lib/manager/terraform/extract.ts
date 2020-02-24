@@ -135,7 +135,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.skipReason = 'no-version';
         }
       } else {
-        logger.info({ dep }, 'terraform dep has no source');
+        logger.debug({ dep }, 'terraform dep has no source');
         dep.skipReason = 'no-source';
       }
     } else if (

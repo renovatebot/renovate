@@ -25,7 +25,7 @@ export async function getPkgReleases({
     });
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `Dependency lookup failure: not found`);
+      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
       logger.debug({ err }, 'Dart lookup error');
       return null;
     }
