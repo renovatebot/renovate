@@ -538,8 +538,8 @@ export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 50000)
     .replace(
-      'tick the rebase/retry checkbox below',
-      'rename this PR to start with "rebase!"'
+      'you tick the rebase/retry checkbox',
+      'rename PR to start with "rebase!"'
     )
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
