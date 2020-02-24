@@ -847,7 +847,7 @@ export async function ensureComment({
     }
     if (!commentId) {
       await addComment(number, body);
-      logger.debug(
+      logger.info(
         { repository: config.repository, prNo: number, topic },
         'Comment added'
       );

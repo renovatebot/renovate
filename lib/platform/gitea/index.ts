@@ -768,7 +768,7 @@ const platform: Platform = {
       // Create a new comment if no match has been found, otherwise update if necessary
       if (!comment) {
         const c = await helper.createComment(config.repository, issue, body);
-        logger.debug(
+        logger.info(
           { repository: config.repository, issue, comment: c.id },
           'Comment added'
         );

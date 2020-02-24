@@ -530,7 +530,7 @@ export async function ensureComment({
       config.repoId,
       number
     );
-    logger.debug(
+    logger.info(
       { repository: config.repository, issueNo: number, topic },
       'Comment added'
     );
