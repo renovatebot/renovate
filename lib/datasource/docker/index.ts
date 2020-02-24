@@ -547,7 +547,10 @@ async function getLabels(
         },
         'Config Manifest is unknown'
       );
-    } else if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    } else if (
+      err.statusCode === 429 &&
+      registry.endsWith('docker.io') // lgtm [js/incomplete-url-substring-sanitization]
+    ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(

@@ -72,9 +72,10 @@ export async function getChangeLogJSON({
     hostType: PLATFORM_TYPE_GITHUB,
     url,
   });
+  // istanbul ignore if
   if (!config.token) {
-    // istanbul ignore if
-    if (URL.parse(sourceUrl).host.endsWith('github.com')) {
+    // prettier-ignore
+    if (URL.parse(sourceUrl).host.endsWith('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
