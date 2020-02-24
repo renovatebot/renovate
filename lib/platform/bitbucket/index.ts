@@ -584,7 +584,7 @@ export async function ensureIssue({
         return 'updated';
       }
     } else {
-      logger.debug('Issue created');
+      logger.info('Issue created');
       await api.post(`/2.0/repositories/${config.repository}/issues`, {
         body: {
           title,

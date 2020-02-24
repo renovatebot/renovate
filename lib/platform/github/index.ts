@@ -1401,7 +1401,7 @@ export async function ensureIssue({
         body,
       },
     });
-    logger.debug('Issue created');
+    logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     delete config.issueList;
     return 'created';

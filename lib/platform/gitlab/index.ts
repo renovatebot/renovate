@@ -739,6 +739,7 @@ export async function ensureIssue({
           description,
         },
       });
+      logger.info('Issue created');
       // delete issueList so that it will be refetched as necessary
       delete config.issueList;
       return 'created';
