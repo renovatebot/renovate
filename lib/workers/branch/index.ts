@@ -135,7 +135,7 @@ export async function processBranch(
           }
         }
       } else if (existingPr.state === 'merged') {
-        logger.info(
+        logger.debug(
           { pr: existingPr.number },
           'Merged PR is blocking this branch'
         );
