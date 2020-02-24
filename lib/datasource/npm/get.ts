@@ -236,7 +236,7 @@ export async function getDependency(
         (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
         retries > 0
       ) {
-        logger.debug({ pkgUrl, errName: err.name }, 'Retrying npm error');
+        logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
         await delay(5000);
         return getDependency(name, retries - 1);
       }
