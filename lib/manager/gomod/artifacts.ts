@@ -134,7 +134,7 @@ export async function updateArtifacts({
       ''
     );
     if (finalGoModContent !== newGoModContent) {
-      logger.info('Found updated go.mod after go.sum update');
+      logger.debug('Found updated go.mod after go.sum update');
       res.push({
         file: {
           name: goModFileName,
@@ -144,7 +144,7 @@ export async function updateArtifacts({
     }
     return res;
   } catch (err) {
-    logger.info({ err }, 'Failed to update go.sum');
+    logger.debug({ err }, 'Failed to update go.sum');
     return [
       {
         artifactError: {

@@ -78,7 +78,7 @@ export function initPlatform({
 }
 
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering Azure DevOps repositories');
+  logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   return repos.map(repo => `${repo.project.name}/${repo.name}`);
@@ -253,7 +253,7 @@ export async function getPrList(): Promise<Pr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(azureHelper.getRenovatePRFormat);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
 }
@@ -598,7 +598,7 @@ export function setBranchStatus({
 }
 
 export async function mergePr(pr: number): Promise<void> {
-  logger.info(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
+  logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
   await Promise.resolve();
 }
 
@@ -711,7 +711,7 @@ export async function addReviewers(
         prNo,
         obj.id
       );
-      logger.info(`Reviewer added: ${obj.name}`);
+      logger.debug(`Reviewer added: ${obj.name}`);
     })
   );
 }
@@ -727,7 +727,7 @@ export /* istanbul ignore next */ async function deleteLabel(
 
 // to become async?
 export function getPrFiles(prNo: number): string[] {
-  logger.info(
+  logger.debug(
     `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
   );
   return [];

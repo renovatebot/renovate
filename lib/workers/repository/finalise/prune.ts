@@ -29,9 +29,9 @@ async function cleanUpBranches(
         }
       }
       const closePr = true;
-      logger.info({ branch: branchName }, `Deleting orphan branch`);
+      logger.debug({ branch: branchName }, `Deleting orphan branch`);
       if (skipAutoclose) {
-        logger.info(
+        logger.debug(
           { prNo: pr.number, prTitle: pr.title },
           'Skip PR autoclosing'
         );

@@ -117,7 +117,7 @@ export async function getDependency(
     const raw = await got(pkgUrl, opts);
     // istanbul ignore if
     if (retries < 3) {
-      logger.info({ pkgUrl, retries }, 'Recovered from npm error');
+      logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
@@ -131,7 +131,7 @@ export async function getDependency(
     }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.info({ dependency: name }, 'No versions returned');
+      logger.debug({ dependency: name }, 'No versions returned');
       return null;
     }
 
@@ -194,7 +194,7 @@ export async function getDependency(
     return dep;
   } catch (err) {
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         {
           pkgUrl,
           authInfoType: authInfo ? authInfo.type : undefined,
@@ -209,7 +209,7 @@ export async function getDependency(
     }
     // istanbul ignore if
     if (err.statusCode === 402) {
-      logger.info(
+      logger.debug(
         {
           pkgUrl,
           authInfoType: authInfo ? authInfo.type : undefined,
@@ -223,7 +223,7 @@ export async function getDependency(
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ depName: name }, `Dependency lookup failure: not found`);
+      logger.debug({ depName: name }, `Dependency lookup failure: not found`);
       logger.debug({
         err,
         token: authInfo ? maskToken(authInfo.token) : 'none',
@@ -236,7 +236,7 @@ export async function getDependency(
         (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
         retries > 0
       ) {
-        logger.info({ pkgUrl, errName: err.name }, 'Retrying npm error');
+        logger.debug({ pkgUrl, errName: err.name }, 'Retrying npm error');
         await delay(5000);
         return getDependency(name, retries - 1);
       }

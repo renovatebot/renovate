@@ -22,7 +22,7 @@ export function decryptConfig(
               decryptedStr = crypto
                 .privateDecrypt(privateKey, Buffer.from(eVal, 'base64'))
                 .toString();
-              logger.info('Decrypted config using default padding');
+              logger.debug('Decrypted config using default padding');
             } catch (err) {
               logger.debug('Trying RSA_PKCS1_PADDING for ' + eKey);
               decryptedStr = crypto
@@ -40,10 +40,10 @@ export function decryptConfig(
             if (!decryptedStr.length) {
               throw new Error('empty string');
             }
-            logger.info(`Decrypted ${eKey}`);
+            logger.debug(`Decrypted ${eKey}`);
             if (eKey === 'npmToken') {
               const token = decryptedStr.replace(/\n$/, '');
-              logger.info(
+              logger.debug(
                 { decryptedToken: maskToken(token) },
                 'Migrating npmToken to npmrc'
               );

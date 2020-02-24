@@ -28,7 +28,7 @@ export async function rebaseOnboardingBranch(
   logger.debug('Checking if onboarding branch needs rebasing');
   const pr = await platform.getBranchPr(config.onboardingBranch);
   if (pr.isModified) {
-    logger.info('Onboarding branch has been edited and cannot be rebased');
+    logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
   const existingContents = await platform.getFile(
@@ -37,10 +37,10 @@ export async function rebaseOnboardingBranch(
   );
   const contents = await getOnboardingConfig(config);
   if (contents === existingContents && !pr.isStale) {
-    logger.info('Onboarding branch is up to date');
+    logger.debug('Onboarding branch is up to date');
     return null;
   }
-  logger.info('Rebasing onboarding branch');
+  logger.debug('Rebasing onboarding branch');
   // istanbul ignore next
   const commitMessage = getCommitMessage(config);
 

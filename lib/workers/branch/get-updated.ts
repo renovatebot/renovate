@@ -39,7 +39,7 @@ export async function getUpdatedPackageFiles(
         (await platform.getFile(packageFile, config.parentBranch));
       // istanbul ignore if
       if (config.parentBranch && !existingContent) {
-        logger.info('Rebasing branch after file not found');
+        logger.debug('Rebasing branch after file not found');
         return getUpdatedPackageFiles({
           ...config,
           parentBranch: undefined,
@@ -72,7 +72,7 @@ export async function getUpdatedPackageFiles(
       });
       if (!newContent) {
         if (config.parentBranch) {
-          logger.info('Rebasing branch after error updating content');
+          logger.debug('Rebasing branch after error updating content');
           return getUpdatedPackageFiles({
             ...config,
             parentBranch: undefined,
@@ -87,7 +87,7 @@ export async function getUpdatedPackageFiles(
       if (newContent !== existingContent) {
         if (config.parentBranch) {
           // This ensure it's always 1 commit from the bot
-          logger.info('Need to update package file so will rebase first');
+          logger.debug('Need to update package file so will rebase first');
           return getUpdatedPackageFiles({
             ...config,
             parentBranch: undefined,

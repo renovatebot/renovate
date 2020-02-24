@@ -41,7 +41,7 @@ export async function tryBranchAutomerge(
     } catch (err) {
       // istanbul ignore if
       if (err.message === 'not ready') {
-        logger.info('Branch is not ready for automerge');
+        logger.debug('Branch is not ready for automerge');
         return 'not ready';
       }
       logger.info({ err }, `Failed to automerge branch`);

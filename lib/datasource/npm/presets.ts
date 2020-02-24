@@ -16,7 +16,7 @@ export async function getPreset(
   const presetConfig = dep['renovate-config'][presetName];
   if (!presetConfig) {
     const presetNames = Object.keys(dep['renovate-config']);
-    logger.info(
+    logger.debug(
       { presetNames, presetName },
       'Preset not found within renovate-config'
     );

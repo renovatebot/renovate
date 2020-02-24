@@ -131,7 +131,7 @@ export class Storage {
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
-    logger.info('Initialising git repository into ' + cwd);
+    logger.debug('Initializing git repository into ' + cwd);
     const gitHead = join(cwd, '.git/HEAD');
     let clone = true;
 
@@ -171,7 +171,7 @@ export class Storage {
           Math.round(
             1 + 10 * convertHrtime(process.hrtime(fetchStart)).seconds
           ) / 10;
-        logger.info({ fetchSeconds }, 'git fetch completed');
+        logger.debug({ fetchSeconds }, 'git fetch completed');
         clone = false;
       } catch (err) /* istanbul ignore next */ {
         logger.error({ err }, 'git fetch error');
@@ -188,10 +188,10 @@ export class Storage {
         logger.debug({ err }, 'git clone error');
         throw new Error(PLATFORM_FAILURE);
       }
-      const cloneSeconds =
+      const seconds =
         Math.round(1 + 10 * convertHrtime(process.hrtime(cloneStart)).seconds) /
         10;
-      logger.info({ cloneSeconds }, 'git clone completed');
+      logger.debug({ seconds }, 'git clone completed');
     }
     const submodules = await this.getSubmodules();
     for (const submodule of submodules) {
@@ -221,7 +221,7 @@ export class Storage {
     }
 
     if (global.gitAuthor) {
-      logger.info({ gitAuthor: global.gitAuthor }, 'Setting git author');
+      logger.debug({ gitAuthor: global.gitAuthor }, 'Setting git author');
       try {
         await this._git.raw(['config', 'user.name', global.gitAuthor.name]);
         await this._git.raw(['config', 'user.email', global.gitAuthor.email]);
@@ -459,7 +459,7 @@ export class Storage {
     if (branchName) {
       const exists = await this.branchExists(branchName);
       if (!exists) {
-        logger.info({ branchName }, 'branch no longer exists - aborting');
+        logger.debug({ branchName }, 'branch no longer exists - aborting');
         throw new Error(REPOSITORY_CHANGED);
       }
     }
@@ -532,7 +532,7 @@ export class Storage {
       const commitRes = await this._git.commit(message);
       const commit = commitRes?.commit || 'unknown';
       if (!(await this.hasDiff(`origin/${branchName}`))) {
-        logger.info(
+        logger.debug(
           { branchName, fileNames },
           'No file changes detected. Skipping commit'
         );

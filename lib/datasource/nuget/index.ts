@@ -39,7 +39,7 @@ export async function getPkgReleases({
     }
   }
   if (dep === null) {
-    logger.info(
+    logger.debug(
       { lookupName },
       `Dependency lookup failure: not found in all feeds`
     );

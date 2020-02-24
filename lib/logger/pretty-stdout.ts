@@ -24,7 +24,6 @@ const metaFields = [
   'dependency',
   'dependencies',
   'branch',
-  'logContext',
 ];
 
 const levels: Record<number, string> = {
@@ -64,7 +63,11 @@ export function getDetails(rec: BunyanRecord): string {
   const recFiltered = { ...rec };
   delete recFiltered.module;
   Object.keys(recFiltered).forEach(key => {
-    if (bunyanFields.includes(key) || metaFields.includes(key)) {
+    if (
+      key === 'logContext' ||
+      bunyanFields.includes(key) ||
+      metaFields.includes(key)
+    ) {
       delete recFiltered[key];
     }
   });

@@ -55,7 +55,7 @@ export function extractPackageFile(
       };
     }
   } catch (e) {
-    logger.info({ packageFile }, 'Can not parse dependency');
+    logger.debug({ packageFile }, 'Can not parse dependency');
   }
   return null;
 }

@@ -33,12 +33,12 @@ export function updateDependency({
   }
   if (!section) {
     if (target) {
-      logger.info(
+      logger.debug(
         { config: upgrade },
         `Error: Section [target.${target}.${depType}] doesn't exist in Cargo.toml file, update failed`
       );
     } else {
-      logger.info(
+      logger.debug(
         { config: upgrade },
         `Error: Section [${depType}] doesn't exist in Cargo.toml file, update failed`
       );
@@ -48,7 +48,7 @@ export function updateDependency({
   let oldVersion: any;
   const oldDep = section[depName];
   if (!oldDep) {
-    logger.info(
+    logger.debug(
       { config: upgrade },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
@@ -66,14 +66,14 @@ export function updateDependency({
     oldVersion = oldVersion.version;
   }
   if (!oldVersion) {
-    logger.info(
+    logger.debug(
       { config: upgrade },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
     return fileContent;
   }
   if (oldVersion === newValue) {
-    logger.info('Version is already updated');
+    logger.debug('Version is already updated');
     return fileContent;
   }
   if (nestedVersion) {
