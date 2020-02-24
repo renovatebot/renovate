@@ -252,7 +252,7 @@ export async function initRepo({
     hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
-  config.isGhe = !defaults.endpoint.startsWith('https://api.github.com');
+  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   config.localDir = localDir;
   config.repository = repository;
