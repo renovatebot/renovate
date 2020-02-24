@@ -93,10 +93,9 @@ export async function getDependency(
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }
 
-  if (
-    pkgUrl.startsWith('https://registry.npmjs.org') &&
-    !pkgUrl.startsWith('https://registry.npmjs.org/@')
-  ) {
+  const uri = url.parse(pkgUrl);
+
+  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching
     // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
     // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses
@@ -231,7 +230,7 @@ export async function getDependency(
       });
       return null;
     }
-    if (regUrl.startsWith('https://registry.npmjs.org')) {
+    if (uri.host === 'registry.npmjs.org') {
       // istanbul ignore if
       if (
         (err.name === 'ParseError' || err.code === 'ECONNRESET') &&

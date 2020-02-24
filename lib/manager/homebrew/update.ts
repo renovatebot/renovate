@@ -142,7 +142,6 @@ export async function updateDependency({
   /*
     1. Update url field 2. Update sha256 field
    */
-  let newContent = fileContent;
   let newUrl: string;
   // Example urls:
   // "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
@@ -154,7 +153,7 @@ export async function updateDependency({
     );
     return fileContent;
   }
-  let newSha256;
+  let newSha256: string;
   try {
     newUrl = `https://github.com/${upgrade.managerData.ownerName}/${
       upgrade.managerData.repoName
@@ -195,7 +194,7 @@ export async function updateDependency({
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return fileContent;
   }
-  newContent = updateUrl(fileContent, upgrade.managerData.url, newUrl);
+  let newContent = updateUrl(fileContent, upgrade.managerData.url, newUrl);
   if (!newContent) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return fileContent;

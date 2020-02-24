@@ -65,9 +65,8 @@ export async function getUpdatedPackageFiles(
         logger.error('Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = existingContent;
       const updateDependency = get(manager, 'updateDependency');
-      newContent = await updateDependency({
+      const newContent = await updateDependency({
         fileContent: existingContent,
         upgrade,
       });

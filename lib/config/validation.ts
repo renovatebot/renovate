@@ -79,7 +79,7 @@ export async function validateConfig(
         try {
           let res = handlebars.compile(val)(config);
           res = handlebars.compile(res)(config);
-          res = handlebars.compile(res)(config);
+          handlebars.compile(res)(config);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
