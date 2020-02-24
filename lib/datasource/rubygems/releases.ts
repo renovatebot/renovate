@@ -14,7 +14,8 @@ export async function getPkgReleases({
 
   for (const registry of registries) {
     let pkg: ReleaseResult;
-    if (registry.endsWith('rubygems.org')) {
+    // prettier-ignore
+    if (registry.endsWith('rubygems.org')) { // lgtm [js/incomplete-url-substring-sanitization]
       pkg = await getRubygemsOrgDependency(lookupName);
     } else {
       pkg = await getDependency({ dependency: lookupName, registry });
