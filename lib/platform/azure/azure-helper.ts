@@ -191,6 +191,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
     pr.isConflicted = true;
   }
 
+  // value is updated later to be correct for
+  // specific pr's after filtering, for performance
   pr.isModified = false;
 
   return pr;

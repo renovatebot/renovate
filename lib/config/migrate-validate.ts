@@ -13,7 +13,7 @@ export async function migrateAndValidate(
   try {
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(input);
     if (isMigrated) {
-      logger.info(
+      logger.debug(
         { oldConfig: input, newConfig: migratedConfig },
         'Config migration necessary'
       );

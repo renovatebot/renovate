@@ -3,6 +3,12 @@ import { filter } from '@renovate/pep440/lib/specifier';
 import { getNewValue } from './range';
 import { VersioningApi } from '../common';
 
+export const id = 'pep440';
+export const displayName = 'PEP440';
+export const urls = ['https://www.python.org/dev/peps/pep-0440/'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const {
   compare: sortVersions,
   satisfies: matches,

@@ -123,7 +123,7 @@ export default function extractPackageFile(
     }
     return { deps };
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ err }, 'Error extracting ansible-galaxy deps');
+    logger.debug({ err }, 'Error extracting ansible-galaxy deps');
     return null;
   }
 }

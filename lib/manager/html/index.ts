@@ -1,10 +1,15 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
-import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
+import * as semverVersioning from '../../versioning/semver';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile };
+
+export const autoReplace = true;
 
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
-  versionScheme: VERSION_SCHEME_SEMVER,
+  versioning: semverVersioning.id,
+  digest: {
+    enabled: false,
+  },
+  pinDigests: false,
 };

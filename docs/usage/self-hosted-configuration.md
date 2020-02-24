@@ -73,6 +73,10 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## gitPrivateKey
 
+## logContext
+
+`logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output. If left as default (null), a random short ID will be selected.
+
 ## logFile
 
 ## logFileLevel

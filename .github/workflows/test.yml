@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - 'renovate/**'
 
   pull_request:
 
@@ -100,7 +101,7 @@ jobs:
 
       - name: Clear pip cache
         if: steps.pip_cache_packages.outputs.cache-hit != 'true'
-        run: rm -rf ${{ steps.init.outputs.pip_cache }}
+        run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
 
       - name: Installing dependencies
         shell: bash
@@ -110,12 +111,15 @@ jobs:
           pip install --user -r requirements.txt
 
       - name: Lint
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
         run: yarn lint
 
       - name: Test schema
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
         run: yarn test-schema
 
       - name: Type check
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
         run: yarn type-check
 
       - name: Build

@@ -178,8 +178,8 @@ export interface Platform {
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  setBaseBranch(baseBranch: string): Promise<void>;
-  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
+  setBaseBranch(baseBranch?: string): Promise<void>;
+  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   mergeBranch(branchName: string): Promise<void>;

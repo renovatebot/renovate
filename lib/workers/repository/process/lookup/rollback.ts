@@ -1,25 +1,25 @@
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { LookupUpdate } from './common';
 
 export interface RollbackConfig {
   currentValue?: string;
   depName?: string;
   packageFile: string;
-  versionScheme: string;
+  versioning: string;
 }
 
 export function getRollbackUpdate(
   config: RollbackConfig,
   versions: string[]
 ): LookupUpdate {
-  const { packageFile, versionScheme, depName, currentValue } = config;
-  const version = versioning.get(versionScheme);
+  const { packageFile, versioning, depName, currentValue } = config;
+  const version = allVersioning.get(versioning);
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
-    logger.info(
-      { versionScheme },
-      'Current version scheme does not support isLessThanRange()'
+    logger.debug(
+      { versioning },
+      'Current versioning does not support isLessThanRange()'
     );
     return null;
   }
@@ -28,13 +28,13 @@ export function getRollbackUpdate(
   );
   // istanbul ignore if
   if (!lessThanVersions.length) {
-    logger.info(
+    logger.debug(
       { packageFile, depName, currentValue },
       'Missing version has nothing to roll back to'
     );
     return null;
   }
-  logger.info(
+  logger.debug(
     { packageFile, depName, currentValue },
     `Current version not found - rolling back`
   );
@@ -46,7 +46,7 @@ export function getRollbackUpdate(
   const toVersion = lessThanVersions.pop();
   // istanbul ignore if
   if (!toVersion) {
-    logger.info('No toVersion to roll back to');
+    logger.debug('No toVersion to roll back to');
     return null;
   }
   const newValue = version.getNewValue({

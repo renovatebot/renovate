@@ -13,7 +13,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "files.associations": {
-    "Dockerfile.*": "dockerfile"
+    "Dockerfile.*": "dockerfile",
+    ".releaserc": "json"
   },
   "omnisharp.autoStart": false
 }

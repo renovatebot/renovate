@@ -1,6 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import { getPkgReleases } from '.';
+import { getDigest, getPkgReleases } from '.';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const got: jest.Mock<any> = _got as any;
@@ -18,15 +18,38 @@ let res2 = fs.readFileSync(
 );
 res2 = JSON.parse(res2);
 
+let res3 = fs.readFileSync(
+  'lib/datasource/cdnjs/__fixtures__/KaTeX.json',
+  'utf8'
+);
+res3 = JSON.parse(res3);
+
 describe('datasource/cdnjs', () => {
+  describe('getDigest', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      global.repoCache = {};
+      return global.renovateCache.rmAll();
+    });
+    it('returns digest', async () => {
+      got.mockResolvedValueOnce({ body: res3 });
+      const res = await getDigest(
+        { lookupName: 'KaTeX/katex.min.js' },
+        '0.11.1'
+      );
+      expect(res).toBe('sha256-F/Xda58SPdcUCr+xhSGz9MA2zQBPb0ASEYKohl8UCHc=');
+    });
+  });
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       return global.renovateCache.rmAll();
     });
-    it('returns null for empty result', async () => {
+    it('throws for empty result', async () => {
       got.mockResolvedValueOnce(null);
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      await expect(
+        getPkgReleases({ lookupName: 'foo/bar' })
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('returns null for missing fields', async () => {
       got.mockResolvedValueOnce({});
@@ -56,7 +79,9 @@ describe('datasource/cdnjs', () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      await expect(
+        getPkgReleases({ lookupName: 'foo/bar' })
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('returns null with wrong auth token', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });

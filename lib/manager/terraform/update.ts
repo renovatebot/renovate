@@ -15,6 +15,11 @@ export function updateDependency({
         return null;
       }
       newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
+    } else if (upgrade.depType === 'gitTags') {
+      if (!lineToChange.includes(upgrade.depNameShort)) {
+        return null;
+      }
+      newLine = lineToChange.replace(/\?ref=.*"/, `?ref=${upgrade.newValue}"`);
     } else if (upgrade.depType === 'terraform') {
       if (!/version\s*=\s*"/.test(lineToChange)) {
         return null;
@@ -31,7 +36,7 @@ export function updateDependency({
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ err }, 'Error setting new terraform module version');
+    logger.debug({ err }, 'Error setting new terraform module version');
     return null;
   }
 }

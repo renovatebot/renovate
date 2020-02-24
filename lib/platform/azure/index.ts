@@ -78,7 +78,7 @@ export function initPlatform({
 }
 
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering Azure DevOps repositories');
+  logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   return repos.map(repo => `${repo.project.name}/${repo.name}`);
@@ -251,8 +251,9 @@ export async function getPrList(): Promise<Pr[]> {
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
+
     config.prList = prs.map(azureHelper.getRenovatePRFormat);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
 }
@@ -279,6 +280,15 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter(label => label.active)
     .map(label => label.name);
+
+  const commits = await azureApiGit.getPullRequestCommits(
+    config.repoId,
+    pullRequestId
+  );
+  azurePr.isModified =
+    commits.length > 0 &&
+    commits[0].author.name !== commits[commits.length - 1].author.name;
+
   return azurePr;
 }
 
@@ -361,7 +371,7 @@ export /* istanbul ignore next */ function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
@@ -491,16 +501,59 @@ export async function ensureComment({
   content,
 }: EnsureCommentConfig): Promise<void> {
   logger.debug(`ensureComment(${number}, ${topic}, content)`);
-  const body = `### ${topic}\n\n${sanitize(content)}`;
+  const header = topic ? `### ${topic}\n\n` : '';
+  const body = `${header}${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
-  await azureApiGit.createThread(
-    {
-      comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
-      status: 1,
-    },
-    config.repoId,
-    number
-  );
+
+  const threads = await azureApiGit.getThreads(config.repoId, number);
+  let threadIdFound = null;
+  let commentIdFound = null;
+  let commentNeedsUpdating = false;
+  threads.forEach(thread => {
+    const firstCommentContent = thread.comments[0].content;
+    if (
+      (topic && firstCommentContent.startsWith(header)) ||
+      (!topic && firstCommentContent === body)
+    ) {
+      threadIdFound = thread.id;
+      commentIdFound = thread.comments[0].id;
+      commentNeedsUpdating = firstCommentContent !== body;
+    }
+  });
+
+  if (!threadIdFound) {
+    await azureApiGit.createThread(
+      {
+        comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
+        status: 1,
+      },
+      config.repoId,
+      number
+    );
+    logger.info(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment added'
+    );
+  } else if (commentNeedsUpdating) {
+    await azureApiGit.updateComment(
+      {
+        content: body,
+      },
+      config.repoId,
+      number,
+      threadIdFound,
+      commentIdFound
+    );
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment updated'
+    );
+  } else {
+    logger.debug(
+      { repository: config.repository, issueNo: number, topic },
+      'Comment is already update-to-date'
+    );
+  }
 }
 
 export async function ensureCommentRemoval(
@@ -545,7 +598,7 @@ export function setBranchStatus({
 }
 
 export async function mergePr(pr: number): Promise<void> {
-  logger.info(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
+  logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
   await Promise.resolve();
 }
 
@@ -553,8 +606,8 @@ export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 4000)
     .replace(
-      'tick the rebase/retry checkbox below',
-      'rename this PR to start with "rebase!"'
+      'you tick the rebase/retry checkbox',
+      'rename PR to start with "rebase!"'
     )
     .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace('<summary>', '**')
@@ -658,7 +711,7 @@ export async function addReviewers(
         prNo,
         obj.id
       );
-      logger.info(`Reviewer added: ${obj.name}`);
+      logger.debug(`Reviewer added: ${obj.name}`);
     })
   );
 }
@@ -674,7 +727,7 @@ export /* istanbul ignore next */ async function deleteLabel(
 
 // to become async?
 export function getPrFiles(prNo: number): string[] {
-  logger.info(
+  logger.debug(
     `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
   );
   return [];

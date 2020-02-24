@@ -144,7 +144,7 @@ export async function getPkgReleases(
     }
   }
 
-  logger.info(
+  logger.debug(
     `No versions found for ${lookupName} in ${searchRoots.length} repositories`
   );
   return null;

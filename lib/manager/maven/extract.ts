@@ -299,10 +299,10 @@ export async function extractAllPackageFiles(
       if (pkg) {
         packages.push(pkg);
       } else {
-        logger.info({ packageFile }, 'can not read dependencies');
+        logger.debug({ packageFile }, 'can not read dependencies');
       }
     } else {
-      logger.info({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
   return cleanResult(resolveParents(packages));

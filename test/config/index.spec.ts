@@ -36,7 +36,11 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports token in CLI options', async () => {
-      defaultArgv = defaultArgv.concat(['--token=abc', '--pr-footer=custom']);
+      defaultArgv = defaultArgv.concat([
+        '--token=abc',
+        '--pr-footer=custom',
+        '--log-context=abc123',
+      ]);
       const env: NodeJS.ProcessEnv = {};
       await configParser.parseConfigs(env, defaultArgv);
     });

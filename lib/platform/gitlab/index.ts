@@ -76,7 +76,7 @@ export async function initPlatform({
     defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
     api.setBaseUrl(defaults.endpoint);
   } else {
-    logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
+    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   let gitAuthor: string;
   try {
@@ -84,7 +84,7 @@ export async function initPlatform({
     gitAuthor = `${user.name} <${user.email}>`;
     authorId = user.id;
   } catch (err) {
-    logger.info(
+    logger.debug(
       { err },
       'Error authenticating with GitLab. Check that your token includes "user" permissions'
     );
@@ -99,11 +99,11 @@ export async function initPlatform({
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering GitLab repositories');
+  logger.debug('Autodiscovering GitLab repositories');
   try {
     const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
     const res = await api.get(url, { paginate: true });
-    logger.info(`Discovered ${res.body.length} project(s)`);
+    logger.debug(`Discovered ${res.body.length} project(s)`);
     return res.body.map(
       (repo: { path_with_namespace: string }) => repo.path_with_namespace
     );
@@ -150,25 +150,25 @@ export async function initRepo({
   try {
     res = await api.get(`projects/${config.repository}`);
     if (res.body.archived) {
-      logger.info(
+      logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
     if (res.body.mirror) {
-      logger.info(
+      logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_MIRRORED);
     }
     if (res.body.repository_access_level === 'disabled') {
-      logger.info(
+      logger.debug(
         'Repository portion of project is disabled - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.merge_requests_access_level === 'disabled') {
-      logger.info(
+      logger.debug(
         'MRs are disabled for the project - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_DISABLED);
@@ -249,7 +249,7 @@ export async function initRepo({
     if (err.message === REPOSITORY_DISABLED) {
       throw err;
     }
-    logger.info({ err }, 'Unknown GitLab initRepo error');
+    logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
   const repoConfig: RepoConfig = {
@@ -501,15 +501,15 @@ export async function mergePr(iid: number): Promise<boolean> {
     return true;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 401) {
-      logger.info('No permissions to merge PR');
+      logger.debug('No permissions to merge PR');
       return false;
     }
     if (err.statusCode === 406) {
-      logger.info('PR not acceptable for merging');
+      logger.debug({ err }, 'PR not acceptable for merging');
       return false;
     }
     logger.debug({ err }, 'merge PR error');
-    logger.info('PR merge failed');
+    logger.debug('PR merge failed');
     return false;
   }
 }
@@ -568,7 +568,7 @@ export function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
@@ -660,7 +660,7 @@ export async function setBranchStatus({
       )
     ) {
       // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
-      logger.info('Ignoring status transition error');
+      logger.debug('Ignoring status transition error');
     } else {
       logger.debug({ err });
       logger.warn('Failed to set branch status');
@@ -739,13 +739,14 @@ export async function ensureIssue({
           description,
         },
       });
+      logger.info('Issue created');
       // delete issueList so that it will be refetched as necessary
       delete config.issueList;
       return 'created';
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
-      logger.info(`Could not create issue: ${err.message}`);
+      logger.debug(`Could not create issue: ${err.message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -758,7 +759,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.title === title) {
-      logger.info({ issue }, 'Closing issue');
+      logger.debug({ issue }, 'Closing issue');
       await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
         body: { state_event: 'close' },
       });
@@ -895,13 +896,13 @@ export async function ensureComment({
   }
   if (!commentId) {
     await addComment(number, body);
-    logger.info(
+    logger.debug(
       { repository: config.repository, issueNo: number },
       'Added comment'
     );
   } else if (commentNeedsUpdating) {
     await editComment(number, commentId, body);
-    logger.info(
+    logger.debug(
       { repository: config.repository, issueNo: number },
       'Updated comment'
     );

@@ -7,3 +7,4 @@
 !bin/config-validator.js
 !tsconfig*.json
 !data
+!tools

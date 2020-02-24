@@ -102,7 +102,7 @@ export function initPlatform({
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering Bitbucket Server repositories');
+  logger.debug('Autodiscovering Bitbucket Server repositories');
   try {
     const repos = await utils.accumulateValues(
       `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`
@@ -230,7 +230,7 @@ export async function initRepo({
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    logger.info({ err }, 'Unknown Bitbucket initRepo error');
+    logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
 }
@@ -387,7 +387,7 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
     );
 
     config.prList = values.map(utils.prInfo);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   } else {
     logger.debug('returning cached PR list');
   }
@@ -438,7 +438,7 @@ export async function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
       {
@@ -451,7 +451,7 @@ export async function commitFilesToBranch({
       2
     )})`
   );
-  await config.storage.commitFilesToBranch({
+  const commit = config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
@@ -462,6 +462,7 @@ export async function commitFilesToBranch({
   await delay(1000);
   // refresh cache
   await getBranchPr(branchName, true);
+  return commit;
 }
 
 export function getFile(filePath: string, branchName: string): Promise<string> {
@@ -611,7 +612,7 @@ export async function setBranchStatus({
   if (existingStatus === state) {
     return;
   }
-  logger.info({ branch: branchName, context, state }, 'Setting branch status');
+  logger.debug({ branch: branchName, context, state }, 'Setting branch status');
 
   const branchCommit = await config.storage.getBranchCommit(branchName);
 
@@ -852,7 +853,7 @@ export async function ensureComment({
       );
     } else if (commentNeedsUpdating) {
       await editComment(number, commentId, body);
-      logger.info(
+      logger.debug(
         { repository: config.repository, prNo: number },
         'Comment updated'
       );
@@ -952,7 +953,7 @@ export async function createPr({
       err.body.errors[0].exceptionName ===
         'com.atlassian.bitbucket.pull.EmptyPullRequestException'
     ) {
-      logger.info(
+      logger.debug(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
       await deleteBranch(branchName);
@@ -1071,8 +1072,8 @@ export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 30000)
     .replace(
-      'tick the rebase/retry checkbox below',
-      'rename this PR to start with "rebase!"'
+      'you tick the rebase/retry checkbox',
+      'rename PR to start with "rebase!"'
     )
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')

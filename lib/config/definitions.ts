@@ -1,10 +1,8 @@
 import { RenovateConfigStage } from './common';
-import {
-  VERSION_SCHEME_DOCKER,
-  VERSION_SCHEME_PEP440,
-  VERSION_SCHEME_SEMVER,
-} from '../constants/version-schemes';
-import { getVersionSchemeList } from '../versioning';
+import * as dockerVersioning from '../versioning/docker';
+import * as pep440Versioning from '../versioning/pep440';
+import * as semverVersioning from '../versioning/semver';
+import { getVersioningList } from '../versioning';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { platformList } from '../platform';
 
@@ -40,16 +38,17 @@ export interface RenovateOptionBase {
   stage?: RenovateConfigStage;
 }
 
-export interface RenovateArrayOption<T extends string | object = any>
+export interface RenovateArrayOption<T extends string | object = object>
   extends RenovateOptionBase {
-  default?: T;
+  default?: T[];
   mergeable?: boolean;
   type: 'array';
+  subType?: 'string' | 'object';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
-  subType: 'string' | 'object';
+  subType: 'string';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
@@ -294,6 +293,13 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'debug',
   },
+  {
+    name: 'logContext',
+    description: 'Add a global or per-repo log context to each log entry.',
+    stage: 'global',
+    type: 'string',
+    default: null,
+  },
   // Onboarding
   {
     name: 'onboarding',
@@ -307,7 +313,7 @@ const options: RenovateOptions[] = [
     description: 'Configuration to use in onboarding PRs',
     stage: 'repository',
     type: 'object',
-    default: {},
+    default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
     admin: true,
     mergeable: true,
   },
@@ -412,7 +418,7 @@ const options: RenovateOptions[] = [
     allowString: true,
     cli: true,
     env: false,
-    default: 'at any time',
+    default: ['at any time'],
   },
   {
     name: 'updateNotScheduled',
@@ -605,15 +611,6 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'engines',
-    description: 'Configuration specifically for `package.json`>`engines`',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
     name: 'aliases',
     description: 'Aliases for registries, package manager specific',
     type: 'object',
@@ -635,11 +632,11 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'versionScheme',
-    description: 'Version scheme to use for filtering and comparisons',
+    name: 'versioning',
+    description: 'versioning to use for filtering and comparisons',
     type: 'string',
-    allowedValues: getVersionSchemeList(),
-    default: VERSION_SCHEME_SEMVER,
+    allowedValues: getVersioningList(),
+    default: semverVersioning.id,
     cli: false,
     env: false,
   },
@@ -985,7 +982,7 @@ const options: RenovateOptions[] = [
     default: {
       unpublishSafe: false,
       recreateClosed: true,
-      rebaseStalePrs: true,
+      rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
       commitMessageAction: 'Pin',
@@ -1045,16 +1042,11 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'rebaseConflictedPrs',
-    description: 'Auto-rebase when there is conflict in PRs',
-    type: 'boolean',
-    default: true,
-  },
-  {
-    name: 'rebaseStalePrs',
-    description: 'Rebase any PRs that are not up-to-date with the base branch',
-    type: 'boolean',
-    default: null,
+    name: 'rebaseWhen',
+    description: 'Control when Renovate decides to rebase an existing branch',
+    type: 'string',
+    allowedValues: ['auto', 'never', 'conflicted', 'behind-base-branch'],
+    default: 'auto',
   },
   {
     name: 'rebaseLabel',
@@ -1464,7 +1456,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: VERSION_SCHEME_DOCKER,
+      versioning: dockerVersioning.id,
       managerBranchPrefix: 'docker-',
       commitMessageTopic: '{{{depName}}} Docker tag',
       major: { enabled: false },
@@ -1510,7 +1502,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      versionScheme: VERSION_SCHEME_PEP440,
+      versioning: pep440Versioning.id,
     },
     mergeable: true,
     cli: false,
@@ -1631,6 +1623,7 @@ const options: RenovateOptions[] = [
     name: 'prBodyColumns',
     description: 'List of columns to use in PR bodies',
     type: 'array',
+    subType: 'string',
     default: ['Package', 'Type', 'Update', 'Change'],
   },
   {
@@ -1648,6 +1641,7 @@ const options: RenovateOptions[] = [
     description:
       'Options to suppress various types of warnings and other notifications',
     type: 'array',
+    subType: 'string',
     default: ['deprecationWarningIssues'],
     allowedValues: [
       'prIgnoreNotification',
