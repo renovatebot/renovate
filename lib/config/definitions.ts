@@ -36,16 +36,17 @@ export interface RenovateOptionBase {
   stage?: RenovateConfigStage;
 }
 
-export interface RenovateArrayOption<T extends string | object = any>
+export interface RenovateArrayOption<T extends string | object = object>
   extends RenovateOptionBase {
-  default?: T;
+  default?: T[];
   mergeable?: boolean;
   type: 'array';
+  subType?: 'string' | 'object';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
-  subType: 'string' | 'object';
+  subType: 'string';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
@@ -415,7 +416,7 @@ const options: RenovateOptions[] = [
     allowString: true,
     cli: true,
     env: false,
-    default: 'at any time',
+    default: ['at any time'],
   },
   {
     name: 'updateNotScheduled',
@@ -1620,6 +1621,7 @@ const options: RenovateOptions[] = [
     name: 'prBodyColumns',
     description: 'List of columns to use in PR bodies',
     type: 'array',
+    subType: 'string',
     default: ['Package', 'Type', 'Update', 'Change'],
   },
   {
@@ -1637,6 +1639,7 @@ const options: RenovateOptions[] = [
     description:
       'Options to suppress various types of warnings and other notifications',
     type: 'array',
+    subType: 'string',
     default: ['deprecationWarningIssues'],
     allowedValues: [
       'prIgnoreNotification',
