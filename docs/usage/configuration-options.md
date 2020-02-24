@@ -472,10 +472,6 @@ Use this figure to adjust the timeout for queries. The default is 60s, which is 
 }
 ```
 
-## html
-
-Supports subresource integrity (SRI) hashes.
-
 ## ignoreDeprecated
 
 By default, Renovate won't update a dependency version to a deprecated release unless the current version was _itself_ deprecated. The goal of this is to make sure you don't upgrade from a non-deprecated version to a deprecated one just because it's higher than the current version.
