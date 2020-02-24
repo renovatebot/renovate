@@ -505,7 +505,7 @@ export async function mergePr(iid: number): Promise<boolean> {
       return false;
     }
     if (err.statusCode === 406) {
-      logger.debug('PR not acceptable for merging');
+      logger.debug({ err }, 'PR not acceptable for merging');
       return false;
     }
     logger.debug({ err }, 'merge PR error');
