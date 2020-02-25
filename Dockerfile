@@ -20,6 +20,9 @@ FROM base as tsbuild
 # Python 3 and make are required to build node-re2
 RUN apt-get update && apt-get install -y python3-minimal build-essential
 
+# Update to latest npm, because installed is to old for python3
+RUN npm install -g npm@latest
+
 COPY package.json .
 COPY yarn.lock .
 COPY tools tools
