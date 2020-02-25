@@ -12,11 +12,11 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
-import { GotResponse } from '../../../lib/platform';
+import { GotResponse, Platform } from '../../../lib/platform';
 import { partial } from '../../util';
 
 describe('platform/gitlab', () => {
-  let gitlab: typeof import('../../../lib/platform/gitlab');
+  let gitlab: Platform;
   let api: jest.Mocked<typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api>;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let GitStorage: jest.Mocked<
@@ -305,8 +305,32 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getRepoForceRebase', () => {
-    it('should return false', () => {
-      expect(gitlab.getRepoForceRebase()).toBe(false);
+    it('should return false', async () => {
+      api.get.mockResolvedValueOnce(
+        partial<GotResponse>({
+          body: {
+            default_branch: 'master',
+            http_url_to_repo: null,
+            merge_method: 'merge',
+          },
+        })
+      );
+      await initRepo({ repository: 'some/repo/project', token: 'some-token' });
+      expect(await gitlab.getRepoForceRebase()).toBe(false);
+    });
+
+    it('should return true', async () => {
+      api.get.mockResolvedValueOnce(
+        partial<GotResponse>({
+          body: {
+            default_branch: 'master',
+            http_url_to_repo: null,
+            merge_method: 'ff',
+          },
+        })
+      );
+      await initRepo({ repository: 'some/repo/project', token: 'some-token' });
+      expect(await gitlab.getRepoForceRebase()).toBe(true);
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -1074,7 +1098,7 @@ describe('platform/gitlab', () => {
   describe('mergePr(pr)', () => {
     jest.resetAllMocks();
     it('merges the PR', async () => {
-      await gitlab.mergePr(1);
+      await gitlab.mergePr(1, undefined);
       expect(api.put.mock.calls.length).toEqual(1);
     });
   });
