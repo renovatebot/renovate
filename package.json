@@ -9,10 +9,12 @@
   "scripts": {
     "build": "run-s clean compile:* copy-static-files",
     "build:docker": "run-s compile:ts copy-static-files",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist  tools/**/*.generated.ts",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
     "compile:dts": "tsc -p tsconfig.dts.json",
+    "generate": "run-s generate:*",
+    "generate:imports": "node --experimental-modules tools/generate-imports.js",
     "copy-static-files": "copyfiles -u 1 -e **/__fixtures__/**  -e **/__mocks__/** lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
@@ -31,7 +33,8 @@
     "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "babel-node --extensions \".ts,.js\" -- test/json-schema.ts",
     "test": "run-s lint test-schema type-check jest",
-    "type-check": "tsc --noEmit"
+    "tsc": "tsc",
+    "type-check": "run-s generate:* \"tsc --noEmit\""
   },
   "repository": {
     "type": "git",

@@ -11,3 +11,5 @@ coverage
 **/__mocks__/**
 **/*.d.ts
 /config.js
+
+**/*.generated.ts

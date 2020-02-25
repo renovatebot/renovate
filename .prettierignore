@@ -13,3 +13,5 @@ package.json
 **/_fixtures/
 **/__mocks__/
 bin/yarn*
+
+**/*.generated.ts
