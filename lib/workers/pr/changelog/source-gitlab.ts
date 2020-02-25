@@ -2,24 +2,30 @@ import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
-import * as allVersioning from '../../../versioning';
+import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
+import {
+  ChangeLogConfig,
+  ChangeLogError,
+  ChangeLogRelease,
+  ChangeLogResult,
+} from './common';
 import { Release } from '../../../datasource';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
-import { BranchUpgradeConfig } from '../../common';
 
-const { get: ghGot } = api;
+const ghGot = api.get;
 
 async function getTags(
   endpoint: string,
-  versioning: string,
+  versionScheme: string,
   repository: string
 ): Promise<string[]> {
+  logger.debug('getTags from gitlab');
   let url = endpoint
     ? endpoint.replace(/\/?$/, '/')
-    : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
-  url += `repos/${repository}/tags?per_page=100`;
+    : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://gitlab.com/api/v4/';
+  let repoid = repository.replace(/\.git/, '').replace(/\//, '%2F');
+  url += `projects/${repoid}/repository/tags`;
+  logger.debug({ url }, 'Tags URL');
   try {
     const res = await ghGot<{ name: string }[]>(url, {
       paginate: true,
@@ -28,12 +34,13 @@ async function getTags(
     const tags = (res && res.body) || [];
 
     if (!tags.length) {
-      logger.debug({ repository }, 'repository has no Github tags');
+      logger.debug({ repoid }, 'repository has no Gitlab tags');
     }
+    // logger.debug({ tags }, 'Repository tags');
 
     return tags.map(tag => tag.name).filter(Boolean);
   } catch (err) {
-    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
+    logger.info({ sourceRepo: repoid }, 'Failed to fetch Gitlab tags');
     logger.debug({ err });
     // istanbul ignore if
     if (err.message && err.message.includes('Bad credentials')) {
@@ -46,51 +53,60 @@ async function getTags(
 
 export async function getChangeLogJSON({
   endpoint,
-  versioning,
+  versionScheme,
   fromVersion,
   toVersion,
   sourceUrl,
   releases,
   depName,
   manager,
-}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
-  if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
-    logger.debug('No release notes for @types');
-    return null;
-  }
-  const version = allVersioning.get(versioning);
+}: ChangeLogConfig): Promise<ChangeLogResult | null> {
+  logger.debug('Getting ChangeLog JSON');
+  const version = versioning.get(versionScheme);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const baseURL = `${protocol}//${host}/`;
-  const url = sourceUrl.startsWith('https://github.com/')
-    ? 'https://api.github.com/'
-    : sourceUrl;
+  logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
+  //
+  // const baseURL = `${protocol}//${host}/`;
+  //
+  const baseURL = 'https://gitlab.com/';
+  // const url = sourceUrl.startsWith('https://github.com/')
+  // ? 'https://api.github.com/'
+  // : sourceUrl;
+  const url = sourceUrl;
+  logger.debug({ url }, 'URL from sourceUrl');
   const config = hostRules.find({
-    hostType: PLATFORM_TYPE_GITHUB,
+    hostType: 'gitlab',
     url,
   });
-  // istanbul ignore if
-  if (!config.token) {
-    // prettier-ignore
-    if (URL.parse(sourceUrl).host.endsWith('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
-      logger.warn(
-        { manager, depName, sourceUrl },
-        'No github.com token has been configured. Skipping release notes retrieval'
-      );
-      return { error: ChangeLogError.MissingGithubToken };
-    }
-    // This should change now that gitlab is another option for retrieval
-    logger.debug(
-      { manager, depName, sourceUrl },
-      'Repository URL does not match any known github hosts - skipping changelog retrieval'
-    );
-    return null;
-  }
-  const apiBaseURL = sourceUrl.startsWith('https://github.com/')
-    ? 'https://api.github.com/'
-    : endpoint; // TODO FIX
-  const repository = pathname.slice(1).replace(/\/$/, '');
+  // if (!config.token) {
+  // // istanbul ignore if
+  // if (sourceUrl.includes('gitlab.com')) {
+  // logger.warn(
+  // { manager, depName, sourceUrl, config },
+  // 'No gitlab.com token has been configured. Skipping release notes retrieval'
+  // );
+  // return { error: ChangeLogError.MissingGithubToken };
+  // }
+  // logger.info(
+  // { manager, depName, sourceUrl },
+  // 'Repository URL does not match any known gitlab hosts - skipping changelog retrieval'
+  // );
+  // return null;
+  // }
+  // const apiBaseURL = sourceUrl.startsWith('https://github.com/')
+  // ? 'https://api.github.com/'
+  // : endpoint; // TODO FIX
+  logger.debug({ endpoint }, 'Endpoint');
+  // const apiBaseURL = endpoint; // TODO FIX ver arriba
+  const apiBaseURL = 'https://gitlab.com/api/v4/';
+  logger.debug({ apiBaseURL }, 'apiBaseURL');
+  const repository = pathname
+    .slice(1)
+    .replace(/\/$/, '')
+    .replace(/\.git/, '');
+  logger.debug({ repository }, 'Repository sliced url');
   if (repository.split('/').length !== 2) {
-    logger.debug({ sourceUrl }, 'Invalid github URL found');
+    logger.info({ sourceUrl }, 'Invalid gitlab (github) URL found');
     return null;
   }
   if (!(releases && releases.length)) {
@@ -111,7 +127,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versioning, repository);
+      tags = await getTags(endpoint, versionScheme, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags
@@ -126,7 +142,7 @@ export async function getChangeLogJSON({
     return null;
   }
 
-  const cacheNamespace = 'changelog-github-release';
+  const cacheNamespace = 'changelog-gitlab-release';
   function getCacheKey(prev: string, next: string): string {
     return `${manager}:${depName}:${prev}:${next}`;
   }
@@ -173,14 +189,17 @@ export async function getChangeLogJSON({
     project: {
       apiBaseURL,
       baseURL,
-      github: repository,
+      gitlab: repository,
       repository: sourceUrl,
       depName,
     },
     versions: changelogReleases,
   };
+  logger.debug({ res }, 'Res from source-gitlab getChangeLogJSON');
 
   res = await addReleaseNotes(res);
+
+  // logger.debug({ res }, 'Res after addReleaseNotes');
 
   return res;
 }

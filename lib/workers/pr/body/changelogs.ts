@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import handlebars from 'handlebars';
 import releaseNotesHbs from '../changelog/hbs-template';
 import { BranchConfig } from '../../common';
@@ -8,6 +9,10 @@ export function getChangelogs(config: BranchConfig): string {
   if (!config.hasReleaseNotes) {
     return releaseNotes;
   }
+  logger.debug({ config }, 'Config before compile');
+  // TODO: debugging upgrades, remove
+  const upgrades = config.upgrades;
+  logger.debug({ upgrades }, 'Config upgrades array');
   releaseNotes +=
     '\n\n---\n\n' + handlebars.compile(releaseNotesHbs)(config) + '\n\n';
   releaseNotes = releaseNotes.replace(/### \[`vv/g, '### [`v');
@@ -32,5 +37,6 @@ export function getChangelogs(config: BranchConfig): string {
   const backTickRe = /&#x60;([^/]*?)&#x60;/g;
   releaseNotes = releaseNotes.replace(backTickRe, '`$1`');
   releaseNotes = releaseNotes.replace(/`#&#8203;(\d+)`/g, '`#$1`');
+  logger.debug({ releaseNotes }, 'releaseNotes after replacing stuff');
   return releaseNotes;
 }
