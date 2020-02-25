@@ -31,7 +31,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
-import { RenovateConfig } from '../../../test/util';
+import { RenovateConfig } from '../../config';
 
 interface Config {
   storage: GitStorage;
