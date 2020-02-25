@@ -17,6 +17,7 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  BranchStatus,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
@@ -119,13 +120,14 @@ function urlEscape(str: string): string {
   return str ? str.replace(/\//g, '%2F') : str;
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage) {
     config.storage.cleanRepo();
   }
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
+  return Promise.resolve();
 }
 
 // Initialize GitLab by getting base branch
@@ -296,7 +298,7 @@ export function branchExists(branchName: string): Promise<boolean> {
 
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
 
-interface BranchStatus {
+interface GitlabBranchStatus {
   status: BranchState;
   name: string;
   allow_failure?: boolean;
@@ -305,7 +307,7 @@ interface BranchStatus {
 async function getStatus(
   branchName: string,
   useCache = true
-): Promise<BranchStatus[]> {
+): Promise<GitlabBranchStatus[]> {
   const branchSha = await config.storage.getBranchCommit(branchName);
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
@@ -316,7 +318,7 @@ async function getStatus(
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks?: string[] | null
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
@@ -338,13 +340,13 @@ export async function getBranchStatus(
     // Return 'pending' if we have no status checks
     return BRANCH_STATUS_PENDING;
   }
-  let status = BRANCH_STATUS_SUCCESS;
+  let status: BranchStatus = BRANCH_STATUS_SUCCESS;
   // Return 'success' if all are success
   res.forEach(check => {
     // If one is failed then don't overwrite that
     if (status !== 'failure') {
       if (!check.allow_failure) {
-        if (check.status === 'failed') {
+        if (check.status === 'failed' || check.status === 'canceled') {
           status = BRANCH_STATUS_FAILURE;
         } else if (check.status !== 'success') {
           ({ status } = check);
@@ -870,15 +872,15 @@ export async function ensureComment({
   number,
   topic,
   content,
-}: EnsureCommentConfig): Promise<void> {
+}: EnsureCommentConfig): Promise<boolean> {
   const sanitizedContent = sanitize(content);
   const massagedTopic = topic
     ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
     : topic;
   const comments = await getComments(number);
   let body: string;
-  let commentId;
-  let commentNeedsUpdating;
+  let commentId: number;
+  let commentNeedsUpdating: boolean;
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
@@ -914,6 +916,7 @@ export async function ensureComment({
   } else {
     logger.debug('Comment is already update-to-date');
   }
+  return true;
 }
 
 export async function ensureCommentRemoval(
@@ -922,7 +925,7 @@ export async function ensureCommentRemoval(
 ): Promise<void> {
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
-  let commentId;
+  let commentId: number;
   comments.forEach((comment: { body: string; id: number }) => {
     if (comment.body.startsWith(`### ${topic}\n\n`)) {
       commentId = comment.id;

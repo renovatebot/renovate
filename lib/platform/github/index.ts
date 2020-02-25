@@ -18,6 +18,8 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
+  BranchStatus,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -178,13 +180,14 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage) {
     config.storage.cleanRepo();
   }
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
+  return Promise.resolve();
 }
 
 async function getBranchProtection(
@@ -1054,14 +1057,14 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 type BranchState = 'failure' | 'pending' | 'success';
 
-interface BranchStatus {
+interface GhBranchStatus {
   context: string;
   state: BranchState;
 }
 
 interface CombinedBranchStatus {
   state: BranchState;
-  statuses: BranchStatus[];
+  statuses: GhBranchStatus[];
 }
 
 async function getStatus(
@@ -1079,7 +1082,7 @@ async function getStatus(
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks: any
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
@@ -1168,7 +1171,7 @@ export async function getBranchStatus(
 async function getStatusCheck(
   branchName: string,
   useCache = true
-): Promise<BranchStatus[]> {
+): Promise<GhBranchStatus[]> {
   const branchCommit = await config.storage.getBranchCommit(branchName);
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
@@ -1346,7 +1349,7 @@ export async function ensureIssue({
   body: rawBody,
   once = false,
   shouldReOpen = true,
-}: EnsureIssueConfig): Promise<string | null> {
+}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   const body = sanitize(rawBody);
   try {

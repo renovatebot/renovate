@@ -19,6 +19,8 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
+  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -29,6 +31,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
+import { RenovateConfig } from '../../../test/util';
 
 interface Config {
   storage: GitStorage;
@@ -55,10 +58,7 @@ const defaults: any = {
 export function initPlatform({
   endpoint,
   token,
-}: {
-  endpoint: string;
-  token: string;
-}): PlatformConfig {
+}: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
@@ -74,7 +74,7 @@ export function initPlatform({
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -163,14 +163,14 @@ export async function initRepo({
   return repoConfig;
 }
 
-export function getRepoForceRebase(): boolean {
-  return false;
+export function getRepoForceRebase(): Promise<boolean> {
+  return Promise.resolve(config.repoForceRebase === true);
 }
 
 // Search
 
 export /* istanbul ignore next */ function getFileList(
-  branchName: string
+  branchName?: string
 ): Promise<string[]> {
   return config.storage.getFileList(branchName);
 }
@@ -389,7 +389,7 @@ export /* istanbul ignore next */ function getCommitMessages(): Promise<
 export async function getBranchStatusCheck(
   branchName: string,
   context?: string
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
@@ -405,7 +405,7 @@ export async function getBranchStatusCheck(
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks: any
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
@@ -499,7 +499,7 @@ export async function ensureComment({
   number,
   topic,
   content,
-}: EnsureCommentConfig): Promise<void> {
+}: EnsureCommentConfig): Promise<boolean> {
   logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const header = topic ? `### ${topic}\n\n` : '';
   const body = `${header}${sanitize(content)}`;
@@ -554,6 +554,8 @@ export async function ensureComment({
       'Comment is already update-to-date'
     );
   }
+
+  return true;
 }
 
 export async function ensureCommentRemoval(
@@ -591,15 +593,16 @@ export function setBranchStatus({
   description,
   state,
   url: targetUrl,
-}: BranchStatusConfig): void {
+}: BranchStatusConfig): Promise<void> {
   logger.debug(
     `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
   );
+  return Promise.resolve();
 }
 
-export async function mergePr(pr: number): Promise<void> {
+export function mergePr(pr: number, branchName: string): Promise<boolean> {
   logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  await Promise.resolve();
+  return Promise.resolve(false);
 }
 
 export function getPrBody(input: string): string {
@@ -616,22 +619,24 @@ export function getPrBody(input: string): string {
     .replace('</details>', '');
 }
 
-export /* istanbul ignore next */ function findIssue(): Issue | null {
+export /* istanbul ignore next */ function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue(): void {
+export /* istanbul ignore next */ function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
+  return Promise.resolve(null);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export /* istanbul ignore next */ function ensureIssueClosing(): void {}
+export /* istanbul ignore next */ function ensureIssueClosing(): Promise<void> {
+  return Promise.resolve();
+}
 
-export /* istanbul ignore next */ function getIssueList(): Issue[] {
+export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
-  return [];
+  return Promise.resolve([]);
 }
 
 /**
@@ -726,21 +731,22 @@ export /* istanbul ignore next */ async function deleteLabel(
 }
 
 // to become async?
-export function getPrFiles(prNo: number): string[] {
+export function getPrFiles(prNo: number): Promise<string[]> {
   logger.debug(
     `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
   );
-  return [];
+  return Promise.resolve([]);
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
   config = {} as any;
+  return Promise.resolve();
 }

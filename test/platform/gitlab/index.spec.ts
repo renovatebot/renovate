@@ -23,12 +23,12 @@ describe('platform/gitlab', () => {
     typeof import('../../../lib/platform/git/storage')
   > &
     jest.Mock;
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.resetAllMocks();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
-    gitlab = require('../../../lib/platform/gitlab');
+    gitlab = await import('../../../lib/platform/gitlab');
     api = require('../../../lib/platform/gitlab/gl-got-wrapper').api;
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
