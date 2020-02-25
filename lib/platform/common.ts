@@ -145,8 +145,10 @@ export interface EnsureCommentConfig {
  */
 export type VulnerabilityAlert = any;
 
+export type EnsureIssueResult = 'updated' | 'created';
+
 export interface Platform {
-  findIssue(title: string): Promise<Issue>;
+  findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   getCommitMessages(): Promise<string[]>;
@@ -160,7 +162,7 @@ export interface Platform {
   getFileList(): Promise<string[]>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
-  ): Promise<'updated' | 'created' | null>;
+  ): Promise<EnsureIssueResult | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;

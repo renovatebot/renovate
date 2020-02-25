@@ -18,6 +18,9 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
+  EnsureIssueConfig,
+  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -33,6 +36,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
+import { RenovateConfig } from '../../config';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -78,11 +82,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: {
-  endpoint: string;
-  username: string;
-  password: string;
-}): PlatformConfig {
+}: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
@@ -97,7 +97,7 @@ export function initPlatform({
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
 // Get all repositories that the user has access to
@@ -119,12 +119,13 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   logger.debug(`cleanRepo()`);
   if (config.storage) {
     config.storage.cleanRepo();
   }
   config = {} as any;
+  return Promise.resolve();
 }
 
 // Initialize GitLab by getting base branch
@@ -235,13 +236,13 @@ export async function initRepo({
   }
 }
 
-export function getRepoForceRebase(): boolean {
+export function getRepoForceRebase(): Promise<boolean> {
   logger.debug(`getRepoForceRebase()`);
   // TODO if applicable
   // This function should return true only if the user has enabled a setting on the repo that enforces PRs to be kept up to date with master
   // In such cases we rebase Renovate branches every time they fall behind
   // In GitHub this is part of "branch protection"
-  return false;
+  return Promise.resolve(false);
 }
 
 export async function setBaseBranch(
@@ -525,8 +526,8 @@ async function getStatus(
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks?: string[] | boolean | null
-): Promise<string> {
+  requiredStatusChecks?: string[] | null
+): Promise<BranchStatus> {
   logger.debug(
     `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
   );
@@ -658,7 +659,7 @@ export async function setBranchStatus({
 
 export /* istanbul ignore next */ function findIssue(
   title: string
-): Issue | null {
+): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -666,10 +667,9 @@ export /* istanbul ignore next */ function findIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue(
-  title: string,
-  body: string
-): Promise<'updated' | 'created' | null> {
+export /* istanbul ignore next */ function ensureIssue({
+  title,
+}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
