@@ -202,7 +202,7 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
-    config.mergeMethod = res.body.merge_method;
+    config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
     config.email = (await api.get(`user`)).body.email;
