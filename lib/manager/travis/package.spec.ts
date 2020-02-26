@@ -1,5 +1,5 @@
 import { getPackageUpdates } from './package';
-import { getPkgReleases as _getPkgReleases } from '../../datasource/github';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/github-tags';
 import { getConfig } from '../../config/defaults';
 
 const defaultConfig = getConfig();
