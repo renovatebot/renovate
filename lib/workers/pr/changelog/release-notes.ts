@@ -59,6 +59,7 @@ export async function getReleaseList(
       return res.body.map(release => ({
         name: release.name,
         body: release.description,
+        tag: release.tag_name,
       }));
     }
   } catch (err) /* istanbul ignore next */ {
@@ -109,15 +110,17 @@ export async function getReleaseNotes(
   logger.debug({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach(release => {
-    // TODO: this might match only github, check
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
       release.tag === `${depName}-${version}`
     ) {
-      logger.debug('¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡ESTAMOS DENTRO!!!!!!!!!!!!!!!!');
+      logger.debug('¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡We are in!!!!!!!!!!!!!!!!');
       releaseNotes = release;
-      releaseNotes.url = `${baseURL}${repository}/releases/${release.tag}`;
+      releaseNotes.url =
+        baseURL.search(/github/) != -1
+          ? `${baseURL}${repository}/releases/${release.tag}`
+          : `${baseURL}${repository}/tags/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseURL);
       if (!releaseNotes.body.length) {
         releaseNotes = null;

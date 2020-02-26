@@ -9,10 +9,6 @@ export function getChangelogs(config: BranchConfig): string {
   if (!config.hasReleaseNotes) {
     return releaseNotes;
   }
-  logger.debug({ config }, 'Config before compile');
-  // TODO: debugging upgrades, remove
-  const upgrades = config.upgrades;
-  logger.debug({ upgrades }, 'Config upgrades array');
   releaseNotes +=
     '\n\n---\n\n' + handlebars.compile(releaseNotesHbs)(config) + '\n\n';
   releaseNotes = releaseNotes.replace(/### \[`vv/g, '### [`v');
