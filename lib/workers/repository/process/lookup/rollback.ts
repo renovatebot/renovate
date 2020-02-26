@@ -17,7 +17,7 @@ export function getRollbackUpdate(
   const version = allVersioning.get(versioning);
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
-    logger.info(
+    logger.debug(
       { versioning },
       'Current versioning does not support isLessThanRange()'
     );
@@ -28,13 +28,13 @@ export function getRollbackUpdate(
   );
   // istanbul ignore if
   if (!lessThanVersions.length) {
-    logger.info(
+    logger.debug(
       { packageFile, depName, currentValue },
       'Missing version has nothing to roll back to'
     );
     return null;
   }
-  logger.info(
+  logger.debug(
     { packageFile, depName, currentValue },
     `Current version not found - rolling back`
   );
@@ -46,7 +46,7 @@ export function getRollbackUpdate(
   const toVersion = lessThanVersions.pop();
   // istanbul ignore if
   if (!toVersion) {
-    logger.info('No toVersion to roll back to');
+    logger.debug('No toVersion to roll back to');
     return null;
   }
   const newValue = version.getNewValue({

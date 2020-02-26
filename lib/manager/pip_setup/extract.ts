@@ -52,7 +52,7 @@ export async function extractSetupFile(
   let cmd: string;
   const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
   if (config.binarySource === BinarySource.Docker) {
-    logger.info('Running python via docker');
+    logger.debug('Running python via docker');
     await exec(`docker pull renovate/pip`);
     cmd = 'docker';
     args.unshift(
@@ -72,7 +72,7 @@ export async function extractSetupFile(
       'python'
     );
   } else {
-    logger.info('Running python via global command');
+    logger.debug('Running python via global command');
     cmd = await getPythonAlias();
   }
   logger.debug({ cmd, args }, 'python command');

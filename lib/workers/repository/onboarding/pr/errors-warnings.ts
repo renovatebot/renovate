@@ -56,7 +56,7 @@ export function getDepWarnings(
     if (!warnings.length) {
       return '';
     }
-    logger.info(
+    logger.debug(
       { warnings, warningFiles },
       'Found package lookup warnings in onboarding'
     );

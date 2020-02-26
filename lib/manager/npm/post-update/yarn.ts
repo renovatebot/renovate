@@ -23,8 +23,8 @@ export async function generateLockFile(
   const { binarySource } = config;
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
-  let stdout: string;
-  let stderr: string;
+  let stdout = '';
+  let stderr = '';
   let cmd: string;
   try {
     try {
@@ -44,10 +44,10 @@ export async function generateLockFile(
           const renovatePath = await getInstalledPath('renovate', {
             local: true,
           });
-          logger.info('Using nested bundled yarn@1.9.4 for install');
+          logger.debug('Using nested bundled yarn@1.9.4 for install');
           cmd = 'node ' + join(renovatePath, 'bin/yarn-1.9.4.js');
         } catch (err) {
-          logger.info('Using bundled yarn@1.9.4 for install');
+          logger.debug('Using bundled yarn@1.9.4 for install');
           cmd = cmd.replace(
             'node_modules/yarn/bin/yarn.js',
             'bin/yarn-1.9.4.js'
@@ -103,7 +103,7 @@ export async function generateLockFile(
       .filter(upgrade => upgrade.isLockfileUpdate)
       .map(upgrade => upgrade.depName);
     if (lockUpdates.length) {
-      logger.info('Performing lockfileUpdate (yarn)');
+      logger.debug('Performing lockfileUpdate (yarn)');
       const updateCmd =
         cmd +
         ' upgrade' +
@@ -124,7 +124,7 @@ export async function generateLockFile(
       config.postUpdateOptions &&
       config.postUpdateOptions.includes('yarnDedupeFewer')
     ) {
-      logger.info('Performing yarn dedupe fewer');
+      logger.debug('Performing yarn dedupe fewer');
       const dedupeCommand =
         'npx yarn-deduplicate@1.1.1 --strategy fewer && yarn';
       const dedupeRes = await exec(dedupeCommand, {
@@ -142,7 +142,7 @@ export async function generateLockFile(
       config.postUpdateOptions &&
       config.postUpdateOptions.includes('yarnDedupeHighest')
     ) {
-      logger.info('Performing yarn dedupe highest');
+      logger.debug('Performing yarn dedupe highest');
       const dedupeCommand =
         'npx yarn-deduplicate@1.1.1 --strategy highest && yarn';
       const dedupeRes = await exec(dedupeCommand, {
@@ -158,7 +158,7 @@ export async function generateLockFile(
     }
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    logger.debug(
       {
         cmd,
         err,

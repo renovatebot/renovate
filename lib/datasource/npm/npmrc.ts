@@ -45,7 +45,7 @@ export function setNpmrc(input?: string): void {
         val &&
         val.includes('localhost')
       ) {
-        logger.info(
+        logger.debug(
           { key, val },
           'Detected localhost registry - rejecting npmrc file'
         );

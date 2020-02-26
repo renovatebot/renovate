@@ -159,7 +159,7 @@ export async function getReleaseNotesMd(
     [changelogFile] = files;
     /* istanbul ignore if */
     if (files.length > 1) {
-      logger.info(
+      logger.debug(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }

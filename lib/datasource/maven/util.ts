@@ -72,13 +72,13 @@ export async function downloadHttpProtocol(
         'Dependency lookup unauthorized. Please add authentication with a hostRule'
       );
     } else if (isTemporalError(err)) {
-      logger.info({ failedUrl, err }, 'Temporary error');
+      logger.debug({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
         throw new DatasourceError(err);
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next
-      logger.info({ failedUrl }, 'Connection refused to maven registry');
+      logger.debug({ failedUrl }, 'Connection refused to maven registry');
     } else {
       logger.warn({ failedUrl, err }, 'Unknown error');
     }

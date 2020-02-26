@@ -1,5 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "parentBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "updated-file",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch needs update 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "parentBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "updated-file",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch no update 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "parentBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [],
+}
+`;
+
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
 Object {
   "artifactErrors": Array [],

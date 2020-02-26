@@ -115,7 +115,8 @@ function moduleStringVariableExpressionVersionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return new RegExp(
-    `${groovyQuotes}${dependency.group}:${dependency.name}:\\$\{([^{].*?)}${groovyQuotes}`
+    `${groovyQuotes}${dependency.group}:${dependency.name}:\\$` +
+      `{([^{].*?)}${groovyQuotes}`
   );
 }
 

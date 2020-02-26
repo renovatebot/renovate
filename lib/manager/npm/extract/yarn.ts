@@ -13,7 +13,7 @@ export async function getYarnLock(filePath: string): Promise<YarnLock> {
     const yarnLockParsed = parse(yarnLockRaw);
     // istanbul ignore if
     if (yarnLockParsed.type !== 'success') {
-      logger.info(
+      logger.debug(
         { filePath, parseType: yarnLockParsed.type },
         'Error parsing yarn.lock - not success'
       );
@@ -33,7 +33,7 @@ export async function getYarnLock(filePath: string): Promise<YarnLock> {
     }
     return lockFile;
   } catch (err) {
-    logger.info({ filePath, err }, 'Warning: Exception parsing yarn.lock');
+    logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
     return {};
   }
 }

@@ -4,6 +4,14 @@ exports[`datasource/github getPkgReleases returns releases 1`] = `
 Object {
   "releases": Array [
     Object {
+      "gitRef": "a",
+      "version": "a",
+    },
+    Object {
+      "gitRef": "v",
+      "version": "v",
+    },
+    Object {
       "gitRef": "1.0.0",
       "version": "1.0.0",
     },

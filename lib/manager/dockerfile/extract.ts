@@ -89,7 +89,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug({ currentFrom }, 'Skipping index reference COPY --from');
       } else {
         const dep = getDep(currentFrom);
-        logger.info(
+        logger.debug(
           {
             depName: dep.depName,
             currentValue: dep.currentValue,

@@ -57,7 +57,7 @@ export async function getPreset(
   try {
     return JSON.parse(res);
   } catch (err) /* istanbul ignore next */ {
-    logger.info('Failed to parse renovate.json');
+    logger.debug('Failed to parse renovate.json');
     throw new Error('invalid preset JSON');
   }
 }
@@ -120,7 +120,7 @@ export async function getPkgReleases({
     }
   } catch (err) {
     // istanbul ignore next
-    logger.info({ repo, err }, 'Error retrieving from Gitlab');
+    logger.debug({ repo, err }, 'Error retrieving from Gitlab');
   }
 
   // istanbul ignore if

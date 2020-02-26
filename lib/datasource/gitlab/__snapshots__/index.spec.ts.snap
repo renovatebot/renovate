@@ -4,6 +4,14 @@ exports[`datasource/gitlab getPkgReleases returns releases 1`] = `
 Object {
   "releases": Array [
     Object {
+      "gitRef": "a",
+      "version": "a",
+    },
+    Object {
+      "gitRef": "v",
+      "version": "v",
+    },
+    Object {
       "gitRef": "1.0.0",
       "version": "1.0.0",
     },
@@ -12,7 +20,7 @@ Object {
       "version": "v1.1.0",
     },
   ],
-  "sourceUrl": "https://gitlab.com/some/dep",
+  "sourceUrl": "https://gitlab.com/undefined",
 }
 `;
 
@@ -28,6 +36,6 @@ Object {
       "version": "v1.1.0",
     },
   ],
-  "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+  "sourceUrl": "https://gitlab.company.com/api/v4/undefined",
 }
 `;

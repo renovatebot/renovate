@@ -75,7 +75,7 @@ async function getDependency(
     }
     return dependency;
   } catch (err) {
-    logger.info(
+    logger.debug(
       'pypi dependency not found: ' + depName + '(searching in ' + hostUrl + ')'
     );
     return null;
@@ -141,7 +141,7 @@ async function getSimpleDependency(
     }
     return dependency;
   } catch (err) {
-    logger.info(
+    logger.debug(
       'pypi dependency not found: ' + depName + '(searching in ' + hostUrl + ')'
     );
     return null;

@@ -11,7 +11,7 @@ export async function getParentBranch(
   // Check if branch exists
   const branchExists = await platform.branchExists(branchName);
   if (!branchExists) {
-    logger.info(`Branch needs creating`);
+    logger.debug(`Branch needs creating`);
     return { parentBranch: undefined };
   }
   logger.debug(`Branch already exists`);
@@ -21,15 +21,15 @@ export async function getParentBranch(
 
   if (pr) {
     if (pr.title && pr.title.startsWith('rebase!')) {
-      logger.info('Manual rebase requested via PR title for #' + pr.number);
+      logger.debug('Manual rebase requested via PR title for #' + pr.number);
       return { parentBranch: undefined };
     }
     if (pr.body && pr.body.includes(`- [x] <!-- rebase-check -->`)) {
-      logger.info('Manual rebase requested via PR checkbox for #' + pr.number);
+      logger.debug('Manual rebase requested via PR checkbox for #' + pr.number);
       return { parentBranch: undefined };
     }
     if (pr.labels && pr.labels.includes(config.rebaseLabel)) {
-      logger.info('Manual rebase requested via PR labels for #' + pr.number);
+      logger.debug('Manual rebase requested via PR labels for #' + pr.number);
       // istanbul ignore if
       if (config.dryRun) {
         logger.info(
@@ -43,19 +43,19 @@ export async function getParentBranch(
   }
 
   if (
-    config.rebaseStalePrs ||
-    (config.rebaseStalePrs === null && (await platform.getRepoForceRebase())) ||
+    config.rebaseWhen === 'behind-base-branch' ||
+    (config.rebaseWhen === 'auto' && (await platform.getRepoForceRebase())) ||
     (config.automerge && config.automergeType === 'branch')
   ) {
     const isBranchStale = await platform.isBranchStale(branchName);
     if (isBranchStale) {
-      logger.info(`Branch is stale and needs rebasing`);
+      logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (!pr || !pr.isModified) {
         return { parentBranch: undefined };
       }
       // TODO: Warn here so that it appears in PR body
-      logger.info('Cannot rebase branch');
+      logger.debug('Cannot rebase branch');
       return { parentBranch: branchName, isModified: true };
     }
   }
@@ -65,9 +65,9 @@ export async function getParentBranch(
     logger.debug('PR is conflicted');
 
     if (!pr.isModified) {
-      logger.info(`Branch is not mergeable and needs rebasing`);
-      if (!config.rebaseConflictedPrs) {
-        logger.info('rebaseConflictedPrs is disabled');
+      logger.debug(`Branch is not mergeable and needs rebasing`);
+      if (config.rebaseWhen === 'never') {
+        logger.debug('Rebasing disabled by config');
         return { parentBranch: branchName, isModified: false };
       }
       // Setting parentBranch back to undefined means that we'll use the default branch
@@ -75,7 +75,7 @@ export async function getParentBranch(
     }
     // Don't do anything different, but warn
     // TODO: Add warning to PR
-    logger.info(`Branch is not mergeable but can't be rebased`);
+    logger.debug(`Branch is not mergeable but can't be rebased`);
   }
   logger.debug(`Branch does not need rebasing`);
   return { parentBranch: branchName, isModified: false };
