@@ -200,7 +200,7 @@ const platform: Platform = {
       // Ensure endpoint contains trailing slash
       defaults.endpoint = endpoint.replace(/\/?$/, '/');
     } else {
-      logger.info('Using default Gitea endpoint: ' + defaults.endpoint);
+      logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
     api.setBaseUrl(defaults.endpoint);
 
@@ -210,7 +210,10 @@ const platform: Platform = {
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
     } catch (err) {
-      logger.info({ err }, 'Error authenticating with Gitea. Check your token');
+      logger.debug(
+        { err },
+        'Error authenticating with Gitea. Check your token'
+      );
       throw new Error('Init: Authentication failure');
     }
 
@@ -236,31 +239,31 @@ const platform: Platform = {
     try {
       repo = await helper.getRepo(repository);
     } catch (err) {
-      logger.info({ err }, 'Unknown Gitea initRepo error');
+      logger.debug({ err }, 'Unknown Gitea initRepo error');
       throw err;
     }
 
     // Ensure appropriate repository state and permissions
     if (repo.archived) {
-      logger.info(
+      logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
     if (repo.mirror) {
-      logger.info(
+      logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_MIRRORED);
     }
     if (!repo.permissions.pull || !repo.permissions.push) {
-      logger.info(
+      logger.debug(
         'Repository does not permit pull and push - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (repo.empty) {
-      logger.info('Repository is empty - throwing error to abort renovation');
+      logger.debug('Repository is empty - throwing error to abort renovation');
       throw new Error(REPOSITORY_EMPTY);
     }
 
@@ -273,7 +276,7 @@ const platform: Platform = {
     } else if (repo.allow_merge_commits) {
       config.mergeMethod = 'merge';
     } else {
-      logger.info(
+      logger.debug(
         'Repository has no allowed merge methods - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_BLOCKED);
@@ -327,7 +330,7 @@ const platform: Platform = {
   },
 
   async getRepos(): Promise<string[]> {
-    logger.info('Auto-discovering Gitea repositories');
+    logger.debug('Auto-discovering Gitea repositories');
     try {
       const repos = await helper.searchRepos({ uid: botUserID });
       return repos.map(r => r.full_name);
@@ -389,13 +392,13 @@ const platform: Platform = {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
     } catch (err) {
       if (err.statusCode === 404) {
-        logger.info(
+        logger.debug(
           'Received 404 when checking branch status, assuming branch deletion'
         );
         throw new Error(REPOSITORY_CHANGED);
       }
 
-      logger.info('Unknown error when checking branch status');
+      logger.debug('Unknown error when checking branch status');
       throw err;
     }
 
@@ -552,14 +555,14 @@ const platform: Platform = {
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
         if (pr) {
           if (pr.title !== title || pr.body !== body) {
-            logger.info(
+            logger.debug(
               `Recovered from 409 Conflict, but PR for ${branchName} is outdated. Updating...`
             );
             await platform.updatePr(pr.number, title, body);
             pr.title = title;
             pr.body = body;
           } else {
-            logger.info(
+            logger.debug(
               `Recovered from 409 Conflict and PR for ${branchName} is up-to-date`
             );
           }
@@ -659,7 +662,7 @@ const platform: Platform = {
             return null;
           }
           if (shouldReOpen) {
-            logger.info('Reopening previously closed Issue');
+            logger.debug('Reopening previously closed Issue');
           }
 
           // Pick the last issue in the list as the active one
@@ -676,14 +679,14 @@ const platform: Platform = {
 
         // Check if issue has already correct state
         if (activeIssue.body === body && activeIssue.state === 'open') {
-          logger.info(
+          logger.debug(
             `Issue #${activeIssue.number} is open and up to date - nothing to do`
           );
           return null;
         }
 
         // Update issue body and re-open if enabled
-        logger.info(`Updating Issue #${activeIssue.number}`);
+        logger.debug(`Updating Issue #${activeIssue.number}`);
         await helper.updateIssue(config.repository, activeIssue.number, {
           body,
           state: shouldReOpen
@@ -699,7 +702,7 @@ const platform: Platform = {
         body,
         title,
       });
-      logger.info(`Created new Issue #${issue.number}`);
+      logger.debug(`Created new Issue #${issue.number}`);
       config.issueList = null;
 
       return 'created';
@@ -715,7 +718,7 @@ const platform: Platform = {
     const issueList = await platform.getIssueList();
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
-        logger.info({ number: issue.number }, 'Closing issue');
+        logger.debug({ number: issue.number }, 'Closing issue');
         await helper.closeIssue(config.repository, issue.number);
       }
     }
@@ -743,7 +746,7 @@ const platform: Platform = {
     content,
   }: EnsureCommentConfig): Promise<boolean> {
     if (topic === 'Renovate Ignore Notification') {
-      logger.info(
+      logger.debug(
         `Skipping ensureComment(${topic}) as ignoring PRs is unsupported on Gitea.`
       );
       return false;
@@ -771,7 +774,7 @@ const platform: Platform = {
         );
       } else if (comment.body !== body) {
         const c = await helper.updateComment(config.repository, issue, body);
-        logger.info(
+        logger.debug(
           { repository: config.repository, issue, comment: c.id },
           'Comment updated'
         );
@@ -843,7 +846,7 @@ const platform: Platform = {
     files,
     message,
     parentBranch = config.baseBranch,
-  }: CommitFilesConfig): Promise<void> {
+  }: CommitFilesConfig): Promise<string | null> {
     return config.storage.commitFilesToBranch({
       branchName,
       files,

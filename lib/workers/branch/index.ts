@@ -83,7 +83,9 @@ export async function processBranch(
   const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
   // istanbul ignore if
   if (masterIssueCheck) {
-    logger.info('Branch has been checked in master issue: ' + masterIssueCheck);
+    logger.debug(
+      'Branch has been checked in master issue: ' + masterIssueCheck
+    );
   }
   if (branchPr) {
     config.rebaseRequested = rebaseCheck(config, branchPr);
@@ -133,7 +135,7 @@ export async function processBranch(
           }
         }
       } else if (existingPr.state === 'merged') {
-        logger.info(
+        logger.debug(
           { pr: existingPr.number },
           'Merged PR is blocking this branch'
         );
@@ -143,9 +145,9 @@ export async function processBranch(
     // istanbul ignore if
     if (!branchExists && config.masterIssueApproval) {
       if (masterIssueCheck) {
-        logger.info(`Branch ${config.branchName} is approved for creation`);
+        logger.debug(`Branch ${config.branchName} is approved for creation`);
       } else {
-        logger.info(`Branch ${config.branchName} needs approval`);
+        logger.debug(`Branch ${config.branchName} needs approval`);
         return 'needs-approval';
       }
     }
@@ -155,7 +157,7 @@ export async function processBranch(
       !masterIssueCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.info(
+      logger.debug(
         'Reached PR creation limit or per run commits limit - skipping branch creation'
       );
       return 'pr-hourly-limit-reached';
@@ -165,7 +167,7 @@ export async function processBranch(
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
-          logger.info(
+          logger.debug(
             'PR has been closed or merged since this run started - aborting'
           );
           throw new Error(REPOSITORY_CHANGED);
@@ -213,7 +215,7 @@ export async function processBranch(
     config.isScheduledNow = isScheduledNow(config);
     if (!config.isScheduledNow && !masterIssueCheck) {
       if (!branchExists) {
-        logger.info('Skipping branch creation as not within schedule');
+        logger.debug('Skipping branch creation as not within schedule');
         return 'not-scheduled';
       }
       if (config.updateNotScheduled === false && !config.rebaseRequested) {
@@ -237,7 +239,7 @@ export async function processBranch(
       (config.prCreation === 'not-pending' ||
         /* istanbul ignore next */ config.prCreation === 'status-success')
     ) {
-      logger.info(
+      logger.debug(
         'Skipping branch creation due to unpublishSafe + status checks'
       );
       return 'pending';
@@ -280,14 +282,14 @@ export async function processBranch(
         config.stabilityStatus === 'pending' &&
         ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
-        logger.info('Skipping branch creation due to stability days not met');
+        logger.debug('Skipping branch creation due to stability days not met');
         return 'pending';
       }
     }
 
     // istanbul ignore if
     if (masterIssueCheck === 'rebase' || config.masterIssueRebaseAllOpen) {
-      logger.info('Manual rebase requested via master issue');
+      logger.debug('Manual rebase requested via master issue');
       delete config.parentBranch;
     } else {
       Object.assign(config, await getParentBranch(config));
@@ -407,13 +409,15 @@ export async function processBranch(
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
         const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
         if (releaseTimestamp.plus({ days: 1 }) < DateTime.local()) {
-          logger.info('PR is older than a day, raise PR with lock file errors');
+          logger.debug(
+            'PR is older than a day, raise PR with lock file errors'
+          );
         } else if (branchExists) {
-          logger.info(
+          logger.debug(
             'PR is less than a day old but branchExists so updating anyway'
           );
         } else {
-          logger.info('PR is less than a day old - raise error instead of PR');
+          logger.debug('PR is less than a day old - raise error instead of PR');
           throw new Error(MANAGER_LOCKFILE_ERROR);
         }
       } else {
@@ -421,10 +425,10 @@ export async function processBranch(
       }
     }
 
-    config.committedFiles = await commitFilesToBranch(config);
+    const commit = await commitFilesToBranch(config);
+    // TODO: Remove lockFileMaintenance rule?
     if (
       config.updateType === 'lockFileMaintenance' &&
-      !config.committedFiles &&
       !config.parentBranch &&
       branchExists
     ) {
@@ -438,10 +442,13 @@ export async function processBranch(
       }
       return 'done';
     }
-    if (!(config.committedFiles || branchExists)) {
+    if (!commit && !branchExists) {
       return 'no-work';
     }
-
+    if (commit) {
+      const action = branchExists ? 'updated' : 'created';
+      logger.info({ commit }, `Branch ${action}`);
+    }
     // Set branch statuses
     await setStability(config);
     await setUnpublishable(config);
@@ -459,7 +466,7 @@ export async function processBranch(
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
       ) {
-        logger.info({ mergeStatus }, 'Branch automerge not possible');
+        logger.debug({ mergeStatus }, 'Branch automerge not possible');
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }

@@ -14,8 +14,7 @@ function parseSha256(idx: number, content: string): string | null {
     return null;
   }
   i += 1;
-  let j = i;
-  j = skip(i, content, c => {
+  const j = skip(i, content, c => {
     return c !== '"' && c !== "'";
   });
   const sha256 = content.slice(i, j);
@@ -42,8 +41,7 @@ function parseUrl(idx: number, content: string): string | null {
     return null;
   }
   i += 1;
-  let j = i;
-  j = skip(i, content, c => {
+  const j = skip(i, content, c => {
     return c !== '"' && c !== "'" && !isSpace(c);
   });
   const url = content.slice(i, j);

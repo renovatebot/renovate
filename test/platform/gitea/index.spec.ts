@@ -15,6 +15,7 @@ import {
   GotResponse,
   RepoConfig,
   RepoParams,
+  Platform,
 } from '../../../lib/platform';
 import { logger as _logger } from '../../../lib/logger';
 import {
@@ -26,7 +27,7 @@ import { GiteaGotApi } from '../../../lib/platform/gitea/gitea-got-wrapper';
 import { CommitFilesConfig, File } from '../../../lib/platform/git/storage';
 
 describe('platform/gitea', () => {
-  let gitea: typeof import('../../../lib/platform/gitea');
+  let gitea: Platform;
   let helper: jest.Mocked<typeof import('../../../lib/platform/gitea/gitea-helper')>;
   let api: jest.Mocked<GiteaGotApi>;
   let logger: jest.Mocked<typeof _logger>;

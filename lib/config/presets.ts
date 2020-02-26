@@ -166,10 +166,10 @@ export async function resolveConfigPresets(
     for (const preset of inputConfig.extends) {
       // istanbul ignore if
       if (existingPresets.includes(preset)) {
-        logger.info(`Already seen preset ${preset} in ${existingPresets}`);
+        logger.debug(`Already seen preset ${preset} in ${existingPresets}`);
       } else if (ignorePresets.includes(preset)) {
         // istanbul ignore next
-        logger.info(`Ignoring preset ${preset} in ${existingPresets}`);
+        logger.debug(`Ignoring preset ${preset} in ${existingPresets}`);
       } else {
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset;

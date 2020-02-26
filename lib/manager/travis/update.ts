@@ -26,7 +26,7 @@ export function updateDependency({
     });
     return fileContent.replace(/node_js:(\n\s+-[^\n]+)+\n/, newString);
   } catch (err) {
-    logger.info({ err }, 'Error setting new .travis.yml node versions');
+    logger.debug({ err }, 'Error setting new .travis.yml node versions');
     return null;
   }
 }

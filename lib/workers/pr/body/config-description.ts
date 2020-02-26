@@ -43,13 +43,13 @@ export async function getPrConfigDescription(
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
   if (config.rebaseWhen === 'behind-base-branch') {
-    prBody += 'Whenever PR falls behind the base branch';
+    prBody += 'Whenever PR is behind base branch';
   } else if (config.rebaseWhen === 'never') {
     prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';
   }
-  prBody += `, or if you tick the rebase/retry checkbox below.\n\n`;
+  prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
       `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks.help}) if that's undesired.\n\n`

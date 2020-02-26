@@ -55,7 +55,7 @@ export async function getReleases(
     return releases;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getReleases err');
-    logger.info({ datasource, depName }, 'Error getting releases');
+    logger.debug({ datasource, depName }, 'Error getting releases');
     return null;
   }
 }

@@ -2,6 +2,9 @@ import { mock } from 'jest-mock-extended';
 import { RenovateConfig, platform, getConfig } from '../../../../util';
 import { checkOnboardingBranch } from '../../../../../lib/workers/repository/onboarding/branch';
 import { Pr } from '../../../../../lib/platform';
+import * as _rebase from '../../../../../lib/workers/repository/onboarding/branch/rebase';
+
+const rebase: any = _rebase;
 
 jest.mock('../../../../../lib/workers/repository/onboarding/branch/rebase');
 
@@ -86,6 +89,7 @@ describe('workers/repository/onboarding/branch', () => {
         },
       });
       platform.getFile.mockResolvedValue(pJsonContent);
+      platform.commitFilesToBranch.mockResolvedValueOnce('abc123');
       await checkOnboardingBranch(config);
       expect(
         platform.commitFilesToBranch.mock.calls[0][0].files[0].contents
@@ -95,6 +99,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('abc123');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);

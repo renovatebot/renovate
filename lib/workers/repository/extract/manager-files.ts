@@ -67,7 +67,7 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
       }
     } else {
       // istanbul ignore next
-      logger.info({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
   return packageFiles;

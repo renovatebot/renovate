@@ -33,7 +33,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
         shaLineNumber += 1;
       }
 
-      logger.info(dependency, 'Gradle Wrapper');
+      logger.debug(dependency, 'Gradle Wrapper');
       return { deps: [dependency] };
     }
     lineNumber += 1;

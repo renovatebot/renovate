@@ -27,7 +27,10 @@ export default function updateDependency({
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new ansible-galaxy role version value');
+    logger.debug(
+      { err },
+      'Error setting new ansible-galaxy role version value'
+    );
     return null;
   }
 }

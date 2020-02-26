@@ -53,7 +53,7 @@ export async function generateLockFiles(
       env,
     });
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    logger.debug(
       {
         cmd,
         err,

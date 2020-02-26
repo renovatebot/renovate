@@ -28,7 +28,7 @@ export function updateDependency({
     logger.error('Unknown DroneCI depType');
     return null;
   } catch (err) {
-    logger.info({ err }, 'Error setting new DroneCI image value');
+    logger.debug({ err }, 'Error setting new DroneCI image value');
     return null;
   }
 }

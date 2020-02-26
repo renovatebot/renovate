@@ -57,7 +57,7 @@ export default (numberOfRetries = NUMBER_OF_RETRIES): got.RetryFunction => (
   const errorMessage = getErrorMessage(statusCode);
   const message = `${errorMessage} Retry in ${delaySec} seconds.`;
 
-  logger.info(message);
+  logger.debug(message);
 
   return delaySec * 1000;
 };

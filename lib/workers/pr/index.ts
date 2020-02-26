@@ -41,10 +41,10 @@ async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
         logger.info('DRY-RUN: Would add assignees to PR #' + pr.number);
       } else {
         await platform.addAssignees(pr.number, assignees);
-        logger.info({ assignees }, 'Added assignees');
+        logger.debug({ assignees }, 'Added assignees');
       }
     } catch (err) {
-      logger.info(
+      logger.debug(
         { assignees: config.assignees, err },
         'Failed to add assignees'
       );
@@ -67,10 +67,10 @@ async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
         logger.info('DRY-RUN: Would add reviewers to PR #' + pr.number);
       } else {
         await platform.addReviewers(pr.number, reviewers);
-        logger.info({ reviewers }, 'Added reviewers');
+        logger.debug({ reviewers }, 'Added reviewers');
       }
     } catch (err) {
-      logger.info(
+      logger.debug(
         { reviewers: config.reviewers, err },
         'Failed to add reviewers'
       );
@@ -136,7 +136,7 @@ export async function ensurePr(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
       if (elapsedHours >= config.prNotPendingHours) {
-        logger.info('Branch exceeds prNotPending hours - forcing PR creation');
+        logger.debug('Branch exceeds prNotPending hours - forcing PR creation');
         config.forcePr = true;
       }
     }
@@ -304,7 +304,7 @@ export async function ensurePr(
       }
       // PR must need updating
       if (existingPr.title !== prTitle) {
-        logger.info(
+        logger.debug(
           {
             branchName,
             oldPrTitle: existingPr.title,
@@ -327,10 +327,7 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would update PR #' + existingPr.number);
       } else {
         await platform.updatePr(existingPr.number, prTitle, prBody);
-        logger.info(
-          { committedFiles: config.committedFiles, pr: existingPr.number },
-          `PR updated`
-        );
+        logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return existingPr;
     }
@@ -362,7 +359,7 @@ export async function ensurePr(
           useDefaultBranch: false,
           platformOptions,
         });
-        logger.info({ branch: branchName, pr: pr.number }, 'PR created');
+        logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Pull request creation error');
@@ -403,10 +400,10 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
-      logger.info('Adding branch automerge failure message to PR');
+      logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (config.dryRun) {
-        logger.info('Would add comment to PR #' + pr.number);
+        logger.info('DRY-RUN: Would add comment to PR #' + pr.number);
       } else {
         await platform.ensureComment({
           number: pr.number,
@@ -431,7 +428,7 @@ export async function ensurePr(
     } else {
       await addAssigneesReviewers(config, pr);
     }
-    logger.info(`Created ${pr.displayNumber}`);
+    logger.debug(`Created ${pr.displayNumber}`);
     return pr;
   } catch (err) {
     // istanbul ignore if
@@ -466,12 +463,12 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
     logger.debug('PR is configured for automerge');
     // Return if PR not ready for automerge
     if (pr.isConflicted) {
-      logger.info('PR is conflicted');
+      logger.debug('PR is conflicted');
       logger.debug({ pr });
       return false;
     }
     if (requiredStatusChecks && pr.canMerge !== true) {
-      logger.info(
+      logger.debug(
         { canMergeReason: pr.canMergeReason },
         'PR is not ready for merge'
       );
@@ -482,18 +479,18 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
       requiredStatusChecks
     );
     if (branchStatus !== BRANCH_STATUS_SUCCESS) {
-      logger.info(
+      logger.debug(
         `PR is not ready for merge (branch status is ${branchStatus})`
       );
       return false;
     }
     // Check if it's been touched
     if (pr.isModified) {
-      logger.info('PR is ready for automerge but has been modified');
+      logger.debug('PR is ready for automerge but has been modified');
       return false;
     }
     if (automergeType === 'pr-comment') {
-      logger.info(`Applying automerge comment: ${automergeComment}`);
+      logger.debug(`Applying automerge comment: ${automergeComment}`);
       // istanbul ignore if
       if (config.dryRun) {
         logger.info(
@@ -516,7 +513,7 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
     }
     const res = await platform.mergePr(pr.number, branchName);
     if (res) {
-      logger.info({ pr: pr.number }, 'PR automerged');
+      logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     }
     return res;
   }

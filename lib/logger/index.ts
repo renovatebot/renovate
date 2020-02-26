@@ -42,6 +42,8 @@ const bunyanLogger = bunyan.createLogger({
     migratedConfig: configSerializer,
     originalConfig: configSerializer,
     presetConfig: configSerializer,
+    oldConfig: configSerializer,
+    newConfig: configSerializer,
     err: errSerializer,
   },
   streams: [
