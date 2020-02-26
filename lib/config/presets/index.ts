@@ -1,23 +1,23 @@
 import is from '@sindresorhus/is';
-import { logger } from '../logger';
-import * as massage from './massage';
-import * as migration from './migration';
-import * as github from '../datasource/github';
-import * as npm from '../datasource/npm';
-import * as gitlab from '../datasource/gitlab';
-import { RenovateConfig } from './common';
-import { mergeChildConfig } from './utils';
-import { regEx } from '../util/regex';
+import { logger } from '../../logger';
+import * as massage from '../massage';
+import * as migration from '../migration';
+import * as github from '../../datasource/github';
+import * as npm from '../../datasource/npm';
+import * as gitlab from '../../datasource/gitlab';
+import { RenovateConfig } from '../common';
+import { mergeChildConfig } from '../utils';
+import { regEx } from '../../util/regex';
 import {
   CONFIG_VALIDATION,
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
-} from '../constants/error-messages';
+} from '../../constants/error-messages';
 import {
   DATASOURCE_GITHUB,
   DATASOURCE_GITLAB,
   DATASOURCE_NPM,
-} from '../constants/data-binary-source';
+} from '../../constants/data-binary-source';
 
 const datasources = {
   github,
