@@ -31,6 +31,7 @@ COPY lib lib
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.app.json tsconfig.app.json
 
+
 RUN yarn build:docker
 
 # Prune node_modules to production-only so they can be copied into the final image
