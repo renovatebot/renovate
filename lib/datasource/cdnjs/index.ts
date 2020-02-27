@@ -21,8 +21,8 @@ export interface CdnjsResponse {
   assets?: CdnjsAsset[];
 }
 
-export function depUrl(depName: string): string {
-  return `https://api.cdnjs.com/libraries/${depName}?fields=homepage,repository,assets`;
+export function depUrl(library: string): string {
+  return `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
 }
 
 export async function getDigest(
@@ -30,9 +30,9 @@ export async function getDigest(
   newValue?: string
 ): Promise<string | null> {
   let result = null;
-  const depName = lookupName.split('/')[0];
-  const url = depUrl(depName);
-  const assetName = lookupName.replace(`${depName}/`, '');
+  const library = lookupName.split('/')[0];
+  const url = depUrl(library);
+  const assetName = lookupName.replace(`${library}/`, '');
   let res = null;
   try {
     res = await got(url, { json: true });
@@ -55,10 +55,10 @@ export async function getPkgReleases({
     return null;
   }
 
-  const [depName, ...assetParts] = lookupName.split('/');
+  const [library, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 
-  const cacheKey = depName;
+  const cacheKey = library;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
@@ -66,7 +66,7 @@ export async function getPkgReleases({
   // istanbul ignore if
   if (cachedResult) return cachedResult;
 
-  const url = depUrl(depName);
+  const url = depUrl(library);
 
   try {
     const res = await got(url, { json: true });
@@ -74,7 +74,7 @@ export async function getPkgReleases({
     const cdnjsResp: CdnjsResponse = res.body;
 
     if (!cdnjsResp || !cdnjsResp.assets) {
-      logger.warn({ depName }, `Invalid CDNJS response`);
+      logger.warn({ library }, `Invalid CDNJS response`);
       return null;
     }
 
@@ -93,7 +93,7 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    const errorData = { depName, err };
+    const errorData = { library, err };
 
     if (
       err.statusCode === 429 ||

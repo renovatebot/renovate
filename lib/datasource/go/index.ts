@@ -13,9 +13,9 @@ interface DataSource {
   lookupName: string;
 }
 
-async function getDatasource(name: string): Promise<DataSource | null> {
-  if (name.startsWith('gopkg.in/')) {
-    const [pkg] = name.replace('gopkg.in/', '').split('.');
+async function getDatasource(goModule: string): Promise<DataSource | null> {
+  if (goModule.startsWith('gopkg.in/')) {
+    const [pkg] = goModule.replace('gopkg.in/', '').split('.');
     if (pkg.includes('/')) {
       return { datasource: DATASOURCE_GITHUB_TAGS, lookupName: pkg };
     }
@@ -24,15 +24,15 @@ async function getDatasource(name: string): Promise<DataSource | null> {
       lookupName: `go-${pkg}/${pkg}`,
     };
   }
-  if (name.startsWith('github.com/')) {
-    const split = name.split('/');
+  if (goModule.startsWith('github.com/')) {
+    const split = goModule.split('/');
     const lookupName = split[1] + '/' + split[2];
     return {
       datasource: DATASOURCE_GITHUB_TAGS,
       lookupName,
     };
   }
-  const pkgUrl = `https://${name}?go-get=1`;
+  const pkgUrl = `https://${goModule}?go-get=1`;
   try {
     const res = (
       await got(pkgUrl, {
@@ -40,11 +40,11 @@ async function getDatasource(name: string): Promise<DataSource | null> {
       })
     ).body;
     const sourceMatch = res.match(
-      regEx(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
+      regEx(`<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`)
     );
     if (sourceMatch) {
       const [, goSourceUrl] = sourceMatch;
-      logger.debug({ depName: name, goSourceUrl }, 'Go lookup source url');
+      logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
       if (goSourceUrl && goSourceUrl.startsWith('https://github.com/')) {
         return {
           datasource: DATASOURCE_GITHUB_TAGS,
@@ -54,13 +54,13 @@ async function getDatasource(name: string): Promise<DataSource | null> {
         };
       }
     } else {
-      logger.trace({ depName: name }, 'No go-source header found');
+      logger.trace({ goModule }, 'No go-source header found');
     }
     return null;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.debug(
-        { dependency: name },
+        { dependency: goModule },
         `Dependency lookup failure: not found`
       );
       logger.debug({
@@ -68,7 +68,7 @@ async function getDatasource(name: string): Promise<DataSource | null> {
       });
       return null;
     }
-    logger.debug({ err, name }, 'go lookup failure: Unknown error');
+    logger.debug({ err, goModule }, 'go lookup failure: Unknown error');
     return null;
   }
 }
