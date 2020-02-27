@@ -9,7 +9,6 @@ export interface Config {
 export interface PkgReleaseConfig extends Config {
   compatibility?: Record<string, string>;
   depType?: string;
-  lookupType?: string;
   npmrc?: string;
   versioning?: string;
 }

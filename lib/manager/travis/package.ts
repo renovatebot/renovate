@@ -5,6 +5,7 @@ import { getPkgReleases } from '../../datasource';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import nodeJsSchedule from '../../../data/node-js-schedule.json';
 import { PackageUpdateConfig, PackageUpdateResult } from '../common';
+import { DATASOURCE_GITHUB_TAGS } from '../../constants/data-binary-source';
 
 interface NodeJsPolicies {
   all: number[];
@@ -101,7 +102,7 @@ export async function getPackageUpdates(
     const versions = (
       await getPkgReleases({
         ...config,
-        datasource: 'github',
+        datasource: DATASOURCE_GITHUB_TAGS,
         depName: 'nodejs/node',
       })
     ).releases.map(release => release.version);

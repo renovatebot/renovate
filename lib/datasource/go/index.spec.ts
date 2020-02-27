@@ -1,11 +1,11 @@
 import _got from '../../util/got';
-import * as _github from '../github';
+import * as _github from '../github-tags';
 import * as go from '.';
 import { mocked, partial } from '../../../test/util';
 import { ReleaseResult } from '..';
 
 jest.mock('../../util/got');
-jest.mock('../github');
+jest.mock('../github-tags');
 
 const got: any = mocked(_got);
 const github = mocked(_github);

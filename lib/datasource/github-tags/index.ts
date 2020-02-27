@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 
 const { get: ghGot } = api;
 
-const cacheNamespace = 'datasource-github';
+const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(repo: string, type: string): string {
   return `${repo}:${type}`;
 }
@@ -108,42 +108,28 @@ export async function getDigest(
  */
 export async function getPkgReleases({
   lookupName: repo,
-  lookupType,
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
   let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(repo, lookupType || 'tags')
+    getCacheKey(repo, 'tags')
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   try {
-    if (lookupType === 'releases') {
-      const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-      type GitHubRelease = {
-        tag_name: string;
-      }[];
+    // tag
+    const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
+    type GitHubTag = {
+      name: string;
+    }[];
 
-      versions = (
-        await ghGot<GitHubRelease>(url, {
-          paginate: true,
-        })
-      ).body.map(o => o.tag_name);
-    } else {
-      // tag
-      const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
-      type GitHubTag = {
-        name: string;
-      }[];
-
-      versions = (
-        await ghGot<GitHubTag>(url, {
-          paginate: true,
-        })
-      ).body.map(o => o.name);
-    }
+    versions = (
+      await ghGot<GitHubTag>(url, {
+        paginate: true,
+      })
+    ).body.map(o => o.name);
   } catch (err) {
     logger.debug({ repo, err }, 'Error retrieving from github');
   }
@@ -161,7 +147,7 @@ export async function getPkgReleases({
   const cacheMinutes = 10;
   await renovateCache.set(
     cacheNamespace,
-    getCacheKey(repo, lookupType),
+    getCacheKey(repo, 'tags'),
     dependency,
     cacheMinutes
   );

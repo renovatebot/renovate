@@ -134,7 +134,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   fromVersion?: string;
   lockedVersion?: string;
-  lookupType?: string;
   moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
