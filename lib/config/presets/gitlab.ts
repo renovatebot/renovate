@@ -1,5 +1,6 @@
 import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
+import { Preset } from './common';
 
 const { get: glGot } = api;
 
@@ -30,7 +31,7 @@ async function getDefaultBranchName(
 export async function getPreset(
   pkgName: string,
   presetName = 'default'
-): Promise<any> {
+): Promise<Preset> {
   if (presetName !== 'default') {
     // TODO: proper error contructor
     throw new Error(

@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
-
+import { Preset } from './common';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
-async function fetchJSONFile(repo: string, fileName: string): Promise<any> {
+async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
   const opts: GotJSONOptions = {
     headers: {
@@ -40,7 +40,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<any> {
 export async function getPreset(
   pkgName: string,
   presetName = 'default'
-): Promise<any> {
+): Promise<Preset> {
   if (presetName === 'default') {
     try {
       const defaultJson = await fetchJSONFile(pkgName, 'default.json');
