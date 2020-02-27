@@ -1,13 +1,13 @@
-import * as _npm from '../../lib/datasource/npm';
-import * as presets from '../../lib/config/presets';
-import presetDefaults from './npm/_fixtures/renovate-config-default.json';
-import presetPackages from './npm/_fixtures/renovate-config-packages.json';
-import presetGroup from './npm/_fixtures/renovate-config-group.json';
-import presetMonorepo from './npm/_fixtures/renovate-config-monorepo.json';
-import presetIkatyang from './npm/_fixtures/renovate-config-ikatyang.json';
-import { RenovateConfig } from '../../lib/config';
+import * as _npm from './npm';
+import * as presets from '.';
+import presetDefaults from './__fixtures__/renovate-config-default.json';
+import presetPackages from './__fixtures__/renovate-config-packages.json';
+import presetGroup from './__fixtures__/renovate-config-group.json';
+import presetMonorepo from './__fixtures__/renovate-config-monorepo.json';
+import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
+import { RenovateConfig } from '..';
 
-jest.mock('../../lib/datasource/npm');
+jest.mock('./npm');
 
 const npm: any = _npm;
 
