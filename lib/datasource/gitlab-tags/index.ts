@@ -6,19 +6,14 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 const { get: glGot } = api;
 
 const cacheNamespace = 'datasource-gitlab';
-function getCacheKey(
-  depHost: string,
-  repo: string,
-  lookupType: string
-): string {
-  const type = lookupType || 'tags';
+function getCacheKey(depHost: string, repo: string): string {
+  const type = 'tags';
   return `${depHost}:${repo}:${type}`;
 }
 
 export async function getPkgReleases({
   registryUrls,
   lookupName: repo,
-  lookupType,
 }: PkgReleaseConfig): Promise<ReleaseResult | null> {
   // Use registryUrls if present, otherwise default to publid gitlab.com
   const depHost = is.nonEmptyArray(registryUrls)
@@ -27,7 +22,7 @@ export async function getPkgReleases({
   let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(depHost, repo, lookupType)
+    getCacheKey(depHost, repo)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -37,30 +32,17 @@ export async function getPkgReleases({
   const urlEncodedRepo = encodeURIComponent(repo);
 
   try {
-    if (lookupType === 'releases') {
-      const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/releases?per_page=100`;
-      type GlRelease = {
-        tag_name: string;
-      }[];
+    // tag
+    const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
+    type GlTag = {
+      name: string;
+    }[];
 
-      versions = (
-        await glGot<GlRelease>(url, {
-          paginate: true,
-        })
-      ).body.map(o => o.tag_name);
-    } else {
-      // tag
-      const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
-      type GlTag = {
-        name: string;
-      }[];
-
-      versions = (
-        await glGot<GlTag>(url, {
-          paginate: true,
-        })
-      ).body.map(o => o.name);
-    }
+    versions = (
+      await glGot<GlTag>(url, {
+        paginate: true,
+      })
+    ).body.map(o => o.name);
   } catch (err) {
     // istanbul ignore next
     logger.debug({ repo, err }, 'Error retrieving from Gitlab');
@@ -83,7 +65,7 @@ export async function getPkgReleases({
   const cacheMinutes = 10;
   await renovateCache.set(
     cacheNamespace,
-    getCacheKey(depHost, repo, lookupType),
+    getCacheKey(depHost, repo),
     dependency,
     cacheMinutes
   );
