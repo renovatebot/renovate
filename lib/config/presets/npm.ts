@@ -1,11 +1,10 @@
 import { logger } from '../../logger';
-import { getDependency } from './get';
-import { Preset } from '../common';
+import { getDependency } from '../../datasource/npm/get';
 
 export async function getPreset(
   pkgName: string,
   presetName = 'default'
-): Promise<Preset> {
+): Promise<any> {
   const dep = await getDependency(pkgName);
   if (!dep) {
     throw new Error('dep not found');

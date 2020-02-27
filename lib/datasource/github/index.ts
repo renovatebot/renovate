@@ -1,71 +1,8 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-import {
-  ReleaseResult,
-  PkgReleaseConfig,
-  Preset,
-  DigestConfig,
-} from '../common';
+import { ReleaseResult, PkgReleaseConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
-import got, { GotJSONOptions } from '../../util/got';
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
 const { get: ghGot } = api;
-
-async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
-  const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
-  const opts: GotJSONOptions = {
-    headers: {
-      accept: global.appMode
-        ? 'application/vnd.github.machine-man-preview+json'
-        : 'application/vnd.github.v3+json',
-    },
-    json: true,
-    hostType: DATASOURCE_GITHUB,
-  };
-  let res: { body: { content: string } };
-  try {
-    res = await got(url, opts);
-  } catch (err) {
-    if (err.message === PLATFORM_FAILURE) {
-      throw err;
-    }
-    logger.debug(
-      { statusCode: err.statusCodef },
-      `Failed to retrieve ${fileName} from repo`
-    );
-    throw new Error('dep not found');
-  }
-  try {
-    const content = Buffer.from(res.body.content, 'base64').toString();
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error('invalid preset JSON');
-  }
-}
-
-export async function getPreset(
-  pkgName: string,
-  presetName = 'default'
-): Promise<Preset> {
-  if (presetName === 'default') {
-    try {
-      const defaultJson = await fetchJSONFile(pkgName, 'default.json');
-      return defaultJson;
-    } catch (err) {
-      if (err.message === PLATFORM_FAILURE) {
-        throw err;
-      }
-      if (err.message === 'dep not found') {
-        logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json');
-      }
-      throw err;
-    }
-  }
-  return fetchJSONFile(pkgName, `${presetName}.json`);
-}
 
 const cacheNamespace = 'datasource-github';
 function getCacheKey(repo: string, type: string): string {
