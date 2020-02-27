@@ -2,7 +2,6 @@ import { logger } from '../../logger';
 import { Preset } from './common';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
 async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
@@ -13,7 +12,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
         : 'application/vnd.github.v3+json',
     },
     json: true,
-    hostType: DATASOURCE_GITHUB,
+    hostType: 'github',
   };
   let res: { body: { content: string } };
   try {
