@@ -1,7 +1,5 @@
 import getArgv from './config/_fixtures/argv';
 import { getConfig } from '../../lib/config/defaults';
-import * as _npm from '../../lib/datasource/npm';
-import presetDefaults from './npm/_fixtures/renovate-config-default.json';
 
 jest.mock('../../lib/datasource/npm');
 try {
@@ -10,15 +8,7 @@ try {
   // file does not exist
 }
 
-const npm: any = _npm;
 const defaultConfig = getConfig();
-
-npm.getPkgReleases = jest.fn(() => ({
-  'renovate-config':
-    presetDefaults.versions[presetDefaults['dist-tags'].latest][
-      'renovate-config'
-    ],
-}));
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -36,7 +26,11 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports token in CLI options', async () => {
-      defaultArgv = defaultArgv.concat(['--token=abc', '--pr-footer=custom']);
+      defaultArgv = defaultArgv.concat([
+        '--token=abc',
+        '--pr-footer=custom',
+        '--log-context=abc123',
+      ]);
       const env: NodeJS.ProcessEnv = {};
       await configParser.parseConfigs(env, defaultArgv);
     });

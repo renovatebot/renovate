@@ -18,20 +18,20 @@ export async function getOnboardingConfig(
     }
     const { label, branchName, ignore } = greenkeeperConfig;
     if (label) {
-      logger.info({ label }, 'Migrating Greenkeeper label');
+      logger.debug({ label }, 'Migrating Greenkeeper label');
       onboardingConfig.labels = [
         String(label).replace('greenkeeper', 'renovate'),
       ];
     }
     if (branchName) {
-      logger.info({ branch: branchName }, 'Migrating Greenkeeper branchName');
+      logger.debug({ branch: branchName }, 'Migrating Greenkeeper branchName');
       onboardingConfig.branchName = String(branchName).replace(
         'greenkeeper',
         'renovate'
       );
     }
     if (is.nonEmptyArray(ignore)) {
-      logger.info({ ignore }, 'Migrating Greenkeeper ignore');
+      logger.debug({ ignore }, 'Migrating Greenkeeper ignore');
       onboardingConfig.ignoreDeps = ignore.map(String);
     }
   } catch (err) {

@@ -247,7 +247,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.lookupName = repository;
       deps.push(dep);
     } else {
-      logger.info(
+      logger.debug(
         { def },
         'Failed to find dependency in bazel WORKSPACE definition'
       );

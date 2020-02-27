@@ -119,14 +119,14 @@ export function branchifyUpgrades(
     for (const [key, value] of Object.entries(branchUpdates)) {
       if (Object.keys(value).length > 1) {
         const [sourceUrl, toVersion] = key.split('|');
-        logger.info(
+        logger.debug(
           { sourceUrl, toVersion, branches: value },
           'Found sourceUrl with multiple branches that should probably be combined into a group'
         );
       }
     }
   } catch (err) {
-    logger.info({ err }, 'Error checking branch duplicates');
+    logger.debug({ err }, 'Error checking branch duplicates');
   }
   return {
     errors: config.errors.concat(errors),

@@ -17,7 +17,7 @@ export async function getNpmLock(
     }
     return lockFile;
   } catch (err) {
-    logger.info({ filePath, err }, 'Warning: Exception parsing npm lock file');
+    logger.debug({ filePath, err }, 'Warning: Exception parsing npm lock file');
     return {};
   }
 }

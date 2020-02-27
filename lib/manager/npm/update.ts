@@ -41,7 +41,7 @@ export function bumpPackageVersion(
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');
     } else {
-      logger.info('Bumped package.json version');
+      logger.debug('Bumped package.json version');
     }
     return bumpedContent;
   } catch (err) {
@@ -65,13 +65,13 @@ export function updateDependency({
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
     if (upgrade.currentDigest) {
-      logger.info('Updating package.json git digest');
+      logger.debug('Updating package.json git digest');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentDigest,
         upgrade.newDigest.substring(0, upgrade.currentDigest.length)
       );
     } else {
-      logger.info('Updating package.json git version tag');
+      logger.debug('Updating package.json git version tag');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentValue,
         upgrade.newValue
@@ -124,7 +124,7 @@ export function updateDependency({
     }
     // istanbul ignore if
     if (!newFileContent) {
-      logger.info(
+      logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
         'Warning: updateDependency error'
       );
@@ -140,7 +140,7 @@ export function updateDependency({
       if (depKey) {
         // istanbul ignore if
         if (parsedContents.resolutions[depKey] !== oldVersion) {
-          logger.info(
+          logger.debug(
             {
               depName,
               depKey,
@@ -185,7 +185,7 @@ export function updateDependency({
       upgrade.bumpVersion
     );
   } catch (err) {
-    logger.info({ err }, 'updateDependency error');
+    logger.debug({ err }, 'updateDependency error');
     return null;
   }
 }

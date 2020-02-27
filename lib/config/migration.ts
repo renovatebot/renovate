@@ -46,6 +46,7 @@ export function migrateConfig(
     const depTypes = [
       'dependencies',
       'devDependencies',
+      'engines',
       'optionalDependencies',
       'peerDependencies',
     ];
@@ -132,6 +133,18 @@ export function migrateConfig(
       } else if (key === 'gitFs') {
         isMigrated = true;
         delete migratedConfig.gitFs;
+      } else if (key === 'rebaseStalePrs') {
+        isMigrated = true;
+        delete migratedConfig.rebaseStalePrs;
+        if (!migratedConfig.rebaseWhen) {
+          if (val === null) migratedConfig.rebaseWhen = 'auto';
+          if (val === true) migratedConfig.rebaseWhen = 'behind-base-branch';
+          if (val === false) migratedConfig.rebaseWhen = 'conflicted';
+        }
+      } else if (key === 'rebaseConflictedPrs') {
+        isMigrated = true;
+        delete migratedConfig.rebaseConflictedPrs;
+        if (val === false) migratedConfig.rebaseWhen = 'never';
       } else if (key === 'exposeEnv') {
         isMigrated = true;
         delete migratedConfig.exposeEnv;

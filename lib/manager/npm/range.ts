@@ -13,7 +13,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   } = config;
   const isComplexRange = parseRange(currentValue).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
-    logger.info(
+    logger.debug(
       { currentValue },
       'Replacing bump strategy for complex range with widen'
     );

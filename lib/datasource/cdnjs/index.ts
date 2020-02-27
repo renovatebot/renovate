@@ -101,13 +101,13 @@ export async function getPkgReleases({
     ) {
       throw new DatasourceError(err);
     }
-
     if (err.statusCode === 401) {
       logger.debug(errorData, 'Authorization error');
     } else if (err.statusCode === 404) {
       logger.debug(errorData, 'Package lookup error');
     } else {
-      logger.warn(errorData, 'CDNJS lookup failure: Unknown error');
+      logger.debug(errorData, 'CDNJS lookup failure: Unknown error');
+      throw new DatasourceError(err);
     }
   }
 

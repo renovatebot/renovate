@@ -215,6 +215,7 @@ describe('workers/pr', () => {
       ]);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
+      config.rebaseWhen = 'never';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
@@ -226,7 +227,7 @@ describe('workers/pr', () => {
       config.updateType = 'pin';
       config.schedule = 'before 5am';
       config.timezone = 'some timezone';
-      config.rebaseStalePrs = true;
+      config.rebaseWhen = 'behind-base-branch';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();

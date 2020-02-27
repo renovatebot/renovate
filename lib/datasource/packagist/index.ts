@@ -73,11 +73,11 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
     return meta;
   } catch (err) {
     if (err.code === 'ETIMEDOUT') {
-      logger.info({ regUrl }, 'Packagist timeout');
+      logger.debug({ regUrl }, 'Packagist timeout');
       return null;
     }
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info({ regUrl }, 'Unauthorized Packagist repository');
+      logger.debug({ regUrl }, 'Unauthorized Packagist repository');
       return null;
     }
     if (
@@ -85,7 +85,7 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
       err.url &&
       err.url.endsWith('/packages.json')
     ) {
-      logger.info({ regUrl }, 'Packagist repository not found');
+      logger.debug({ regUrl }, 'Packagist repository not found');
       return null;
     }
     logger.warn({ err }, 'Packagist download error');
@@ -282,7 +282,10 @@ async function packageLookup(
     return dep;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ dependency: name }, `Dependency lookup failure: not found`);
+      logger.debug(
+        { dependency: name },
+        `Dependency lookup failure: not found`
+      );
       logger.debug({
         err,
       });

@@ -13,6 +13,8 @@ loggerLevels.forEach(k => {
   logger[k] = jest.fn();
 });
 
+export const setContext = jest.fn();
+export const getContext = jest.fn();
 export const setMeta = jest.fn();
 export const addMeta = jest.fn();
 export const removeMeta = jest.fn();

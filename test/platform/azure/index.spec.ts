@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as _hostRules from '../../../lib/util/host-rules';
-import { RepoParams } from '../../../lib/platform/common';
+import { RepoParams, Platform } from '../../../lib/platform/common';
 import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 import {
   BRANCH_STATUS_FAILED,
@@ -10,11 +10,11 @@ import {
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let azure: jest.Mocked<typeof import('../../../lib/platform/azure')>;
+  let azure: Platform;
   let azureApi: jest.Mocked<typeof import('../../../lib/platform/azure/azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('../../../lib/platform/azure/azure-helper')>;
   let GitStorage;
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
@@ -23,7 +23,7 @@ describe('platform/azure', () => {
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
     require('../../../lib/util/sanitize').sanitize = jest.fn(input => input);
-    azure = require('../../../lib/platform/azure');
+    azure = await import('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
     GitStorage = require('../../../lib/platform/git/storage').Storage;
@@ -46,7 +46,7 @@ describe('platform/azure', () => {
     hostRules.find.mockReturnValue({
       token: 'token',
     });
-    azure.initPlatform({
+    await azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
@@ -83,20 +83,20 @@ describe('platform/azure', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no endpoint', () => {
-      expect(() => {
-        azure.initPlatform({} as any);
-      }).toThrow();
+      expect.assertions(1);
+      expect(() => azure.initPlatform({})).toThrow();
     });
     it('should throw if no token', () => {
-      expect(() => {
+      expect.assertions(1);
+      expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
-        } as any);
-      }).toThrow();
+        })
+      ).toThrow();
     });
-    it('should init', () => {
+    it('should init', async () => {
       expect(
-        azure.initPlatform({
+        await azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           token: 'token',
         })
@@ -170,8 +170,8 @@ describe('platform/azure', () => {
   });
 
   describe('cleanRepo()', () => {
-    it('exists', () => {
-      azure.cleanRepo();
+    it('exists', async () => {
+      await azure.cleanRepo();
     });
   });
 
@@ -194,8 +194,8 @@ describe('platform/azure', () => {
   });
 
   describe('getRepoForceRebase', () => {
-    it('should return false', () => {
-      expect(azure.getRepoForceRebase()).toBe(false);
+    it('should return false', async () => {
+      expect(await azure.getRepoForceRebase()).toBe(false);
     });
   });
 
@@ -851,8 +851,8 @@ describe('platform/azure', () => {
   });
 
   describe('Not supported by Azure DevOps (yet!)', () => {
-    it('setBranchStatus', () => {
-      const res = azure.setBranchStatus({
+    it('setBranchStatus', async () => {
+      const res = await azure.setBranchStatus({
         branchName: 'test',
         context: 'test',
         description: 'test',
@@ -863,13 +863,13 @@ describe('platform/azure', () => {
     });
 
     it('mergePr', async () => {
-      const res = await azure.mergePr(0);
-      expect(res).toBeUndefined();
+      const res = await azure.mergePr(0, undefined);
+      expect(res).toBe(false);
     });
 
     // to become async?
-    it('getPrFiles', () => {
-      const res = azure.getPrFiles(46);
+    it('getPrFiles', async () => {
+      const res = await azure.getPrFiles(46);
       expect(res).toHaveLength(0);
     });
   });

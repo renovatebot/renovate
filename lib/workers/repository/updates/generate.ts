@@ -142,7 +142,7 @@ export function generateBranchConfig(branchUpgrades): RenovateConfig {
       upgrade.updateType !== 'lockFileMaintenance' &&
       upgrade.displayFrom.length * upgrade.displayTo.length === 0
     ) {
-      logger.info({ config: upgrade }, 'empty displayFrom/displayTo');
+      logger.debug({ config: upgrade }, 'empty displayFrom/displayTo');
     }
     if (upgrade.depName) {
       upgrade.depNameEscaped = (upgrade.lookupName || upgrade.depName).replace(

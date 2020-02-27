@@ -56,13 +56,16 @@ async function getDatasource(name: string): Promise<DataSource | null> {
     return null;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ dependency: name }, `Dependency lookup failure: not found`);
+      logger.debug(
+        { dependency: name },
+        `Dependency lookup failure: not found`
+      );
       logger.debug({
         err,
       });
       return null;
     }
-    logger.info({ err, name }, 'go lookup failure: Unknown error');
+    logger.debug({ err, name }, 'go lookup failure: Unknown error');
     return null;
   }
 }

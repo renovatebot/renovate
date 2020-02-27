@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
-import { getDependency } from './get';
-import { Preset } from '../common';
+import { getDependency } from '../../datasource/npm/get';
+import { Preset } from './common';
 
 export async function getPreset(
   pkgName: string,
@@ -16,7 +16,7 @@ export async function getPreset(
   const presetConfig = dep['renovate-config'][presetName];
   if (!presetConfig) {
     const presetNames = Object.keys(dep['renovate-config']);
-    logger.info(
+    logger.debug(
       { presetNames, presetName },
       'Preset not found within renovate-config'
     );

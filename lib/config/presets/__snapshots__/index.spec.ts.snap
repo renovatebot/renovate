@@ -82,93 +82,92 @@ Object {
 
 exports[`config/presets parsePreset parses github 1`] = `
 Object {
-  "datasource": "github",
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetSource": "github",
 }
 `;
 
 exports[`config/presets parsePreset parses gitlab 1`] = `
 Object {
-  "datasource": "gitlab",
   "packageName": "some/repo",
   "params": undefined,
   "presetName": "default",
+  "presetSource": "gitlab",
 }
 `;
 
 exports[`config/presets parsePreset returns default package name 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "renovate-config-default",
   "params": undefined,
   "presetName": "base",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns default package name with params 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "renovate-config-default",
   "params": Array [
     "packages/eslint",
     "eslint",
   ],
   "presetName": "group",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns non-scoped default 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "default",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns non-scoped package name 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "webapp",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns non-scoped package name full 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "webapp",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns non-scoped package name with params 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": Array [
     "param1",
   ],
   "presetName": "webapp",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns scope with packageName and default 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": undefined,
   "presetName": "default",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns scope with packageName and params and default 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": Array [
     "param1",
@@ -176,67 +175,68 @@ Object {
     "param3",
   ],
   "presetName": "default",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns scope with packageName and presetName 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": undefined,
   "presetName": "somePresetName",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns scope with packageName and presetName and params 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": Array [
     "param1",
     "param2",
   ],
   "presetName": "somePresetName",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns scope with presetName 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": undefined,
   "presetName": "somePresetName",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns scope with presetName and params 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": Array [
     "param1",
   ],
   "presetName": "somePresetName",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns simple scope 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": undefined,
   "presetName": "default",
+  "presetSource": "npm",
 }
 `;
 
 exports[`config/presets parsePreset returns simple scope and params 1`] = `
 Object {
-  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": Array [
     "param1",
   ],
   "presetName": "default",
+  "presetSource": "npm",
 }
 `;
 
@@ -329,7 +329,7 @@ Object {
     },
   ],
   "prCreation": "immediate",
-  "rebaseStalePrs": true,
+  "rebaseWhen": "behind-base-branch",
   "requiredStatusChecks": Array [],
   "respectLatest": true,
   "schedule": Array [
