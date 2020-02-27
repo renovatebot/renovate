@@ -61,6 +61,9 @@ module.exports = {
       },
     ], // disable until proper interfaced api
   },
+  settings: {
+    'import/ignore:': ['type-fest'],
+  },
   overrides: [
     {
       files: ['**/*.spec.ts'],
