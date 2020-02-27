@@ -6,6 +6,7 @@ export const DATASOURCE_DART = 'dart';
 export const DATASOURCE_DOCKER = 'docker';
 export const DATASOURCE_GIT_SUBMODULES = 'git-submodules';
 export const DATASOURCE_GIT_TAGS = 'git-tags';
+export const DATASOURCE_GITHUB_RELEASES = 'github-releases';
 export const DATASOURCE_GITHUB_TAGS = 'github-tags';
 export const DATASOURCE_GITLAB = 'gitlab';
 export const DATASOURCE_GO = 'go';
