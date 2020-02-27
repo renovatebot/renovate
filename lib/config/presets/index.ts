@@ -1,25 +1,20 @@
 import is from '@sindresorhus/is';
-import { logger } from '../logger';
-import * as massage from './massage';
-import * as migration from './migration';
-import * as github from '../datasource/github';
-import * as npm from '../datasource/npm';
-import * as gitlab from '../datasource/gitlab';
-import { RenovateConfig } from './common';
-import { mergeChildConfig } from './utils';
-import { regEx } from '../util/regex';
+import { logger } from '../../logger';
+import * as massage from '../massage';
+import * as migration from '../migration';
+import * as github from './github';
+import * as npm from './npm';
+import * as gitlab from './gitlab';
+import { RenovateConfig } from '../common';
+import { mergeChildConfig } from '../utils';
+import { regEx } from '../../util/regex';
 import {
   CONFIG_VALIDATION,
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
-} from '../constants/error-messages';
-import {
-  DATASOURCE_GITHUB,
-  DATASOURCE_GITLAB,
-  DATASOURCE_NPM,
-} from '../constants/data-binary-source';
+} from '../../constants/error-messages';
 
-const datasources = {
+const presetSources = {
   github,
   npm,
   gitlab,
@@ -56,19 +51,19 @@ export function replaceArgs(
 
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
-  let datasource: string;
+  let presetSource: string;
   let packageName: string;
   let presetName: string;
   let params: string[];
   if (str.startsWith('github>')) {
-    datasource = DATASOURCE_GITHUB;
+    presetSource = 'github';
     str = str.substring('github>'.length);
   } else if (str.startsWith('gitlab>')) {
-    datasource = DATASOURCE_GITLAB;
+    presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
   }
   str = str.replace(/^npm>/, '');
-  datasource = datasource || DATASOURCE_NPM;
+  presetSource = presetSource || 'npm';
   if (str.includes('(')) {
     params = str
       .slice(str.indexOf('(') + 1, -1)
@@ -96,23 +91,20 @@ export function parsePreset(input: string): ParsedPreset {
     // non-scoped namespace
     [, packageName] = /(.*?)(:|$)/.exec(str);
     presetName = str.slice(packageName.length + 1);
-    if (
-      datasource === DATASOURCE_NPM &&
-      !packageName.startsWith('renovate-config-')
-    ) {
+    if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
     }
     if (presetName === '') {
       presetName = 'default';
     }
   }
-  return { datasource, packageName, presetName, params };
+  return { presetSource, packageName, presetName, params };
 }
 
 export async function getPreset(preset: string): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
-  const { datasource, packageName, presetName, params } = parsePreset(preset);
-  let presetConfig = await datasources[datasource].getPreset(
+  const { presetSource, packageName, presetName, params } = parsePreset(preset);
+  let presetConfig = await presetSources[presetSource].getPreset(
     packageName,
     presetName
   );
@@ -254,7 +246,7 @@ export async function resolveConfigPresets(
 }
 
 export interface ParsedPreset {
-  datasource: string;
+  presetSource: string;
   packageName: string;
   presetName: string;
   params?: string[];

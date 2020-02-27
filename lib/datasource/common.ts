@@ -44,12 +44,8 @@ export interface ReleaseResult {
   versions?: any;
 }
 
-// TODO: Proper typing
-export type Preset = any;
-
 export interface Datasource {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
-  getPreset?(packageName: string, presetName?: string): Promise<Preset>;
   getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
 }
 
