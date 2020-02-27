@@ -78,4 +78,30 @@ describe('datasource/metadata', () => {
     addMetaData(dep, datasource, lookupName);
     expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
   });
+
+  it('Should move github homepage to sourceUrl', () => {
+    const dep = {
+      homepage: 'http://www.github.com/mockk/mockk/',
+      releases: [{ version: '1.9.3' }],
+      sourceUrl: undefined,
+    };
+    const datasource = datasourceMaven.id;
+    const lookupName = 'io.mockk:mockk';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
+    expect(dep.homepage).toBeUndefined();
+  });
+
+  it('Should handle parsing/converting of GitLab sourceUrls with http and www correctly', () => {
+    const dep = {
+      sourceUrl: 'http://gitlab.com/meno/dropzone/',
+      releases: [{ version: '5.7.0' }],
+    };
+    const datasource = DATASOURCE_MAVEN;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep.sourceUrl).toEqual('https://gitlab.com/meno/dropzone');
+  });
 });
