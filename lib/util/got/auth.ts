@@ -20,8 +20,8 @@ export default got.extend({
           'Converting token to Bearer auth'
         );
         if (
-          options.hostType === PLATFORM_TYPE_GITHUB ||
-          options.hostType === PLATFORM_TYPE_GITEA
+          options.context?.hostType === PLATFORM_TYPE_GITHUB ||
+          options.context?.hostType === PLATFORM_TYPE_GITEA
         ) {
           options.headers.authorization = `token ${options.context.token}`; // eslint-disable-line no-param-reassign
         } else if (options.context.hostType === PLATFORM_TYPE_GITLAB) {
