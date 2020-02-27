@@ -39,9 +39,10 @@ export async function getPkgReleases({
         paginate: true,
       })
     ).body.map(o => o.tag_name);
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.debug({ repo, err }, 'Error retrieving from github');
   }
+  // istanbul ignore if
   if (!versions) {
     return null;
   }

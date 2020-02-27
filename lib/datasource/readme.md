@@ -9,7 +9,6 @@ The minimum exported interface for a datasource is a function called `getPkgRele
 The config contains:
 
 - `lookupName`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `lookupType`: used only when there is a need to specify different types of lookups within the same datasource
 - `registryUrls`: an array of registry Urls to try
 
 `getPkgReleases` should return an object containing:
