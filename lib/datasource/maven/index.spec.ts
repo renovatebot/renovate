@@ -39,6 +39,8 @@ const config = {
 
 describe('datasource/maven', () => {
   beforeEach(() => {
+    global.repoCache = {};
+    hostRules.clear();
     hostRules.add({
       hostType: DATASOURCE_MAVEN,
       hostName: 'frontend_for_private_s3_repository',
@@ -173,11 +175,9 @@ describe('datasource/maven', () => {
     });
 
     it('should throw registry-failure if maven-central fails', async () => {
-      nock.cleanAll();
-      nock.disableNetConnect();
       nock('http://central.maven.org')
         .get('/maven2/org/artifact/maven-metadata.xml')
-        .times(10)
+        .times(3)
         .reply(503);
 
       expect.assertions(1);

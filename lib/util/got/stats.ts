@@ -37,7 +37,7 @@ export const instance = got.extend({
   handlers: [
     (options, next) => {
       const nextPromise = next(options);
-      const { hostname } = options;
+      const { hostname } = options.url;
 
       (nextPromise as CancelableRequest<unknown>).on(
         'response',
