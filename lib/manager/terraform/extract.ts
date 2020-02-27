@@ -3,7 +3,7 @@ import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
 import {
   DATASOURCE_GIT_TAGS,
-  DATASOURCE_GITHUB,
+  DATASOURCE_GITHUB_TAGS,
   DATASOURCE_TERRAFORM,
   DATASOURCE_TERRAFORM_PROVIDER,
 } from '../../constants/data-binary-source';
@@ -99,7 +99,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.depName = 'github.com/' + githubRefMatch[2];
         dep.depNameShort = githubRefMatch[2];
         dep.currentValue = githubRefMatch[3];
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = DATASOURCE_GITHUB_TAGS;
         dep.lookupName = githubRefMatch[2];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {

@@ -19,7 +19,7 @@ import * as pep440Versioning from '../../../../../lib/versioning/pep440';
 import {
   DATASOURCE_DOCKER,
   DATASOURCE_GIT_SUBMODULES,
-  DATASOURCE_GITHUB,
+  DATASOURCE_GITHUB_TAGS,
   DATASOURCE_NPM,
   DATASOURCE_PACKAGIST,
   DATASOURCE_PYPI,
@@ -989,7 +989,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles github 404', async () => {
       config.depName = 'foo';
-      config.datasource = DATASOURCE_GITHUB;
+      config.datasource = DATASOURCE_GITHUB_TAGS;
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
       nock('https://pypi.org')

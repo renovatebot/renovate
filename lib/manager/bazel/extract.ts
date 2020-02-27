@@ -7,7 +7,7 @@ import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import {
   DATASOURCE_DOCKER,
-  DATASOURCE_GITHUB,
+  DATASOURCE_GITHUB_TAGS,
   DATASOURCE_GO,
 } from '../../constants/data-binary-source';
 
@@ -183,7 +183,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = DATASOURCE_GITHUB_TAGS;
         dep.lookupName = repo;
         deps.push(dep);
       }
@@ -228,7 +228,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else {
         dep.currentValue = parsedUrl.currentValue;
       }
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = DATASOURCE_GITHUB_TAGS;
       dep.lookupName = dep.repo;
       dep.lookupType = 'releases';
       deps.push(dep);

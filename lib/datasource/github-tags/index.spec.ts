@@ -10,7 +10,7 @@ jest.mock('../../util/host-rules');
 const ghGot: any = api.get;
 const hostRules: any = _hostRules;
 
-describe('datasource/github', () => {
+describe('datasource/github-tags', () => {
   beforeEach(() => global.renovateCache.rmAll());
   describe('getDigest', () => {
     beforeEach(() => {

@@ -28,7 +28,7 @@ exports[`lib/manager/bazel/extract extractPackageFile() extracts dependencies fr
 Array [
   Object {
     "currentDigest": "0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "subpar",
     "depType": "http_archive",
     "lookupName": "google/subpar",
@@ -46,7 +46,7 @@ Array [
   },
   Object {
     "currentValue": "0.6.0",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
     "lookupName": "bazelbuild/bazel-skylib",
@@ -68,7 +68,7 @@ exports[`lib/manager/bazel/extract extractPackageFile() extracts multiple types 
 Array [
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
     "lookupName": "GoogleContainerTools/distroless",
@@ -85,7 +85,7 @@ Array [
   },
   Object {
     "currentDigest": "d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "bazel_toolchains",
     "depType": "http_archive",
     "lookupName": "bazelbuild/bazel-toolchains",
@@ -105,7 +105,7 @@ Array [
   },
   Object {
     "currentValue": "0.7.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
     "lookupName": "bazelbuild/rules_go",
@@ -121,7 +121,7 @@ Array [
   },
   Object {
     "currentValue": "0.5.0",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
     "lookupName": "bazelbuild/bazel-skylib",
@@ -141,7 +141,7 @@ Array [
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
     "lookupName": "GoogleContainerTools/distroless",
@@ -203,7 +203,7 @@ Array [
   },
   Object {
     "currentValue": "0.3.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
     "lookupName": "bazelbuild/rules_nodejs",
@@ -217,7 +217,7 @@ Array [
   },
   Object {
     "currentValue": "0.6.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
     "lookupName": "bazelbuild/rules_typescript",
@@ -231,7 +231,7 @@ Array [
   },
   Object {
     "currentValue": "0.0.3",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
     "lookupName": "bazelbuild/rules_sass",
@@ -245,7 +245,7 @@ Array [
   },
   Object {
     "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "com_github_bazelbuild_buildtools",
     "depType": "git_repository",
     "lookupName": "bazelbuild/buildtools",
