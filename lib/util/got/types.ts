@@ -17,7 +17,10 @@ Object.defineProperty(GotError.prototype, 'statusCode', {
 });
 Object.defineProperty(GotError.prototype, 'code', {
   get: function code() {
-    return this.response?.code;
+    return this._code ?? this.response?.code;
+  },
+  set: function code(v) {
+    this._code = v;
   },
 });
 
