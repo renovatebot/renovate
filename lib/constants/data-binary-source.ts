@@ -21,6 +21,6 @@ export const DATASOURCE_PACKAGIST = 'packagist';
 export const DATASOURCE_PYPI = 'pypi';
 export const DATASOURCE_RUBYGEMS = 'rubygems';
 export const DATASOURCE_RUBY_VERSION = 'ruby-version';
-export const DATASOURCE_SBT = 'sbt';
+export const DATASOURCE_SBT_PLUGIN = 'sbt-plugin';
 export const DATASOURCE_TERRAFORM = 'terraform';
 export const DATASOURCE_TERRAFORM_PROVIDER = 'terraform-provider';
