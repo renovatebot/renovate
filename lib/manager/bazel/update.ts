@@ -159,12 +159,12 @@ export async function updateDependency({
     const existingDef = regEx(existingRegExStr);
     // istanbul ignore if
     if (!existingDef.test(fileContent)) {
-      logger.info('Cannot match existing string');
+      logger.debug('Cannot match existing string');
       return null;
     }
     return fileContent.replace(existingDef, newDef);
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ err }, 'Error setting new bazel WORKSPACE version');
+    logger.debug({ err }, 'Error setting new bazel WORKSPACE version');
     return null;
   }
 }

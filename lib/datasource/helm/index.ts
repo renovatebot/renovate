@@ -23,7 +23,7 @@ export async function getRepositoryData(
   } catch (err) {
     // istanbul ignore if
     if (err.code === 'ERR_INVALID_URL') {
-      logger.info(
+      logger.debug(
         { helmRepository: repository },
         'helm repository is not a valid URL - skipping'
       );
@@ -31,7 +31,7 @@ export async function getRepositoryData(
     }
     // istanbul ignore if
     if (err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN') {
-      logger.info({ err }, 'Could not connect to helm repository');
+      logger.debug({ err }, 'Could not connect to helm repository');
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
@@ -46,7 +46,7 @@ export async function getRepositoryData(
     }
     // istanbul ignore if
     if (err.name === 'UnsupportedProtocolError') {
-      logger.info({ repository }, 'Unsupported protocol');
+      logger.debug({ repository }, 'Unsupported protocol');
       return null;
     }
     logger.warn(
@@ -96,7 +96,7 @@ export async function getPkgReleases({
   }
   const repositoryData = await getRepositoryData(helmRepository);
   if (!repositoryData) {
-    logger.info(`Couldn't get index.yaml file from ${helmRepository}`);
+    logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
     return null;
   }
   const releases = repositoryData.find(chart => chart.name === lookupName);

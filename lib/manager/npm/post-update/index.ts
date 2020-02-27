@@ -194,7 +194,7 @@ export async function writeExistingFiles(
           }
         }
         if (widens.length) {
-          logger.info(`Removing ${widens} from ${npmLock} to force an update`);
+          logger.debug(`Removing ${widens} from ${npmLock} to force an update`);
           try {
             const npmLockParsed = JSON.parse(existingNpmLock);
             if (npmLockParsed.dependencies) {
@@ -313,7 +313,7 @@ export async function getAdditionalFiles(
     return { artifactErrors, updatedArtifacts };
   }
   if (!config.updateLockFiles) {
-    logger.info('Skipping lock file generation');
+    logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }
   logger.debug('Getting updated lock files');
@@ -379,7 +379,7 @@ export async function getAdditionalFiles(
               `No matching version found for ${upgrade.depName}`
             )
           ) {
-            logger.info(
+            logger.debug(
               { dependency: upgrade.depName, type: 'npm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
@@ -434,7 +434,7 @@ export async function getAdditionalFiles(
               `Couldn't find any versions for \\\"${upgrade.depName}\\\"`
             )
           ) {
-            logger.info(
+            logger.debug(
               { dependency: upgrade.depName, type: 'yarn' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
@@ -477,7 +477,7 @@ export async function getAdditionalFiles(
                 .replace(/"/g, '')
                 .replace(/\/?$/, '/');
               const resolvedPath = upath.join(lockFileDir, mirrorPath);
-              logger.info('Found yarn offline  mirror: ' + resolvedPath);
+              logger.debug('Found yarn offline  mirror: ' + resolvedPath);
               const status = await platform.getRepoStatus();
               for (const f of status.modified.concat(status.not_added)) {
                 if (f.startsWith(resolvedPath)) {
@@ -524,7 +524,7 @@ export async function getAdditionalFiles(
               `No compatible version found: ${upgrade.depName}`
             )
           ) {
-            logger.info(
+            logger.debug(
               { dependency: upgrade.depName, type: 'pnpm' },
               'lock file failed for the dependency being updated - skipping branch creation'
             );
@@ -597,7 +597,7 @@ export async function getAdditionalFiles(
             `Couldn't find any versions for \\\"${upgrade.depName}\\\"`
           )
         ) {
-          logger.info(
+          logger.debug(
             { dependency: upgrade.depName, type: 'yarn' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
@@ -613,7 +613,7 @@ export async function getAdditionalFiles(
             `No matching version found for ${upgrade.depName}`
           )
         ) {
-          logger.info(
+          logger.debug(
             { dependency: upgrade.depName, type: 'npm' },
             'lock file failed for the dependency being updated - skipping branch creation'
           );
@@ -664,7 +664,7 @@ export async function getAdditionalFiles(
             }
           } catch (err) {
             if (config.updateType === 'lockFileMaintenance') {
-              logger.info(
+              logger.debug(
                 { packageFile, lockFilePath },
                 'No lock file found after lerna lockFileMaintenance'
               );

@@ -2,8 +2,24 @@
 
 exports[`datasource/packagist getPkgReleases adds packagist source implicitly 1`] = `
 Object {
+  "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
   "releases": Array [
+    Object {
+      "gitRef": "dev-api-v2",
+      "releaseTimestamp": "2016-01-17T15:57:27+00:00",
+      "version": "dev-api-v2",
+    },
+    Object {
+      "gitRef": "dev-api-v3",
+      "releaseTimestamp": "2016-01-17T15:59:26+00:00",
+      "version": "dev-api-v3",
+    },
+    Object {
+      "gitRef": "dev-master",
+      "releaseTimestamp": "2018-02-23T09:45:38+00:00",
+      "version": "dev-master",
+    },
     Object {
       "gitRef": "v1.0",
       "releaseTimestamp": "2014-05-30T16:51:39+00:00",
@@ -80,14 +96,30 @@ Object {
       "version": "2.5",
     },
   ],
-  "sourceUrl": "https://github.com/drewm/mailchimp-api",
+  "sourceUrl": "https://github.com/drewm/mailchimp-api.git",
 }
 `;
 
 exports[`datasource/packagist getPkgReleases processes real versioned data 1`] = `
 Object {
+  "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
   "releases": Array [
+    Object {
+      "gitRef": "dev-api-v2",
+      "releaseTimestamp": "2016-01-17T15:57:27+00:00",
+      "version": "dev-api-v2",
+    },
+    Object {
+      "gitRef": "dev-api-v3",
+      "releaseTimestamp": "2016-01-17T15:59:26+00:00",
+      "version": "dev-api-v3",
+    },
+    Object {
+      "gitRef": "dev-master",
+      "releaseTimestamp": "2018-02-23T09:45:38+00:00",
+      "version": "dev-master",
+    },
     Object {
       "gitRef": "v1.0",
       "releaseTimestamp": "2014-05-30T16:51:39+00:00",
@@ -164,7 +196,7 @@ Object {
       "version": "2.5",
     },
   ],
-  "sourceUrl": "https://github.com/drewm/mailchimp-api",
+  "sourceUrl": "https://github.com/drewm/mailchimp-api.git",
 }
 `;
 
@@ -309,14 +341,25 @@ Object {
       "version": "3.8.1",
     },
   ],
-  "sourceUrl": "https://github.com/guzzle/guzzle",
+  "sourceUrl": "https://github.com/guzzle/guzzle.git",
 }
 `;
 
 exports[`datasource/packagist getPkgReleases supports plain packages 1`] = `
 Object {
+  "homepage": undefined,
   "name": "vendor/package-name",
   "releases": Array [
+    Object {
+      "gitRef": "dev-master",
+      "releaseTimestamp": undefined,
+      "version": "dev-master",
+    },
+    Object {
+      "gitRef": "1.0.x-dev",
+      "releaseTimestamp": undefined,
+      "version": "1.0.x-dev",
+    },
     Object {
       "gitRef": "0.0.1",
       "releaseTimestamp": undefined,
@@ -360,6 +403,11 @@ Object {
       "gitRef": "1.5.1",
       "releaseTimestamp": undefined,
       "version": "1.5.1",
+    },
+    Object {
+      "gitRef": "dev-trunk",
+      "releaseTimestamp": "2018-09-03 21:31:30",
+      "version": "dev-trunk",
     },
   ],
   "sourceUrl": "https://plugins.svn.wordpress.org/1beyt/",

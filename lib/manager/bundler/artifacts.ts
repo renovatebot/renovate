@@ -5,13 +5,7 @@ import {
 } from '../../util/fs';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { getPkgReleases } from '../../datasource/docker';
-import {
-  isValid,
-  isVersion,
-  matches,
-  sortVersions,
-} from '../../versioning/ruby';
+import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
 import {
@@ -47,49 +41,6 @@ async function getRubyConstraint(
   return rubyConstraint;
 }
 
-async function getDockerTag(updateArtifact: UpdateArtifact): Promise<string> {
-  const constraint = await getRubyConstraint(updateArtifact);
-  if (!constraint) {
-    logger.debug('No ruby version constraint found, so using latest');
-    return 'latest';
-  }
-  if (!isValid(constraint)) {
-    logger.warn({ constraint }, 'Invalid ruby version constraint');
-    return 'latest';
-  }
-  logger.debug(
-    { constraint },
-    'Found ruby version constraint - checking for a compatible renovate/ruby image to use'
-  );
-  const rubyReleases = await getPkgReleases({
-    lookupName: 'renovate/ruby',
-  });
-  // istanbul ignore else
-  if (rubyReleases && rubyReleases.releases) {
-    let versions = rubyReleases.releases.map(release => release.version);
-    versions = versions.filter(
-      version => isVersion(version) && matches(version, constraint)
-    );
-    versions = versions.sort(sortVersions);
-    if (versions.length) {
-      const rubyVersion = versions.pop();
-      logger.debug(
-        { constraint, rubyVersion },
-        'Found compatible ruby version'
-      );
-      return rubyVersion;
-    }
-  } else {
-    logger.error('No renovate/ruby releases found');
-    return 'latest';
-  }
-  logger.warn(
-    { constraint },
-    'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
-  );
-  return 'latest';
-}
-
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
@@ -104,7 +55,7 @@ export async function updateArtifacts(
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {
-    logger.info('Aborting Bundler artifacts due to previous failed attempt');
+    logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(global.repoCache.bundlerArtifactsError);
   }
   const lockFileName = `${packageFileName}.lock`;
@@ -138,7 +89,8 @@ export async function updateArtifacts(
       cwdFile: packageFileName,
       docker: {
         image: 'renovate/ruby',
-        tag: await getDockerTag(updateArtifact),
+        tagScheme: 'ruby',
+        tagConstraint: await getRubyConstraint(updateArtifact),
         preCommands,
       },
     };
@@ -181,7 +133,7 @@ export async function updateArtifacts(
           'Please make sure you have the correct access rights'
         ))
     ) {
-      logger.info(
+      logger.debug(
         { err },
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
@@ -215,7 +167,7 @@ export async function updateArtifacts(
           config,
         });
       }
-      logger.info(
+      logger.debug(
         { err },
         'Gemfile.lock update failed due to incompatible packages'
       );

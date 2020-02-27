@@ -43,7 +43,7 @@ export function extractPackageFile(content: string): PackageFile {
     // the current approach we need to match anything we find again during the update
     parsedContent = yaml.safeLoad(content, { json: true });
   } catch (err) {
-    logger.info({ err }, 'Failed to parse helm-values YAML');
+    logger.debug({ err }, 'Failed to parse helm-values YAML');
     return null;
   }
   try {

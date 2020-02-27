@@ -65,7 +65,7 @@ export async function generateLockFile(
       cmd = 'pnpm';
     }
     if (config.binarySource === BinarySource.Docker) {
-      logger.info('Running pnpm via docker');
+      logger.debug('Running pnpm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if
       if (config.dockerUser) {
@@ -102,7 +102,7 @@ export async function generateLockFile(
     }));
     lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    logger.debug(
       {
         cmd,
         err,

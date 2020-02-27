@@ -103,7 +103,7 @@ export async function getPkgReleases({
     return dep;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info(
+      logger.debug(
         { lookupName },
         `Terraform registry lookup failure: not found`
       );

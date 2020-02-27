@@ -99,20 +99,20 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = platform.getPrBody(prBody);
 
   if (existingPr) {
-    logger.info('Found open onboarding PR');
+    logger.debug('Found open onboarding PR');
     // Check if existing PR needs updating
     if (
       existingPr.body.trim() === prBody.trim() // Bitbucket strips trailing \n
     ) {
-      logger.info(`${existingPr.displayNumber} does not need updating`);
+      logger.debug(`${existingPr.displayNumber} does not need updating`);
       return;
     }
     // PR must need updating
     await platform.updatePr(existingPr.number, existingPr.title, prBody);
-    logger.info(`Updated ${existingPr.displayNumber}`);
+    logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
     return;
   }
-  logger.info('Creating onboarding PR');
+  logger.debug('Creating onboarding PR');
   const labels = [];
   const useDefaultBranch = true;
   try {
@@ -127,7 +127,7 @@ If you need any further assistance then you can also [request help here](${confi
         labels,
         useDefaultBranch,
       });
-      logger.info({ pr: pr.displayNumber }, 'Created onboarding PR');
+      logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
     }
   } catch (err) /* istanbul ignore next */ {
     if (
@@ -140,7 +140,7 @@ If you need any further assistance then you can also [request help here](${confi
         'A pull request already exists'
       )
     ) {
-      logger.info('Onboarding PR already exists but cannot find it');
+      logger.debug('Onboarding PR already exists but cannot find it');
       await platform.deleteBranch(config.onboardingBranch);
       return;
     }

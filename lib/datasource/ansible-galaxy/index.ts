@@ -96,7 +96,7 @@ export async function getPkgReleases({
     return result;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `Dependency lookup failure: not found`);
+      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
       return null;
     }
     logger.warn(

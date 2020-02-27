@@ -42,7 +42,7 @@ export async function getPkgReleases({
       })
     ).body.data.orb;
     if (!res) {
-      logger.info({ lookupName }, 'Failed to look up orb');
+      logger.debug({ lookupName }, 'Failed to look up orb');
       return null;
     }
     // Simplify response before caching and returning
@@ -67,7 +67,7 @@ export async function getPkgReleases({
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'CircleCI Orb lookup error');
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `CircleCI Orb lookup failure: not found`);
+      logger.debug({ lookupName }, `CircleCI Orb lookup failure: not found`);
       return null;
     }
     logger.warn({ lookupName }, 'CircleCI Orb lookup failure: Unknown error');

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/auto-replace doAutoReplace handles already updated 1`] = `"     <script src=\\"https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.1/reactstrap.min.js\\">   "`;
+
+exports[`workers/branch/auto-replace doAutoReplace updates version and integrity 1`] = `"     <script src=\\"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js\\" integrity=\\"sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\" crossorigin=\\"anonymous\\">   "`;
+
+exports[`workers/branch/auto-replace doAutoReplace updates version only 1`] = `"     <script src=\\"https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.1/reactstrap.min.js\\">   "`;

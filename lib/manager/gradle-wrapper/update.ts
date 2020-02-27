@@ -12,7 +12,7 @@ async function getChecksum(url: string): Promise<string> {
     return response.body;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info('Gradle checksum lookup failure: not found');
+      logger.debug('Gradle checksum lookup failure: not found');
       logger.debug({ err });
     } else {
       logger.warn({ err }, 'Gradle checksum lookup failure: Unknown error');
@@ -49,7 +49,7 @@ export async function updateDependency({
 
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new Gradle Wrapper release value');
+    logger.debug({ err }, 'Error setting new Gradle Wrapper release value');
     return null;
   }
 }

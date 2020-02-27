@@ -73,7 +73,7 @@ function getECRAuthToken(
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
         logger.trace({ err }, 'err');
-        logger.info('ECR getAuthorizationToken error');
+        logger.debug('ECR getAuthorizationToken error');
         resolve(null);
       } else {
         const authorizationToken =
@@ -155,7 +155,7 @@ async function getAuthHeaders(
     };
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 401) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Unauthorized docker lookup'
       );
@@ -163,17 +163,19 @@ async function getAuthHeaders(
       return null;
     }
     if (err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Not allowed to access docker registry'
       );
       logger.debug({ err });
       return null;
     }
-    if (err.name === 'RequestError' && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new DatasourceError(err);
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
@@ -207,7 +209,7 @@ async function getManifestResponse(
   try {
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
-      logger.info('No docker auth found - returning');
+      logger.debug('No docker auth found - returning');
       return null;
     }
     headers.accept = 'application/vnd.docker.distribution.manifest.v2+json';
@@ -221,7 +223,7 @@ async function getManifestResponse(
       throw err;
     }
     if (err.statusCode === 401) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Unauthorized docker lookup'
       );
@@ -229,7 +231,7 @@ async function getManifestResponse(
       return null;
     }
     if (err.statusCode === 404) {
-      logger.info(
+      logger.debug(
         {
           err,
           registry,
@@ -240,21 +242,22 @@ async function getManifestResponse(
       );
       return null;
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new DatasourceError(err);
     }
     if (err.code === 'ETIMEDOUT') {
-      logger.info(
+      logger.debug(
         { registry },
         'Timeout when attempting to connect to docker registry'
       );
       logger.debug({ err });
       return null;
     }
-    logger.info(
+    logger.debug(
       {
         err,
         registry,
@@ -311,7 +314,7 @@ export async function getDigest(
     if (err instanceof DatasourceError) {
       throw err;
     }
-    logger.info(
+    logger.debug(
       {
         err,
         lookupName,
@@ -376,19 +379,20 @@ async function getTags(
       'docker.getTags() error'
     );
     if (err.statusCode === 404 && !repository.includes('/')) {
-      logger.info(
+      logger.debug(
         `Retrying Tags for ${registry}/${repository} using library/ prefix`
       );
       return getTags(registry, 'library/' + repository);
     }
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository, err },
         'Not authorised to look up docker tags'
       );
       return null;
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
@@ -403,7 +407,7 @@ async function getTags(
       throw new DatasourceError(err);
     }
     if (err.code === 'ETIMEDOUT') {
-      logger.info(
+      logger.debug(
         { registry },
         'Timeout when attempting to connect to docker registry'
       );
@@ -432,13 +436,14 @@ export function getConfigResponseBeforeRedirectHook(options: any): void {
     delete options.headers.authorization;
   }
 
-  if (
-    options.href?.includes('blob.core.windows.net') &&
-    options.headers?.authorization
-  ) {
-    // docker registry is hosted on Azure blob, redirect url includes authentication.
-    // eslint-disable-next-line no-param-reassign
-    delete options.headers.authorization;
+  if (options.href && options.headers?.authorization) {
+    const { host } = URL.parse(options.href);
+    // prettier-ignore
+    if (host && host.endsWith('blob.core.windows.net')) { // lgtm [js/incomplete-url-substring-sanitization]
+      // docker registry is hosted on Azure blob, redirect url includes authentication.
+      // eslint-disable-next-line no-param-reassign
+      delete options.headers.authorization;
+    }
   }
 }
 
@@ -488,7 +493,7 @@ async function getLabels(
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
     if (!manifestResponse) {
-      logger.info(
+      logger.debug(
         {
           registry,
           dockerRepository: repository,
@@ -511,7 +516,7 @@ async function getLabels(
     const configDigest = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
-      logger.info('No docker auth found - returning');
+      logger.debug('No docker auth found - returning');
       return {};
     }
     const url = `${registry}/v2/${repository}/blobs/${configDigest}`;
@@ -534,7 +539,7 @@ async function getLabels(
       throw err;
     }
     if (err.statusCode === 401) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Unauthorized docker lookup'
       );
@@ -549,7 +554,10 @@ async function getLabels(
         },
         'Config Manifest is unknown'
       );
-    } else if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    } else if (
+      err.statusCode === 429 &&
+      registry.endsWith('docker.io') // lgtm [js/incomplete-url-substring-sanitization]
+    ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
@@ -562,7 +570,7 @@ async function getLabels(
         'docker registry failure: internal error'
       );
     } else if (err.code === 'ETIMEDOUT') {
-      logger.info(
+      logger.debug(
         { registry },
         'Timeout when attempting to connect to docker registry'
       );

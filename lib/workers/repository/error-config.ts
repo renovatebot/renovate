@@ -17,7 +17,7 @@ export async function raiseConfigWarningIssue(
   }
   const pr = await platform.getBranchPr(config.onboardingBranch);
   if (pr && pr.state && pr.state.startsWith('open')) {
-    logger.info('Updating onboarding PR with config error notice');
+    logger.debug('Updating onboarding PR with config error notice');
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
     body += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;
     if (config.dryRun) {

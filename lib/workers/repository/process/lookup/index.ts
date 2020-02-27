@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { getRollbackUpdate, RollbackConfig } from './rollback';
 import { getRangeStrategy } from '../../../../manager';
 import { filterVersions, FilterConfig } from './filter';
@@ -56,8 +56,8 @@ function getType(
   fromVersion: string,
   toVersion: string
 ): string {
-  const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = versioning.get(versionScheme);
+  const { versioning, rangeStrategy, currentValue } = config;
+  const version = allVersioning.get(versioning);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
     return 'bump';
   }
@@ -82,8 +82,8 @@ function getFromVersion(
   latestVersion: string,
   allVersions: string[]
 ): string | null {
-  const { currentValue, lockedVersion, versionScheme } = config;
-  const version = versioning.get(versionScheme);
+  const { currentValue, lockedVersion, versioning } = config;
+  const version = allVersioning.get(versioning);
   if (version.isVersion(currentValue)) {
     return currentValue;
   }
@@ -134,7 +134,7 @@ export async function lookupUpdates(
 ): Promise<UpdateResult> {
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = versioning.get(config.versionScheme);
+  const version = allVersioning.get(config.versioning);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
   if (version.isValid(currentValue)) {
     const dependency = clone(await getPkgReleases(config));
@@ -144,7 +144,7 @@ export async function lookupUpdates(
         updateType: 'warning',
         message: `Failed to look up dependency ${depName}`,
       };
-      logger.info(
+      logger.debug(
         { dependency: depName, packageFile: config.packageFile },
         result.message
       );
@@ -153,7 +153,7 @@ export async function lookupUpdates(
       return res;
     }
     if (dependency.deprecationMessage) {
-      logger.info({ dependency: depName }, 'Found deprecationMessage');
+      logger.debug({ dependency: depName }, 'Found deprecationMessage');
       res.deprecationMessage = dependency.deprecationMessage;
     }
     res.sourceUrl =
@@ -172,7 +172,7 @@ export async function lookupUpdates(
       res.dockerRepository = dependency.dockerRepository;
     }
     const { latestVersion, releases } = dependency;
-    // Filter out any results from datasource that don't comply with our versioning scheme
+    // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases
       .map(release => release.version)
       .filter(v => version.isVersion(v));
@@ -392,7 +392,7 @@ export async function lookupUpdates(
             .replace('sha256:', '')
             .substring(0, 7);
         } else {
-          logger.info({ newValue: update.newValue }, 'Could not getDigest');
+          logger.debug({ newValue: update.newValue }, 'Could not getDigest');
         }
       }
     }

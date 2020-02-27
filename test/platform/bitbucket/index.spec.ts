@@ -1,6 +1,6 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
-import { GotApi, RepoParams } from '../../../lib/platform/common';
+import { GotApi, RepoParams, Platform } from '../../../lib/platform/common';
 import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 import {
   BRANCH_STATUS_FAILED,
@@ -9,14 +9,14 @@ import {
 } from '../../../lib/constants/branch-constants';
 
 describe('platform/bitbucket', () => {
-  let bitbucket: typeof import('../../../lib/platform/bitbucket');
+  let bitbucket: Platform;
   let api: jest.Mocked<GotApi>;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage: jest.Mocked<
     import('../../../lib/platform/git/storage').Storage
   > &
     jest.Mock;
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
@@ -24,7 +24,7 @@ describe('platform/bitbucket', () => {
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
-    bitbucket = require('../../../lib/platform/bitbucket');
+    bitbucket = await import('../../../lib/platform/bitbucket');
     GitStorage = require('../../../lib/platform/git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
@@ -90,22 +90,22 @@ describe('platform/bitbucket', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no username/password', () => {
-      expect(() => {
-        bitbucket.initPlatform({} as any);
-      }).toThrow();
+      expect.assertions(1);
+      expect(() => bitbucket.initPlatform({})).toThrow();
     });
     it('should throw if wrong endpoint', () => {
-      expect(() => {
+      expect.assertions(1);
+      expect(() =>
         bitbucket.initPlatform({
           endpoint: 'endpoint',
           username: 'abc',
           password: '123',
-        });
-      }).toThrow();
+        })
+      ).toThrow();
     });
-    it('should init', () => {
+    it('should init', async () => {
       expect(
-        bitbucket.initPlatform({
+        await bitbucket.initPlatform({
           username: 'abc',
           password: '123',
         })
@@ -138,8 +138,8 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getRepoForceRebase()', () => {
-    it('always return false, since bitbucket does not support force rebase', () => {
-      const actual = bitbucket.getRepoForceRebase();
+    it('always return false, since bitbucket does not support force rebase', async () => {
+      const actual = await bitbucket.getRepoForceRebase();
       expect(actual).toBe(false);
     });
   });

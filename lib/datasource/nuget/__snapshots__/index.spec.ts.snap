@@ -19,46 +19,100 @@ Object {
   "pkgName": "nunit",
   "releases": Array [
     Object {
-      "version": "2.6.1",
-    },
-    Object {
-      "version": "2.6.2",
-    },
-    Object {
-      "version": "2.6.3",
-    },
-    Object {
-      "version": "2.6.4",
-    },
-    Object {
-      "version": "2.6.5",
-    },
-    Object {
-      "version": "2.6.6",
-    },
-    Object {
-      "version": "2.6.7",
+      "version": "3.11.0",
     },
     Object {
       "version": "2.7.0",
     },
     Object {
+      "version": "2.6.7",
+    },
+    Object {
+      "version": "2.6.6",
+    },
+    Object {
+      "version": "2.6.5",
+    },
+    Object {
+      "version": "3.10.1",
+    },
+    Object {
+      "version": "3.10.0",
+    },
+    Object {
+      "version": "3.9.0",
+    },
+    Object {
+      "version": "3.8.1",
+    },
+    Object {
+      "version": "3.8.0",
+    },
+    Object {
+      "version": "3.7.1",
+    },
+    Object {
+      "version": "3.7.0",
+    },
+    Object {
+      "version": "3.6.1",
+    },
+    Object {
+      "version": "3.6.0",
+    },
+    Object {
+      "version": "3.5.0",
+    },
+    Object {
+      "version": "3.4.1",
+    },
+    Object {
+      "version": "3.4.0",
+    },
+    Object {
+      "version": "3.2.1",
+    },
+    Object {
+      "version": "3.2.0",
+    },
+    Object {
+      "version": "3.0.1",
+    },
+    Object {
+      "version": "3.0.0",
+    },
+    Object {
+      "version": "2.6.4",
+    },
+    Object {
+      "version": "3.0.0-rc-3",
+    },
+    Object {
+      "version": "3.0.0-rc-2",
+    },
+    Object {
+      "version": "3.0.0-rc",
+    },
+    Object {
+      "version": "3.0.0-beta-5",
+    },
+    Object {
+      "version": "3.0.0-beta-4",
+    },
+    Object {
+      "version": "2.6.3",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
       "version": "3.0.0-alpha",
     },
     Object {
-      "version": "3.0.0-alpha-2",
+      "version": "2.6.0.12054",
     },
     Object {
-      "version": "3.0.0-alpha-3",
-    },
-    Object {
-      "version": "3.0.0-alpha-4",
-    },
-    Object {
-      "version": "3.0.0-alpha-5",
-    },
-    Object {
-      "version": "3.0.0-beta-1",
+      "version": "2.6.1",
     },
     Object {
       "version": "3.0.0-beta-2",
@@ -67,70 +121,31 @@ Object {
       "version": "3.0.0-beta-3",
     },
     Object {
-      "version": "3.0.0-beta-4",
+      "version": "2.5.10.11092",
     },
     Object {
-      "version": "3.0.0-beta-5",
+      "version": "2.5.7.10213",
     },
     Object {
-      "version": "3.0.0-rc",
+      "version": "2.6.0.12051",
     },
     Object {
-      "version": "3.0.0-rc-2",
+      "version": "3.0.0-alpha-3",
     },
     Object {
-      "version": "3.0.0-rc-3",
+      "version": "3.0.0-beta-1",
     },
     Object {
-      "version": "3.0.0",
+      "version": "3.0.0-alpha-4",
     },
     Object {
-      "version": "3.0.1",
+      "version": "2.5.9.10348",
     },
     Object {
-      "version": "3.2.0",
+      "version": "3.0.0-alpha-2",
     },
     Object {
-      "version": "3.2.1",
-    },
-    Object {
-      "version": "3.4.0",
-    },
-    Object {
-      "version": "3.4.1",
-    },
-    Object {
-      "version": "3.5.0",
-    },
-    Object {
-      "version": "3.6.0",
-    },
-    Object {
-      "version": "3.6.1",
-    },
-    Object {
-      "version": "3.7.0",
-    },
-    Object {
-      "version": "3.7.1",
-    },
-    Object {
-      "version": "3.8.0",
-    },
-    Object {
-      "version": "3.8.1",
-    },
-    Object {
-      "version": "3.9.0",
-    },
-    Object {
-      "version": "3.10.0",
-    },
-    Object {
-      "version": "3.10.1",
-    },
-    Object {
-      "version": "3.11.0",
+      "version": "3.0.0-alpha-5",
     },
   ],
   "sourceUrl": "https://github.com/nunit/nunit",
@@ -141,6 +156,18 @@ exports[`datasource/nuget getPkgReleases processes real data (v3) feed is a nuge
 Object {
   "pkgName": "nunit",
   "releases": Array [
+    Object {
+      "version": "2.5.7.10213",
+    },
+    Object {
+      "version": "2.5.9.10348",
+    },
+    Object {
+      "version": "2.5.10.11092",
+    },
+    Object {
+      "version": "2.6.0.12054",
+    },
     Object {
       "version": "2.6.1",
     },
@@ -225,6 +252,18 @@ exports[`datasource/nuget getPkgReleases processes real data (v3) feed is not a 
 Object {
   "pkgName": "nunit",
   "releases": Array [
+    Object {
+      "version": "2.5.7.10213",
+    },
+    Object {
+      "version": "2.5.9.10348",
+    },
+    Object {
+      "version": "2.5.10.11092",
+    },
+    Object {
+      "version": "2.6.0.12054",
+    },
     Object {
       "version": "2.6.1",
     },
@@ -320,7 +359,11 @@ Object {
 exports[`datasource/nuget getPkgReleases processes real data with no github project url (v3) 1`] = `
 Object {
   "pkgName": "nunit",
-  "releases": Array [],
+  "releases": Array [
+    Object {
+      "version": "2.5.7.10213",
+    },
+  ],
   "sourceUrl": "https://nunit.org",
 }
 `;
@@ -330,46 +373,100 @@ Object {
   "pkgName": "nunit",
   "releases": Array [
     Object {
-      "version": "2.6.1",
-    },
-    Object {
-      "version": "2.6.2",
-    },
-    Object {
-      "version": "2.6.3",
-    },
-    Object {
-      "version": "2.6.4",
-    },
-    Object {
-      "version": "2.6.5",
-    },
-    Object {
-      "version": "2.6.6",
-    },
-    Object {
-      "version": "2.6.7",
+      "version": "3.11.0",
     },
     Object {
       "version": "2.7.0",
     },
     Object {
+      "version": "2.6.7",
+    },
+    Object {
+      "version": "2.6.6",
+    },
+    Object {
+      "version": "2.6.5",
+    },
+    Object {
+      "version": "3.10.1",
+    },
+    Object {
+      "version": "3.10.0",
+    },
+    Object {
+      "version": "3.9.0",
+    },
+    Object {
+      "version": "3.8.1",
+    },
+    Object {
+      "version": "3.8.0",
+    },
+    Object {
+      "version": "3.7.1",
+    },
+    Object {
+      "version": "3.7.0",
+    },
+    Object {
+      "version": "3.6.1",
+    },
+    Object {
+      "version": "3.6.0",
+    },
+    Object {
+      "version": "3.5.0",
+    },
+    Object {
+      "version": "3.4.1",
+    },
+    Object {
+      "version": "3.4.0",
+    },
+    Object {
+      "version": "3.2.1",
+    },
+    Object {
+      "version": "3.2.0",
+    },
+    Object {
+      "version": "3.0.1",
+    },
+    Object {
+      "version": "3.0.0",
+    },
+    Object {
+      "version": "2.6.4",
+    },
+    Object {
+      "version": "3.0.0-rc-3",
+    },
+    Object {
+      "version": "3.0.0-rc-2",
+    },
+    Object {
+      "version": "3.0.0-rc",
+    },
+    Object {
+      "version": "3.0.0-beta-5",
+    },
+    Object {
+      "version": "3.0.0-beta-4",
+    },
+    Object {
+      "version": "2.6.3",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
       "version": "3.0.0-alpha",
     },
     Object {
-      "version": "3.0.0-alpha-2",
+      "version": "2.6.0.12054",
     },
     Object {
-      "version": "3.0.0-alpha-3",
-    },
-    Object {
-      "version": "3.0.0-alpha-4",
-    },
-    Object {
-      "version": "3.0.0-alpha-5",
-    },
-    Object {
-      "version": "3.0.0-beta-1",
+      "version": "2.6.1",
     },
     Object {
       "version": "3.0.0-beta-2",
@@ -378,70 +475,31 @@ Object {
       "version": "3.0.0-beta-3",
     },
     Object {
-      "version": "3.0.0-beta-4",
+      "version": "2.5.10.11092",
     },
     Object {
-      "version": "3.0.0-beta-5",
+      "version": "2.5.7.10213",
     },
     Object {
-      "version": "3.0.0-rc",
+      "version": "2.6.0.12051",
     },
     Object {
-      "version": "3.0.0-rc-2",
+      "version": "3.0.0-alpha-3",
     },
     Object {
-      "version": "3.0.0-rc-3",
+      "version": "3.0.0-beta-1",
     },
     Object {
-      "version": "3.0.0",
+      "version": "3.0.0-alpha-4",
     },
     Object {
-      "version": "3.0.1",
+      "version": "2.5.9.10348",
     },
     Object {
-      "version": "3.2.0",
+      "version": "3.0.0-alpha-2",
     },
     Object {
-      "version": "3.2.1",
-    },
-    Object {
-      "version": "3.4.0",
-    },
-    Object {
-      "version": "3.4.1",
-    },
-    Object {
-      "version": "3.5.0",
-    },
-    Object {
-      "version": "3.6.0",
-    },
-    Object {
-      "version": "3.6.1",
-    },
-    Object {
-      "version": "3.7.0",
-    },
-    Object {
-      "version": "3.7.1",
-    },
-    Object {
-      "version": "3.8.0",
-    },
-    Object {
-      "version": "3.8.1",
-    },
-    Object {
-      "version": "3.9.0",
-    },
-    Object {
-      "version": "3.10.0",
-    },
-    Object {
-      "version": "3.10.1",
-    },
-    Object {
-      "version": "3.11.0",
+      "version": "3.0.0-alpha-5",
     },
   ],
 }
@@ -451,6 +509,18 @@ exports[`datasource/nuget getPkgReleases processes real data without project url
 Object {
   "pkgName": "nunit",
   "releases": Array [
+    Object {
+      "version": "2.5.7.10213",
+    },
+    Object {
+      "version": "2.5.9.10348",
+    },
+    Object {
+      "version": "2.5.10.11092",
+    },
+    Object {
+      "version": "2.6.0.12054",
+    },
     Object {
       "version": "2.6.1",
     },

@@ -169,7 +169,7 @@ export async function getPkgReleases({
   }
 
   if (versions.length === 0) {
-    logger.info(`No versions found for ${dependency.display} in ${repositories.length} repositories`); // prettier-ignore
+    logger.debug(`No versions found for ${dependency.display} in ${repositories.length} repositories`); // prettier-ignore
     return null;
   }
   logger.debug(`Found ${versions.length} versions for ${dependency.display}`);

@@ -92,10 +92,9 @@ export async function getDependency(
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }
 
-  if (
-    pkgUrl.startsWith('https://registry.npmjs.org') &&
-    !pkgUrl.startsWith('https://registry.npmjs.org/@')
-  ) {
+  const uri = url.parse(pkgUrl);
+
+  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching
     // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
     // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses
@@ -118,7 +117,7 @@ export async function getDependency(
     const raw = await got<any>(pkgUrl, opts);
     // istanbul ignore if
     if (retries < 3) {
-      logger.info({ pkgUrl, retries }, 'Recovered from npm error');
+      logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
@@ -132,7 +131,7 @@ export async function getDependency(
     }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.info({ dependency: name }, 'No versions returned');
+      logger.debug({ dependency: name }, 'No versions returned');
       return null;
     }
 
@@ -195,7 +194,7 @@ export async function getDependency(
     return dep;
   } catch (err) {
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         {
           pkgUrl,
           authInfoType: authInfo ? authInfo.type : undefined,
@@ -210,7 +209,7 @@ export async function getDependency(
     }
     // istanbul ignore if
     if (err.statusCode === 402) {
-      logger.info(
+      logger.debug(
         {
           pkgUrl,
           authInfoType: authInfo ? authInfo.type : undefined,
@@ -224,20 +223,20 @@ export async function getDependency(
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ depName: name }, `Dependency lookup failure: not found`);
+      logger.debug({ depName: name }, `Dependency lookup failure: not found`);
       logger.debug({
         err,
         token: authInfo ? maskToken(authInfo.token) : 'none',
       });
       return null;
     }
-    if (regUrl.startsWith('https://registry.npmjs.org')) {
+    if (uri.host === 'registry.npmjs.org') {
       // istanbul ignore if
       if (
         (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
         retries > 0
       ) {
-        logger.info({ pkgUrl, errName: err.name }, 'Retrying npm error');
+        logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
         await delay(5000);
         return getDependency(name, retries - 1);
       }

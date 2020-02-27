@@ -12,6 +12,10 @@ jest.mock('./npm');
 const npmDatasource: any = _npm;
 
 describe('datasource/index', () => {
+  it('returns datasources', () => {
+    expect(datasource.getDatasources()).toBeDefined();
+    expect(datasource.getDatasourceList()).toBeDefined();
+  });
   it('returns if digests are supported', () => {
     expect(datasource.supportsDigests({ datasource: DATASOURCE_GITHUB })).toBe(
       true

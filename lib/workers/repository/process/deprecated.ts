@@ -41,7 +41,7 @@ export async function raiseDeprecationWarnings(
     const issueTitlePrefix = 'Dependency deprecation warning:';
     for (const [depName, val] of Object.entries(deprecatedPackages)) {
       const { deprecationMessage, depPackageFiles } = val;
-      logger.info(
+      logger.debug(
         {
           depName,
           deprecationMessage,

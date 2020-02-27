@@ -23,7 +23,7 @@ export interface ExtractConfig extends ManagerConfig {
   ignoreNpmrcFile?: boolean;
 
   skipInstalls?: boolean;
-  versionScheme?: string;
+  versioning?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
@@ -70,6 +70,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  autoReplace?: boolean;
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
   compatibility?: Record<string, string>;
@@ -104,7 +105,7 @@ export interface Package<T> extends ManagerData<T> {
   lookupName?: string;
   repo?: string;
   target?: string;
-  versionScheme?: string;
+  versioning?: string;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
@@ -117,6 +118,11 @@ export interface Package<T> extends ManagerData<T> {
   currentRawValue?: string;
   major?: { enabled?: boolean };
   prettyDepType?: any;
+}
+
+export interface AutoReplaceData {
+  replaceString: string;
+  depIndex?: number;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -138,6 +144,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   sourceLine?: number;
   updates?: PackageUpdateResult[];
   versionLine?: number;
+  autoReplaceData?: AutoReplaceData;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -188,6 +195,7 @@ export interface UpdateDependencyConfig {
 
 export interface ManagerApi {
   defaultConfig: object;
+  autoReplace?: boolean;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 

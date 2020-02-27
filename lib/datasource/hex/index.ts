@@ -41,7 +41,7 @@ export async function getPkgReleases({
     const { releases = [], html_url: homepage, meta } = hexRelease;
 
     if (releases.length === 0) {
-      logger.info(`No versions found for ${depName} (${hexUrl})`); // prettier-ignore
+      logger.debug(`No versions found for ${depName} (${hexUrl})`); // prettier-ignore
       return null;
     }
 

@@ -20,7 +20,7 @@ describe('workers/branch/automerge', () => {
         updatedArtifacts: [],
       };
       jest.resetAllMocks();
-      platform.commitFilesToBranch.mockResolvedValueOnce();
+      platform.commitFilesToBranch.mockResolvedValueOnce('abc123');
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);

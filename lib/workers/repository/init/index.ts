@@ -28,7 +28,7 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
-    logger.info({ config }, 'Full resolved config including presets');
+    logger.debug({ config }, 'Full resolved config including presets');
   }
   return config;
 }

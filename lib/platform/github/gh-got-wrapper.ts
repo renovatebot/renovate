@@ -47,22 +47,22 @@ export function dispatchError(
       err.code === 'ETIMEDOUT' ||
       err.code === 'EAI_AGAIN')
   ) {
-    logger.info({ err }, 'GitHub failure: RequestError');
+    logger.debug({ err }, 'GitHub failure: RequestError');
     throw new Error(PLATFORM_FAILURE);
   }
   if (err.name === 'ParseError') {
-    logger.info({ err }, 'GitHub failure: ParseError');
+    logger.debug({ err }, 'GitHub failure: ParseError');
     throw new Error(PLATFORM_FAILURE);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
-    logger.info({ err }, 'GitHub failure: 5xx');
+    logger.debug({ err }, 'GitHub failure: 5xx');
     throw new Error(PLATFORM_FAILURE);
   }
   if (
     err.statusCode === 403 &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
-    logger.info({ err }, 'GitHub failure: abuse detection');
+    logger.debug({ err }, 'GitHub failure: abuse detection');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
@@ -70,14 +70,14 @@ export function dispatchError(
     throw err;
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
-    logger.info({ err }, 'GitHub failure: rate limit');
+    logger.debug({ err }, 'GitHub failure: rate limit');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
     err.statusCode === 403 &&
     message.startsWith('Resource not accessible by integration')
   ) {
-    logger.info(
+    logger.debug(
       { err },
       'GitHub failure: Resource not accessible by integration'
     );
@@ -85,7 +85,7 @@ export function dispatchError(
   }
   if (err.statusCode === 401 && message.includes('Bad credentials')) {
     const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
-    logger.info(
+    logger.debug(
       {
         token: maskToken(opts.context?.token),
         err,
@@ -183,7 +183,7 @@ async function get(
       const goodResult = '{"data":{';
       if (result.body.startsWith(goodResult)) {
         if (!okToRetry) {
-          logger.info('Recovered graphql query');
+          logger.debug('Recovered graphql query');
         }
       } else if (okToRetry) {
         logger.info('Retrying graphql query');

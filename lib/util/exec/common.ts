@@ -28,6 +28,8 @@ export type DockerExtraCommands = Opt<DockerExtraCommand[]>;
 export interface DockerOptions {
   image: string;
   tag?: Opt<string>;
+  tagScheme?: Opt<string>;
+  tagConstraint?: Opt<string>;
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;

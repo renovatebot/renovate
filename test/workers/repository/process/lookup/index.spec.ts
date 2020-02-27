@@ -11,12 +11,10 @@ import * as _docker from '../../../../../lib/datasource/docker';
 import * as _gitSubmodules from '../../../../../lib/datasource/git-submodules';
 import { mocked, getConfig } from '../../../../util';
 import { CONFIG_VALIDATION } from '../../../../../lib/constants/error-messages';
-import {
-  VERSION_SCHEME_DOCKER,
-  VERSION_SCHEME_GIT,
-  VERSION_SCHEME_NPM,
-  VERSION_SCHEME_PEP440,
-} from '../../../../../lib/constants/version-schemes';
+import * as dockerVersioning from '../../../../../lib/versioning/docker';
+import * as gitVersioning from '../../../../../lib/versioning/git';
+import * as npmVersioning from '../../../../../lib/versioning/npm';
+import * as pep440Versioning from '../../../../../lib/versioning/pep440';
 
 import {
   DATASOURCE_DOCKER,
@@ -41,7 +39,7 @@ describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
     config = getConfig();
     config.manager = 'npm';
-    config.versionScheme = VERSION_SCHEME_NPM;
+    config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
     global.repoCache = {};
     jest.resetAllMocks();
@@ -180,7 +178,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '<1';
       config.depName = 'q';
-      config.versionScheme = VERSION_SCHEME_DOCKER; // this doesn't make sense but works for this test
+      config.versioning = dockerVersioning.id; // this doesn't make sense but works for this test
       config.datasource = DATASOURCE_NPM; // this doesn't make sense but works for this test
       nock('https://registry.npmjs.org')
         .get('/q')
@@ -1030,9 +1028,9 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles PEP440', async () => {
       config.manager = 'pip_requirements';
-      config.versionScheme = VERSION_SCHEME_PEP440;
+      config.versioning = pep440Versioning.id;
       config.manager = 'pip_requirements';
-      config.versionScheme = 'pep440';
+      config.versioning = 'pep440';
       config.rangeStrategy = 'pin';
       config.lockedVersion = '0.9.4';
       config.currentValue = '~=0.9';
@@ -1125,7 +1123,7 @@ describe('workers/repository/process/lookup', () => {
       it('skips uncompatible versions for ' + currentValue, async () => {
         config.currentValue = currentValue;
         config.depName = 'node';
-        config.versionScheme = VERSION_SCHEME_DOCKER;
+        config.versioning = dockerVersioning.id;
         config.datasource = DATASOURCE_DOCKER;
         docker.getPkgReleases.mockResolvedValueOnce({
           releases: [
@@ -1252,7 +1250,7 @@ describe('workers/repository/process/lookup', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles git submodule update', async () => {
-      config.versionScheme = VERSION_SCHEME_GIT;
+      config.versioning = gitVersioning.id;
       config.datasource = DATASOURCE_GIT_SUBMODULES;
       gitSubmodules.getPkgReleases.mockResolvedValueOnce({
         releases: [
