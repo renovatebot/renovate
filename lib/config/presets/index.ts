@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import * as massage from '../massage';
 import * as migration from '../migration';
-import * as github from './github-tags';
+import * as github from './github';
 import * as npm from './npm';
 import * as gitlab from './gitlab';
 import { RenovateConfig } from '../common';
