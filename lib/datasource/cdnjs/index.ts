@@ -35,7 +35,7 @@ export async function getDigest(
   const assetName = lookupName.replace(`${depName}/`, '');
   let res = null;
   try {
-    res = await got(url, { json: true });
+    res = await got(url, { responseType: 'json' });
   } catch (e) /* istanbul ignore next */ {
     return null;
   }

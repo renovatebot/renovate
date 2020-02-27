@@ -1,7 +1,13 @@
 import URL from 'url';
 import { GotApi, GotApiOptions, GotResponse } from '../common';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
-import got from '../../util/got';
+import got, { GotJSONOptions, GotMethod } from '../../util/got';
+
+declare module 'http' {
+  interface IncomingHttpHeaders {
+    'x-total-count'?: string;
+  }
+}
 
 const hostType = PLATFORM_TYPE_GITEA;
 let baseUrl: string;
@@ -17,19 +23,24 @@ function getPaginationContainer(body: any): any[] {
   return null;
 }
 
-async function get(path: string, options?: any): Promise<GotResponse> {
-  const opts = {
-    hostType,
-    baseUrl,
-    json: true,
-    ...options,
+async function get(
+  path: string,
+  options?: GiteaApiOptions
+): Promise<GotResponse> {
+  const opts: GotJSONOptions = {
+    prefixUrl: baseUrl,
+    json: options.body,
+    headers: options.headers,
+    ...options.options,
+    responseType: 'json',
+    context: { hostType, ...options.options?.context },
   };
 
   const res = await got(path, opts);
   const pc = getPaginationContainer(res.body);
-  if (opts.paginate && pc) {
+  if (options.paginate && pc) {
     const url = URL.parse(res.url, true);
-    const total = parseInt(res.headers['x-total-count'] as string, 10);
+    const total = parseInt(res.headers['x-total-count'], 10);
     let nextPage = parseInt(url.query.page as string, 10) || 1 + 1;
 
     while (total && pc.length < total) {
@@ -44,22 +55,19 @@ async function get(path: string, options?: any): Promise<GotResponse> {
   return res;
 }
 
-const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
+const helpers: GotMethod[] = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
-export type GiteaGotOptions = {
-  paginate?: boolean;
-  token?: string;
-} & GotApiOptions;
+export type GiteaApiOptions = GotApiOptions;
 
-export interface GiteaGotApi extends GotApi<GiteaGotOptions> {
+export interface GiteaGotApi extends GotApi<GiteaApiOptions> {
   setBaseUrl(url: string): void;
 }
 
 export const api: GiteaGotApi = {} as any;
 
-for (const x of helpers) {
-  (api as any)[x] = (path: string, options: any): Promise<GotResponse> =>
-    get(path, { ...options, method: x.toUpperCase() });
+for (const method of helpers) {
+  (api as any)[method] = (path: string, options: any): Promise<GotResponse> =>
+    get(path, { ...options, method });
 }
 
 // eslint-disable-next-line @typescript-eslint/unbound-method

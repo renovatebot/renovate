@@ -200,8 +200,12 @@ Array [
   Array [
     "user/repos?per_page=100",
     Object {
+      "options": Object {
+        "context": Object {
+          "token": "abc123",
+        },
+      },
       "paginate": true,
-      "token": "abc123",
     },
   ],
   Array [

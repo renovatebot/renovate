@@ -1,7 +1,7 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
-import { GotResponse, Pr } from '../common';
+import { GotResponse, Pr, GotApiOptions } from '../common';
 
 export interface Config {
   baseBranch: string;
@@ -81,7 +81,7 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: any,
+  options?: GotApiOptions,
   pagelen?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];

@@ -3,7 +3,7 @@ import url from 'url';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
-import got, { GotJSONOptions } from '../../util/got';
+import got from '../../util/got';
 import { PkgReleaseConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
@@ -40,8 +40,8 @@ async function getDependency(
     // TODO: fix type
     const rep = await got<any>(lookupUrl, {
       responseType: 'json',
-      hostType: DATASOURCE_PYPI,
-    } as GotJSONOptions);
+      context: { hostType: DATASOURCE_PYPI },
+    });
     const dep = rep && rep.body;
     if (!dep) {
       logger.debug({ dependency: depName }, 'pip package not found');

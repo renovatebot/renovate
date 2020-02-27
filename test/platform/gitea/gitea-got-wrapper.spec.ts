@@ -1,11 +1,11 @@
+import { Got } from 'got';
 import { GotResponse } from '../../../lib/platform';
 import { partial } from '../../util';
-import { GotFn } from '../../../lib/util/got';
 import { GiteaGotApi } from '../../../lib/platform/gitea/gitea-got-wrapper';
 
 describe('platform/gitea/gitea-got-wrapper', () => {
   let api: GiteaGotApi;
-  let got: jest.Mocked<GotFn> & jest.Mock;
+  let got: jest.Mocked<Got> & jest.Mock;
 
   const baseURL = 'https://gitea.renovatebot.com/api/v1';
 
@@ -13,8 +13,7 @@ describe('platform/gitea/gitea-got-wrapper', () => {
     jest.resetAllMocks();
     jest.mock('../../../lib/util/got');
 
-    api = (await import('../../../lib/platform/gitea/gitea-got-wrapper'))
-      .api as any;
+    api = (await import('../../../lib/platform/gitea/gitea-got-wrapper')).api;
     got = (await import('../../../lib/util/got')).api as any;
     api.setBaseUrl(baseURL);
   });

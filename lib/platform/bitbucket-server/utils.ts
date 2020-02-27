@@ -1,7 +1,8 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
 import { api } from './bb-got-wrapper';
-import { Pr } from '../common';
+import { Pr, GotApiOptions } from '../common';
+import { GotMethod } from '../../util/got';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
@@ -35,8 +36,8 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
 
 export async function accumulateValues<T = any>(
   reqUrl: string,
-  method = 'get',
-  options?: any,
+  method: GotMethod = 'get',
+  options?: GotApiOptions,
   limit?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];

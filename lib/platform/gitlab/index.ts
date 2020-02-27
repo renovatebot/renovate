@@ -83,7 +83,8 @@ export async function initPlatform({
   }
   let gitAuthor: string;
   try {
-    const user = (await api.get(`user`, { token })).body;
+    const user = (await api.get(`user`, { options: { context: { token } } }))
+      .body;
     gitAuthor = `${user.name} <${user.email}>`;
     authorId = user.id;
   } catch (err) {

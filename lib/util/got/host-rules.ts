@@ -14,7 +14,7 @@ export default got.extend({
         return next(options);
       }
       const { username, password, token, timeout } = hostRules.find({
-        hostType: (options as any).hostType,
+        hostType: options.context?.hostType,
         url: options.href,
       });
       if (

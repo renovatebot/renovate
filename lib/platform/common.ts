@@ -1,5 +1,6 @@
 import Git from 'simple-git/promise';
-import { GotResponse as Response } from '../util/got';
+import { Method } from 'got';
+import { GotResponse as Response, GotOptions, GotHeaders } from '../util/got';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
 
@@ -10,8 +11,13 @@ export interface FileData {
 
 export interface GotApiOptions {
   useCache?: boolean;
-  hostType?: string;
-  body?: any;
+  body?: unknown;
+
+  headers?: GotHeaders;
+  method?: Method;
+  options?: GotOptions;
+  pageLimit?: number;
+  paginate?: boolean | 'all';
 }
 
 /**
@@ -19,8 +25,8 @@ export interface GotApiOptions {
  */
 export type GotResponse<T extends object = any> = Response<T>;
 
-export interface GotApi<TOptions extends object = any> {
-  get<T extends object = any>(
+export interface GotApi<TOptions extends object = GotApiOptions> {
+  /** @deprecated use other */ get<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
   ): Promise<GotResponse<T>>;

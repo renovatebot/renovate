@@ -205,8 +205,11 @@ const platform: Platform = {
     api.setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
+    const options = { context: { token } };
     try {
-      const user = await helper.getCurrentUser({ token });
+      const user = await helper.getCurrentUser({
+        options,
+      });
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
     } catch (err) {

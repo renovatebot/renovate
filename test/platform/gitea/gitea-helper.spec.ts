@@ -3,7 +3,7 @@ import { GotResponse } from '../../../lib/platform';
 import { partial } from '../../util';
 import {
   GiteaGotApi,
-  GiteaGotOptions,
+  GiteaApiOptions,
 } from '../../../lib/platform/gitea/gitea-got-wrapper';
 import * as ght from '../../../lib/platform/gitea/gitea-helper';
 import { PRSearchParams } from '../../../lib/platform/gitea/gitea-helper';
@@ -161,7 +161,7 @@ describe('platform/gitea/gitea-helper', () => {
 
     // Mock request implementation once and verify request
     api[options.method].mockImplementationOnce(
-      (rawUrl: string, apiOpts?: GiteaGotOptions): Promise<GotResponse<B>> => {
+      (rawUrl: string, apiOpts?: GiteaApiOptions): Promise<GotResponse<B>> => {
         // Construct and parse absolute URL
         const absoluteUrl = rawUrl.includes('://')
           ? rawUrl

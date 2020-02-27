@@ -1,8 +1,10 @@
 import {
   NormalizedOptions,
+  Headers,
   Options,
   Response as _Response,
   GotError,
+  Method,
 } from 'got';
 import { Merge } from 'type-fest';
 
@@ -20,7 +22,9 @@ Object.defineProperty(GotError.prototype, 'code', {
 
 export type GotResponse<T> = _Response<T>;
 
-export type GotHeaders = Record<string, string | string[]>;
+export type GotMethod = Method;
+
+export type GotHeaders = Headers;
 
 export type RenovateGotOptions = Merge<
   NormalizedOptions,

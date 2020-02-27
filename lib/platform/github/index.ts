@@ -4,7 +4,7 @@ import semver from 'semver';
 import URL from 'url';
 
 import { logger } from '../../logger';
-import { api } from './gh-got-wrapper';
+import { api, GithubApiOptions } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
@@ -20,6 +20,7 @@ import {
   EnsureCommentConfig,
   EnsureIssueResult,
   BranchStatus,
+  GotApiOptions,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -46,6 +47,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
+import { GotOptions } from '../../util/got';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -129,12 +131,10 @@ export async function initPlatform({
   }
   let gitAuthor: string;
   let renovateUsername: string;
+  const options: GotOptions = { context: { token } };
   try {
-    const userData = (
-      await api.get(defaults.endpoint + 'user', {
-        token,
-      })
-    ).body;
+    const userData = (await api.get(defaults.endpoint + 'user', { options }))
+      .body;
     renovateUsername = userData.login;
     gitAuthor = userData.name;
   } catch (err) {
@@ -143,9 +143,7 @@ export async function initPlatform({
   }
   try {
     const userEmail = (
-      await api.get(defaults.endpoint + 'user/emails', {
-        token,
-      })
+      await api.get(defaults.endpoint + 'user/emails', { options })
     ).body;
     if (userEmail.length && userEmail[0].email) {
       gitAuthor += ` <${userEmail[0].email}>`;
@@ -383,18 +381,18 @@ export async function initRepo({
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
+
+    const options: GotOptions = { context: { token: forkToken || opts.token } };
     // Get list of existing repos
     const existingRepos = (
       await api.get<{ full_name: string }[]>('user/repos?per_page=100', {
-        token: forkToken || opts.token,
+        options,
         paginate: true,
       })
     ).body.map(r => r.full_name);
     try {
       config.repository = (
-        await api.post(`repos/${repository}/forks`, {
-          token: forkToken || opts.token,
-        })
+        await api.post(`repos/${repository}/forks`, { options })
       ).body.full_name;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
@@ -420,7 +418,7 @@ export async function initRepo({
               sha: parentSha,
               force: true,
             },
-            token: forkToken || opts.token,
+            options,
           }
         );
       } catch (err) /* istanbul ignore next */ {
@@ -640,7 +638,7 @@ async function getClosedPrs(): Promise<PrList> {
         }
       }
       `;
-      const options = {
+      const options: GithubApiOptions = {
         body: JSON.stringify({ query }),
         json: false,
       };
@@ -744,7 +742,7 @@ async function getOpenPrs(): Promise<PrList> {
         }
       }
       `;
-      const options = {
+      const options: GithubApiOptions = {
         headers,
         body: JSON.stringify({ query }),
         json: false,
@@ -1117,7 +1115,7 @@ export async function getBranchStatus(
       const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
         branchName
       )}/check-runs`;
-      const opts = {
+      const opts: GotApiOptions = {
         headers: {
           Accept: 'application/vnd.github.antiope-preview+json',
         },
@@ -1895,7 +1893,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  const options = {
+  const options: GithubApiOptions = {
     headers,
     body: JSON.stringify({ query }),
     json: false,

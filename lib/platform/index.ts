@@ -72,8 +72,7 @@ export async function initPlatform(
     name: gitAuthorParsed.name,
     email: gitAuthorParsed.address,
   };
-  // TODO: types
-  const platformRule: any = {
+  const platformRule: hostRules.HostRule = {
     hostType: returnConfig.platform,
     hostName: URL.parse(returnConfig.endpoint).hostname,
   };

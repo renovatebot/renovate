@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import got, { GotHeaders } from '../../util/got';
+import got from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
 import { ReleaseResult } from '../common';
@@ -28,23 +28,15 @@ const processError = ({ err, ...rest }): null => {
   return null;
 };
 
-const getHeaders = (): GotHeaders => {
-  return { hostType: DATASOURCE_RUBYGEMS };
-};
-
 const fetch = async ({ dependency, registry, path }): Promise<any> => {
-  const responseType = 'json';
-
-  const headers = getHeaders();
-
   const name = `${path}/${dependency}.json`;
   const baseUrl = registry;
 
   logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
   const response = (await got(name, {
-    responseType,
+    responseType: 'json',
     prefixUrl: baseUrl,
-    headers,
+    context: { hostType: DATASOURCE_RUBYGEMS },
   })) || {
     body: undefined,
   };

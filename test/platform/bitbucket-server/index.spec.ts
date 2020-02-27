@@ -12,6 +12,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
+import { GotJSONOptions } from '../../../lib/util/got';
 
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
@@ -28,16 +29,19 @@ describe('platform/bitbucket-server', () => {
         jest.mock('delay');
         jest.mock(
           '../../../lib/util/got',
-          () => (url: string, options: { method: string }) => {
-            const { method } = options;
-            const body = mockResponses[url] && mockResponses[url][method];
+          () => async (path: string, options: GotJSONOptions) => {
+            const { method, prefixUrl } = options;
+            const { resolve } = await import('url');
+            const url = resolve(prefixUrl.toString(), path);
+            const body =
+              mockResponses[url] && mockResponses[url][method.toUpperCase()];
             if (!body) {
-              return Promise.reject(new Error(`no match for ${method} ${url}`));
+              throw new Error(`no match for ${method} ${url}`);
             }
             if (body instanceof Promise) {
               return body;
             }
-            return Promise.resolve({ body });
+            return { body };
           }
         );
         jest.mock('../../../lib/platform/git/storage');
@@ -73,10 +77,7 @@ describe('platform/bitbucket-server', () => {
               ),
             } as any)
         );
-        const endpoint =
-          scenarioName === 'endpoint with path'
-            ? 'https://stash.renovatebot.com/vcs/'
-            : 'https://stash.renovatebot.com';
+        const endpoint = mockResponses.baseURL;
         hostRules.find.mockReturnValue({
           username: 'abc',
           password: '123',
@@ -94,7 +95,7 @@ describe('platform/bitbucket-server', () => {
 
       function initRepo(config?: Partial<RepoParams>) {
         return bitbucket.initRepo({
-          endpoint: 'https://stash.renovatebot.com/vcs/',
+          endpoint: mockResponses.baseURL,
           repository: 'SOME/repo',
           ...config,
         } as any);
@@ -114,7 +115,7 @@ describe('platform/bitbucket-server', () => {
         it('should init', async () => {
           expect(
             await bitbucket.initPlatform({
-              endpoint: 'https://stash.renovatebot.com',
+              endpoint: mockResponses.baseURL,
               username: 'abc',
               password: '123',
             })

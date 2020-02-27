@@ -2592,7 +2592,7 @@ Array [
 
 exports[`platform/bitbucket-server endpoint with path initPlatform() should init 1`] = `
 Object {
-  "endpoint": "https://stash.renovatebot.com/",
+  "endpoint": "https://stash.renovatebot.com/vcs/",
 }
 `;
 

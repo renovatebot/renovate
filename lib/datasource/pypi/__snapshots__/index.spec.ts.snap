@@ -217,7 +217,9 @@ Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
     Object {
-      "hostType": "pypi",
+      "context": Object {
+        "hostType": "pypi",
+      },
       "responseType": "json",
     },
   ],
@@ -229,7 +231,9 @@ Array [
   Array [
     "https://my.pypi.python/pypi/azure-cli-monitor/json",
     Object {
-      "hostType": "pypi",
+      "context": Object {
+        "hostType": "pypi",
+      },
       "responseType": "json",
     },
   ],
@@ -241,14 +245,18 @@ Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
     Object {
-      "hostType": "pypi",
+      "context": Object {
+        "hostType": "pypi",
+      },
       "responseType": "json",
     },
   ],
   Array [
     "https://second-index/foo/azure-cli-monitor/json",
     Object {
-      "hostType": "pypi",
+      "context": Object {
+        "hostType": "pypi",
+      },
       "responseType": "json",
     },
   ],

@@ -301,7 +301,7 @@ async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await api.get(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
+      { json: false }
     )
   ).body;
 
@@ -781,7 +781,7 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
   const diff = (
     await api.get(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
+      { json: false }
     )
   ).body;
   const files = parseDiff(diff).map(file => file.to);

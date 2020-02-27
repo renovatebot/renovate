@@ -3,9 +3,9 @@ import parseLinkHeader from 'parse-link-header';
 import pAll from 'p-all';
 
 import { GotError } from 'got';
-import got, { GotJSONOptions } from '../../util/got';
+import got, { GotJSONOptions, GotMethod } from '../../util/got';
 import { maskToken } from '../../util/mask';
-import { GotApi, GotResponse } from '../common';
+import { GotApi, GotResponse, GotApiOptions } from '../common';
 import { logger } from '../../logger';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -117,21 +117,29 @@ export function dispatchError(
 
 async function get(
   path: string,
-  options?: any,
+  options?: GithubApiOptions,
   okToRetry = true
 ): Promise<GotResponse> {
-  let result = null;
+  let result: GotResponse = null;
 
   const opts: GotJSONOptions = {
-    hostType,
     prefixUrl: baseUrl,
+    json: options.body,
+    headers: options.headers,
+    ...options.options,
     responseType: 'json',
-    ...options,
+    context: { hostType, ...options.options?.context },
   };
   const method = opts.method || 'get';
   if (method.toLowerCase() === 'post' && path === 'graphql') {
     // GitHub Enterprise uses unversioned graphql path
     opts.prefixUrl = opts.prefixUrl.toString().replace('/v3/', '/');
+    delete opts.json;
+    opts.body = options.body as string;
+  }
+  // response expected as string
+  if (options.json === false) {
+    (opts as any).responseType = 'text';
   }
   logger.trace(`${method.toUpperCase()} ${path}`);
   try {
@@ -168,7 +176,7 @@ async function get(
           nextUrl.query.page = page.toString();
           return get(
             URL.format(nextUrl),
-            { ...opts, paginate: false },
+            { ...options, paginate: false },
             okToRetry
           );
         });
@@ -188,8 +196,11 @@ async function get(
       } else if (okToRetry) {
         logger.info('Retrying graphql query');
         // TODO: fix type
-        opts.body = (opts.body as string).replace('first: 100', 'first: 25');
-        return get(path, opts, !okToRetry);
+        const body = (options.body as string).replace(
+          'first: 100',
+          'first: 25'
+        );
+        return get(path, { ...options, body }, !okToRetry);
       }
     }
   } catch (gotErr) {
@@ -198,16 +209,23 @@ async function get(
   return result;
 }
 
-const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
+const helpers: GotMethod[] = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
-for (const x of helpers) {
-  (get as any)[x] = (url: string, opts: any): Promise<GotResponse> =>
-    get(url, { ...opts, method: x.toUpperCase() });
+for (const method of helpers) {
+  (get as any)[method] = (url: string, opts: any): Promise<GotResponse> =>
+    get(url, { ...opts, method });
 }
 
 get.setBaseUrl = (u: string): void => {
   baseUrl = u;
 };
 
-export const api: GotApi = get as any;
+export interface GithubApiOptions extends GotApiOptions {
+  /**
+   * response should be string instead of json
+   */
+  json?: false;
+}
+
+export const api: GotApi<GithubApiOptions> = get as any;
 export default api;
