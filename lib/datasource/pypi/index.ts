@@ -4,7 +4,7 @@ import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
 function normalizeName(input: string): string {
@@ -160,7 +160,7 @@ export async function getPkgReleases({
   compatibility,
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let hostUrls = ['https://pypi.org/pypi/'];
   if (is.nonEmptyArray(registryUrls)) {
     hostUrls = registryUrls;

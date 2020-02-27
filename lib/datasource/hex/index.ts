@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { DatasourceError, ReleaseResult, PkgReleaseConfig } from '../common';
+import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 import { DATASOURCE_HEX } from '../../constants/data-binary-source';
 
 interface HexRelease {
@@ -11,7 +11,7 @@ interface HexRelease {
 
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   // istanbul ignore if
   if (!lookupName) {
     logger.warn('hex lookup failure: No lookupName');

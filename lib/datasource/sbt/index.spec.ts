@@ -5,7 +5,6 @@ import { getPkgReleases } from '.';
 import { DEFAULT_MAVEN_REPO } from '../../manager/maven/extract';
 import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
 import * as ivyVersioning from '../../versioning/ivy';
-import { DATASOURCE_SBT } from '../../constants/data-binary-source';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./__fixtures__/maven-index.html`),
@@ -102,7 +101,6 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
@@ -110,7 +108,6 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalaz',
           depType: 'plugin',
           registryUrls: [SBT_PLUGINS_REPO],
@@ -121,7 +118,6 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
             'https://failed_repo/maven',
@@ -139,7 +135,6 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          datasource: DATASOURCE_SBT,
           lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
         })
@@ -155,7 +150,6 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          datasource: DATASOURCE_SBT,
           lookupName: 'org.foundweekends:sbt-bintray',
           depType: 'plugin',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
@@ -171,7 +165,6 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          datasource: DATASOURCE_SBT,
           lookupName: 'org.foundweekends:sbt-bintray_2.12',
           depType: 'plugin',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],

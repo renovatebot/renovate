@@ -12,7 +12,7 @@ import AWS from 'aws-sdk';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
 import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 
@@ -276,7 +276,7 @@ async function getManifestResponse(
  *  - Return the digest as a string
  */
 export async function getDigest(
-  { registryUrls, lookupName }: PkgReleaseConfig,
+  { registryUrls, lookupName }: GetReleasesConfig,
   newValue?: string
 ): Promise<string | null> {
   const { registry, repository } = getRegistryRepository(
@@ -597,7 +597,7 @@ async function getLabels(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls

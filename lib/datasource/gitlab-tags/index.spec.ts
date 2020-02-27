@@ -18,7 +18,7 @@ describe('datasource/gitlab-tags', () => {
       glGot.mockReturnValueOnce({ headers: {}, body });
       const res = await gitlab.getPkgReleases({
         registryUrls: ['https://gitlab.company.com/api/v4/'],
-        depName: 'some/dep2',
+        lookupName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);

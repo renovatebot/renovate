@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { DatasourceError, ReleaseResult, PkgReleaseConfig } from '../common';
+import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
 
 export interface CdnjsAsset {
@@ -26,7 +26,7 @@ export function depUrl(library: string): string {
 }
 
 export async function getDigest(
-  { lookupName }: PkgReleaseConfig,
+  { lookupName }: GetReleasesConfig,
   newValue?: string
 ): Promise<string | null> {
   let result = null;
@@ -48,7 +48,7 @@ export async function getDigest(
 
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   // istanbul ignore if
   if (!lookupName) {
     logger.warn('CDNJS lookup failure: empty lookupName');

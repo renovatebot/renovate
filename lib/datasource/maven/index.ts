@@ -7,7 +7,7 @@ import { compare } from '../../versioning/maven/compare';
 import mavenVersion from '../../versioning/maven';
 import { containsPlaceholder } from '../../manager/maven/extract';
 import { downloadHttpProtocol } from './util';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
   const pkgPath = pkgUrl.toString().replace('file://', '');
@@ -131,7 +131,7 @@ function extractVersions(metadata: XmlDocument): string[] {
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const versions: string[] = [];
   const dependency = getDependencyParts(lookupName);
   if (!is.nonEmptyArray(registryUrls)) {

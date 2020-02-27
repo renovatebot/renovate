@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as github from '../github-tags';
-import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import { regEx } from '../../util/regex';
 import {
   DATASOURCE_GITHUB_TAGS,
@@ -85,7 +85,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  */
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   logger.trace(`go.getPkgReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === DATASOURCE_GITHUB_TAGS) {
