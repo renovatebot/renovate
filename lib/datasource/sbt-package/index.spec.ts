@@ -3,7 +3,7 @@ import fs from 'fs';
 import nock from 'nock';
 import { getPkgReleases } from '.';
 import { DEFAULT_MAVEN_REPO } from '../../manager/maven/extract';
-import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
+import { parseIndexDir, SBT_PLUGINS_REPO } from '../sbt-plugin/util';
 import * as ivyVersioning from '../../versioning/ivy';
 
 const mavenIndexHtml = fs.readFileSync(
@@ -105,42 +105,37 @@ describe('datasource/sbt', () => {
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toEqual(null);
-      expect(
-        await getPkgReleases({
-          versioning: ivyVersioning.id,
-          lookupName: 'org.scalatest:scalaz',
-          registryUrls: [SBT_PLUGINS_REPO],
-        })
-      ).toEqual(null);
     });
-    it('fetches sbt plugins', async () => {
+    it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          lookupName: 'org.foundweekends:sbt-bintray',
-          registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
+          lookupName: 'org.scalatest:scalatest',
+          registryUrls: [
+            'https://failed_repo/maven',
+            DEFAULT_MAVEN_REPO,
+            SBT_PLUGINS_REPO,
+          ],
         })
       ).toEqual({
-        dependencyUrl:
-          'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        display: 'org.foundweekends:sbt-bintray',
-        group: 'org.foundweekends',
-        name: 'sbt-bintray',
-        releases: [{ version: '0.5.5' }],
+        dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        display: 'org.scalatest:scalatest',
+        group: 'org.scalatest',
+        name: 'scalatest',
+        releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
       expect(
         await getPkgReleases({
           versioning: ivyVersioning.id,
-          lookupName: 'org.foundweekends:sbt-bintray_2.12',
+          lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
         })
       ).toEqual({
-        dependencyUrl:
-          'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        display: 'org.foundweekends:sbt-bintray_2.12',
-        group: 'org.foundweekends',
-        name: 'sbt-bintray_2.12',
-        releases: [{ version: '0.5.5' }],
+        dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
+        display: 'org.scalatest:scalatest_2.12',
+        group: 'org.scalatest',
+        name: 'scalatest_2.12',
+        releases: [{ version: '1.2.3' }],
       });
     });
   });

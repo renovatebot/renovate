@@ -4,7 +4,6 @@ export interface GetReleasesConfig {
   lookupName: string;
   registryUrls?: string[];
   compatibility?: Record<string, string>;
-  depType?: string;
   npmrc?: string;
   versioning?: string;
 }
@@ -17,7 +16,6 @@ export interface Config {
 }
 export interface PkgReleaseConfig extends Config {
   compatibility?: Record<string, string>;
-  depType?: string;
   npmrc?: string;
   versioning?: string;
 }

@@ -158,7 +158,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt-plugin",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -216,7 +216,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt-plugin",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -301,7 +301,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt-plugin",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -386,7 +386,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt-plugin",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -444,7 +444,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt-plugin",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
