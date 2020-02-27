@@ -31,7 +31,3 @@ The `getDigest` function has two inputs:
 - `newValue`: the version or value to retrieve the digest for
 
 The `getDigest` function returns a string output representing the digest value. If none is found then a return value of `null` should be returned.
-
-### getPreset
-
-This function is supported by npm, github and gitlab for retrieving a Renovate preset.

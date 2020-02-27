@@ -1,6 +1,5 @@
 import getArgv from './config/_fixtures/argv';
 import { getConfig } from '../../lib/config/defaults';
-import * as _npm from '../../lib/datasource/npm';
 
 jest.mock('../../lib/datasource/npm');
 try {
