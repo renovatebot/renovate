@@ -2,7 +2,7 @@ import * as datasource from '.';
 import * as _npm from './npm';
 import {
   DATASOURCE_DOCKER,
-  DATASOURCE_GITHUB,
+  DATASOURCE_GITHUB_TAGS,
   DATASOURCE_NPM,
 } from '../constants/data-binary-source';
 
@@ -17,9 +17,9 @@ describe('datasource/index', () => {
     expect(datasource.getDatasourceList()).toBeDefined();
   });
   it('returns if digests are supported', () => {
-    expect(datasource.supportsDigests({ datasource: DATASOURCE_GITHUB })).toBe(
-      true
-    );
+    expect(
+      datasource.supportsDigests({ datasource: DATASOURCE_GITHUB_TAGS })
+    ).toBe(true);
   });
   it('returns null for no datasource', async () => {
     expect(

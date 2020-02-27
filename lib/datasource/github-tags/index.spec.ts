@@ -10,7 +10,7 @@ jest.mock('../../util/host-rules');
 const ghGot: any = api.get;
 const hostRules: any = _hostRules;
 
-describe('datasource/github', () => {
+describe('datasource/github-tags', () => {
   beforeEach(() => global.renovateCache.rmAll());
   describe('getDigest', () => {
     beforeEach(() => {
@@ -61,24 +61,6 @@ describe('datasource/github', () => {
   });
   describe('getPkgReleases', () => {
     beforeAll(() => global.renovateCache.rmAll());
-    it('returns releases', async () => {
-      const body = [
-        { tag_name: 'a' },
-        { tag_name: 'v' },
-        { tag_name: '1.0.0' },
-        { tag_name: 'v1.1.0' },
-      ];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await github.getPkgReleases({
-        lookupName: 'some/dep',
-        lookupType: 'releases',
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(4);
-      expect(
-        res.releases.find(release => release.version === 'v1.1.0')
-      ).toBeDefined();
-    });
     it('returns tags', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       ghGot.mockReturnValueOnce({ headers: {}, body });
