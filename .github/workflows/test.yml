@@ -10,7 +10,6 @@ on:
 
 env:
   CI: true
-  COLLECT_COVERAGE: true
 
 jobs:
   test:
@@ -52,7 +51,6 @@ jobs:
         if: matrix.node-version != 12 || github.ref == 'refs/heads/master'
         run: |
           echo "::set-env name=SKIP_JAVA_TESTS::true"
-          echo "::set-env name=COLLECT_COVERAGE::false"
 
       - name: Init platform
         id: init
@@ -114,14 +112,14 @@ jobs:
           pip install --user -r requirements.txt
 
       - name: Build
-        run: yarn build
+        run: yarn Build
 
       - name: Unit tests
         shell: bash
-        run: yarn jest --maxWorkers=2 --ci --coverage ${COLLECT_COVERAGE}
+        run: yarn jest --maxWorkers=2 --ci --coverage ${{ matrix.os == 'ubuntu-latest' && github.ref != 'refs/heads/master' }}
 
       - name: Codecov
-        if: always() && env.COLLECT_COVERAGE == 'true'
+        if: always()
         shell: bash
         run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
         env:
