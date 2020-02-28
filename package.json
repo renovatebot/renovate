@@ -9,6 +9,7 @@
   "scripts": {
     "build": "run-s clean generate:* compile:* copy-static-files",
     "build:docker": "run-s generate:* compile:ts copy-static-files",
+    "build:bundle": "ncc build lib/renovate.ts",
     "clean": "rimraf dist lib/**/*.generated.ts",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
@@ -37,6 +38,7 @@
     "release:release": "node --experimental-modules tools/release.mjs",
     "release:dispatch": "node --experimental-modules tools/dispatch-release.mjs",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
+    "start:bundle": "ncc run lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "babel-node --extensions \".ts,.js\" -- test/json-schema.ts",
@@ -219,6 +221,7 @@
     "@types/yawn-yaml": "1.4.0",
     "@typescript-eslint/eslint-plugin": "2.24.0",
     "@typescript-eslint/parser": "2.24.0",
+    "@zeit/ncc": "0.21.1",
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "25.1.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
