@@ -124,6 +124,14 @@ jobs:
           name: coverage
           path: coverage
 
+      - name: Codecov
+        shell: bash
+        if: always() && env.coverage == 'true'
+        continue-on-error: true
+        run: bash <(curl -s https://codecov.io/bash)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: E2E Test
         run: yarn test-e2e
 
@@ -192,26 +200,3 @@ jobs:
 
       - name: Type check
         run: yarn type-check
-
-  coverage:
-    if: github.ref != 'refs/heads/master'
-    needs: test
-    runs-on: ubuntu-latest
-
-    # codecov shouldn't need more than 3 min
-    timeout-minutes: 3
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Download coverage
-        uses: actions/download-artifact@v1
-        with:
-          name: coverage
-
-      - name: Codecov
-        shell: bash
-        continue-on-error: true
-        run: bash <(curl -s https://codecov.io/bash)
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
