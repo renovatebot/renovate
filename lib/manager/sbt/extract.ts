@@ -2,7 +2,10 @@ import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { PackageFile, PackageDependency } from '../common';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
-import { DATASOURCE_SBT } from '../../constants/data-binary-source';
+import {
+  DATASOURCE_SBT_PACKAGE,
+  DATASOURCE_SBT_PLUGIN,
+} from '../../constants/data-binary-source';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -250,12 +253,17 @@ function parseSbtLine(
     }
   }
 
-  if (dep)
+  if (dep) {
+    if (dep.depType === 'plugin') {
+      dep.datasource = DATASOURCE_SBT_PLUGIN;
+    } else {
+      dep.datasource = DATASOURCE_SBT_PACKAGE;
+    }
     deps.push({
-      datasource: DATASOURCE_SBT,
       registryUrls,
       ...dep,
     });
+  }
 
   if (lineIndex + 1 < lines.length)
     return {
