@@ -11,12 +11,12 @@ import { Merge } from 'type-fest';
 
 // TODO: remove when code is refactord
 Object.defineProperty(GotError.prototype, 'statusCode', {
-  get: function statusCode() {
+  get: function statusCode(this: any) {
     return this.response?.statusCode;
   },
 });
 Object.defineProperty(GotError.prototype, 'code', {
-  get: function code() {
+  get: function code(this: any) {
     return this._code ?? this.response?.code;
   },
   set: function code(v) {

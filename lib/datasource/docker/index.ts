@@ -10,7 +10,7 @@ import wwwAuthenticate from 'www-authenticate';
 import AWS from 'aws-sdk';
 import { Options } from 'got';
 import { logger } from '../../logger';
-import got, { GotHeaders } from '../../util/got';
+import got, { GotHeaders, RenovateGotHandlerOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
@@ -421,11 +421,13 @@ async function getTags(
   }
 }
 
-export function getConfigResponseBeforeRedirectHook(options: any): void {
-  if (options.search?.includes('X-Amz-Algorithm')) {
+export function getConfigResponseBeforeRedirectHook(
+  options: RenovateGotHandlerOptions
+): void {
+  if (options.url.search?.includes('X-Amz-Algorithm')) {
     // if there is no port in the redirect URL string, then delete it from the redirect options.
     // This can be evaluated for removal after upgrading to Got v10
-    const portInUrl = options.href.split('/')[2].split(':')[1];
+    const portInUrl = options.url.href.split('/')[2].split(':')[1];
     if (!portInUrl) {
       // eslint-disable-next-line no-param-reassign
       delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
@@ -436,10 +438,10 @@ export function getConfigResponseBeforeRedirectHook(options: any): void {
     delete options.headers.authorization;
   }
 
-  if (options.href && options.headers?.authorization) {
-    const { host } = URL.parse(options.href);
+  if (options.headers?.authorization) {
+    const { host } = options.url;
     // prettier-ignore
-    if (host && host.endsWith('blob.core.windows.net')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (host.endsWith('blob.core.windows.net')) { // lgtm [js/incomplete-url-substring-sanitization]
       // docker registry is hosted on Azure blob, redirect url includes authentication.
       // eslint-disable-next-line no-param-reassign
       delete options.headers.authorization;

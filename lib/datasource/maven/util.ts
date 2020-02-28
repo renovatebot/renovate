@@ -1,5 +1,5 @@
 import url from 'url';
-import got from '../../util/got';
+import got, { RenovateGotHandlerOptions } from '../../util/got';
 import { logger } from '../../logger';
 import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import { DatasourceError } from '../common';
@@ -46,14 +46,11 @@ export async function downloadHttpProtocol(
       context: { hostType },
       hooks: {
         beforeRedirect: [
-          (options: any): void => {
-            if (
-              options.search &&
-              options.search.indexOf('X-Amz-Algorithm') !== -1
-            ) {
+          (options: RenovateGotHandlerOptions): void => {
+            if (options.url.search?.includes('X-Amz-Algorithm')) {
               // maven repository is hosted on amazon, redirect url includes authentication.
               // eslint-disable-next-line no-param-reassign
-              delete options.auth;
+              delete options.headers.authentication;
             }
           },
         ],

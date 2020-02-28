@@ -106,7 +106,7 @@ async function getPackagistFile(
   const { key, sha256 } = file;
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
-  if (opts.auth || (opts.headers && opts.headers.authorization)) {
+  if (opts.username || opts.headers?.authorization) {
     return (await got<PackagistFile>(regUrl + '/' + fileName, opts)).body;
   }
   const cacheNamespace = 'datasource-packagist-files';
@@ -277,8 +277,9 @@ async function packageLookup(
         .replace('%hash%', providerPackages[name])
     );
     const opts = getHostOpts(regUrl);
-    // TODO: fix types
-    const versions = (await got<any>(pkgUrl, opts)).body.packages[name];
+    const versions = (
+      await got<{ packages: Record<string, RegistryFile> }>(pkgUrl, opts)
+    ).body.packages[name];
     const dep = extractDepReleases(versions);
     dep.name = name;
     logger.trace({ dep }, 'dep');

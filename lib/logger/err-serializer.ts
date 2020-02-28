@@ -18,22 +18,16 @@ export default function errSerializer(err: any): any {
   if (err.stack) {
     response.stack = err.stack;
   }
-  if (response.gotOptions) {
-    if (is.string(response.gotOptions.auth)) {
-      response.gotOptions.auth = response.gotOptions.auth.replace(
-        /:.*/,
-        ':***********'
-      );
-    }
-    if (err.gotOptions.headers) {
+  if (response.options) {
+    if (err.options.headers) {
       const redactedHeaders = [
         'authorization',
         'private-header',
         'Private-header',
       ];
       redactedHeaders.forEach(header => {
-        if (response.gotOptions.headers[header]) {
-          response.gotOptions.headers[header] = '** redacted **';
+        if (response.options.headers[header]) {
+          response.options.headers[header] = '** redacted **';
         }
       });
     }
