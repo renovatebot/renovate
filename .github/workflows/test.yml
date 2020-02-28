@@ -17,10 +17,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't nee more than 10 min
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     strategy:
-      max-parallel: 6
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [10, 12]
@@ -30,6 +29,8 @@ jobs:
           - os: windows-latest
             node-version: 10
 
+    env:
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 && github.ref != 'refs/heads/master' }}
     steps:
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -105,21 +106,19 @@ jobs:
         run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
 
       - name: Installing dependencies
-        shell: bash
         run: |
           python -m pip install --upgrade pip
           yarn install --frozen-lockfile --link-duplicates
           pip install --user -r requirements.txt
 
       - name: Build
-        run: yarn Build
+        run: yarn build
 
       - name: Unit tests
-        shell: bash
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ matrix.os == 'ubuntu-latest' && github.ref != 'refs/heads/master' }}
+        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        if: always()
+        if: always() && env.coverage == 'true'
         shell: bash
         run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
         env:
@@ -135,7 +134,6 @@ jobs:
     timeout-minutes: 10
 
     strategy:
-      max-parallel: 6
       matrix:
         os: [ubuntu-latest]
         node-version: [12]
@@ -184,9 +182,7 @@ jobs:
         run: yarn cache clean
 
       - name: Installing dependencies
-        shell: bash
-        run: |
-          yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile --link-duplicates
 
       - name: Lint
         run: yarn lint
