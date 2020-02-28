@@ -86,15 +86,16 @@ describe('platform/bitbucket', () => {
       expect.assertions(1);
       expect(() => bitbucket.initPlatform({})).toThrow();
     });
-    it('should throw if wrong endpoint', () => {
-      expect.assertions(1);
-      expect(() =>
-        bitbucket.initPlatform({
-          endpoint: 'endpoint',
-          username: 'abc',
-          password: '123',
-        })
-      ).toThrow();
+    it('should show warning message if custom endpoint', async () => {
+      jest.spyOn(console, 'warn');
+      await bitbucket.initPlatform({
+        endpoint: 'endpoint',
+        username: 'abc',
+        password: '123',
+      });
+      expect(console.warn).toHaveBeenCalledWith(
+        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?'
+      );
     });
     it('should init', async () => {
       expect(
