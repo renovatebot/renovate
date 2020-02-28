@@ -6,13 +6,14 @@ module.exports = {
   extends: [
     'airbnb-typescript/base',
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
+
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:import/typescript',
     'prettier',
     'prettier/@typescript-eslint',
   ],
@@ -40,8 +41,6 @@ module.exports = {
     'prefer-template': 0,
     'no-underscore-dangle': 0,
 
-    'import/no-unresolved': [2, { ignore: ['^type-fest$'] }],
-
     // Makes no sense to allow type inferrence for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
       'error',
@@ -62,7 +61,8 @@ module.exports = {
     ], // disable until proper interfaced api
   },
   settings: {
-    'import/ignore:': ['type-fest'],
+    // https://github.com/benmosher/eslint-plugin-import/issues/1618
+    'import/internal-regex': '^type\\-fest$',
   },
   overrides: [
     {
