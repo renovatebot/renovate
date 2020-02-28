@@ -45,8 +45,8 @@ export function initPlatform({
     );
   }
   if (endpoint && endpoint !== 'https://api.bitbucket.org/') {
-    throw new Error(
-      'Init: Bitbucket Cloud endpoint can only be https://api.bitbucket.org/'
+    console.warn(
+      'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?'
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
