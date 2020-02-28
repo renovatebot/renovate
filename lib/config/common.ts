@@ -16,6 +16,7 @@ export interface RenovateSharedConfig {
   labels?: string[];
   managers?: string | string[];
   platform?: string;
+  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseWhen?: string;
