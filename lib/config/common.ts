@@ -45,6 +45,11 @@ export interface RenovateSharedConfig {
   postUpgradeTasks?: PostUpgradeTasks;
 }
 
+export interface GlobalConfig {
+  prBanner?: string;
+  prFooter?: string;
+}
+
 export interface RenovateAdminConfig {
   allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
@@ -54,7 +59,7 @@ export interface RenovateAdminConfig {
   cacheDir?: string;
   dryRun?: boolean;
 
-  global?: Record<'prBanner' | 'prFooter' | string, string>;
+  global?: GlobalConfig;
 
   onboarding?: boolean;
   onboardingBranch?: string;
@@ -118,6 +123,7 @@ export type UpdateType =
   | 'pin'
   | 'digest'
   | 'lockFileMaintenance'
+  | 'lockfileUpdate'
   | 'rollback'
   | 'bump';
 

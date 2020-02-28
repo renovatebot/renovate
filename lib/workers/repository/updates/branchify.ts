@@ -1,12 +1,16 @@
 import slugify from 'slugify';
 import handlebars from 'handlebars';
 import { clean as cleanGitRef } from 'clean-git-ref';
+import { Merge } from 'type-fest';
 import { logger, addMeta, removeMeta } from '../../../logger';
 
-import { generateBranchConfig } from './generate';
+import {
+  generateBranchConfig,
+  BranchUpgradeConfig,
+  BranchUpgrade,
+} from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
-import { BranchConfig } from '../../common';
 
 /**
  * Clean git branch name
@@ -23,9 +27,12 @@ function cleanBranchName(branchName: string): string {
     .replace(/\s/g, ''); // whitespace
 }
 
-export type BranchifiedConfig = RenovateConfig & {
-  branches: BranchConfig[];
-};
+export type BranchifiedConfig = Merge<
+  RenovateConfig,
+  {
+    branches: BranchUpgrade[];
+  }
+>;
 export function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
@@ -39,10 +46,10 @@ export function branchifyUpgrades(
   );
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
-  const branchUpgrades = {};
-  const branches: BranchConfig[] = [];
+  const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
+  const branches: BranchUpgrade[] = [];
   for (const u of updates) {
-    const update = { ...u };
+    const update: BranchUpgradeConfig = { ...u } as any;
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;

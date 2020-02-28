@@ -1,6 +1,7 @@
 import { defaultConfig } from '../../../util';
 import { generateBranchConfig } from '../../../../lib/workers/repository/updates/generate';
 import * as datasourceNpm from '../../../../lib/datasource/npm';
+import { UpdateType } from '../../../../lib/config';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -508,7 +509,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMinorPatch: true,
-          updateType: 'minor',
+          updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
         },
         {
@@ -519,7 +520,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          updateType: 'major',
+          updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
         },
         {
@@ -530,7 +531,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          updateType: 'patch',
+          updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },
       ];

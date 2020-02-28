@@ -1,5 +1,9 @@
 import { LookupUpdate } from '../../repository/process/lookup/common';
-import { RenovateSharedConfig } from '../../../config';
+import {
+  RenovateSharedConfig,
+  GlobalConfig,
+  UpdateType,
+} from '../../../config';
 import { Release, ReleaseResult } from '../../../datasource';
 
 export type PrBodyUpgrade = LookupUpdate &
@@ -21,9 +25,9 @@ export type PrBodyConfig<T extends PrBodyUpgrade = PrBodyUpgrade> = {
   prBodyColumns: string[];
   prBodyDefinitions: Record<string, string>;
   prTitle?: string;
-  updateType: string;
+  updateType: UpdateType;
   isGroup?: boolean;
   isPin?: boolean;
   hasReleaseNotes?: boolean;
-  global?: { prBanner?: string; prFooter?: string };
+  global?: GlobalConfig;
 } & Partial<RenovateSharedConfig>;
