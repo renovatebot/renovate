@@ -132,6 +132,8 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  displayFrom?: string;
+  displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
   moduleName?: string;
@@ -141,6 +143,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   skipReason?: string;
   source?: string;
   sourceLine?: number;
+  toVersion?: string;
   updates?: PackageUpdateResult[];
   versionLine?: number;
   autoReplaceData?: AutoReplaceData;

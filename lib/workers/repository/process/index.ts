@@ -3,12 +3,13 @@ import { mergeChildConfig, RenovateConfig } from '../../../config';
 import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
 import { platform } from '../../../platform';
 import { WriteUpdateResult } from './write';
-import { BranchConfig } from '../../common';
+import { BranchConfig, RepositoryConfig } from '../../common';
 
 export async function processRepo(
-  config: RenovateConfig
+  repoConfig: RenovateConfig
 ): Promise<ExtractAndUpdateResult> {
   logger.debug('processRepo()');
+  const config = repoConfig as RepositoryConfig;
   /* eslint-disable no-param-reassign */
   config.masterIssueChecks = {};
   // istanbul ignore next

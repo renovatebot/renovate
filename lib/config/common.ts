@@ -7,15 +7,28 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export interface GroupConfig extends Record<string, unknown> {
+  branchName?: string;
+  branchTopic?: string;
+}
+
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   automerge?: boolean;
   branchName?: string;
+
+  commitMessage?: string;
   enabled?: boolean;
+
+  group?: GroupConfig;
+  groupName?: string;
+  groupSlug?: string;
   ignoreDeps?: string[];
   labels?: string[];
   managers?: string | string[];
+  masterIssueApproval?: boolean;
   platform?: string;
+  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseWhen?: string;
@@ -29,8 +42,26 @@ export interface RenovateSharedConfig {
   statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
-  allowedPostUpgradeCommands?: string[];
   postUpgradeTasks?: PostUpgradeTasks;
+}
+
+export interface RenovateAdminConfig {
+  allowedPostUpgradeCommands?: string[];
+  autodiscover?: boolean;
+  autodiscoverFilter?: string;
+
+  baseDir?: string;
+  cacheDir?: string;
+  dryRun?: boolean;
+
+  global?: Record<'prBanner' | 'prFooter' | string, string>;
+
+  onboarding?: boolean;
+  onboardingBranch?: string;
+  onboardingConfig?: RenovateSharedConfig;
+  privateKey?: string | Buffer;
+  repositories?: RenovateRepository[];
+  requireConfig?: boolean;
 }
 
 export type PostUpgradeTasks = {
@@ -50,33 +81,34 @@ export type RenovateRepository =
 
 // TODO: Proper typings
 export interface RenovateConfig
-  extends RenovateSharedConfig,
+  extends RenovateAdminConfig,
+    RenovateSharedConfig,
     UpdateConfig<PackageRule>,
-    Record<string, any> {
-  autodiscover?: boolean;
-  autodiscoverFilter?: string;
-  baseBranch?: string;
+    Record<string, unknown> {
   baseBranches?: string[];
+  baseBranch?: string;
   branchList?: string[];
   description?: string[];
-  dryRun?: boolean;
   errors?: ValidationMessage[];
-
-  /** TODO: Type? */
-  global?: Record<string, any>;
 
   includeForks?: boolean;
   isFork?: boolean;
-  onboarding?: boolean;
-  onboardingConfig?: RenovateSharedConfig;
+
+  localDir?: string;
+
+  masterIssue?: boolean;
+  masterIssueAutoclose?: boolean;
+  masterIssueTitle?: string;
+
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
-  privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
-  repositories?: RenovateRepository[];
-  requireConfig?: boolean;
+
+  updateType?: UpdateType;
+
   warnings?: ValidationMessage[];
+  vulnerabilityAlerts?: RenovateSharedConfig;
 }
 
 export type UpdateType =

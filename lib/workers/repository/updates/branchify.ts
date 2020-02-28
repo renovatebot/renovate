@@ -6,6 +6,7 @@ import { logger, addMeta, removeMeta } from '../../../logger';
 import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
+import { BranchConfig } from '../../common';
 
 /**
  * Clean git branch name
@@ -22,11 +23,13 @@ function cleanBranchName(branchName: string): string {
     .replace(/\s/g, ''); // whitespace
 }
 
-// TODO: fix return type
+export type BranchifiedConfig = RenovateConfig & {
+  branches: BranchConfig[];
+};
 export function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-): RenovateConfig {
+): BranchifiedConfig {
   logger.debug('branchifyUpgrades');
   const updates = flattenUpdates(config, packageFiles);
   logger.debug(
@@ -37,7 +40,7 @@ export function branchifyUpgrades(
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
   const branchUpgrades = {};
-  const branches = [];
+  const branches: BranchConfig[] = [];
   for (const u of updates) {
     const update = { ...u };
     // Massage legacy vars just in case

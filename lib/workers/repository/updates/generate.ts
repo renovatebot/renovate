@@ -3,12 +3,9 @@ import { DateTime } from 'luxon';
 import semver from 'semver';
 import mdTable from 'markdown-table';
 import { logger } from '../../../logger';
-import {
-  mergeChildConfig,
-  ManagerConfig,
-  RenovateConfig,
-} from '../../../config';
+import { mergeChildConfig, ManagerConfig } from '../../../config';
 import { PackageDependency } from '../../../manager/common';
+import { BranchConfig } from '../../common';
 
 function ifTypesGroup(
   depNames: string[],
@@ -63,7 +60,7 @@ function getTableValues(
   return null;
 }
 
-export function generateBranchConfig(branchUpgrades): RenovateConfig {
+export function generateBranchConfig(branchUpgrades): BranchConfig {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
   let config: any = {
