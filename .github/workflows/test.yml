@@ -16,8 +16,8 @@ jobs:
     name: test
     runs-on: ${{ matrix.os }}
 
-    # tests shouldn't nee more than 10 min
-    timeout-minutes: 10
+    # tests shouldn't need more than 15 min
+    timeout-minutes: 15
 
     strategy:
       matrix:
@@ -31,6 +31,7 @@ jobs:
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 && github.ref != 'refs/heads/master' }}
+
     steps:
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -50,8 +51,7 @@ jobs:
 
       - name: Skip Java tests
         if: matrix.node-version != 12 || github.ref == 'refs/heads/master'
-        run: |
-          echo "::set-env name=SKIP_JAVA_TESTS::true"
+        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
       - name: Init platform
         id: init
@@ -117,12 +117,12 @@ jobs:
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
-      - name: Codecov
+      - name: Upload coverage
+        uses: actions/upload-artifact@v1
         if: always() && env.coverage == 'true'
-        shell: bash
-        run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          name: coverage
+          path: coverage
 
       - name: E2E Test
         run: yarn test-e2e
@@ -130,7 +130,7 @@ jobs:
   lint:
     runs-on: ${{ matrix.os }}
 
-    # tests shouldn't nee more than 10 min
+    # lint shouldn't need more than 10 min
     timeout-minutes: 10
 
     strategy:
@@ -192,3 +192,25 @@ jobs:
 
       - name: Type check
         run: yarn type-check
+
+  coverage:
+    needs: test
+    runs-on: ubuntu-latest
+
+    # codecov shouldn't need more than 3 min
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download coverage
+        uses: actions/download-artifact@v1
+        with:
+          name: coverage
+
+      - name: Codecov
+        shell: bash
+        continue-on-error: true
+        run: bash <(curl -s https://codecov.io/bash)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
