@@ -57,7 +57,6 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
         datasource: 'github',
         depName,
         lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
-        lookupType: 'tags',
         currentValue: tag,
       };
     }
