@@ -122,6 +122,7 @@ jobs:
 
       - name: Codecov
         if: always()
+        shell: bash
         run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
