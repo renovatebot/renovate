@@ -6,9 +6,9 @@ import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
-import { RenovateGotInitOptions } from './types';
+import { RenovateGotExtendOptions } from './types';
 
-const hook: InitHook = (options: RenovateGotInitOptions) => {
+const hook: InitHook = (options: RenovateGotExtendOptions) => {
   const uri = parse(options.url.toString());
   if (options.username || options.headers?.authorization) {
     return;

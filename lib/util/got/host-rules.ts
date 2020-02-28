@@ -3,11 +3,11 @@ import got, { InitHook } from 'got';
 import { parse } from 'url';
 import { logger } from '../../logger';
 import * as hostRules from '../host-rules';
-import { RenovateGotInitOptions } from './types';
+import { RenovateGotExtendOptions } from './types';
 
 // Apply host rules to requests
 
-const hook: InitHook = (options: RenovateGotInitOptions) => {
+const hook: InitHook = (options: RenovateGotExtendOptions) => {
   const uri = parse(options.url.toString());
   if (!uri.hostname) {
     return;

@@ -36,14 +36,14 @@ export type RenovateGotContext = {
   useCache?: boolean;
 };
 
-export type RenovateGotInitOptions = Merge<
+export type RenovateGotExtendOptions = Merge<
   ExtendOptions,
   {
     context?: RenovateGotContext;
   }
 >;
 
-export type RenovateGotHandlerOptions = Merge<
+export type RenovateGotNormalizedOptions = Merge<
   NormalizedOptions,
   {
     context: RenovateGotContext;

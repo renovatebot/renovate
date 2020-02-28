@@ -1,11 +1,13 @@
 import AWSMock from 'aws-sdk-mock';
 import AWS from 'aws-sdk';
-import _got from '../../util/got';
+import { URL } from 'url';
+import _got, { RenovateGotNormalizedOptions } from '../../util/got';
 import * as docker from '.';
 import { getPkgReleases } from '..';
 import * as _hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
+import { partial } from '../../../test/util';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
@@ -413,86 +415,76 @@ describe('api/docker', () => {
   });
   describe('getConfigResponseBeforeRedirectHook', () => {
     it('leaves a non-Amazon or Microsoft request unmodified', () => {
-      const emptyOpts = {};
+      let url = new URL('https://myurl.com');
+      const emptyOpts = partial<RenovateGotNormalizedOptions>({ url });
       docker.getConfigResponseBeforeRedirectHook(emptyOpts);
-      expect(emptyOpts).toEqual({});
+      expect(emptyOpts).toEqual({ url });
 
-      const nonAmzOpts = {
-        search: 'my-search-string',
-      };
+      url = new URL('https://myurl.com?my-search-string');
+      const nonAmzOpts = partial<RenovateGotNormalizedOptions>({
+        url,
+      });
       docker.getConfigResponseBeforeRedirectHook(nonAmzOpts);
       expect(nonAmzOpts).toEqual({
-        search: 'my-search-string',
-      });
-
-      const nonMsOpts = {
-        href: 'https://myurl.com',
-      };
-      docker.getConfigResponseBeforeRedirectHook(nonMsOpts);
-      expect(nonMsOpts).toEqual({
-        href: 'https://myurl.com',
+        url,
       });
     });
 
     it('removes the authorization header for Azure requests', () => {
-      const href = 'https://myaccount.blob.core.windows.net/xyz';
-      const opts = {
-        href,
-      };
+      const url = new URL('https://myaccount.blob.core.windows.net/xyz');
+      const opts = partial<RenovateGotNormalizedOptions>({
+        url,
+      });
       docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(opts).toEqual({ href });
+      expect(opts).toEqual({ url });
 
       const optsWithHeadersNoAuth = {
-        href,
+        url,
         headers: {},
       };
       docker.getConfigResponseBeforeRedirectHook(opts);
       expect(optsWithHeadersNoAuth).toEqual({
-        href,
+        url,
         headers: {},
       });
 
-      const optsWithAuth = {
-        href,
+      const optsWithAuth = partial<RenovateGotNormalizedOptions>({
+        url,
         headers: {
           authorization: 'Bearer xyz',
         },
-      };
+      });
       docker.getConfigResponseBeforeRedirectHook(optsWithAuth);
       expect(optsWithAuth.headers).toBeDefined();
       expect(optsWithAuth.headers.authorization).not.toBeDefined();
     });
 
     it('removes the authorization header for Amazon requests', () => {
-      const href = 'https://amazon.com';
-      const search = 'X-Amz-Algorithm';
+      const url = new URL('https://amazon.com?X-Amz-Algorithm');
       const authorization = 'Bearer xyz';
-      const opts = {
-        href,
-        search,
+      const opts = partial<RenovateGotNormalizedOptions>({
+        url,
         headers: {
           authorization,
         },
-      };
+      });
       docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(opts).toEqual({ search, href, headers: {} });
+      expect(opts).toEqual({ url, headers: {} });
     });
 
     it('removes the port when not specified in URL', () => {
-      const href = 'https://amazon.com/xyz';
-      const search = 'X-Amz-Algorithm';
+      const url = new URL('https://amazon.com?X-Amz-Algorithm');
       const authorization = 'Bearer xyz';
       const port = 8080;
-      const opts = {
-        href,
-        search,
+      const opts = partial<RenovateGotNormalizedOptions>({
+        url,
         port,
         headers: {
           authorization,
         },
-      };
+      });
       docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(opts).toEqual({ search, href, headers: {} });
+      expect(opts).toEqual({ url, headers: {} });
     });
   });
 });

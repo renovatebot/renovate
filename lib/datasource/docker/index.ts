@@ -10,9 +10,9 @@ import wwwAuthenticate from 'www-authenticate';
 import AWS from 'aws-sdk';
 import { Options } from 'got';
 import { logger } from '../../logger';
-import got, { GotHeaders, RenovateGotHandlerOptions } from '../../util/got';
+import got, { GotHeaders, RenovateGotNormalizedOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
 import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 
@@ -280,7 +280,7 @@ async function getManifestResponse(
  *  - Return the digest as a string
  */
 export async function getDigest(
-  { registryUrls, lookupName }: GetReleasesConfig,
+  { registryUrls, lookupName }: PkgReleaseConfig,
   newValue?: string
 ): Promise<string | null> {
   const { registry, repository } = getRegistryRepository(
@@ -422,7 +422,7 @@ async function getTags(
 }
 
 export function getConfigResponseBeforeRedirectHook(
-  options: RenovateGotHandlerOptions
+  options: RenovateGotNormalizedOptions
 ): void {
   if (options.url.search?.includes('X-Amz-Algorithm')) {
     // if there is no port in the redirect URL string, then delete it from the redirect options.
@@ -606,7 +606,7 @@ async function getLabels(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+}: PkgReleaseConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls

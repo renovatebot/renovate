@@ -1,7 +1,7 @@
 import got from 'got';
 import crypto from 'crypto';
 import { clone } from '../clone';
-import { RenovateGotHandlerOptions } from './types';
+import { RenovateGotNormalizedOptions } from './types';
 
 // global.repoCache is reset to {} every time a repository is initialized
 // With this caching, it means every GET request is cached during each repository run
@@ -9,7 +9,7 @@ import { RenovateGotHandlerOptions } from './types';
 // istanbul ignore next
 export default got.extend({
   handlers: [
-    (options: RenovateGotHandlerOptions, next) => {
+    (options: RenovateGotNormalizedOptions, next) => {
       if (!global.repoCache) {
         return next(options);
       }
