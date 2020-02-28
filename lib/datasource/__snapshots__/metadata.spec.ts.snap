@@ -72,3 +72,19 @@ Object {
   "sourceUrl": "https://github.com/carltongibson/django-filter",
 }
 `;
+
+exports[`datasource/metadata Should handle parsing of sourceUrls correctly for GitLab also 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2020-02-14T13:12:00",
+      "version": "5.7.0",
+    },
+    Object {
+      "releaseTimestamp": "2020-02-14T10:04:00",
+      "version": "5.6.1",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/meno/dropzone/tree/master",
+}
+`;
