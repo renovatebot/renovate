@@ -58,10 +58,9 @@ Array [
   },
   Object {
     "currentValue": "0.0.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "h",
     "lookupName": "foo/bar",
-    "lookupType": "tags",
     "managerData": Object {
       "lineNumber": 10,
     },
