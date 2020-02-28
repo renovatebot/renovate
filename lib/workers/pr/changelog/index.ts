@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
 import * as sourceGithub from './source-github';
-import { getReleases } from './releases';
+import { getInRangeReleases } from './releases';
 import { ChangeLogConfig, ChangeLogResult } from './common';
 
 export * from './common';
@@ -18,7 +18,7 @@ export async function getChangeLogJSON(
     return null;
   }
 
-  const releases = args.releases || (await getReleases(args));
+  const releases = args.releases || (await getInRangeReleases(args));
 
   try {
     const res = await sourceGithub.getChangeLogJSON({ ...args, releases });

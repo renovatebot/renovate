@@ -1,5 +1,5 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-import { ReleaseResult, PkgReleaseConfig, DigestConfig } from '../common';
+import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
 
 const { get: ghGot } = api;
@@ -108,7 +108,7 @@ export async function getDigest(
  */
 export async function getPkgReleases({
   lookupName: repo,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,

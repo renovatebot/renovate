@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_TERRAFORM } from '../../constants/data-binary-source';
 
 interface TerraformProvider {
@@ -19,7 +19,7 @@ interface TerraformProvider {
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const repository = `hashicorp/${lookupName}`;
 
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');

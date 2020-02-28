@@ -2,7 +2,7 @@ import { compare } from '../../versioning/maven/compare';
 import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
 import { logger } from '../../logger';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
@@ -96,7 +96,7 @@ async function resolvePluginReleases(
 }
 
 export async function getPkgReleases(
-  config: PkgReleaseConfig
+  config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
   const { lookupName, depType } = config;
 

@@ -1,5 +1,5 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { ReleaseResult, GetReleasesConfig } from '../common';
 import { logger } from '../../logger';
 
 const { get: ghGot } = api;
@@ -18,7 +18,7 @@ const cacheNamespace = 'datasource-github-releases';
  */
 export async function getPkgReleases({
   lookupName: repo,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,

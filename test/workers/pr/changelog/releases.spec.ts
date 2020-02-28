@@ -46,7 +46,7 @@ describe('workers/pr/changelog/releases', () => {
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
@@ -56,7 +56,7 @@ describe('workers/pr/changelog/releases', () => {
         fromVersion: '1.0.1-rc0',
         toVersion: '1.1.0',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
@@ -66,7 +66,7 @@ describe('workers/pr/changelog/releases', () => {
         fromVersion: '1.0.1',
         toVersion: '1.2.0-rc1',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
@@ -76,7 +76,7 @@ describe('workers/pr/changelog/releases', () => {
         fromVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc1',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(6);
     });
@@ -86,7 +86,7 @@ describe('workers/pr/changelog/releases', () => {
         fromVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc0',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: glGot } = api;
 
@@ -14,7 +14,7 @@ function getCacheKey(depHost: string, repo: string): string {
 export async function getPkgReleases({
   registryUrls,
   lookupName: repo,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   // Use registryUrls if present, otherwise default to publid gitlab.com
   const depHost = is.nonEmptyArray(registryUrls)
     ? registryUrls[0].replace(/\/$/, '')

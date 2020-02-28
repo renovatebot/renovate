@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import {
   DatasourceError,
-  PkgReleaseConfig,
+  GetReleasesConfig,
   ReleaseResult,
   Release,
 } from '../common';
@@ -10,7 +10,7 @@ import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   if (!lookupName) {
     return null;
   }

@@ -1,7 +1,7 @@
 import simpleGit from 'simple-git/promise';
 import * as semver from '../../versioning/semver';
 import { logger } from '../../logger';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { ReleaseResult, GetReleasesConfig } from '../common';
 
 const cacheNamespace = 'git-tags';
 const cacheMinutes = 10;
@@ -11,7 +11,7 @@ process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const git = simpleGit();
   try {
     const cachedResult = await renovateCache.get<ReleaseResult>(

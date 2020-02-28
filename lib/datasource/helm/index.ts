@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
 
-import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
 
@@ -84,7 +84,7 @@ export async function getRepositoryData(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   if (!lookupName) {
     logger.warn(`lookupName was not provided to getPkgReleases`);
     return null;
