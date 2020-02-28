@@ -1,73 +1,10 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-import {
-  ReleaseResult,
-  PkgReleaseConfig,
-  Preset,
-  DigestConfig,
-} from '../common';
+import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
-import got, { GotJSONOptions } from '../../util/got';
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
 
 const { get: ghGot } = api;
 
-async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
-  const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
-  const opts: GotJSONOptions = {
-    headers: {
-      accept: global.appMode
-        ? 'application/vnd.github.machine-man-preview+json'
-        : 'application/vnd.github.v3+json',
-    },
-    json: true,
-    hostType: DATASOURCE_GITHUB,
-  };
-  let res: { body: { content: string } };
-  try {
-    res = await got(url, opts);
-  } catch (err) {
-    if (err.message === PLATFORM_FAILURE) {
-      throw err;
-    }
-    logger.debug(
-      { statusCode: err.statusCodef },
-      `Failed to retrieve ${fileName} from repo`
-    );
-    throw new Error('dep not found');
-  }
-  try {
-    const content = Buffer.from(res.body.content, 'base64').toString();
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error('invalid preset JSON');
-  }
-}
-
-export async function getPreset(
-  pkgName: string,
-  presetName = 'default'
-): Promise<Preset> {
-  if (presetName === 'default') {
-    try {
-      const defaultJson = await fetchJSONFile(pkgName, 'default.json');
-      return defaultJson;
-    } catch (err) {
-      if (err.message === PLATFORM_FAILURE) {
-        throw err;
-      }
-      if (err.message === 'dep not found') {
-        logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json');
-      }
-      throw err;
-    }
-  }
-  return fetchJSONFile(pkgName, `${presetName}.json`);
-}
-
-const cacheNamespace = 'datasource-github';
+const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(repo: string, type: string): string {
   return `${repo}:${type}`;
 }
@@ -171,42 +108,28 @@ export async function getDigest(
  */
 export async function getPkgReleases({
   lookupName: repo,
-  lookupType,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(repo, lookupType || 'tags')
+    getCacheKey(repo, 'tags')
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   try {
-    if (lookupType === 'releases') {
-      const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-      type GitHubRelease = {
-        tag_name: string;
-      }[];
+    // tag
+    const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
+    type GitHubTag = {
+      name: string;
+    }[];
 
-      versions = (
-        await ghGot<GitHubRelease>(url, {
-          paginate: true,
-        })
-      ).body.map(o => o.tag_name);
-    } else {
-      // tag
-      const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
-      type GitHubTag = {
-        name: string;
-      }[];
-
-      versions = (
-        await ghGot<GitHubTag>(url, {
-          paginate: true,
-        })
-      ).body.map(o => o.name);
-    }
+    versions = (
+      await ghGot<GitHubTag>(url, {
+        paginate: true,
+      })
+    ).body.map(o => o.name);
   } catch (err) {
     logger.debug({ repo, err }, 'Error retrieving from github');
   }
@@ -224,7 +147,7 @@ export async function getPkgReleases({
   const cacheMinutes = 10;
   await renovateCache.set(
     cacheNamespace,
-    getCacheKey(repo, lookupType),
+    getCacheKey(repo, 'tags'),
     dependency,
     cacheMinutes
   );

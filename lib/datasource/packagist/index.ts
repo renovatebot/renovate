@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
 function getHostOpts(url: string): GotJSONOptions {
@@ -307,7 +307,7 @@ async function packageLookup(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`getPkgReleases(${lookupName})`);
 
   let res: ReleaseResult;

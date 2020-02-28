@@ -4,7 +4,7 @@ import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
 function normalizeName(input: string): string {
@@ -30,11 +30,11 @@ function compatibleVersions(
 }
 
 async function getDependency(
-  depName: string,
+  packageName: string,
   hostUrl: string,
   compatibility: Record<string, string>
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${depName}/json`);
+  const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   try {
     const dependency: ReleaseResult = { releases: null };
     const rep = await got(url.parse(lookupUrl), {
@@ -43,14 +43,14 @@ async function getDependency(
     });
     const dep = rep && rep.body;
     if (!dep) {
-      logger.debug({ dependency: depName }, 'pip package not found');
+      logger.debug({ dependency: packageName }, 'pip package not found');
       return null;
     }
     if (
-      !(dep.info && normalizeName(dep.info.name) === normalizeName(depName))
+      !(dep.info && normalizeName(dep.info.name) === normalizeName(packageName))
     ) {
       logger.warn(
-        { lookupUrl, lookupName: depName, returnedName: dep.info.name },
+        { lookupUrl, lookupName: packageName, returnedName: dep.info.name },
         'Returned name does not match with requested name'
       );
       return null;
@@ -76,7 +76,11 @@ async function getDependency(
     return dependency;
   } catch (err) {
     logger.debug(
-      'pypi dependency not found: ' + depName + '(searching in ' + hostUrl + ')'
+      'pypi dependency not found: ' +
+        packageName +
+        '(searching in ' +
+        hostUrl +
+        ')'
     );
     return null;
   }
@@ -84,9 +88,9 @@ async function getDependency(
 
 function extractVersionFromLinkText(
   text: string,
-  depName: string
+  packageName: string
 ): string | null {
-  const srcPrefixes = [`${depName}-`, `${depName.replace(/-/g, '_')}-`];
+  const srcPrefixes = [`${packageName}-`, `${packageName.replace(/-/g, '_')}-`];
   for (const prefix of srcPrefixes) {
     const suffix = '.tar.gz';
     if (text.startsWith(prefix) && text.endsWith(suffix)) {
@@ -96,7 +100,7 @@ function extractVersionFromLinkText(
 
   // pep-0427 wheel packages
   //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
-  const wheelPrefix = depName.replace(/[^\w\d.]+/g, '_') + '-';
+  const wheelPrefix = packageName.replace(/[^\w\d.]+/g, '_') + '-';
   const wheelSuffix = '.whl';
   if (
     text.startsWith(wheelPrefix) &&
@@ -110,10 +114,10 @@ function extractVersionFromLinkText(
 }
 
 async function getSimpleDependency(
-  depName: string,
+  packageName: string,
   hostUrl: string
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${depName}`);
+  const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   try {
     const dependency: ReleaseResult = { releases: null };
     const response = await got<string>(url.parse(lookupUrl), {
@@ -121,14 +125,14 @@ async function getSimpleDependency(
     });
     const dep = response && response.body;
     if (!dep) {
-      logger.debug({ dependency: depName }, 'pip package not found');
+      logger.debug({ dependency: packageName }, 'pip package not found');
       return null;
     }
     const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
     const links = root.querySelectorAll('a');
     const versions = new Set<string>();
     for (const link of Array.from(links)) {
-      const result = extractVersionFromLinkText(link.text, depName);
+      const result = extractVersionFromLinkText(link.text, packageName);
       if (result) {
         versions.add(result);
       }
@@ -142,7 +146,11 @@ async function getSimpleDependency(
     return dependency;
   } catch (err) {
     logger.debug(
-      'pypi dependency not found: ' + depName + '(searching in ' + hostUrl + ')'
+      'pypi dependency not found: ' +
+        packageName +
+        '(searching in ' +
+        hostUrl +
+        ')'
     );
     return null;
   }
@@ -152,7 +160,7 @@ export async function getPkgReleases({
   compatibility,
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let hostUrls = ['https://pypi.org/pypi/'];
   if (is.nonEmptyArray(registryUrls)) {
     hostUrls = registryUrls;

@@ -25,7 +25,7 @@ export type ReleaseConfig = PkgReleaseConfig & {
   toVersion: string;
 };
 
-export async function getReleases(
+export async function getInRangeReleases(
   config: ReleaseConfig
 ): Promise<Release[] | null> {
   const { versioning, fromVersion, toVersion, depName, datasource } = config;
@@ -54,7 +54,7 @@ export async function getReleases(
     }
     return releases;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'getReleases err');
+    logger.debug({ err }, 'getInRangeReleases err');
     logger.debug({ datasource, depName }, 'Error getting releases');
     return null;
   }

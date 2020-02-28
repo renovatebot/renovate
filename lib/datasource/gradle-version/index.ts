@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import {
   DatasourceError,
-  PkgReleaseConfig,
+  GetReleasesConfig,
   ReleaseResult,
   Release,
 } from '../common';
@@ -24,7 +24,7 @@ interface GradleRelease {
 
 export async function getPkgReleases({
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   const versionsUrls = is.nonEmptyArray(registryUrls)
     ? registryUrls
     : [GradleVersionsServiceUrl];

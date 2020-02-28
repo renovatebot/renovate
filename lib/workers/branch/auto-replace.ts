@@ -83,7 +83,7 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceData,
   } = upgrade;
-  const { replaceString } = autoReplaceData;
+  const replaceString = autoReplaceData.replaceString || currentValue;
   try {
     let newString = replaceString;
     do {

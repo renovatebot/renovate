@@ -5,7 +5,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v1.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
       "depType": "github",
@@ -19,7 +19,7 @@ Object {
     },
     Object {
       "currentValue": "next",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
       "depType": "github",
@@ -47,7 +47,7 @@ Object {
     },
     Object {
       "currentValue": "v0.1.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
       "depNameShort": "tieto-cem/terraform-aws-ecs-task-definition",
       "depType": "github",
@@ -61,7 +61,7 @@ Object {
     },
     Object {
       "currentValue": "v0.1.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
       "depNameShort": "tieto-cem/terraform-aws-ecs-task-definition",
       "depType": "github",
@@ -75,7 +75,7 @@ Object {
     },
     Object {
       "currentValue": "v2.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
       "depType": "github",

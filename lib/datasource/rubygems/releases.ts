@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const defaultRegistry = 'https://rubygems.org';
   const registries = is.nonEmptyArray(registryUrls)
     ? registryUrls

@@ -19,7 +19,7 @@ import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as nodeVersioning from '../../../versioning/node';
 import {
-  DATASOURCE_GITHUB,
+  DATASOURCE_GITHUB_TAGS,
   DATASOURCE_NPM,
 } from '../../../constants/data-binary-source';
 
@@ -156,7 +156,7 @@ export async function extractPackageFile(
     dep.currentValue = input.trim();
     if (depType === 'engines') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = DATASOURCE_GITHUB_TAGS;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
@@ -177,7 +177,7 @@ export async function extractPackageFile(
     // support for volta
     if (depType === 'volta') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = DATASOURCE_GITHUB_TAGS;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
@@ -248,7 +248,7 @@ export async function extractPackageFile(
     if (isVersion(depRefPart)) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = DATASOURCE_GITHUB_TAGS;
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
@@ -258,7 +258,7 @@ export async function extractPackageFile(
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
       dep.currentDigest = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = DATASOURCE_GITHUB_TAGS;
       dep.lookupName = githubOwnerRepo;
     } else {
       dep.skipReason = 'unversioned-reference';

@@ -2,7 +2,7 @@ import { isValid } from '../../versioning/semver';
 import { skip, isSpace, removeComments } from './util';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
+import { DATASOURCE_GITHUB_TAGS } from '../../constants/data-binary-source';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
@@ -192,7 +192,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
-    datasource: DATASOURCE_GITHUB,
+    datasource: DATASOURCE_GITHUB_TAGS,
   };
   if (skipReason) {
     dep.skipReason = skipReason;
