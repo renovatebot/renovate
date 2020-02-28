@@ -194,6 +194,7 @@ jobs:
         run: yarn type-check
 
   coverage:
+    if: github.ref != 'refs/heads/master'
     needs: test
     runs-on: ubuntu-latest
 
