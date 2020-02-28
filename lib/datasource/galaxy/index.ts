@@ -2,6 +2,8 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult, Release } from '../common';
 
+export const id = 'galaxy';
+
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

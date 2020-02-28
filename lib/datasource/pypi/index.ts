@@ -7,6 +7,8 @@ import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
 
+export const id = 'pypi';
+
 function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
 }

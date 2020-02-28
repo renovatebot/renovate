@@ -22,7 +22,7 @@ function relatePath(here: string, there: string): string {
 
 export function loadModules<T>(
   dirname: string,
-  validate?: (x: unknown) => boolean
+  validate?: (module: unknown, moduleName?: string) => boolean
 ): Record<string, T> {
   const result: Record<string, T> = {};
 
@@ -37,7 +37,7 @@ export function loadModules<T>(
     const modulePath = join(relatePath(__dirname, dirname), moduleName);
     const module = require(modulePath); // eslint-disable-line
     // istanbul ignore if
-    if (!module || (validate && !validate(module)))
+    if (!module || (validate && !validate(module, moduleName)))
       throw new Error(`Invalid module: ${modulePath}`);
     result[moduleName] = module as T;
   }

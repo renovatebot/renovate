@@ -4,6 +4,8 @@ import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import got from '../../util/got';
 import { logger } from '../../logger';
 
+export const id = 'helm';
+
 export async function getRepositoryData(
   repository: string
 ): Promise<ReleaseResult[]> {

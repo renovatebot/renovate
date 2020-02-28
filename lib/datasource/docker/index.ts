@@ -15,6 +15,8 @@ import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
+export const id = 'docker';
+
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
 export interface RegistryRepository {

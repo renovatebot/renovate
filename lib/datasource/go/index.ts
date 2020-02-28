@@ -8,6 +8,8 @@ import {
   DATASOURCE_GO,
 } from '../../constants/data-binary-source';
 
+export const id = 'go';
+
 interface DataSource {
   datasource: string;
   lookupName: string;

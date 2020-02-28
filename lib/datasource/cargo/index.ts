@@ -8,6 +8,8 @@ import {
 } from '../common';
 import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
 
+export const id = 'cargo';
+
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

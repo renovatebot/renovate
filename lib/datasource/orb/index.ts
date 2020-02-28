@@ -2,6 +2,8 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
+export const id = 'orb';
+
 interface OrbRelease {
   homeUrl?: string;
   versions: {

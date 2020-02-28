@@ -2,6 +2,8 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
+export const id = 'dart';
+
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

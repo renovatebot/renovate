@@ -10,6 +10,8 @@ import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
+export const id = 'packagist';
+
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
     json: true,

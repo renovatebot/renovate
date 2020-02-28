@@ -9,6 +9,8 @@ import { containsPlaceholder } from '../../manager/maven/extract';
 import { downloadHttpProtocol } from './util';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
+export const id = 'maven';
+
 async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
   const pkgPath = pkgUrl.toString().replace('file://', '');
   if (!(await fs.exists(pkgPath))) {

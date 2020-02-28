@@ -3,6 +3,8 @@ import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { DATASOURCE_TERRAFORM } from '../../constants/data-binary-source';
 
+export const id = 'terraform-provider';
+
 interface TerraformProvider {
   namespace: string;
   name: string;

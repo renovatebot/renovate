@@ -9,6 +9,8 @@ export interface CdnjsAsset {
   sri?: Record<string, string>;
 }
 
+export const id = 'cdnjs';
+
 const cacheNamespace = `datasource-${DATASOURCE_CDNJS}`;
 const cacheMinutes = 60;
 

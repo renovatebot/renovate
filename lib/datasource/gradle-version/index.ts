@@ -9,6 +9,8 @@ import {
   Release,
 } from '../common';
 
+export const id = 'gradle-version';
+
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
 interface GradleRelease {

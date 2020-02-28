@@ -4,6 +4,8 @@ import * as v2 from './v2';
 import * as v3 from './v3';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
+export const id = 'nuget';
+
 function detectFeedVersion(url: string): 2 | 3 | null {
   try {
     const parsecUrl = urlApi.parse(url);
