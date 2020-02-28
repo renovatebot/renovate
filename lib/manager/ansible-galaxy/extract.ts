@@ -113,6 +113,7 @@ export default function extractPackageFile(
           if (lineMatch) lineNumber += 1;
         } while (lineMatch);
         if (finalize(dep)) {
+          delete dep.managerData;
           deps.push(dep);
         }
       }
