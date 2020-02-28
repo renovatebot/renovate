@@ -7,5 +7,5 @@ export { updateArtifacts } from './artifacts';
 export const defaultConfig = {
   enabled: false,
   fileMatch: ['(^|/)Podfile$'],
-  versionScheme: rubyVersioning.id,
+  versioning: rubyVersioning.id,
 };

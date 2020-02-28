@@ -51,6 +51,7 @@ export async function updateArtifacts({
 
   const cmd = 'pod install';
   const execOptions: ExecOptions = {
+    cwdFile: packageFileName,
     docker: {
       image: 'renovate/cocoapods',
       tagScheme: 'ruby',
@@ -65,7 +66,7 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: err.message,
+          stderr: err.stderr || err.stdout || err.message,
         },
       },
     ];
