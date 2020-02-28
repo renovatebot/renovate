@@ -128,5 +128,11 @@ jobs:
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
 
+      - name: Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
+        run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: E2E Test
         run: yarn test-e2e
