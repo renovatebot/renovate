@@ -7,26 +7,12 @@ Array [
     "datasource": "ansible-galaxy",
     "depName": "yatesr.timezone",
     "lookupName": "yatesr.timezone",
-    "managerData": Object {
-      "lineNumber": 2,
-      "name": null,
-      "scm": null,
-      "src": "yatesr.timezone",
-      "version": "0.1.0",
-    },
   },
   Object {
     "currentValue": "0.1",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
     "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
-    "managerData": Object {
-      "lineNumber": 5,
-      "name": null,
-      "scm": "git",
-      "src": "git@gitlab.company.com:mygroup/ansible-base.git",
-      "version": "0.1",
-    },
   },
 ]
 `;
@@ -38,65 +24,30 @@ Array [
     "datasource": "ansible-galaxy",
     "depName": "yatesr.timezone",
     "lookupName": "yatesr.timezone",
-    "managerData": Object {
-      "lineNumber": 2,
-      "name": null,
-      "scm": null,
-      "src": "yatesr.timezone",
-      "version": "0.1.0",
-    },
   },
   Object {
     "currentValue": "master",
     "datasource": "git-tags",
     "depName": "nginx_role",
     "lookupName": "https://github.com/bennojoy/nginx",
-    "managerData": Object {
-      "lineNumber": 5,
-      "name": "nginx_role",
-      "scm": null,
-      "src": "https://github.com/bennojoy/nginx",
-      "version": "master",
-    },
   },
   Object {
     "currentValue": "v1.4",
     "datasource": "git-tags",
     "depName": "willthames/git-ansible-galaxy",
     "lookupName": "http://bitbucket.org/willthames/git-ansible-galaxy",
-    "managerData": Object {
-      "lineNumber": 11,
-      "name": null,
-      "scm": null,
-      "src": "git+http://bitbucket.org/willthames/git-ansible-galaxy",
-      "version": "v1.4",
-    },
   },
   Object {
     "currentValue": "0.1",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
     "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
-    "managerData": Object {
-      "lineNumber": 16,
-      "name": null,
-      "scm": "git",
-      "src": "git@gitlab.company.com:mygroup/ansible-base.git",
-      "version": "0.1",
-    },
   },
   Object {
     "currentValue": "0.14",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
     "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
-    "managerData": Object {
-      "lineNumber": 24,
-      "name": null,
-      "scm": "git",
-      "src": "git@gitlab.company.com:mygroup/ansible-base.git",
-      "version": "0.14",
-    },
   },
 ]
 `;

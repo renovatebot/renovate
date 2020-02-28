@@ -87,6 +87,14 @@ describe('workers/repository/init/config', () => {
       platform.getFile.mockResolvedValue('{}');
       await mergeRenovateConfig(config);
     });
+    it('finds .gitlab/renovate.json', async () => {
+      platform.getFileList.mockResolvedValue([
+        'package.json',
+        '.gitlab/renovate.json',
+      ]);
+      platform.getFile.mockResolvedValue('{}');
+      await mergeRenovateConfig(config);
+    });
     it('finds .renovaterc.json', async () => {
       platform.getFileList.mockResolvedValue([
         'package.json',

@@ -11,6 +11,8 @@ You can store your Renovate configuration file in one of the following locations
 
 - `.github/renovate.json`
 - `.github/renovate.json5`
+- `.gitlab/renovate.json`
+- `.gitlab/renovate.json5`
 - `.renovaterc.json`
 - `renovate.json`
 - `renovate.json5`
