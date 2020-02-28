@@ -10,8 +10,8 @@ module.exports = {
     '!lib/**/{__fixtures__,__mocks__}/**/*.{js,ts}',
   ],
   coverageReporters: ci
-    ? ['lcov', 'text-summary']
-    : ['html', 'json', 'lcov', 'text-summary'],
+    ? ['html', 'json', 'text-summary']
+    : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
       branches: 95,
