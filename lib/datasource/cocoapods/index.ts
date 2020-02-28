@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { api } from '../../platform/github/gh-got-wrapper';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
 
 const cacheNamespace = 'cocoapods';
@@ -122,7 +122,7 @@ function isDefaultRepo(url: string): boolean {
 }
 
 export async function getPkgReleases(
-  config: Partial<PkgReleaseConfig>
+  config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
   const { lookupName } = config;
   let { registryUrls } = config;
