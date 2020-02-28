@@ -456,7 +456,7 @@ export async function processBranch(
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
       commit &&
-      (config.requiredStatusChecks || config.prCreation !== 'immediate')
+      (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
       logger.debug({ commit }, `Branch status pending`);
       return 'pending';
