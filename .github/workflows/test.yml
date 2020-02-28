@@ -121,7 +121,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci --coverage ${COLLECT_COVERAGE}
 
       - name: Codecov
-        if: always()
+        if: always() && env.COLLECT_COVERAGE == 'true'
         shell: bash
         run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
         env:
