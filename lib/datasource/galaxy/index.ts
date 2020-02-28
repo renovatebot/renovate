@@ -9,7 +9,7 @@ export async function getPkgReleases({
     return null;
   }
 
-  const cacheNamespace = 'datasource-ansible-galaxy';
+  const cacheNamespace = 'datasource-galaxy';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
@@ -35,7 +35,7 @@ export async function getPkgReleases({
 
   try {
     let res: any = await got(galaxyAPIUrl, {
-      hostType: 'ansible-galaxy',
+      hostType: 'galaxy',
     });
     if (!res || !res.body) {
       logger.warn(
@@ -99,10 +99,7 @@ export async function getPkgReleases({
       logger.debug({ lookupName }, `Dependency lookup failure: not found`);
       return null;
     }
-    logger.warn(
-      { err, lookupName },
-      'ansible-galaxy lookup failure: Unknown error'
-    );
+    logger.warn({ err, lookupName }, 'galaxy lookup failure: Unknown error');
     return null;
   }
 }

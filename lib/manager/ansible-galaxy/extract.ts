@@ -4,7 +4,7 @@ import * as semver from '../../versioning/semver';
 import * as git from '../../versioning/git';
 import {
   DATASOURCE_GIT_TAGS,
-  DATASOURCE_ANSIBLE_GALAXY,
+  DATASOURCE_GALAXY,
 } from '../../constants/data-binary-source';
 
 function interpretLine(
@@ -58,7 +58,7 @@ function finalize(dependency: PackageDependency): boolean {
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(/git\+/, '');
   } else if (new RegExp(/.+\..+/).exec(source)) {
-    dep.datasource = DATASOURCE_ANSIBLE_GALAXY;
+    dep.datasource = DATASOURCE_GALAXY;
     dep.depName = dep.managerData.src;
     dep.lookupName = dep.managerData.src;
   } else {
@@ -72,7 +72,7 @@ function finalize(dependency: PackageDependency): boolean {
   if (
     (dep.datasource === DATASOURCE_GIT_TAGS &&
       !git.api.isValid(dependency.managerData.version)) ||
-    (dep.datasource === DATASOURCE_ANSIBLE_GALAXY &&
+    (dep.datasource === DATASOURCE_GALAXY &&
       !semver.isValid(dependency.managerData.version))
   ) {
     dep.skipReason = 'invalid-version';

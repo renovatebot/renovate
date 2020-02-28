@@ -6,17 +6,17 @@ import { getPkgReleases } from './index';
 const got: any = _got;
 
 const res1 = fs.readFileSync(
-  'lib/datasource/ansible-galaxy/__fixtures__/timezone',
+  'lib/datasource/galaxy/__fixtures__/timezone',
   'utf8'
 );
 const empty = fs.readFileSync(
-  'lib/datasource/ansible-galaxy/__fixtures__/empty',
+  'lib/datasource/galaxy/__fixtures__/empty',
   'utf8'
 );
 
 jest.mock('../../util/got');
 
-describe('datasource/ansible-galaxy', () => {
+describe('datasource/galaxy', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       global.repoCache = {};
