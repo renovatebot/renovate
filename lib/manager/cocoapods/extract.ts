@@ -54,7 +54,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     const { account, repo } = (githubMatch && githubMatch.groups) || {};
     if (account && repo) {
       return {
-        datasource: 'github',
+        datasource: 'github-tags',
         depName,
         lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
         currentValue: tag,
