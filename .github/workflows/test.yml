@@ -126,7 +126,7 @@ jobs:
         run: yarn build
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
+        run: yarn jest --maxWorkers=2 --ci
 
       - name: Codecov
         if: always() && matrix.os == 'ubuntu-latest' && matrix.node-version == 12
