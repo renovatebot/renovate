@@ -10,6 +10,7 @@ on:
 
 env:
   CI: true
+  COLLECT_COVERAGE: true
 
 jobs:
   test:
@@ -49,7 +50,9 @@ jobs:
 
       - name: Skip Java tests
         if: matrix.node-version != 12 || github.ref == 'refs/heads/master'
-        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
+        run: |
+          echo "::set-env name=SKIP_JAVA_TESTS::true"
+          echo "::set-env name=COLLECT_COVERAGE::false"
 
       - name: Init platform
         id: init
@@ -110,29 +113,87 @@ jobs:
           yarn install --frozen-lockfile --link-duplicates
           pip install --user -r requirements.txt
 
-      - name: Lint
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
-        run: yarn lint
-
-      - name: Test schema
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
-        run: yarn test-schema
-
-      - name: Type check
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 12
-        run: yarn type-check
-
       - name: Build
         run: yarn build
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci
+        shell: bash
+        run: yarn jest --maxWorkers=2 --ci --coverage ${COLLECT_COVERAGE}
 
       - name: Codecov
-        if: always() && matrix.os == 'ubuntu-latest' && matrix.node-version == 12
+        if: always()
         run: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: E2E Test
         run: yarn test-e2e
+
+  lint:
+    runs-on: ${{ matrix.os }}
+
+    # tests shouldn't nee more than 10 min
+    timeout-minutes: 10
+
+    strategy:
+      max-parallel: 6
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [12]
+
+    steps:
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Init platform
+        id: init
+        shell: bash
+        run: |
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name  'Renovate Bot'
+          node --version
+          python --version
+          yarn --version
+
+      - uses: actions/checkout@v2
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: v1-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            v1-${{ runner.os }}-yarn_cache-
+
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ matrix.node-version }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-yarn-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Installing dependencies
+        shell: bash
+        run: |
+          yarn install --frozen-lockfile --link-duplicates
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test schema
+        run: yarn test-schema
+
+      - name: Type check
+        run: yarn type-check
