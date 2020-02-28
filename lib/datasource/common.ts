@@ -5,7 +5,6 @@ export interface GetReleasesConfig {
   registryUrls?: string[];
   compatibility?: Record<string, string>;
   npmrc?: string;
-  versioning?: string;
 }
 
 export interface Config {

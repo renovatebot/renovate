@@ -4,7 +4,6 @@ import nock from 'nock';
 import { getPkgReleases } from '.';
 import { DEFAULT_MAVEN_REPO } from '../../manager/maven/extract';
 import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
-import * as ivyVersioning from '../../versioning/ivy';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./__fixtures__/maven-index.html`),
@@ -100,14 +99,12 @@ describe('datasource/sbt', () => {
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toEqual(null);
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.scalatest:scalaz',
           registryUrls: [SBT_PLUGINS_REPO],
         })
@@ -116,7 +113,6 @@ describe('datasource/sbt', () => {
     it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.foundweekends:sbt-bintray',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
         })
@@ -130,7 +126,6 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
         })

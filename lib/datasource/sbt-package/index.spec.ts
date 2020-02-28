@@ -4,7 +4,6 @@ import nock from 'nock';
 import { getPkgReleases } from '.';
 import { DEFAULT_MAVEN_REPO } from '../../manager/maven/extract';
 import { parseIndexDir, SBT_PLUGINS_REPO } from '../sbt-plugin/util';
-import * as ivyVersioning from '../../versioning/ivy';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./__fixtures__/maven-index.html`),
@@ -100,7 +99,6 @@ describe('datasource/sbt', () => {
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
@@ -109,7 +107,6 @@ describe('datasource/sbt', () => {
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
             'https://failed_repo/maven',
@@ -126,7 +123,6 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          versioning: ivyVersioning.id,
           lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
         })
