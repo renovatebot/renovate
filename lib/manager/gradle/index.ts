@@ -23,8 +23,7 @@ import {
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import * as datasourceMaven from '../../datasource/maven';
-import { BinarySource } from '../../util/exec/common';
+import * as datasourceMaven from '../../datasource/maven';;
 import { DatasourceError } from '../../datasource';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
@@ -45,8 +44,6 @@ async function getGradleCommandLine(
   cwd: string
 ): Promise<string> {
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
-
-  if (config.binarySource === BinarySource.Docker) return `gradle ${args}`;
 
   const gradlewPath = upath.join(cwd, 'gradlew');
   const gradlewExists = await exists(gradlewPath);
