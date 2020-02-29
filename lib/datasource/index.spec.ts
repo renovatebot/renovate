@@ -7,7 +7,7 @@ import * as datasourceNpm from './npm';
 jest.mock('./docker');
 jest.mock('./npm');
 
-const npmDatasource: any = datasourceNpm;
+const npmDatasource = mocked(datasourceNpm);
 
 describe('datasource/index', () => {
   it('returns datasources', () => {
