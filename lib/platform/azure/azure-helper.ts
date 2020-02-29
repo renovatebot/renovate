@@ -5,6 +5,7 @@ import {
   GitPullRequest,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
+import { Options } from 'simple-git/promise';
 import * as azureApi from './azure-got-wrapper';
 import { logger } from '../../logger';
 import { Pr } from '../common';
@@ -13,8 +14,28 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { HostRule } from '../../util/host-rules';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
+
+function toBase64(from: string): string {
+  return Buffer.from(from).toString('base64');
+}
+
+export function getStorageExtraCloneOpts(config: HostRule): Options {
+  let header: string;
+  const headerName = 'AUTHORIZATION';
+  if (!config.token && config.username && config.password) {
+    header = `${headerName}: basic ${toBase64(
+      `${config.username}:${config.password}`
+    )}`;
+  } else if (config.token.length !== 52) {
+    header = `${headerName}: bearer ${config.token}`;
+  } else {
+    header = `${headerName}: basic ${toBase64(`:${config.token}`)}`;
+  }
+  return { '--config': `http.extraheader=${header}` };
+}
 
 export function getNewBranchName(branchName?: string): string {
   if (branchName && !branchName.startsWith('refs/heads/')) {
