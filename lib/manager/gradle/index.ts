@@ -23,7 +23,7 @@ import {
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import * as datasourceMaven from '../../datasource/maven';;
+import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
