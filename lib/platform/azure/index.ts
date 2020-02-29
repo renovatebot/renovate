@@ -49,6 +49,11 @@ interface Config {
   repository: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 let config: Config = {} as any;
 
 const defaults: any = {
@@ -638,33 +643,7 @@ export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
 
-/**
- *
- * @param {number} issueNo
- * @param {string[]} assignees
- */
-export async function addAssignees(
-  issueNo: number,
-  assignees: string[]
-): Promise<void> {
-  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
-  await ensureComment({
-    number: issueNo,
-    topic: 'Add Assignees',
-    content: assignees.map(a => `@<${a}>`).join(', '),
-  });
-}
-
-/**
- *
- * @param {number} prNo
- * @param {string[]} reviewers
- */
-export async function addReviewers(
-  prNo: number,
-  reviewers: string[]
-): Promise<void> {
-  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
+async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
@@ -684,7 +663,7 @@ export async function addReviewers(
   const ids: { id: string; name: string }[] = [];
   members.forEach(listMembers => {
     listMembers.forEach(m => {
-      reviewers.forEach(r => {
+      users.forEach(r => {
         if (
           r.toLowerCase() === m.identity.displayName.toLowerCase() ||
           r.toLowerCase() === m.identity.uniqueName.toLowerCase()
@@ -698,7 +677,7 @@ export async function addReviewers(
   });
 
   teams.forEach(t => {
-    reviewers.forEach(r => {
+    users.forEach(r => {
       if (r.toLowerCase() === t.name.toLowerCase()) {
         if (ids.filter(c => c.id === t.id).length === 0) {
           ids.push({ id: t.id, name: r });
@@ -706,6 +685,41 @@ export async function addReviewers(
       }
     });
   });
+
+  return ids;
+}
+
+/**
+ *
+ * @param {number} issueNo
+ * @param {string[]} assignees
+ */
+export async function addAssignees(
+  issueNo: number,
+  assignees: string[]
+): Promise<void> {
+  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
+  const ids = await getUserIds(assignees);
+  await ensureComment({
+    number: issueNo,
+    topic: 'Add Assignees',
+    content: ids.map(a => `@<${a.id}>`).join(', '),
+  });
+}
+
+/**
+ *
+ * @param {number} prNo
+ * @param {string[]} reviewers
+ */
+export async function addReviewers(
+  prNo: number,
+  reviewers: string[]
+): Promise<void> {
+  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
+  const azureApiGit = await azureApi.gitApi();
+
+  const ids = await getUserIds(reviewers);
 
   await Promise.all(
     ids.map(async obj => {
