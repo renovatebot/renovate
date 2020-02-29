@@ -39,6 +39,7 @@ export async function getPkgReleases({
     const res: OrbRelease = (
       await got.post(url, {
         body,
+        hostType: id,
         json: true,
         retry: 5,
       })

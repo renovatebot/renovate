@@ -6,7 +6,6 @@ import {
   ReleaseResult,
   Release,
 } from '../common';
-import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
 
 export const id = 'cargo';
 
@@ -47,7 +46,7 @@ export async function getPkgReleases({
   const crateUrl = baseUrl + path;
   try {
     let res: any = await got(crateUrl, {
-      hostType: DATASOURCE_CARGO,
+      hostType: id,
     });
     if (!res || !res.body) {
       logger.warn(

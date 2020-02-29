@@ -35,6 +35,7 @@ export async function getPkgReleases({
     versionsUrls.map(async url => {
       try {
         const response: GradleRelease = await got(url, {
+          hostType: id,
           json: true,
         });
         const releases = response.body

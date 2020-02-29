@@ -10,7 +10,6 @@ import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
-import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -44,7 +43,7 @@ export function getRegistryRepository(
   if (!/^https?:\/\//.exec(registry)) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ hostType: DATASOURCE_DOCKER, url: registry });
+  const opts = hostRules.find({ hostType: id, url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
@@ -108,7 +107,7 @@ async function getAuthHeaders(
 
     const opts: hostRules.HostRule & {
       headers?: Record<string, string>;
-    } = hostRules.find({ hostType: DATASOURCE_DOCKER, url: apiCheckUrl });
+    } = hostRules.find({ hostType: id, url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);

@@ -1,2 +1,2 @@
 export { getPkgReleases } from './releases';
-export const id = 'rubygems';
+export { id } from './common';

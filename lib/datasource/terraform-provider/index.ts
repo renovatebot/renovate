@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { DATASOURCE_TERRAFORM } from '../../constants/data-binary-source';
 
 export const id = 'terraform-provider';
 
@@ -39,7 +38,7 @@ export async function getPkgReleases({
     const res: TerraformProvider = (
       await got(pkgUrl, {
         json: true,
-        hostType: DATASOURCE_TERRAFORM,
+        hostType: id,
       })
     ).body;
     // Simplify response before caching and returning

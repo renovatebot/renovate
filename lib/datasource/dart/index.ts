@@ -23,6 +23,7 @@ export async function getPkgReleases({
   } = null;
   try {
     raw = await got(pkgUrl, {
+      hostType: id,
       json: true,
     });
   } catch (err) {

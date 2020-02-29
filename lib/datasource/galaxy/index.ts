@@ -37,7 +37,7 @@ export async function getPkgReleases({
 
   try {
     let res: any = await got(galaxyAPIUrl, {
-      hostType: 'galaxy',
+      hostType: id,
     });
     if (!res || !res.body) {
       logger.warn(

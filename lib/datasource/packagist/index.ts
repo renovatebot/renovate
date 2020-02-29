@@ -8,7 +8,6 @@ import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
-import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
 
 export const id = 'packagist';
 
@@ -17,7 +16,7 @@ function getHostOpts(url: string): GotJSONOptions {
     json: true,
   };
   const { username, password } = hostRules.find({
-    hostType: DATASOURCE_PACKAGIST,
+    hostType: id,
     url,
   });
   if (username && password) {
