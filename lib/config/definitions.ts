@@ -28,7 +28,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'customManagers';
 
   // used by tests
   relatedOptions?: string[];
@@ -1674,6 +1674,61 @@ const options: RenovateOptions[] = [
     description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs`,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'customManagers',
+    description: 'Custom managers using regex matching.',
+    type: 'array',
+    subType: 'object',
+    default: [],
+    stage: 'package',
+    cli: true,
+    mergeable: true,
+  },
+  {
+    name: 'matchString',
+    description:
+      'Regex capture rule to use. Valid only within `customManagers` object.',
+    type: 'string',
+    parent: 'customManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'depName',
+    description:
+      'Optional depName for extracted dependencies. Valid only within `customManagers` object.',
+    type: 'string',
+    parent: 'customManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'lookupName',
+    description:
+      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `customManagers` object.',
+    type: 'string',
+    parent: 'customManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'currentValue',
+    description:
+      'Optional currentValue for extracted dependencies. Valid only within `customManagers` object.',
+    type: 'string',
+    parent: 'customManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'datasource',
+    description:
+      'Optional datasource for extracted dependencies. Valid only within `customManagers` object.',
+    type: 'string',
+    parent: 'customManagers',
+    cli: false,
+    env: false,
   },
 ];
 

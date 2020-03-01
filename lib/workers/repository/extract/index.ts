@@ -1,6 +1,10 @@
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
-import { getManagerConfig, RenovateConfig } from '../../../config';
+import {
+  getManagerConfig,
+  mergeChildConfig,
+  RenovateConfig,
+} from '../../../config';
 import { getManagerPackageFiles } from './manager-files';
 import { PackageFile } from '../../../manager/common';
 
@@ -18,8 +22,24 @@ export async function extractAllDependencies(
       continue; // eslint-disable-line
     }
     const managerConfig = getManagerConfig(config, manager);
+    let packageFiles = [];
+    if (manager === 'custom') {
+      for (const customManager of config.customManagers) {
+        const customManagerConfig = mergeChildConfig(
+          managerConfig,
+          customManager
+        );
+        const customPackageFiles = await getManagerPackageFiles(
+          customManagerConfig
+        );
+        if (customPackageFiles) {
+          packageFiles = packageFiles.concat(customPackageFiles);
+        }
+      }
+    } else {
+      packageFiles = await getManagerPackageFiles(managerConfig);
+    }
     managerConfig.manager = manager;
-    const packageFiles = await getManagerPackageFiles(managerConfig);
     if (packageFiles && packageFiles.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
