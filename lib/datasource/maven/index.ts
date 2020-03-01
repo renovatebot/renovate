@@ -22,25 +22,26 @@ async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
   return fs.readFile(pkgPath, 'utf8');
 }
 
-async function downloadMavenXml(
+function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
-  dependencyFilePath: string
-): Promise<XmlDocument | null> {
-  let pkgUrl;
+  path: string
+): url.URL | null {
   try {
-    pkgUrl = new url.URL(
-      `${dependency.dependencyUrl}/${dependencyFilePath}`,
-      repoUrl
-    );
+    return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
   } catch (err) {
     logger.debug(
-      { err, dependency, repoUrl, dependencyFilePath },
+      { err, dependency, repoUrl, path },
       `Error constructing URL for ${dependency.display}`
     );
-    return null;
   }
+  return null;
+}
 
+async function downloadMavenXml(
+  pkgUrl: url.URL | null
+): Promise<XmlDocument | null> {
+  if (!pkgUrl) return null;
   let rawContent: string;
   switch (pkgUrl.protocol) {
     case 'file:':
@@ -55,20 +56,20 @@ async function downloadMavenXml(
       return null;
     default:
       logger.warn(
-        `Invalid protocol ${pkgUrl.protocol} in repository ${repoUrl}`
+        `Invalid protocol '${pkgUrl.protocol}' for Maven url: ${pkgUrl}`
       );
       return null;
   }
 
   if (!rawContent) {
-    logger.debug(`${dependency.display} not found in repository ${repoUrl}`);
+    logger.debug(`Content is not found for Maven url: ${pkgUrl}`);
     return null;
   }
 
   try {
     return new XmlDocument(rawContent);
   } catch (e) {
-    logger.debug(`Can not parse ${pkgUrl.href} for ${dependency.display}`);
+    logger.debug(`Can not parse ${pkgUrl.href}`);
     return null;
   }
 }
@@ -81,7 +82,8 @@ async function getDependencyInfo(
   const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
 
-  const pomContent = await downloadMavenXml(dependency, repoUrl, path);
+  const pomUrl = getMavenUrl(dependency, repoUrl, path);
+  const pomContent = await downloadMavenXml(pomUrl);
   if (!pomContent) return result;
 
   const homepage = pomContent.valueWithPath('url');
@@ -155,11 +157,8 @@ export async function getPkgReleases({
     logger.debug(
       `Looking up ${dependency.display} in repository #${i} - ${repoUrl}`
     );
-    const mavenMetadata = await downloadMavenXml(
-      dependency,
-      repoUrl,
-      'maven-metadata.xml'
-    );
+    const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
+    const mavenMetadata = await downloadMavenXml(metadataUrl);
     if (mavenMetadata) {
       const newVersions = extractVersions(mavenMetadata).filter(
         version => !versions.includes(version)
