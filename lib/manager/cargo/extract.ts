@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { isValid } from '../../versioning/cargo';
 import { PackageDependency, PackageFile } from '../common';
 import { CargoConfig, CargoSection } from './types';
-import * as datasourceCargo from '../../datasource/cargo';
+import * as datasourceCrate from '../../datasource/crate';
 
 function extractFromSection(
   parsedContent: CargoSection,
@@ -48,7 +48,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as any,
       managerData: { nestedVersion },
-      datasource: datasourceCargo.id,
+      datasource: datasourceCrate.id,
     };
     if (skipReason) {
       dep.skipReason = skipReason;

@@ -7,7 +7,7 @@ import {
   Release,
 } from '../common';
 
-export const id = 'cargo';
+export const id = 'crate';
 
 export async function getPkgReleases({
   lookupName,
@@ -16,7 +16,7 @@ export async function getPkgReleases({
     return null;
   }
 
-  const cacheNamespace = 'datasource-cargo';
+  const cacheNamespace = 'datasource-crate';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
@@ -110,10 +110,7 @@ export async function getPkgReleases({
     ) {
       throw new DatasourceError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'cargo crates.io lookup failure: Unknown error'
-    );
+    logger.warn({ err, lookupName }, 'crates.io lookup failure: Unknown error');
     return null;
   }
 }
