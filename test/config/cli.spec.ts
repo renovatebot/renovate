@@ -1,5 +1,5 @@
 import * as cli from '../../lib/config/cli';
-import getArgv from './config/_fixtures/argv';
+import getArgv from './config/__fixtures__/argv';
 import { RenovateOptions } from '../../lib/config/definitions';
 import { DATASOURCE_DOCKER } from '../../lib/constants/data-binary-source';
 
