@@ -29,7 +29,7 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
+export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   if (config.assignees.length > 0) {
     try {
       let assignees = config.assignees.map(noLeadingAtSymbol);
