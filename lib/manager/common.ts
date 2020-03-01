@@ -26,6 +26,14 @@ export interface ExtractConfig extends ManagerConfig {
   versioning?: string;
 }
 
+export interface CustomExtractConfig extends ExtractConfig {
+  matchString: string;
+  depName?: string;
+  lookupName?: string;
+  currentValue?: string;
+  datasource?: string;
+}
+
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   compatibility?: Record<string, string>;
