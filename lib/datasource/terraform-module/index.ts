@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
-export const id = 'terraform';
+export const id = 'terraform-module';
 
 interface RegistryRepository {
   registry: string;
@@ -61,7 +61,7 @@ export async function getPkgReleases({
     { registry, terraformRepository: repository },
     'terraform.getDependencies()'
   );
-  const cacheNamespace = 'terraform';
+  const cacheNamespace = 'terraform-module';
   const pkgUrl = `${registry}/v1/modules/${repository}`;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,

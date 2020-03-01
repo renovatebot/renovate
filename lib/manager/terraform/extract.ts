@@ -3,7 +3,7 @@ import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceTerraform from '../../datasource/terraform';
+import * as datasourceTerraformModule from '../../datasource/terraform-module';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
 
 export enum TerraformDependencyTypes {
@@ -123,7 +123,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.depName = moduleParts.join('/');
           dep.depNameShort = dep.depName;
           dep.managerData.lineNumber = dep.versionLine;
-          dep.datasource = datasourceTerraform.id;
+          dep.datasource = datasourceTerraformModule.id;
         }
         if (dep.managerData.lineNumber) {
           if (!isValid(dep.currentValue)) {
