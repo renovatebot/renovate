@@ -201,7 +201,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_8_PR.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_8_PR.txt',
           'utf8'
         )
       );
@@ -244,7 +244,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_2_PR_edited.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_2_PR_edited.txt',
           'utf8'
         )
       );
@@ -297,7 +297,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_3_PR_in_progress.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_3_PR_in_progress.txt',
           'utf8'
         )
       );
@@ -344,7 +344,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_2_PR_closed_ignored.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_2_PR_closed_ignored.txt',
           'utf8'
         )
       );
@@ -405,7 +405,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_3_PR_in_approval.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_3_PR_in_approval.txt',
           'utf8'
         )
       );

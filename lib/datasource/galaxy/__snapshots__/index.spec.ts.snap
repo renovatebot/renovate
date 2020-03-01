@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/ansible-galaxy getPkgReleases processes real data 1`] = `
+exports[`datasource/galaxy getPkgReleases processes real data 1`] = `
 Object {
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
   "releases": Array [

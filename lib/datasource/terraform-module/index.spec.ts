@@ -7,10 +7,10 @@ jest.mock('../../util/got');
 const got: any = _got;
 
 const consulData: any = fs.readFileSync(
-  'lib/datasource/terraform/__fixtures__/registry-consul.json'
+  'lib/datasource/terraform-module/__fixtures__/registry-consul.json'
 );
 
-describe('datasource/terraform', () => {
+describe('datasource/terraform-module', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();

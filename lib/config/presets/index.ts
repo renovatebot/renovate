@@ -145,7 +145,7 @@ export async function resolveConfigPresets(
   ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<RenovateConfig> {
-  if (!ignorePresets) {
+  if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
   logger.trace(

@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
+import * as datasourceDocker from '../../datasource/docker';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -31,7 +31,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(currentFrom: string): PackageDependency {
   const dep = splitImageParts(currentFrom);
-  dep.datasource = DATASOURCE_DOCKER;
+  dep.datasource = datasourceDocker.id;
   if (
     dep.depName &&
     (dep.depName === 'node' || dep.depName.endsWith('/node')) &&

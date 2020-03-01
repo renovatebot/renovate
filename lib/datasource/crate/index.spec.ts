@@ -5,19 +5,19 @@ import { getPkgReleases } from '.';
 
 const got: any = _got;
 
-const res1 = fs.readFileSync('lib/datasource/cargo/__fixtures__/libc', 'utf8');
+const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
 const res2 = fs.readFileSync(
-  'lib/datasource/cargo/__fixtures__/amethyst',
+  'lib/datasource/crate/__fixtures__/amethyst',
   'utf8'
 );
 const res3 = fs.readFileSync(
-  'lib/datasource/cargo/__fixtures__/invalid_crate_data',
+  'lib/datasource/crate/__fixtures__/invalid_crate_data',
   'utf8'
 );
 
 jest.mock('../../util/got');
 
-describe('datasource/cargo', () => {
+describe('datasource/crate', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       global.repoCache = {};

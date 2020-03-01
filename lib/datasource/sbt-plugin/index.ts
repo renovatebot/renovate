@@ -5,6 +5,8 @@ import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { resolvePackageReleases } from '../sbt-package';
 
+export const id = 'sbt-plugin';
+
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
 async function resolvePluginReleases(

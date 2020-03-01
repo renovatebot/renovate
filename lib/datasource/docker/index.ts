@@ -1,7 +1,3 @@
-/**
- * @copyright 2020-present by Avid Technology, Inc.
- */
-
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import URL from 'url';
@@ -14,10 +10,11 @@ import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
-import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+
+export const id = 'docker';
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
@@ -46,7 +43,7 @@ export function getRegistryRepository(
   if (!/^https?:\/\//.exec(registry)) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ hostType: DATASOURCE_DOCKER, url: registry });
+  const opts = hostRules.find({ hostType: id, url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
@@ -110,7 +107,7 @@ async function getAuthHeaders(
 
     const opts: hostRules.HostRule & {
       headers?: Record<string, string>;
-    } = hostRules.find({ hostType: DATASOURCE_DOCKER, url: apiCheckUrl });
+    } = hostRules.find({ hostType: id, url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);
@@ -414,32 +411,6 @@ async function getTags(
   }
 }
 
-export function getConfigResponseBeforeRedirectHook(options: any): void {
-  if (options.search?.includes('X-Amz-Algorithm')) {
-    // if there is no port in the redirect URL string, then delete it from the redirect options.
-    // This can be evaluated for removal after upgrading to Got v10
-    const portInUrl = options.href.split('/')[2].split(':')[1];
-    if (!portInUrl) {
-      // eslint-disable-next-line no-param-reassign
-      delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-    }
-
-    // docker registry is hosted on amazon, redirect url includes authentication.
-    // eslint-disable-next-line no-param-reassign
-    delete options.headers.authorization;
-  }
-
-  if (options.href && options.headers?.authorization) {
-    const { host } = URL.parse(options.href);
-    // prettier-ignore
-    if (host && host.endsWith('blob.core.windows.net')) { // lgtm [js/incomplete-url-substring-sanitization]
-      // docker registry is hosted on Azure blob, redirect url includes authentication.
-      // eslint-disable-next-line no-param-reassign
-      delete options.headers.authorization;
-    }
-  }
-}
-
 export function getConfigResponse(
   url: string,
   headers: OutgoingHttpHeaders
@@ -447,7 +418,26 @@ export function getConfigResponse(
   return got(url, {
     headers,
     hooks: {
-      beforeRedirect: [getConfigResponseBeforeRedirectHook],
+      beforeRedirect: [
+        (options: any): void => {
+          if (
+            options.search &&
+            options.search.indexOf('X-Amz-Algorithm') !== -1
+          ) {
+            // if there is no port in the redirect URL string, then delete it from the redirect options.
+            // This can be evaluated for removal after upgrading to Got v10
+            const portInUrl = options.href.split('/')[2].split(':')[1];
+            if (!portInUrl) {
+              // eslint-disable-next-line no-param-reassign
+              delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
+            }
+
+            // docker registry is hosted on amazon, redirect url includes authentication.
+            // eslint-disable-next-line no-param-reassign
+            delete options.headers.authorization;
+          }
+        },
+      ],
     },
   });
 }

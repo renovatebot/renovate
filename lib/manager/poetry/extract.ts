@@ -3,7 +3,7 @@ import { isValid } from '../../versioning/poetry';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { PoetryFile, PoetrySection } from './types';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import * as datasourcePypi from '../../datasource/pypi';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -47,7 +47,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as string,
       managerData: { nestedVersion },
-      datasource: DATASOURCE_PYPI,
+      datasource: datasourcePypi.id,
     };
     if (skipReason) {
       dep.skipReason = skipReason;
