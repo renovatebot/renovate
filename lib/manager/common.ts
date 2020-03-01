@@ -213,13 +213,13 @@ export interface ManagerApi {
     config: PackageUpdateConfig
   ): Result<PackageUpdateResult[]>;
 
-  getRangeStrategy(config: RangeConfig): RangeStrategy;
+  getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact
   ): Result<UpdateArtifactsResult[] | null>;
 
-  updateDependency(
+  updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
