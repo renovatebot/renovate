@@ -6,8 +6,8 @@ import {
   RangeConfig,
   Result,
   PackageUpdateResult,
-  CustomExtractConfig,
 } from './common';
+import * as customManager from './custom';
 import { RangeStrategy } from '../types';
 import {
   LANGUAGE_DART,
@@ -24,7 +24,6 @@ import {
 } from '../constants/languages';
 import { loadModules } from '../util/modules';
 import { logger } from '../logger';
-import { regEx } from '../util/regex';
 
 // istanbul ignore next
 function validateManager(manager): boolean {
@@ -51,42 +50,7 @@ managers.custom = {
     autoReplace: true,
     versioning: 'semver',
   },
-  extractPackageFile: (
-    content: string,
-    packageFile: string,
-    config: CustomExtractConfig
-  ) => {
-    const regexMatch = regEx(config.matchString, 'g');
-    const deps = [];
-    let matchResult;
-    let depIndex = 0;
-    do {
-      matchResult = regexMatch.exec(content);
-      if (matchResult) {
-        const { groups } = matchResult;
-        const depName = groups.depName || config.depName;
-        const lookupName = groups.lookupName || config.lookupName;
-        const currentValue = groups.currentValue || config.currentValue;
-        const datasource = groups.datasource || config.datasource;
-        const versioning = groups.versioning || config.versioning || 'semver';
-        const dep = {
-          depName,
-          lookupName,
-          currentValue,
-          datasource,
-          versioning,
-          autoReplaceData: {
-            depIndex,
-            replaceString: matchResult[0],
-          },
-        };
-        deps.push(dep);
-      }
-      depIndex += 1;
-    } while (matchResult);
-    if (deps.length) return { deps, matchString: config.matchString };
-    return null;
-  },
+  extractPackageFile: customManager.extractPackageFile,
 };
 
 const managerList = Object.keys(managers);

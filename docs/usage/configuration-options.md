@@ -231,13 +231,17 @@ Users can define custom managers for cases such as:
 
 The custom manager concept is based on using Regular Expression named capture groups.
 
-### matchString
+### matchStrings
 
-`matchString` should be a valid regular expression with named capture groups. Example:
+`matchStrings` should each be a valid regular expression, optionally with named capture groups. Currently only a length of one `matchString` is supported.
+
+Example:
 
 ```json
 {
-  "matchString": "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  "matchStrings": [
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  ]
 }
 ```
 

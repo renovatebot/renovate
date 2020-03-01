@@ -27,7 +27,7 @@ export interface ExtractConfig extends ManagerConfig {
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
-  matchString: string;
+  matchStrings: string[];
   depName?: string;
   lookupName?: string;
   currentValue?: string;
@@ -99,6 +99,7 @@ export interface PackageFile<T = Record<string, any>>
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
+  matchStrings?: string[];
 }
 
 export interface Package<T> extends ManagerData<T> {

@@ -1686,10 +1686,12 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'matchString',
+    name: 'matchStrings',
     description:
       'Regex capture rule to use. Valid only within `customManagers` object.',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
+    format: 'regex',
     parent: 'customManagers',
     cli: false,
     env: false,
