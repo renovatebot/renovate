@@ -3,7 +3,9 @@ import { api } from '../../platform/github/gh-got-wrapper';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
 
-const cacheNamespace = 'cocoapods';
+export const id = 'pod';
+
+const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
 function shardParts(lookupName: string): string[] {

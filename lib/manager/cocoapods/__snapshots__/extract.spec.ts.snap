@@ -14,7 +14,7 @@ Array [
   },
   Object {
     "currentValue": "1.2.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "b",
     "groupName": "b",
     "managerData": Object {
@@ -26,7 +26,7 @@ Array [
   },
   Object {
     "currentValue": "1.2.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "c",
     "groupName": "c",
     "managerData": Object {
@@ -72,7 +72,7 @@ exports[`lib/manager/cocoapods/extract extractPackageFile() extracts all depende
 Array [
   Object {
     "currentValue": "~> 6.5.0",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "IQKeyboardManager",
     "groupName": "IQKeyboardManager",
     "managerData": Object {
@@ -84,7 +84,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.28.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "CYLTabBarController",
     "groupName": "CYLTabBarController",
     "managerData": Object {
@@ -96,7 +96,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.1.4",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "PureLayout",
     "groupName": "PureLayout",
     "managerData": Object {
@@ -108,7 +108,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.2.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "AFNetworking/Serialization",
     "groupName": "AFNetworking",
     "managerData": Object {
@@ -120,7 +120,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.2.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "AFNetworking/Security",
     "groupName": "AFNetworking",
     "managerData": Object {
@@ -132,7 +132,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.2.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "AFNetworking/Reachability",
     "groupName": "AFNetworking",
     "managerData": Object {
@@ -144,7 +144,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.2.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "AFNetworking/NSURLSession",
     "groupName": "AFNetworking",
     "managerData": Object {
@@ -156,7 +156,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.1.0",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "MBProgressHUD",
     "groupName": "MBProgressHUD",
     "managerData": Object {
@@ -168,7 +168,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.1.16",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "MJRefresh",
     "groupName": "MJRefresh",
     "managerData": Object {
@@ -180,7 +180,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.1.0",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "MJExtension",
     "groupName": "MJExtension",
     "managerData": Object {
@@ -192,7 +192,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.1.2",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "TYPagerController",
     "groupName": "TYPagerController",
     "managerData": Object {
@@ -204,7 +204,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.0.4",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "YYImage",
     "groupName": "YYImage",
     "managerData": Object {
@@ -216,7 +216,7 @@ Array [
   },
   Object {
     "currentValue": "~> 5.0",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "SDWebImage",
     "groupName": "SDWebImage",
     "managerData": Object {
@@ -228,7 +228,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.80",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "SDCycleScrollView",
     "groupName": "SDCycleScrollView",
     "managerData": Object {
@@ -240,7 +240,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.0",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "NullSafe",
     "groupName": "NullSafe",
     "managerData": Object {
@@ -252,7 +252,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.2.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "TZImagePickerController",
     "groupName": "TZImagePickerController",
     "managerData": Object {
@@ -264,7 +264,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.5.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "TOCropViewController",
     "groupName": "TOCropViewController",
     "managerData": Object {
@@ -276,7 +276,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.7.5",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "FMDB",
     "groupName": "FMDB",
     "managerData": Object {
@@ -288,7 +288,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.0.1",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "FDStackView",
     "groupName": "FDStackView",
     "managerData": Object {
@@ -305,7 +305,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.0.22",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "MMKV",
     "groupName": "MMKV",
     "managerData": Object {
@@ -322,7 +322,7 @@ Array [
   },
   Object {
     "currentValue": "~> 3.5.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "CocoaLumberjack",
     "groupName": "CocoaLumberjack",
     "managerData": Object {
@@ -334,7 +334,7 @@ Array [
   },
   Object {
     "currentValue": "~> 1.2",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "GZIP",
     "groupName": "GZIP",
     "managerData": Object {
@@ -346,7 +346,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "LBXScan/LBXNative",
     "groupName": "LBXScan",
     "managerData": Object {
@@ -358,7 +358,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "LBXScan/LBXZXing",
     "groupName": "LBXScan",
     "managerData": Object {
@@ -370,7 +370,7 @@ Array [
   },
   Object {
     "currentValue": "~> 2.3",
-    "datasource": "cocoapods",
+    "datasource": "pod",
     "depName": "LBXScan/UI",
     "groupName": "LBXScan",
     "managerData": Object {

@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
+import * as datasourcePod from '../../datasource/pod';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -101,7 +102,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep = {
           depName,
           groupName,
-          datasource: 'cocoapods',
+          datasource: datasourcePod.id,
           currentValue,
           managerData,
           registryUrls,
