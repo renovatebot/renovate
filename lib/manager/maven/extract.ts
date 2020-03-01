@@ -5,7 +5,7 @@ import { isValid } from '../../versioning/maven';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
+import * as datasourceMaven from '../../datasource/maven';
 
 export const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
 
@@ -28,7 +28,7 @@ export function parsePom(raw: string): XmlDocument | null {
   return null;
 }
 
-export function containsPlaceholder(str: string): boolean {
+function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
 }
 
@@ -52,7 +52,7 @@ function depFromNode(node: XmlElement): PackageDependency | null {
     const depName = `${groupId}:${artifactId}`;
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
-    const datasource = DATASOURCE_MAVEN;
+    const datasource = datasourceMaven.id;
     const registryUrls = [DEFAULT_MAVEN_REPO];
     return {
       datasource,
@@ -159,7 +159,7 @@ export function extractPackage(
   if (!project) return null;
 
   const result: PackageFile = {
-    datasource: DATASOURCE_MAVEN,
+    datasource: datasourceMaven.id,
     packageFile,
     deps: [],
   };

@@ -1,8 +1,9 @@
 import url from 'url';
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import { DatasourceError } from '../common';
+
+import { id } from './common';
 
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
   return (
@@ -38,7 +39,7 @@ function isConnectionError(err: { code: string }): boolean {
 
 export async function downloadHttpProtocol(
   pkgUrl: url.URL | string,
-  hostType = DATASOURCE_MAVEN
+  hostType = id
 ): Promise<string | null> {
   let raw: { body: string };
   try {

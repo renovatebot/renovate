@@ -5,9 +5,14 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { compare } from '../../versioning/maven/compare';
 import mavenVersion from '../../versioning/maven';
-import { containsPlaceholder } from '../../manager/maven/extract';
 import { downloadHttpProtocol } from './util';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+
+export { id } from './common';
+
+function containsPlaceholder(str: string): boolean {
+  return /\${.*?}/g.test(str);
+}
 
 async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
   const pkgPath = pkgUrl.toString().replace('file://', '');

@@ -1,15 +1,14 @@
 import * as datasource from '.';
-import * as _npm from './npm';
-import {
-  DATASOURCE_DOCKER,
-  DATASOURCE_GITHUB_TAGS,
-  DATASOURCE_NPM,
-} from '../constants/data-binary-source';
+
+import * as datasourceDocker from './docker';
+import * as datasourceGithubTags from './github-tags';
+import * as datasourceNpm from './npm';
+import { mocked } from '../../test/util';
 
 jest.mock('./docker');
 jest.mock('./npm');
 
-const npmDatasource: any = _npm;
+const npmDatasource = mocked(datasourceNpm);
 
 describe('datasource/index', () => {
   it('returns datasources', () => {
@@ -18,7 +17,7 @@ describe('datasource/index', () => {
   });
   it('returns if digests are supported', () => {
     expect(
-      datasource.supportsDigests({ datasource: DATASOURCE_GITHUB_TAGS })
+      datasource.supportsDigests({ datasource: datasourceGithubTags.id })
     ).toBe(true);
   });
   it('returns null for no datasource', async () => {
@@ -39,15 +38,15 @@ describe('datasource/index', () => {
   it('returns getDigest', async () => {
     expect(
       await datasource.getDigest({
-        datasource: DATASOURCE_DOCKER,
+        datasource: datasourceDocker.id,
         depName: 'docker/node',
       })
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
-    npmDatasource.getPkgReleases.mockReturnValue({});
+    npmDatasource.getPkgReleases.mockResolvedValue({ releases: [] });
     const res = await datasource.getPkgReleases({
-      datasource: DATASOURCE_NPM,
+      datasource: datasourceNpm.id,
       depName: 'react-native',
     });
     expect(res).toMatchSnapshot();
@@ -55,30 +54,32 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockReturnValue({});
+    npmDatasource.getPkgReleases.mockResolvedValue({ releases: [] });
     const res = await datasource.getPkgReleases({
-      datasource: DATASOURCE_NPM,
+      datasource: datasourceNpm.id,
       depName: 'node',
     });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });
   it('trims sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockReturnValue({
+    npmDatasource.getPkgReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
+      releases: [],
     });
     const res = await datasource.getPkgReleases({
-      datasource: DATASOURCE_NPM,
+      datasource: datasourceNpm.id,
       depName: 'abc',
     });
     expect(res.sourceUrl).toEqual('https://abc.com');
   });
   it('massages sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockReturnValue({
+    npmDatasource.getPkgReleases.mockResolvedValue({
       sourceUrl: 'scm:git@github.com:Jasig/cas.git',
+      releases: [],
     });
     const res = await datasource.getPkgReleases({
-      datasource: DATASOURCE_NPM,
+      datasource: datasourceNpm.id,
       depName: 'cas',
     });
     expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');

@@ -1,7 +1,7 @@
 import { DEFAULT_MAVEN_REPO } from '../maven/extract';
 import { expandDepName, DEFAULT_CLOJARS_REPO } from '../leiningen/extract';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
+import * as datasourceMaven from '../../datasource/maven';
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
@@ -20,7 +20,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = regex.exec(rest);
 
     deps.push({
-      datasource: DATASOURCE_MAVEN,
+      datasource: datasourceMaven.id,
       depName: expandDepName(depName),
       currentValue,
       fileReplacePosition,

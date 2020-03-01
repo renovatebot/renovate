@@ -4,6 +4,8 @@ import { URL } from 'url';
 import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
 
+export const id = 'git-submodules';
+
 export async function getPkgReleases({
   lookupName,
   registryUrls,
