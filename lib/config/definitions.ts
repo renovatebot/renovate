@@ -636,7 +636,7 @@ const options: RenovateOptions[] = [
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
     allowedValues: getVersioningList(),
-    default: semverVersioning.id,
+    default: null,
     cli: false,
     env: false,
   },
@@ -1697,7 +1697,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'depName',
+    name: 'depNameTemplate',
     description:
       'Optional depName for extracted dependencies. Valid only within `customManagers` object.',
     type: 'string',
@@ -1706,7 +1706,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'lookupName',
+    name: 'lookupNameTemplate',
     description:
       'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `customManagers` object.',
     type: 'string',
@@ -1715,7 +1715,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'currentValue',
+    name: 'currentValueTemplate',
     description:
       'Optional currentValue for extracted dependencies. Valid only within `customManagers` object.',
     type: 'string',
@@ -1724,9 +1724,18 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'datasource',
+    name: 'datasourceTemplate',
     description:
       'Optional datasource for extracted dependencies. Valid only within `customManagers` object.',
+    type: 'string',
+    parent: 'customManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'versioningTemplate',
+    description:
+      'Optional versioning for extracted dependencies. Valid only within `customManagers` object.',
     type: 'string',
     parent: 'customManagers',
     cli: false,

@@ -28,10 +28,11 @@ export interface ExtractConfig extends ManagerConfig {
 
 export interface CustomExtractConfig extends ExtractConfig {
   matchStrings: string[];
-  depName?: string;
-  lookupName?: string;
-  currentValue?: string;
-  datasource?: string;
+  depNameTemplate?: string;
+  lookupNameTemplate?: string;
+  currentValueTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {

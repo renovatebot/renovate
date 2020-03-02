@@ -245,11 +245,11 @@ Example:
 }
 ```
 
-### depName
+### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 
-### lookupName
+### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions. It is sourced in this order:
 
@@ -257,13 +257,17 @@ If `depName` cannot be captured with a named capture group in `matchString` then
 - From inside the `customManagers` config (this field)
 - Defaults to `depName` if neither of the above are defined
 
-### currentValue
+### currentValueTemplate
 
 `currentValue` is usually extracted directly using a capture group, but it can also be composed using this configuration field.
 
-### datasource
+### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
+
+### versioningTemplate
+
+If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
 
 ## description
 

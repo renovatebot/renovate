@@ -13,22 +13,17 @@ export function extractPackageFile(
   do {
     matchResult = regexMatch.exec(content);
     if (matchResult) {
+      const dep: any = {};
       const { groups } = matchResult;
-      const depName = groups.depName || config.depName;
-      const lookupName = groups.lookupName || config.lookupName;
-      const currentValue = groups.currentValue || config.currentValue;
-      const datasource = groups.datasource || config.datasource;
-      const versioning = groups.versioning || config.versioning || 'semver';
-      const dep = {
-        depName,
-        lookupName,
-        currentValue,
-        datasource,
-        versioning,
-        autoReplaceData: {
-          depIndex,
-          replaceString: matchResult[0],
-        },
+      dep.depName = config.depNameTemplate || groups.depName;
+      dep.lookupName = config.lookupNameTemplate || groups.lookupName;
+      dep.currentValue = config.currentValueTemplate || groups.currentValue;
+      dep.datasource = config.datasourceTemplate || groups.datasource;
+      dep.versioning =
+        config.versioningTemplate || groups.versioning || 'semver';
+      dep.autoReplaceData = {
+        depIndex,
+        replaceString: `${matchResult[0]}`,
       };
       deps.push(dep);
     }
