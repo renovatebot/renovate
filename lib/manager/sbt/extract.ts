@@ -1,4 +1,4 @@
-import { DEFAULT_MAVEN_REPO } from '../maven/extract';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { PackageFile, PackageDependency } from '../common';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
@@ -283,7 +283,7 @@ export function extractPackageFile(content: string): PackageFile {
   const lines = content.split(/\n/);
   return lines.reduce(parseSbtLine, {
     fileOffset: 0,
-    registryUrls: [DEFAULT_MAVEN_REPO],
+    registryUrls: [MAVEN_REPO],
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,

@@ -3,12 +3,15 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { DatasourceError } from '../common';
 
-import { id } from './common';
+import { id, MAVEN_REPO, MAVEN_REPO_DEPRECATED } from './common';
+
+const getHost = (x: string): string => new url.URL(x).host;
+
+const defaultHosts = [MAVEN_REPO, MAVEN_REPO_DEPRECATED].map(getHost);
 
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
-  return (
-    (typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host) === 'central.maven.org'
-  );
+  const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
+  return defaultHosts.includes(host);
 }
 
 function isTemporalError(err: { code: string; statusCode: number }): boolean {
