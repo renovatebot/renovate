@@ -7,7 +7,7 @@ import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../../lib/constants/platforms';
-import { DATASOURCE_DOCKER } from '../../../lib/constants/data-binary-source';
+import * as datasourceDocker from '../../../lib/datasource/docker';
 
 jest.mock('../../../lib/workers/repository');
 
@@ -46,7 +46,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: DATASOURCE_DOCKER,
+          hostType: datasourceDocker.id,
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',
@@ -66,7 +66,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          hostType: DATASOURCE_DOCKER,
+          hostType: datasourceDocker.id,
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',

@@ -1,12 +1,12 @@
 import { isValid } from '../../versioning/node';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GITHUB_TAGS } from '../../constants/data-binary-source';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 
 export function extractPackageFile(content: string): PackageFile {
   const dep: PackageDependency = {
     depName: 'node',
     currentValue: content.trim(),
-    datasource: DATASOURCE_GITHUB_TAGS,
+    datasource: datasourceGithubTags.id,
     lookupName: 'nodejs/node',
   };
   if (!isValid(dep.currentValue)) {

@@ -2,6 +2,8 @@ import got from '../../util/got';
 import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
+export const id = 'dart';
+
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -22,6 +24,7 @@ export async function getPkgReleases({
   try {
     raw = await got(pkgUrl, {
       responseType: 'json',
+      context: { hostType: id },
     });
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {

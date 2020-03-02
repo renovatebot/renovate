@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
-import { DATASOURCE_HEX } from '../../constants/data-binary-source';
+
+export const id = 'hex';
 
 interface HexRelease {
   html_url: string;
@@ -28,7 +29,7 @@ export async function getPkgReleases({
   try {
     const response = await got<HexRelease>(hexUrl, {
       responseType: 'json',
-      context: { hostType: DATASOURCE_HEX },
+      context: { hostType: id },
     });
 
     const hexRelease = response.body;

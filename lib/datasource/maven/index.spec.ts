@@ -4,7 +4,6 @@ import { resolve } from 'path';
 import * as maven from '.';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import * as looseVersioning from '../../versioning/loose';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
 import * as hostRules from '../../util/host-rules';
 
 const MYSQL_VERSIONS = [
@@ -42,7 +41,7 @@ describe('datasource/maven', () => {
     global.repoCache = {};
     hostRules.clear();
     hostRules.add({
-      hostType: DATASOURCE_MAVEN,
+      hostType: maven.id,
       hostName: 'frontend_for_private_s3_repository',
       username: 'username',
       password: 'password',

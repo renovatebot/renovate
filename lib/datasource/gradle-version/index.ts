@@ -9,6 +9,8 @@ import {
   Release,
 } from '../common';
 
+export const id = 'gradle-version';
+
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
 interface GradleRelease {
@@ -34,6 +36,7 @@ export async function getPkgReleases({
       try {
         const response: GradleRelease = await got(url, {
           responseType: 'json',
+          context: { hostType: id },
         });
         const releases = response.body
           .filter(release => !release.snapshot && !release.nightly)

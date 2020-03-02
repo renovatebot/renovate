@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 
 const { get: ghGot } = api;
 
+export const id = 'github-releases';
+
 const cacheNamespace = 'datasource-github-releases';
 
 /**

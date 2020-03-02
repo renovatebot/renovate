@@ -1,4 +1,4 @@
-import responses from './_fixtures/responses';
+import responses from './__fixtures__/responses';
 import { GotApi, RepoParams, Platform } from '../../../lib/platform/common';
 import { Storage } from '../../../lib/platform/git/storage';
 import {

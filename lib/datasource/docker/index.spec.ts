@@ -1,13 +1,10 @@
 import AWSMock from 'aws-sdk-mock';
 import AWS from 'aws-sdk';
-import { URL } from 'url';
-import _got, { RenovateGotNormalizedOptions } from '../../util/got';
+import _got from '../../util/got';
 import * as docker from '.';
 import { getPkgReleases } from '..';
 import * as _hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
-import { partial } from '../../../test/util';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
@@ -281,7 +278,7 @@ describe('api/docker', () => {
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
       const res = await getPkgReleases({
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: 'node',
       });
       expect(res).toBeNull();
@@ -304,7 +301,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const config = {
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
@@ -322,7 +319,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const res = await getPkgReleases({
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: 'registry.company.com/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -332,7 +329,7 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({ headers: {} });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       await getPkgReleases({
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
       });
       // The  tag limit parameter `n` needs to be limited to 1000 for ECR
@@ -357,7 +354,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: 'node',
       });
       expect(res.releases).toHaveLength(1);
@@ -378,7 +375,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: 'docker.io/node',
       });
       expect(res.releases).toHaveLength(1);
@@ -399,7 +396,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
-        datasource: DATASOURCE_DOCKER,
+        datasource: docker.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
       expect(res.releases).toHaveLength(1);
@@ -411,80 +408,6 @@ describe('api/docker', () => {
         lookupName: 'my/node',
       });
       expect(res).toBeNull();
-    });
-  });
-  describe('getConfigResponseBeforeRedirectHook', () => {
-    it('leaves a non-Amazon or Microsoft request unmodified', () => {
-      let url = new URL('https://myurl.com');
-      const emptyOpts = partial<RenovateGotNormalizedOptions>({ url });
-      docker.getConfigResponseBeforeRedirectHook(emptyOpts);
-      expect(emptyOpts).toEqual({ url });
-
-      url = new URL('https://myurl.com?my-search-string');
-      const nonAmzOpts = partial<RenovateGotNormalizedOptions>({
-        url,
-      });
-      docker.getConfigResponseBeforeRedirectHook(nonAmzOpts);
-      expect(nonAmzOpts).toEqual({
-        url,
-      });
-    });
-
-    it('removes the authorization header for Azure requests', () => {
-      const url = new URL('https://myaccount.blob.core.windows.net/xyz');
-      const opts = partial<RenovateGotNormalizedOptions>({
-        url,
-      });
-      docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(opts).toEqual({ url });
-
-      const optsWithHeadersNoAuth = {
-        url,
-        headers: {},
-      };
-      docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(optsWithHeadersNoAuth).toEqual({
-        url,
-        headers: {},
-      });
-
-      const optsWithAuth = partial<RenovateGotNormalizedOptions>({
-        url,
-        headers: {
-          authorization: 'Bearer xyz',
-        },
-      });
-      docker.getConfigResponseBeforeRedirectHook(optsWithAuth);
-      expect(optsWithAuth.headers).toBeDefined();
-      expect(optsWithAuth.headers.authorization).not.toBeDefined();
-    });
-
-    it('removes the authorization header for Amazon requests', () => {
-      const url = new URL('https://amazon.com?X-Amz-Algorithm');
-      const authorization = 'Bearer xyz';
-      const opts = partial<RenovateGotNormalizedOptions>({
-        url,
-        headers: {
-          authorization,
-        },
-      });
-      docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(opts).toEqual({ url, headers: {} });
-    });
-
-    it('removes the port when not specified in URL', () => {
-      const url = new URL('https://amazon.com?X-Amz-Algorithm');
-      const authorization = 'Bearer xyz';
-      const port = 8080;
-      const opts = partial<RenovateGotNormalizedOptions>({
-        url,
-        port,
-        headers: {
-          authorization,
-        },
-      });
-      docker.getConfigResponseBeforeRedirectHook(opts);
-      expect(opts).toEqual({ url, headers: {} });
     });
   });
 });

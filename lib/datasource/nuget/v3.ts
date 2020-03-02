@@ -3,7 +3,8 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import got, { GotResponse } from '../../util/got';
 import { ReleaseResult } from '../common';
-import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
+
+import { id } from './common';
 
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
@@ -31,7 +32,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
     // TODO: fix types
     const servicesIndexRaw = await got<{ resources: any[] }>(url, {
       responseType: 'json',
-      context: { hostType: DATASOURCE_NUGET },
+      context: { hostType: id },
     });
     if (servicesIndexRaw.statusCode !== 200) {
       logger.debug(
@@ -81,7 +82,7 @@ export async function getPkgReleases(
     // TODO: fix types
     const pkgUrlListRaw = await got<{ data: any[] }>(queryUrl, {
       responseType: 'json',
-      context: { hostType: DATASOURCE_NUGET },
+      context: { hostType: id },
     });
     if (pkgUrlListRaw.statusCode !== 200) {
       logger.debug(
@@ -123,7 +124,7 @@ export async function getPkgReleases(
         let metaresult: GotResponse<string>;
         try {
           metaresult = await got(nugetOrgApi, {
-            context: { hostType: DATASOURCE_NUGET },
+            context: { hostType: id },
           });
         } catch (err) /* istanbul ignore next */ {
           logger.debug(

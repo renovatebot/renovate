@@ -10,7 +10,7 @@ import got, { GotJSONOptions, GotHeaders } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { DatasourceError, Release, ReleaseResult } from '../common';
-import { DATASOURCE_NPM } from '../../constants/data-binary-source';
+import { id } from './common';
 
 let memcache = {};
 
@@ -110,7 +110,7 @@ export async function getDependency(
       responseType: 'json',
       retry: 5,
       headers,
-      context: { useCache },
+      context: { useCache, hostType: id },
       readableHighWaterMark: 1024 * 1024 * 10, // https://github.com/sindresorhus/got/issues/1062#issuecomment-586580036
     };
     // TODO: fix type
@@ -165,7 +165,7 @@ export async function getDependency(
     }
     if (latestVersion.deprecated) {
       dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-      dep.deprecationSource = DATASOURCE_NPM;
+      dep.deprecationSource = id;
     }
     dep.releases = Object.keys(res.versions).map(version => {
       const release: NpmRelease = {

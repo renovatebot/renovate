@@ -4,7 +4,7 @@ exports[`lib/manager/ansible-galaxy/extract extractPackageFile() extracts depend
 Array [
   Object {
     "currentValue": "0.1.0",
-    "datasource": "ansible-galaxy",
+    "datasource": "galaxy",
     "depName": "yatesr.timezone",
     "lookupName": "yatesr.timezone",
   },
@@ -21,7 +21,7 @@ exports[`lib/manager/ansible-galaxy/extract extractPackageFile() extracts multip
 Array [
   Object {
     "currentValue": "0.1.0",
-    "datasource": "ansible-galaxy",
+    "datasource": "galaxy",
     "depName": "yatesr.timezone",
     "lookupName": "yatesr.timezone",
   },

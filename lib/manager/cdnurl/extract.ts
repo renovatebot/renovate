@@ -1,5 +1,5 @@
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
+import * as datasourceCdnjs from '../../datasource/cdnjs';
 
 export const cloudflareUrlRegex = /\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/(?<depName>[^/]+?)\/(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/;
 
@@ -21,7 +21,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = cloudflareUrlRegex.exec(rest);
 
     deps.push({
-      datasource: DATASOURCE_CDNJS,
+      datasource: datasourceCdnjs.id,
       depName,
       lookupName: `${depName}/${asset}`,
       currentValue,

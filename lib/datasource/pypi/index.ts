@@ -5,7 +5,8 @@ import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+
+export const id = 'pypi';
 
 function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
@@ -40,7 +41,7 @@ async function getDependency(
     // TODO: fix type
     const rep = await got<any>(lookupUrl, {
       responseType: 'json',
-      context: { hostType: DATASOURCE_PYPI },
+      context: { hostType: id },
     });
     const dep = rep && rep.body;
     if (!dep) {
@@ -123,7 +124,7 @@ async function getSimpleDependency(
     const dependency: ReleaseResult = { releases: null };
     // TODO: fix me
     const response = await got<string>(url.parse(lookupUrl)?.toString(), {
-      context: { hostType: DATASOURCE_PYPI },
+      context: { hostType: id },
     });
     const dep = response && response.body;
     if (!dep) {
