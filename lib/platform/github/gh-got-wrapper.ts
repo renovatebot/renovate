@@ -224,7 +224,7 @@ export interface GithubApiOptions extends GotApiOptions {
   /**
    * response should be string instead of json
    */
-  json?: false;
+  json?: boolean;
 }
 
 export const api: GotApi<GithubApiOptions> = get as any;
