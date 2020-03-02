@@ -34,7 +34,7 @@ jest.mock('../../../lib/workers/repository/error-config');
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig;
+  config = getConfig();
 });
 
 describe('workers/repository/error', () => {

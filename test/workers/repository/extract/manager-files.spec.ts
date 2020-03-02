@@ -15,7 +15,7 @@ describe('workers/repository/extract/manager-files', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig;
+      config = getConfig();
     });
     it('returns empty of manager is disabled', async () => {
       const managerConfig = { manager: 'travis', enabled: false };

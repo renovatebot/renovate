@@ -10,6 +10,7 @@ import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
+import { HostRule } from '../../types';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -58,7 +59,7 @@ export function getRegistryRepository(
 
 function getECRAuthToken(
   region: string,
-  opts: hostRules.HostRule
+  opts: HostRule
 ): Promise<string | null> {
   const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
   if (opts.username && opts.password) {
@@ -105,7 +106,7 @@ async function getAuthHeaders(
       apiCheckResponse.headers['www-authenticate']
     );
 
-    const opts: hostRules.HostRule & {
+    const opts: HostRule & {
       headers?: Record<string, string>;
     } = hostRules.find({ hostType: id, url: apiCheckUrl });
     opts.json = true;
