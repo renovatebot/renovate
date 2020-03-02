@@ -7,7 +7,6 @@ import {
   Result,
   PackageUpdateResult,
 } from './common';
-import * as customManager from './custom';
 import { RangeStrategy } from '../types';
 import {
   LANGUAGE_DART,
@@ -44,14 +43,6 @@ function validateManager(manager): boolean {
 }
 
 const managers = loadModules<ManagerApi>(__dirname, validateManager);
-
-managers.custom = {
-  defaultConfig: {
-    autoReplace: true,
-  },
-  extractPackageFile: customManager.extractPackageFile,
-};
-
 const managerList = Object.keys(managers);
 
 const languageList = [

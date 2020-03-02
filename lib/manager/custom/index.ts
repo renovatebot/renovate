@@ -1,6 +1,10 @@
 import * as handlebars from 'handlebars';
-import { CustomExtractConfig, PackageFile, Result } from './common';
-import { regEx } from '../util/regex';
+import { CustomExtractConfig, PackageFile, Result } from '../common';
+import { regEx } from '../../util/regex';
+
+export const autoReplace = true;
+
+export const defaultConfig = {};
 
 export function extractPackageFile(
   content: string,
