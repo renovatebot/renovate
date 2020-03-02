@@ -2,11 +2,11 @@ import is from '@sindresorhus/is';
 import { FileData, platform } from '../../platform';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { RenovateConfig } from '../../config';
-import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
+import { ArtifactError } from '../../manager/common';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { doAutoReplace } from './auto-replace';
+import { BranchConfig } from '../common';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -16,7 +16,7 @@ export interface PackageFilesResult {
 }
 
 export async function getUpdatedPackageFiles(
-  config: RenovateConfig & UpdateArtifactsConfig
+  config: BranchConfig
 ): Promise<PackageFilesResult> {
   logger.debug('manager.getUpdatedPackageFiles()');
   logger.trace({ config });

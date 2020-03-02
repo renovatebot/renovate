@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import nock from 'nock';
 import { getPkgReleases } from '.';
-import { DEFAULT_MAVEN_REPO } from '../../manager/maven/extract';
+import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
 
 const mavenIndexHtml = fs.readFileSync(
@@ -114,7 +114,7 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           lookupName: 'org.foundweekends:sbt-bintray',
-          registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
+          registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
         })
       ).toEqual({
         dependencyUrl:
@@ -127,7 +127,7 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           lookupName: 'org.foundweekends:sbt-bintray_2.12',
-          registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
+          registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
         })
       ).toEqual({
         dependencyUrl:

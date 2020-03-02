@@ -1743,7 +1743,7 @@ const options: RenovateOptions[] = [
   },
 ];
 
-export function getOptions(): any {
+export function getOptions(): RenovateOptions[] {
   return options;
 }
 

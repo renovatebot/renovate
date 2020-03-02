@@ -7,6 +7,7 @@ import { compare } from '../../versioning/maven/compare';
 import mavenVersion from '../../versioning/maven';
 import { downloadHttpProtocol } from './util';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { MAVEN_REPO } from './common';
 
 export { id } from './common';
 
@@ -139,18 +140,14 @@ export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const versions: string[] = [];
-  const dependency = getDependencyParts(lookupName);
-  if (!is.nonEmptyArray(registryUrls)) {
-    logger.warn(`No repositories defined for ${dependency.display}`);
-    return null;
-  }
-  const repositories = registryUrls.map(repository =>
+  const registries = is.nonEmptyArray(registryUrls)
+    ? registryUrls
+    : [MAVEN_REPO];
+  const repositories = registries.map(repository =>
     repository.replace(/\/?$/, '/')
   );
-  logger.debug(
-    `Found ${repositories.length} repositories for ${dependency.display}`
-  );
+  const dependency = getDependencyParts(lookupName);
+  const versions: string[] = [];
   const repoForVersions = {};
   for (let i = 0; i < repositories.length; i += 1) {
     const repoUrl = repositories[i];

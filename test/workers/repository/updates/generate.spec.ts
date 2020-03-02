@@ -1,6 +1,8 @@
-import { defaultConfig } from '../../../util';
+import { defaultConfig, partial } from '../../../util';
 import { generateBranchConfig } from '../../../../lib/workers/repository/updates/generate';
 import * as datasourceNpm from '../../../../lib/datasource/npm';
+import { UpdateType } from '../../../../lib/config';
+import { BranchUpgradeConfig } from '../../../../lib/workers/common';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -243,7 +245,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('uses semantic commits', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           semanticCommits: true,
@@ -257,7 +259,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -266,7 +268,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('scopes monorepo commits', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'foo/package.json',
@@ -281,7 +283,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -290,7 +292,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('scopes monorepo commits', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'foo/package.json',
@@ -305,7 +307,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -314,7 +316,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('scopes monorepo commits', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'package.json',
@@ -329,7 +331,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -338,7 +340,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('scopes monorepo commits', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'package.json',
@@ -353,7 +355,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -362,7 +364,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('scopes monorepo commits with nested package files', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           commitBodyTable: false,
           depName: 'some-dep',
@@ -378,7 +380,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -387,7 +389,7 @@ describe('workers/repository/updates/generate', () => {
     });
     it('scopes monorepo commits with nested package files', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
@@ -402,7 +404,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual(
@@ -411,14 +413,14 @@ describe('workers/repository/updates/generate', () => {
     });
     it('adds commit message body', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           commitBody: '[skip-ci]',
           newValue: '1.2.0',
           isSingleVersion: true,
           toVersion: '1.2.0',
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
@@ -426,12 +428,12 @@ describe('workers/repository/updates/generate', () => {
     });
     it('supports manual prTitle', () => {
       const branch = [
-        {
+        partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
           prTitle: 'Upgrade {{depName}}',
           toLowerCase: true,
-        },
+        }),
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toMatchSnapshot();
@@ -508,7 +510,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMinorPatch: true,
-          updateType: 'minor',
+          updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
         },
         {
@@ -519,7 +521,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          updateType: 'major',
+          updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
         },
         {
@@ -530,7 +532,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          updateType: 'patch',
+          updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },
       ];

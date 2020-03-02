@@ -1,4 +1,6 @@
 import { Range } from 'semver';
+import { LogLevel } from 'bunyan';
+import { HostRule } from '../types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -7,30 +9,82 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export interface GroupConfig extends Record<string, unknown> {
+  branchName?: string;
+  branchTopic?: string;
+}
+
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   automerge?: boolean;
+  branchPrefix?: string;
   branchName?: string;
+
+  commitMessage?: string;
   enabled?: boolean;
+  enabledManagers?: string[];
+  group?: GroupConfig;
+  groupName?: string;
+  groupSlug?: string;
   ignoreDeps?: string[];
+  ignorePaths?: string[];
   labels?: string[];
   managers?: string | string[];
+  masterIssueApproval?: boolean;
+  npmrc?: string;
   platform?: string;
+  postUpgradeTasks?: PostUpgradeTasks;
+  prBodyColumns?: string[];
+  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
+  rebaseLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   requiredStatusChecks?: string[];
   schedule?: string[];
-
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
   statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
+  unicodeEmoji?: boolean;
+}
+
+export interface GlobalConfig {
+  prBanner?: string;
+  prFooter?: string;
+}
+
+export interface RenovateAdminConfig {
   allowedPostUpgradeCommands?: string[];
-  postUpgradeTasks?: PostUpgradeTasks;
+  autodiscover?: boolean;
+  autodiscoverFilter?: string;
+
+  baseDir?: string;
+  cacheDir?: string;
+  configWarningReuseIssue?: boolean;
+  dryRun?: boolean;
+
+  global?: GlobalConfig;
+
+  localDir?: string;
+  logFile?: string;
+  logFileLevel?: LogLevel;
+  logLevel?: LogLevel;
+  logContext?: string;
+
+  onboarding?: boolean;
+  onboardingBranch?: string;
+  onboardingPrTitle?: string;
+  onboardingConfig?: RenovateSharedConfig;
+
+  postUpdateOptions?: string[];
+  privateKey?: string | Buffer;
+  repositories?: RenovateRepository[];
+  requireConfig?: boolean;
+  trustLevel?: 'low' | 'high';
 }
 
 export type PostUpgradeTasks = {
@@ -58,33 +112,42 @@ export interface CustomManager {
 
 // TODO: Proper typings
 export interface RenovateConfig
-  extends RenovateSharedConfig,
+  extends RenovateAdminConfig,
+    RenovateSharedConfig,
     UpdateConfig<PackageRule>,
-    Record<string, any> {
-  autodiscover?: boolean;
-  autodiscoverFilter?: string;
-  baseBranch?: string;
+    Record<string, unknown> {
   baseBranches?: string[];
+  baseBranch?: string;
   branchList?: string[];
   description?: string[];
-  dryRun?: boolean;
+
+  endpoint?: string;
   errors?: ValidationMessage[];
+  extends?: string[];
 
-  /** TODO: Type? */
-  global?: Record<string, any>;
+  gitAuthor?: string;
 
+  hostRules?: HostRule[];
+
+  ignorePresets?: string[];
   includeForks?: boolean;
   isFork?: boolean;
-  onboarding?: boolean;
-  onboardingConfig?: RenovateSharedConfig;
+
+  masterIssue?: boolean;
+  masterIssueAutoclose?: boolean;
+  masterIssueChecks?: Record<string, string>;
+  masterIssueRebaseAllOpen?: boolean;
+  masterIssueTitle?: string;
+
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
-  privateKey?: string | Buffer;
   repoIsOnboarded?: boolean;
-  repositories?: RenovateRepository[];
-  requireConfig?: boolean;
+
+  updateType?: UpdateType;
+
   warnings?: ValidationMessage[];
+  vulnerabilityAlerts?: RenovateSharedConfig;
   customManagers?: CustomManager[];
 }
 
@@ -95,6 +158,7 @@ export type UpdateType =
   | 'pin'
   | 'digest'
   | 'lockFileMaintenance'
+  | 'lockfileUpdate'
   | 'rollback'
   | 'bump';
 

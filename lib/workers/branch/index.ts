@@ -19,7 +19,7 @@ import { ensurePr, checkAutoMerge } from '../pr';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
-import { BranchConfig } from '../common';
+import { BranchConfig, ProcessBranchResult } from '../common';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -35,20 +35,6 @@ import {
 import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
-
-export type ProcessBranchResult =
-  | 'already-existed'
-  | 'automerged'
-  | 'done'
-  | 'error'
-  | 'needs-approval'
-  | 'needs-pr-approval'
-  | 'not-scheduled'
-  | 'no-work'
-  | 'pending'
-  | 'pr-created'
-  | 'pr-edited'
-  | 'pr-hourly-limit-reached';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {

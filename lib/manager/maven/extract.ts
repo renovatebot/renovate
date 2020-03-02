@@ -6,8 +6,7 @@ import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import * as datasourceMaven from '../../datasource/maven';
-
-export const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;
@@ -53,7 +52,7 @@ function depFromNode(node: XmlElement): PackageDependency | null {
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
     const datasource = datasourceMaven.id;
-    const registryUrls = [DEFAULT_MAVEN_REPO];
+    const registryUrls = [MAVEN_REPO];
     return {
       datasource,
       depName,

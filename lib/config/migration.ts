@@ -3,7 +3,8 @@ import later from 'later';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { getOptions, RenovateOptions } from './definitions';
-import { RenovateConfig } from './common';
+import { RenovateConfig, PackageRule } from './common';
+import { HostRule } from '../types';
 
 const options = getOptions();
 
@@ -28,6 +29,15 @@ export interface MigratedConfig {
   migratedConfig: RenovateConfig;
 }
 
+interface MigratedRenovateConfig extends RenovateConfig {
+  endpoints?: HostRule[];
+  pathRules: PackageRule[];
+  packages: PackageRule[];
+
+  node?: RenovateConfig;
+  travis?: RenovateConfig;
+}
+
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
@@ -42,7 +52,7 @@ export function migrateConfig(
       });
     }
     let isMigrated = false;
-    const migratedConfig = clone(config);
+    const migratedConfig = clone(config) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
       'devDependencies',
@@ -94,7 +104,8 @@ export function migrateConfig(
             fileList.push((packageFile as any).packageFile);
             if (Object.keys(packageFile).length > 1) {
               migratedConfig.packageRules = migratedConfig.packageRules || [];
-              const payload = migrateConfig(packageFile, key).migratedConfig;
+              const payload = migrateConfig(packageFile as RenovateConfig, key)
+                .migratedConfig;
               for (const subrule of payload.packageRules || []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
@@ -117,7 +128,8 @@ export function migrateConfig(
       } else if (depTypes.includes(key)) {
         isMigrated = true;
         migratedConfig.packageRules = migratedConfig.packageRules || [];
-        const depTypePackageRule = migrateConfig(val, key).migratedConfig;
+        const depTypePackageRule = migrateConfig(val as RenovateConfig, key)
+          .migratedConfig;
         depTypePackageRule.depTypeList = [key];
         delete depTypePackageRule.packageRules;
         migratedConfig.packageRules.push(depTypePackageRule);
@@ -165,10 +177,10 @@ export function migrateConfig(
         if (val === 'widen') {
           migratedConfig.rangeStrategy = 'widen';
         }
-      } else if (key === 'semanticPrefix') {
+      } else if (key === 'semanticPrefix' && is.string(val)) {
         isMigrated = true;
         delete migratedConfig.semanticPrefix;
-        let [text] = val.split(':');
+        let [text] = val.split(':') as any; // TODO: fixme
         text = text.split('(');
         [migratedConfig.semanticCommitType] = text;
         if (text.length > 1) {
@@ -211,7 +223,7 @@ export function migrateConfig(
         isMigrated = true;
         delete migratedConfig.multipleMajorPrs;
         migratedConfig.separateMultipleMajor = val;
-      } else if (key === 'renovateFork') {
+      } else if (key === 'renovateFork' && is.boolean(val)) {
         isMigrated = true;
         delete migratedConfig.renovateFork;
         migratedConfig.includeForks = val;
@@ -281,7 +293,7 @@ export function migrateConfig(
         delete migratedConfig.baseBranch;
       } else if (key === 'schedule' && val) {
         // massage to array first
-        const schedules = is.string(val) ? [val] : [...val];
+        const schedules = is.string(val) ? [val] : [...(val as string[])];
         // split 'and'
         const schedulesLength = schedules.length;
         for (let i = 0; i < schedulesLength; i += 1) {
@@ -340,9 +352,7 @@ export function migrateConfig(
             schedules[i] = schedules[i].replace(' every day', '');
           }
           if (
-            schedules[i].match(
-              /every (mon|tues|wednes|thurs|fri|satur|sun)day$/
-            )
+            /every (mon|tues|wednes|thurs|fri|satur|sun)day$/.test(schedules[i])
           ) {
             isMigrated = true;
             schedules[i] = schedules[i].replace(/every ([a-z]*day)$/, 'on $1');
@@ -354,7 +364,7 @@ export function migrateConfig(
         }
         if (isMigrated) {
           if (is.string(val) && schedules.length === 1) {
-            [migratedConfig.schedule] = schedules;
+            [migratedConfig.schedule] = schedules as any; // TODO: fixme
           } else {
             migratedConfig.schedule = schedules;
           }
@@ -371,7 +381,10 @@ export function migrateConfig(
             const depTypeName = (depType as any).depType;
             if (depTypeName) {
               migratedConfig.packageRules = migratedConfig.packageRules || [];
-              const newPackageRule = migrateConfig(depType, key).migratedConfig;
+              const newPackageRule = migrateConfig(
+                depType as RenovateConfig,
+                key
+              ).migratedConfig;
               delete newPackageRule.depType;
               newPackageRule.depTypeList = [depTypeName];
               migratedConfig.packageRules.push(newPackageRule);
@@ -395,7 +408,7 @@ export function migrateConfig(
         val.length === 1
       ) {
         migratedConfig[key] = `${val[0]}`;
-      } else if (key === 'node' && val.enabled === true) {
+      } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
         isMigrated = true;
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
@@ -408,9 +421,9 @@ export function migrateConfig(
         }
       } else if (is.array(val)) {
         const newArray = [];
-        for (const item of migratedConfig[key]) {
+        for (const item of migratedConfig[key] as unknown[]) {
           if (is.object(item) && !is.array(item)) {
-            const arrMigrate = migrateConfig(item, key);
+            const arrMigrate = migrateConfig(item as RenovateConfig, key);
             newArray.push(arrMigrate.migratedConfig);
             if (arrMigrate.isMigrated) {
               isMigrated = true;
@@ -421,14 +434,17 @@ export function migrateConfig(
         }
         migratedConfig[key] = newArray;
       } else if (is.object(val)) {
-        const subMigrate = migrateConfig(migratedConfig[key], key);
+        const subMigrate = migrateConfig(
+          migratedConfig[key] as RenovateConfig,
+          key
+        );
         if (subMigrate.isMigrated) {
           isMigrated = true;
           migratedConfig[key] = subMigrate.migratedConfig;
         }
       } else if (
         key.startsWith('commitMessage') &&
-        val &&
+        is.string(val) &&
         (val.includes('currentVersion') || val.includes('newVersion'))
       ) {
         isMigrated = true;
