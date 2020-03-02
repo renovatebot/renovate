@@ -7,6 +7,8 @@ import {
   rawExec,
 } from '../common';
 import { logger } from '../../../logger';
+import * as versioning from '../../../versioning';
+import { getPkgReleases } from '../../../datasource/docker';
 
 const prefetchedImages = new Set<string>();
 
@@ -61,12 +63,54 @@ function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter(command => command && typeof command === 'string');
 }
 
+async function getDockerTag(
+  lookupName: string,
+  constraint: string,
+  scheme: string
+): Promise<string> {
+  const { isValid, isVersion, matches, sortVersions } = versioning.get(scheme);
+
+  if (!isValid(constraint)) {
+    logger.warn({ constraint }, `Invalid ${scheme} version constraint`);
+    return 'latest';
+  }
+
+  logger.debug(
+    { constraint },
+    `Found ${scheme} version constraint - checking for a compatible ${lookupName} image to use`
+  );
+  const imageReleases = await getPkgReleases({ lookupName });
+  if (imageReleases && imageReleases.releases) {
+    let versions = imageReleases.releases.map(release => release.version);
+    versions = versions.filter(
+      version => isVersion(version) && matches(version, constraint)
+    );
+    versions = versions.sort(sortVersions);
+    if (versions.length) {
+      const version = versions.pop();
+      logger.debug(
+        { constraint, version },
+        `Found compatible ${scheme} version`
+      );
+      return version;
+    }
+  } /* istanbul ignore next */ else {
+    logger.error(`No ${lookupName} releases found`);
+    return 'latest';
+  }
+  logger.warn(
+    { constraint },
+    'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
+  );
+  return 'latest';
+}
+
 export async function generateDockerCommand(
   commands: string[],
   options: DockerOptions,
   config: ExecConfig
 ): Promise<string> {
-  const { image, tag, envVars, cwd } = options;
+  const { image, envVars, cwd, tagScheme, tagConstraint } = options;
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
@@ -87,6 +131,13 @@ export async function generateDockerCommand(
 
   if (cwd) result.push(`-w "${cwd}"`);
 
+  let tag;
+  if (options.tag) {
+    tag = options.tag;
+  } else if (tagConstraint) {
+    tag = await getDockerTag(image, tagConstraint, tagScheme || 'semver');
+  }
+
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
@@ -96,7 +147,7 @@ export async function generateDockerCommand(
     ...commands,
     ...prepareCommands(postCommands),
   ].join(' && ');
-  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`);
+  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');
 }

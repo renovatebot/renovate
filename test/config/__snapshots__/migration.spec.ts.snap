@@ -85,6 +85,12 @@ Object {
       ],
     },
     Object {
+      "packageNames": Array [
+        "guava",
+      ],
+      "versioning": "maven",
+    },
+    Object {
       "depTypeList": Array [
         "peerDependencies",
       ],
@@ -119,12 +125,23 @@ Object {
   "patch": Object {
     "automerge": true,
   },
+  "pip_setup": Object {
+    "rebaseWhen": "never",
+  },
+  "pipenv": Object {
+    "rebaseWhen": "conflicted",
+  },
   "platform": "github",
+  "poetry": Object {
+    "rebaseWhen": "behind-base-branch",
+    "versioning": "pep440",
+  },
   "postUpdateOptions": Array [
     "gomodTidy",
   ],
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
   "rangeStrategy": "bump",
+  "rebaseWhen": "auto",
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",

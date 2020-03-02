@@ -1,10 +1,8 @@
 import * as releases from '../../../../lib/workers/pr/changelog/releases';
 import * as datasource from '../../../../lib/datasource';
 import { mocked } from '../../../util';
-import {
-  VERSION_SCHEME_DOCKER,
-  VERSION_SCHEME_NPM,
-} from '../../../../lib/constants/version-schemes';
+import * as dockerVersioning from '../../../../lib/versioning/docker';
+import * as npmVersioning from '../../../../lib/versioning/npm';
 
 jest.mock('../../../../lib/datasource');
 
@@ -44,51 +42,51 @@ describe('workers/pr/changelog/releases', () => {
     });
     it('should contain only stable', async () => {
       const config = {
-        versionScheme: VERSION_SCHEME_NPM,
+        versioning: npmVersioning.id,
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
     it('should contain fromVersion unstable', async () => {
       const config = {
-        versionScheme: VERSION_SCHEME_NPM,
+        versioning: npmVersioning.id,
         fromVersion: '1.0.1-rc0',
         toVersion: '1.1.0',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
     it('should contain toVersion unstable', async () => {
       const config = {
-        versionScheme: VERSION_SCHEME_NPM,
+        versioning: npmVersioning.id,
         fromVersion: '1.0.1',
         toVersion: '1.2.0-rc1',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
     it('should contain both fromVersion toVersion unstable', async () => {
       const config = {
-        versionScheme: VERSION_SCHEME_NPM,
+        versioning: npmVersioning.id,
         fromVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc1',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(6);
     });
     it('should valueToVersion', async () => {
       const config = {
-        versionScheme: VERSION_SCHEME_DOCKER,
+        versioning: dockerVersioning.id,
         fromVersion: '1.0.1-rc0',
         toVersion: '1.2.0-rc0',
       };
-      const res = await releases.getReleases(config);
+      const res = await releases.getInRangeReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });

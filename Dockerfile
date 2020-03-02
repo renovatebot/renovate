@@ -1,7 +1,8 @@
-FROM amd64/node:10.19.0@sha256:06e80d0a45ea264fa69296cce992bc6f9c6956ff18f314c6211ba5b0db34e468 AS tsbuild
+FROM amd64/node:10.19.0@sha256:a9d108f82e34c84e6e2a9901fda2048b9f5a40f614c3ea1348cbf276a7c2031c AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
+COPY tools tools
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
@@ -11,7 +12,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build:docker
 
 
-FROM amd64/ubuntu:18.04@sha256:bc025862c3e8ec4a8754ea4756e33da6c41cba38330d7e324abd25c8e0b93300
+FROM amd64/ubuntu:18.04@sha256:0925d086715714114c1988f7c947db94064fd385e171a63c07730f1fa014e6f9
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -24,19 +25,31 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar build-essential && \
+RUN apt-get update && \
+    apt-get install -y gpg curl wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless dirmngr && \
     rm -rf /var/lib/apt/lists/*
 
-## Gradle
-
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jre-headless gradle && \
+# The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
+RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24 && \
+    apt-get update && \
+    apt-get -y install git && \
     rm -rf /var/lib/apt/lists/*
+
+## Gradle (needs java-jre, installed above)
+ENV GRADLE_VERSION 6.2
+
+RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
+    unzip -q -d /opt/ gradle-$GRADLE_VERSION-bin.zip && \
+    rm -f gradle-$GRADLE_VERSION-bin.zip && \
+    mv /opt/gradle-$GRADLE_VERSION /opt/gradle && \
+    ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
 ## Node.js
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
 
-ENV NODE_VERSION 10.16.0
+ENV NODE_VERSION 10.19.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -107,7 +120,7 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 RUN apt-get update && apt-get install -y php-cli php-mbstring && \
     rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_VERSION=1.8.6
+ENV COMPOSER_VERSION=1.9.3
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
@@ -147,6 +160,12 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 # Pip
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
+
+# CocoaPods
+RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt/lists/*
+RUN ruby --version
+ENV COCOAPODS_VERSION 1.9.0
+RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
 # Set up ubuntu user and home directory with access to users in the root group (0)
 

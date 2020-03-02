@@ -25,13 +25,13 @@ export type ReleaseConfig = PkgReleaseConfig & {
   toVersion: string;
 };
 
-export async function getReleases(
+export async function getInRangeReleases(
   config: ReleaseConfig
 ): Promise<Release[] | null> {
-  const { versionScheme, fromVersion, toVersion, depName, datasource } = config;
+  const { versioning, fromVersion, toVersion, depName, datasource } = config;
   try {
     const pkgReleases = (await getPkgReleases(config)).releases;
-    const version = get(versionScheme);
+    const version = get(versioning);
 
     const releases = pkgReleases
       .filter(release => version.isCompatible(release.version, fromVersion))
@@ -54,8 +54,8 @@ export async function getReleases(
     }
     return releases;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'getReleases err');
-    logger.info({ datasource, depName }, 'Error getting releases');
+    logger.debug({ err }, 'getInRangeReleases err');
+    logger.debug({ datasource, depName }, 'Error getting releases');
     return null;
   }
 }

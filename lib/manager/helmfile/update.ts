@@ -3,32 +3,13 @@ import yaml from 'js-yaml';
 import is from '@sindresorhus/is';
 
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
+import { matchAt, replaceAt } from '../../util/string';
 
-// Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
-
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   logger.trace({ config: upgrade }, 'updateDependency()');
   if (!upgrade || !upgrade.depName || !upgrade.newValue) {
     logger.debug('Failed to update dependency, invalid upgrade');

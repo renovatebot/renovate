@@ -2,6 +2,7 @@
 
 exports[`workers/repository/onboarding/branch checkOnboardingBranch creates onboarding branch with greenkeeper migration 1`] = `
 "{
+  \\"$schema\\": \\"https://docs.renovatebot.com/renovate-schema.json\\",
   \\"statusCheckVerify\\": true,
   \\"labels\\": [
     \\"renovate\\"
@@ -11,6 +12,13 @@ exports[`workers/repository/onboarding/branch checkOnboardingBranch creates onbo
     \\"foo\\",
     \\"bar\\"
   ]
+}
+"
+`;
+
+exports[`workers/repository/onboarding/branch checkOnboardingBranch has default onboarding config 1`] = `
+"{
+  \\"$schema\\": \\"https://docs.renovatebot.com/renovate-schema.json\\"
 }
 "
 `;

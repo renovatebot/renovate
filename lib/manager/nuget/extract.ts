@@ -1,8 +1,8 @@
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
-import { VERSION_SCHEME_SEMVER } from '../../constants/version-schemes';
-import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
+import * as semverVersioning from '../../versioning/semver';
+import * as datasourceNuget from '../../datasource/nuget';
 
 export function extractPackageFile(
   content: string,
@@ -10,7 +10,7 @@ export function extractPackageFile(
   config: ExtractConfig = {}
 ): PackageFile {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
-  const { isVersion } = get(config.versionScheme || VERSION_SCHEME_SEMVER);
+  const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
   let lineNumber = 0;
@@ -38,7 +38,7 @@ export function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_NUGET,
+        datasource: datasourceNuget.id,
       };
       if (!isVersion(currentValue)) {
         dep.skipReason = 'not-version';

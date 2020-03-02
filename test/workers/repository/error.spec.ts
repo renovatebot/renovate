@@ -27,6 +27,7 @@ import {
   UNKNOWN_ERROR,
 } from '../../../lib/constants/error-messages';
 import { RenovateConfig, getConfig } from '../../util';
+import { DatasourceError } from '../../../lib/datasource/common';
 
 jest.mock('../../../lib/workers/repository/error-config');
 
@@ -69,6 +70,10 @@ describe('workers/repository/error', () => {
         const res = await handleError(config, new Error(err));
         expect(res).toEqual(err);
       });
+    });
+    it(`handles DatasourceError`, async () => {
+      const res = await handleError(config, new DatasourceError(new Error()));
+      expect(res).toEqual(DATASOURCE_FAILURE);
     });
     it('rewrites git 5xx error', async () => {
       const gitError = new Error(

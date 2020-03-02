@@ -161,6 +161,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
   pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
+  pr.branchName = pr.targetBranch;
+  pr.createdAt = pr.creationDate;
 
   // status
   // export declare enum PullRequestStatus {
@@ -191,6 +193,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
     pr.isConflicted = true;
   }
 
+  // value is updated later to be correct for
+  // specific pr's after filtering, for performance
   pr.isModified = false;
 
   return pr;

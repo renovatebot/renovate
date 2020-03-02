@@ -2,7 +2,7 @@ import { safeLoad } from 'js-yaml';
 import { isValid } from '../../versioning/npm/index';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_DART } from '../../constants/data-binary-source';
+import * as datasourceDart from '../../datasource/dart';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -50,12 +50,12 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        datasource: DATASOURCE_DART,
+        datasource: datasourceDart.id,
         deps,
       };
     }
   } catch (e) {
-    logger.info({ packageFile }, 'Can not parse dependency');
+    logger.debug({ packageFile }, 'Can not parse dependency');
   }
   return null;
 }

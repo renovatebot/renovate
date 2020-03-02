@@ -2,7 +2,7 @@ import fs from 'fs';
 import { decryptConfig } from '../../lib/config/decrypt';
 import { RenovateConfig } from '../../lib/config';
 
-const privateKey = fs.readFileSync('test/config/keys/_fixtures/private.pem');
+const privateKey = fs.readFileSync('test/config/keys/__fixtures__/private.pem');
 
 describe('config/decrypt', () => {
   describe('decryptConfig()', () => {

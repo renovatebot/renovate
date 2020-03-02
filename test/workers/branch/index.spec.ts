@@ -62,7 +62,7 @@ describe('workers/branch', () => {
         upgrades: [{ depName: 'some-dep-name' } as never],
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValue('abc123');
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -221,7 +221,7 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       platform.branchExists.mockResolvedValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(await branchWorker.processBranch(config)).toEqual('no-work');
     });
     it('returns if branch automerged', async () => {
@@ -462,7 +462,7 @@ describe('workers/branch', () => {
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       expect(
         await branchWorker.processBranch({
@@ -521,7 +521,7 @@ describe('workers/branch', () => {
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -558,7 +558,7 @@ describe('workers/branch', () => {
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       const result = await branchWorker.processBranch({
         ...config,

@@ -5,7 +5,7 @@ import { CommitFilesConfig } from './git/storage';
 
 export interface FileData {
   name: string;
-  contents: string;
+  contents: string | Buffer;
 }
 
 export interface GotApiOptions {
@@ -145,8 +145,10 @@ export interface EnsureCommentConfig {
  */
 export type VulnerabilityAlert = any;
 
+export type EnsureIssueResult = 'updated' | 'created';
+
 export interface Platform {
-  findIssue(title: string): Promise<Issue>;
+  findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   getCommitMessages(): Promise<string[]>;
@@ -160,7 +162,7 @@ export interface Platform {
   getFileList(): Promise<string[]>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
-  ): Promise<'updated' | 'created' | null>;
+  ): Promise<EnsureIssueResult | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
@@ -178,8 +180,8 @@ export interface Platform {
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  setBaseBranch(baseBranch: string): Promise<void>;
-  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
+  setBaseBranch(baseBranch?: string): Promise<void>;
+  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   mergeBranch(branchName: string): Promise<void>;

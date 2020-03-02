@@ -9,7 +9,7 @@ Object {
       "depName": "persistent-sorted-set:persistent-sorted-set",
       "fileReplacePosition": 53,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -19,7 +19,7 @@ Object {
       "depName": "org.clojure:clojure",
       "fileReplacePosition": 147,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -29,7 +29,7 @@ Object {
       "depName": "org.clojure:clojure",
       "fileReplacePosition": 241,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -39,7 +39,7 @@ Object {
       "depName": "org.clojure:clojurescript",
       "fileReplacePosition": 389,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -49,7 +49,7 @@ Object {
       "depName": "org.clojure:tools.namespace",
       "fileReplacePosition": 451,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -59,7 +59,7 @@ Object {
       "depName": "org.clojure:clojurescript",
       "fileReplacePosition": 584,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -69,7 +69,7 @@ Object {
       "depName": "lambdaisland:kaocha",
       "fileReplacePosition": 644,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -79,7 +79,7 @@ Object {
       "depName": "lambdaisland:kaocha-cljs",
       "fileReplacePosition": 703,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -89,7 +89,7 @@ Object {
       "depName": "cider:cider-nrepl",
       "fileReplacePosition": 810,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -99,7 +99,7 @@ Object {
       "depName": "nrepl:nrepl",
       "fileReplacePosition": 870,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -109,7 +109,7 @@ Object {
       "depName": "org.clojure:tools.namespace",
       "fileReplacePosition": 929,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },
@@ -119,7 +119,7 @@ Object {
       "depName": "com.datomic:datomic-free",
       "fileReplacePosition": 1141,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
       ],
     },

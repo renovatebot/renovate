@@ -16,7 +16,7 @@ describe('manager/cdnurl/update', () => {
       newValue: '9.9.999',
     };
     const { currentValue, newValue } = upgrade;
-    const newFileContent = updateDependency(content, upgrade);
+    const newFileContent = updateDependency({ fileContent: content, upgrade });
     const cmpContent = content.replace(currentValue, newValue);
     expect(newFileContent).toEqual(cmpContent);
   });
@@ -29,7 +29,10 @@ describe('manager/cdnurl/update', () => {
     };
     const { currentValue } = upgrade;
     const alreadyUpdated = content.replace(currentValue, '9.9.999');
-    const newFileContent = updateDependency(alreadyUpdated, upgrade);
+    const newFileContent = updateDependency({
+      fileContent: alreadyUpdated,
+      upgrade,
+    });
     expect(newFileContent).toBe(alreadyUpdated);
   });
   it('returns null if content has changed', () => {
@@ -41,7 +44,10 @@ describe('manager/cdnurl/update', () => {
     };
     const { currentValue } = upgrade;
     const alreadyUpdated = content.replace(currentValue, '2020.1');
-    const newFileContent = updateDependency(alreadyUpdated, upgrade);
+    const newFileContent = updateDependency({
+      fileContent: alreadyUpdated,
+      upgrade,
+    });
     expect(newFileContent).toBeNull();
   });
 });

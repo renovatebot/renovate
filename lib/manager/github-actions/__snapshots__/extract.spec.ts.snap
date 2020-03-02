@@ -10,7 +10,7 @@ Array [
     "managerData": Object {
       "lineNumber": 11,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -21,7 +21,7 @@ Array [
     "managerData": Object {
       "lineNumber": 36,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
 ]
 `;
@@ -36,7 +36,7 @@ Array [
     "managerData": Object {
       "lineNumber": 17,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -47,7 +47,7 @@ Array [
     "managerData": Object {
       "lineNumber": 31,
     },
-    "versionScheme": "docker",
+    "versioning": "docker",
   },
 ]
 `;

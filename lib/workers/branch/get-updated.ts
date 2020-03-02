@@ -5,7 +5,8 @@ import { get } from '../../manager';
 import { RenovateConfig } from '../../config';
 import { UpdateArtifactsConfig, ArtifactError } from '../../manager/common';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
+import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -19,12 +20,13 @@ export async function getUpdatedPackageFiles(
 ): Promise<PackageFilesResult> {
   logger.debug('manager.getUpdatedPackageFiles()');
   logger.trace({ config });
+  const { parentBranch } = config;
   const updatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { manager, packageFile, depName } = upgrade;
+    const { autoReplace, manager, packageFile, depName } = upgrade;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -37,21 +39,40 @@ export async function getUpdatedPackageFiles(
         (await platform.getFile(packageFile, config.parentBranch));
       // istanbul ignore if
       if (config.parentBranch && !existingContent) {
-        logger.info('Rebasing branch after file not found');
+        logger.debug('Rebasing branch after file not found');
         return getUpdatedPackageFiles({
           ...config,
           parentBranch: undefined,
         });
       }
-      let newContent = existingContent;
+      if (autoReplace) {
+        logger.debug('autoReplace');
+        const res = await doAutoReplace(upgrade, existingContent, parentBranch);
+        if (res) {
+          if (res === existingContent) {
+            logger.debug('No content changed');
+          } else {
+            logger.debug('Contents updated');
+            updatedFileContents[packageFile] = res;
+          }
+          continue; // eslint-disable-line no-continue
+        } else if (parentBranch) {
+          return getUpdatedPackageFiles({
+            ...config,
+            parentBranch: undefined,
+          });
+        }
+        logger.error('Could not autoReplace');
+        throw new Error(WORKER_FILE_UPDATE_FAILED);
+      }
       const updateDependency = get(manager, 'updateDependency');
-      newContent = await updateDependency({
+      const newContent = await updateDependency({
         fileContent: existingContent,
         upgrade,
       });
       if (!newContent) {
         if (config.parentBranch) {
-          logger.info('Rebasing branch after error updating content');
+          logger.debug('Rebasing branch after error updating content');
           return getUpdatedPackageFiles({
             ...config,
             parentBranch: undefined,
@@ -66,7 +87,7 @@ export async function getUpdatedPackageFiles(
       if (newContent !== existingContent) {
         if (config.parentBranch) {
           // This ensure it's always 1 commit from the bot
-          logger.info('Need to update package file so will rebase first');
+          logger.debug('Need to update package file so will rebase first');
           return getUpdatedPackageFiles({
             ...config,
             parentBranch: undefined,
@@ -77,7 +98,7 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === existingContent &&
-        upgrade.datasource === DATASOURCE_GIT_SUBMODULES
+        upgrade.datasource === datasourceGitSubmodules.id
       ) {
         updatedFileContents[packageFile] = newContent;
       }

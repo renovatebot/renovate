@@ -50,11 +50,11 @@ function massageUpdateMetadata(config: PrBodyConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    const { fromVersion, toVersion, updateType, versionScheme } = upgrade;
+    const { fromVersion, toVersion, updateType, versioning } = upgrade;
     // istanbul ignore if
     if (updateType === 'minor') {
       try {
-        const version = get(versionScheme);
+        const version = get(versioning);
         if (version.getMinor(fromVersion) === version.getMinor(toVersion)) {
           upgrade.updateType = 'patch';
         }

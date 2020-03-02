@@ -20,7 +20,7 @@ function getPreCommands(): string[] | null {
       ? `x-access-token:${credentials.token}`
       : credentials.token;
     preCommands = [
-      `git config --global url.\\\\"https://${token}@github.com/\\\\".insteadOf \\\\"https://github.com/\\\\"`,
+      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ];
   }
   return preCommands;
@@ -55,7 +55,7 @@ export async function updateArtifacts({
     await writeLocalFile(goModFileName, massagedGoMod);
     const cmd = 'go';
     const execOptions: ExecOptions = {
-      cwd: join(config.localDir, dirname(goModFileName)),
+      cwdFile: goModFileName,
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
@@ -134,7 +134,7 @@ export async function updateArtifacts({
       ''
     );
     if (finalGoModContent !== newGoModContent) {
-      logger.info('Found updated go.mod after go.sum update');
+      logger.debug('Found updated go.mod after go.sum update');
       res.push({
         file: {
           name: goModFileName,
@@ -144,7 +144,7 @@ export async function updateArtifacts({
     }
     return res;
   } catch (err) {
-    logger.info({ err }, 'Failed to update go.sum');
+    logger.debug({ err }, 'Failed to update go.sum');
     return [
       {
         artifactError: {

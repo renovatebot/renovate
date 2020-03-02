@@ -10,7 +10,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 2747,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -25,7 +25,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 2794,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -40,7 +40,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 2862,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -55,7 +55,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 2912,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -70,7 +70,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 3223,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -85,7 +85,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 3272,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -100,7 +100,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 3330,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -115,7 +115,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 11073,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -130,7 +130,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 11139,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -145,7 +145,7 @@ Object {
       "depType": "dependencies",
       "fileReplacePosition": 11287,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -160,7 +160,7 @@ Object {
       "depType": "managed-dependencies",
       "fileReplacePosition": 4705,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -175,7 +175,7 @@ Object {
       "depType": "managed-dependencies",
       "fileReplacePosition": 4754,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -190,7 +190,7 @@ Object {
       "depType": "plugins",
       "fileReplacePosition": 5558,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -205,7 +205,7 @@ Object {
       "depType": "plugins",
       "fileReplacePosition": 5591,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -220,7 +220,7 @@ Object {
       "depType": "plugins",
       "fileReplacePosition": 5630,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -235,7 +235,7 @@ Object {
       "depType": "plugins",
       "fileReplacePosition": 5661,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -250,7 +250,7 @@ Object {
       "depType": "plugins",
       "fileReplacePosition": 5705,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -265,7 +265,7 @@ Object {
       "depType": "plugins",
       "fileReplacePosition": 11489,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -280,7 +280,7 @@ Object {
       "depType": "pom-plugins",
       "fileReplacePosition": 26925,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -295,7 +295,7 @@ Object {
       "depType": "pom-plugins",
       "fileReplacePosition": 27372,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -310,7 +310,7 @@ Object {
       "depType": "pom-plugins",
       "fileReplacePosition": 27440,
       "registryUrls": Array [
-        "https://clojars.org/repo/",
+        "https://clojars.org/repo",
         "https://repo.maven.apache.org/maven2",
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",

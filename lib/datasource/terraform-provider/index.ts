@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
-import { DATASOURCE_TERRAFORM } from '../../constants/data-binary-source';
+import { GetReleasesConfig, ReleaseResult } from '../common';
+
+export const id = 'terraform-provider';
 
 interface TerraformProvider {
   namespace: string;
@@ -19,7 +20,7 @@ interface TerraformProvider {
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const repository = `hashicorp/${lookupName}`;
 
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
@@ -37,7 +38,7 @@ export async function getPkgReleases({
     const res: TerraformProvider = (
       await got(pkgUrl, {
         json: true,
-        hostType: DATASOURCE_TERRAFORM,
+        hostType: id,
       })
     ).body;
     // Simplify response before caching and returning
@@ -61,7 +62,7 @@ export async function getPkgReleases({
     return dep;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info(
+      logger.debug(
         { lookupName },
         `Terraform registry lookup failure: not found`
       );

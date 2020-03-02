@@ -3,8 +3,7 @@ import upath from 'upath';
 
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
+import * as mavenVersioning from '../../versioning/maven';
 
 import {
   init,
@@ -24,8 +23,8 @@ import {
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
-import { BinarySource } from '../../util/exec/common';
+import * as datasourceMaven from '../../datasource/maven';
+import { DatasourceError } from '../../datasource';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -45,8 +44,6 @@ async function getGradleCommandLine(
   cwd: string
 ): Promise<string> {
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
-
-  if (config.binarySource === BinarySource.Docker) return `gradle ${args}`;
 
   const gradlewPath = upath.join(cwd, 'gradlew');
   const gradlewExists = await exists(gradlewPath);
@@ -78,23 +75,17 @@ async function executeGradle(
   try {
     logger.debug({ cmd }, 'Start gradle command');
     ({ stdout, stderr } = await exec(cmd, execOptions));
-  } catch (err) {
-    // istanbul ignore if
+  } catch (err) /* istanbul ignore next */ {
     if (err.code === TIMEOUT_CODE) {
-      logger.warn({ err }, ' Process killed. Possibly gradle timed out.');
+      const error = new DatasourceError(err);
+      error.datasource = 'gradle';
+      throw error;
     }
-    // istanbul ignore if
-    if (err.message.includes('Could not resolve all files for configuration')) {
-      logger.debug({ err }, 'Gradle error');
-      logger.warn('Gradle resolution error');
-      return;
-    }
-    logger.warn({ err, cmd }, 'Gradle run failed');
-    logger.info('Aborting Renovate due to Gradle lookup errors');
-    throw new Error(DATASOURCE_FAILURE);
+    logger.warn({ errMessage: err.message }, 'Gradle extraction failed');
+    return;
   }
   logger.debug(stdout + stderr);
-  logger.info('Gradle report complete');
+  logger.debug('Gradle report complete');
 }
 
 export async function extractAllPackageFiles(
@@ -123,7 +114,7 @@ export async function extractAllPackageFiles(
     logger.warn('No root build.gradle nor build.gradle.kts found - skipping');
     return null;
   }
-  logger.info('Extracting dependencies from all gradle files');
+  logger.debug('Extracting dependencies from all gradle files');
 
   const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
 
@@ -143,14 +134,14 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        datasource: DATASOURCE_MAVEN,
+        datasource: datasourceMaven.id,
         deps: dependencies,
       });
 
       collectVersionVariables(dependencies, content);
     } else {
       // istanbul ignore next
-      logger.info({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
 
@@ -158,7 +149,11 @@ export async function extractAllPackageFiles(
 }
 
 function buildGradleDependency(config: Upgrade): GradleDependency {
-  return { group: config.depGroup, name: config.name, version: config.version };
+  return {
+    group: config.depGroup,
+    name: config.name,
+    version: config.currentValue,
+  };
 }
 
 export function updateDependency({
@@ -166,7 +161,7 @@ export function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): string {
   // prettier-ignore
-  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
+  logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
 
   return updateGradleVersion(
     fileContent,
@@ -180,5 +175,5 @@ export const language = LANGUAGE_JAVA;
 export const defaultConfig = {
   fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
   timeout: 600,
-  versionScheme: VERSION_SCHEME_MAVEN,
+  versioning: mavenVersioning.id,
 };

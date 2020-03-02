@@ -1,7 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import * as datasource from '..';
-import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
+import * as gradleVersion from '.';
 
 jest.mock('../../util/got');
 
@@ -11,57 +10,22 @@ const allResponse: any = fs.readFileSync(
   'lib/datasource/gradle-version/__fixtures__/all.json'
 );
 
-let config: datasource.PkgReleaseConfig = {};
+let config: any = {};
 
-describe('datasource/gradle', () => {
+describe('datasource/gradle-version', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
-      config = {
-        datasource: DATASOURCE_GRADLE_VERSION,
-      };
+      config = {};
       jest.clearAllMocks();
       global.repoCache = {};
       return global.renovateCache.rmAll();
-    });
-
-    it('throws for empty result', async () => {
-      got.mockReturnValueOnce({ body: {} });
-      await expect(
-        datasource.getPkgReleases({
-          ...config,
-        })
-      ).rejects.toThrow();
-    });
-
-    it('throws for 404', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      await expect(
-        datasource.getPkgReleases({
-          ...config,
-        })
-      ).rejects.toThrow();
-    });
-
-    it('throws for unknown error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
-      await expect(
-        datasource.getPkgReleases({
-          ...config,
-        })
-      ).rejects.toThrow();
     });
 
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(allResponse),
       });
-      const res = await datasource.getPkgReleases(config);
+      const res = await gradleVersion.getPkgReleases(config);
       expect(got).toHaveBeenCalledTimes(1);
       expect(got.mock.calls[0][0]).toEqual(
         'https://services.gradle.org/versions/all'
@@ -74,7 +38,7 @@ describe('datasource/gradle', () => {
       got.mockReturnValue({
         body: JSON.parse(allResponse),
       });
-      const res = await datasource.getPkgReleases({
+      const res = await gradleVersion.getPkgReleases({
         ...config,
         registryUrls: ['https://foo.bar', 'http://baz.qux'],
       });

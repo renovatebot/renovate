@@ -1,6 +1,6 @@
 # Base image
 #============
-FROM renovate/yarn:1.22.0@sha256:22cfbb7ecd47655a905c01fe3f2fcb3ac34839dd6d42d81eeb437c80475483ea AS base
+FROM renovate/yarn:1.22.0@sha256:a7737a9182c1456ac089022a44bea22eb9d5069b3f8388cda06b473717a8dd41 AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -30,6 +30,7 @@ USER ubuntu
 
 COPY package.json .
 COPY yarn.lock .
+COPY tools tools
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
@@ -49,6 +50,13 @@ FROM base as final
 
 # required for install
 USER root
+
+# The git version of ubuntu 18.04 is too old to sort ref tags properly (see #5477), so update it to the latest stable version
+RUN echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main\ndeb-src http://ppa.launchpad.net/git-core/ppa/ubuntu bionic main" > /etc/apt/sources.list.d/git.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24 && \
+    apt-get update && \
+    apt-get -y install git && \
+    rm -rf /var/lib/apt/lists/*
 
 # Docker client and group
 

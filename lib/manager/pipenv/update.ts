@@ -2,26 +2,7 @@ import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
-
-// Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
+import { matchAt, replaceAt } from '../../util/string';
 
 export function updateDependency({
   fileContent,
@@ -39,7 +20,7 @@ export function updateDependency({
       oldVersion = parsedContents[depType][depName];
     }
     if (oldVersion === newValue) {
-      logger.info('Version is already updated');
+      logger.debug('Version is already updated');
       return fileContent;
     }
     if (nestedVersion) {
@@ -73,7 +54,7 @@ export function updateDependency({
     }
     // istanbul ignore if
     if (!newFileContent) {
-      logger.info(
+      logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
         'Warning: updateDependency error'
       );
@@ -81,7 +62,7 @@ export function updateDependency({
     }
     return newFileContent;
   } catch (err) {
-    logger.info({ err }, 'Error setting new package version');
+    logger.debug({ err }, 'Error setting new package version');
     return null;
   }
 }

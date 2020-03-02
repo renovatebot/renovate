@@ -1,6 +1,14 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'cargo';
+export const displayName = 'Cargo';
+export const urls = [
+  'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const isVersion = (input: string): string | boolean => npm.isVersion(input);
 
 function convertToCaret(item: string): string {

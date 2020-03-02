@@ -8,10 +8,10 @@ const defaultConfigFile = configFileNames[0];
 
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
-): Promise<void> {
+): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
   const contents = await getOnboardingConfig(config);
-  logger.info('Creating onboarding branch');
+  logger.debug('Creating onboarding branch');
   let commitMessage;
   // istanbul ignore if
   if (config.semanticCommits) {
@@ -27,16 +27,16 @@ export async function createOnboardingBranch(
   // istanbul ignore if
   if (config.dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
-  } else {
-    await platform.commitFilesToBranch({
-      branchName: config.onboardingBranch,
-      files: [
-        {
-          name: defaultConfigFile,
-          contents,
-        },
-      ],
-      message: commitMessage,
-    });
+    return null;
   }
+  return platform.commitFilesToBranch({
+    branchName: config.onboardingBranch,
+    files: [
+      {
+        name: defaultConfigFile,
+        contents,
+      },
+    ],
+    message: commitMessage,
+  });
 }

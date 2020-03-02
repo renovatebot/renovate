@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as _hostRules from '../../../lib/util/host-rules';
-import { RepoParams } from '../../../lib/platform/common';
+import { RepoParams, Platform } from '../../../lib/platform/common';
 import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 import {
   BRANCH_STATUS_FAILED,
@@ -10,11 +10,11 @@ import {
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let azure: jest.Mocked<typeof import('../../../lib/platform/azure')>;
+  let azure: Platform;
   let azureApi: jest.Mocked<typeof import('../../../lib/platform/azure/azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('../../../lib/platform/azure/azure-helper')>;
   let GitStorage;
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
@@ -23,7 +23,7 @@ describe('platform/azure', () => {
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
     require('../../../lib/util/sanitize').sanitize = jest.fn(input => input);
-    azure = require('../../../lib/platform/azure');
+    azure = await import('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
     GitStorage = require('../../../lib/platform/git/storage').Storage;
@@ -46,7 +46,7 @@ describe('platform/azure', () => {
     hostRules.find.mockReturnValue({
       token: 'token',
     });
-    azure.initPlatform({
+    await azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
@@ -83,20 +83,20 @@ describe('platform/azure', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no endpoint', () => {
-      expect(() => {
-        azure.initPlatform({} as any);
-      }).toThrow();
+      expect.assertions(1);
+      expect(() => azure.initPlatform({})).toThrow();
     });
     it('should throw if no token', () => {
-      expect(() => {
+      expect.assertions(1);
+      expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
-        } as any);
-      }).toThrow();
+        })
+      ).toThrow();
     });
-    it('should init', () => {
+    it('should init', async () => {
       expect(
-        azure.initPlatform({
+        await azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           token: 'token',
         })
@@ -170,8 +170,8 @@ describe('platform/azure', () => {
   });
 
   describe('cleanRepo()', () => {
-    it('exists', () => {
-      azure.cleanRepo();
+    it('exists', async () => {
+      await azure.cleanRepo();
     });
   });
 
@@ -194,8 +194,8 @@ describe('platform/azure', () => {
   });
 
   describe('getRepoForceRebase', () => {
-    it('should return false', () => {
-      expect(azure.getRepoForceRebase()).toBe(false);
+    it('should return false', async () => {
+      expect(await azure.getRepoForceRebase()).toBe(false);
     });
   });
 
@@ -215,6 +215,7 @@ describe('platform/azure', () => {
                   state: 'open',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -251,6 +252,7 @@ describe('platform/azure', () => {
                   state: 'closed',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -287,6 +289,7 @@ describe('platform/azure', () => {
                   state: 'closed',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -323,6 +326,7 @@ describe('platform/azure', () => {
                   state: 'closed',
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementationOnce(
@@ -387,6 +391,7 @@ describe('platform/azure', () => {
                   status: 2,
                 },
               ]),
+            getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
       azureHelper.getNewBranchName.mockImplementation(
@@ -474,13 +479,57 @@ describe('platform/azure', () => {
             getPullRequestLabels: jest
               .fn()
               .mockReturnValue([{ active: true, name: 'renovate' }]),
+            getPullRequestCommits: jest.fn().mockReturnValue([
+              {
+                author: {
+                  name: 'renovate',
+                },
+              },
+            ]),
           } as any)
       );
       azureHelper.getRenovatePRFormat.mockImplementation(
         () =>
           ({
             pullRequestId: 1234,
-            labels: ['renovate'],
+          } as any)
+      );
+      const pr = await azure.getPr(1234);
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return a pr thats been modified', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1234,
+                },
+              ]),
+            getPullRequestLabels: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: jest.fn().mockReturnValue([
+              {
+                author: {
+                  name: 'renovate',
+                },
+              },
+              {
+                author: {
+                  name: 'end user',
+                },
+              },
+            ]),
+          } as any)
+      );
+      azureHelper.getRenovatePRFormat.mockImplementation(
+        () =>
+          ({
+            pullRequestId: 1234,
+            isModified: false,
           } as any)
       );
       const pr = await azure.getPr(1234);
@@ -593,44 +642,123 @@ describe('platform/azure', () => {
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = jest.fn();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            updatePullRequest: jest.fn(),
+            updatePullRequest,
           } as any)
       );
       await azure.updatePr(1234, 'The New Title', 'Hello world again');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
 
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = jest.fn();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            updatePullRequest: jest.fn(),
+            updatePullRequest,
           } as any)
       );
       await azure.updatePr(1234, 'The New Title - autoclose');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
   });
 
   describe('ensureComment', () => {
-    it('add comment', async () => {
+    it('adds comment if missing', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            createThread: jest.fn(() => [{ id: 123 }]),
-          } as any)
-      );
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 2,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
       await azure.ensureComment({
         number: 42,
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+    });
+    it('updates comment if missing', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 3,
+          },
+          {
+            comments: [{ content: '### some-subject\n\nsome\ncontent', id: 2 }],
+            id: 4,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\nnew\ncontent',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+    });
+    it('does nothing if comment exists and is the same', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 3,
+          },
+          {
+            comments: [{ content: '### some-subject\n\nsome\ncontent', id: 2 }],
+            id: 4,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+    });
+    it('does nothing if comment exists and is the same when there is no topic', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'some\ncontent', id: 2 }],
+            id: 4,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'some\ncontent',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
   });
 
@@ -679,6 +807,7 @@ describe('platform/azure', () => {
         () =>
           ({
             createThread: jest.fn(() => [{ id: 123 }]),
+            getThreads: jest.fn(() => []),
           } as any)
       );
       await azure.addAssignees(123, ['test@bonjour.fr']);
@@ -722,8 +851,8 @@ describe('platform/azure', () => {
   });
 
   describe('Not supported by Azure DevOps (yet!)', () => {
-    it('setBranchStatus', () => {
-      const res = azure.setBranchStatus({
+    it('setBranchStatus', async () => {
+      const res = await azure.setBranchStatus({
         branchName: 'test',
         context: 'test',
         description: 'test',
@@ -734,13 +863,13 @@ describe('platform/azure', () => {
     });
 
     it('mergePr', async () => {
-      const res = await azure.mergePr(0);
-      expect(res).toBeUndefined();
+      const res = await azure.mergePr(0, undefined);
+      expect(res).toBe(false);
     });
 
     // to become async?
-    it('getPrFiles', () => {
-      const res = azure.getPrFiles(46);
+    it('getPrFiles', async () => {
+      const res = await azure.getPrFiles(46);
       expect(res).toHaveLength(0);
     });
   });

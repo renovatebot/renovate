@@ -1,23 +1,38 @@
 name: Docker Images CI
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - master
+      - 'renovate/**'
+
+  pull_request:
 
 env:
   PLATFORM: linux/amd64
+  DOCKER_CACHE_TAG: _cache
+  DOCKER_REPO: renovate/renovate
 
 jobs:
   build:
     name: Build image
     runs-on: ubuntu-latest
 
+    timeout-minutes: 20
+
     strategy:
       matrix:
-        file: [Dockerfile, Dockerfile.slim]
+        tag: [latest, slim]
+
+    env:
+      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
+      DOCKER_TAG: ${{ matrix.tag }}
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
+      - name: Overwrite env for latest tag
+        if: matrix.tag == 'latest'
+        run: |
+          echo "::set-env name=DOCKER_FILE::Dockerfile"
 
       - name: Set up Docker Buildx
         id: buildx
@@ -25,16 +40,22 @@ jobs:
         with:
           version: v0.3.1
 
+      - uses: actions/checkout@v2
+
       - name: Build the Docker image
         run: |
           docker buildx build \
             --platform ${PLATFORM} \
-            --output "type=docker" \
-            --tag renovate \
-            --file ./${{ matrix.file }} .
+            --output=type=docker \
+            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
+            --tag=renovate \
+            --file=./${DOCKER_FILE} .
+
+      - name: Test the Docker image
+        run: |
+          docker run --rm -t renovate --version
 
       - name: Image history
         run: docker history renovate
-
       - name: Image size
         run: docker image ls | grep renovate

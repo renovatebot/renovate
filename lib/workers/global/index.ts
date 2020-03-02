@@ -71,7 +71,7 @@ export async function start(): Promise<0 | 1> {
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
-        logger.info(
+        logger.debug(
           'Max commits created for this run. Skipping all remaining repositories.'
         );
         break;
@@ -87,7 +87,7 @@ export async function start(): Promise<0 | 1> {
     }
     setMeta({});
     printStats();
-    logger.info(`Renovate finished`);
+    logger.debug(`Renovate existing successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));

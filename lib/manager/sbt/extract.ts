@@ -1,8 +1,9 @@
-import { DEFAULT_MAVEN_REPO } from '../maven/extract';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { PackageFile, PackageDependency } from '../common';
 import { get } from '../../versioning';
-import { VERSION_SCHEME_MAVEN } from '../../constants/version-schemes';
-import { DATASOURCE_SBT } from '../../constants/data-binary-source';
+import * as mavenVersioning from '../../versioning/maven';
+import * as datasourceSbtPackage from '../../datasource/sbt-package';
+import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -29,7 +30,7 @@ const getScalaVersion = (str: string): string =>
 const normalizeScalaVersion = (str: string): string => {
   // istanbul ignore if
   if (!str) return str;
-  const versioning = get(VERSION_SCHEME_MAVEN);
+  const versioning = get(mavenVersioning.id);
   if (versioning.isVersion(str)) {
     // Do not normalize unstable versions
     if (!versioning.isStable(str)) return str;
@@ -250,12 +251,17 @@ function parseSbtLine(
     }
   }
 
-  if (dep)
+  if (dep) {
+    if (dep.depType === 'plugin') {
+      dep.datasource = datasourceSbtPlugin.id;
+    } else {
+      dep.datasource = datasourceSbtPackage.id;
+    }
     deps.push({
-      datasource: DATASOURCE_SBT,
       registryUrls,
       ...dep,
     });
+  }
 
   if (lineIndex + 1 < lines.length)
     return {
@@ -277,7 +283,7 @@ export function extractPackageFile(content: string): PackageFile {
   const lines = content.split(/\n/);
   return lines.reduce(parseSbtLine, {
     fileOffset: 0,
-    registryUrls: [DEFAULT_MAVEN_REPO],
+    registryUrls: [MAVEN_REPO],
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,

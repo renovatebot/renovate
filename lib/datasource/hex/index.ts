@@ -1,8 +1,8 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_HEX } from '../../constants/data-binary-source';
+import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+
+export const id = 'hex';
 
 interface HexRelease {
   html_url: string;
@@ -12,7 +12,7 @@ interface HexRelease {
 
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   // istanbul ignore if
   if (!lookupName) {
     logger.warn('hex lookup failure: No lookupName');
@@ -21,28 +21,28 @@ export async function getPkgReleases({
 
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
-  // depName:organizationName
-  // depName is used to pass it in hex dep url
+  // hexPackageName:organizationName
+  // hexPackageName is used to pass it in hex dep url
   // organizationName is used for accessing to private deps
-  const depName = lookupName.split(':')[0];
-  const hexUrl = `https://hex.pm/api/packages/${depName}`;
+  const hexPackageName = lookupName.split(':')[0];
+  const hexUrl = `https://hex.pm/api/packages/${hexPackageName}`;
   try {
     const response = await got(hexUrl, {
       json: true,
-      hostType: DATASOURCE_HEX,
+      hostType: id,
     });
 
     const hexRelease: HexRelease = response.body;
 
     if (!hexRelease) {
-      logger.warn({ depName }, `Invalid response body`);
+      logger.warn({ datasource: 'hex', lookupName }, `Invalid response body`);
       return null;
     }
 
     const { releases = [], html_url: homepage, meta } = hexRelease;
 
     if (releases.length === 0) {
-      logger.info(`No versions found for ${depName} (${hexUrl})`); // prettier-ignore
+      logger.debug(`No versions found for ${hexPackageName} (${hexUrl})`); // prettier-ignore
       return null;
     }
 
@@ -60,14 +60,13 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    const errorData = { depName, err };
+    const errorData = { lookupName, err };
 
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `hex.pm registry failure`);
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
 
     if (err.statusCode === 401) {

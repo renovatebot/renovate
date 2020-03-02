@@ -222,12 +222,6 @@ exports[`api/npm should return deprecated 2`] = `
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
 `;
 
-exports[`api/npm should return preset 1`] = `
-Object {
-  "rangeStrategy": "auto",
-}
-`;
-
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
   "homepage": "https://github.com/renovateapp/dummy",
