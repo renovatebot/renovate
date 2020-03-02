@@ -636,7 +636,7 @@ const options: RenovateOptions[] = [
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
     allowedValues: getVersioningList(),
-    default: null,
+    default: semverVersioning.id,
     cli: false,
     env: false,
   },
