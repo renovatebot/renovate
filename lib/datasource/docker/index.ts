@@ -10,10 +10,12 @@ import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
-import { DATASOURCE_DOCKER } from '../../constants/data-binary-source';
+import { HostRule } from '../../types';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+
+export const id = 'docker';
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
@@ -42,7 +44,7 @@ export function getRegistryRepository(
   if (!/^https?:\/\//.exec(registry)) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ hostType: DATASOURCE_DOCKER, url: registry });
+  const opts = hostRules.find({ hostType: id, url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
@@ -57,7 +59,7 @@ export function getRegistryRepository(
 
 function getECRAuthToken(
   region: string,
-  opts: hostRules.HostRule
+  opts: HostRule
 ): Promise<string | null> {
   const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
   if (opts.username && opts.password) {
@@ -104,9 +106,9 @@ async function getAuthHeaders(
       apiCheckResponse.headers['www-authenticate']
     );
 
-    const opts: hostRules.HostRule & {
+    const opts: HostRule & {
       headers?: Record<string, string>;
-    } = hostRules.find({ hostType: DATASOURCE_DOCKER, url: apiCheckUrl });
+    } = hostRules.find({ hostType: id, url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);

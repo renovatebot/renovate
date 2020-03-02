@@ -4,6 +4,8 @@ import { parseIndexDir } from '../sbt-plugin/util';
 import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
+export const id = 'sbt-package';
+
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
 export async function resolvePackageReleases(

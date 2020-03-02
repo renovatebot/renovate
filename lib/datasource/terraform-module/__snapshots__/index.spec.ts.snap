@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/terraform getPkgReleases processes real data 1`] = `
+exports[`datasource/terraform-module getPkgReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
   "name": "hashicorp/consul/aws",
@@ -80,7 +80,7 @@ Object {
 }
 `;
 
-exports[`datasource/terraform getPkgReleases processes with registry in name 1`] = `
+exports[`datasource/terraform-module getPkgReleases processes with registry in name 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
   "name": "hashicorp/consul/aws",

@@ -86,13 +86,15 @@ export function decryptConfig(
       decryptedConfig[key] = [];
       val.forEach(item => {
         if (is.object(item) && !is.array(item)) {
-          decryptedConfig[key].push(decryptConfig(item, privateKey));
+          (decryptedConfig[key] as RenovateConfig[]).push(
+            decryptConfig(item as RenovateConfig, privateKey)
+          );
         } else {
-          decryptedConfig[key].push(item);
+          (decryptedConfig[key] as RenovateConfig[]).push(item);
         }
       });
     } else if (is.object(val) && key !== 'content') {
-      decryptedConfig[key] = decryptConfig(val, privateKey);
+      decryptedConfig[key] = decryptConfig(val as RenovateConfig, privateKey);
     }
   }
   delete decryptedConfig.encrypted;

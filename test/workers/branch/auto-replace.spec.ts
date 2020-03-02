@@ -21,11 +21,6 @@ describe('workers/branch/auto-replace', () => {
       };
       parentBranch = undefined;
     });
-    it('throws on error', async () => {
-      await expect(
-        doAutoReplace(upgrade, 'existing content', parentBranch)
-      ).rejects.toThrow();
-    });
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
       parentBranch = 'some existing branch';
@@ -54,7 +49,6 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.autoReplaceData = {
         depIndex: 0,
-        replaceString: script,
       };
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();

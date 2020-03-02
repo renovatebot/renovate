@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/cargo getPkgReleases processes real data 1`] = `
+exports[`datasource/crate getPkgReleases processes real data 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -204,7 +204,7 @@ Object {
 }
 `;
 
-exports[`datasource/cargo getPkgReleases processes real data 2`] = `
+exports[`datasource/crate getPkgReleases processes real data 2`] = `
 Object {
   "releases": Array [
     Object {
@@ -269,4 +269,4 @@ Object {
 }
 `;
 
-exports[`datasource/cargo getPkgReleases throws for 5xx 1`] = `[Error: registry-failure]`;
+exports[`datasource/crate getPkgReleases throws for 5xx 1`] = `[Error: registry-failure]`;

@@ -5,7 +5,7 @@ describe('platform/utils/pr-body', () => {
   let prBody: string;
   beforeAll(async () => {
     prBody = await fs.readFile(
-      'test/platform/utils/_fixtures/pr-body.txt',
+      'test/platform/utils/__fixtures__/pr-body.txt',
       'utf8'
     );
   });

@@ -6,7 +6,8 @@ import {
   ReleaseResult,
   Release,
 } from '../common';
-import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
+
+export const id = 'crate';
 
 export async function getPkgReleases({
   lookupName,
@@ -15,7 +16,7 @@ export async function getPkgReleases({
     return null;
   }
 
-  const cacheNamespace = 'datasource-cargo';
+  const cacheNamespace = 'datasource-crate';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
@@ -45,7 +46,7 @@ export async function getPkgReleases({
   const crateUrl = baseUrl + path;
   try {
     let res: any = await got(crateUrl, {
-      hostType: DATASOURCE_CARGO,
+      hostType: id,
     });
     if (!res || !res.body) {
       logger.warn(
@@ -109,10 +110,7 @@ export async function getPkgReleases({
     ) {
       throw new DatasourceError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'cargo crates.io lookup failure: Unknown error'
-    );
+    logger.warn({ err, lookupName }, 'crates.io lookup failure: Unknown error');
     return null;
   }
 }

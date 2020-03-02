@@ -9,7 +9,7 @@ jest.mock('../../../lib/platform');
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig;
+  config = getConfig();
 });
 
 describe('workers/repository/error-config', () => {

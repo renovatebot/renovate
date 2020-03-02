@@ -1,15 +1,12 @@
-import {
-  commitFilesToBranch,
-  CommitConfig,
-} from '../../../lib/workers/branch/commit';
-import { defaultConfig, platform } from '../../util';
-import { RenovateConfig } from '../../../lib/config';
+import { commitFilesToBranch } from '../../../lib/workers/branch/commit';
+import { defaultConfig, platform, partial } from '../../util';
+import { BranchConfig } from '../../../lib/workers/common';
 
 describe('workers/branch/automerge', () => {
   describe('commitFilesToBranch', () => {
-    let config: RenovateConfig & CommitConfig;
+    let config: BranchConfig;
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         ...defaultConfig,
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
@@ -18,7 +15,7 @@ describe('workers/branch/automerge', () => {
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
         updatedArtifacts: [],
-      };
+      });
       jest.resetAllMocks();
       platform.commitFilesToBranch.mockResolvedValueOnce('abc123');
     });

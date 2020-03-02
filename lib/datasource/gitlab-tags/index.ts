@@ -5,6 +5,8 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: glGot } = api;
 
+export const id = 'gitlab-tags';
+
 const cacheNamespace = 'datasource-gitlab';
 function getCacheKey(depHost: string, repo: string): string {
   const type = 'tags';

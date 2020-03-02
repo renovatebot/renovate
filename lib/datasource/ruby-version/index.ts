@@ -4,6 +4,8 @@ import got from '../../util/got';
 import { isVersion } from '../../versioning/ruby';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
+export const id = 'ruby-version';
+
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 
 export async function getPkgReleases(

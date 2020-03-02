@@ -4,7 +4,7 @@ import { RenovateConfig, getConfig } from '../../util';
 let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig;
+  config = getConfig();
 });
 
 describe('workers/repository/result', () => {

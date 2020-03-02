@@ -3,9 +3,11 @@ import { mock } from 'jest-mock-extended';
 
 import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
-import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
+import { BranchConfig, BranchUpgradeConfig } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
 import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platforms';
+
+type PrUpgrade = BranchUpgradeConfig;
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -90,7 +92,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('closes master issue when all branches are automerged and masterIssueAutoclose is true', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         { ...mock<BranchConfig>(), prTitle: 'pr1', res: 'automerged' },
         {
           ...mock<BranchConfig>(),
@@ -134,11 +136,11 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
           res: 'needs-approval',
           branchName: 'branchName1',
         },
@@ -201,7 +203,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_8_PR.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_8_PR.txt',
           'utf8'
         )
       );
@@ -213,7 +215,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 2 PR pr-edited', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -244,7 +246,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_2_PR_edited.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_2_PR_edited.txt',
           'utf8'
         )
       );
@@ -258,7 +260,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 3 PR in progress and rebase all option', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -297,7 +299,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_3_PR_in_progress.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_3_PR_in_progress.txt',
           'utf8'
         )
       );
@@ -312,7 +314,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 2 PR closed / ignored', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -344,7 +346,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_2_PR_closed_ignored.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_2_PR_closed_ignored.txt',
           'utf8'
         )
       );
@@ -362,7 +364,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 3 PR in approval', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -405,7 +407,7 @@ describe('workers/repository/master-issue', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
-          'test/workers/repository/_fixtures/master-issue_with_3_PR_in_approval.txt',
+          'test/workers/repository/__fixtures__/master-issue_with_3_PR_in_approval.txt',
           'utf8'
         )
       );

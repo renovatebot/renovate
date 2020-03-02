@@ -1,20 +1,11 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { FileData, platform } from '../../platform';
+import { platform } from '../../platform';
 import { logger } from '../../logger';
-import { RenovateConfig } from '../../config';
-
-export type CommitConfig = RenovateConfig & {
-  baseBranch?: string;
-  branchName: string;
-  commitMessage: string;
-  excludeCommitPaths?: string[];
-  updatedPackageFiles: FileData[];
-  updatedArtifacts: FileData[];
-};
+import { BranchConfig } from '../common';
 
 export async function commitFilesToBranch(
-  config: CommitConfig
+  config: BranchConfig
 ): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if

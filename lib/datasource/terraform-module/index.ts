@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { DATASOURCE_TERRAFORM } from '../../constants/data-binary-source';
+
+export const id = 'terraform-module';
 
 interface RegistryRepository {
   registry: string;
@@ -60,7 +61,7 @@ export async function getPkgReleases({
     { registry, terraformRepository: repository },
     'terraform.getDependencies()'
   );
-  const cacheNamespace = 'terraform';
+  const cacheNamespace = 'terraform-module';
   const pkgUrl = `${registry}/v1/modules/${repository}`;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
@@ -74,7 +75,7 @@ export async function getPkgReleases({
     const res: TerraformRelease = (
       await got(pkgUrl, {
         json: true,
-        hostType: DATASOURCE_TERRAFORM,
+        hostType: id,
       })
     ).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;

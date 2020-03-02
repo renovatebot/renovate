@@ -2,6 +2,8 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult, Release } from '../common';
 
+export const id = 'galaxy';
+
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -35,7 +37,7 @@ export async function getPkgReleases({
 
   try {
     let res: any = await got(galaxyAPIUrl, {
-      hostType: 'galaxy',
+      hostType: id,
     });
     if (!res || !res.body) {
       logger.warn(
