@@ -77,6 +77,7 @@ export interface RenovateConfig
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   warnings?: ValidationMessage[];
+  customManagers?: any[];
 }
 
 export type UpdateType =
