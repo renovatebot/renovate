@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { BranchConfig } from '../../common';
 
-export function sortBranches(branches: BranchConfig[]): void {
+export function sortBranches(branches: Partial<BranchConfig>[]): void {
   // Sort branches
   const sortOrder = [
     'pin',
