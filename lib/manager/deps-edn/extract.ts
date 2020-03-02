@@ -1,5 +1,5 @@
-import { DEFAULT_MAVEN_REPO } from '../maven/extract';
-import { expandDepName, DEFAULT_CLOJARS_REPO } from '../leiningen/extract';
+import { CLOJARS_REPO, MAVEN_REPO } from '../../datasource/maven/common';
+import { expandDepName } from '../leiningen/extract';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourceMaven from '../../datasource/maven';
 
@@ -24,7 +24,7 @@ export function extractPackageFile(content: string): PackageFile {
       depName: expandDepName(depName),
       currentValue,
       fileReplacePosition,
-      registryUrls: [DEFAULT_CLOJARS_REPO, DEFAULT_MAVEN_REPO],
+      registryUrls: [CLOJARS_REPO, MAVEN_REPO],
     });
   }
 

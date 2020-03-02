@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import nock from 'nock';
 import { getPkgReleases } from '.';
-import { DEFAULT_MAVEN_REPO } from '../../manager/maven/extract';
+import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir, SBT_PLUGINS_REPO } from '../sbt-plugin/util';
 
 const mavenIndexHtml = fs.readFileSync(
@@ -110,7 +110,7 @@ describe('datasource/sbt', () => {
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
             'https://failed_repo/maven',
-            DEFAULT_MAVEN_REPO,
+            MAVEN_REPO,
             SBT_PLUGINS_REPO,
           ],
         })
@@ -124,7 +124,7 @@ describe('datasource/sbt', () => {
       expect(
         await getPkgReleases({
           lookupName: 'org.scalatest:scalatest_2.12',
-          registryUrls: [DEFAULT_MAVEN_REPO, SBT_PLUGINS_REPO],
+          registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',

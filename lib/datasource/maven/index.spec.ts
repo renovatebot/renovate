@@ -45,10 +45,10 @@ describe('datasource/maven', () => {
       password: 'password',
     });
     nock.disableNetConnect();
-    nock('http://central.maven.org')
+    nock('https://repo.maven.apache.org')
       .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(200, MYSQL_MAVEN_METADATA);
-    nock('http://central.maven.org')
+    nock('https://repo.maven.apache.org')
       .get(
         '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
       )
@@ -150,7 +150,7 @@ describe('datasource/maven', () => {
       const releases = await maven.getPkgReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
-        registryUrls: ['http://central.maven.org/maven2/'],
+        registryUrls: ['https://repo.maven.apache.org/maven2/'],
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
@@ -160,7 +160,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
-          'http://central.maven.org/maven2/',
+          'https://repo.maven.apache.org/maven2/',
           'http://failed_repo/',
           'http://unauthorized_repo/',
           'http://dns_error_repo',
@@ -185,13 +185,28 @@ describe('datasource/maven', () => {
         })
       ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
+    it('should throw registry-failure if default maven repo fails', async () => {
+      nock('https://repo.maven.apache.org')
+        .get('/maven2/org/artifact/maven-metadata.xml')
+        .times(4)
+        .reply(503);
+
+      expect.assertions(1);
+      await expect(
+        maven.getPkgReleases({
+          ...config,
+          lookupName: 'org:artifact',
+          registryUrls: ['https://repo.maven.apache.org/maven2/'],
+        })
+      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+    });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {
       const releases = await maven.getPkgReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
-          'http://central.maven.org/maven2/',
+          'https://repo.maven.apache.org/maven2/',
           'http://failed_repo/',
           'ftp://protocol_error_repo',
         ],
@@ -217,7 +232,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
-          'http://central.maven.org/maven2/',
+          'https://repo.maven.apache.org/maven2/',
           'http://invalid_metadata_repo/maven2/',
         ],
       });
@@ -235,7 +250,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
-          'http://central.maven.org/maven2/',
+          'https://repo.maven.apache.org/maven2/',
           'http://invalid_metadata_repo/maven2/',
         ],
       });
@@ -246,7 +261,7 @@ describe('datasource/maven', () => {
       const releases = await maven.getPkgReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
-        registryUrls: ['http://central.maven.org/maven2'],
+        registryUrls: ['https://repo.maven.apache.org/maven2'],
       });
       expect(releases).not.toBeNull();
     });
@@ -256,7 +271,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'mysql:mysql-connector-java',
       });
-      expect(releases).toBeNull();
+      expect(releases).not.toBeNull();
     });
     it('should return null for invalid registryUrls', async () => {
       const releases = await maven.getPkgReleases({
