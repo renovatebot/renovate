@@ -1,6 +1,7 @@
 import * as handlebars from 'handlebars';
 import { CustomExtractConfig, PackageFile, Result } from '../common';
 import { regEx } from '../../util/regex';
+import { logger } from '../../logger';
 
 export const autoReplace = true;
 
@@ -30,7 +31,15 @@ export function extractPackageFile(
       for (const field of fields) {
         const fieldTemplate = `${field}Template`;
         if (config[fieldTemplate]) {
-          dep[field] = handlebars.compile(config[fieldTemplate])(groups);
+          try {
+            dep[field] = handlebars.compile(config[fieldTemplate])(groups);
+          } catch (err) {
+            logger.warn(
+              { template: config[fieldTemplate] },
+              'Error compiling handlebars template for custom manager'
+            );
+            return null;
+          }
         } else {
           dep[field] = groups[field];
         }

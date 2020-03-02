@@ -175,5 +175,70 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+    it('errors if no customManager matchStrings', async () => {
+      const config = {
+        customManagers: [
+          {
+            matchStrings: [],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('validates regEx for each matchStrings', async () => {
+      const config = {
+        customManagers: [
+          {
+            matchStrings: ['***$}{]]['],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('passes if customManager fields are present', async () => {
+      const config = {
+        customManagers: [
+          {
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+    it('errors if customManager fields are missing', async () => {
+      const config = {
+        customManagers: [
+          {
+            matchStrings: ['ENV (.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+      expect(errors).toHaveLength(1);
+    });
   });
 });

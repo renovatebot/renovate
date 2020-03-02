@@ -40,4 +40,18 @@ describe('manager/custom/extract', () => {
     const res = await extractPackageFile('', 'Dockerfile', config);
     expect(res).toBeNull();
   });
+  it('returns null if invalid handlebars template', async () => {
+    const config = {
+      matchStrings: [
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+      ],
+      versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver',
+    };
+    const res = await extractPackageFile(
+      dockerfileContent,
+      'Dockerfile',
+      config
+    );
+    expect(res).toBeNull();
+  });
 });
