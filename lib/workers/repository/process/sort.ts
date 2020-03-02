@@ -1,11 +1,7 @@
 import { logger } from '../../../logger';
 import { BranchConfig } from '../../common';
 
-export type SortBranchConfig = Pick<
-  BranchConfig,
-  'prPriority' | 'updateType' | 'prTitle'
-> &
-  Partial<BranchConfig>;
+export type SortBranchConfig = Partial<BranchConfig>;
 
 export function sortBranches(branches: SortBranchConfig[]): void {
   // Sort branches

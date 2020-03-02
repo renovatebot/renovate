@@ -2,11 +2,9 @@ import * as handlebars from 'handlebars';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import mdTable from 'markdown-table';
-import { Merge } from 'type-fest';
 import { logger } from '../../../logger';
-import { mergeChildConfig, RenovateConfig, GroupConfig } from '../../../config';
-import { PackageDependency } from '../../../manager/common';
-import { LookupUpdate } from '../process/lookup/common';
+import { mergeChildConfig } from '../../../config';
+import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
 function ifTypesGroup(
   depNames: string[],
@@ -61,38 +59,12 @@ function getTableValues(
   return null;
 }
 
-export interface BranchUpgradeConfig
-  extends Merge<RenovateConfig, PackageDependency>,
-    Partial<LookupUpdate> {
-  commitMessage?: string;
-  currentDigest?: string;
-  currentDigestShort?: string;
-  currentValue?: string;
-  currentVersion?: string;
-  group?: GroupConfig;
-
-  groupName?: string;
-  groupSlug?: string;
-  language?: string;
-  manager?: string;
-  packageFile?: string;
-  prTitle?: string;
-  releaseTimestamp?: string;
-}
-
-export interface BranchUpgrade extends BranchUpgradeConfig {
-  upgrades: BranchUpgradeConfig[];
-  hasTypes?: boolean;
-  canBeUnpublished?: boolean;
-  releaseTimestamp?: string;
-}
-
 export function generateBranchConfig(
   branchUpgrades: BranchUpgradeConfig[]
-): BranchUpgrade {
+): BranchConfig {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
-  let config: BranchUpgrade = {
+  let config: BranchConfig = {
     upgrades: [],
   } as any;
   const hasGroupName = branchUpgrades[0].groupName !== null;
@@ -331,7 +303,7 @@ export function generateBranchConfig(
     });
   }
   // Now assign first upgrade's config as branch config
-  config = { ...config, ...config.upgrades[0], releaseTimestamp } as any; // TODO: fixme
+  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme
   config.canBeUnpublished = config.upgrades.some(
     upgrade => upgrade.canBeUnpublished
   );

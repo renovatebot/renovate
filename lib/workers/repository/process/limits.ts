@@ -4,8 +4,7 @@ import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { BranchConfig } from '../../common';
 
-export type LimitBranchConfig = Pick<BranchConfig, 'branchName'> &
-  Partial<BranchConfig>;
+export type LimitBranchConfig = Partial<BranchConfig>;
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig

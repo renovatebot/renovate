@@ -3,10 +3,7 @@ import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
 import { BranchConfig } from '../../../common';
 
-export type PrBranchConfig = Pick<
-  BranchConfig,
-  'upgrades' | 'baseBranch' | 'branchName' | 'schedule' | 'prTitle'
->;
+export type PrBranchConfig = BranchConfig;
 
 export function getPrList(
   config: RenovateConfig,

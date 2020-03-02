@@ -3,7 +3,7 @@ import { mergeChildConfig, RenovateConfig } from '../../../config';
 import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
 import { platform } from '../../../platform';
 import { WriteUpdateResult } from './write';
-import { BranchConfig, RepositoryConfig } from '../../common';
+import { RepositoryConfig, BranchConfig } from '../../common';
 
 export async function processRepo(
   repoConfig: RenovateConfig

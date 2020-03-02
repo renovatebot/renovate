@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { fromStream as _fromStream } from 'hasha';
 import { resolve } from 'path';
 import { updateDependency } from './update';
+import { UpdateType } from '../../config';
 
 jest.mock('hasha');
 jest.mock('../../util/got');
@@ -99,7 +100,7 @@ describe('manager/bazel/update', () => {
         currentDigest: 'dec09d789f3dba190787f8b4454c7d3c936fed9e',
         newDigest: 'aaa09d789f3dba190787f8b4454c7d3c936fe123',
         newValue: 'v1.0.3',
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
       };
       const res = await updateDependency({
         fileContent: content,

@@ -2,12 +2,13 @@ import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
 import * as sourceGithub from './source-github';
 import { getInRangeReleases } from './releases';
-import { ChangeLogConfig, ChangeLogResult } from './common';
+import { ChangeLogResult } from './common';
+import { BranchUpgradeConfig } from '../../common';
 
 export * from './common';
 
 export async function getChangeLogJSON(
-  args: ChangeLogConfig
+  args: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
   const { sourceUrl, versioning, fromVersion, toVersion } = args;
   if (!sourceUrl) {

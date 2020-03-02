@@ -1,4 +1,6 @@
 import { Range } from 'semver';
+import { LogLevel } from 'bunyan';
+import { HostRule } from '../types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -15,34 +17,39 @@ export interface GroupConfig extends Record<string, unknown> {
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   automerge?: boolean;
+  branchPrefix?: string;
   branchName?: string;
 
   commitMessage?: string;
   enabled?: boolean;
-
+  enabledManagers?: string[];
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
   ignoreDeps?: string[];
+  ignorePaths?: string[];
   labels?: string[];
   managers?: string | string[];
   masterIssueApproval?: boolean;
+  npmrc?: string;
   platform?: string;
+  postUpgradeTasks?: PostUpgradeTasks;
+  prBodyColumns?: string[];
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
+  rebaseLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   requiredStatusChecks?: string[];
   schedule?: string[];
-
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
   statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
-  postUpgradeTasks?: PostUpgradeTasks;
+  unicodeEmoji?: boolean;
 }
 
 export interface GlobalConfig {
@@ -57,16 +64,27 @@ export interface RenovateAdminConfig {
 
   baseDir?: string;
   cacheDir?: string;
+  configWarningReuseIssue?: boolean;
   dryRun?: boolean;
 
   global?: GlobalConfig;
 
+  localDir?: string;
+  logFile?: string;
+  logFileLevel?: LogLevel;
+  logLevel?: LogLevel;
+  logContext?: string;
+
   onboarding?: boolean;
   onboardingBranch?: string;
+  onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
+
+  postUpdateOptions?: string[];
   privateKey?: string | Buffer;
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
+  trustLevel?: 'low' | 'high';
 }
 
 export type PostUpgradeTasks = {
@@ -94,13 +112,18 @@ export interface RenovateConfig
   baseBranch?: string;
   branchList?: string[];
   description?: string[];
-  errors?: ValidationMessage[];
 
+  endpoint?: string;
+  errors?: ValidationMessage[];
+  extends?: string[];
+
+  gitAuthor?: string;
+
+  hostRules?: HostRule[];
+
+  ignorePresets?: string[];
   includeForks?: boolean;
   isFork?: boolean;
-
-  localDir?: string;
-
   masterIssue?: boolean;
   masterIssueAutoclose?: boolean;
   masterIssueTitle?: string;

@@ -3,9 +3,11 @@ import { mock } from 'jest-mock-extended';
 
 import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
-import { BranchConfig, PrUpgrade } from '../../../lib/workers/common';
+import { BranchConfig, BranchUpgradeConfig } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
 import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platforms';
+
+type PrUpgrade = BranchUpgradeConfig;
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -90,7 +92,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('closes master issue when all branches are automerged and masterIssueAutoclose is true', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         { ...mock<BranchConfig>(), prTitle: 'pr1', res: 'automerged' },
         {
           ...mock<BranchConfig>(),
@@ -134,11 +136,11 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
           res: 'needs-approval',
           branchName: 'branchName1',
         },
@@ -213,7 +215,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 2 PR pr-edited', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -258,7 +260,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 3 PR in progress and rebase all option', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -312,7 +314,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 2 PR closed / ignored', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
@@ -362,7 +364,7 @@ describe('workers/repository/master-issue', () => {
     });
 
     it('checks an issue with 3 PR in approval', async () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',

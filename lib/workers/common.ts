@@ -1,28 +1,81 @@
-import { PrBodyUpgrade, PrBodyConfig } from './pr/body/common';
-import { PackageDependency } from '../manager/common';
-import { ChangeLogConfig } from './pr/changelog';
-import { RenovateSharedConfig, RenovateConfig } from '../config';
-import { StabilityConfig, UnpublishableConfig } from './branch/status-checks';
-import { CommitConfig } from './branch/commit';
-
-export type PrUpgrade = PrBodyUpgrade &
-  PackageDependency &
-  ChangeLogConfig &
-  PrBodyConfig & {
-    manager?: string;
-    hasUrls?: boolean;
-    githubName?: string | undefined;
-  };
-
-export type BranchConfig = RenovateSharedConfig &
-  StabilityConfig &
-  UnpublishableConfig &
-  CommitConfig &
-  PrBodyConfig<PrUpgrade> & {
-    forcePr?: boolean;
-  };
+import { Merge } from 'type-fest';
+import { PackageDependency, ArtifactError } from '../manager/common';
+import {
+  RenovateSharedConfig,
+  RenovateConfig,
+  GroupConfig,
+  RenovateAdminConfig,
+  ValidationMessage,
+} from '../config';
+import { LookupUpdate } from './repository/process/lookup/common';
+import { FileData, PlatformPrOptions } from '../platform';
+import { Release } from '../datasource';
 
 export type RepositoryConfig = RenovateConfig & {
   masterIssueChecks: Record<string, string>;
   masterIssueRebaseAllOpen: boolean;
 };
+
+export interface BranchUpgradeConfig
+  extends Merge<RenovateConfig, PackageDependency>,
+    Partial<LookupUpdate>,
+    RenovateSharedConfig {
+  artifactErrors?: ArtifactError[];
+  branchName: string;
+  commitMessage?: string;
+  currentDigest?: string;
+  currentDigestShort?: string;
+  currentValue?: string;
+  currentVersion?: string;
+
+  endpoint?: string;
+  excludeCommitPaths?: string[];
+  group?: GroupConfig;
+
+  groupName?: string;
+  groupSlug?: string;
+  language?: string;
+  manager?: string;
+  packageFile?: string;
+
+  parentBranch?: string;
+  prBodyNotes?: string[];
+  prPriority?: number;
+  prTitle?: string;
+  releases?: Release[];
+  releaseTimestamp?: string;
+
+  sourceDirectory?: string;
+  updatedPackageFiles?: FileData[];
+  updatedArtifacts?: FileData[];
+}
+
+export type ProcessBranchResult =
+  | 'already-existed'
+  | 'automerged'
+  | 'done'
+  | 'error'
+  | 'needs-approval'
+  | 'needs-pr-approval'
+  | 'not-scheduled'
+  | 'no-work'
+  | 'pending'
+  | 'pr-created'
+  | 'pr-edited'
+  | 'pr-hourly-limit-reached'
+  | 'rebase';
+
+export interface BranchConfig
+  extends BranchUpgradeConfig,
+    RenovateAdminConfig,
+    PlatformPrOptions {
+  automergeType?: string;
+  baseBranch?: string;
+  canBeUnpublished?: boolean;
+  errors?: ValidationMessage[];
+  hasTypes?: boolean;
+  releaseTimestamp?: string;
+
+  res?: ProcessBranchResult;
+  upgrades: BranchUpgradeConfig[];
+}

@@ -4,13 +4,10 @@ import { clean as cleanGitRef } from 'clean-git-ref';
 import { Merge } from 'type-fest';
 import { logger, addMeta, removeMeta } from '../../../logger';
 
-import {
-  generateBranchConfig,
-  BranchUpgradeConfig,
-  BranchUpgrade,
-} from './generate';
+import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
+import { BranchUpgradeConfig, BranchConfig } from '../../common';
 
 /**
  * Clean git branch name
@@ -30,7 +27,8 @@ function cleanBranchName(branchName: string): string {
 export type BranchifiedConfig = Merge<
   RenovateConfig,
   {
-    branches: BranchUpgrade[];
+    branches: BranchConfig[];
+    branchList: string[];
   }
 >;
 export function branchifyUpgrades(
@@ -47,7 +45,7 @@ export function branchifyUpgrades(
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
-  const branches: BranchUpgrade[] = [];
+  const branches: BranchConfig[] = [];
   for (const u of updates) {
     const update: BranchUpgradeConfig = { ...u } as any;
     // Massage legacy vars just in case
