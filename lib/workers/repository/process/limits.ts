@@ -4,8 +4,6 @@ import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { BranchConfig } from '../../common';
 
-export type LimitBranchConfig = Partial<BranchConfig>;
-
 export async function getPrHourlyRemaining(
   config: RenovateConfig
 ): Promise<number> {
@@ -43,7 +41,7 @@ export async function getPrHourlyRemaining(
 
 export async function getConcurrentPrsRemaining(
   config: RenovateConfig,
-  branches: LimitBranchConfig[]
+  branches: BranchConfig[]
 ): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
@@ -63,7 +61,7 @@ export async function getConcurrentPrsRemaining(
 
 export async function getPrsRemaining(
   config: RenovateConfig,
-  branches: LimitBranchConfig[]
+  branches: BranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);

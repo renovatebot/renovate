@@ -11,11 +11,6 @@ import { LookupUpdate } from './repository/process/lookup/common';
 import { FileData, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
 
-export type RepositoryConfig = RenovateConfig & {
-  masterIssueChecks: Record<string, string>;
-  masterIssueRebaseAllOpen: boolean;
-};
-
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
     Partial<LookupUpdate>,

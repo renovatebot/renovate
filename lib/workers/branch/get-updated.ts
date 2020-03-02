@@ -8,12 +8,12 @@ import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { doAutoReplace } from './auto-replace';
 import { BranchConfig } from '../common';
 
-export type PackageFilesResult = {
+export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
   parentBranch?: string;
   updatedPackageFiles: FileData[];
   updatedArtifacts: FileData[];
-};
+}
 
 export async function getUpdatedPackageFiles(
   config: BranchConfig

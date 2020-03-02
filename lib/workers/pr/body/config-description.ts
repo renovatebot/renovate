@@ -1,10 +1,10 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
-import { PrBodyConfig } from './common';
+import { BranchConfig } from '../../common';
 import { BRANCH_STATUS_FAILED } from '../../../constants/branch-constants';
 
 export async function getPrConfigDescription(
-  config: PrBodyConfig
+  config: BranchConfig
 ): Promise<string> {
   let prBody = `\n\n---\n\n### Renovate configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);

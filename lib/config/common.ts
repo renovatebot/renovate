@@ -124,8 +124,11 @@ export interface RenovateConfig
   ignorePresets?: string[];
   includeForks?: boolean;
   isFork?: boolean;
+
   masterIssue?: boolean;
   masterIssueAutoclose?: boolean;
+  masterIssueChecks?: Record<string, string>;
+  masterIssueRebaseAllOpen?: boolean;
   masterIssueTitle?: string;
 
   packageRules?: PackageRule[];
