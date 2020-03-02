@@ -19,11 +19,17 @@ describe('workers/repository/extract/index', () => {
       const res = await extractAllDependencies(config);
       expect(Object.keys(res).includes('ansible')).toBe(true);
     });
-    it('skips non-enabled maangers', async () => {
+    it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       const res = await extractAllDependencies(config);
       expect(res).toMatchSnapshot();
+    });
+    it('checks custom managers', async () => {
+      managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
+      config.customManagers = [{}];
+      const res = await extractAllDependencies(config);
+      expect(Object.keys(res).includes('ansible')).toBe(true);
     });
   });
 });
