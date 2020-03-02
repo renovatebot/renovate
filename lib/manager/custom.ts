@@ -1,3 +1,4 @@
+import * as handlebars from 'handlebars';
 import { CustomExtractConfig, PackageFile, Result } from './common';
 import { regEx } from '../util/regex';
 
@@ -15,12 +16,21 @@ export function extractPackageFile(
     if (matchResult) {
       const dep: any = {};
       const { groups } = matchResult;
-      dep.depName = config.depNameTemplate || groups.depName;
-      dep.lookupName = config.lookupNameTemplate || groups.lookupName;
-      dep.currentValue = config.currentValueTemplate || groups.currentValue;
-      dep.datasource = config.datasourceTemplate || groups.datasource;
-      dep.versioning =
-        config.versioningTemplate || groups.versioning || 'semver';
+      const fields = [
+        'depName',
+        'lookupName',
+        'currentValue',
+        'datasource',
+        'versioning',
+      ];
+      for (const field of fields) {
+        const fieldTemplate = `${field}Template`;
+        if (config[fieldTemplate]) {
+          dep[field] = handlebars.compile(config[fieldTemplate])(groups);
+        } else {
+          dep[field] = groups[field];
+        }
+      }
       dep.autoReplaceData = {
         depIndex,
         replaceString: `${matchResult[0]}`,
