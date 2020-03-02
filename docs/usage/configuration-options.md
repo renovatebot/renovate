@@ -247,27 +247,23 @@ Example:
 
 ### depNameTemplate
 
-If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field. It will be compiled using `handlebars` and the regex `groups` result.
 
 ### lookupNameTemplate
 
-`lookupName` is used for looking up dependency versions. It is sourced in this order:
-
-- From a named capture group, if present
-- From inside the `customManagers` config (this field)
-- Defaults to `depName` if neither of the above are defined
+`lookupName` is used for looking up dependency versions. It will be compiled using `handlebars` and the regex `groups` result. It will default to the value of `depName` if left unconfigured/undefined.
 
 ### currentValueTemplate
 
-`currentValue` is usually extracted directly using a capture group, but it can also be composed using this configuration field.
+`currentValue` is usually extracted directly using a capture group, but it can also be composed using this configuration field. It will be compiled using `handlebars` and the regex `groups` result.
 
 ### datasourceTemplate
 
-If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
+If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field. It will be compiled using `handlebars` and the regex `groups` result.
 
 ### versioningTemplate
 
-If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
+If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field. It will be compiled using `handlebars` and the regex `groups` result.
 
 ## description
 
