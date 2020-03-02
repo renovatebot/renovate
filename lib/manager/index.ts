@@ -48,7 +48,6 @@ const managers = loadModules<ManagerApi>(__dirname, validateManager);
 managers.custom = {
   defaultConfig: {
     autoReplace: true,
-    versioning: 'semver',
   },
   extractPackageFile: customManager.extractPackageFile,
 };
