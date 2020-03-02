@@ -93,7 +93,7 @@ export async function getDependency(
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
     logger.trace(
-      { token: maskToken(process.env.NPM_TOKEN), npmName: name },
+      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
       'Using auth (via process.env.NPM_TOKEN) for npm lookup'
     );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
@@ -104,7 +104,7 @@ export async function getDependency(
     });
     if (opts.token) {
       logger.trace(
-        { token: maskToken(opts.token), npmName: name },
+        { token: maskToken(opts.token), npmName: packageName },
         'Using auth (via hostRules) for npm lookup'
       );
       headers.authorization = `Bearer ${opts.token}`;
