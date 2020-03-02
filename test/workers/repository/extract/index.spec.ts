@@ -27,9 +27,9 @@ describe('workers/repository/extract/index', () => {
     });
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      config.customManagers = [{}];
+      config.customManagers = [{ matchStrings: [''] }];
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res).includes('ansible')).toBe(true);
+      expect(Object.keys(res).includes('custom')).toBe(true);
     });
   });
 });

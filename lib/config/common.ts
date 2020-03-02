@@ -48,6 +48,14 @@ export type RenovateRepository =
       repository: string;
     };
 
+export interface CustomManager {
+  matchStrings: string[];
+  depNameTemplate?: string;
+  datasourceTemplate?: string;
+  lookupNameTemplate?: string;
+  versioningTemplate?: string;
+}
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends RenovateSharedConfig,
@@ -77,7 +85,7 @@ export interface RenovateConfig
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   warnings?: ValidationMessage[];
-  customManagers?: any[];
+  customManagers?: CustomManager[];
 }
 
 export type UpdateType =
