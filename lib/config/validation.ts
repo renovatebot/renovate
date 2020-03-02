@@ -234,7 +234,7 @@ export async function validateConfig(
                       if (
                         !customManager[`${field}Template`] &&
                         !customManager.matchStrings.some(matchString =>
-                          matchString.includes(`(?<${field}`)
+                          matchString.includes(`(?<${field}>`)
                         )
                       ) {
                         errors.push({
