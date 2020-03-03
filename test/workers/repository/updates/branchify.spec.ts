@@ -1,7 +1,6 @@
 import { RenovateConfig, mocked } from '../../../util';
 import { branchifyUpgrades } from '../../../../lib/workers/repository/updates/branchify';
 import * as _flatten from '../../../../lib/workers/repository/updates/flatten';
-import { BranchConfig } from '../../../../lib/workers/common';
 import { getConfig } from '../../../../lib/config/defaults';
 
 const flattenUpdates = mocked(_flatten).flattenUpdates;
@@ -238,7 +237,7 @@ describe('workers/repository/updates/branchify', () => {
       );
 
       branchifyUpgrades(config, {}).branches.forEach(
-        ({ branchName }: BranchConfig, index: number) => {
+        ({ branchName }, index: number) => {
           expect(branchName).toBe(fixtures[index].expectedBranchName);
         }
       );

@@ -35,7 +35,7 @@ export function updateDependency({
     lines[upgrade.managerData.lineNumber] = newValue;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new package version');
+    logger.debug({ err }, 'Error setting new package version');
     return null;
   }
 }

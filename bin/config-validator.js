@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
 const fs = require('fs-extra');
-const os = require('os');
 const { validateConfig } = require('../dist/config/validation');
 const { massageConfig } = require('../dist/config/massage');
 const { getConfig } = require('../dist/config/file');
-const cache = require('../dist/workers/global/cache');
 const { configFileNames } = require('../dist/config/app-strings');
 
 /* eslint-disable no-console */

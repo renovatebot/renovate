@@ -27,7 +27,7 @@ export function updateDependency({
 
     return yawn.yaml;
   } catch (err) {
-    logger.info({ err }, 'Error setting new .gitlab-ci.yml include value');
+    logger.debug({ err }, 'Error setting new .gitlab-ci.yml include value');
     return null;
   }
 }

@@ -5,7 +5,7 @@ describe('platform/utils/read-only-issue-body', () => {
   let issueBody: string;
   beforeAll(async () => {
     issueBody = await fs.readFile(
-      'test/platform/utils/_fixtures/issue-body.txt',
+      'test/platform/utils/__fixtures__/issue-body.txt',
       'utf8'
     );
   });

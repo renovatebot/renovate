@@ -8,7 +8,7 @@ import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { platform } from '../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
-import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
+import * as datasourcePackagist from '../../datasource/packagist';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -71,7 +71,7 @@ export async function updateArtifacts({
           if (regUrl) {
             const { host } = URL.parse(regUrl);
             const hostRule = hostRules.find({
-              hostType: DATASOURCE_PACKAGIST,
+              hostType: datasourcePackagist.id,
               url: regUrl,
             });
             // istanbul ignore else

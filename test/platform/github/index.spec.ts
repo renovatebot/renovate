@@ -1,5 +1,10 @@
 import fs from 'fs-extra';
-import { GotApi, GotResponse, RepoConfig } from '../../../lib/platform/common';
+import {
+  GotApi,
+  GotResponse,
+  RepoConfig,
+  Platform,
+} from '../../../lib/platform/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
@@ -10,9 +15,10 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
+import { mocked } from '../../util';
 
 describe('platform/github', () => {
-  let github: typeof import('../../../lib/platform/github');
+  let github: Platform;
   let api: jest.Mocked<GotApi>;
   let got: jest.Mock<Promise<Partial<GotResponse>>>;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
@@ -25,11 +31,12 @@ describe('platform/github', () => {
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     jest.mock('../../../lib/util/host-rules');
     jest.mock('../../../lib/util/got');
-    api = (await import('../../../lib/platform/github/gh-got-wrapper'))
-      .api as any;
+    api = mocked(
+      (await import('../../../lib/platform/github/gh-got-wrapper')).api
+    );
     got = (await import('../../../lib/util/got')).default as any;
     github = await import('../../../lib/platform/github');
-    hostRules = (await import('../../../lib/util/host-rules')) as any;
+    hostRules = mocked(await import('../../../lib/util/host-rules'));
     jest.mock('../../../lib/platform/git/storage');
     GitStorage = (await import('../../../lib/platform/git/storage'))
       .Storage as any;
@@ -62,11 +69,11 @@ describe('platform/github', () => {
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
-    'test/platform/github/_fixtures/graphql/pullrequest-1.json',
+    'test/platform/github/__fixtures__/graphql/pullrequest-1.json',
     'utf8'
   );
   const graphqlClosedPullrequests = fs.readFileSync(
-    'test/platform/github/_fixtures/graphql/pullrequests-closed.json',
+    'test/platform/github/__fixtures__/graphql/pullrequests-closed.json',
     'utf8'
   );
 

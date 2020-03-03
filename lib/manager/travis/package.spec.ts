@@ -1,11 +1,11 @@
 import { getPackageUpdates } from './package';
-import { getPkgReleases as _getPkgReleases } from '../../datasource/github';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/github-tags';
 import { getConfig } from '../../config/defaults';
 
 const defaultConfig = getConfig();
 const getPkgReleases: any = _getPkgReleases;
 
-jest.mock('../../datasource/github');
+jest.mock('../../datasource/github-tags');
 
 describe('lib/manager/travis/package', () => {
   describe('getPackageUpdates', () => {

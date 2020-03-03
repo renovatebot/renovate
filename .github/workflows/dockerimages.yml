@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - master
+      - 'renovate/**'
 
   pull_request:
 
 env:
   PLATFORM: linux/amd64
-  # TODO: Replace with renovate/renovate
-  DOCKER_REPO: renovate/cache-test
+  DOCKER_CACHE_TAG: _cache
+  DOCKER_REPO: renovate/renovate
 
 jobs:
   build:
@@ -19,20 +20,7 @@ jobs:
 
     timeout-minutes: 20
 
-    strategy:
-      matrix:
-        tag: [latest, slim]
-
-    env:
-      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
-      DOCKER_TAG: ${{ matrix.tag }}
-
     steps:
-      - name: Overwrite env for latest tag
-        if: matrix.tag == 'latest'
-        run: |
-          echo "::set-env name=DOCKER_FILE::Dockerfile"
-
       - name: Set up Docker Buildx
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
@@ -41,32 +29,22 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build the Docker image
+      - name: Build the Docker images
         run: |
-          docker buildx build \
-            --platform ${PLATFORM} \
-            --output=type=docker \
-            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --tag=renovate \
-            --file=./${DOCKER_FILE} .
+          docker buildx bake \
+            --file docker/bake.hcl \
+            --set settings.output=type=docker \
+            default
 
-      - name: Test the Docker image
+      - name: Test the Docker images
         run: |
-          docker run --rm -t renovate --version
+          docker run --rm -t ${DOCKER_REPO} --version
+          docker run --rm -t ${DOCKER_REPO}:slim --version
 
-      - name: Image history
-        run: docker history renovate
-      - name: Image size
-        run: docker image ls | grep renovate
+      - name: Image history latest
+        run: docker history ${DOCKER_REPO}
+      - name: Image history slim
+        run: docker history ${DOCKER_REPO}:slim
 
-      - name: Push the Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
-          docker buildx build \
-            --platform ${PLATFORM} \
-            --output=type=registry \
-            --cache-from=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --cache-to=${DOCKER_REPO}:cache-${DOCKER_TAG} \
-            --tag=${DOCKER_REPO}:test-${DOCKER_TAG} \
-            --file=./${DOCKER_FILE} .
+      - name: Images size
+        run: docker image ls | grep ${DOCKER_REPO}

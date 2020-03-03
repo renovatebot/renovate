@@ -1,5 +1,5 @@
 import { add, find, findAll, clear, hosts } from '../../lib/util/host-rules';
-import { DATASOURCE_NUGET } from '../../lib/constants/data-binary-source';
+import * as datasourceNuget from '../../lib/datasource/nuget';
 import { PLATFORM_TYPE_AZURE } from '../../lib/constants/platforms';
 
 describe('util/host-rules', () => {
@@ -49,21 +49,21 @@ describe('util/host-rules', () => {
     });
     it('needs exact host matches', () => {
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         hostName: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
       });
-      expect(find({ hostType: DATASOURCE_NUGET })).toMatchSnapshot();
+      expect(find({ hostType: datasourceNuget.id })).toMatchSnapshot();
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.org' })
+        find({ hostType: datasourceNuget.id, url: 'https://nuget.org' })
       ).not.toEqual({});
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://not.nuget.org' })
+        find({ hostType: datasourceNuget.id, url: 'https://not.nuget.org' })
       ).toEqual({});
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://not-nuget.org' })
+        find({ hostType: datasourceNuget.id, url: 'https://not-nuget.org' })
       ).toEqual({});
     });
     it('matches on empty rules', () => {
@@ -71,16 +71,16 @@ describe('util/host-rules', () => {
         json: true,
       });
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://api.github.com' })
+        find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
       ).toEqual({ json: true });
     });
     it('matches on hostType', () => {
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         token: 'abc',
       });
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.local/api' })
+        find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
     });
     it('matches on domainName', () => {
@@ -89,7 +89,7 @@ describe('util/host-rules', () => {
         token: 'def',
       });
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://api.github.com' })
+        find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
           .token
       ).toEqual('def');
     });
@@ -99,50 +99,50 @@ describe('util/host-rules', () => {
         token: 'abc',
       });
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.local/api' })
+        find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
     });
     it('matches on hostType and endpoint', () => {
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         baseUrl: 'https://nuget.local/api',
         token: 'abc',
       });
       expect(
-        find({ hostType: DATASOURCE_NUGET, url: 'https://nuget.local/api' })
+        find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
           .token
       ).toEqual('abc');
     });
     it('matches on endpoint subresource', () => {
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         baseUrl: 'https://nuget.local/api',
         token: 'abc',
       });
       expect(
         find({
-          hostType: DATASOURCE_NUGET,
+          hostType: datasourceNuget.id,
           url: 'https://nuget.local/api/sub-resource',
         })
       ).toMatchSnapshot();
     });
     it('returns hosts', () => {
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         token: 'aaaaaa',
       });
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         baseUrl: 'https://nuget.local/api',
         token: 'abc',
       });
       add({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
         hostName: 'my.local.registry',
         token: 'def',
       });
       const res = hosts({
-        hostType: DATASOURCE_NUGET,
+        hostType: datasourceNuget.id,
       });
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);

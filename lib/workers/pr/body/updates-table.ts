@@ -1,13 +1,13 @@
 import handlebars from 'handlebars';
 import { logger } from '../../../logger';
-import { PrBodyConfig } from './common';
+import { BranchConfig } from '../../common';
 
 type TableDefinition = {
   header: string;
   value: string;
 };
 
-function getTableDefinition(config: PrBodyConfig): TableDefinition[] {
+function getTableDefinition(config: BranchConfig): TableDefinition[] {
   const res = [];
   for (const header of config.prBodyColumns) {
     const value = config.prBodyDefinitions[header];
@@ -34,7 +34,7 @@ function getNonEmptyColumns(
   return res;
 }
 
-export function getPrUpdatesTable(config: PrBodyConfig): string {
+export function getPrUpdatesTable(config: BranchConfig): string {
   const tableDefinitions = getTableDefinition(config);
   const tableValues = config.upgrades.map(upgrade => {
     const res: Record<string, string> = {};

@@ -2,19 +2,19 @@ import { api } from '../../../../lib/platform/github/gh-got-wrapper';
 import * as hostRules from '../../../../lib/util/host-rules';
 import {
   getChangeLogJSON,
-  ChangeLogConfig,
   ChangeLogError,
 } from '../../../../lib/workers/pr/changelog';
-import { mocked } from '../../../util';
+import { mocked, partial } from '../../../util';
 import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platforms';
 import * as semverVersioning from '../../../../lib/versioning/semver';
+import { BranchConfig } from '../../../../lib/workers/common';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
 const ghGot = mocked(api).get;
 
-const upgrade: ChangeLogConfig = {
+const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versioning: semverVersioning.id,
@@ -33,7 +33,7 @@ const upgrade: ChangeLogConfig = {
     { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
     { version: '2.5.2' },
   ],
-};
+});
 
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {

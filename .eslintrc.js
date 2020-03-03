@@ -5,6 +5,9 @@ module.exports = {
   },
   extends: [
     'airbnb-typescript/base',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
@@ -17,6 +20,7 @@ module.exports = {
     ecmaVersion: 9,
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
+    extraFileExtensions: ['.mjs'],
   },
   rules: {
     /*
@@ -55,6 +59,10 @@ module.exports = {
         ignoreRestSiblings: false,
       },
     ], // disable until proper interfaced api
+  },
+  settings: {
+    // https://github.com/benmosher/eslint-plugin-import/issues/1618
+    'import/internal-regex': '^type\\-fest$',
   },
   overrides: [
     {

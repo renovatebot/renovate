@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { exists, readFile, writeFile } from 'fs-extra';
 import { logger } from '../../logger';
-import { DATASOURCE_SBT } from '../../constants/data-binary-source';
+import * as datasourceSbtPackage from '../../datasource/sbt-package';
 
 export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
@@ -160,7 +160,7 @@ export async function extractDependenciesFromUpdatesReport(
         return {
           ...dep,
           depName: depName.replace(/_%%/, ''),
-          datasource: DATASOURCE_SBT,
+          datasource: datasourceSbtPackage.id,
         };
       }
       if (/^%.*%$/.test(currentValue)) {

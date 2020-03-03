@@ -40,7 +40,7 @@ export function updateDependency({
     lines[lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new Dockerfile value');
+    logger.debug({ err }, 'Error setting new Dockerfile value');
     return null;
   }
 }
