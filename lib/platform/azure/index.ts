@@ -512,7 +512,7 @@ export async function ensureComment({
   threads.forEach(thread => {
     const firstCommentContent = thread.comments[0].content;
     if (
-      (topic && firstCommentContent && firstCommentContent.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) ||
       (!topic && firstCommentContent === body)
     ) {
       threadIdFound = thread.id;
