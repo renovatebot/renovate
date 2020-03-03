@@ -1,18 +1,18 @@
 import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
-import * as hostRules from '../../../util/host-rules';
+// import * as hostRules from '../../../util/host-rules';
 import * as versioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
 import {
   ChangeLogConfig,
-  ChangeLogError,
+  //  ChangeLogError,
   ChangeLogRelease,
   ChangeLogResult,
 } from './common';
 import { Release } from '../../../datasource';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,
@@ -23,7 +23,7 @@ async function getTags(
   let url = endpoint
     ? endpoint.replace(/\/?$/, '/')
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://gitlab.com/api/v4/';
-  let repoid = repository.replace(/\.git/, '').replace(/\//, '%2F');
+  const repoid = repository.replace(/\.git/, '').replace(/\//, '%2F');
   url += `projects/${repoid}/repository/tags`;
   try {
     const res = await ghGot<{ name: string }[]>(url, {

@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
 import handlebars from 'handlebars';
+import { logger } from '../../../logger';
 import releaseNotesHbs from '../changelog/hbs-template';
 import { BranchConfig } from '../../common';
 

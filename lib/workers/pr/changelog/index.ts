@@ -23,8 +23,14 @@ export async function getChangeLogJSON(
   const releases = args.releases || (await getInRangeReleases(args));
 
   try {
-    let res = await sourceGithub.getChangeLogJSON({ ...args, releases });
-    if (res === null) {
+    let res = null;
+    if (
+      args.sourceUrl === undefined ||
+      args.sourceUrl.search(/github/) !== -1
+    ) {
+      res = await sourceGithub.getChangeLogJSON({ ...args, releases });
+    }
+    if (res === null && args.sourceUrl.search(/gitlab/) !== -1) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
     }
     return res;

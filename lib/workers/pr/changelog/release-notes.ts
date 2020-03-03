@@ -3,10 +3,12 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
+import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../../logger';
 import { ChangeLogResult, ChangeLogNotes } from './common';
 
 const { get: ghGot } = api;
+const { get: glGot } = api_gitlab;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -23,7 +25,7 @@ export async function getReleaseList(
   }
   try {
     let url = apiBaseURL.replace(/\/?$/, '/');
-    if (apiBaseURL.search(/github/) != -1) {
+    if (apiBaseURL.search(/github/) !== -1) {
       // github repo
       url += `repos/${repository}/releases?per_page=100`;
       const res = await ghGot<
@@ -42,7 +44,8 @@ export async function getReleaseList(
         name: release.name,
         body: release.body,
       }));
-    } else {
+    }
+    if (apiBaseURL.search(/gitlab/) !== -1) {
       // not github, hopefully gitlab
       url += `projects/${repository.replace(
         /\//,
@@ -52,14 +55,19 @@ export async function getReleaseList(
         {
           name: string;
           release: string;
+          description: string;
+          tag_name: string;
         }[]
       >(url);
       return res.body.map(release => ({
+        url: undefined, // FIXME: url should be set
         name: release.name,
         body: release.description,
         tag: release.tag_name,
       }));
     }
+
+    return null;
   } catch (err) /* istanbul ignore next */ {
     logger.info({ repository, err }, 'getReleaseList error');
     return [];
@@ -114,7 +122,7 @@ export async function getReleaseNotes(
     ) {
       releaseNotes = release;
       releaseNotes.url =
-        baseURL.search(/github/) != -1
+        baseURL.search(/github/) !== -1
           ? `${baseURL}${repository}/releases/${release.tag}`
           : `${baseURL}${repository}/tags/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseURL);

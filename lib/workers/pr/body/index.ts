@@ -1,4 +1,5 @@
 import handlebars from 'handlebars';
+import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { get } from '../../../versioning';
 import { getPrConfigDescription } from './config-description';
