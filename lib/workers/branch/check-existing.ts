@@ -1,15 +1,15 @@
 import { logger } from '../../logger';
-import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { BranchConfig } from '../common';
 
 /** TODO: Proper return type */
 export async function prAlreadyExisted(
-  config: RenovateConfig
+  config: BranchConfig
 ): Promise<any | null> {
   logger.trace({ config }, 'prAlreadyExisted');
   if (config.recreateClosed) {

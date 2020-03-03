@@ -147,7 +147,7 @@ export async function generateDockerCommand(
     ...commands,
     ...prepareCommands(postCommands),
   ].join(' && ');
-  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`);
+  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');
 }

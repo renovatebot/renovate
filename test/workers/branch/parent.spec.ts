@@ -16,7 +16,7 @@ describe('workers/branch/parent', () => {
       config = {
         branchName: 'renovate/some-branch',
         rebaseLabel: 'rebase',
-        rebaseConflictedPrs: true,
+        rebaseWhen: 'behind-base-branch',
       };
     });
     afterEach(() => {
@@ -52,8 +52,8 @@ describe('workers/branch/parent', () => {
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
     });
-    it('returns branchName if unmergeable and can rebase, but rebaseConflictedPrs is disabled', async () => {
-      config.rebaseConflictedPrs = false;
+    it('returns branchName if unmergeable and can rebase, but rebaseWhen is never', async () => {
+      config.rebaseWhen = 'never';
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
@@ -117,8 +117,8 @@ describe('workers/branch/parent', () => {
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBeUndefined();
     });
-    it('returns branch if rebaseStalePrs enabled but cannot rebase', async () => {
-      config.rebaseStalePrs = true;
+    it('returns branch if rebaseWhen=behind-base-branch but cannot rebase', async () => {
+      config.rebaseWhen = 'behind-base-branch';
       platform.branchExists.mockResolvedValueOnce(true);
       platform.isBranchStale.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({

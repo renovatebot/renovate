@@ -24,7 +24,7 @@ export async function renovateRepository(
 ): Promise<ProcessResult> {
   let config = { ...repoConfig };
   setMeta({ repository: config.repository });
-  logger.info({ renovateVersion }, 'Renovating repository');
+  logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
   try {
@@ -49,6 +49,6 @@ export async function renovateRepository(
   if (config.localDir && !config.persistRepoData) {
     await fs.remove(config.localDir);
   }
-  logger.info('Finished repository');
+  logger.info('Repository finished');
   return repoResult;
 }

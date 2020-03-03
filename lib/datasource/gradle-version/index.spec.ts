@@ -1,7 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import * as datasource from '..';
-import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
+import * as gradleVersion from '.';
 
 jest.mock('../../util/got');
 
@@ -11,14 +10,12 @@ const allResponse: any = fs.readFileSync(
   'lib/datasource/gradle-version/__fixtures__/all.json'
 );
 
-let config: datasource.PkgReleaseConfig = {};
+let config: any = {};
 
 describe('datasource/gradle-version', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
-      config = {
-        datasource: DATASOURCE_GRADLE_VERSION,
-      };
+      config = {};
       jest.clearAllMocks();
       global.repoCache = {};
       return global.renovateCache.rmAll();
@@ -28,7 +25,7 @@ describe('datasource/gradle-version', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(allResponse),
       });
-      const res = await datasource.getPkgReleases(config);
+      const res = await gradleVersion.getPkgReleases(config);
       expect(got).toHaveBeenCalledTimes(1);
       expect(got.mock.calls[0][0]).toEqual(
         'https://services.gradle.org/versions/all'
@@ -41,7 +38,7 @@ describe('datasource/gradle-version', () => {
       got.mockReturnValue({
         body: JSON.parse(allResponse),
       });
-      const res = await datasource.getPkgReleases({
+      const res = await gradleVersion.getPkgReleases({
         ...config,
         registryUrls: ['https://foo.bar', 'http://baz.qux'],
       });

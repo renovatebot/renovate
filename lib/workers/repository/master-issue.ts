@@ -35,7 +35,7 @@ export async function ensureMasterIssue(
   ) {
     return;
   }
-  logger.info('Ensuring master issue');
+  logger.debug('Ensuring master issue');
   if (
     !branches.length ||
     branches.every(branch => branch.res === 'automerged')

@@ -7,15 +7,16 @@ import { logger } from '../../logger';
 
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
-import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+
+export const id = 'packagist';
 
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
     json: true,
   };
   const { username, password } = hostRules.find({
-    hostType: DATASOURCE_PACKAGIST,
+    hostType: id,
     url,
   });
   if (username && password) {
@@ -73,11 +74,11 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
     return meta;
   } catch (err) {
     if (err.code === 'ETIMEDOUT') {
-      logger.info({ regUrl }, 'Packagist timeout');
+      logger.debug({ regUrl }, 'Packagist timeout');
       return null;
     }
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info({ regUrl }, 'Unauthorized Packagist repository');
+      logger.debug({ regUrl }, 'Unauthorized Packagist repository');
       return null;
     }
     if (
@@ -85,7 +86,7 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
       err.url &&
       err.url.endsWith('/packages.json')
     ) {
-      logger.info({ regUrl }, 'Packagist repository not found');
+      logger.debug({ regUrl }, 'Packagist repository not found');
       return null;
     }
     logger.warn({ err }, 'Packagist download error');
@@ -282,7 +283,10 @@ async function packageLookup(
     return dep;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ dependency: name }, `Dependency lookup failure: not found`);
+      logger.debug(
+        { dependency: name },
+        `Dependency lookup failure: not found`
+      );
       logger.debug({
         err,
       });
@@ -304,7 +308,7 @@ async function packageLookup(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`getPkgReleases(${lookupName})`);
 
   let res: ReleaseResult;

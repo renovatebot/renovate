@@ -2,7 +2,7 @@ import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import * as semverVersioning from '../../versioning/semver';
-import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
+import * as datasourceGradleVersion from '../../datasource/gradle-version';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
@@ -15,7 +15,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     );
     if (match) {
       const dependency: PackageDependency = {
-        datasource: DATASOURCE_GRADLE_VERSION,
+        datasource: datasourceGradleVersion.id,
         depType: 'gradle-wrapper',
         depName: 'gradle',
         currentValue: coerce(match[1]).toString(),
@@ -33,7 +33,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
         shaLineNumber += 1;
       }
 
-      logger.info(dependency, 'Gradle Wrapper');
+      logger.debug(dependency, 'Gradle Wrapper');
       return { deps: [dependency] };
     }
     lineNumber += 1;

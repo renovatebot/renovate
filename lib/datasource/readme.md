@@ -9,7 +9,6 @@ The minimum exported interface for a datasource is a function called `getPkgRele
 The config contains:
 
 - `lookupName`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `lookupType`: used only when there is a need to specify different types of lookups within the same datasource
 - `registryUrls`: an array of registry Urls to try
 
 `getPkgReleases` should return an object containing:
@@ -31,7 +30,3 @@ The `getDigest` function has two inputs:
 - `newValue`: the version or value to retrieve the digest for
 
 The `getDigest` function returns a string output representing the digest value. If none is found then a return value of `null` should be returned.
-
-### getPreset
-
-This function is supported by npm, github and gitlab for retrieving a Renovate preset.

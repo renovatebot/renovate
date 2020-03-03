@@ -19,6 +19,8 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
+  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -33,6 +35,7 @@ import {
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
 } from '../../constants/branch-constants';
+import { RenovateConfig } from '../../config';
 
 let config: utils.Config = {} as any;
 
@@ -40,11 +43,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: {
-  endpoint?: string;
-  username: string;
-  password: string;
-}): PlatformConfig {
+}: RenovateConfig): Promise<PlatformConfig> {
   if (!(username && password)) {
     throw new Error(
       'Init: You must configure a Bitbucket username and password'
@@ -59,12 +58,12 @@ export function initPlatform({
   const platformConfig: PlatformConfig = {
     endpoint: 'https://api.bitbucket.org/',
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering Bitbucket Cloud repositories');
+  logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
     const repos = await utils.accumulateValues<{ full_name: string }>(
       `/2.0/repositories/?role=contributor`
@@ -132,7 +131,7 @@ export async function initRepo({
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    logger.info({ err }, 'Unknown Bitbucket initRepo error');
+    logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
 
@@ -157,9 +156,9 @@ export async function initRepo({
 }
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
-export function getRepoForceRebase(): boolean {
+export function getRepoForceRebase(): Promise<boolean> {
   // BB doesnt have an option to flag staled branches
-  return false;
+  return Promise.resolve(false);
 }
 
 // Search
@@ -229,7 +228,7 @@ export async function getPrList(): Promise<Pr[]> {
     url += utils.prStates.all.map(state => 'state=' + state).join('&');
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
 }
@@ -286,7 +285,7 @@ export function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
@@ -411,7 +410,7 @@ async function getStatus(
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks?: string[]
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
@@ -542,8 +541,8 @@ export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 50000)
     .replace(
-      'tick the rebase/retry checkbox below',
-      'rename this PR to start with "rebase!"'
+      'you tick the rebase/retry checkbox',
+      'rename PR to start with "rebase!"'
     )
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
@@ -554,14 +553,14 @@ export function getPrBody(input: string): string {
 export async function ensureIssue({
   title,
   body,
-}: EnsureIssueConfig): Promise<string | null> {
+}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
 
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.info({ title }, 'Failed to ensure Issue');
+    logger.debug({ title }, 'Failed to ensure Issue');
     return null;
   }
   try {
@@ -573,7 +572,7 @@ export async function ensureIssue({
       }
       const [issue] = issues;
       if (String(issue.content.raw).trim() !== description.trim()) {
-        logger.info('Issue updated');
+        logger.debug('Issue updated');
         await api.put(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
@@ -599,7 +598,7 @@ export async function ensureIssue({
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.info(
+      logger.debug(
         `Issues are disabled, so could not create issue: ${err.message}`
       );
     } else {
@@ -822,7 +821,7 @@ export async function mergePr(
       }
     );
     delete config.baseCommitSHA;
-    logger.info('Automerging succeeded');
+    logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
     return false;
   }
@@ -831,12 +830,13 @@ export async function mergePr(
 
 // Pull Request
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
   config = {} as any;
+  return Promise.resolve();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

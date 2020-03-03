@@ -122,7 +122,7 @@ export function updateDependency({
 
     return yawn.yaml;
   } catch (err) {
-    logger.info({ err }, 'Error setting new helm-values value');
+    logger.debug({ err }, 'Error setting new helm-values value');
     return fileContent;
   }
 }

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import * as datasource from '..';
-import { DATASOURCE_TERRAFORM_PROVIDER } from '../../constants/data-binary-source';
+import * as terraformProvider from '.';
 
 jest.mock('../../util/got');
 
@@ -21,8 +20,7 @@ describe('datasource/terraform', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases({
-          datasource: DATASOURCE_TERRAFORM_PROVIDER,
+        await terraformProvider.getPkgReleases({
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -34,8 +32,7 @@ describe('datasource/terraform', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
-          datasource: DATASOURCE_TERRAFORM_PROVIDER,
+        await terraformProvider.getPkgReleases({
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -45,8 +42,7 @@ describe('datasource/terraform', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
-          datasource: DATASOURCE_TERRAFORM_PROVIDER,
+        await terraformProvider.getPkgReleases({
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -55,8 +51,7 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await datasource.getPkgReleases({
-        datasource: DATASOURCE_TERRAFORM_PROVIDER,
+      const res = await terraformProvider.getPkgReleases({
         lookupName: 'azurerm',
       });
       expect(res).toMatchSnapshot();

@@ -173,7 +173,7 @@ export function getNewValue({
       res = `<${toVersionMajor + 1}`;
     }
     if (currentValue.includes('< ')) {
-      res = res.replace('<', '< ');
+      res = res.replace(/</g, '< ');
     }
     return res;
   }

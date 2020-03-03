@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import * as file from '../../lib/config/file';
-import customConfig from './config/_fixtures/file';
+import customConfig from './config/__fixtures__/file';
 
 describe('config/file', () => {
   describe('.getConfig()', () => {
@@ -11,19 +11,28 @@ describe('config/file', () => {
       );
     });
     it('parses custom config file', () => {
-      const configFile = path.resolve(__dirname, './config/_fixtures/file.js');
+      const configFile = path.resolve(
+        __dirname,
+        './config/__fixtures__/file.js'
+      );
       expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toEqual(
         customConfig
       );
     });
     it('migrates', () => {
-      const configFile = path.resolve(__dirname, './config/_fixtures/file2.js');
+      const configFile = path.resolve(
+        __dirname,
+        './config/__fixtures__/file2.js'
+      );
       const res = file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toEqual('bump');
     });
     it('informs user when error in parsing config.js', () => {
-      const configFile = path.resolve(__dirname, './config/_fixtures/file3.ts');
+      const configFile = path.resolve(
+        __dirname,
+        './config/__fixtures__/file3.ts'
+      );
       const fileContent = `module.exports = {
         "platform": "github",
         "token":"abcdef",
@@ -44,7 +53,10 @@ describe('config/file', () => {
     });
   });
   it('handles when invalid file location is provided', () => {
-    const configFile = path.resolve(__dirname, './config/_fixtures/file4.ts');
+    const configFile = path.resolve(
+      __dirname,
+      './config/__fixtures__/file4.ts'
+    );
     expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toStrictEqual(
       {}
     );

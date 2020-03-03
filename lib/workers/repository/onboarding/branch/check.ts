@@ -79,7 +79,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
   }
-  logger.info('Repo is not onboarded and no merged PRs exist');
+  logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications.includes('onboardingClose')) {
     // ensure PR comment
     await platform.ensureComment({

@@ -41,7 +41,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       if (!renovateFiles.length) {
         continue; // eslint-disable-line no-continue
       }
-      logger.info(
+      logger.debug(
         { prNo: pr.number, title: pr.title, renovateFiles },
         'PR has renovate files'
       );
@@ -112,7 +112,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       }
       // istanbul ignore else
       if (pr.sourceRepo === config.repository) {
-        logger.info({ status, description }, 'Setting PR validation status');
+        logger.debug({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
         await platform.setBranchStatus({
           branchName: pr.branchName,
@@ -126,7 +126,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
     } catch (err) {
       // istanbul ignore if
       if (err.message === REPOSITORY_CHANGED) {
-        logger.info('Cannot access PR files to check them');
+        logger.debug('Cannot access PR files to check them');
       } else {
         logger.warn(
           {

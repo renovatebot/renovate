@@ -22,7 +22,7 @@ export async function extractAllDependencies(
     const packageFiles = await getManagerPackageFiles(managerConfig);
     if (packageFiles && packageFiles.length) {
       fileCount += packageFiles.length;
-      logger.info(`Found ${manager} package files`);
+      logger.debug(`Found ${manager} package files`);
       extractions[manager] = packageFiles;
     }
   }

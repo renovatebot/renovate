@@ -55,7 +55,7 @@ export async function updateArtifacts(
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
   if (global.repoCache.bundlerArtifactsError) {
-    logger.info('Aborting Bundler artifacts due to previous failed attempt');
+    logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(global.repoCache.bundlerArtifactsError);
   }
   const lockFileName = `${packageFileName}.lock`;
@@ -133,7 +133,7 @@ export async function updateArtifacts(
           'Please make sure you have the correct access rights'
         ))
     ) {
-      logger.info(
+      logger.debug(
         { err },
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
@@ -167,7 +167,7 @@ export async function updateArtifacts(
           config,
         });
       }
-      logger.info(
+      logger.debug(
         { err },
         'Gemfile.lock update failed due to incompatible packages'
       );

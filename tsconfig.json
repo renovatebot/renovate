@@ -14,6 +14,6 @@
     "lib": ["es2018"],
     "types": ["node", "jest"]
   },
-  "include": ["lib/**/*", "test/**/*"],
+  "include": ["lib/**/*", "test/**/*", "tools"],
   "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
 }

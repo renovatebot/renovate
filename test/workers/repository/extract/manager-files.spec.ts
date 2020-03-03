@@ -1,21 +1,21 @@
 import { getManagerPackageFiles } from '../../../../lib/workers/repository/extract/manager-files';
 import * as _fileMatch from '../../../../lib/workers/repository/extract/file-match';
-import * as _dockerfile from '../../../../lib/manager/dockerfile';
+import * as _html from '../../../../lib/manager/html';
 import { mocked, platform, getConfig } from '../../../util';
 import { RenovateConfig } from '../../../../lib/config';
 
 jest.mock('../../../../lib/workers/repository/extract/file-match');
-jest.mock('../../../../lib/manager/dockerfile');
+jest.mock('../../../../lib/manager/html');
 
 const fileMatch = mocked(_fileMatch);
-const dockerfile = mocked(_dockerfile);
+const html = mocked(_html);
 
 describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig;
+      config = getConfig();
     });
     it('returns empty of manager is disabled', async () => {
       const managerConfig = { manager: 'travis', enabled: false };
@@ -35,11 +35,11 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toHaveLength(0);
     });
     it('returns files with extractPackageFile', async () => {
-      const managerConfig = { manager: 'dockerfile', enabled: true };
+      const managerConfig = { manager: 'html', enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       platform.getFile.mockResolvedValue('some content');
-      dockerfile.extractPackageFile = jest.fn(() => ({
-        some: 'result',
+      html.extractPackageFile = jest.fn(() => ({
+        deps: [{}, { autoReplaceData: { replaceString: 'abc' } }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toMatchSnapshot();

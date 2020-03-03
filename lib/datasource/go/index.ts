@@ -1,68 +1,72 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import * as github from '../github';
-import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
+import * as github from '../github-tags';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import { regEx } from '../../util/regex';
-import {
-  DATASOURCE_GITHUB,
-  DATASOURCE_GO,
-} from '../../constants/data-binary-source';
+
+export const id = 'go';
 
 interface DataSource {
   datasource: string;
   lookupName: string;
 }
 
-async function getDatasource(name: string): Promise<DataSource | null> {
-  if (name.startsWith('gopkg.in/')) {
-    const [pkg] = name.replace('gopkg.in/', '').split('.');
+async function getDatasource(goModule: string): Promise<DataSource | null> {
+  if (goModule.startsWith('gopkg.in/')) {
+    const [pkg] = goModule.replace('gopkg.in/', '').split('.');
     if (pkg.includes('/')) {
-      return { datasource: DATASOURCE_GITHUB, lookupName: pkg };
+      return { datasource: github.id, lookupName: pkg };
     }
-    return { datasource: DATASOURCE_GITHUB, lookupName: `go-${pkg}/${pkg}` };
+    return {
+      datasource: github.id,
+      lookupName: `go-${pkg}/${pkg}`,
+    };
   }
-  if (name.startsWith('github.com/')) {
-    const split = name.split('/');
+  if (goModule.startsWith('github.com/')) {
+    const split = goModule.split('/');
     const lookupName = split[1] + '/' + split[2];
     return {
-      datasource: DATASOURCE_GITHUB,
+      datasource: github.id,
       lookupName,
     };
   }
-  const pkgUrl = `https://${name}?go-get=1`;
+  const pkgUrl = `https://${goModule}?go-get=1`;
   try {
     const res = (
       await got(pkgUrl, {
-        hostType: DATASOURCE_GO,
+        hostType: id,
       })
     ).body;
     const sourceMatch = res.match(
-      regEx(`<meta\\s+name="go-source"\\s+content="${name}\\s+([^\\s]+)`)
+      regEx(`<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`)
     );
     if (sourceMatch) {
       const [, goSourceUrl] = sourceMatch;
-      logger.debug({ depName: name, goSourceUrl }, 'Go lookup source url');
+      logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
       if (goSourceUrl && goSourceUrl.startsWith('https://github.com/')) {
         return {
-          datasource: DATASOURCE_GITHUB,
+          datasource: github.id,
           lookupName: goSourceUrl
             .replace('https://github.com/', '')
             .replace(/\/$/, ''),
         };
       }
     } else {
-      logger.trace({ depName: name }, 'No go-source header found');
+      logger.trace({ goModule }, 'No go-source header found');
     }
     return null;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ dependency: name }, `Dependency lookup failure: not found`);
+      logger.debug(
+        { dependency: goModule },
+        `Dependency lookup failure: not found`
+      );
       logger.debug({
         err,
       });
       return null;
     }
-    logger.info({ err, name }, 'go lookup failure: Unknown error');
+    logger.debug({ err, goModule }, 'go lookup failure: Unknown error');
     return null;
   }
 }
@@ -79,10 +83,10 @@ async function getDatasource(name: string): Promise<DataSource | null> {
  */
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   logger.trace(`go.getPkgReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  if (source && source.datasource === DATASOURCE_GITHUB) {
+  if (source && source.datasource === github.id) {
     const res = await github.getPkgReleases(source);
     if (res && res.releases) {
       res.releases = res.releases.filter(
@@ -109,7 +113,7 @@ export async function getDigest(
   value?: string
 ): Promise<string | null> {
   const source = await getDatasource(lookupName);
-  if (source && source.datasource === DATASOURCE_GITHUB) {
+  if (source && source.datasource === github.id) {
     // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
     const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
     const digest = await github.getDigest(source, tag);
