@@ -85,6 +85,6 @@ Object {
       "version": "5.6.1",
     },
   ],
-  "sourceUrl": "https://gitlab.com/meno/dropzone/tree/master",
+  "sourceUrl": "https://gitlab.com/meno/dropzone",
 }
 `;
