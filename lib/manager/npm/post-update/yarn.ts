@@ -36,24 +36,6 @@ export async function generateLockFile(
         'bin/yarn.js'
       );
       cmd = `node ${installedPath}`;
-      const yarnIntegrity =
-        config.upgrades &&
-        config.upgrades.some(upgrade => upgrade.yarnIntegrity);
-      if (!yarnIntegrity) {
-        try {
-          const renovatePath = await getInstalledPath('renovate', {
-            local: true,
-          });
-          logger.debug('Using nested bundled yarn@1.9.4 for install');
-          cmd = 'node ' + join(renovatePath, 'bin/yarn-1.9.4.js');
-        } catch (err) {
-          logger.debug('Using bundled yarn@1.9.4 for install');
-          cmd = cmd.replace(
-            'node_modules/yarn/bin/yarn.js',
-            'bin/yarn-1.9.4.js'
-          );
-        }
-      }
     } catch (localerr) {
       logger.debug('No locally installed yarn found');
       // Look inside globally installed renovate
