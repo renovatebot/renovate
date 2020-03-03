@@ -30,7 +30,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+        "COMPOSER_CACHE_DIR": "/tmp/root/project/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -53,7 +53,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+        "COMPOSER_CACHE_DIR": "/tmp/root/project/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -76,7 +76,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+        "COMPOSER_CACHE_DIR": "/tmp/root/project/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -111,7 +111,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+        "COMPOSER_CACHE_DIR": "/tmp/root/project/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -134,7 +134,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+        "COMPOSER_CACHE_DIR": "/tmp/root/project/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -157,7 +157,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
+        "COMPOSER_CACHE_DIR": "/tmp/root/project/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
