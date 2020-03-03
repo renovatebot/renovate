@@ -1,14 +1,17 @@
+ARG IMAGE=latest
+
 # Base image
 #============
-FROM renovate/yarn:1.22.0@sha256:22cfbb7ecd47655a905c01fe3f2fcb3ac34839dd6d42d81eeb437c80475483ea AS base
+FROM renovate/yarn:1.22.0@sha256:a7737a9182c1456ac089022a44bea22eb9d5069b3f8388cda06b473717a8dd41 AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
-LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
+LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" \
+      org.opencontainers.image.url="https://renovatebot.com" \
+      org.opencontainers.image.licenses="AGPL-3.0-only"
 
 USER root
 WORKDIR /usr/src/app/
-RUN chown -R ubuntu:ubuntu /usr/src/app
 
 # Build image
 #============
@@ -16,6 +19,8 @@ FROM base as tsbuild
 
 # Python 3 and make are required to build node-re2
 RUN apt-get update && apt-get install -y python3-minimal build-essential
+# force python3 for node-gyp
+RUN rm -rf /usr/bin/python && ln /usr/bin/python3 /usr/bin/python
 
 COPY package.json .
 COPY yarn.lock .
@@ -34,19 +39,14 @@ RUN yarn build:docker
 RUN yarn install --production --frozen-lockfile
 
 
-# Final image
+# Final-base image
 #============
-FROM base as final
+FROM base as final-base
 
-ENV APP_ROOT=/usr/src/app
-ENV HOME=/home/ubuntu
+# Docker client and group
 
-RUN chown -R ubuntu:0 ${APP_ROOT} ${HOME} && \
-  chmod -R g=u ${APP_ROOT} ${HOME}
-
-
-# required for install
-USER root
+RUN groupadd -g 999 docker
+RUN usermod -aG docker ubuntu
 
 ENV DOCKER_VERSION=19.03.5
 
@@ -55,10 +55,29 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
     -C /usr/local/bin docker/docker \
     && rm docker-${DOCKER_VERSION}.tgz
 
-## Gradle
+# Slim image
+#============
+FROM final-base as slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends gradle && \
+ENV RENOVATE_BINARY_SOURCE=docker
+
+# Full image
+#============
+FROM final-base as latest
+
+RUN apt-get update && \
+    apt-get install -y gpg wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless dirmngr && \
     rm -rf /var/lib/apt/lists/*
+
+
+## Gradle (needs java-jre, installed above)
+ENV GRADLE_VERSION 6.2
+
+RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
+    unzip -q -d /opt/ gradle-$GRADLE_VERSION-bin.zip && \
+    rm -f gradle-$GRADLE_VERSION-bin.zip && \
+    mv /opt/gradle-$GRADLE_VERSION /opt/gradle && \
+    ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
 # Erlang
 
@@ -131,17 +150,11 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
-# Docker client and group
-
-RUN groupadd -g 999 docker
-RUN usermod -aG docker ubuntu
-
-ENV DOCKER_VERSION=19.03.1
-
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
-  && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
-  -C /usr/local/bin docker/docker \
-  && rm docker-${DOCKER_VERSION}.tgz
+# CocoaPods
+RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt/lists/*
+RUN ruby --version
+ENV COCOAPODS_VERSION 1.9.0
+RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
 USER ubuntu
 
@@ -179,6 +192,9 @@ ENV PATH="${HOME}/.poetry/bin:$PATH"
 RUN poetry config virtualenvs.in-project false
 
 # Renovate
+#=========
+FROM $IMAGE as final
+
 
 COPY package.json .
 
