@@ -309,8 +309,6 @@ export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult> {
-  logger.trace(`getPkgReleases(${lookupName})`);
-
   let res: ReleaseResult;
   const registries = is.nonEmptyArray(registryUrls)
     ? registryUrls

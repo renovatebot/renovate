@@ -93,7 +93,6 @@ async function syncVersions(): Promise<void> {
 export async function getRubygemsOrgDependency(
   lookupName: string
 ): Promise<ReleaseResult | null> {
-  logger.debug(`getRubygemsOrgDependency(${lookupName})`);
   await syncVersions();
   if (!packageReleases[lookupName]) {
     return null;

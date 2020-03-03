@@ -54,7 +54,6 @@ export async function getRefs(
   repoId: string,
   branchName?: string
 ): Promise<GitRef[]> {
-  logger.debug(`getRefs(${repoId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
   const refs = await azureApiGit.getRefs(
     repoId,
@@ -204,7 +203,6 @@ export async function getCommitDetails(
   commit: string,
   repoId: string
 ): Promise<GitCommit> {
-  logger.debug(`getCommitDetails(${commit}, ${repoId})`);
   const azureApiGit = await azureApi.gitApi();
   const results = await azureApiGit.getCommit(commit, repoId);
   return results;
@@ -213,7 +211,6 @@ export async function getCommitDetails(
 export function getProjectAndRepo(
   str: string
 ): { project: string; repo: string } {
-  logger.trace(`getProjectAndRepo(${str})`);
   const strSplited = str.split(`/`);
   if (strSplited.length === 1) {
     return {

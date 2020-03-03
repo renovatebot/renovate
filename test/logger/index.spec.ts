@@ -15,6 +15,7 @@ import { add } from '../../lib/util/host-rules';
 jest.unmock('../../lib/logger');
 
 jest.mock('fs-extra');
+jest.mock('njstrace');
 const fs: any = _fs;
 
 describe('logger', () => {
@@ -49,6 +50,10 @@ describe('logger', () => {
 
   it('sets level', () => {
     levels('stdout', 'debug');
+  });
+
+  it('injects instrumentation on trace', () => {
+    levels('stdout', 'trace');
   });
 
   it('saves errors', () => {

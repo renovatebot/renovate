@@ -15,7 +15,6 @@ import { PackageFile } from '../../../manager/common';
 
 export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;
-  logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
     return [];

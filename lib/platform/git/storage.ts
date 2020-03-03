@@ -105,7 +105,6 @@ export class Storage {
   private _cwd: string | undefined;
 
   private async _resetToBranch(branchName: string): Promise<void> {
-    logger.debug(`resetToBranch(${branchName})`);
     await this._git.raw(['reset', '--hard']);
     await this._git.checkout(branchName);
     await this._git.raw(['reset', '--hard', 'origin/' + branchName]);
@@ -241,7 +240,6 @@ export class Storage {
   }
 
   async createBranch(branchName: string, sha: string): Promise<void> {
-    logger.debug(`createBranch(${branchName})`);
     await this._git.reset('hard');
     await this._git.raw(['clean', '-fd']);
     await this._git.checkout(['-B', branchName, sha]);

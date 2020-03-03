@@ -264,7 +264,6 @@ export /* istanbul ignore next */ function setBranchPrefix(
 export function getFileList(
   branchName: string = config.baseBranch
 ): Promise<string[]> {
-  logger.debug(`getFileList(${branchName})`);
   return config.storage.getFileList(branchName);
 }
 
@@ -272,12 +271,10 @@ export function getFileList(
 
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
-  logger.debug(`branchExists(${branchName})`);
   return config.storage.branchExists(branchName);
 }
 
 export function isBranchStale(branchName: string): Promise<boolean> {
-  logger.debug(`isBranchStale(${branchName})`);
   return config.storage.isBranchStale(branchName);
 }
 
@@ -286,7 +283,6 @@ export async function getPr(
   prNo: number,
   refreshCache?: boolean
 ): Promise<Pr | null> {
-  logger.debug(`getPr(${prNo})`);
   if (!prNo) {
     return null;
   }
@@ -403,7 +399,6 @@ export async function findPr({
   state = 'all',
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
   const prList = await getPrList({ refreshCache });
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
@@ -419,7 +414,6 @@ export async function getBranchPr(
   branchName: string,
   refreshCache?: boolean
 ): Promise<Pr | null> {
-  logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
     state: 'open',
@@ -467,7 +461,6 @@ export async function commitFilesToBranch({
 }
 
 export function getFile(filePath: string, branchName: string): Promise<string> {
-  logger.debug(`getFile(${filePath}, ${branchName})`);
   return config.storage.getFile(filePath, branchName);
 }
 
@@ -475,7 +468,6 @@ export async function deleteBranch(
   branchName: string,
   closePr = false
 ): Promise<void> {
-  logger.debug(`deleteBranch(${branchName}, closePr=${closePr})`);
   // TODO: coverage
   // istanbul ignore next
   if (closePr) {
@@ -493,12 +485,10 @@ export async function deleteBranch(
 }
 
 export function mergeBranch(branchName: string): Promise<void> {
-  logger.debug(`mergeBranch(${branchName})`);
   return config.storage.mergeBranch(branchName);
 }
 
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  logger.debug(`getBranchLastCommitTime(${branchName})`);
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
@@ -576,8 +566,6 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<string | null> {
-  logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
-
   try {
     const states = await getStatusCheck(branchName);
 
@@ -607,8 +595,6 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
-  logger.debug(`setBranchStatus(${branchName})`);
-
   const existingStatus = await getBranchStatusCheck(branchName, context);
   if (existingStatus === state) {
     return;
@@ -660,7 +646,6 @@ export async function setBranchStatus({
 export /* istanbul ignore next */ function findIssue(
   title: string
 ): Promise<Issue | null> {
-  logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
   // BB Server doesnt have issues
@@ -686,7 +671,6 @@ export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
 export /* istanbul ignore next */ function ensureIssueClosing(
   title: string
 ): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
   // BB Server doesnt have issues
@@ -694,7 +678,6 @@ export /* istanbul ignore next */ function ensureIssueClosing(
 }
 
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
-  logger.debug(`addAssignees(${iid}, ${assignees})`);
   // TODO: Needs implementation
   // Currently Renovate does "Create PR" and then "Add assignee" as a two-step process, with this being the second step.
   // BB Server doesnt support assignees
@@ -740,7 +723,6 @@ export async function addReviewers(
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
-  logger.debug(`deleteLabel(${issueNo}, ${label})`);
   // TODO: Needs implementation
   // Only used for the "request Renovate to rebase a PR using a label" feature
   return Promise.resolve();
@@ -900,7 +882,7 @@ export async function createPr({
   useDefaultBranch,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  logger.debug(`createPr(${branchName}, title=${title})`);
+
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
   let reviewers = [];
 
@@ -982,7 +964,6 @@ export async function createPr({
 // Return a list of all modified files in a PR
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html
 export async function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug(`getPrFiles(${prNo})`);
   if (!prNo) {
     return [];
   }
@@ -1000,7 +981,6 @@ export async function updatePr(
   rawDescription: string
 ): Promise<void> {
   const description = sanitize(rawDescription);
-  logger.debug(`updatePr(${prNo}, title=${title})`);
 
   try {
     const pr = await getPr(prNo);
@@ -1038,7 +1018,6 @@ export async function mergePr(
   prNo: number,
   branchName: string
 ): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
   // Used for "automerge" feature
   try {
     const pr = await getPr(prNo);

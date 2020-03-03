@@ -182,7 +182,6 @@ function getLabelList(): Promise<helper.Label[]> {
 }
 
 async function lookupLabelByName(name: string): Promise<number | null> {
-  logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
   return labelList.find(l => l.name === name)?.id;
 }
@@ -486,7 +485,6 @@ const platform: Platform = {
     prTitle: title,
     state = 'all',
   }: FindPRConfig): Promise<Pr> {
-    logger.debug(`findPr(${branchName}, ${title}, ${state})`);
     const prList = await platform.getPrList();
     const pr = prList.find(
       p =>
@@ -646,7 +644,6 @@ const platform: Platform = {
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
-    logger.debug(`ensureIssue(${title})`);
     try {
       const issueList = await platform.getIssueList();
       const issues = issueList.filter(i => i.title === title);
@@ -714,7 +711,6 @@ const platform: Platform = {
   },
 
   async ensureIssueClosing(title: string): Promise<void> {
-    logger.debug(`ensureIssueClosing(${title})`);
     const issueList = await platform.getIssueList();
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
@@ -809,13 +805,11 @@ const platform: Platform = {
   },
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
-    logger.debug(`getBranchPr(${branchName})`);
     const pr = await platform.findPr({ branchName, state: 'open' });
     return pr ? platform.getPr(pr.number) : null;
   },
 
   async deleteBranch(branchName: string, closePr?: boolean): Promise<void> {
-    logger.debug(`deleteBranch(${branchName})`);
     if (closePr) {
       const pr = await platform.getBranchPr(branchName);
       if (pr) {

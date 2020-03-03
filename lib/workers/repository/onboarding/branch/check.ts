@@ -5,7 +5,6 @@ import { RenovateConfig } from '../../../../config';
 import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
 
 const findFile = async (fileName: string): Promise<boolean> => {
-  logger.debug(`findFile(${fileName})`);
   const fileList = await platform.getFileList();
   return fileList.includes(fileName);
 };

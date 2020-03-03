@@ -319,7 +319,6 @@ export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks?: string[] | null
 ): Promise<BranchStatus> {
-  logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     return BRANCH_STATUS_SUCCESS;
@@ -411,7 +410,6 @@ export async function createPr({
 }
 
 export async function getPr(iid: number): Promise<Pr> {
-  logger.debug(`getPr(${iid})`);
   const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
   const pr = (await api.get(url)).body;
   // Harmonize fields with GitHub
@@ -535,7 +533,6 @@ export function getPrBody(input: string): string {
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr> {
-  logger.debug(`getBranchPr(${branchName})`);
   // istanbul ignore if
   if (!(await branchExists(branchName))) {
     return null;
@@ -699,7 +696,6 @@ export async function getIssueList(): Promise<any[]> {
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findIssue(${title})`);
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i: { title: string }) => i.title === title);
@@ -990,7 +986,6 @@ export async function findPr({
   prTitle,
   state = 'all',
 }: FindPRConfig): Promise<Pr> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   return prList.find(
     (p: { branchName: string; title: string; state: string }) =>

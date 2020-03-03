@@ -199,7 +199,6 @@ async function getManifestResponse(
   repository: string,
   tag: string
 ): Promise<GotResponse> {
-  logger.debug(`getManifestResponse(${registry}, ${repository}, ${tag})`);
   try {
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
@@ -281,7 +280,6 @@ export async function getDigest(
     lookupName,
     registryUrls
   );
-  logger.debug(`getDigest(${registry}, ${repository}, ${newValue})`);
   const newTag = newValue || 'latest';
   try {
     const cacheNamespace = 'datasource-docker-digest';
@@ -456,7 +454,6 @@ async function getLabels(
   repository: string,
   tag: string
 ): Promise<Record<string, string>> {
-  logger.debug(`getLabels(${registry}, ${repository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
   const cacheKey = `${registry}:${repository}:${tag}`;
   const cachedResult = await renovateCache.get<Record<string, string>>(

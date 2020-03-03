@@ -81,7 +81,6 @@ export async function getReleaseNotes(
   githubBaseURL: string,
   githubApiBaseURL: string
 ): Promise<ChangeLogNotes | null> {
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getReleaseList(githubApiBaseURL, repository);
   let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach(release => {
@@ -136,7 +135,6 @@ export async function getReleaseNotesMd(
   githubBaseURL: string,
   githubApiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
-  logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
   // istanbul ignore if
   if (skippedRepos.includes(repository)) {

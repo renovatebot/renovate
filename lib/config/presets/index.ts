@@ -102,7 +102,6 @@ export function parsePreset(input: string): ParsedPreset {
 }
 
 export async function getPreset(preset: string): Promise<RenovateConfig> {
-  logger.trace(`getPreset(${preset})`);
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset(
     packageName,

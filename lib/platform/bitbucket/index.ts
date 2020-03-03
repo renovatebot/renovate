@@ -237,7 +237,6 @@ export async function findPr({
   prTitle,
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
     p =>
@@ -386,7 +385,6 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -407,7 +405,6 @@ export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks?: string[]
 ): Promise<BranchStatus> {
-  logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
@@ -506,8 +503,6 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
 }
 
 export async function findIssue(title: string): Promise<Issue> {
-  logger.debug(`findIssue(${title})`);
-
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot findIssue');
@@ -793,7 +788,6 @@ export async function updatePr(
   title: string,
   description: string
 ): Promise<void> {
-  logger.debug(`updatePr(${prNo}, ${title}, body)`);
   await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`, {
     body: { title, description: sanitize(description) },
   });
@@ -803,8 +797,6 @@ export async function mergePr(
   prNo: number,
   branchName: string
 ): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
-
   try {
     await api.post(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/merge`,

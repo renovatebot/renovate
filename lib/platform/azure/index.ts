@@ -259,7 +259,6 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
-  logger.debug(`getPr(${pullRequestId})`);
   if (!pullRequestId) {
     return null;
   }
@@ -332,7 +331,6 @@ export async function findPr({
 }
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
@@ -390,7 +388,6 @@ export async function getBranchStatusCheck(
   branchName: string,
   context?: string
 ): Promise<BranchStatus> {
-  logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
@@ -406,7 +403,6 @@ export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks: any
 ): Promise<BranchStatus> {
-  logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     return BRANCH_STATUS_SUCCESS;
@@ -484,7 +480,6 @@ export async function updatePr(
   title: string,
   body?: string
 ): Promise<void> {
-  logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: any = {
     title,
@@ -500,7 +495,6 @@ export async function ensureComment({
   topic,
   content,
 }: EnsureCommentConfig): Promise<boolean> {
-  logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const header = topic ? `### ${topic}\n\n` : '';
   const body = `${header}${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
@@ -648,7 +642,6 @@ export async function addAssignees(
   issueNo: number,
   assignees: string[]
 ): Promise<void> {
-  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
   await ensureComment({
     number: issueNo,
     topic: 'Add Assignees',
@@ -665,7 +658,6 @@ export async function addReviewers(
   prNo: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();

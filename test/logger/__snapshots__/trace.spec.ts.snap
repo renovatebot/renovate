@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`trace onEntry 1`] = `"method(\\"arg1\\",\\"arg2\\")"`;
+
+exports[`trace onEntry 2`] = `null`;

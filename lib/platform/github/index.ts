@@ -1033,7 +1033,6 @@ export async function findPr({
   prTitle,
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
     p =>
@@ -1050,7 +1049,6 @@ export async function findPr({
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -1083,7 +1081,6 @@ export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks: any
 ): Promise<BranchStatus> {
-  logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
@@ -1315,7 +1312,6 @@ export async function getIssueList(): Promise<Issue[]> {
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
     i => i.state === 'open' && i.title === title
   );
@@ -1335,7 +1331,6 @@ export async function findIssue(title: string): Promise<Issue | null> {
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
-  logger.debug(`closeIssue(${issueNumber})`);
   await api.patch(
     `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
     {
@@ -1350,7 +1345,6 @@ export async function ensureIssue({
   once = false,
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
-  logger.debug(`ensureIssue(${title})`);
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1425,7 +1419,6 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1715,7 +1708,6 @@ export async function updatePr(
   title: string,
   rawBody?: string
 ): Promise<void> {
-  logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
@@ -1746,7 +1738,6 @@ export async function mergePr(
   prNo: number,
   branchName: string
 ): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
   if (config.isGhe && config.pushProtection) {
     logger.debug(
