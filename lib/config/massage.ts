@@ -21,20 +21,22 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   for (const [key, val] of Object.entries(config)) {
     if (allowedStrings.includes(key) && is.string(val)) {
       massagedConfig[key] = [val];
-    } else if (key === 'npmToken' && val && val.length < 50) {
+    } else if (key === 'npmToken' && is.string(val) && val.length < 50) {
       massagedConfig.npmrc = `//registry.npmjs.org/:_authToken=${val}\n`;
       delete massagedConfig.npmToken;
     } else if (is.array(val)) {
       massagedConfig[key] = [];
       val.forEach(item => {
         if (is.object(item)) {
-          massagedConfig[key].push(massageConfig(item));
+          (massagedConfig[key] as RenovateConfig[]).push(
+            massageConfig(item as RenovateConfig)
+          );
         } else {
-          massagedConfig[key].push(item);
+          (massagedConfig[key] as RenovateConfig[]).push(item);
         }
       });
     } else if (is.object(val) && key !== 'encrypted') {
-      massagedConfig[key] = massageConfig(val);
+      massagedConfig[key] = massageConfig(val as RenovateConfig);
     }
   }
   if (is.nonEmptyArray(massagedConfig.packageRules)) {

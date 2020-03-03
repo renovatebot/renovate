@@ -1,23 +1,24 @@
 import { sortBranches } from '../../../../lib/workers/repository/process/sort';
+import { UpdateType } from '../../../../lib/config';
 
 describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [
         {
-          updateType: 'major',
+          updateType: 'major' as UpdateType,
           prTitle: 'some major update',
         },
         {
-          updateType: 'pin',
+          updateType: 'pin' as UpdateType,
           prTitle: 'some pin',
         },
         {
-          updateType: 'pin',
+          updateType: 'pin' as UpdateType,
           prTitle: 'some other pin',
         },
         {
-          updateType: 'minor',
+          updateType: 'minor' as UpdateType,
           prTitle: 'a minor update',
         },
       ];
@@ -27,22 +28,22 @@ describe('workers/repository/process/sort', () => {
     it('sorts based on prPriority', () => {
       const branches = [
         {
-          updateType: 'major',
+          updateType: 'major' as UpdateType,
           prTitle: 'some major update',
           prPriority: 1,
         },
         {
-          updateType: 'pin',
+          updateType: 'pin' as UpdateType,
           prTitle: 'some pin',
           prPriority: -1,
         },
         {
-          updateType: 'pin',
+          updateType: 'pin' as UpdateType,
           prTitle: 'some other pin',
           prPriority: 0,
         },
         {
-          updateType: 'minor',
+          updateType: 'minor' as UpdateType,
           prTitle: 'a minor update',
           prPriority: -1,
         },

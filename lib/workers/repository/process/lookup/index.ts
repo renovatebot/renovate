@@ -11,9 +11,9 @@ import {
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
-import { RenovateConfig } from '../../../../config';
+import { RenovateConfig, UpdateType } from '../../../../config';
 import { clone } from '../../../../util/clone';
-import { DATASOURCE_GIT_SUBMODULES } from '../../../../constants/data-binary-source';
+import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 
 export interface LookupWarning {
   updateType: 'warning';
@@ -55,7 +55,7 @@ function getType(
   config: LookupUpdateConfig,
   fromVersion: string,
   toVersion: string
-): string {
+): UpdateType {
   const { versioning, rangeStrategy, currentValue } = config;
   const version = allVersioning.get(versioning);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
@@ -351,7 +351,7 @@ export async function lookupUpdates(
   if (supportsDigests(config)) {
     if (
       config.currentDigest &&
-      config.datasource !== DATASOURCE_GIT_SUBMODULES
+      config.datasource !== datasourceGitSubmodules.id
     ) {
       if (!config.digestOneAndOnly || !res.updates.length) {
         // digest update
@@ -369,7 +369,7 @@ export async function lookupUpdates(
           newValue: config.currentValue,
         });
       }
-    } else if (config.datasource === DATASOURCE_GIT_SUBMODULES) {
+    } else if (config.datasource === datasourceGitSubmodules.id) {
       const dependency = clone(await getPkgReleases(config));
       res.updates.push({
         updateType: 'digest',

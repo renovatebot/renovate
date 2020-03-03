@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 
 const { get: ghGot } = api;
 
+export const id = 'github-tags';
+
 const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(repo: string, type: string): string {
   return `${repo}:${type}`;

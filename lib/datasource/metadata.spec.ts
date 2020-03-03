@@ -1,8 +1,6 @@
 import { addMetaData } from './metadata';
-import {
-  DATASOURCE_MAVEN,
-  DATASOURCE_PYPI,
-} from '../constants/data-binary-source';
+import * as datasourceMaven from './maven';
+import * as datasourcePypi from './pypi';
 
 describe('datasource/metadata', () => {
   it('Should do nothing if dep is not specified', () => {
@@ -22,7 +20,7 @@ describe('datasource/metadata', () => {
       ],
     };
 
-    const datasource = DATASOURCE_PYPI;
+    const datasource = datasourcePypi.id;
     const lookupName = 'django';
 
     addMetaData(dep, datasource, lookupName);
@@ -42,7 +40,7 @@ describe('datasource/metadata', () => {
       ],
     };
 
-    const datasource = DATASOURCE_PYPI;
+    const datasource = datasourcePypi.id;
     const lookupName = 'coverage';
 
     addMetaData(dep, datasource, lookupName);
@@ -62,7 +60,7 @@ describe('datasource/metadata', () => {
         { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00' },
       ],
     };
-    const datasource = DATASOURCE_PYPI;
+    const datasource = datasourcePypi.id;
     const lookupName = 'django-filter';
 
     addMetaData(dep, datasource, lookupName);
@@ -74,7 +72,7 @@ describe('datasource/metadata', () => {
       sourceUrl: 'http://www.github.com/mockk/mockk/',
       releases: [{ version: '1.9.3' }],
     };
-    const datasource = DATASOURCE_MAVEN;
+    const datasource = datasourceMaven.id;
     const lookupName = 'io.mockk:mockk';
 
     addMetaData(dep, datasource, lookupName);

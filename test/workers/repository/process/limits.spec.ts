@@ -1,6 +1,7 @@
 import moment from 'moment';
 import * as limits from '../../../../lib/workers/repository/process/limits';
 import { platform, getConfig, RenovateConfig } from '../../../util';
+import { BranchConfig } from '../../../../lib/workers/common';
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -34,7 +35,10 @@ describe('workers/repository/process/limits', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
       platform.branchExists.mockResolvedValueOnce(true);
-      const branches = [{ branchName: 'test' }, { branchName: undefined }];
+      const branches: BranchConfig[] = [
+        { branchName: 'test', upgrades: [] },
+        { branchName: undefined, upgrades: [] },
+      ];
       const res = await limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });

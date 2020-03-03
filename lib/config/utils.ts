@@ -3,10 +3,10 @@ import { logger } from '../logger';
 import { clone } from '../util/clone';
 import * as definitions from './definitions';
 
-export function mergeChildConfig<
-  T extends RenovateConfig = RenovateConfig,
-  TChild extends RenovateConfig = RenovateConfig
->(parent: T, child: TChild): T & TChild {
+export function mergeChildConfig<T, TChild>(
+  parent: T,
+  child: TChild
+): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
     return parent as never;
@@ -22,13 +22,13 @@ export function mergeChildConfig<
     ) {
       logger.trace(`mergeable option: ${option.name}`);
       if (option.type === 'array') {
-        config[option.name] = parentConfig[option.name].concat(
+        config[option.name] = (parentConfig[option.name] as unknown[]).concat(
           config[option.name]
         );
       } else {
         config[option.name] = mergeChildConfig(
-          parentConfig[option.name],
-          childConfig[option.name]
+          parentConfig[option.name] as RenovateConfig,
+          childConfig[option.name] as RenovateConfig
         );
       }
       logger.trace(

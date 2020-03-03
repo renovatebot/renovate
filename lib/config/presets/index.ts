@@ -145,7 +145,7 @@ export async function resolveConfigPresets(
   ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<RenovateConfig> {
-  if (!ignorePresets) {
+  if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
   }
   logger.trace(
@@ -223,18 +223,22 @@ export async function resolveConfigPresets(
       config[key] = [];
       for (const element of val) {
         if (is.object(element)) {
-          config[key].push(
-            await resolveConfigPresets(element, ignorePresets, existingPresets)
+          (config[key] as RenovateConfig[]).push(
+            await resolveConfigPresets(
+              element as RenovateConfig,
+              ignorePresets,
+              existingPresets
+            )
           );
         } else {
-          config[key].push(element);
+          (config[key] as RenovateConfig[]).push(element);
         }
       }
     } else if (is.object(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
       config[key] = await resolveConfigPresets(
-        val,
+        val as RenovateConfig,
         ignorePresets,
         existingPresets
       );

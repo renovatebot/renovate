@@ -1,5 +1,3 @@
-import { Release } from '../../../datasource';
-
 export interface ChangeLogNotes {
   body?: string;
   id?: number;
@@ -39,17 +37,4 @@ export interface ChangeLogResult {
   project?: ChangeLogProject;
   versions?: ChangeLogRelease[];
   error?: ChangeLogError;
-}
-
-export interface ChangeLogConfig {
-  depName: string;
-  depType?: string;
-  endpoint: string;
-  fromVersion: string;
-  manager?: string;
-  releases: Release[];
-  sourceUrl?: string;
-  toVersion: string;
-  versioning: string;
-  changeLogError?: ChangeLogError;
 }

@@ -1,4 +1,4 @@
-import getArgv from './config/_fixtures/argv';
+import getArgv from './config/__fixtures__/argv';
 import { getConfig } from '../../lib/config/defaults';
 
 jest.mock('../../lib/datasource/npm');

@@ -2,6 +2,8 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
+export const id = 'orb';
+
 interface OrbRelease {
   homeUrl?: string;
   versions: {
@@ -37,6 +39,7 @@ export async function getPkgReleases({
     const res: OrbRelease = (
       await got.post(url, {
         body,
+        hostType: id,
         json: true,
         retry: 5,
       })

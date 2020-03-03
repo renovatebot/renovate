@@ -9,16 +9,16 @@ import {
 const ghGot: jest.Mock<Promise<{ body: unknown }>> = got as never;
 
 const angularJsChangelogMd = fs.readFileSync(
-  'test/workers/pr/_fixtures/angular.js.md',
+  'test/workers/pr/__fixtures__/angular.js.md',
   'utf8'
 );
 const jestChangelogMd = fs.readFileSync(
-  'test/workers/pr/_fixtures/jest.md',
+  'test/workers/pr/__fixtures__/jest.md',
   'utf8'
 );
 
 const jsYamlChangelogMd = fs.readFileSync(
-  'test/workers/pr/_fixtures/js-yaml.md',
+  'test/workers/pr/__fixtures__/js-yaml.md',
   'utf8'
 );
 

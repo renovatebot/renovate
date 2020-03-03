@@ -1,5 +1,5 @@
 import URL from 'url';
-import responses from './_fixtures/responses';
+import responses from './__fixtures__/responses';
 import { GotApi, RepoParams, Platform } from '../../../lib/platform/common';
 import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
 import {

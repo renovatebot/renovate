@@ -3,6 +3,8 @@ import * as semver from '../../versioning/semver';
 import { logger } from '../../logger';
 import { ReleaseResult, GetReleasesConfig } from '../common';
 
+export const id = 'git-tags';
+
 const cacheNamespace = 'git-tags';
 const cacheMinutes = 10;
 
