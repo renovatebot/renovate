@@ -439,8 +439,17 @@ export async function processBranch(
     await setStability(config);
     await setUnpublishable(config);
 
+    // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    if (
+      commit &&
+      (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
+    ) {
+      logger.debug({ commit }, `Branch status pending`);
+      return 'pending';
+    }
+
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || !config.requiresStatusChecks) {
+    if (branchExists || !config.requiredStatusChecks) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
