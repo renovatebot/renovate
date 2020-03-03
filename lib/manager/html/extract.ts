@@ -1,47 +1,49 @@
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
+import * as datasourceCdnjs from '../../datasource/cdnjs';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
 
 const regex = /<\s*(script|link)\s+[^>]*?\/?>/i;
 
+const integrityRegex = /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/;
+
 export function extractDep(tag: string): PackageDependency | null {
   const match = cloudflareUrlRegex.exec(tag);
-  if (match) {
-    const { depName, currentValue, asset } = match.groups;
-    return {
-      datasource: DATASOURCE_CDNJS,
-      depName,
-      lookupName: `${depName}/${asset}`,
-      currentValue,
-    };
+  if (!match) {
+    return null;
   }
-  return null;
+  const { depName, currentValue, asset } = match.groups;
+  const dep: PackageDependency = {
+    datasource: datasourceCdnjs.id,
+    depName,
+    lookupName: `${depName}/${asset}`,
+    currentValue,
+  };
+  const integrityMatch = integrityRegex.exec(tag);
+  if (integrityMatch) {
+    dep.currentDigest = integrityMatch.groups.currentDigest;
+  }
+  return dep;
 }
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
-
   let rest = content;
   let match = regex.exec(rest);
   let offset = 0;
   while (match) {
-    const [tag] = match;
-    const tagLength = tag.length;
-    const fileReplacePosition = offset + match.index;
-
-    offset += match.index + tag.length;
+    const [replaceString] = match;
+    offset += match.index + replaceString.length;
     rest = content.slice(offset);
     match = regex.exec(rest);
-
-    const dep = extractDep(tag);
+    const dep = extractDep(replaceString);
     if (dep) {
       deps.push({
         ...dep,
-        fileReplacePosition,
-        managerData: { tagLength },
+        autoReplaceData: {
+          replaceString,
+        },
       });
     }
   }
-
   return { deps };
 }

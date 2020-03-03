@@ -4,14 +4,10 @@ import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import {
-  ChangeLogConfig,
-  ChangeLogError,
-  ChangeLogRelease,
-  ChangeLogResult,
-} from './common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { BranchUpgradeConfig } from '../../common';
 
 const { get: ghGot } = api;
 
@@ -37,7 +33,7 @@ async function getTags(
 
     return tags.map(tag => tag.name).filter(Boolean);
   } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Github tags');
+    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });
     // istanbul ignore if
     if (err.message && err.message.includes('Bad credentials')) {
@@ -57,7 +53,7 @@ export async function getChangeLogJSON({
   releases,
   depName,
   manager,
-}: ChangeLogConfig): Promise<ChangeLogResult | null> {
+}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.debug('No release notes for @types');
     return null;
@@ -72,16 +68,17 @@ export async function getChangeLogJSON({
     hostType: PLATFORM_TYPE_GITHUB,
     url,
   });
+  // istanbul ignore if
   if (!config.token) {
-    // istanbul ignore if
-    if (sourceUrl.includes('github.com')) {
+    // prettier-ignore
+    if (URL.parse(sourceUrl).host.endsWith('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
       );
       return { error: ChangeLogError.MissingGithubToken };
     }
-    logger.info(
+    logger.debug(
       { manager, depName, sourceUrl },
       'Repository URL does not match any known hosts - skipping changelog retrieval'
     );
@@ -92,7 +89,7 @@ export async function getChangeLogJSON({
     : endpoint; // TODO FIX
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
-    logger.info({ sourceUrl }, 'Invalid github URL found');
+    logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
   if (!(releases && releases.length)) {

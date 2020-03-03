@@ -73,6 +73,7 @@ export function flattenUpdates(
             }
             delete updateConfig.repoIsOnboarded;
             delete updateConfig.renovateJsonPresent;
+            updateConfig.baseDeps = packageFile.deps;
             updates.push(updateConfig);
           }
         }

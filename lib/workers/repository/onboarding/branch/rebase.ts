@@ -24,12 +24,12 @@ function getCommitMessage(config: RenovateConfig): string {
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig
-): Promise<void> {
+): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
   const pr = await platform.getBranchPr(config.onboardingBranch);
   if (pr.isModified) {
-    logger.info('Onboarding branch has been edited and cannot be rebased');
-    return;
+    logger.debug('Onboarding branch has been edited and cannot be rebased');
+    return null;
   }
   const existingContents = await platform.getFile(
     defaultConfigFile,
@@ -37,26 +37,26 @@ export async function rebaseOnboardingBranch(
   );
   const contents = await getOnboardingConfig(config);
   if (contents === existingContents && !pr.isStale) {
-    logger.info('Onboarding branch is up to date');
-    return;
+    logger.debug('Onboarding branch is up to date');
+    return null;
   }
-  logger.info('Rebasing onboarding branch');
+  logger.debug('Rebasing onboarding branch');
   // istanbul ignore next
   const commitMessage = getCommitMessage(config);
 
   // istanbul ignore if
   if (config.dryRun) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
-  } else {
-    await platform.commitFilesToBranch({
-      branchName: config.onboardingBranch,
-      files: [
-        {
-          name: defaultConfigFile,
-          contents,
-        },
-      ],
-      message: commitMessage,
-    });
+    return null;
   }
+  return platform.commitFilesToBranch({
+    branchName: config.onboardingBranch,
+    files: [
+      {
+        name: defaultConfigFile,
+        contents,
+      },
+    ],
+    message: commitMessage,
+  });
 }

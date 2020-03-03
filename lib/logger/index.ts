@@ -1,4 +1,5 @@
 import * as bunyan from 'bunyan';
+import * as shortid from 'shortid';
 
 import is from '@sindresorhus/is';
 import { RenovateStream } from './pretty-stdout';
@@ -7,7 +8,9 @@ import errSerializer from './err-serializer';
 import cmdSerializer from './cmd-serializer';
 import { ErrorStream, withSanitizer } from './utils';
 
+let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
 let meta = {};
+
 export interface LogError {
   level: bunyan.LogLevel;
   meta: any;
@@ -39,6 +42,8 @@ const bunyanLogger = bunyan.createLogger({
     migratedConfig: configSerializer,
     originalConfig: configSerializer,
     presetConfig: configSerializer,
+    oldConfig: configSerializer,
+    newConfig: configSerializer,
     err: errSerializer,
   },
   streams: [
@@ -56,13 +61,13 @@ const logFactory = (level: bunyan.LogLevelString): any => {
   return (p1: any, p2: any): void => {
     if (p2) {
       // meta and msg provided
-      bunyanLogger[level]({ ...meta, ...p1 }, p2);
+      bunyanLogger[level]({ logContext, ...meta, ...p1 }, p2);
     } else if (is.string(p1)) {
       // only message provided
-      bunyanLogger[level](meta, p1);
+      bunyanLogger[level]({ logContext, ...meta }, p1);
     } else {
       // only meta provided
-      bunyanLogger[level]({ ...meta, ...p1 });
+      bunyanLogger[level]({ logContext, ...meta, ...p1 });
     }
   };
 };
@@ -96,6 +101,14 @@ export const logger: Logger = {} as any;
 loggerLevels.forEach(loggerLevel => {
   logger[loggerLevel] = logFactory(loggerLevel);
 });
+
+export function setContext(value: string): void {
+  logContext = value;
+}
+
+export function getContext(): any {
+  return logContext;
+}
 
 // setMeta overrides existing meta, may remove fields if no longer existing
 export function setMeta(obj: any): void {

@@ -62,7 +62,7 @@ export function getNewValue({
     }
   }
   if (!['replace', 'bump'].includes(rangeStrategy)) {
-    logger.info(
+    logger.debug(
       'Unsupported rangeStrategy: ' +
         rangeStrategy +
         '. Using "replace" instead.'

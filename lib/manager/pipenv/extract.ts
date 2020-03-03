@@ -3,7 +3,7 @@ import toml from 'toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import * as datasourcePypi from '../../datasource/pypi';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -70,7 +70,7 @@ function extractFromSection(
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
         if (!packageMatches) {
-          logger.info(
+          logger.debug(
             `Skipping dependency with malformed package name "${depName}".`
           );
           skipReason = 'invalid-name';
@@ -92,7 +92,7 @@ function extractFromSection(
       if (skipReason) {
         dep.skipReason = skipReason;
       } else {
-        dep.datasource = DATASOURCE_PYPI;
+        dep.datasource = datasourcePypi.id;
       }
       if (nestedVersion) dep.managerData.nestedVersion = nestedVersion;
       if (requirements.index) {

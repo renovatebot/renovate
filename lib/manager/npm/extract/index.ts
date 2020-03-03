@@ -18,10 +18,8 @@ import { NpmPackage } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as nodeVersioning from '../../../versioning/node';
-import {
-  DATASOURCE_GITHUB,
-  DATASOURCE_NPM,
-} from '../../../constants/data-binary-source';
+import * as datasourceNpm from '../../../datasource/npm';
+import * as datasourceGithubTags from '../../../datasource/github-tags';
 
 export async function extractPackageFile(
   content: string,
@@ -35,12 +33,12 @@ export async function extractPackageFile(
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
-    logger.info({ fileName }, 'Invalid JSON');
+    logger.debug({ fileName }, 'Invalid JSON');
     return null;
   }
   // eslint-disable-next-line no-underscore-dangle
   if (packageJson._id && packageJson._args && packageJson._from) {
-    logger.info('Ignoring vendorised package.json');
+    logger.debug('Ignoring vendorised package.json');
     return null;
   }
   if (fileName !== 'package.json' && packageJson.renovate) {
@@ -94,12 +92,12 @@ export async function extractPackageFile(
   } else {
     npmrc = await platform.getFile(npmrcFileName);
     if (npmrc && npmrc.includes('package-lock')) {
-      logger.info('Stripping package-lock setting from npmrc');
+      logger.debug('Stripping package-lock setting from npmrc');
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
     }
     if (npmrc) {
       if (npmrc.includes('=${') && !(global.trustLevel === 'high')) {
-        logger.info('Discarding .npmrc file with variables');
+        logger.debug('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;
         await remove(npmrcFileNameLocal);
@@ -156,14 +154,14 @@ export async function extractPackageFile(
     dep.currentValue = input.trim();
     if (depType === 'engines') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
       } else if (depName === 'npm') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
       } else {
         dep.skipReason = 'unknown-engines';
@@ -177,11 +175,11 @@ export async function extractPackageFile(
     // support for volta
     if (depType === 'volta') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
       } else {
         dep.skipReason = 'unknown-volta';
@@ -202,7 +200,7 @@ export async function extractPackageFile(
         dep.lookupName = valSplit[0] + '@' + valSplit[1];
         dep.currentValue = valSplit[2];
       } else {
-        logger.info('Invalid npm package alias: ' + dep.currentValue);
+        logger.debug('Invalid npm package alias: ' + dep.currentValue);
       }
     }
     if (dep.currentValue.startsWith('file:')) {
@@ -211,7 +209,7 @@ export async function extractPackageFile(
       return dep;
     }
     if (isValid(dep.currentValue)) {
-      dep.datasource = DATASOURCE_NPM;
+      dep.datasource = datasourceNpm.id;
       if (dep.currentValue === '*') {
         dep.skipReason = 'any-version';
       }
@@ -248,7 +246,7 @@ export async function extractPackageFile(
     if (isVersion(depRefPart)) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
@@ -258,7 +256,7 @@ export async function extractPackageFile(
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
       dep.currentDigest = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
     } else {
       dep.skipReason = 'unversioned-reference';
@@ -290,7 +288,7 @@ export async function extractPackageFile(
           deps.push(dep);
         }
       } catch (err) /* istanbul ignore next */ {
-        logger.info({ fileName, depType, err }, 'Error parsing package.json');
+        logger.debug({ fileName, depType, err }, 'Error parsing package.json');
         return null;
       }
     }
@@ -317,7 +315,7 @@ export async function extractPackageFile(
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: references
       //  - So we set skipInstalls to false if file: refs are found *and* the user hasn't explicitly set the value already
-      logger.info('Automatically setting skipInstalls to false');
+      logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
     } else {
       skipInstalls = true;
@@ -362,7 +360,7 @@ export async function extractAllPackageFiles(
         });
       }
     } else {
-      logger.info({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
   await postExtract(npmFiles);

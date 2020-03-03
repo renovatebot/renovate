@@ -23,8 +23,7 @@ import {
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
-import { BinarySource } from '../../util/exec/common';
+import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
@@ -45,8 +44,6 @@ async function getGradleCommandLine(
   cwd: string
 ): Promise<string> {
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
-
-  if (config.binarySource === BinarySource.Docker) return `gradle ${args}`;
 
   const gradlewPath = upath.join(cwd, 'gradlew');
   const gradlewExists = await exists(gradlewPath);
@@ -88,7 +85,7 @@ async function executeGradle(
     return;
   }
   logger.debug(stdout + stderr);
-  logger.info('Gradle report complete');
+  logger.debug('Gradle report complete');
 }
 
 export async function extractAllPackageFiles(
@@ -117,7 +114,7 @@ export async function extractAllPackageFiles(
     logger.warn('No root build.gradle nor build.gradle.kts found - skipping');
     return null;
   }
-  logger.info('Extracting dependencies from all gradle files');
+  logger.debug('Extracting dependencies from all gradle files');
 
   const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
 
@@ -137,14 +134,14 @@ export async function extractAllPackageFiles(
     if (content) {
       gradleFiles.push({
         packageFile,
-        datasource: DATASOURCE_MAVEN,
+        datasource: datasourceMaven.id,
         deps: dependencies,
       });
 
       collectVersionVariables(dependencies, content);
     } else {
       // istanbul ignore next
-      logger.info({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
 

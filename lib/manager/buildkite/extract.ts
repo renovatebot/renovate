@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -61,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             skipReason,
           };
           if (repo) {
-            dep.datasource = DATASOURCE_GITHUB;
+            dep.datasource = datasourceGithubTags.id;
             dep.lookupName = repo;
           }
           deps.push(dep);

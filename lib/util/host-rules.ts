@@ -2,19 +2,7 @@ import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import * as sanitize from './sanitize';
-
-export interface HostRule {
-  hostType?: string;
-  domainName?: string;
-  hostName?: string;
-  json?: true;
-  baseUrl?: string;
-  token?: string;
-  username?: string;
-  password?: string;
-  insecureRegistry?: boolean;
-  timeout?: number;
-}
+import { HostRule } from '../types';
 
 let hostRules: HostRule[] = [];
 

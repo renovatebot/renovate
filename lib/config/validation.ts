@@ -79,7 +79,7 @@ export async function validateConfig(
         try {
           let res = handlebars.compile(val)(config);
           res = handlebars.compile(res)(config);
-          res = handlebars.compile(res)(config);
+          handlebars.compile(res)(config);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
@@ -93,7 +93,7 @@ export async function validateConfig(
           message: `Invalid configuration option: ${currentPath}`,
         });
       } else if (key === 'schedule') {
-        const [validSchedule, errorMessage] = hasValidSchedule(val);
+        const [validSchedule, errorMessage] = hasValidSchedule(val as string[]);
         if (!validSchedule) {
           errors.push({
             depName: 'Configuration Error',
@@ -101,7 +101,7 @@ export async function validateConfig(
           });
         }
       } else if (key === 'timezone' && val !== null) {
-        const [validTimezone, errorMessage] = hasValidTimezone(val);
+        const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
           errors.push({
             depName: 'Configuration Error',
@@ -173,7 +173,9 @@ export async function validateConfig(
               for (const packageRule of val) {
                 let hasSelector = false;
                 if (is.object(packageRule)) {
-                  const resolvedRule = await resolveConfigPresets(packageRule);
+                  const resolvedRule = await resolveConfigPresets(
+                    packageRule as RenovateConfig
+                  );
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );

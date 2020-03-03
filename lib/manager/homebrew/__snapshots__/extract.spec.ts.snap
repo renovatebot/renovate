@@ -5,7 +5,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.8.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
       "managerData": Object {
         "ownerName": "bazelbuild",
@@ -23,7 +23,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.16.1",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "aide/aide",
       "managerData": Object {
         "ownerName": "aide",
@@ -41,7 +41,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.8.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
       "managerData": Object {
         "ownerName": "bazelbuild",
@@ -154,7 +154,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.8.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
       "managerData": Object {
         "ownerName": "bazelbuild",
@@ -173,7 +173,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.8.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
       "managerData": Object {
         "ownerName": "bazelbuild",

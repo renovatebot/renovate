@@ -2,7 +2,9 @@ import urlApi from 'url';
 import { logger } from '../../logger';
 import * as v2 from './v2';
 import * as v3 from './v3';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
+
+export { id } from './common';
 
 function detectFeedVersion(url: string): 2 | 3 | null {
   try {
@@ -21,7 +23,7 @@ function detectFeedVersion(url: string): 2 | 3 | null {
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`nuget.getPkgReleases(${lookupName})`);
   let dep: ReleaseResult = null;
   for (const feed of registryUrls || [v3.getDefaultFeed()]) {
@@ -39,7 +41,7 @@ export async function getPkgReleases({
     }
   }
   if (dep === null) {
-    logger.info(
+    logger.debug(
       { lookupName },
       `Dependency lookup failure: not found in all feeds`
     );
