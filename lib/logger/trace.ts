@@ -1,7 +1,7 @@
 import Formatter from 'njstrace/lib/formatter';
 import { Logger } from './common';
 
-interface FormatterArgs {
+export interface FormatterArgs {
   name: string;
   file: string;
   line: number;
