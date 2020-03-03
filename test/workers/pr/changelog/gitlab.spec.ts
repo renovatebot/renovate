@@ -6,7 +6,7 @@ import {
   ChangeLogError,
 } from '../../../../lib/workers/pr/changelog';
 import { mocked } from '../../../util';
-import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platforms';
+import { PLATFORM_TYPE_GITLAB } from '../../../../lib/constants/platforms';
 import * as semverVersioning from '../../../../lib/versioning/semver';
 
 jest.mock('../../../../lib/platform/gitlab/gl-got-wrapper');
@@ -40,8 +40,8 @@ describe('workers/pr/changelog', () => {
       glGot.mockClear();
       hostRules.clear();
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://gitlab.com/api/v4/',
+        hostType: PLATFORM_TYPE_GITLAB,
+        baseUrl: 'https://gitlab.com/',
         token: 'abc',
       });
       await global.renovateCache.rmAll();
@@ -59,7 +59,7 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          sourceUrl: 'https://gitlab.com/meno/dropzone',
+          sourceUrl: 'https://gitlab.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBeNull();
       expect(glGot).toHaveBeenCalledTimes(0);
@@ -78,11 +78,11 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          sourceUrl: 'https://gitlab.com/nonononononononononononono',
+          sourceUrl: 'https://gitlab.com/help',
         })
       ).toBeNull();
     });
-    it('works without GitLub', async () => {
+    it('works without GitLab', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -167,7 +167,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports gitlab enterprise and gitlab.com changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PLATFORM_TYPE_GITLAB,
         token: 'super_secret',
         baseUrl: 'https://gitlab-enterprise.example.com/',
       });
@@ -180,7 +180,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PLATFORM_TYPE_GITLAB,
         baseUrl: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
