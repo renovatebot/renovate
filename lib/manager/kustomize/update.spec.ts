@@ -1,8 +1,6 @@
 import { readFileSync } from 'fs';
-import {
-  DATASOURCE_GIT_TAGS,
-  DATASOURCE_DOCKER,
-} from '../../constants/data-binary-source';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGitTags from '../../datasource/git-tags';
 import { updateDependency } from './update';
 
 const dockerImages = readFileSync(
@@ -30,13 +28,13 @@ describe('manager/kustomize/update', () => {
     it('should return null if no file is passed in', () => {
       const res = updateDependency({
         fileContent: null,
-        upgrade: { depType: DATASOURCE_DOCKER },
+        upgrade: { depType: datasourceDocker.id },
       });
       expect(res).toBeNull();
 
       const res2 = updateDependency({
         fileContent: null,
-        upgrade: { depType: DATASOURCE_GIT_TAGS },
+        upgrade: { depType: datasourceGitTags.id },
       });
       expect(res2).toBeNull();
     });
@@ -64,7 +62,7 @@ describe('manager/kustomize/update', () => {
           'git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld',
         currentValue: 'v2.0.0',
         newValue: 'v2.0.1',
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHSubdir,
@@ -79,7 +77,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/remote-kustomize.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHBase,
@@ -94,7 +92,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/remote-kustomize.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHBase,
@@ -109,7 +107,7 @@ describe('manager/kustomize/update', () => {
         depName: 'github.com/user/repo',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.2',
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
       };
       const res = updateDependency({ fileContent: kustomizeHTTP, upgrade });
       expect(res).not.toEqual(kustomizeGitSSHBase);
@@ -120,7 +118,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/remote-kustomize.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.1',
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHBase,
@@ -134,7 +132,7 @@ describe('manager/kustomize/update', () => {
         depName: 'git@github.com:moredhel/invalid-repo.git',
         currentValue: 'v0.0.1',
         newValue: 'v0.0.1',
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
       };
       const res = updateDependency({
         fileContent: kustomizeGitSSHSubdir,
@@ -160,7 +158,7 @@ describe('manager/kustomize/update/image', () => {
       depName: 'node',
       currentValue: 'v0.1.0',
       newValue: 'v0.1.1',
-      depType: DATASOURCE_DOCKER,
+      depType: datasourceDocker.id,
     };
     const res = updateDependency({ fileContent: dockerImages, upgrade });
     expect(res.includes(upgrade.newValue)).toBe(true);
@@ -170,7 +168,7 @@ describe('manager/kustomize/update/image', () => {
       depName: 'group/instance',
       currentValue: 'v0.0.1',
       newValue: 'v1.1.1',
-      depType: DATASOURCE_DOCKER,
+      depType: datasourceDocker.id,
     };
     const res = updateDependency({ fileContent: dockerImages, upgrade });
     expect(res.includes(upgrade.newValue)).toBe(true);
@@ -180,7 +178,7 @@ describe('manager/kustomize/update/image', () => {
       depName: 'gitlab.com/org/suborg/image',
       currentValue: 'v0.0.3',
       newValue: 'v1.1.3',
-      depType: DATASOURCE_DOCKER,
+      depType: datasourceDocker.id,
     };
     const res = updateDependency({ fileContent: dockerImages, upgrade });
     expect(res.includes(upgrade.newValue)).toBe(true);

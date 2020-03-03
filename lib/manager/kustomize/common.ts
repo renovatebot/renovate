@@ -1,8 +1,6 @@
 import { safeLoad } from 'js-yaml';
-import {
-  DATASOURCE_GIT_TAGS,
-  DATASOURCE_DOCKER,
-} from '../../constants/data-binary-source';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGitTags from '../../datasource/git-tags';
 import { PackageDependency } from '../common';
 
 interface Image {
@@ -36,8 +34,8 @@ export function extractBase(base: string): PackageDependency | null {
     }
 
     return {
-      datasource: DATASOURCE_GIT_TAGS,
-      depType: DATASOURCE_GIT_TAGS,
+      datasource: datasourceGitTags.id,
+      depType: datasourceGitTags.id,
       depName: root,
       lookupName: url,
       source: url,
@@ -51,8 +49,8 @@ export function extractBase(base: string): PackageDependency | null {
 export function extractImage(image: Image): PackageDependency | null {
   if (image && image.name && image.newTag) {
     return {
-      datasource: DATASOURCE_DOCKER,
-      depType: DATASOURCE_DOCKER,
+      datasource: datasourceDocker.id,
+      depType: datasourceDocker.id,
       depName: image.name,
       lookupName: image.name,
       source: image.name,

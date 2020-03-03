@@ -1,8 +1,6 @@
 import { readFileSync } from 'fs';
-import {
-  DATASOURCE_GIT_TAGS,
-  DATASOURCE_DOCKER,
-} from '../../constants/data-binary-source';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGitTags from '../../datasource/git-tags';
 import { extractBase, extractImage, parseKustomize } from './common';
 
 const kustomizeGitSSHBase = readFileSync(
@@ -32,9 +30,9 @@ describe('manager/kustomize/common', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: DATASOURCE_GIT_TAGS,
+        datasource: datasourceGitTags.id,
         depName: base,
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
         lookupName: base,
         source: base,
       };
@@ -47,9 +45,9 @@ describe('manager/kustomize/common', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: DATASOURCE_GIT_TAGS,
+        datasource: datasourceGitTags.id,
         depName: base,
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
         lookupName: base,
         source: base,
       };
@@ -62,9 +60,9 @@ describe('manager/kustomize/common', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: DATASOURCE_GIT_TAGS,
+        datasource: datasourceGitTags.id,
         depName: `${base}//subdir`,
-        depType: DATASOURCE_GIT_TAGS,
+        depType: datasourceGitTags.id,
         lookupName: base,
         source: base,
       };
@@ -87,9 +85,9 @@ describe('manager/kustomize/common', () => {
     it('should correctly extract a default image', () => {
       const sample = {
         currentValue: 'v1.0.0',
-        datasource: DATASOURCE_DOCKER,
+        datasource: datasourceDocker.id,
         depName: 'node',
-        depType: DATASOURCE_DOCKER,
+        depType: datasourceDocker.id,
         lookupName: 'node',
         source: 'node',
       };
@@ -102,9 +100,9 @@ describe('manager/kustomize/common', () => {
     it('should correctly extract an image in a repo', () => {
       const sample = {
         currentValue: 'v1.0.0',
-        datasource: DATASOURCE_DOCKER,
+        datasource: datasourceDocker.id,
         depName: 'test/node',
-        depType: DATASOURCE_DOCKER,
+        depType: datasourceDocker.id,
         lookupName: 'test/node',
         source: 'test/node',
       };
@@ -117,9 +115,9 @@ describe('manager/kustomize/common', () => {
     it('should correctly extract from a different registry', () => {
       const sample = {
         currentValue: 'v1.0.0',
-        datasource: DATASOURCE_DOCKER,
+        datasource: datasourceDocker.id,
         depName: 'quay.io/repo/image',
-        depType: DATASOURCE_DOCKER,
+        depType: datasourceDocker.id,
         lookupName: 'quay.io/repo/image',
         source: 'quay.io/repo/image',
       };
@@ -132,9 +130,9 @@ describe('manager/kustomize/common', () => {
     it('should correctly extract from a different port', () => {
       const sample = {
         currentValue: 'v1.0.0',
-        datasource: DATASOURCE_DOCKER,
+        datasource: datasourceDocker.id,
         depName: 'localhost:5000/repo/image',
-        depType: DATASOURCE_DOCKER,
+        depType: datasourceDocker.id,
         lookupName: 'localhost:5000/repo/image',
         source: 'localhost:5000/repo/image',
       };
@@ -147,9 +145,9 @@ describe('manager/kustomize/common', () => {
     it('should correctly extract from a multi-depth registry', () => {
       const sample = {
         currentValue: 'v1.0.0',
-        datasource: DATASOURCE_DOCKER,
+        datasource: datasourceDocker.id,
         depName: 'localhost:5000/repo/image/service',
-        depType: DATASOURCE_DOCKER,
+        depType: datasourceDocker.id,
         lookupName: 'localhost:5000/repo/image/service',
         source: 'localhost:5000/repo/image/service',
       };

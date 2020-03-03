@@ -1,7 +1,5 @@
-import {
-  DATASOURCE_GIT_TAGS,
-  DATASOURCE_DOCKER,
-} from '../../constants/data-binary-source';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGitTags from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
 
@@ -72,10 +70,10 @@ export function updateDependency({
     return fileContent;
   }
 
-  if (upgrade.depType === DATASOURCE_GIT_TAGS) {
+  if (upgrade.depType === datasourceGitTags.id) {
     return updateBase({ fileContent, upgrade });
   }
-  if (upgrade.depType === DATASOURCE_DOCKER) {
+  if (upgrade.depType === datasourceDocker.id) {
     return updateImageTag({ fileContent, upgrade });
   }
   logger.warn(`datasource type not supported ${upgrade.depType}`);
