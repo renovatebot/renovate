@@ -2,4 +2,4 @@
 
 exports[`trace onEntry 1`] = `"method(\\"arg1\\",\\"arg2\\")"`;
 
-exports[`trace onEntry 2`] = `null`;
+exports[`trace onExit 1`] = `null`;
