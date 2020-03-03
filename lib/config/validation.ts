@@ -201,11 +201,11 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'customManagers') {
-              for (const customManager of val) {
+            if (key === 'regexManagers') {
+              for (const regexManager of val) {
                 if (
-                  !customManager.matchStrings ||
-                  customManager.matchStrings.length !== 1
+                  !regexManager.matchStrings ||
+                  regexManager.matchStrings.length !== 1
                 ) {
                   errors.push({
                     depName: 'Configuration Error',
@@ -213,7 +213,7 @@ export async function validateConfig(
                   });
                 } else {
                   let validRegex = false;
-                  for (const matchString of customManager.matchStrings) {
+                  for (const matchString of regexManager.matchStrings) {
                     try {
                       regEx(matchString);
                       validRegex = true;
@@ -232,8 +232,8 @@ export async function validateConfig(
                     ];
                     for (const field of mandatoryFields) {
                       if (
-                        !customManager[`${field}Template`] &&
-                        !customManager.matchStrings.some(matchString =>
+                        !regexManager[`${field}Template`] &&
+                        !regexManager.matchStrings.some(matchString =>
                           matchString.includes(`(?<${field}>`)
                         )
                       ) {

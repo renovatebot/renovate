@@ -148,7 +148,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
-  customManagers?: CustomManager[];
+  regexManagers?: CustomManager[];
 }
 
 export type UpdateType =

@@ -23,14 +23,14 @@ export async function extractAllDependencies(
     }
     const managerConfig = getManagerConfig(config, manager);
     let packageFiles = [];
-    if (manager === 'custom') {
-      for (const customManager of config.customManagers) {
-        const customManagerConfig = mergeChildConfig(
+    if (manager === 'regex') {
+      for (const regexManager of config.regexManagers) {
+        const regexManagerConfig = mergeChildConfig(
           managerConfig,
-          customManager
+          regexManager
         );
         const customPackageFiles = await getManagerPackageFiles(
-          customManagerConfig
+          regexManagerConfig
         );
         if (customPackageFiles) {
           packageFiles = packageFiles.concat(customPackageFiles);

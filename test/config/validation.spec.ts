@@ -175,9 +175,9 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
-    it('errors if no customManager matchStrings', async () => {
+    it('errors if no regexManager matchStrings', async () => {
       const config = {
-        customManagers: [
+        regexManagers: [
           {
             matchStrings: [],
           },
@@ -192,7 +192,7 @@ describe('config/validation', () => {
     });
     it('validates regEx for each matchStrings', async () => {
       const config = {
-        customManagers: [
+        regexManagers: [
           {
             matchStrings: ['***$}{]]['],
           },
@@ -205,9 +205,9 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
-    it('passes if customManager fields are present', async () => {
+    it('passes if regexManager fields are present', async () => {
       const config = {
-        customManagers: [
+        regexManagers: [
           {
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
@@ -222,9 +222,9 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
-    it('errors if customManager fields are missing', async () => {
+    it('errors if regexManager fields are missing', async () => {
       const config = {
-        customManagers: [
+        regexManagers: [
           {
             matchStrings: ['ENV (.*?)\\s'],
             depNameTemplate: 'foo',

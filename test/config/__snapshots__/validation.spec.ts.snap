@@ -75,7 +75,7 @@ Array [
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if customManager fields are missing 1`] = `
+exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",

@@ -28,7 +28,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'customManagers';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
 
   // used by tests
   relatedOptions?: string[];
@@ -1676,7 +1676,7 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'customManagers',
+    name: 'regexManagers',
     description: 'Custom managers using regex matching.',
     type: 'array',
     subType: 'object',
@@ -1688,56 +1688,56 @@ const options: RenovateOptions[] = [
   {
     name: 'matchStrings',
     description:
-      'Regex capture rule to use. Valid only within `customManagers` object.',
+      'Regex capture rule to use. Valid only within `regexManagers` object.',
     type: 'array',
     subType: 'string',
     format: 'regex',
-    parent: 'customManagers',
+    parent: 'regexManagers',
     cli: false,
     env: false,
   },
   {
     name: 'depNameTemplate',
     description:
-      'Optional depName for extracted dependencies. Valid only within `customManagers` object.',
+      'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
-    parent: 'customManagers',
+    parent: 'regexManagers',
     cli: false,
     env: false,
   },
   {
     name: 'lookupNameTemplate',
     description:
-      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `customManagers` object.',
+      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `regexManagers` object.',
     type: 'string',
-    parent: 'customManagers',
+    parent: 'regexManagers',
     cli: false,
     env: false,
   },
   {
     name: 'currentValueTemplate',
     description:
-      'Optional currentValue for extracted dependencies. Valid only within `customManagers` object.',
+      'Optional currentValue for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
-    parent: 'customManagers',
+    parent: 'regexManagers',
     cli: false,
     env: false,
   },
   {
     name: 'datasourceTemplate',
     description:
-      'Optional datasource for extracted dependencies. Valid only within `customManagers` object.',
+      'Optional datasource for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
-    parent: 'customManagers',
+    parent: 'regexManagers',
     cli: false,
     env: false,
   },
   {
     name: 'versioningTemplate',
     description:
-      'Optional versioning for extracted dependencies. Valid only within `customManagers` object.',
+      'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
-    parent: 'customManagers',
+    parent: 'regexManagers',
     cli: false,
     env: false,
   },
