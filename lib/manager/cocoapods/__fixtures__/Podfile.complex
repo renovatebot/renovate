@@ -1,0 +1,72 @@
+platform :ios, '9.0'
+# use_frameworks!
+inhibit_all_warnings!
+
+source "https://github.com/CocoaPods/Specs.git"
+
+target 'Sample' do
+
+  pod 'IQKeyboardManager', '~> 6.5.0'
+  pod 'CYLTabBarController', '~> 1.28.3'
+
+  pod 'PureLayout', '~> 3.1.4'
+  pod 'AFNetworking/Serialization', '~> 3.2.1'
+  pod 'AFNetworking/Security', '~> 3.2.1'
+  pod 'AFNetworking/Reachability', '~> 3.2.1'
+  pod 'AFNetworking/NSURLSession', '~> 3.2.1'
+  # pod 'SVProgressHUD', '~> 2.2.5'
+  pod 'MBProgressHUD', '~> 1.1.0'
+  pod 'MJRefresh', '~> 3.1.16'
+  pod 'MJExtension', '~> 3.1.0'
+  pod 'TYPagerController', '~> 2.1.2'
+  pod 'YYImage', '~> 1.0.4'
+  pod 'SDWebImage', '~> 5.0'
+  pod 'SDCycleScrollView','~> 1.80'
+  pod 'NullSafe', '~> 2.0'
+  # pod 'ZLPhotoBrowser'
+  pod 'TZImagePickerController', '~> 3.2.1'
+  pod 'TOCropViewController', '~> 2.5.1'
+  # pod 'RSKImageCropper', '~> 2.2.3'
+  # pod 'LBPhotoBrowser', '~> 2.2.2'
+  # pod 'YBImageBrowser', '~> 3.0.3'
+  pod 'FMDB', '~> 2.7.5'
+  pod 'FDStackView', '~> 1.0.1'
+  pod 'LYEmptyView'
+
+  pod 'MMKV', '~> 1.0.22'
+
+  pod 'fishhook'
+
+  pod 'CocoaLumberjack', '~> 3.5.3'
+
+  pod 'GZIP', '~> 1.2'
+
+  pod 'LBXScan/LBXNative','~> 2.3'
+  pod 'LBXScan/LBXZXing','~> 2.3'
+  # pod 'LBXScan/LBXZBar','~> 2.3'
+  pod 'LBXScan/UI','~> 2.3'
+
+  pod 'MLeaksFinder'
+  pod 'FBMemoryProfiler'
+
+  target 'SampleTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'SampleUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f <= 8.0
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+      end
+    end
+  end
+end

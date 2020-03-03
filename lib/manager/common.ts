@@ -1,6 +1,6 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy } from '../types';
-import { ValidationMessage } from '../config/common';
+import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -17,7 +17,7 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
-  global?: any;
+  global?: GlobalConfig;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
@@ -132,9 +132,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  displayFrom?: string;
+  displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  lookupType?: string;
   moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
@@ -142,6 +143,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   skipReason?: string;
   source?: string;
   sourceLine?: number;
+  toVersion?: string;
   updates?: PackageUpdateResult[];
   versionLine?: number;
   autoReplaceData?: AutoReplaceData;
@@ -167,7 +169,7 @@ export interface Upgrade<T = Record<string, any>>
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
   toVersion?: string;
-  updateType?: string;
+  updateType?: UpdateType;
   version?: string;
 }
 

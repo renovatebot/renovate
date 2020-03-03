@@ -7,7 +7,15 @@ Configuration is supported via any or all of the below:
 - Configuration file
 - Environment
 - CLI
-- `renovate.json`, `renovate.json5`, `.github/renovate.json`, `.github/renovate.json5`, `.renovaterc.json`, or `.renovaterc` in target repository
+- Configuration file in target repository at one of the following paths:
+  - `renovate.json`
+  - `renovate.json5`
+  - `.github/renovate.json`
+  - `.github/renovate.json5`
+  - `.gitlab/renovate.json`
+  - `.gitlab/renovate.json5`
+  - `.renovaterc.json`
+  - `.renovaterc`
 - `renovate` field of `package.json` in target repository
 
 The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.

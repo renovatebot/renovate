@@ -5,7 +5,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v1.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
       "depType": "github",
@@ -19,7 +19,7 @@ Object {
     },
     Object {
       "currentValue": "next",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
       "depType": "github",
@@ -34,7 +34,7 @@ Object {
     },
     Object {
       "currentValue": "0.1.0",
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "hashicorp/consul/aws",
       "depNameShort": "hashicorp/consul/aws",
       "depType": "terraform",
@@ -47,7 +47,7 @@ Object {
     },
     Object {
       "currentValue": "v0.1.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
       "depNameShort": "tieto-cem/terraform-aws-ecs-task-definition",
       "depType": "github",
@@ -61,7 +61,7 @@ Object {
     },
     Object {
       "currentValue": "v0.1.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
       "depNameShort": "tieto-cem/terraform-aws-ecs-task-definition",
       "depType": "github",
@@ -75,7 +75,7 @@ Object {
     },
     Object {
       "currentValue": "v2.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
       "depType": "github",
@@ -88,7 +88,7 @@ Object {
       "source": "git@github.com:hashicorp/example.git?ref=v2.0.0",
     },
     Object {
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "terraform-aws-modules/security-group/aws",
       "depNameShort": "terraform-aws-modules/security-group/aws",
       "depType": "terraform",
@@ -102,7 +102,7 @@ Object {
     },
     Object {
       "currentValue": "<= 2.4.0",
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "terraform-aws-modules/security-group/aws",
       "depNameShort": "terraform-aws-modules/security-group/aws",
       "depType": "terraform",
@@ -115,7 +115,7 @@ Object {
     },
     Object {
       "currentValue": "~> 1.1.0",
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
@@ -128,7 +128,7 @@ Object {
     },
     Object {
       "currentValue": "~> 1.1",
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
@@ -141,7 +141,7 @@ Object {
     },
     Object {
       "currentValue": "~~ 1.1",
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
@@ -155,7 +155,7 @@ Object {
     },
     Object {
       "currentValue": ">= 1.0.0, <= 2.0.0",
-      "datasource": "terraform",
+      "datasource": "terraform-module",
       "depName": "hashicorp/consul/aws",
       "depNameShort": "hashicorp/consul/aws",
       "depType": "terraform",

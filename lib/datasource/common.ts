@@ -1,5 +1,12 @@
 import { DATASOURCE_FAILURE } from '../constants/error-messages';
 
+export interface GetReleasesConfig {
+  lookupName: string;
+  registryUrls?: string[];
+  compatibility?: Record<string, string>;
+  npmrc?: string;
+}
+
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -8,8 +15,6 @@ export interface Config {
 }
 export interface PkgReleaseConfig extends Config {
   compatibility?: Record<string, string>;
-  depType?: string;
-  lookupType?: string;
   npmrc?: string;
   versioning?: string;
 }
@@ -44,12 +49,8 @@ export interface ReleaseResult {
   versions?: any;
 }
 
-// TODO: Proper typing
-export type Preset = any;
-
 export interface Datasource {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
-  getPreset?(packageName: string, presetName?: string): Promise<Preset>;
   getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
 }
 

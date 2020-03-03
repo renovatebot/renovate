@@ -33,7 +33,7 @@ exports[`lib/manager/buildkite/extract extractPackageFile() extracts arrays of p
 Array [
   Object {
     "currentValue": "v2.0.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "docker-login",
     "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
     "managerData": Object {
@@ -43,7 +43,7 @@ Array [
   },
   Object {
     "currentValue": "v2.5.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "managerData": Object {
@@ -53,7 +53,7 @@ Array [
   },
   Object {
     "currentValue": "v2.0.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "docker-login",
     "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
     "managerData": Object {
@@ -63,7 +63,7 @@ Array [
   },
   Object {
     "currentValue": "v2.5.1",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "managerData": Object {
@@ -78,7 +78,7 @@ exports[`lib/manager/buildkite/extract extractPackageFile() extracts multiple pl
 Array [
   Object {
     "currentValue": "v1.3.2",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "managerData": Object {
@@ -88,7 +88,7 @@ Array [
   },
   Object {
     "currentValue": "v1.3.2",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "managerData": Object {
@@ -103,7 +103,7 @@ exports[`lib/manager/buildkite/extract extractPackageFile() extracts simple sing
 Array [
   Object {
     "currentValue": "v2.0.0",
-    "datasource": "github",
+    "datasource": "github-tags",
     "depName": "abc/detect-clowns",
     "lookupName": "abc/detect-clowns-buildkite-plugin",
     "managerData": Object {

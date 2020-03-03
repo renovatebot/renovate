@@ -10,7 +10,10 @@ jest.mock('../../../../lib/workers/repository/extract');
 
 const branchify = mocked(_branchify);
 
-branchify.branchifyUpgrades.mockReturnValueOnce({});
+branchify.branchifyUpgrades.mockReturnValueOnce({
+  branches: [],
+  branchList: [],
+});
 
 describe('workers/repository/process/extract-update', () => {
   describe('extractAndUpdate()', () => {

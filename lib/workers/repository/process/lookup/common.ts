@@ -1,3 +1,5 @@
+import { UpdateType } from '../../../../config';
+
 export interface LookupUpdate {
   blockedByPin?: boolean;
   branchName?: string;
@@ -18,5 +20,5 @@ export interface LookupUpdate {
   newVersion?: string;
   semanticCommitType?: string;
   toVersion?: string;
-  updateType: string;
+  updateType: UpdateType;
 }

@@ -4,10 +4,12 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import {
   DatasourceError,
-  PkgReleaseConfig,
+  GetReleasesConfig,
   ReleaseResult,
   Release,
 } from '../common';
+
+export const id = 'gradle-version';
 
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
@@ -24,7 +26,7 @@ interface GradleRelease {
 
 export async function getPkgReleases({
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   const versionsUrls = is.nonEmptyArray(registryUrls)
     ? registryUrls
     : [GradleVersionsServiceUrl];
@@ -33,6 +35,7 @@ export async function getPkgReleases({
     versionsUrls.map(async url => {
       try {
         const response: GradleRelease = await got(url, {
+          hostType: id,
           json: true,
         });
         const releases = response.body

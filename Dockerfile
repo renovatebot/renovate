@@ -150,6 +150,11 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3.8 /usr/bin/python
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
+# CocoaPods
+RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt/lists/*
+RUN ruby --version
+ENV COCOAPODS_VERSION 1.9.0
+RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
 USER ubuntu
 

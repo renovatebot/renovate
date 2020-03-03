@@ -4,14 +4,10 @@ import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import {
-  ChangeLogConfig,
-  ChangeLogError,
-  ChangeLogRelease,
-  ChangeLogResult,
-} from './common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { BranchUpgradeConfig } from '../../common';
 
 const { get: ghGot } = api;
 
@@ -57,7 +53,7 @@ export async function getChangeLogJSON({
   releases,
   depName,
   manager,
-}: ChangeLogConfig): Promise<ChangeLogResult | null> {
+}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.debug('No release notes for @types');
     return null;

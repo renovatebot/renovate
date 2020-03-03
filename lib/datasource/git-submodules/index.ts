@@ -1,13 +1,15 @@
 import Git from 'simple-git/promise';
 import { URL } from 'url';
 
-import { ReleaseResult, PkgReleaseConfig, DigestConfig } from '../common';
+import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
+
+export const id = 'git-submodules';
 
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-git-submodules';
   const cacheKey = `${registryUrls[0]}-${registryUrls[1]}`;
   const cachedResult = await renovateCache.get<ReleaseResult>(

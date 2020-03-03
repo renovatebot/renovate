@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { ReleaseResult } from './common';
 import * as hostRules from '../util/host-rules';
-import { DATASOURCE_GITHUB } from '../constants/data-binary-source';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
@@ -73,15 +72,18 @@ export function addMetaData(
   if (!dep) {
     return;
   }
-  const depName = lookupName ? lookupName.toLowerCase() : null;
+  const lookupNameLowercase = lookupName ? lookupName.toLowerCase() : null;
   if (
     manualChangelogUrls[datasource] &&
-    manualChangelogUrls[datasource][depName]
+    manualChangelogUrls[datasource][lookupNameLowercase]
   ) {
-    dep.changelogUrl = manualChangelogUrls[datasource][depName];
+    dep.changelogUrl = manualChangelogUrls[datasource][lookupNameLowercase];
   }
-  if (manualSourceUrls[datasource] && manualSourceUrls[datasource][depName]) {
-    dep.sourceUrl = manualSourceUrls[datasource][depName];
+  if (
+    manualSourceUrls[datasource] &&
+    manualSourceUrls[datasource][lookupNameLowercase]
+  ) {
+    dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
   }
 
   /**
@@ -112,7 +114,7 @@ export function addMetaData(
   }
   const extraBaseUrls = [];
   // istanbul ignore next
-  hostRules.hosts({ hostType: DATASOURCE_GITHUB }).forEach(host => {
+  hostRules.hosts({ hostType: 'github' }).forEach(host => {
     extraBaseUrls.push(host, `gist.${host}`);
   });
   if (dep.sourceUrl) {
