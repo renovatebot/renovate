@@ -1,4 +1,4 @@
-import { maskToken } from '../../lib/util/mask';
+import { maskToken } from './mask';
 
 describe('util/mask', () => {
   describe('.maskToken', () => {

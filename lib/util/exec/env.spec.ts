@@ -1,4 +1,4 @@
-import { getChildProcessEnv } from '../../lib/util/exec/env';
+import { getChildProcessEnv } from './env';
 
 describe('getChildProcess environment when trustlevel set to low', () => {
   const envVars = [

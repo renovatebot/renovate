@@ -1,6 +1,6 @@
-import { add, find, findAll, clear, hosts } from '../../lib/util/host-rules';
-import * as datasourceNuget from '../../lib/datasource/nuget';
-import { PLATFORM_TYPE_AZURE } from '../../lib/constants/platforms';
+import { add, find, findAll, clear, hosts } from './host-rules';
+import * as datasourceNuget from '../datasource/nuget';
+import { PLATFORM_TYPE_AZURE } from '../constants/platforms';
 
 describe('util/host-rules', () => {
   beforeEach(() => {

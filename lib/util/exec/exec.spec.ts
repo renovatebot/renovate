@@ -2,15 +2,15 @@ import {
   exec as _cpExec,
   ExecOptions as ChildProcessExecOptions,
 } from 'child_process';
-import { exec, ExecOptions, setExecConfig } from '../../lib/util/exec';
+import { exec, ExecOptions, setExecConfig } from '.';
 import {
   BinarySource,
   ExecConfig,
   RawExecOptions,
   VolumeOption,
-} from '../../lib/util/exec/common';
-import { envMock } from '../execUtil';
-import { resetPrefetchedImages } from '../../lib/util/exec/docker';
+} from './common';
+import { envMock } from '../../../test/execUtil';
+import { resetPrefetchedImages } from './docker';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 

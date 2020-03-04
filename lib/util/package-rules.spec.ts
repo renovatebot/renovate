@@ -1,14 +1,14 @@
-import { applyPackageRules, Config } from '../../lib/util/package-rules';
-import { UpdateType } from '../../lib/config';
+import { applyPackageRules, Config } from './package-rules';
+import { UpdateType } from '../config';
 import {
   LANGUAGE_DOCKER,
   LANGUAGE_JAVASCRIPT,
   LANGUAGE_NODE,
   LANGUAGE_PYTHON,
-} from '../../lib/constants/languages';
+} from '../constants/languages';
 
-import * as datasourceDocker from '../../lib/datasource/docker';
-import * as datasourceOrb from '../../lib/datasource/orb';
+import * as datasourceDocker from '../datasource/docker';
+import * as datasourceOrb from '../datasource/orb';
 
 type TestConfig = Config & { x?: number; y?: number };
 

@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import RE2 from 're2';
-import { regEx } from '../../lib/util/regex';
-import { CONFIG_VALIDATION } from '../../lib/constants/error-messages';
+import { regEx } from './regex';
+import { CONFIG_VALIDATION } from '../constants/error-messages';
 
 describe('util/regex', () => {
   beforeEach(() => {

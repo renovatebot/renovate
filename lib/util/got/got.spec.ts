@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { getConfigResponse } from '../../lib/datasource/docker';
+import { getConfigResponse } from '../../datasource/docker';
 
 describe('getConfigResponse', () => {
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { add, clear, sanitize } from '../../lib/util/sanitize';
+import { add, clear, sanitize } from './sanitize';
 
 describe('util/sanitize', () => {
   beforeEach(() => {
