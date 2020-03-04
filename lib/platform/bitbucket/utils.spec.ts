@@ -1,5 +1,5 @@
-import * as utils from '../../../lib/platform/bitbucket/utils';
-import { GotApi } from '../../../lib/platform/common';
+import * as utils from './utils';
+import { GotApi } from '../common';
 
 jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
 

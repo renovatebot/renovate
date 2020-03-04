@@ -1,11 +1,11 @@
 import responses from './__fixtures__/responses';
-import { GotApi, RepoParams, Platform } from '../../../lib/platform/common';
-import { Storage } from '../../../lib/platform/git/storage';
+import { GotApi, RepoParams, Platform } from '../common';
+import { Storage } from '../git/storage';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
-} from '../../../lib/constants/error-messages';
+} from '../../constants/error-messages';
 import {
   PR_STATE_CLOSED,
   PR_STATE_OPEN,
@@ -15,14 +15,14 @@ import {
   BRANCH_STATUS_FAILURE,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
-} from '../../../lib/constants/branch-constants';
+} from '../../constants/branch-constants';
 
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
     describe(scenarioName, () => {
       let bitbucket: Platform;
       let api: jest.Mocked<GotApi>;
-      let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
+      let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
       let GitStorage: jest.Mock<Storage> & {
         getUrl: jest.MockInstance<any, any>;
       };
@@ -46,15 +46,14 @@ describe('platform/bitbucket-server', () => {
         );
         jest.mock('../../../lib/platform/git/storage');
         jest.mock('../../../lib/util/host-rules');
-        hostRules = require('../../../lib/util/host-rules');
-        api = require('../../../lib/platform/bitbucket-server/bb-got-wrapper')
-          .api;
+        hostRules = require('../../util/host-rules');
+        api = require('./bb-got-wrapper').api;
         jest.spyOn(api, 'get');
         jest.spyOn(api, 'post');
         jest.spyOn(api, 'put');
         jest.spyOn(api, 'delete');
-        bitbucket = await import('../../../lib/platform/bitbucket-server');
-        GitStorage = require('../../../lib/platform/git/storage').Storage;
+        bitbucket = await import('.');
+        GitStorage = require('../git/storage').Storage;
         GitStorage.mockImplementation(
           () =>
             ({

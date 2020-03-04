@@ -179,7 +179,7 @@ function generateServerResponses(endpoint) {
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`]: {
       GET: {
         totalCount: 1,
-        values: [ { author: { emailAddress: 'bot@renovateapp.com'} } ],
+        values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
       },
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/participants`]: {
@@ -437,46 +437,46 @@ function generateServerResponses(endpoint) {
         "limit": 25,
         "isLastPage": true,
         "values": [
-            {
-                "contentId": "5c279d6c7a3a053a145905aa9682ce02c16449e9",
-                "fromContentId": "7b86ad1a05b4259b8fa54497a8be0bd359a405bd",
-                "path": {
-                    "components": [
-                        "path",
-                        "to",
-                        "unreviewed",
-                        "file.txt"
-                    ],
-                    "parent": "path/to/unreviewed",
-                    "name": "file.txt",
-                    "extension": "txt",
-                    "toString": "path/to/unreviewed/file.txt"
-                },
-                "executable": false,
-                "percentUnchanged": 98,
-                "type": "MOVE",
-                "nodeType": "FILE",
-                "srcPath": {
-                    "components": [
-                        "path",
-                        "to",
-                        "file.txt"
-                    ],
-                    "parent": "path/to",
-                    "name": "file.txt",
-                    "extension": "txt",
-                    "toString": "path/to/file.txt"
-                },
-                "srcExecutable": false,
-                "links": {
-                    "self": [
-                        null
-                    ]
-                },
-                "properties": {
-                    "unreviewedCommits": 1
-                }
+          {
+            "contentId": "5c279d6c7a3a053a145905aa9682ce02c16449e9",
+            "fromContentId": "7b86ad1a05b4259b8fa54497a8be0bd359a405bd",
+            "path": {
+              "components": [
+                "path",
+                "to",
+                "unreviewed",
+                "file.txt"
+              ],
+              "parent": "path/to/unreviewed",
+              "name": "file.txt",
+              "extension": "txt",
+              "toString": "path/to/unreviewed/file.txt"
+            },
+            "executable": false,
+            "percentUnchanged": 98,
+            "type": "MOVE",
+            "nodeType": "FILE",
+            "srcPath": {
+              "components": [
+                "path",
+                "to",
+                "file.txt"
+              ],
+              "parent": "path/to",
+              "name": "file.txt",
+              "extension": "txt",
+              "toString": "path/to/file.txt"
+            },
+            "srcExecutable": false,
+            "links": {
+              "self": [
+                null
+              ]
+            },
+            "properties": {
+              "unreviewedCommits": 1
             }
+          }
         ],
         "start": 0
       },

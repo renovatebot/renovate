@@ -1,16 +1,13 @@
 import { URL } from 'url';
-import { GotResponse } from '../../../lib/platform';
-import { partial } from '../../util';
-import {
-  GiteaGotApi,
-  GiteaGotOptions,
-} from '../../../lib/platform/gitea/gitea-got-wrapper';
-import * as ght from '../../../lib/platform/gitea/gitea-helper';
-import { PRSearchParams } from '../../../lib/platform/gitea/gitea-helper';
-import { PR_STATE_CLOSED } from '../../../lib/constants/pull-requests';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import { GotResponse } from '..';
+import { partial } from '../../../test/util';
+import { GiteaGotApi, GiteaGotOptions } from './gitea-got-wrapper';
+import * as ght from './gitea-helper';
+import { PRSearchParams } from './gitea-helper';
 
 describe('platform/gitea/gitea-helper', () => {
-  let helper: typeof import('../../../lib/platform/gitea/gitea-helper');
+  let helper: typeof import('./gitea-helper');
   let api: jest.Mocked<GiteaGotApi>;
 
   const baseURL = 'https://gitea.renovatebot.com/api/v1';
@@ -206,9 +203,8 @@ describe('platform/gitea/gitea-helper', () => {
     jest.resetAllMocks();
     jest.mock('../../../lib/platform/gitea/gitea-got-wrapper');
 
-    helper = (await import('../../../lib/platform/gitea/gitea-helper')) as any;
-    api = (await import('../../../lib/platform/gitea/gitea-got-wrapper'))
-      .api as any;
+    helper = (await import('./gitea-helper')) as any;
+    api = (await import('./gitea-got-wrapper')).api as any;
   });
 
   describe('getCurrentUser', () => {

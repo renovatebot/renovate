@@ -1,7 +1,7 @@
-import { GotResponse } from '../../../lib/platform';
-import { partial } from '../../util';
-import { GotFn } from '../../../lib/util/got';
-import { GiteaGotApi } from '../../../lib/platform/gitea/gitea-got-wrapper';
+import { GotResponse } from '..';
+import { partial } from '../../../test/util';
+import { GotFn } from '../../util/got';
+import { GiteaGotApi } from './gitea-got-wrapper';
 
 describe('platform/gitea/gitea-got-wrapper', () => {
   let api: GiteaGotApi;
@@ -13,9 +13,8 @@ describe('platform/gitea/gitea-got-wrapper', () => {
     jest.resetAllMocks();
     jest.mock('../../../lib/util/got');
 
-    api = (await import('../../../lib/platform/gitea/gitea-got-wrapper'))
-      .api as any;
-    got = (await import('../../../lib/util/got')).api as any;
+    api = (await import('./gitea-got-wrapper')).api as any;
+    got = (await import('../../util/got')).api as any;
     api.setBaseUrl(baseURL);
   });
 

@@ -1,14 +1,14 @@
 import delay from 'delay';
 import { Response } from 'got';
-import _got from '../../../lib/util/got';
-import { api } from '../../../lib/platform/github/gh-got-wrapper';
+import _got from '../../util/got';
+import { api } from './gh-got-wrapper';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../../lib/constants/error-messages';
+} from '../../constants/error-messages';
 
 jest.mock('../../../lib/util/got');
 jest.mock('delay');

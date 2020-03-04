@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
-import { readOnlyIssueBody } from '../../../lib/platform/utils/read-only-issue-body';
+import { readOnlyIssueBody } from './read-only-issue-body';
 
 describe('platform/utils/read-only-issue-body', () => {
   let issueBody: string;
   beforeAll(async () => {
     issueBody = await fs.readFile(
-      'test/platform/utils/__fixtures__/issue-body.txt',
+      'lib/platform/utils/__fixtures__/issue-body.txt',
       'utf8'
     );
   });

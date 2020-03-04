@@ -1,13 +1,13 @@
-import * as github from '../../lib/platform/github';
-import * as gitlab from '../../lib/platform/gitlab';
-import * as gitea from '../../lib/platform/gitea';
-import * as azure from '../../lib/platform/azure';
-import * as bitbucket from '../../lib/platform/bitbucket';
-import * as bitbucketServer from '../../lib/platform/bitbucket-server';
-import { PLATFORM_NOT_FOUND } from '../../lib/constants/error-messages';
+import * as github from './github';
+import * as gitlab from './gitlab';
+import * as gitea from './gitea';
+import * as azure from './azure';
+import * as bitbucket from './bitbucket';
+import * as bitbucketServer from './bitbucket-server';
+import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 
-import * as platform from '../../lib/platform';
-import { PLATFORM_TYPE_BITBUCKET } from '../../lib/constants/platforms';
+import * as platform from '.';
+import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 
 jest.unmock('../../lib/platform');
 

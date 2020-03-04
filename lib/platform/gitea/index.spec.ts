@@ -1,5 +1,5 @@
-import { partial } from '../../util';
-import * as ght from '../../../lib/platform/gitea/gitea-helper';
+import { partial } from '../../../test/util';
+import * as ght from './gitea-helper';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -8,7 +8,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
-} from '../../../lib/constants/error-messages';
+} from '../../constants/error-messages';
 import {
   BranchStatus,
   BranchStatusConfig,
@@ -16,24 +16,22 @@ import {
   RepoConfig,
   RepoParams,
   Platform,
-} from '../../../lib/platform';
-import { logger as _logger } from '../../../lib/logger';
+} from '..';
+import { logger as _logger } from '../../logger';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
-} from '../../../lib/constants/branch-constants';
-import { GiteaGotApi } from '../../../lib/platform/gitea/gitea-got-wrapper';
-import { CommitFilesConfig, File } from '../../../lib/platform/git/storage';
+} from '../../constants/branch-constants';
+import { GiteaGotApi } from './gitea-got-wrapper';
+import { CommitFilesConfig, File } from '../git/storage';
 
 describe('platform/gitea', () => {
   let gitea: Platform;
-  let helper: jest.Mocked<typeof import('../../../lib/platform/gitea/gitea-helper')>;
+  let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let api: jest.Mocked<GiteaGotApi>;
   let logger: jest.Mocked<typeof _logger>;
-  let GitStorage: jest.Mocked<
-    typeof import('../../../lib/platform/git/storage').Storage
-  > &
+  let GitStorage: jest.Mocked<typeof import('../git/storage').Storage> &
     jest.Mock;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
@@ -171,13 +169,11 @@ describe('platform/gitea', () => {
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/logger');
 
-    gitea = await import('../../../lib/platform/gitea');
-    helper = (await import('../../../lib/platform/gitea/gitea-helper')) as any;
-    api = (await import('../../../lib/platform/gitea/gitea-got-wrapper'))
-      .api as any;
-    logger = (await import('../../../lib/logger')).logger as any;
-    GitStorage = (await import('../../../lib/platform/git/storage'))
-      .Storage as any;
+    gitea = await import('.');
+    helper = (await import('./gitea-helper')) as any;
+    api = (await import('./gitea-got-wrapper')).api as any;
+    logger = (await import('../../logger')).logger as any;
+    GitStorage = (await import('../git/storage')).Storage as any;
 
     GitStorage.mockImplementation(() => ({
       initRepo: gsmInitRepo,

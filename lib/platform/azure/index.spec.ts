@@ -1,18 +1,18 @@
 import is from '@sindresorhus/is';
-import * as _hostRules from '../../../lib/util/host-rules';
-import { RepoParams, Platform } from '../../../lib/platform/common';
-import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
+import * as _hostRules from '../../util/host-rules';
+import { RepoParams, Platform } from '../common';
+import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
-} from '../../../lib/constants/branch-constants';
+} from '../../constants/branch-constants';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
-  let azureApi: jest.Mocked<typeof import('../../../lib/platform/azure/azure-got-wrapper')>;
-  let azureHelper: jest.Mocked<typeof import('../../../lib/platform/azure/azure-helper')>;
+  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
+  let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
   let GitStorage;
   beforeEach(async () => {
     // reset module
@@ -21,12 +21,12 @@ describe('platform/azure', () => {
     jest.mock('../../../lib/platform/azure/azure-helper');
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/util/host-rules');
-    hostRules = require('../../../lib/util/host-rules');
-    require('../../../lib/util/sanitize').sanitize = jest.fn(input => input);
-    azure = await import('../../../lib/platform/azure');
-    azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
-    azureHelper = require('../../../lib/platform/azure/azure-helper');
-    GitStorage = require('../../../lib/platform/git/storage').Storage;
+    hostRules = require('../../util/host-rules');
+    require('../../util/sanitize').sanitize = jest.fn(input => input);
+    azure = await import('.');
+    azureApi = require('./azure-got-wrapper');
+    azureHelper = require('./azure-helper');
+    GitStorage = require('../git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),

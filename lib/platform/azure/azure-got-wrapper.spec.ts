@@ -1,14 +1,14 @@
-import * as _hostRules from '../../../lib/util/host-rules';
-import { PLATFORM_TYPE_AZURE } from '../../../lib/constants/platforms';
+import * as _hostRules from '../../util/host-rules';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 
 describe('platform/azure/azure-got-wrapper', () => {
-  let azure: typeof import('../../../lib/platform/azure/azure-got-wrapper');
+  let azure: typeof import('./azure-got-wrapper');
   let hostRules: typeof _hostRules;
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    hostRules = require('../../../lib/util/host-rules');
-    azure = require('../../../lib/platform/azure/azure-got-wrapper');
+    hostRules = require('../../util/host-rules');
+    azure = require('./azure-got-wrapper');
   });
 
   describe('gitApi', () => {

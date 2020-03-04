@@ -1,17 +1,17 @@
-import { GotApi } from '../../../lib/platform/common';
-import { PLATFORM_TYPE_BITBUCKET } from '../../../lib/constants/platforms';
+import { GotApi } from '../common';
+import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 
 describe('platform/gl-got-wrapper', () => {
   let api: GotApi;
   let got: jest.Mock<typeof import('got')>;
-  let hostRules: typeof import('../../../lib/util/host-rules');
+  let hostRules: typeof import('../../util/host-rules');
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();
     jest.mock('../../../lib/util/got');
-    got = require('../../../lib/util/got').api;
-    hostRules = require('../../../lib/util/host-rules');
-    api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
+    got = require('../../util/got').api;
+    hostRules = require('../../util/host-rules');
+    api = require('./bb-got-wrapper').api;
 
     // clean up hostRules
     hostRules.clear();

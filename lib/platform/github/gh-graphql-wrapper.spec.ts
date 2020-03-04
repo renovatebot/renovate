@@ -1,4 +1,4 @@
-import { getGraphqlNodes } from '../../../lib/platform/github/gh-graphql-wrapper';
+import { getGraphqlNodes } from './gh-graphql-wrapper';
 
 /** @type any */
 const got = require('../../../lib/util/got').default;

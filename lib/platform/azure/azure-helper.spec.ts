@@ -9,7 +9,7 @@ describe('platform/azure/helpers', () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
-    azureHelper = require('../../../lib/platform/azure/azure-helper');
+    azureHelper = require('.../../../lib/platform/azure/azure-helper');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
   });
 

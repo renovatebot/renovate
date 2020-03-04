@@ -1,6 +1,6 @@
 import URL from 'url';
-import { api as _api } from '../../../lib/platform/bitbucket/bb-got-wrapper';
-import * as comments from '../../../lib/platform/bitbucket/comments';
+import { api as _api } from './bb-got-wrapper';
+import * as comments from './comments';
 import responses from './__fixtures__/responses';
 
 jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');

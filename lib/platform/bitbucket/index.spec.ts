@@ -1,31 +1,28 @@
 import URL from 'url';
 import responses from './__fixtures__/responses';
-import { GotApi, RepoParams, Platform } from '../../../lib/platform/common';
-import { REPOSITORY_DISABLED } from '../../../lib/constants/error-messages';
+import { GotApi, RepoParams, Platform } from '../common';
+import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
-} from '../../../lib/constants/branch-constants';
+} from '../../constants/branch-constants';
 
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
   let api: jest.Mocked<GotApi>;
-  let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
-  let GitStorage: jest.Mocked<
-    import('../../../lib/platform/git/storage').Storage
-  > &
-    jest.Mock;
+  let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
+  let GitStorage: jest.Mocked<import('../git/storage').Storage> & jest.Mock;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/util/host-rules');
-    hostRules = require('../../../lib/util/host-rules');
-    api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
-    bitbucket = await import('../../../lib/platform/bitbucket');
-    GitStorage = require('../../../lib/platform/git/storage').Storage;
+    hostRules = require('../../util/host-rules');
+    api = require('./bb-got-wrapper').api;
+    bitbucket = await import('.');
+    GitStorage = require('../git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),

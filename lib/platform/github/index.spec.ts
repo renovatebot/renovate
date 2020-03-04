@@ -1,28 +1,23 @@
 import fs from 'fs-extra';
-import {
-  GotApi,
-  GotResponse,
-  RepoConfig,
-  Platform,
-} from '../../../lib/platform/common';
+import { GotApi, GotResponse, RepoConfig, Platform } from '../common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
-} from '../../../lib/constants/error-messages';
+} from '../../constants/error-messages';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
-} from '../../../lib/constants/branch-constants';
-import { mocked } from '../../util';
+} from '../../constants/branch-constants';
+import { mocked } from '../../../test/util';
 
 describe('platform/github', () => {
   let github: Platform;
   let api: jest.Mocked<GotApi>;
   let got: jest.Mock<Promise<Partial<GotResponse>>>;
-  let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
-  let GitStorage: jest.Mock<typeof import('../../../lib/platform/git/storage')>;
+  let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
+  let GitStorage: jest.Mock<typeof import('../git/storage')>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -31,15 +26,12 @@ describe('platform/github', () => {
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     jest.mock('../../../lib/util/host-rules');
     jest.mock('../../../lib/util/got');
-    api = mocked(
-      (await import('../../../lib/platform/github/gh-got-wrapper')).api
-    );
-    got = (await import('../../../lib/util/got')).default as any;
-    github = await import('../../../lib/platform/github');
-    hostRules = mocked(await import('../../../lib/util/host-rules'));
+    api = mocked((await import('./gh-got-wrapper')).api);
+    got = (await import('../../util/got')).default as any;
+    github = await import('.');
+    hostRules = mocked(await import('../../util/host-rules'));
     jest.mock('../../../lib/platform/git/storage');
-    GitStorage = (await import('../../../lib/platform/git/storage'))
-      .Storage as any;
+    GitStorage = (await import('../git/storage')).Storage as any;
     GitStorage.mockImplementation(
       () =>
         ({
@@ -69,11 +61,11 @@ describe('platform/github', () => {
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
-    'test/platform/github/__fixtures__/graphql/pullrequest-1.json',
+    'lib/platform/github/__fixtures__/graphql/pullrequest-1.json',
     'utf8'
   );
   const graphqlClosedPullrequests = fs.readFileSync(
-    'test/platform/github/__fixtures__/graphql/pullrequests-closed.json',
+    'lib/platform/github/__fixtures__/graphql/pullrequests-closed.json',
     'utf8'
   );
 

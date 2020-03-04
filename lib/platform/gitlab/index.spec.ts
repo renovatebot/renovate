@@ -1,11 +1,11 @@
-import * as _hostRules from '../../../lib/util/host-rules';
+import * as _hostRules from '../../util/host-rules';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
-} from '../../../lib/constants/error-messages';
+} from '../../constants/error-messages';
 import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
@@ -15,29 +15,26 @@ import {
   BRANCH_STATUS_FAILURE,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
-} from '../../../lib/constants/branch-constants';
-import { GotResponse, Platform } from '../../../lib/platform';
-import { partial } from '../../util';
+} from '../../constants/branch-constants';
+import { GotResponse, Platform } from '..';
+import { partial } from '../../../test/util';
 
 describe('platform/gitlab', () => {
   let gitlab: Platform;
-  let api: jest.Mocked<typeof import('../../../lib/platform/gitlab/gl-got-wrapper').api>;
+  let api: jest.Mocked<typeof import('./gl-got-wrapper').api>;
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let GitStorage: jest.Mocked<
-    typeof import('../../../lib/platform/git/storage')
-  > &
-    jest.Mock;
+  let GitStorage: jest.Mocked<typeof import('../git/storage')> & jest.Mock;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.resetAllMocks();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
-    gitlab = await import('../../../lib/platform/gitlab');
-    api = require('../../../lib/platform/gitlab/gl-got-wrapper').api;
+    gitlab = await import('.');
+    api = require('./gl-got-wrapper').api;
     jest.mock('../../../lib/util/host-rules');
-    hostRules = require('../../../lib/util/host-rules');
+    hostRules = require('../../util/host-rules');
     jest.mock('../../../lib/platform/git/storage');
-    GitStorage = require('../../../lib/platform/git/storage').Storage;
+    GitStorage = require('../git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),

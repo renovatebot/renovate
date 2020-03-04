@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
-import { smartTruncate } from '../../../lib/platform/utils/pr-body';
+import { smartTruncate } from './pr-body';
 
 describe('platform/utils/pr-body', () => {
   let prBody: string;
   beforeAll(async () => {
     prBody = await fs.readFile(
-      'test/platform/utils/__fixtures__/pr-body.txt',
+      'lib/platform/utils/__fixtures__/pr-body.txt',
       'utf8'
     );
   });
