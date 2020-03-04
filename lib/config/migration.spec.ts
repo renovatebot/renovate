@@ -1,10 +1,7 @@
-import * as configMigration from '../../lib/config/migration';
-import { getConfig } from '../../lib/config/defaults';
-import {
-  RenovateConfig as _RenovateConfig,
-  RenovateSharedConfig,
-} from '../../lib/config';
-import { PLATFORM_TYPE_GITHUB } from '../../lib/constants/platforms';
+import * as configMigration from './migration';
+import { getConfig } from './defaults';
+import { RenovateConfig as _RenovateConfig, RenovateSharedConfig } from '.';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 
 const defaultConfig = getConfig();
 

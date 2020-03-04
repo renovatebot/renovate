@@ -1,7 +1,7 @@
-import * as cli from '../../lib/config/cli';
+import * as cli from './cli';
 import getArgv from './config/__fixtures__/argv';
-import { RenovateOptions } from '../../lib/config/definitions';
-import * as datasourceDocker from '../../lib/datasource/docker';
+import { RenovateOptions } from './definitions';
+import * as datasourceDocker from '../datasource/docker';
 
 describe('config/cli', () => {
   let argv: string[];

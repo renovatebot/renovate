@@ -1,5 +1,5 @@
-import * as configValidation from '../../lib/config/validation';
-import { RenovateConfig } from '../../lib/config';
+import * as configValidation from './validation';
+import { RenovateConfig } from '.';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {

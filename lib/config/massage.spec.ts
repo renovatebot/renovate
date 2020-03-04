@@ -1,5 +1,5 @@
-import * as massage from '../../lib/config/massage';
-import { RenovateConfig } from '../../lib/config';
+import * as massage from './massage';
+import { RenovateConfig } from '.';
 
 describe('config/massage', () => {
   describe('massageConfig', () => {

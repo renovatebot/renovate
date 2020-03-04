@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import * as file from '../../lib/config/file';
+import * as file from './file';
 import customConfig from './config/__fixtures__/file';
 
 describe('config/file', () => {

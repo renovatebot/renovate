@@ -1,5 +1,5 @@
 import getArgv from './config/__fixtures__/argv';
-import { getConfig } from '../../lib/config/defaults';
+import { getConfig } from './defaults';
 
 jest.mock('../../lib/datasource/npm');
 try {
@@ -12,11 +12,11 @@ const defaultConfig = getConfig();
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
-    let configParser: typeof import('../../lib/config');
+    let configParser: typeof import('.');
     let defaultArgv: string[];
     beforeEach(() => {
       jest.resetModules();
-      configParser = require('../../lib/config/index');
+      configParser = require('./index');
       defaultArgv = getArgv();
       jest.mock('delay');
       require('delay').mockImplementation(() => Promise.resolve());
@@ -67,7 +67,7 @@ describe('config/index', () => {
           schedule: ['on monday'],
         },
       };
-      const configParser = require('../../lib/config/index');
+      const configParser = require('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.foo).toEqual('bar');
       expect(config.rangeStrategy).toEqual('replace');
@@ -82,7 +82,7 @@ describe('config/index', () => {
       const childConfig = {
         packageRules: [{ a: 3 }, { a: 4 }],
       };
-      const configParser = require('../../lib/config/index');
+      const configParser = require('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules.map(rule => rule.a)).toMatchObject([
         1,
@@ -99,20 +99,20 @@ describe('config/index', () => {
       const childConfig = {
         packageRules: [{ a: 3 }, { a: 4 }],
       };
-      const configParser = require('../../lib/config/index');
+      const configParser = require('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules).toHaveLength(2);
     });
     it('handles null child packageRules', () => {
       const parentConfig = { ...defaultConfig };
       parentConfig.packageRules = [{ a: 3 }, { a: 4 }];
-      const configParser = require('../../lib/config/index');
+      const configParser = require('./index');
       const config = configParser.mergeChildConfig(parentConfig, {});
       expect(config.packageRules).toHaveLength(2);
     });
     it('handles undefined childConfig', () => {
       const parentConfig = { ...defaultConfig };
-      const configParser = require('../../lib/config/index');
+      const configParser = require('./index');
       const config = configParser.mergeChildConfig(parentConfig, undefined);
       expect(config).toMatchObject(parentConfig);
     });
