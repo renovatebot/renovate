@@ -49,5 +49,11 @@ Array [
     "depName": "mygroup/ansible-base",
     "lookupName": "git@gitlab.company.com:mygroup/ansible-base.git",
   },
+  Object {
+    "currentValue": "0.14",
+    "datasource": "galaxy",
+    "depName": "company.com:mygroup/ansible-base.git",
+    "lookupName": "company.com:mygroup/ansible-base.git",
+  },
 ]
 `;

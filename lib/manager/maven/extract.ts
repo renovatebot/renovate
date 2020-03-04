@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
-import { isValid } from '../../versioning/maven';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
@@ -129,8 +128,6 @@ function applyProps(
     result.skipReason = 'name-placeholder';
   } else if (containsPlaceholder(currentValue)) {
     result.skipReason = 'version-placeholder';
-  } else if (!isValid(currentValue)) {
-    result.skipReason = 'not-a-version';
   }
 
   return result;

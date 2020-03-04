@@ -2,7 +2,6 @@
 import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
-import { isValid, isSingleVersion } from '../../versioning/pep440';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
 
@@ -69,11 +68,7 @@ export function extractPackageFile(
         managerData: { lineNumber },
         datasource: datasourcePypi.id,
       };
-      if (
-        isValid(currentValue) &&
-        isSingleVersion(currentValue) &&
-        currentValue.startsWith('==')
-      ) {
+      if (currentValue && currentValue.startsWith('==')) {
         dep.fromVersion = currentValue.replace(/^==/, '');
       }
       return dep;
