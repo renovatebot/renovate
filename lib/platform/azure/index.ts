@@ -48,7 +48,7 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  azureWorkItemId: any;
+  azureWorkItemId: string;
   prList: Pr[];
   fileList: null;
   repository: string;
@@ -301,9 +301,7 @@ export async function findPr({
   prTitle,
   state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  // TODO: fix typing
-  let prsFiltered: any[] = [];
+  let prsFiltered: Pr[] = [];
   try {
     const prs = await getPrList();
 
@@ -411,7 +409,7 @@ export async function getBranchStatusCheck(
 
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any
+  requiredStatusChecks: string[]
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
@@ -446,7 +444,7 @@ export async function createPr({
       id: config.azureWorkItemId,
     },
   ];
-  let pr: any = await azureApiGit.createPullRequest(
+  let pr: GitPullRequest = await azureApiGit.createPullRequest(
     {
       sourceRefName,
       targetRefName,
@@ -460,7 +458,7 @@ export async function createPr({
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
-          id: pr.createdBy!.id,
+          id: pr.createdBy.id,
         },
         completionOptions: {
           mergeStrategy: config.mergeMethod,
@@ -468,7 +466,7 @@ export async function createPr({
         },
       },
       config.repoId,
-      pr.pullRequestId!
+      pr.pullRequestId
     );
   }
   await Promise.all(
@@ -478,11 +476,10 @@ export async function createPr({
           name: label,
         },
         config.repoId,
-        pr.pullRequestId!
+        pr.pullRequestId
       )
     )
   );
-  pr.branchName = branchName;
   return azureHelper.getRenovatePRFormat(pr);
 }
 
@@ -493,7 +490,7 @@ export async function updatePr(
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const azureApiGit = await azureApi.gitApi();
-  const objToUpdate: any = {
+  const objToUpdate: GitPullRequest = {
     title,
   };
   if (body) {
@@ -689,7 +686,7 @@ export async function addReviewers(
     )
   );
 
-  const ids: any[] = [];
+  const ids: { id: string; name: string }[] = [];
   members.forEach(listMembers => {
     listMembers.forEach(m => {
       reviewers.forEach(r => {
