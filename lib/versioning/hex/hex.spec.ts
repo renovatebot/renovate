@@ -1,4 +1,4 @@
-import { api as hexScheme } from '../../lib/versioning/hex';
+import { api as hexScheme } from '.';
 
 describe('lib/versioning/hex', () => {
   describe('hexScheme.matches()', () => {

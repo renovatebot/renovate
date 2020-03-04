@@ -1,12 +1,92 @@
-import { api as semver } from '../../lib/versioning/cargo';
+import { api as semver } from '.';
 
+describe('semver.isValid(input)', () => {
+  it('should return null for irregular versions', () => {
+    expect(semver.isValid('17.04.0')).toBeFalsy();
+  });
+  it('should support simple semver', () => {
+    expect(semver.isValid('1.2.3')).toBeTruthy();
+  });
+  it('should support semver with dash', () => {
+    expect(semver.isValid('1.2.3-foo')).toBeTruthy();
+  });
+  it('should reject semver without dash', () => {
+    expect(semver.isValid('1.2.3foo')).toBeFalsy();
+  });
+  it('should support ranges', () => {
+    expect(semver.isValid('~1.2.3')).toBeTruthy();
+    expect(semver.isValid('^1.2.3')).toBeTruthy();
+    expect(semver.isValid('>1.2.3')).toBeTruthy();
+  });
+  it('should reject github repositories', () => {
+    expect(semver.isValid('renovatebot/renovate')).toBeFalsy();
+    expect(semver.isValid('renovatebot/renovate#master')).toBeFalsy();
+    expect(
+      semver.isValid('https://github.com/renovatebot/renovate.git')
+    ).toBeFalsy();
+  });
+});
+describe('semver.isSingleVersion()', () => {
+  it('returns true if naked version', () => {
+    expect(semver.isSingleVersion('1.2.3')).toBeTruthy();
+    expect(semver.isSingleVersion('1.2.3-alpha.1')).toBeTruthy();
+  });
+  it('returns true if equals', () => {
+    expect(semver.isSingleVersion('=1.2.3')).toBeTruthy();
+    expect(semver.isSingleVersion('= 1.2.3')).toBeTruthy();
+  });
+  it('returns false when not version', () => {
+    expect(semver.isSingleVersion('1.*')).toBeFalsy();
+  });
+});
 describe('semver.matches()', () => {
   it('handles comma', () => {
     expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
     expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
-    expect(semver.matches('4.2.0', '4.2.0, < 4.2.4')).toBe(true);
+    expect(semver.matches('4.2.2', '4.2.0, < 4.2.4')).toBe(false);
+    expect(semver.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
     expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
     expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
+  });
+});
+describe('semver.isLessThanRange()', () => {
+  it('handles comma', () => {
+    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBe(true);
+    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBe(false);
+  });
+});
+describe('semver.minSatisfyingVersion()', () => {
+  it('handles comma', () => {
+    expect(
+      semver.minSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
+        '4.*, > 4.2'
+      )
+    ).toBe('4.3.0');
+    expect(
+      semver.minSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
+        '^4.0.0'
+      )
+    ).toBe('4.2.0');
+    expect(
+      semver.minSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
+        '^4.0.0, = 0.5.0'
+      )
+    ).toBeNull();
+    expect(
+      semver.minSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
+        '^4.0.0, > 4.1.0, <= 4.3.5'
+      )
+    ).toBe('4.2.0');
+    expect(
+      semver.minSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
+        '^6.2.0, 3.*'
+      )
+    ).toBeNull();
   });
 });
 describe('semver.maxSatisfyingVersion()', () => {
@@ -25,84 +105,34 @@ describe('semver.maxSatisfyingVersion()', () => {
     ).toBe('5.0.3');
   });
 });
-describe('semver.isValid()', () => {
-  it('simple constraints are valid', () => {
-    expect(semver.isValid('1')).toBeTruthy();
-    expect(semver.isValid('1.2')).toBeTruthy();
-    expect(semver.isValid('1.2.3')).toBeTruthy();
-    expect(semver.isValid('^1.2.3')).toBeTruthy();
-    expect(semver.isValid('~1.2.3')).toBeTruthy();
-    expect(semver.isValid('1.2.*')).toBeTruthy();
-  });
-  it('handles comma', () => {
-    expect(semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0')).toBeTruthy();
-    expect(semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2')).toBeTruthy();
-  });
-});
-describe('semver.isVersion()', () => {
-  it('handles comma', () => {
-    expect(semver.isVersion('1.2.3')).toBeTruthy();
-    expect(semver.isValid('1.2')).toBeTruthy();
-  });
-});
-describe('semver.isLessThanRange()', () => {
-  it('handles comma', () => {
-    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBe(true);
-    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBe(false);
-  });
-});
-describe('semver.minSatisfyingVersion()', () => {
-  it('handles comma', () => {
-    expect(
-      semver.minSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
-        '4.*, > 4.2'
-      )
-    ).toBe('4.3.0');
-    expect(
-      semver.minSatisfyingVersion(['0.4.0', '0.5.0', '4.2.0', '5.0.0'], '4.0.0')
-    ).toBe('4.2.0');
-    expect(
-      semver.minSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-        '4.0.0, = 0.5.0'
-      )
-    ).toBeNull();
-    expect(
-      semver.minSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-        '4.0.0, > 4.1.0, <= 4.3.5'
-      )
-    ).toBe('4.2.0');
-    expect(
-      semver.minSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-        '6.2.0, 3.*'
-      )
-    ).toBeNull();
-  });
-});
-describe('semver.isSingleVersion()', () => {
-  it('returns false if naked version', () => {
-    expect(semver.isSingleVersion('1.2.3')).toBeFalsy();
-    expect(semver.isSingleVersion('1.2.3-alpha.1')).toBeFalsy();
-  });
-  it('returns true if equals', () => {
-    expect(semver.isSingleVersion('=1.2.3')).toBeTruthy();
-    expect(semver.isSingleVersion('= 1.2.3')).toBeTruthy();
-    expect(semver.isSingleVersion('  = 1.2.3')).toBeTruthy();
-  });
-  it('returns false for partial versions', () => {
-    expect(semver.isSingleVersion('1')).toBeFalsy();
-    expect(semver.isSingleVersion('1.2')).toBeFalsy();
-  });
-  it('returns false for wildcard constraints', () => {
-    expect(semver.isSingleVersion('*')).toBeFalsy();
-    expect(semver.isSingleVersion('1.*')).toBeFalsy();
-    expect(semver.isSingleVersion('1.2.*')).toBeFalsy();
-  });
-});
+
 describe('semver.getNewValue()', () => {
+  it('bumps exact', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '1.0.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.0',
+      })
+    ).toEqual('1.1.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '   1.0.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.0',
+      })
+    ).toEqual('1.1.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '1.0.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.0',
+      })
+    ).toEqual('1.1.0');
+  });
   it('bumps equals', () => {
     expect(
       semver.getNewValue({
@@ -114,7 +144,7 @@ describe('semver.getNewValue()', () => {
     ).toEqual('=1.1.0');
     expect(
       semver.getNewValue({
-        currentValue: '   =1.0.0',
+        currentValue: '=  1.0.0',
         rangeStrategy: 'bump',
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
@@ -129,7 +159,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
       })
-    ).toEqual('= 1.1.0');
+    ).toEqual('=1.1.0');
     expect(
       semver.getNewValue({
         currentValue: '  = 1.0.0',
@@ -153,17 +183,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
       })
-    ).toEqual('= 1.1.0');
-  });
-  it('bumps version range', () => {
-    expect(
-      semver.getNewValue({
-        currentValue: '1.0.0',
-        rangeStrategy: 'bump',
-        fromVersion: '1.0.0',
-        toVersion: '1.1.0',
-      })
-    ).toEqual('1.1.0');
+    ).toEqual('=1.1.0');
   });
   it('bumps short caret to same', () => {
     expect(
@@ -175,7 +195,7 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('^1.0');
   });
-  it('replaces with newer', () => {
+  it('replaces caret with newer', () => {
     expect(
       semver.getNewValue({
         currentValue: '^1.0.0',
@@ -185,7 +205,7 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('^2.0.0');
   });
-  it('replaces with version range', () => {
+  it('replaces naked version', () => {
     expect(
       semver.getNewValue({
         currentValue: '1.0.0',
@@ -193,9 +213,19 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0',
         toVersion: '2.0.7',
       })
-    ).toEqual('2.0.0');
+    ).toEqual('2.0.7');
   });
-  it('updates naked caret', () => {
+  it('replaces with version range', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '1.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0.0',
+        toVersion: '^2.0.7',
+      })
+    ).toEqual('^2.0.7');
+  });
+  it('bumps naked caret', () => {
     expect(
       semver.getNewValue({
         currentValue: '^1',
@@ -242,7 +272,6 @@ describe('semver.getNewValue()', () => {
         toVersion: '5.0.7',
       })
     ).toEqual('5.0');
-
     expect(
       semver.getNewValue({
         currentValue: '5.0',
@@ -279,6 +308,36 @@ describe('semver.getNewValue()', () => {
         toVersion: '1.1.0',
       })
     ).toEqual('=1.1.0');
+  });
+  it('bumps caret to prerelease', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^1',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.0.7-prerelease.1',
+      })
+    ).toEqual('^1.0.7-prerelease.1');
+  });
+  it('replaces with newer', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0.0',
+        toVersion: '1.0.7',
+      })
+    ).toEqual('^1.0.7');
+  });
+  it('bumps short tilde', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.7',
+      })
+    ).toEqual('~1.1');
   });
   it('handles long asterisk', () => {
     expect(
@@ -361,5 +420,41 @@ describe('semver.getNewValue()', () => {
         toVersion: '1.5.0',
       })
     ).toEqual('<= 1.5.0');
+  });
+  it('handles replacing short caret versions', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.2',
+        rangeStrategy: 'replace',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.0',
+      })
+    ).toEqual('^2.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '^1',
+        rangeStrategy: 'replace',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.0',
+      })
+    ).toEqual('^2');
+  });
+  it('handles replacing short tilde versions', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '~1.2',
+        rangeStrategy: 'replace',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.0',
+      })
+    ).toEqual('~2.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '~1',
+        rangeStrategy: 'replace',
+        fromVersion: '1.2.3',
+        toVersion: '2.0.0',
+      })
+    ).toEqual('~2');
   });
 });

@@ -22,8 +22,9 @@ describe('versioning metadata', () => {
   });
   it('contains mandatory fields', async () => {
     const allVersioning = (await readdir('lib/versioning')).filter(
-      item => !item.includes('.')
+      item => !item.includes('.') && !item.startsWith('_')
     );
+
     for (const versioning of allVersioning) {
       const versioningObj = require(`../../lib/versioning/${versioning}`);
       expect(versioningObj.id).toEqual(versioning);

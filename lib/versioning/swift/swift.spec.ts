@@ -1,5 +1,5 @@
-import swift from '../../lib/versioning/swift';
-import { RangeStrategy } from '../../lib/versioning';
+import swift from '.';
+import { RangeStrategy } from '..';
 
 const {
   getNewValue,

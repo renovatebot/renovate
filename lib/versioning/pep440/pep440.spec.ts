@@ -1,4 +1,4 @@
-import pep440 from '../../lib/versioning/pep440';
+import pep440 from '.';
 
 describe('pep440.isValid(input)', () => {
   it('should return null for irregular versions', () => {

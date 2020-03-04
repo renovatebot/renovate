@@ -1,5 +1,5 @@
-import { api as semverRuby } from '../../lib/versioning/ruby';
-import { RangeStrategy } from '../../lib/versioning';
+import { api as semverRuby } from '.';
+import { RangeStrategy } from '..';
 
 describe('semverRuby', () => {
   describe('.equals', () => {

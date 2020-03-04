@@ -1,4 +1,4 @@
-import loose from '../../lib/versioning/loose';
+import loose from '.';
 
 describe('loose.', () => {
   describe('isVersion', () => {

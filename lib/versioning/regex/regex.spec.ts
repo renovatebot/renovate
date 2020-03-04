@@ -1,5 +1,5 @@
-import { get, VersioningApi } from '../../lib/versioning';
-import { CONFIG_VALIDATION } from '../../lib/constants/error-messages';
+import { get, VersioningApi } from '..';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
 describe('regex', () => {
   const regex: VersioningApi = get(

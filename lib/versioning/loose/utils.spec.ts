@@ -1,7 +1,4 @@
-import {
-  GenericVersioningApi,
-  GenericVersion,
-} from '../../../lib/versioning/loose/generic';
+import { GenericVersioningApi, GenericVersion } from './generic';
 
 describe('loose/utils', () => {
   const optionalFunctions = [

@@ -1,4 +1,4 @@
-import { api as semver } from '../../lib/versioning/composer';
+import { api as semver } from '.';
 
 describe('semver.getPatch(input)', () => {
   it('gets patch', () => {

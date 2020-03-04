@@ -1,4 +1,4 @@
-import git from '../../lib/versioning/git';
+import git from '.';
 
 describe('git.', () => {
   describe('isValid(version)', () => {

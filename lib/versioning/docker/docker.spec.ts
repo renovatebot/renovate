@@ -1,5 +1,5 @@
-import docker from '../../lib/versioning/docker';
-import semver from '../../lib/versioning/semver';
+import docker from '.';
+import semver from '../semver';
 
 describe('docker.', () => {
   describe('isValid(version)', () => {

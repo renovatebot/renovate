@@ -1,4 +1,4 @@
-import nuget from '../../lib/versioning/nuget';
+import nuget from '.';
 
 describe('nuget.', () => {
   describe('isVersion and isValid', () => {

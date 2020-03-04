@@ -1,4 +1,4 @@
-import semver from '../../lib/versioning/semver';
+import semver from '.';
 
 describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {

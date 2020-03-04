@@ -3,8 +3,8 @@ import {
   parseRange,
   rangeToStr,
   autoExtendMavenRange,
-} from '../../lib/versioning/maven/compare';
-import maven from '../../lib/versioning/maven';
+} from './compare';
+import maven from '.';
 
 const {
   isValid,

@@ -3,8 +3,8 @@ import {
   REV_TYPE_SUBREV,
   REV_TYPE_RANGE,
   parseDynamicRevision,
-} from '../../lib/versioning/ivy/parse';
-import ivy from '../../lib/versioning/ivy';
+} from './parse';
+import ivy from '.';
 
 const { isVersion, matches } = ivy;
 

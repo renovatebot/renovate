@@ -1,4 +1,4 @@
-import { api as nodever } from '../../lib/versioning/node';
+import { api as nodever } from '.';
 
 describe('semver.getNewValue()', () => {
   it('returns normalized toVersion', () => {
