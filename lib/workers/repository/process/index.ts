@@ -44,7 +44,7 @@ export async function processRepo(
     }
   }
   if (config.baseBranches && config.baseBranches.length) {
-    logger.info({ baseBranches: config.baseBranches }, 'baseBranches');
+    logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     let res: WriteUpdateResult | undefined;
     let branches: BranchConfig[] = [];
     let branchList: string[] = [];

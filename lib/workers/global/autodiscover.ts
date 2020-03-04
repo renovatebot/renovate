@@ -24,7 +24,7 @@ export async function autodiscoverRepositories(
   let discovered = await platform.getRepos();
   if (!(discovered && discovered.length)) {
     // Soft fail (no error thrown) if no accessible repositories
-    logger.info(
+    logger.debug(
       'The account associated with your token does not have access to any repos'
     );
     return config;
@@ -33,11 +33,11 @@ export async function autodiscoverRepositories(
     discovered = discovered.filter(minimatch.filter(config.autodiscoverFilter));
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
-      logger.info('None of the discovered repositories matched the filter');
+      logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
   }
-  logger.info(`Discovered ${discovered.length} repositories`);
+  logger.debug(`Discovered ${discovered.length} repositories`);
   // istanbul ignore if
   if (config.repositories && config.repositories.length) {
     logger.debug(

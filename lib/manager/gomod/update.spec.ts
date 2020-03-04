@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { updateDependency } from './update';
+import { UpdateType } from '../../config';
 
 const gomod1 = readFileSync('lib/manager/gomod/__fixtures__/1/go.mod', 'utf8');
 const gomod2 = readFileSync('lib/manager/gomod/__fixtures__/2/go.mod', 'utf8');
@@ -57,7 +58,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/pkg/errors',
         managerData: { lineNumber: 2 },
         newMajor: 2,
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
         currentValue: 'v0.7.0',
         newValue: 'v2.0.0',
         depType: 'require',
@@ -72,7 +73,7 @@ describe('manager/gomod/update', () => {
         depName: 'gopkg.in/russross/blackfriday.v1',
         managerData: { lineNumber: 7 },
         newMajor: 2,
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
         currentValue: 'v1.0.0',
         newValue: 'v2.0.0',
         depType: 'require',
@@ -127,7 +128,7 @@ describe('manager/gomod/update', () => {
         currentValue: 'v1.9.0',
         newValue: 'v2.0.0',
         newMajor: 2,
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
         depType: 'require',
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
@@ -142,7 +143,7 @@ describe('manager/gomod/update', () => {
         currentValue: 'v2.3.0',
         newValue: 'v3.0.0',
         newMajor: 3,
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
         depType: 'require',
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
@@ -155,7 +156,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/spf13/jwalterweatherman',
         managerData: { lineNumber: 43, multiLine: true },
         currentVersion: 'v0.0.0',
-        updateType: 'digest',
+        updateType: 'digest' as UpdateType,
         currentDigest: '14d3d4c51834',
         newDigest: '123456123456abcdef',
         depType: 'require',
@@ -170,7 +171,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/spf13/jwalterweatherman',
         managerData: { lineNumber: 43, multiLine: true },
         currentVersion: 'v0.0.0',
-        updateType: 'digest',
+        updateType: 'digest' as UpdateType,
         currentDigest: 'abcdefabcdef',
         newDigest: '14d3d4c51834000000',
         depType: 'require',
@@ -219,7 +220,7 @@ describe('manager/gomod/update', () => {
         depType: 'replace',
         currentValue: 'v0.7.0',
         newMajor: 2,
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
@@ -233,7 +234,7 @@ describe('manager/gomod/update', () => {
         depType: 'replace',
         currentValue: 'v0.7.0',
         newMajor: 2,
-        updateType: 'digest',
+        updateType: 'digest' as UpdateType,
         currentDigest: '14d3d4c51834',
         newDigest: '123456123456abcdef',
       };
@@ -249,7 +250,7 @@ describe('manager/gomod/update', () => {
         depType: 'require',
         currentValue: 'v3.5.0+incompatible',
         newMajor: 6,
-        updateType: 'major',
+        updateType: 'major' as UpdateType,
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);

@@ -16,7 +16,7 @@ describe('workers/repository', () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
-      config = getConfig;
+      config = getConfig();
     });
     it('runs', async () => {
       process.processRepo.mockResolvedValue(mock<ExtractAndUpdateResult>());

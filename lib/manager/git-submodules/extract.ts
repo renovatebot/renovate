@@ -3,7 +3,7 @@ import upath from 'upath';
 import URL from 'url';
 
 import { ManagerConfig, PackageFile } from '../common';
-import { DATASOURCE_GIT_SUBMODULES } from '../../constants/data-binary-source';
+import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 
 type GitModule = {
   name: string;
@@ -105,5 +105,5 @@ export default async function extractPackageFile(
     })
   );
 
-  return { deps, datasource: DATASOURCE_GIT_SUBMODULES };
+  return { deps, datasource: datasourceGitSubmodules.id };
 }

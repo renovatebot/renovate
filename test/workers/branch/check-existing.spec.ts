@@ -1,17 +1,17 @@
 import { prAlreadyExisted } from '../../../lib/workers/branch/check-existing';
-import { defaultConfig, platform } from '../../util';
-import { RenovateConfig } from '../../../lib/config';
+import { defaultConfig, platform, partial } from '../../util';
+import { BranchConfig } from '../../../lib/workers/common';
 import { PR_STATE_CLOSED } from '../../../lib/constants/pull-requests';
 
 describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
-    let config: RenovateConfig;
+    let config: BranchConfig;
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         ...defaultConfig,
         branchName: 'some-branch',
         prTitle: 'some-title',
-      };
+      });
       jest.resetAllMocks();
     });
     it('returns false if recreating closed PRs', async () => {

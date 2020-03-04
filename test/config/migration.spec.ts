@@ -1,15 +1,22 @@
 import * as configMigration from '../../lib/config/migration';
 import { getConfig } from '../../lib/config/defaults';
-import { RenovateConfig } from '../../lib/config';
+import {
+  RenovateConfig as _RenovateConfig,
+  RenovateSharedConfig,
+} from '../../lib/config';
 import { PLATFORM_TYPE_GITHUB } from '../../lib/constants/platforms';
 
 const defaultConfig = getConfig();
+
+interface RenovateConfig extends _RenovateConfig {
+  node?: RenovateSharedConfig & { supportPolicy?: unknown };
+}
 
 describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('it migrates config', () => {
       const config: RenovateConfig = {
-        endpoints: [{}],
+        endpoints: [{}] as never,
         enabled: true,
         platform: PLATFORM_TYPE_GITHUB,
         hostRules: [
@@ -42,8 +49,18 @@ describe('config/migration', () => {
           enabled: true,
         },
         poetry: {
+          rebaseStalePrs: true,
           versionScheme: 'pep440',
         },
+        pipenv: {
+          rebaseStalePrs: false,
+          rebaseConflictedPrs: true,
+        },
+        pip_setup: {
+          rebaseConflictedPrs: false,
+        },
+        rebaseStalePrs: null,
+        rebaseConflictedPrs: true,
         meteor: true,
         autodiscover: 'true' as never,
         schedule: 'on the last day of the month' as never,
@@ -63,12 +80,12 @@ describe('config/migration', () => {
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)' as never,
-            groupName: ['angular packages'],
+            groupName: ['angular packages'] as never,
             excludedPackageNames: 'foo',
           },
           {
             packagePatterns: ['^foo'],
-            groupName: ['foo'],
+            groupName: ['foo'] as never,
           },
           {
             packageName: 'angular',
@@ -287,7 +304,7 @@ describe('config/migration', () => {
         node: {
           enabled: true,
           supportPolicy: ['lts'],
-          automerge: 'none',
+          automerge: 'none' as never,
         },
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -296,9 +313,15 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.node.enabled).toBeUndefined();
-      expect(migratedConfig.travis.enabled).toBe(true);
-      expect(migratedConfig.node.supportPolicy).toBeDefined();
+      expect(
+        (migratedConfig.node as RenovateSharedConfig).enabled
+      ).toBeUndefined();
+      expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
+        true
+      );
+      expect(
+        (migratedConfig.node as RenovateConfig).supportPolicy
+      ).toBeDefined();
     });
     it('it migrates packageFiles', () => {
       const config: RenovateConfig = {

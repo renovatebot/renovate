@@ -21,7 +21,6 @@ Object {
   "autoCompleteSetBy": Object {
     "id": 123,
   },
-  "branchName": "some-branch",
   "completionOptions": Object {
     "deleteSourceBranch": true,
     "squashMerge": true,

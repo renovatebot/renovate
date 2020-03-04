@@ -38,7 +38,7 @@ export async function getLockedVersions(
         dep.lockedVersion = valid(lockFileCache[npmLock][dep.depName]);
       }
     } else if (pnpmShrinkwrap) {
-      logger.info('TODO: implement pnpm-lock.yaml parsing of lockVersion');
+      logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
     }
   }
 }

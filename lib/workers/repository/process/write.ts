@@ -15,7 +15,7 @@ export async function writeUpdates(
   allBranches: BranchConfig[]
 ): Promise<WriteUpdateResult> {
   let branches = allBranches;
-  logger.info(
+  logger.debug(
     `Processing ${branches.length} branch${
       branches.length !== 1 ? 'es' : ''
     }: ${branches

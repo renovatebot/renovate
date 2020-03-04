@@ -1,5 +1,5 @@
-import responses from './_fixtures/responses';
-import { GotApi, RepoParams } from '../../../lib/platform/common';
+import responses from './__fixtures__/responses';
+import { GotApi, RepoParams, Platform } from '../../../lib/platform/common';
 import { Storage } from '../../../lib/platform/git/storage';
 import {
   REPOSITORY_CHANGED,
@@ -17,18 +17,16 @@ import {
   BRANCH_STATUS_SUCCESS,
 } from '../../../lib/constants/branch-constants';
 
-type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
-
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
     describe(scenarioName, () => {
-      let bitbucket: BbsApi;
+      let bitbucket: Platform;
       let api: jest.Mocked<GotApi>;
       let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
       let GitStorage: jest.Mock<Storage> & {
         getUrl: jest.MockInstance<any, any>;
       };
-      beforeEach(() => {
+      beforeEach(async () => {
         // reset module
         jest.resetModules();
         jest.mock('delay');
@@ -55,7 +53,7 @@ describe('platform/bitbucket-server', () => {
         jest.spyOn(api, 'post');
         jest.spyOn(api, 'put');
         jest.spyOn(api, 'delete');
-        bitbucket = require('../../../lib/platform/bitbucket-server');
+        bitbucket = await import('../../../lib/platform/bitbucket-server');
         GitStorage = require('../../../lib/platform/git/storage').Storage;
         GitStorage.mockImplementation(
           () =>
@@ -87,15 +85,15 @@ describe('platform/bitbucket-server', () => {
           username: 'abc',
           password: '123',
         });
-        bitbucket.initPlatform({
+        await bitbucket.initPlatform({
           endpoint,
           username: 'abc',
           password: '123',
         });
       });
 
-      afterEach(() => {
-        bitbucket.cleanRepo();
+      afterEach(async () => {
+        await bitbucket.cleanRepo();
       });
 
       function initRepo(config?: Partial<RepoParams>) {
@@ -108,18 +106,18 @@ describe('platform/bitbucket-server', () => {
 
       describe('initPlatform()', () => {
         it('should throw if no endpoint', () => {
-          expect(() => {
-            bitbucket.initPlatform({} as any);
-          }).toThrow();
+          expect.assertions(1);
+          expect(() => bitbucket.initPlatform({})).toThrow();
         });
         it('should throw if no username/password', () => {
-          expect(() => {
-            bitbucket.initPlatform({ endpoint: 'endpoint' } as any);
-          }).toThrow();
+          expect.assertions(1);
+          expect(() =>
+            bitbucket.initPlatform({ endpoint: 'endpoint' })
+          ).toThrow();
         });
-        it('should init', () => {
+        it('should init', async () => {
           expect(
-            bitbucket.initPlatform({
+            await bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
               username: 'abc',
               password: '123',
@@ -168,9 +166,9 @@ describe('platform/bitbucket-server', () => {
       });
 
       describe('repoForceRebase()', () => {
-        it('always return false, since bitbucket does not support force rebase', () => {
+        it('always return false, since bitbucket does not support force rebase', async () => {
           expect.assertions(1);
-          const actual = bitbucket.getRepoForceRebase();
+          const actual = await bitbucket.getRepoForceRebase();
           expect(actual).toBe(false);
         });
       });
@@ -483,7 +481,7 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.getBranchPr('userName1/pullRequest5', false)
+            await bitbucket.getBranchPr('userName1/pullRequest5')
           ).toMatchSnapshot();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -792,7 +790,7 @@ Followed by some information.
           } as any);
 
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', [])
           ).resolves.toEqual(BRANCH_STATUS_SUCCESS);
 
           await expect(
@@ -814,7 +812,7 @@ Followed by some information.
           } as any);
 
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', [])
           ).resolves.toEqual(BRANCH_STATUS_PENDING);
 
           api.get.mockReturnValueOnce({
@@ -826,7 +824,7 @@ Followed by some information.
           } as any);
 
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', [])
           ).resolves.toEqual(BRANCH_STATUS_PENDING);
 
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -845,7 +843,7 @@ Followed by some information.
           } as any);
 
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', [])
           ).resolves.toEqual(BRANCH_STATUS_FAILED);
 
           api.get.mockImplementationOnce(() => {
@@ -853,7 +851,7 @@ Followed by some information.
           });
 
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', [])
           ).resolves.toEqual(BRANCH_STATUS_FAILED);
 
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -871,7 +869,7 @@ Followed by some information.
           );
           await initRepo();
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', [])
           ).rejects.toThrow(REPOSITORY_CHANGED);
         });
       });

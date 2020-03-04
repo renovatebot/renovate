@@ -2,12 +2,14 @@ import { parse } from 'node-html-parser';
 
 import got from '../../util/got';
 import { isVersion } from '../../versioning/ruby';
-import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+
+export const id = 'ruby-version';
 
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 
 export async function getPkgReleases(
-  _config?: PkgReleaseConfig
+  _config?: GetReleasesConfig
 ): Promise<ReleaseResult> {
   // First check the persistent cache
   const cacheNamespace = 'datasource-ruby-version';

@@ -268,3 +268,10 @@ describe('semver.getNewValue()', () => {
     ).toEqual('v3.2.*'); // #5388
   });
 });
+describe('.sortVersions', () => {
+  it('sorts versions in an ascending order', () => {
+    expect(
+      ['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3'].sort(semver.sortVersions)
+    ).toEqual(['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']);
+  });
+});

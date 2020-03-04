@@ -8,11 +8,11 @@ import { getPrUpdatesTable } from './updates-table';
 import { getPrNotes, getPrExtraNotes } from './notes';
 import { getChangelogs } from './changelogs';
 import { getControls } from './controls';
-import { PrBodyConfig } from './common';
+import { BranchConfig } from '../../common';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-function massageUpdateMetadata(config: PrBodyConfig): void {
+function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach(upgrade => {
     /* eslint-disable no-param-reassign */
     const { homepage, sourceUrl, sourceDirectory, changelogUrl } = upgrade;
@@ -66,7 +66,7 @@ function massageUpdateMetadata(config: PrBodyConfig): void {
   });
 }
 
-export async function getPrBody(config: PrBodyConfig): Promise<string> {
+export async function getPrBody(config: BranchConfig): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
     banner: getPrBanner(config),

@@ -4,18 +4,18 @@ exports[`lib/manager/gitlabci-include/extract extractPackageFile() extracts mult
 Array [
   Object {
     "currentValue": "1.0.0",
-    "datasource": "gitlab",
+    "datasource": "gitlab-tags",
     "depName": "mikebryant/include-source-example",
     "depType": "repository",
   },
   Object {
     "currentValue": "master",
-    "datasource": "gitlab",
+    "datasource": "gitlab-tags",
     "depName": "mikebryant/include-source-example2",
     "depType": "repository",
   },
   Object {
-    "datasource": "gitlab",
+    "datasource": "gitlab-tags",
     "depName": "mikebryant/include-source-example3",
     "depType": "repository",
     "skipReason": "unknown-version",

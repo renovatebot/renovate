@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const defaultRegistry = 'https://rubygems.org';
   const registries = is.nonEmptyArray(registryUrls)
     ? registryUrls
@@ -14,7 +14,8 @@ export async function getPkgReleases({
 
   for (const registry of registries) {
     let pkg: ReleaseResult;
-    if (registry.endsWith('rubygems.org')) {
+    // prettier-ignore
+    if (registry.endsWith('rubygems.org')) { // lgtm [js/incomplete-url-substring-sanitization]
       pkg = await getRubygemsOrgDependency(lookupName);
     } else {
       pkg = await getDependency({ dependency: lookupName, registry });

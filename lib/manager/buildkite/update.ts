@@ -24,7 +24,7 @@ export function updateDependency({
     lines[lineIdx] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new buildkite version');
+    logger.debug({ err }, 'Error setting new buildkite version');
     return null;
   }
 }

@@ -67,7 +67,7 @@ describe('workers/branch', () => {
         upgrades: [{ depName: 'some-dep-name' } as never],
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValue('abc123');
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -226,7 +226,7 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       platform.branchExists.mockResolvedValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(await branchWorker.processBranch(config)).toEqual('no-work');
     });
     it('returns if branch automerged', async () => {
@@ -238,12 +238,33 @@ describe('workers/branch', () => {
         updatedArtifacts: [{}],
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch(config);
       expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
+
+    it('returns if branch automerged and no checks', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as never);
+      platform.branchExists.mockResolvedValueOnce(false);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      await branchWorker.processBranch({
+        ...config,
+        requiredStatusChecks: null,
+      });
+      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
     it('returns if branch automerged (dry-run)', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
@@ -253,6 +274,7 @@ describe('workers/branch', () => {
         updatedArtifacts: [{}],
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({ ...config, dryRun: true });
       expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
@@ -268,6 +290,7 @@ describe('workers/branch', () => {
         updatedArtifacts: [{}],
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce('needs-pr-approval');
       expect(await branchWorker.processBranch(config)).toEqual(
@@ -275,6 +298,7 @@ describe('workers/branch', () => {
       );
     });
     it('returns if branch exists but pending', async () => {
+      expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
@@ -283,11 +307,32 @@ describe('workers/branch', () => {
         updatedArtifacts: [{}],
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce('pending');
       expect(await branchWorker.processBranch(config)).toEqual(
         BRANCH_STATUS_PENDING
       );
+    });
+    it('returns if branch exists but updated', async () => {
+      expect.assertions(3);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as never);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          requiredStatusChecks: null,
+          prCreation: 'not-pending',
+        })
+      ).toEqual(BRANCH_STATUS_PENDING);
+
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -301,6 +346,7 @@ describe('workers/branch', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({} as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
@@ -318,6 +364,7 @@ describe('workers/branch', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({} as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
@@ -337,6 +384,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({} as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
@@ -356,6 +404,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({} as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
@@ -392,6 +441,7 @@ describe('workers/branch', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({} as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
@@ -469,7 +519,7 @@ describe('workers/branch', () => {
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       expect(
         await branchWorker.processBranch({
@@ -501,6 +551,7 @@ describe('workers/branch', () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -528,7 +579,7 @@ describe('workers/branch', () => {
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -565,7 +616,7 @@ describe('workers/branch', () => {
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      commit.commitFilesToBranch.mockResolvedValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
       const result = await branchWorker.processBranch({
         ...config,

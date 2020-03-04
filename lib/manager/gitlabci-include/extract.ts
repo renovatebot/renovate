@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
-import { DATASOURCE_GITLAB } from '../../constants/data-binary-source';
+import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 
 function extractDepFromInclude(includeObj: {
   file: any;
@@ -13,7 +13,7 @@ function extractDepFromInclude(includeObj: {
     return null;
   }
   const dep: PackageDependency = {
-    datasource: DATASOURCE_GITLAB,
+    datasource: datasourceGitlabTags.id,
     depName: includeObj.project,
     depType: 'repository',
   };
@@ -47,7 +47,7 @@ export function extractPackageFile(
   } catch (err) /* istanbul ignore next */ {
     if (err.stack && err.stack.startsWith('YAMLException:')) {
       logger.debug({ err });
-      logger.info('YAML exception extracting GitLab CI includes');
+      logger.debug('YAML exception extracting GitLab CI includes');
     } else {
       logger.warn({ err }, 'Error extracting GitLab CI includes');
     }
