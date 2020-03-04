@@ -9,8 +9,8 @@ import {
   levels,
   getErrors,
   addStream,
-} from '../../lib/logger';
-import { add } from '../../lib/util/host-rules';
+} from '.';
+import { add } from '../util/host-rules';
 
 jest.unmock('../../lib/logger');
 

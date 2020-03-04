@@ -1,4 +1,4 @@
-import configSerializer from '../../lib/logger/config-serializer';
+import configSerializer from './config-serializer';
 
 describe('logger/config-serializer', () => {
   it('redacts sensitive fields', () => {
