@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import handlebars from 'handlebars';
 import { platform } from '../../../platform';
 import { get } from '../../../versioning';
@@ -25,13 +24,9 @@ function massageUpdateMetadata(config: BranchConfig): void {
     const otherLinks = [];
     if (homepage && sourceUrl) {
       otherLinks.push(`[source](${sourceUrl})`);
-    } else {
-      logger.debug('Homepage or sourceUrl missing');
     }
     if (changelogUrl) {
       otherLinks.push(`[changelog](${changelogUrl})`);
-    } else {
-      logger.debug('No changelogUrl to massage');
     }
     if (otherLinks.length) {
       depNameLinked += ` (${otherLinks.join(', ')})`;
@@ -49,7 +44,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
           'tree/HEAD/' +
           sourceDirectory.replace('^/?/', '');
       }
-      logger.debug({ fullUrl }, 'fullUrl');
       references.push(`[source](${fullUrl})`);
     }
     if (changelogUrl) {
@@ -74,7 +68,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
 
 export async function getPrBody(config: BranchConfig): Promise<string> {
   massageUpdateMetadata(config);
-  logger.debug('Getting PR body');
   const content = {
     banner: getPrBanner(config),
     table: getPrUpdatesTable(config),
@@ -84,7 +77,6 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     controls: getControls(),
     footer: getPrFooter(config),
   };
-  logger.debug({ content }, 'Content in getPrBody');
   const defaultPrBodyTemplate =
     '{{{banner}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
   const prBodyTemplate = config.prBodyTemplate || defaultPrBodyTemplate;

@@ -19,13 +19,12 @@ async function getTags(
   versionScheme: string,
   repository: string
 ): Promise<string[]> {
-  logger.debug('getTags from gitlab');
+  logger.trace('getTags() from gitlab');
   let url = endpoint
     ? endpoint.replace(/\/?$/, '/')
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://gitlab.com/api/v4/';
   let repoid = repository.replace(/\.git/, '').replace(/\//, '%2F');
   url += `projects/${repoid}/repository/tags`;
-  logger.debug({ url }, 'Tags URL');
   try {
     const res = await ghGot<{ name: string }[]>(url, {
       paginate: true,
@@ -36,12 +35,10 @@ async function getTags(
     if (!tags.length) {
       logger.debug({ repoid }, 'repository has no Gitlab tags');
     }
-    // logger.debug({ tags }, 'Repository tags');
 
     return tags.map(tag => tag.name).filter(Boolean);
   } catch (err) {
     logger.info({ sourceRepo: repoid }, 'Failed to fetch Gitlab tags');
-    logger.debug({ err });
     // istanbul ignore if
     if (err.message && err.message.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
@@ -61,19 +58,12 @@ export async function getChangeLogJSON({
   depName,
   manager,
 }: ChangeLogConfig): Promise<ChangeLogResult | null> {
-  logger.debug('Getting ChangeLog JSON');
+  logger.trace('getChangeLogJSON for gitlab');
   const version = versioning.get(versionScheme);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
-  //
-  // const baseURL = `${protocol}//${host}/`;
-  //
   const baseURL = 'https://gitlab.com/';
-  // const url = sourceUrl.startsWith('https://github.com/')
-  // ? 'https://api.github.com/'
-  // : sourceUrl;
   const url = sourceUrl;
-  logger.debug({ url }, 'URL from sourceUrl');
   const config = hostRules.find({
     hostType: 'gitlab',
     url,
@@ -96,15 +86,12 @@ export async function getChangeLogJSON({
   // const apiBaseURL = sourceUrl.startsWith('https://github.com/')
   // ? 'https://api.github.com/'
   // : endpoint; // TODO FIX
-  logger.debug({ endpoint }, 'Endpoint');
-  // const apiBaseURL = endpoint; // TODO FIX ver arriba
+  // const apiBaseURL = endpoint; // TODO FIX see above
   const apiBaseURL = 'https://gitlab.com/api/v4/';
-  logger.debug({ apiBaseURL }, 'apiBaseURL');
   const repository = pathname
     .slice(1)
     .replace(/\/$/, '')
     .replace(/\.git/, '');
-  logger.debug({ repository }, 'Repository sliced url');
   if (repository.split('/').length !== 2) {
     logger.info({ sourceUrl }, 'Invalid gitlab (github) URL found');
     return null;
@@ -195,11 +182,8 @@ export async function getChangeLogJSON({
     },
     versions: changelogReleases,
   };
-  logger.debug({ res }, 'Res from source-gitlab getChangeLogJSON');
 
   res = await addReleaseNotes(res);
-
-  // logger.debug({ res }, 'Res after addReleaseNotes');
 
   return res;
 }

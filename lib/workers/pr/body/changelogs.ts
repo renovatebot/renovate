@@ -4,6 +4,7 @@ import releaseNotesHbs from '../changelog/hbs-template';
 import { BranchConfig } from '../../common';
 
 export function getChangelogs(config: BranchConfig): string {
+  logger.trace('getChangelogs for pr body');
   let releaseNotes = '';
   // istanbul ignore if
   if (!config.hasReleaseNotes) {
@@ -33,6 +34,5 @@ export function getChangelogs(config: BranchConfig): string {
   const backTickRe = /&#x60;([^/]*?)&#x60;/g;
   releaseNotes = releaseNotes.replace(backTickRe, '`$1`');
   releaseNotes = releaseNotes.replace(/`#&#8203;(\d+)`/g, '`#$1`');
-  logger.debug({ releaseNotes }, 'releaseNotes after replacing stuff');
   return releaseNotes;
 }

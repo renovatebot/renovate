@@ -183,7 +183,6 @@ export async function ensurePr(
   const processedUpgrades = [];
   const commitRepos = [];
 
-  logger.debug({ upgrades }, 'Upgrades');
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
     const upgradeKey = `${upgrade.depType}-${upgrade.depName}-${
@@ -196,16 +195,13 @@ export async function ensurePr(
     upgrade.hasUrls = !!(upgrade.sourceUrl || upgrade.homepage);
 
     const logJSON = await getChangeLogJSON(upgrade);
-    logger.debug({ logJSON }, 'logJSON from getChangeLogJSON');
 
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
-        logger.debug('Error undefined, so no error, GOOD');
         // TODO: this githubName thing should be repoName or similar
         upgrade.githubName = logJSON.project.github
           ? logJSON.project.github
           : logJSON.project.gitlab;
-        console.log(upgrade.githubName);
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
         if (
@@ -220,9 +216,6 @@ export async function ensurePr(
               upgrade.releases.push(release);
             });
           }
-        } else {
-          logger.debug('No githubName o algo falta');
-          console.log(upgrade);
         }
       } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
         upgrade.prBodyNotes = [
@@ -246,7 +239,6 @@ export async function ensurePr(
   const releaseNoteRepos = [];
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes) {
-      logger.debug('Ugrade hasReleaseNotes');
       if (releaseNoteRepos.includes(upgrade.sourceUrl)) {
         logger.debug(
           { depName: upgrade.depName },

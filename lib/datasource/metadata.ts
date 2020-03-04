@@ -1,4 +1,3 @@
-import { logger } from '../logger';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { ReleaseResult } from './common';
@@ -125,7 +124,6 @@ export function addMetaData(
       parse(massageGithubUrl(dep.sourceUrl), {
         extraBaseUrls,
       }) || dep.sourceUrl;
-    logger.debug({ dep }, '-----------------------------After Try massaging');
   }
 
   // Clean up any empty urls
@@ -135,7 +133,7 @@ export function addMetaData(
       dep[url] = dep[url].trim();
       // istanbul ignore if
       if (!dep[url].match(/^https?:\/\//)) {
-        // logger.debug({ url, dep}, '-------------------------------------Deleting non https')
+        // logger.debug({ url, dep}, '(not) Deleting non https')
         // TODO: I commented this out but I'm not sure we want to keep it this way
         // delete dep[url];
       }
