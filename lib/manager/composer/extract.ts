@@ -156,9 +156,6 @@ export async function extractPackageFile(
           if (!depName.includes('/')) {
             dep.skipReason = 'unsupported';
           }
-          if (!semverComposer.isValid(currentValue)) {
-            dep.skipReason = 'unsupported-constraint';
-          }
           if (currentValue === '*') {
             dep.skipReason = 'any-version';
           }

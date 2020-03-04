@@ -1,5 +1,4 @@
 import { logger } from '../../logger';
-import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
@@ -57,9 +56,6 @@ export async function extractPackageFile(
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
           .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = 'invalid-value';
-        }
       } else {
         dep.skipReason = 'no-version';
       }

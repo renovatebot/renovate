@@ -496,7 +496,6 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
-    "skipReason": "unknown-version",
   },
   Object {
     "currentValue": "3.2.1",
