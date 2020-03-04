@@ -118,7 +118,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
-        "skipReason": "not-a-version",
       },
       Object {
         "currentValue": "[1.0.0]",

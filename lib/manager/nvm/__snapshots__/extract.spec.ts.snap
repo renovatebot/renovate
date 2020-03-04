@@ -18,7 +18,6 @@ Array [
     "datasource": "github-tags",
     "depName": "node",
     "lookupName": "nodejs/node",
-    "skipReason": "unsupported-version",
   },
 ]
 `;
