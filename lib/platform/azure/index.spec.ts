@@ -17,10 +17,10 @@ describe('platform/azure', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../lib/platform/azure/azure-got-wrapper');
-    jest.mock('../../../lib/platform/azure/azure-helper');
-    jest.mock('../../../lib/platform/git/storage');
-    jest.mock('../../../lib/util/host-rules');
+    jest.mock('./azure-got-wrapper');
+    jest.mock('./azure-helper');
+    jest.mock('../git/storage');
+    jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn(input => input);
     azure = await import('.');

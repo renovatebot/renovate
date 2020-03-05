@@ -70,8 +70,7 @@ describe('allVersioning.get(versioning)', () => {
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = require('../../lib/versioning/' + supportedScheme)
-          .api;
+        const apiOrCtor = require('./' + supportedScheme).api;
         if (allVersioning.isVersioningApiConstructor(apiOrCtor)) return;
 
         expect(Object.keys(apiOrCtor).sort()).toEqual(

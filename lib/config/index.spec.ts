@@ -1,7 +1,7 @@
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
 
-jest.mock('../../lib/datasource/npm');
+jest.mock('../datasource/npm');
 try {
   jest.mock('../../config.js');
 } catch (err) {

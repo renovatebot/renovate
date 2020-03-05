@@ -9,7 +9,7 @@ import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import * as platform from '.';
 import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 
-jest.unmock('../../lib/platform');
+jest.unmock('.');
 
 describe('platform', () => {
   beforeEach(() => {

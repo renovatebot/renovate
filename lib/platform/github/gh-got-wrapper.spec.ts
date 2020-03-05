@@ -10,7 +10,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 
-jest.mock('../../../lib/util/got');
+jest.mock('../../util/got');
 jest.mock('delay');
 
 const got: any = _got;

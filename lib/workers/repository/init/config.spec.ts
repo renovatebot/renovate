@@ -17,7 +17,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-jest.mock('../../../../lib/config/migrate-validate');
+jest.mock('../../../config/migrate-validate');
 
 describe('workers/repository/init/config', () => {
   describe('mergeRenovateConfig()', () => {

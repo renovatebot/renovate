@@ -1,10 +1,9 @@
 import * as utils from './utils';
 import { GotApi } from '../common';
 
-jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
+jest.mock('./bb-got-wrapper');
 
-const api: jest.Mocked<GotApi> = require('../../../lib/platform/bitbucket/bb-got-wrapper')
-  .api;
+const api: jest.Mocked<GotApi> = require('./bb-got-wrapper').api;
 
 const range = (count: number) => [...Array(count).keys()];
 

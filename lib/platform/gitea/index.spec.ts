@@ -164,10 +164,10 @@ describe('platform/gitea', () => {
   beforeEach(async () => {
     jest.resetModules();
     jest.clearAllMocks();
-    jest.mock('../../../lib/platform/gitea/gitea-helper');
-    jest.mock('../../../lib/platform/gitea/gitea-got-wrapper');
-    jest.mock('../../../lib/platform/git/storage');
-    jest.mock('../../../lib/logger');
+    jest.mock('./gitea-helper');
+    jest.mock('./gitea-got-wrapper');
+    jest.mock('../git/storage');
+    jest.mock('../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;

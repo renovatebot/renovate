@@ -201,7 +201,7 @@ describe('platform/gitea/gitea-helper', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    jest.mock('../../../lib/platform/gitea/gitea-got-wrapper');
+    jest.mock('./gitea-got-wrapper');
 
     helper = (await import('./gitea-helper')) as any;
     api = (await import('./gitea-got-wrapper')).api as any;

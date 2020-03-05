@@ -6,8 +6,8 @@ import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
 
-jest.mock('../../../../lib/platform/github/gh-got-wrapper');
-jest.mock('../../../../lib/datasource/npm');
+jest.mock('../../../platform/github/gh-got-wrapper');
+jest.mock('../../../datasource/npm');
 
 const ghGot = mocked(api).get;
 

@@ -9,7 +9,7 @@ import { BinarySource } from '../../../util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../../../lib/util/exec/env');
+jest.mock('../../../util/exec/env');
 jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);

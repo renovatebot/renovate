@@ -16,9 +16,9 @@ describe('platform/bitbucket', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
-    jest.mock('../../../lib/platform/git/storage');
-    jest.mock('../../../lib/util/host-rules');
+    jest.mock('./bb-got-wrapper');
+    jest.mock('../git/storage');
+    jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     api = require('./bb-got-wrapper').api;
     bitbucket = await import('.');

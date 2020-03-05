@@ -11,7 +11,7 @@ describe('platform/gitea/gitea-got-wrapper', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    jest.mock('../../../lib/util/got');
+    jest.mock('../../util/got');
 
     api = (await import('./gitea-got-wrapper')).api as any;
     got = (await import('../../util/got')).api as any;

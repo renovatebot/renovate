@@ -9,7 +9,7 @@ import {
 import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
-} from '../../../lib/constants/pull-requests';
+} from '../../constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_FAILURE,
@@ -28,12 +28,12 @@ describe('platform/gitlab', () => {
     // reset module
     jest.resetModules();
     jest.resetAllMocks();
-    jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
+    jest.mock('./gl-got-wrapper');
     gitlab = await import('.');
     api = require('./gl-got-wrapper').api;
-    jest.mock('../../../lib/util/host-rules');
+    jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
-    jest.mock('../../../lib/platform/git/storage');
+    jest.mock('../git/storage');
     GitStorage = require('../git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),

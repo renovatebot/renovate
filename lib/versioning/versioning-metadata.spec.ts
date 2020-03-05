@@ -26,7 +26,7 @@ describe('versioning metadata', () => {
     );
 
     for (const versioning of allVersioning) {
-      const versioningObj = require(`../../lib/versioning/${versioning}`);
+      const versioningObj = require(`./${versioning}`);
       expect(versioningObj.id).toEqual(versioning);
       expect(versioningObj.displayName).toBeDefined();
       expect(versioningObj.urls).toBeDefined();

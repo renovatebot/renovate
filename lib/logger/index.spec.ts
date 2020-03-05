@@ -12,7 +12,7 @@ import {
 } from '.';
 import { add } from '../util/host-rules';
 
-jest.unmock('../../lib/logger');
+jest.unmock('.');
 
 jest.mock('fs-extra');
 const fs: any = _fs;

@@ -8,7 +8,7 @@ describe('platform/gl-got-wrapper', () => {
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();
-    jest.mock('../../../lib/util/got');
+    jest.mock('../../util/got');
     got = require('../../util/got').api;
     hostRules = require('../../util/host-rules');
     api = require('./bb-got-wrapper').api;

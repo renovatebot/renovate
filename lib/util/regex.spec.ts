@@ -20,7 +20,7 @@ describe('util/regex', () => {
       throw new Error();
     });
 
-    const regex = require('../../lib/util/regex');
+    const regex = require('./regex');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 });

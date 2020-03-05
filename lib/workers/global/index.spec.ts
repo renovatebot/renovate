@@ -9,7 +9,7 @@ import {
 } from '../../constants/platforms';
 import * as datasourceDocker from '../../datasource/docker';
 
-jest.mock('../../../lib/workers/repository');
+jest.mock('../repository');
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;

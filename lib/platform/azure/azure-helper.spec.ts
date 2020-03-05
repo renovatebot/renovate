@@ -2,15 +2,15 @@ import { Readable } from 'stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 describe('platform/azure/helpers', () => {
-  let azureHelper: typeof import('../../../lib/platform/azure/azure-helper');
-  let azureApi: jest.Mocked<typeof import('../../../lib/platform/azure/azure-got-wrapper')>;
+  let azureHelper: typeof import('./azure-helper');
+  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
 
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../lib/platform/azure/azure-got-wrapper');
-    azureHelper = require('.../../../lib/platform/azure/azure-helper');
-    azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
+    jest.mock('./azure-got-wrapper');
+    azureHelper = require('./azure-helper');
+    azureApi = require('./azure-got-wrapper');
   });
 
   describe('getNewBranchName', () => {

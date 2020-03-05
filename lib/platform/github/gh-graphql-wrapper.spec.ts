@@ -1,9 +1,9 @@
 import { getGraphqlNodes } from './gh-graphql-wrapper';
 
 /** @type any */
-const got = require('../../../lib/util/got').default;
+const got = require('../../util/got').default;
 
-jest.mock('../../../lib/util/got');
+jest.mock('../../util/got');
 
 const query = `
       query {

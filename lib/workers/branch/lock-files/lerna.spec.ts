@@ -7,7 +7,7 @@ import * as _env from '../../../util/exec/env';
 import { BinarySource } from '../../../util/exec/common';
 
 jest.mock('child_process');
-jest.mock('../../../../lib/util/exec/env');
+jest.mock('../../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);

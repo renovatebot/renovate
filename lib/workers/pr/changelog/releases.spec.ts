@@ -5,7 +5,7 @@ import * as dockerVersioning from '../../../versioning/docker';
 import * as npmVersioning from '../../../versioning/npm';
 import { BranchUpgradeConfig } from '../../common';
 
-jest.mock('../../../../lib/datasource');
+jest.mock('../../../datasource');
 
 const ds = mocked(datasource);
 

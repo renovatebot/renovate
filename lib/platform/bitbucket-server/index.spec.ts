@@ -6,10 +6,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import {
-  PR_STATE_CLOSED,
-  PR_STATE_OPEN,
-} from '../../../lib/constants/pull-requests';
+import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
 import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_FAILURE,
@@ -31,7 +28,7 @@ describe('platform/bitbucket-server', () => {
         jest.resetModules();
         jest.mock('delay');
         jest.mock(
-          '../../../lib/util/got',
+          '../../util/got',
           () => (url: string, options: { method: string }) => {
             const { method } = options;
             const body = mockResponses[url] && mockResponses[url][method];
@@ -44,8 +41,8 @@ describe('platform/bitbucket-server', () => {
             return Promise.resolve({ body });
           }
         );
-        jest.mock('../../../lib/platform/git/storage');
-        jest.mock('../../../lib/util/host-rules');
+        jest.mock('../git/storage');
+        jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         api = require('./bb-got-wrapper').api;
         jest.spyOn(api, 'get');

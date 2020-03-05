@@ -11,10 +11,10 @@ const gitSubmodules = mocked(_gitSubmodules);
 const npm = mocked(_npm);
 const autoReplace = mocked(_autoReplace);
 
-jest.mock('../../../lib/manager/composer');
-jest.mock('../../../lib/manager/npm');
-jest.mock('../../../lib/manager/git-submodules');
-jest.mock('../../../lib/workers/branch/auto-replace');
+jest.mock('../../manager/composer');
+jest.mock('../../manager/npm');
+jest.mock('../../manager/git-submodules');
+jest.mock('./auto-replace');
 
 describe('workers/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {

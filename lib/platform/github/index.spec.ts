@@ -21,16 +21,16 @@ describe('platform/github', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.unmock('../../../lib/platform');
+    jest.unmock('.');
     jest.mock('delay');
-    jest.mock('../../../lib/platform/github/gh-got-wrapper');
-    jest.mock('../../../lib/util/host-rules');
-    jest.mock('../../../lib/util/got');
+    jest.mock('./gh-got-wrapper');
+    jest.mock('../../util/host-rules');
+    jest.mock('../../util/got');
     api = mocked((await import('./gh-got-wrapper')).api);
     got = (await import('../../util/got')).default as any;
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
-    jest.mock('../../../lib/platform/git/storage');
+    jest.mock('../git/storage');
     GitStorage = (await import('../git/storage')).Storage as any;
     GitStorage.mockImplementation(
       () =>

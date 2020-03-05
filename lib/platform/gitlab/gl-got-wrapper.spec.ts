@@ -3,7 +3,7 @@ import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 
-jest.mock('../../../lib/util/got');
+jest.mock('../../util/got');
 
 const got: any = _got;
 
