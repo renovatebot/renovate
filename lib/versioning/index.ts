@@ -19,7 +19,7 @@ export const getVersioningList = (): string[] => versioningList;
 
 const versionings = fs
   .readdirSync(__dirname, { withFileTypes: true })
-  .filter(dirent => dirent.isDirectory())
+  .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
   .map(dirent => dirent.name)
   .sort();
 
@@ -40,6 +40,7 @@ export function get(versioning: string): VersioningApi {
   }
   let versioningName: string;
   let versioningConfig: string;
+
   if (versioning.includes(':')) {
     const versionSplit = versioning.split(':');
     versioningName = versionSplit.shift();
