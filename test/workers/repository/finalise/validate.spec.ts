@@ -1,5 +1,6 @@
 import * as validate from '../../../../lib/workers/repository/finalise/validate';
 import { platform } from '../../../util';
+import { PR_STATE_OPEN } from '../../../../lib/constants/pull-requests';
 import {
   BRANCH_STATUS_FAILURE,
   BRANCH_STATUS_SUCCESS,
@@ -17,7 +18,7 @@ describe('workers/repository/validate', () => {
     it('catches error', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PR_STATE_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -30,7 +31,7 @@ describe('workers/repository/validate', () => {
     it('returns if no matching files', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PR_STATE_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -44,7 +45,7 @@ describe('workers/repository/validate', () => {
     it('validates failures if cannot parse', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PR_STATE_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -62,7 +63,7 @@ describe('workers/repository/validate', () => {
     it('validates failures if config validation fails', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PR_STATE_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },
@@ -80,7 +81,7 @@ describe('workers/repository/validate', () => {
     it('validates successfully', async () => {
       platform.getPrList.mockResolvedValueOnce([
         {
-          state: 'open',
+          state: PR_STATE_OPEN,
           branchName: 'some/branch',
           title: 'Update Renovate',
         },

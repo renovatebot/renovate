@@ -1,7 +1,5 @@
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import * as semver from '../../versioning/semver';
-import * as git from '../../versioning/git';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGalaxy from '../../datasource/galaxy';
 
@@ -67,15 +65,6 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = dep.managerData.name;
   }
 
-  if (
-    (dep.datasource === datasourceGitTags.id &&
-      !git.api.isValid(dependency.managerData.version)) ||
-    (dep.datasource === datasourceGalaxy.id &&
-      !semver.isValid(dependency.managerData.version))
-  ) {
-    dep.skipReason = 'invalid-version';
-    return false;
-  }
   return true;
 }
 

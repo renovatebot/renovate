@@ -3,6 +3,7 @@ import { RenovateConfig, platform, getConfig } from '../../../../util';
 import { checkOnboardingBranch } from '../../../../../lib/workers/repository/onboarding/branch';
 import { Pr } from '../../../../../lib/platform';
 import * as _rebase from '../../../../../lib/workers/repository/onboarding/branch/rebase';
+import { PR_STATE_OPEN } from '../../../../../lib/constants/pull-requests';
 
 const rebase: any = _rebase;
 
@@ -73,7 +74,11 @@ describe('workers/repository/onboarding/branch', () => {
       config.requireConfig = true;
       platform.findPr.mockResolvedValue(mock<Pr>());
       platform.getPrList.mockResolvedValueOnce([
-        { ...mock<Pr>(), branchName: 'renovate/something', state: 'open' },
+        {
+          ...mock<Pr>(),
+          branchName: 'renovate/something',
+          state: PR_STATE_OPEN,
+        },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });

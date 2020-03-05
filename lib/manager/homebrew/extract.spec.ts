@@ -110,8 +110,6 @@ describe('lib/manager/homebrew/extract', () => {
           end
       `;
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
@@ -124,8 +122,6 @@ describe('lib/manager/homebrew/extract', () => {
           end
       `;
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
@@ -138,8 +134,6 @@ describe('lib/manager/homebrew/extract', () => {
           end
       `;
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url field', () => {
@@ -152,8 +146,6 @@ describe('lib/manager/homebrew/extract', () => {
           end
       `;
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
     it('skips if there is no sha256 field', () => {

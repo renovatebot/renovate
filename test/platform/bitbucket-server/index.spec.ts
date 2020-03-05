@@ -7,6 +7,10 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../lib/constants/error-messages';
 import {
+  PR_STATE_CLOSED,
+  PR_STATE_OPEN,
+} from '../../../lib/constants/pull-requests';
+import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_FAILURE,
   BRANCH_STATUS_PENDING,
@@ -499,7 +503,7 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: 'open',
+              state: PR_STATE_OPEN,
             })
           ).toMatchSnapshot();
           expect(api.get.mock.calls).toMatchSnapshot();
@@ -511,7 +515,7 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: 'closed',
+              state: PR_STATE_CLOSED,
             })
           ).toBeUndefined();
           expect(api.get.mock.calls).toMatchSnapshot();

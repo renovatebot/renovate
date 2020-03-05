@@ -1,6 +1,5 @@
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { isValid } from '../../versioning/cargo';
 import { PackageDependency, PackageFile } from '../common';
 import { CargoConfig, CargoSection } from './types';
 import * as datasourceCrate from '../../datasource/crate';
@@ -52,8 +51,6 @@ function extractFromSection(
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!isValid(dep.currentValue)) {
-      dep.skipReason = 'unknown-version';
     }
     if (target) {
       dep.target = target;

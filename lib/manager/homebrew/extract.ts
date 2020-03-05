@@ -1,4 +1,3 @@
-import { isValid } from '../../versioning/semver';
 import { skip, isSpace, removeComments } from './util';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
@@ -95,9 +94,6 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
       currentValue = s[4];
     }
     if (!currentValue) {
-      return null;
-    }
-    if (!isValid(currentValue)) {
       return null;
     }
     return { currentValue, ownerName, repoName };

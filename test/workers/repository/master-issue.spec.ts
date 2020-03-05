@@ -5,6 +5,7 @@ import * as masterIssue from '../../../lib/workers/repository/master-issue';
 import { RenovateConfig, getConfig, platform } from '../../util';
 import { BranchConfig, BranchUpgradeConfig } from '../../../lib/workers/common';
 import { Pr } from '../../../lib/platform';
+import { PR_STATE_NOT_OPEN } from '../../../lib/constants/pull-requests';
 import { PLATFORM_TYPE_GITHUB } from '../../../lib/constants/platforms';
 
 type PrUpgrade = BranchUpgradeConfig;
@@ -354,10 +355,10 @@ describe('workers/repository/master-issue', () => {
       expect(platform.findPr).toHaveBeenCalledTimes(2);
       expect(platform.findPr.mock.calls[0][0].branchName).toBe('branchName1');
       expect(platform.findPr.mock.calls[0][0].prTitle).toBe('pr1');
-      expect(platform.findPr.mock.calls[0][0].state).toBe('!open');
+      expect(platform.findPr.mock.calls[0][0].state).toBe(PR_STATE_NOT_OPEN);
       expect(platform.findPr.mock.calls[1][0].branchName).toBe('branchName2');
       expect(platform.findPr.mock.calls[1][0].prTitle).toBe('pr2');
-      expect(platform.findPr.mock.calls[1][0].state).toBe('!open');
+      expect(platform.findPr.mock.calls[1][0].state).toBe(PR_STATE_NOT_OPEN);
 
       // same with dry run
       await dryRun(branches, platform, 0, 0, 0, 2);
