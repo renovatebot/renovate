@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/kustomize/extract extractPackageFile() extracts http dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "github.com/user/repo//deploy",
+    "lookupName": "github.com/user/repo",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "https://moredhel/remote-kustomize.git",
+    "lookupName": "https://moredhel/remote-kustomize.git",
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "https://moredhel/remote-kustomize.git//deploy",
+    "lookupName": "https://moredhel/remote-kustomize.git//deploy",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "git@github.com:moredhel/remote-kustomize.git",
+    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency with a subdir 1`] = `
+Array [
+  Object {
+    "currentValue": "v2.0.0",
+    "datasource": "git-tags",
+    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
+    "lookupName": "git@github.com:kubernetes-sigs/kustomize.git",
+  },
+]
+`;
+
+exports[`manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.1.0",
+    "datasource": "docker",
+    "depName": "node",
+    "lookupName": "node",
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "docker",
+    "depName": "group/instance",
+    "lookupName": "group/instance",
+  },
+  Object {
+    "currentValue": "v0.0.2",
+    "datasource": "docker",
+    "depName": "quay.io/test/repo",
+    "lookupName": "quay.io/test/repo",
+  },
+  Object {
+    "currentValue": "v0.0.3",
+    "datasource": "docker",
+    "depName": "gitlab.com/org/suborg/image",
+    "lookupName": "gitlab.com/org/suborg/image",
+  },
+]
+`;
