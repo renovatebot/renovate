@@ -2,13 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import * as npmExtract from '.';
 import { getConfig } from '../../../config/defaults';
-import { platform as _platform } from '../../../platform';
+import { platform as _platform } from '../../../../test/util';
 
 // TODO: fix types
-const defaultConfig = getConfig() as any;
+const defaultConfig = getConfig();
 const platform: any = _platform;
 
-function readFixture(fixture) {
+function readFixture(fixture: string) {
   return fs.readFileSync(
     path.resolve(__dirname, `../__fixtures__/${fixture}`),
     'utf8'

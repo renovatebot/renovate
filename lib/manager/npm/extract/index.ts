@@ -2,6 +2,7 @@ import { remove } from 'fs-extra';
 import { dirname } from 'path';
 import { join } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 
 import { getLockedVersions } from './locked-versions';
@@ -14,7 +15,7 @@ import {
   PackageDependency,
   NpmLockFiles,
 } from '../../common';
-import { NpmPackage } from './common';
+import { NpmPackage, NpmPackageDependeny } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as nodeVersioning from '../../../versioning/node';
@@ -54,7 +55,7 @@ export async function extractPackageFile(
   );
   const packageJsonVersion = packageJson.version;
   let yarnWorkspacesPackages;
-  if (packageJson.workspaces && packageJson.workspaces.packages) {
+  if (!is.array(packageJson.workspaces) && packageJson.workspaces.packages) {
     yarnWorkspacesPackages = packageJson.workspaces.packages;
   } else {
     yarnWorkspacesPackages = packageJson.workspaces;
@@ -272,7 +273,7 @@ export async function extractPackageFile(
     if (packageJson[depType]) {
       try {
         for (const [depName, val] of Object.entries(
-          packageJson[depType] as Record<string, any>
+          packageJson[depType] as NpmPackageDependeny
         )) {
           const dep: PackageDependency = {
             depType,

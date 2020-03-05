@@ -16,7 +16,7 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
-  let newPjVersion;
+  let newPjVersion: string;
   try {
     if (bumpVersion.startsWith('mirror:')) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
@@ -131,7 +131,7 @@ export function updateDependency({
       return fileContent;
     }
     if (parsedContents && parsedContents.resolutions) {
-      let depKey;
+      let depKey: string;
       if (parsedContents.resolutions[depName]) {
         depKey = depName;
       } else if (parsedContents.resolutions[`**/${depName}`]) {
