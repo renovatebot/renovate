@@ -27,6 +27,11 @@ import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
+  PR_STATE_ALL,
+  PR_STATE_NOT_OPEN,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
+import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
@@ -291,11 +296,10 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 
   return azurePr;
 }
-
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -310,11 +314,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case 'all':
+      case PR_STATE_ALL:
         // no more filter needed, we can go further...
         break;
-      case '!open':
-        prsFiltered = prsFiltered.filter(item => item.state !== 'open');
+      case PR_STATE_NOT_OPEN:
+        prsFiltered = prsFiltered.filter(item => item.state !== PR_STATE_OPEN);
         break;
       default:
         prsFiltered = prsFiltered.filter(item => item.state === state);
@@ -331,7 +335,10 @@ export async function findPr({
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, state: 'open' });
+  const existingPr = await findPr({
+    branchName,
+    state: PR_STATE_OPEN,
+  });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 

@@ -34,6 +34,7 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
@@ -421,13 +422,13 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
   pr.isStale = pr.diverged_commits_count > 0;
-  pr.state = pr.state === 'opened' ? 'open' : pr.state;
+  pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
   pr.isModified = true;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
     pr.isConflicted = true;
-  } else if (pr.state === 'open') {
+  } else if (pr.state === PR_STATE_OPEN) {
     const branchStatus = await getBranchStatus(pr.branchName, []);
     if (branchStatus === BRANCH_STATUS_SUCCESS) {
       pr.canMerge = true;
@@ -454,7 +455,7 @@ export async function getPr(iid: number): Promise<Pr> {
     }
   } catch (err) {
     logger.debug({ err }, 'Error getting PR branch');
-    if (pr.state === 'open' || err.statusCode !== 404) {
+    if (pr.state === PR_STATE_OPEN || err.statusCode !== 404) {
       logger.warn({ err }, 'Error getting PR branch');
       pr.isConflicted = true;
     }
@@ -946,7 +947,7 @@ const mapPullRequests = (pr: {
   number: pr.iid,
   branchName: pr.source_branch,
   title: pr.title,
-  state: pr.state === 'opened' ? 'open' : pr.state,
+  state: pr.state === 'opened' ? PR_STATE_OPEN : pr.state,
   createdAt: pr.created_at,
 });
 
@@ -976,7 +977,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -988,7 +989,7 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();

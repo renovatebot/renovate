@@ -1,6 +1,7 @@
 import { URLSearchParams } from 'url';
 import { api, GiteaGotOptions } from './gitea-got-wrapper';
 import { GotResponse } from '../common';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
@@ -287,7 +288,7 @@ export async function closePR(
 ): Promise<void> {
   await updatePR(repoPath, idx, {
     ...options,
-    state: 'closed',
+    state: PR_STATE_CLOSED,
   });
 }
 
