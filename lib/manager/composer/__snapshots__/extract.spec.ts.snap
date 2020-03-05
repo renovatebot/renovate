@@ -1,5 +1,68 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/composer/extract extractHostRulesFromAuthFile() adds hostRules for everything in auth.json 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "domainName": "github.com",
+        "hostType": "github",
+        "token": "repogithubtoken",
+      },
+    ],
+    Array [
+      Object {
+        "domainName": "gitlab.com",
+        "hostType": "gitlab",
+        "token": "repogitlabtoken",
+      },
+    ],
+    Array [
+      Object {
+        "domainName": "git.domain.com",
+        "hostType": "composer",
+        "password": "password",
+        "username": "username",
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/composer/extract extractHostRulesFromAuthFile() adds hostRules for gitlab-oauth in auth.json 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "domainName": "gitlab.com",
+        "hostType": "gitlab",
+        "token": "repogitlabtoken",
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
 Object {
   "deps": Array [

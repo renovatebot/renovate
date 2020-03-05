@@ -1,0 +1,14 @@
+{
+  "http-basic": {
+    "git.domain.com": {
+      "username": "username",
+      "password": "password"
+    }
+  },
+  "github-oauth": {
+    "github.com": "repogithubtoken"
+  },
+  "gitlab-token": {
+    "gitlab.com": "repogitlabtoken"
+  }
+}

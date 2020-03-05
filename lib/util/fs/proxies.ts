@@ -27,6 +27,14 @@ export async function readFile(
 }
 
 // istanbul ignore next
+export async function readJson(
+  file: string,
+  options?: fs.ReadOptions
+): Promise<any> {
+  return fs.readJson(file, options);
+}
+
+// istanbul ignore next
 export async function writeFile(
   fileName: string,
   fileContent: string

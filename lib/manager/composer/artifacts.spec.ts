@@ -32,6 +32,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
+    hostRules.findAll.mockReturnValue([]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
@@ -61,6 +62,29 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('does not write auth.json if no hostRules', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+    expect(fs.writeLocalFile).not.toHaveBeenCalledWith(
+      expect.stringMatching('auth.json$'),
+      expect.anything()
+    );
+  });
   it('uses hostRules to write auth.json', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
@@ -73,6 +97,13 @@ describe('.updateArtifacts()', () => {
       username: 'some-username',
       password: 'some-password',
     });
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        username: 'other-username',
+        password: 'other-password',
+        domainName: 'example.com',
+      },
+    ]);
     git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
     expect(
       await composer.updateArtifacts({
@@ -83,6 +114,12 @@ describe('.updateArtifacts()', () => {
       })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+    expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect.stringMatching('auth.json$'),
+      expect.anything()
+    );
+    expect(fs.writeLocalFile.mock.calls[1][1]).toMatchSnapshot();
   });
   it('returns updated composer.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);

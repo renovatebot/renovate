@@ -1,0 +1,5 @@
+{
+  "gitlab-oauth": {
+    "gitlab.com": "repogitlabtoken"
+  }
+}

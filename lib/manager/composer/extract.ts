@@ -1,11 +1,19 @@
 import is from '@sindresorhus/is';
+import upath from 'upath';
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/fs';
+import { pathExists, readJson, readLocalFile } from '../../util/fs';
+import * as hostRules from '../../util/host-rules';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageDependency, PackageFile } from '../common';
+
+export const HOST_TYPE_COMPOSER = 'composer';
 
 interface Repo {
   name?: string;
@@ -27,6 +35,31 @@ interface ComposerConfig {
 
   require: Record<string, string>;
   'require-dev': Record<string, string>;
+}
+
+interface ComposerAuthTokenConfig {
+  [domainName: string]: string;
+}
+
+export interface ComposerAuthConfig {
+  'bitbucket-oauth'?: {
+    [domainName: string]: {
+      'consumer-key': string;
+      'consumer-secret': string;
+    };
+  };
+  'github-oauth'?: ComposerAuthTokenConfig;
+  'gitlab-oauth'?: ComposerAuthTokenConfig;
+  'gitlab-token'?: ComposerAuthTokenConfig;
+  'http-basic'?: {
+    [domainName: string]: {
+      username: string;
+      password: string;
+    };
+  };
+  bearer?: {
+    [domainName: string]: string;
+  };
 }
 
 /**
@@ -84,6 +117,61 @@ function parseRepositories(
   }
 }
 
+/**
+ * Extract all credentials and tokens from a auth.json file into hostRules
+ */
+async function extractHostRulesFromAuthFile(path: string): Promise<void> {
+  const localAuthFileName = upath.join(path, 'auth.json');
+  if (!(await pathExists(localAuthFileName))) {
+    return;
+  }
+
+  const authJson: ComposerAuthConfig = await readJson(localAuthFileName);
+
+  if (authJson['github-oauth']) {
+    Object.entries(authJson['github-oauth']).forEach(([domainName, token]) => {
+      hostRules.add({
+        hostType: PLATFORM_TYPE_GITHUB,
+        domainName,
+        token,
+      });
+    });
+  }
+
+  if (authJson['gitlab-token']) {
+    Object.entries(authJson['gitlab-token']).forEach(([domainName, token]) => {
+      hostRules.add({
+        hostType: PLATFORM_TYPE_GITLAB,
+        domainName,
+        token,
+      });
+    });
+  }
+
+  if (authJson['gitlab-oauth']) {
+    Object.entries(authJson['gitlab-oauth']).forEach(([domainName, token]) => {
+      hostRules.add({
+        hostType: PLATFORM_TYPE_GITLAB,
+        domainName,
+        token,
+      });
+    });
+  }
+
+  if (authJson['http-basic']) {
+    Object.entries(authJson['http-basic']).forEach(
+      ([domainName, { username, password }]) => {
+        hostRules.add({
+          hostType: HOST_TYPE_COMPOSER,
+          domainName,
+          username,
+          password,
+        });
+      }
+    );
+  }
+}
+
 export async function extractPackageFile(
   content: string,
   fileName: string
@@ -99,6 +187,9 @@ export async function extractPackageFile(
   const repositories: Record<string, Repo> = {};
   const registryUrls: string[] = [];
   const res: PackageFile = { deps: [] };
+
+  // handle committed auth.json file
+  await extractHostRulesFromAuthFile(upath.dirname(fileName));
 
   // handle lockfile
   const lockfilePath = fileName.replace(/\.json$/, '.lock');
