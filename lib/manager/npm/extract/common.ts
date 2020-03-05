@@ -4,7 +4,7 @@ import { PackageJson } from 'type-fest';
 export type NpmPackageDependeny = PackageJson.Dependency;
 
 export interface NpmPackage extends PackageJson {
-  renovate?: any;
+  renovate?: unknown;
   _from?: any;
   _args?: any;
   _id?: any;

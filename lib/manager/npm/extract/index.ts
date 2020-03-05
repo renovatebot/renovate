@@ -54,11 +54,11 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageJsonVersion = packageJson.version;
-  let yarnWorkspacesPackages;
-  if (!is.array(packageJson.workspaces) && packageJson.workspaces.packages) {
-    yarnWorkspacesPackages = packageJson.workspaces.packages;
-  } else {
+  let yarnWorkspacesPackages: string[];
+  if (is.array(packageJson.workspaces)) {
     yarnWorkspacesPackages = packageJson.workspaces;
+  } else {
+    yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
   const packageJsonType = mightBeABrowserLibrary(packageJson)
     ? 'library'
@@ -114,7 +114,7 @@ export async function extractPackageFile(
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
-  let lernaJson;
+  let lernaJson: { packages: string[]; npmClient: string };
   try {
     lernaJson = JSON.parse(
       await platform.getFile(join(dirname(fileName), 'lerna.json'))
