@@ -137,7 +137,7 @@ export async function lookupUpdates(
   const version = allVersioning.get(config.versioning);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
-  const isValid = version.isValid(currentValue);
+  const isValid = currentValue && version.isValid(currentValue);
   if (!isValid) res.skipReason = 'invalid-value';
 
   if (isValid) {
