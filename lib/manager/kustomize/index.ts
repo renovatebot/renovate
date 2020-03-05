@@ -1,5 +1,6 @@
 export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+
+export const autoReplace = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)kustomization\\.yaml'],
