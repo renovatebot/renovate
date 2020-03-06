@@ -222,6 +222,24 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
+    it('errors if extra regexManager fields are present', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
     it('errors if regexManager fields are missing', async () => {
       const config = {
         regexManagers: [

@@ -202,14 +202,34 @@ export async function validateConfig(
               }
             }
             if (key === 'regexManagers') {
+              const allowedKeys = [
+                'fileMatch',
+                'matchStrings',
+                'depNameTemplate',
+                'lookupNameTemplate',
+                'datasourceTemplate',
+                'versioningTemplate',
+              ];
               for (const regexManager of val) {
                 if (
+                  Object.keys(regexManager).some(k => !allowedKeys.includes(k))
+                ) {
+                  const disallowedKeys = Object.keys(regexManager).filter(
+                    k => !allowedKeys.includes(k)
+                  );
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
+                      ', '
+                    )}`,
+                  });
+                } else if (
                   !regexManager.matchStrings ||
                   regexManager.matchStrings.length !== 1
                 ) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Custom Manager ${currentPath} must contain a matchStrings array of length one`,
+                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
                   });
                 } else {
                   let validRegex = false;
@@ -239,7 +259,7 @@ export async function validateConfig(
                       ) {
                         errors.push({
                           depName: 'Configuration Error',
-                          message: `Custom Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
                         });
                       }
                     }

@@ -79,7 +79,7 @@ exports[`config/validation validateConfig(config) errors if regexManager fields 
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Custom Managers must contain currentValueTemplate configuration or regex group named currentValue",
+    "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
   },
 ]
 `;
