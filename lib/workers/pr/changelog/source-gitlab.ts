@@ -1,17 +1,12 @@
 import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
-import * as hostRules from '../../../util/host-rules';
-import * as versioning from '../../../versioning';
+import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import {
-  ChangeLogConfig,
-  ChangeLogError,
-  ChangeLogRelease,
-  ChangeLogResult,
-} from './common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
+import { BranchUpgradeConfig } from '../../common';
 
 const { get: ghGot } = api;
 
@@ -51,46 +46,36 @@ async function getTags(
 
 export async function getChangeLogJSON({
   endpoint,
-  versionScheme,
+  versioning,
   fromVersion,
   toVersion,
   sourceUrl,
   releases,
   depName,
   manager,
-}: ChangeLogConfig): Promise<ChangeLogResult | null> {
+}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   logger.trace('getChangeLogJSON for gitlab');
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseURL = 'https://gitlab.com/';
   const url = sourceUrl;
+  const config = hostRules.find({
+    hostType: PLATFORM_TYPE_GITLAB,
+    url,
+  });
   // istanbul ignore if
   if (!config.token) {
     // prettier-ignore
-    if (URL.parse(sourceUrl).host.search(/gitlab/) !== -1) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (URL.parse(sourceUrl).host.search(/gitlab/) !== -1) {
       logger.warn(
         {manager, depName, sourceUrl},
         'No gitlab token has been configured. Skipping release notes retrieval'
       );
       return {error: ChangeLogError.MissingGitlabToken};
     }
-    // logger.warn(
-    // { manager, depName, sourceUrl, config },
-    // 'No gitlab.com token has been configured. Skipping release notes retrieval'
-    // );
-    // return { error: ChangeLogError.MissingGithubToken };
-    // }
-    // logger.info(
-    // { manager, depName, sourceUrl },
-    // 'Repository URL does not match any known gitlab hosts - skipping changelog retrieval'
-    // );
     return null;
   }
-  // const apiBaseURL = sourceUrl.startsWith('https://github.com/')
-  // ? 'https://api.github.com/'
-  // : endpoint; // TODO FIX
-  // const apiBaseURL = endpoint; // TODO FIX see above
   const apiBaseURL = 'https://gitlab.com/api/v4/';
   const repository = pathname
     .slice(1)
@@ -118,7 +103,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versionScheme, repository);
+      tags = await getTags(endpoint, versioning, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags

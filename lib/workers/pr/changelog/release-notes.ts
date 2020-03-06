@@ -3,12 +3,12 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
-import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
+// import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../../logger';
 import { ChangeLogResult, ChangeLogNotes } from './common';
 
 const { get: ghGot } = api;
-const { get: glGot } = api_gitlab;
+// const { get: glGot } = api_gitlab;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -180,7 +180,7 @@ export async function getReleaseNotesMd(
   try {
     let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
     apiPrefix +=
-      apiBaseUrl.search(/gitlab/) != -1
+      apiBaseUrl.search(/gitlab/) !== -1
         ? `projects/${repository}/repository/tree`
         : `repos/${repository}/contents/`;
     // in gitlab, will look something like projects/meno%2fdropzone/releases/
