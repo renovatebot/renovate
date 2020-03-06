@@ -75,7 +75,7 @@ export async function validateConfig(
         'prTitle',
         'semanticCommitScope',
       ];
-      if (templateKeys.includes(key) && val) {
+      if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
           let res = handlebars.compile(val)(config);
           res = handlebars.compile(res)(config);
@@ -198,6 +198,72 @@ export async function validateConfig(
                     depName: 'Configuration Error',
                     message: `${currentPath} must contain JSON objects`,
                   });
+                }
+              }
+            }
+            if (key === 'regexManagers') {
+              const allowedKeys = [
+                'fileMatch',
+                'matchStrings',
+                'depNameTemplate',
+                'lookupNameTemplate',
+                'datasourceTemplate',
+                'versioningTemplate',
+              ];
+              for (const regexManager of val) {
+                if (
+                  Object.keys(regexManager).some(k => !allowedKeys.includes(k))
+                ) {
+                  const disallowedKeys = Object.keys(regexManager).filter(
+                    k => !allowedKeys.includes(k)
+                  );
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
+                      ', '
+                    )}`,
+                  });
+                } else if (
+                  !regexManager.matchStrings ||
+                  regexManager.matchStrings.length !== 1
+                ) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                  });
+                } else {
+                  let validRegex = false;
+                  for (const matchString of regexManager.matchStrings) {
+                    try {
+                      regEx(matchString);
+                      validRegex = true;
+                    } catch (e) {
+                      errors.push({
+                        depName: 'Configuration Error',
+                        message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+                      });
+                    }
+                  }
+                  if (validRegex) {
+                    const mandatoryFields = [
+                      'depName',
+                      'currentValue',
+                      'datasource',
+                    ];
+                    for (const field of mandatoryFields) {
+                      if (
+                        !regexManager[`${field}Template`] &&
+                        !regexManager.matchStrings.some(matchString =>
+                          matchString.includes(`(?<${field}>`)
+                        )
+                      ) {
+                        errors.push({
+                          depName: 'Configuration Error',
+                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                        });
+                      }
+                    }
+                  }
                 }
               }
             }

@@ -175,5 +175,88 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+    it('errors if no regexManager matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: [],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('validates regEx for each matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['***$}{]]['],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('passes if regexManager fields are present', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+    it('errors if extra regexManager fields are present', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('errors if regexManager fields are missing', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+      expect(errors).toHaveLength(1);
+    });
   });
 });

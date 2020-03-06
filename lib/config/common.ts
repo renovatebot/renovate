@@ -102,6 +102,14 @@ export type RenovateRepository =
       repository: string;
     };
 
+export interface CustomManager {
+  matchStrings: string[];
+  depNameTemplate?: string;
+  datasourceTemplate?: string;
+  lookupNameTemplate?: string;
+  versioningTemplate?: string;
+}
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends RenovateAdminConfig,
@@ -140,6 +148,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
+  regexManagers?: CustomManager[];
 }
 
 export type UpdateType =
