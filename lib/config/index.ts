@@ -116,7 +116,8 @@ export async function parseConfigs(
     config.global[key] = config[key];
     delete config[key];
   });
-  global.trustLevel = config.trustLevel || 'low';
+  global.trustLevel =
+    config.trustLevel || /* istanbul ignore next: never happen? */ 'low';
   delete config.trustLevel;
 
   return config;

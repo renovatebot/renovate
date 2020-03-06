@@ -68,7 +68,7 @@ describe('config/presets', () => {
     it('throws if invalid preset file', async () => {
       config.foo = 1;
       config.extends = ['notfound'];
-      let e;
+      let e: Error;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
@@ -82,7 +82,7 @@ describe('config/presets', () => {
     it('throws if invalid preset', async () => {
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset'];
-      let e;
+      let e: Error;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
@@ -93,6 +93,37 @@ describe('config/presets', () => {
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
+
+    it('throws noconfig', async () => {
+      config.foo = 1;
+      config.extends = ['noconfig:base'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
+    it('throws throw', async () => {
+      config.foo = 1;
+      config.extends = ['throw:base'];
+      let e: Error;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+
     it('works with valid', async () => {
       config.foo = 1;
       config.ignoreDeps = [];
@@ -104,7 +135,7 @@ describe('config/presets', () => {
     it('throws if valid and invalid', async () => {
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset', ':pinVersions'];
-      let e;
+      let e: Error;
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
@@ -163,6 +194,13 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
       expect(res.automerge).not.toBeDefined();
       expect(res.minor.automerge).toBe(true);
+    });
+
+    it('ignores presets', async () => {
+      config.extends = ['config:base'];
+      const res = await presets.resolveConfigPresets(config, ['config:base']);
+      expect(config).toMatchObject(res);
+      expect(res).toMatchSnapshot();
     });
   });
   describe('replaceArgs', () => {
@@ -303,7 +341,7 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles 404 packages', async () => {
-      let e;
+      let e: Error;
       try {
         await presets.getPreset('notfound:foo');
       } catch (err) {
@@ -315,7 +353,7 @@ describe('config/presets', () => {
       expect(e.validationMessage).toMatchSnapshot();
     });
     it('handles no config', async () => {
-      let e;
+      let e: Error;
       try {
         await presets.getPreset('noconfig:foo');
       } catch (err) {
@@ -327,7 +365,7 @@ describe('config/presets', () => {
       expect(e.validationMessage).toMatchSnapshot();
     });
     it('handles throw errors', async () => {
-      let e;
+      let e: Error;
       try {
         await presets.getPreset('throw:foo');
       } catch (err) {
@@ -339,7 +377,7 @@ describe('config/presets', () => {
       expect(e.validationMessage).toMatchSnapshot();
     });
     it('handles preset not found', async () => {
-      let e;
+      let e: Error;
       try {
         await presets.getPreset('wrongpreset:foo');
       } catch (err) {

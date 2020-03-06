@@ -336,10 +336,11 @@ export async function validateConfig(
     }
   }
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
+    // istanbul ignore else: currently never happen
     if (a.depName === b.depName) {
       return a.message > b.message ? 1 : -1;
     }
-    // istanbul ignore next
+    // istanbul ignore next: currently never happen
     return a.depName > b.depName ? 1 : -1;
   }
   errors.sort(sortAll);

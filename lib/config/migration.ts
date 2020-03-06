@@ -265,7 +265,9 @@ export function migrateConfig(
           migratedConfig.minor.automerge = true;
           migratedConfig.major = migratedConfig.major || {};
           migratedConfig.major.automerge = false;
-        } else if (val === 'any') {
+        } /* istanbul ignore else: we can never go to else */ else if (
+          val === 'any'
+        ) {
           migratedConfig.automerge = true;
         }
       } else if (key === 'packages') {

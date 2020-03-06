@@ -294,6 +294,18 @@ Object {
 }
 `;
 
+exports[`config/migration migrateConfig(config, parentConfig) it removes invalid configs 1`] = `
+Object {
+  "baseBranches": Array [],
+  "commitMessage": "test",
+  "ignorePaths": Array [],
+  "includePaths": Array [
+    "test",
+  ],
+  "rebaseWhen": "auto",
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
   "major": Object {
