@@ -1715,15 +1715,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'currentValueTemplate',
-    description:
-      'Optional currentValue for extracted dependencies. Valid only within `regexManagers` object.',
-    type: 'string',
-    parent: 'regexManagers',
-    cli: false,
-    env: false,
-  },
-  {
     name: 'datasourceTemplate',
     description:
       'Optional datasource for extracted dependencies. Valid only within `regexManagers` object.',

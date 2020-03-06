@@ -1174,7 +1174,7 @@ Typically you shouldn't need to modify this setting.
 
 ## regexManagers
 
-`customerManagers` are used to configure the `custom` Manager in Renovate.
+`regexManagers` entries are used to configure the `regex` Manager in Renovate.
 
 Users can define custom managers for cases such as:
 
@@ -1182,6 +1182,8 @@ Users can define custom managers for cases such as:
 - Popular file formats not yet supported as a manager by Renovate
 
 The custom manager concept is based on using Regular Expression named capture groups. For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`). It's not recommended to do both, due to the potential for confusion. It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
+
+For more details and examples, see the documentation page the for the regex manager [here](/modules/managers/regex/).
 
 ### matchStrings
 
@@ -1204,10 +1206,6 @@ If `depName` cannot be captured with a named capture group in `matchString` then
 ### lookupNameTemplate
 
 `lookupName` is used for looking up dependency versions. It will be compiled using `handlebars` and the regex `groups` result. It will default to the value of `depName` if left unconfigured/undefined.
-
-### currentValueTemplate
-
-`currentValue` is usually extracted directly using a capture group, but it can also be composed using this configuration field. It will be compiled using `handlebars` and the regex `groups` result.
 
 ### datasourceTemplate
 

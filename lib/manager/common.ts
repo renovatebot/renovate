@@ -30,7 +30,6 @@ export interface CustomExtractConfig extends ExtractConfig {
   matchStrings: string[];
   depNameTemplate?: string;
   lookupNameTemplate?: string;
-  currentValueTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
 }
