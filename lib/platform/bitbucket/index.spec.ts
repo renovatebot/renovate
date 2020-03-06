@@ -215,7 +215,9 @@ describe('platform/bitbucket', () => {
     it('works', async () => {
       await initRepo();
       expect(await getBranchStatusCheck('master', null)).toBeNull();
-      expect(await getBranchStatusCheck('master', 'foo')).toBe('red');
+      expect(await getBranchStatusCheck('master', 'foo')).toBe(
+        BRANCH_STATUS_RED
+      );
       expect(await getBranchStatusCheck('master', 'bar')).toBeNull();
     });
   });

@@ -3,9 +3,9 @@ import * as _hostRules from '../../util/host-rules';
 import { RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import {
-  BRANCH_STATUS_RED,
-  BRANCH_STATUS_YELLOW,
   BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 
 describe('platform/azure', () => {
