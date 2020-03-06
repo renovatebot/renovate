@@ -1,4 +1,3 @@
-import { isValid } from '../../versioning/hex';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceHex from '../../datasource/hex';
@@ -43,10 +42,6 @@ export function extractPackageFile(content: string): PackageFile {
 
           if (organization) {
             dep.lookupName += ':' + organization;
-          }
-
-          if (!isValid(currentValue)) {
-            dep.skipReason = 'unsupported-version';
           }
 
           if (dep.datasource !== datasourceHex.id) {

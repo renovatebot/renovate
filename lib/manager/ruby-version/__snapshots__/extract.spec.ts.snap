@@ -16,7 +16,6 @@ Array [
     "currentValue": "latestn",
     "datasource": "ruby-version",
     "depName": "ruby",
-    "skipReason": "unsupported-version",
   },
 ]
 `;
