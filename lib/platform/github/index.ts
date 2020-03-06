@@ -1193,6 +1193,12 @@ async function getStatusCheck(
   return (await api.get(url, { useCache })).body;
 }
 
+const githubToRenovateStatusMapping = {
+  success: BRANCH_STATUS_GREEN,
+  failed: BRANCH_STATUS_RED,
+  pending: BRANCH_STATUS_YELLOW,
+};
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
@@ -1201,7 +1207,9 @@ export async function getBranchStatusCheck(
     const res = await getStatusCheck(branchName);
     for (const check of res) {
       if (check.context === context) {
-        return check.state;
+        return (
+          githubToRenovateStatusMapping[check.state] || BRANCH_STATUS_YELLOW
+        );
       }
     }
     return null;

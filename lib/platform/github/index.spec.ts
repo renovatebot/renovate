@@ -792,15 +792,15 @@ describe('platform/github', () => {
             body: [
               {
                 context: 'context-1',
-                state: 'state-1',
+                state: 'success',
               },
               {
                 context: 'context-2',
-                state: 'state-2',
+                state: 'pending',
               },
               {
                 context: 'context-3',
-                state: 'state-3',
+                state: 'failed',
               },
             ],
           } as any)
@@ -809,7 +809,7 @@ describe('platform/github', () => {
         'renovate/future_branch',
         'context-2'
       );
-      expect(res).toEqual('state-2');
+      expect(res).toEqual(BRANCH_STATUS_YELLOW);
     });
     it('returns null', async () => {
       await initRepo({
@@ -821,15 +821,15 @@ describe('platform/github', () => {
             body: [
               {
                 context: 'context-1',
-                state: 'state-1',
+                state: 'success',
               },
               {
                 context: 'context-2',
-                state: 'state-2',
+                state: 'pending',
               },
               {
                 context: 'context-3',
-                state: 'state-3',
+                state: 'failed',
               },
             ],
           } as any)
@@ -849,7 +849,7 @@ describe('platform/github', () => {
             body: [
               {
                 context: 'some-context',
-                state: 'some-state',
+                state: 'pending',
               },
             ],
           } as any)
@@ -858,7 +858,7 @@ describe('platform/github', () => {
         branchName: 'some-branch',
         context: 'some-context',
         description: 'some-description',
-        state: 'some-state',
+        state: BRANCH_STATUS_YELLOW,
         url: 'some-url',
       });
       expect(api.post).toHaveBeenCalledTimes(0);
@@ -907,7 +907,7 @@ describe('platform/github', () => {
         branchName: 'some-branch',
         context: 'some-context',
         description: 'some-description',
-        state: 'some-state',
+        state: BRANCH_STATUS_GREEN,
         url: 'some-url',
       });
       expect(api.post).toHaveBeenCalledTimes(1);
