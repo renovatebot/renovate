@@ -140,7 +140,7 @@
     "moment-timezone": "0.5.28",
     "node-emoji": "1.10.0",
     "node-html-parser": "1.2.8",
-    "npm": "6.14.1",
+    "npm": "6.14.2",
     "p-all": "2.1.0",
     "parse-diff": "0.7.0",
     "parse-link-header": "1.0.1",
