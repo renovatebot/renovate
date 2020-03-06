@@ -159,7 +159,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return BRANCH_STATUS_PENDING;
+      return 'pending';
     }
     logger.debug('Branch status success');
   } else if (
@@ -191,7 +191,7 @@ export async function ensurePr(
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return BRANCH_STATUS_PENDING;
+        return 'pending';
       }
       logger.debug(
         `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`
