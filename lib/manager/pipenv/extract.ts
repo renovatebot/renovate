@@ -4,6 +4,7 @@ import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
+import skipReasonConstants from '../../constants/skip-reason';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -51,21 +52,21 @@ function extractFromSection(
       let nestedVersion: boolean;
       let skipReason: string;
       if (requirements.git) {
-        skipReason = 'git-dependency';
+        skipReason = skipReasonConstants.GIT_DEPENDENCY;
       } else if (requirements.file) {
-        skipReason = 'file-dependency';
+        skipReason = skipReasonConstants.FILE_DEPENDENCY;
       } else if (requirements.path) {
-        skipReason = 'local-dependency';
+        skipReason = skipReasonConstants.LOCAL_DEPENDENCY;
       } else if (requirements.version) {
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = 'any-version';
+        skipReason = skipReasonConstants.ANY_VERSION;
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = 'any-version';
+        skipReason = skipReasonConstants.ANY_VERSION;
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
@@ -73,14 +74,14 @@ function extractFromSection(
           logger.debug(
             `Skipping dependency with malformed package name "${depName}".`
           );
-          skipReason = 'invalid-name';
+          skipReason = skipReasonConstants.INVALID_NAME;
         }
         const specifierMatches = specifierRegex.exec(currentValue);
         if (!specifierMatches) {
           logger.debug(
             `Skipping dependency with malformed version specifier "${currentValue}".`
           );
-          skipReason = 'invalid-version';
+          skipReason = skipReasonConstants.INVALID_VERSION;
         }
       }
       const dep: PackageDependency = {

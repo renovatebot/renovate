@@ -4,7 +4,7 @@ import { join } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-
+import skipReasonConstants from '../../../constants/skip-reason';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -145,11 +145,11 @@ export async function extractPackageFile(
   ): PackageDependency {
     const dep: PackageDependency = {};
     if (!validateNpmPackageName(depName).validForOldPackages) {
-      dep.skipReason = 'invalid-name';
+      dep.skipReason = skipReasonConstants.INVALID_NAME;
       return dep;
     }
     if (typeof input !== 'string') {
-      dep.skipReason = 'invalid-value';
+      dep.skipReason = skipReasonConstants.INVALID_VALUE;
       return dep;
     }
     dep.currentValue = input.trim();
@@ -165,10 +165,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
       } else {
-        dep.skipReason = 'unknown-engines';
+        dep.skipReason = skipReasonConstants.UNKNOWN_ENGINES;
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = skipReasonConstants.UNKNOWN_VERSION;
       }
       return dep;
     }
@@ -183,10 +183,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
       } else {
-        dep.skipReason = 'unknown-volta';
+        dep.skipReason = skipReasonConstants.UNKNOWN_VOLTA;
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = skipReasonConstants.UNKNOWN_VERSION;
       }
       return dep;
     }
@@ -205,23 +205,23 @@ export async function extractPackageFile(
       }
     }
     if (dep.currentValue.startsWith('file:')) {
-      dep.skipReason = 'file';
+      dep.skipReason = skipReasonConstants.FILE;
       hasFileRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = datasourceNpm.id;
       if (dep.currentValue === '*') {
-        dep.skipReason = 'any-version';
+        dep.skipReason = skipReasonConstants.ANY_VERSION;
       }
       if (dep.currentValue === '') {
-        dep.skipReason = 'empty';
+        dep.skipReason = skipReasonConstants.EMPTY;
       }
       return dep;
     }
     const hashSplit = dep.currentValue.split('#');
     if (hashSplit.length !== 2) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = skipReasonConstants.UNKNOWN_VERSION;
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
@@ -232,7 +232,7 @@ export async function extractPackageFile(
       .replace(/\.git$/, '');
     const githubRepoSplit = githubOwnerRepo.split('/');
     if (githubRepoSplit.length !== 2) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = skipReasonConstants.UNKNOWN_VERSION;
       return dep;
     }
     const [githubOwner, githubRepo] = githubRepoSplit;
@@ -241,7 +241,7 @@ export async function extractPackageFile(
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
     ) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = skipReasonConstants.UNKNOWN_VERSION;
       return dep;
     }
     if (isVersion(depRefPart)) {
@@ -260,7 +260,7 @@ export async function extractPackageFile(
       dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
     } else {
-      dep.skipReason = 'unversioned-reference';
+      dep.skipReason = skipReasonConstants.UNVERSIONED_REFERENCE;
       return dep;
     }
     dep.githubRepo = githubOwnerRepo;
