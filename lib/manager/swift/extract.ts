@@ -1,4 +1,3 @@
-import { isValid } from '../../versioning/swift';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 
@@ -165,9 +164,7 @@ export function extractPackageFile(
         fileReplacePosition,
       };
 
-      if (isValid(currentValue)) {
-        deps.push(dep);
-      }
+      deps.push(dep);
     }
     lookupName = null;
     currentValue = null;

@@ -32,6 +32,11 @@ import {
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import {
+  PR_STATE_CLOSED,
+  PR_STATE_MERGED,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
 import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
@@ -87,7 +92,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      if (existingPr.state === 'closed') {
+      if (existingPr.state === PR_STATE_CLOSED) {
         const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
@@ -120,7 +125,7 @@ export async function processBranch(
             await platform.deleteBranch(config.branchName);
           }
         }
-      } else if (existingPr.state === 'merged') {
+      } else if (existingPr.state === PR_STATE_MERGED) {
         logger.debug(
           { pr: existingPr.number },
           'Merged PR is blocking this branch'
@@ -152,7 +157,7 @@ export async function processBranch(
       logger.debug('Checking if PR has been edited');
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== 'open') {
+        if (branchPr.state !== PR_STATE_OPEN) {
           logger.debug(
             'PR has been closed or merged since this run started - aborting'
           );
@@ -439,8 +444,17 @@ export async function processBranch(
     await setStability(config);
     await setUnpublishable(config);
 
+    // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    if (
+      commit &&
+      (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
+    ) {
+      logger.debug({ commit }, `Branch status pending`);
+      return 'pending';
+    }
+
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || !config.requiresStatusChecks) {
+    if (branchExists || !config.requiredStatusChecks) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {

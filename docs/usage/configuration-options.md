@@ -335,7 +335,7 @@ Finally, there are cases where Renovate's default `fileMatch` is good, but you m
 ```json
 {
   "dockerfile": {
-    "fileMatch": ["^ACTUALLY_A_DOCKERFILE.template$"]
+    "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"]
   }
 }
 ```

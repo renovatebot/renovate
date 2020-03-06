@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourcePod from '../../datasource/pod';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -55,7 +56,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     const { account, repo } = (githubMatch && githubMatch.groups) || {};
     if (account && repo) {
       return {
-        datasource: 'github-tags',
+        datasource: datasourceGithubTags.id,
         depName,
         lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
         currentValue: tag,

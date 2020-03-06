@@ -3,6 +3,7 @@ import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
+import * as datasourceHelm from '../../datasource/helm';
 
 const isValidChartName = (name: string): boolean => {
   return !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
@@ -81,5 +82,5 @@ export function extractPackageFile(
     return res;
   });
 
-  return { deps, datasource: 'helm' } as PackageFile;
+  return { deps, datasource: datasourceHelm.id } as PackageFile;
 }

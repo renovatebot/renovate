@@ -8,6 +8,7 @@ import { getPrList } from './pr-list';
 import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
+import { addAssigneesReviewers } from '../../../pr';
 import { BranchConfig } from '../../../common';
 
 export async function ensureOnboardingPr(
@@ -129,6 +130,7 @@ If you need any further assistance then you can also [request help here](${confi
         useDefaultBranch,
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
+      await addAssigneesReviewers(config, pr);
     }
   } catch (err) /* istanbul ignore next */ {
     if (
