@@ -96,12 +96,7 @@ export interface Issue {
   title?: string;
 }
 
-export type BranchStatus =
-  | 'pending'
-  | 'success'
-  | 'failed'
-  | 'running'
-  | 'failure';
+export type BranchStatus = 'green' | 'yellow' | 'red';
 
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;

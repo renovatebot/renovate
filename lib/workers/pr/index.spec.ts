@@ -4,9 +4,9 @@ import { getConfig } from '../../config/defaults';
 import { platform as _platform, Pr } from '../../platform';
 import { mocked } from '../../../test/util';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 
@@ -78,7 +78,7 @@ describe('workers/pr', () => {
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       pr.isModified = false;
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       platform.mergePr.mockResolvedValueOnce(true);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
@@ -88,20 +88,20 @@ describe('workers/pr', () => {
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
       pr.isModified = false;
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
       pr.isModified = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_PENDING);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_YELLOW);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -167,19 +167,19 @@ describe('workers/pr', () => {
       expect(pr).toBeNull();
     });
     it('should return null if waiting for success', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_FAILED);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_RED);
       config.prCreation = 'status-success';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toEqual('pending');
     });
     it('should return needs-approval if prCreation set to approval', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       config.prCreation = 'approval';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe('needs-pr-approval');
     });
     it('should create PR if success', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = 'before 5am';
@@ -221,7 +221,7 @@ describe('workers/pr', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
     });
     it('should add note about Pin', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       config.prCreation = 'status-success';
       config.isPin = true;
       config.updateType = 'pin';
@@ -236,7 +236,7 @@ describe('workers/pr', () => {
       ).toBe(true);
     });
     it('should return null if creating PR fails', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
         throw new Error('Validation Failed (422)');
@@ -246,7 +246,7 @@ describe('workers/pr', () => {
       expect(pr).toBeNull();
     });
     it('should return null if waiting for not pending', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_PENDING);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_YELLOW);
       platform.getBranchLastCommitTime.mockImplementationOnce(() =>
         Promise.resolve(new Date())
       );
@@ -255,7 +255,7 @@ describe('workers/pr', () => {
       expect(pr).toEqual('pending');
     });
     it('should create PR if pending timeout hit', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_PENDING);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_YELLOW);
       platform.getBranchLastCommitTime.mockImplementationOnce(() =>
         Promise.resolve(new Date('2017-01-01'))
       );
@@ -264,7 +264,7 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should create PR if no longer pending', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_FAILED);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_RED);
       config.prCreation = 'not-pending';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -305,7 +305,7 @@ describe('workers/pr', () => {
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
     });
-    it('should not add assignees and reviewers to new PR if automerging enabled', async () => {
+    it('should not add assignees and reviewers to new PR if automerging enabled regularly', async () => {
       config.assignees = ['bar'];
       config.reviewers = ['baz'];
       config.automerge = true;
@@ -394,14 +394,14 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       config.branchAutomergeFailureMessage = 'branch status error';
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_FAILED);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_RED);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should create PR if branch automerging failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       config.forcePr = true;
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -409,7 +409,7 @@ describe('workers/pr', () => {
     it('should return null if branch automerging not failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_PENDING);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_YELLOW);
       platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBeNull();
@@ -417,7 +417,7 @@ describe('workers/pr', () => {
     it('should not return null if branch automerging taking too long', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_PENDING);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_YELLOW);
       platform.getBranchLastCommitTime.mockResolvedValueOnce(
         new Date('2018-01-01')
       );
@@ -430,7 +430,7 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should create privateRepo PR if success', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_SUCCESS);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       config.prCreation = 'status-success';
       config.privateRepo = false;
       const pr = await prWorker.ensurePr(config);
@@ -439,7 +439,7 @@ describe('workers/pr', () => {
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
     it('should create PR if waiting for not pending but artifactErrors', async () => {
-      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_PENDING);
+      platform.getBranchStatus.mockResolvedValueOnce(BRANCH_STATUS_YELLOW);
       platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];

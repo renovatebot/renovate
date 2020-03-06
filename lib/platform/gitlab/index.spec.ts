@@ -11,10 +11,9 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import { GotResponse, Platform } from '..';
 import { partial } from '../../../test/util';
@@ -438,11 +437,11 @@ describe('platform/gitlab', () => {
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('returns success if requiredStatusChecks null', async () => {
       const res = await gitlab.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BRANCH_STATUS_GREEN);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       const res = await gitlab.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BRANCH_STATUS_FAILED);
+      expect(res).toEqual(BRANCH_STATUS_RED);
     });
     it('returns pending if no results', async () => {
       await initRepo();
@@ -452,7 +451,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_PENDING);
+      expect(res).toEqual(BRANCH_STATUS_YELLOW);
     });
     it('returns success if all are success', async () => {
       await initRepo();
@@ -462,7 +461,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BRANCH_STATUS_GREEN);
     });
     it('returns success if optional jobs fail', async () => {
       await initRepo();
@@ -475,7 +474,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BRANCH_STATUS_GREEN);
     });
     it('returns failure if any mandatory jobs fails', async () => {
       await initRepo();
@@ -489,9 +488,9 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_FAILURE);
+      expect(res).toEqual(BRANCH_STATUS_RED);
     });
-    it('returns custom statuses', async () => {
+    it('maps custom statuses to yellow', async () => {
       await initRepo();
       api.get.mockResolvedValueOnce(
         partial<GotResponse>({
@@ -499,7 +498,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual('foo');
+      expect(res).toEqual(BRANCH_STATUS_YELLOW);
     });
     it('throws repository-changed', async () => {
       expect.assertions(1);
@@ -554,7 +553,7 @@ describe('platform/gitlab', () => {
         'somebranch',
         'some-context'
       );
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BRANCH_STATUS_GREEN);
     });
   });
   describe('setBranchStatus', () => {

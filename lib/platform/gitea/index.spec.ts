@@ -19,9 +19,9 @@ import {
 } from '..';
 import { logger as _logger } from '../../logger';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_RED,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_GREEN,
 } from '../../constants/branch-constants';
 import { GiteaGotApi } from './gitea-got-wrapper';
 import { CommitFilesConfig, File } from '../git/storage';
@@ -446,30 +446,30 @@ describe('platform/gitea', () => {
 
     it('should return success if requiredStatusChecks null', async () => {
       expect(await gitea.getBranchStatus('some-branch', null)).toEqual(
-        BRANCH_STATUS_SUCCESS
+        BRANCH_STATUS_GREEN
       );
     });
 
     it('should return failed if unsupported requiredStatusChecks', async () => {
       expect(await gitea.getBranchStatus('some-branch', ['foo'])).toEqual(
-        BRANCH_STATUS_FAILED
+        BRANCH_STATUS_RED
       );
     });
 
     it('should return pending state for unknown result', async () => {
-      expect(await getBranchStatus('unknown')).toEqual(BRANCH_STATUS_PENDING);
+      expect(await getBranchStatus('unknown')).toEqual(BRANCH_STATUS_YELLOW);
     });
 
     it('should return pending state for pending result', async () => {
-      expect(await getBranchStatus('pending')).toEqual(BRANCH_STATUS_PENDING);
+      expect(await getBranchStatus('pending')).toEqual(BRANCH_STATUS_YELLOW);
     });
 
     it('should return success state for success result', async () => {
-      expect(await getBranchStatus('success')).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(await getBranchStatus('success')).toEqual(BRANCH_STATUS_GREEN);
     });
 
     it('should return failed state for all other results', async () => {
-      expect(await getBranchStatus('invalid')).toEqual(BRANCH_STATUS_FAILED);
+      expect(await getBranchStatus('invalid')).toEqual(BRANCH_STATUS_RED);
     });
 
     it('should abort when branch status returns 404', async () => {

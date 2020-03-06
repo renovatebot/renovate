@@ -2,8 +2,8 @@ import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import * as validate from './validate';
 import { platform } from '../../../../test/util';
 import {
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_RED,
+  BRANCH_STATUS_GREEN,
 } from '../../../constants/branch-constants';
 
 beforeEach(() => {
@@ -55,7 +55,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
-        BRANCH_STATUS_FAILURE
+        BRANCH_STATUS_RED
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -73,7 +73,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
-        BRANCH_STATUS_FAILURE
+        BRANCH_STATUS_RED
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -91,7 +91,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
-        BRANCH_STATUS_SUCCESS
+        BRANCH_STATUS_GREEN
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);

@@ -42,9 +42,9 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import {
   PR_STATE_ALL,
@@ -1095,12 +1095,12 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BRANCH_STATUS_GREEN;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BRANCH_STATUS_RED;
   }
   let commitStatus;
   try {
@@ -1159,21 +1159,27 @@ export async function getBranchStatus(
     }
   }
   if (checkRuns.length === 0) {
-    return commitStatus.state;
+    if (commitStatus.state === 'success') {
+      return BRANCH_STATUS_GREEN;
+    }
+    if (commitStatus.state === 'failed') {
+      return BRANCH_STATUS_RED;
+    }
+    return BRANCH_STATUS_YELLOW;
   }
   if (
     commitStatus.state === 'failed' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
-    return BRANCH_STATUS_FAILED;
+    return BRANCH_STATUS_RED;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
     checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
   ) {
-    return BRANCH_STATUS_SUCCESS;
+    return BRANCH_STATUS_GREEN;
   }
-  return BRANCH_STATUS_PENDING;
+  return BRANCH_STATUS_YELLOW;
 }
 
 async function getStatusCheck(
@@ -1696,7 +1702,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: BRANCH_STATUS_SUCCESS,
+      state: 'success',
       url: 'https://github.com/renovatebot/renovate',
     });
   }

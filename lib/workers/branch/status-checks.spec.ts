@@ -5,7 +5,7 @@ import {
   UnpublishableConfig,
 } from './status-checks';
 import { defaultConfig, platform } from '../../../test/util';
-import { BRANCH_STATUS_SUCCESS } from '../../constants/branch-constants';
+import { BRANCH_STATUS_GREEN } from '../../constants/branch-constants';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {
@@ -67,9 +67,7 @@ describe('workers/branch/status-checks', () => {
     it('finds canBeUnpublished false and skips status', async () => {
       config.unpublishSafe = true;
       config.canBeUnpublished = false;
-      platform.getBranchStatusCheck.mockResolvedValueOnce(
-        BRANCH_STATUS_SUCCESS
-      );
+      platform.getBranchStatusCheck.mockResolvedValueOnce(BRANCH_STATUS_GREEN);
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);

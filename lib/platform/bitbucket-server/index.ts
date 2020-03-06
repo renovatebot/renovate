@@ -32,10 +32,9 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import { RenovateConfig } from '../../config';
 /*
@@ -536,7 +535,7 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BRANCH_STATUS_GREEN;
   }
 
   if (!(await branchExists(branchName))) {
@@ -548,14 +547,14 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return BRANCH_STATUS_FAILED;
-    if (commitStatus.inProgress > 0) return BRANCH_STATUS_PENDING;
+    if (commitStatus.failed > 0) return BRANCH_STATUS_RED;
+    if (commitStatus.inProgress > 0) return BRANCH_STATUS_YELLOW;
     return commitStatus.successful > 0
-      ? BRANCH_STATUS_SUCCESS
-      : BRANCH_STATUS_PENDING;
+      ? BRANCH_STATUS_GREEN
+      : BRANCH_STATUS_YELLOW;
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return BRANCH_STATUS_FAILED;
+    return BRANCH_STATUS_RED;
   }
 }
 
@@ -586,12 +585,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return BRANCH_STATUS_SUCCESS;
+            return BRANCH_STATUS_GREEN;
           case 'INPROGRESS':
-            return BRANCH_STATUS_PENDING;
+            return BRANCH_STATUS_YELLOW;
           case 'FAILED':
           default:
-            return BRANCH_STATUS_FAILURE;
+            return BRANCH_STATUS_RED;
         }
       }
     }
@@ -626,13 +625,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case BRANCH_STATUS_SUCCESS:
+      case BRANCH_STATUS_GREEN:
         body.state = 'SUCCESSFUL';
         break;
-      case BRANCH_STATUS_PENDING:
+      case BRANCH_STATUS_YELLOW:
         body.state = 'INPROGRESS';
         break;
-      case BRANCH_STATUS_FAILURE:
+      case BRANCH_STATUS_RED:
       default:
         body.state = 'FAILED';
         break;

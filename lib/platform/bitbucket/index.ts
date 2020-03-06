@@ -31,9 +31,9 @@ import {
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import { RenovateConfig } from '../../config';
 
@@ -415,32 +415,32 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BRANCH_STATUS_GREEN;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BRANCH_STATUS_RED;
   }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BRANCH_STATUS_PENDING;
+    return BRANCH_STATUS_YELLOW;
   }
   const noOfFailures = statuses.filter(
     (status: { state: string }) => status.state === 'FAILED'
   ).length;
   if (noOfFailures) {
-    return BRANCH_STATUS_FAILED;
+    return BRANCH_STATUS_RED;
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return BRANCH_STATUS_PENDING;
+    return BRANCH_STATUS_YELLOW;
   }
-  return BRANCH_STATUS_SUCCESS;
+  return BRANCH_STATUS_GREEN;
 }
 
 export async function getBranchStatusCheck(

@@ -37,7 +37,7 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { BRANCH_STATUS_FAILURE } from '../../constants/branch-constants';
+import { BRANCH_STATUS_RED } from '../../constants/branch-constants';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
 
@@ -607,7 +607,7 @@ export async function processBranch(
         }
         const context = `renovate/artifacts`;
         const description = 'Artifact file update failure';
-        const state = BRANCH_STATUS_FAILURE;
+        const state = BRANCH_STATUS_RED;
         const existingState = await platform.getBranchStatusCheck(
           config.branchName,
           context

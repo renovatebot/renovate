@@ -1,6 +1,10 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
+import {
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+} from '../../constants/branch-constants';
 
 async function setStatusCheck(
   branchName: string,
@@ -65,7 +69,9 @@ export async function setUnpublishable(
   }
   const context = `renovate/unpublish-safe`;
   // Set canBeUnpublished status check
-  const state = config.canBeUnpublished ? 'pending' : 'success';
+  const state = config.canBeUnpublished
+    ? BRANCH_STATUS_YELLOW
+    : BRANCH_STATUS_GREEN;
   const description = config.canBeUnpublished
     ? 'Packages < 24 hours old can be unpublished'
     : 'Packages cannot be unpublished';

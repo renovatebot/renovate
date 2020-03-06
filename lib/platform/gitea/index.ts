@@ -33,9 +33,9 @@ import { configFileNames } from '../../config/app-strings';
 import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import * as helper from './gitea-helper';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
@@ -380,12 +380,12 @@ const platform: Platform = {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus> {
     if (!requiredStatusChecks) {
-      return BRANCH_STATUS_SUCCESS;
+      return BRANCH_STATUS_GREEN;
     }
 
     if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
       logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BRANCH_STATUS_FAILED;
+      return BRANCH_STATUS_RED;
     }
 
     let ccs: helper.CombinedCommitStatus;
@@ -407,11 +407,11 @@ const platform: Platform = {
     switch (ccs.worstStatus) {
       case 'unknown':
       case 'pending':
-        return BRANCH_STATUS_PENDING;
+        return BRANCH_STATUS_YELLOW;
       case 'success':
-        return BRANCH_STATUS_SUCCESS;
+        return BRANCH_STATUS_GREEN;
       default:
-        return BRANCH_STATUS_FAILED;
+        return BRANCH_STATUS_RED;
     }
   },
 

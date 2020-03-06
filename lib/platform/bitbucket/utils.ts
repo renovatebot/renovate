@@ -61,13 +61,13 @@ export const prStates = {
 
 export const buildStates: {
   [key: string]: BitbucketBranchState;
-  success: BitbucketBranchState;
-  failed: BitbucketBranchState;
-  pending: BitbucketBranchState;
+  green: BitbucketBranchState;
+  red: BitbucketBranchState;
+  yellow: BitbucketBranchState;
 } = {
-  success: 'SUCCESSFUL',
-  failed: 'FAILED',
-  pending: 'INPROGRESS',
+  green: 'SUCCESSFUL',
+  red: 'FAILED',
+  yellow: 'INPROGRESS',
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
