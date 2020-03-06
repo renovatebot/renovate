@@ -20,6 +20,7 @@ module.exports = {
     ecmaVersion: 9,
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
+    extraFileExtensions: ['.mjs'],
   },
   rules: {
     /*

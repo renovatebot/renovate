@@ -20,20 +20,7 @@ jobs:
 
     timeout-minutes: 20
 
-    strategy:
-      matrix:
-        tag: [latest, slim]
-
-    env:
-      DOCKER_FILE: Dockerfile.${{ matrix.tag }}
-      DOCKER_TAG: ${{ matrix.tag }}
-
     steps:
-      - name: Overwrite env for latest tag
-        if: matrix.tag == 'latest'
-        run: |
-          echo "::set-env name=DOCKER_FILE::Dockerfile"
-
       - name: Set up Docker Buildx
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
@@ -42,20 +29,22 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build the Docker image
+      - name: Build the Docker images
         run: |
-          docker buildx build \
-            --platform ${PLATFORM} \
-            --output=type=docker \
-            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-${DOCKER_TAG} \
-            --tag=renovate \
-            --file=./${DOCKER_FILE} .
+          docker buildx bake \
+            --file docker/bake.hcl \
+            --set settings.output=type=docker \
+            default
 
-      - name: Test the Docker image
+      - name: Test the Docker images
         run: |
-          docker run --rm -t renovate --version
+          docker run --rm -t ${DOCKER_REPO} --version
+          docker run --rm -t ${DOCKER_REPO}:slim --version
 
-      - name: Image history
-        run: docker history renovate
-      - name: Image size
-        run: docker image ls | grep renovate
+      - name: Image history latest
+        run: docker history ${DOCKER_REPO}
+      - name: Image history slim
+        run: docker history ${DOCKER_REPO}:slim
+
+      - name: Images size
+        run: docker image ls | grep ${DOCKER_REPO}
