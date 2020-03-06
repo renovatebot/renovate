@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as npmUpdater from './update';
 
-function readFixture(fixture) {
+function readFixture(fixture: string) {
   return fs.readFileSync(
     path.resolve(__dirname, `./__fixtures__/${fixture}`),
     'utf8'
