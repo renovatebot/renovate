@@ -24,5 +24,15 @@ describe('config/migrate-validate', () => {
       expect(res).toMatchSnapshot();
       expect(res.errors).toHaveLength(1);
     });
+
+    it('isOnboarded', async () => {
+      const input: RenovateConfig = {};
+      const res = await migrateAndValidate(
+        { ...config, repoIsOnboarded: true, warnings: undefined },
+        input
+      );
+      expect(res.warnings).toBeUndefined();
+      expect(res).toMatchSnapshot();
+    });
   });
 });

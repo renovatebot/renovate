@@ -67,18 +67,53 @@ export async function getPkgReleases(
 ): Promise<ReleaseResult | null> {
   const { datasource } = config;
   const lookupName = config.lookupName || config.depName;
+  if (!lookupName) {
+    logger.error({ config }, 'Datasource getPkgReleases without lookupName');
+    return null;
+  }
   let res;
   try {
     res = await getRawReleases({
       ...config,
       lookupName,
     });
-  } catch (e) /* istanbul ignore next */ {
-    if (e instanceof DatasourceError) {
-      e.datasource = datasource;
-      e.lookupName = lookupName;
+  } catch (err) /* istanbul ignore next */ {
+    logger.trace({ err }, 'getPkgReleases err');
+    if (err instanceof DatasourceError) {
+      err.datasource = datasource;
+      err.lookupName = lookupName;
+      throw err;
     }
-    throw e;
+    const { name, url, code, statusCode, statusMessage } = err;
+    const logMeta = {
+      datasource,
+      lookupName,
+      url,
+      code,
+      statusCode,
+      statusMessage,
+    };
+    const log = (reason: string, level = 'debug'): void =>
+      logger[level]({ ...logMeta, reason }, `Datasource Error (ignored)`);
+    if (name === 'UnsupportedProtocolError') {
+      log('Unsupported Protocol');
+    } else if (name === 'SyntaxError') {
+      log('Could not parse response');
+    } else if (code === 'ERR_INVALID_URL') {
+      log('Invalid URL');
+    } else if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
+      log('Connection Error');
+    } else if (statusCode === 401 || statusCode === 403) {
+      log('Unauthorized');
+    } else if (statusCode === 404 || code === 'ENOTFOUND') {
+      log('Not Found');
+    } else if (statusCode === 429) {
+      log('Rate Limited');
+    } else if (statusCode >= 500 && statusCode < 600) {
+      log('Server Error');
+    } else {
+      log('Unknown', 'info');
+    }
   }
   if (!res) {
     return res;

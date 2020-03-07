@@ -35,28 +35,6 @@ describe('datasource/galaxy', () => {
         await getPkgReleases({ lookupName: 'non_existent_crate' })
       ).toBeNull();
     });
-    it('returns null for empty list', async () => {
-      got.mockReturnValueOnce({
-        body: '\n',
-      });
-      expect(
-        await getPkgReleases({ lookupName: 'non_existent_crate' })
-      ).toBeNull();
-    });
-    it('returns null for 404', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      expect(await getPkgReleases({ lookupName: 'some_crate' })).toBeNull();
-    });
-    it('returns null for unknown error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
-      expect(await getPkgReleases({ lookupName: 'some_crate' })).toBeNull();
-    });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: res1,
@@ -71,13 +49,6 @@ describe('datasource/galaxy', () => {
         body: empty,
       });
       const res = await getPkgReleases({ lookupName: 'foo.bar' });
-      expect(res).toBeNull();
-    });
-    it('returns null if lookupName is undefined', async () => {
-      got.mockReturnValueOnce({
-        body: res1,
-      });
-      const res = await getPkgReleases({ lookupName: undefined });
       expect(res).toBeNull();
     });
   });

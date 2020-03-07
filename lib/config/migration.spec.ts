@@ -373,5 +373,30 @@ describe('config/migration', () => {
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(2);
     });
+
+    it('it removes invalid configs', () => {
+      const config: RenovateConfig = {
+        pathRules: {},
+        packageFiles: [{ packageFile: 'test' }],
+        gomodTidy: false,
+        pinVersions: undefined,
+        rebaseStalePrs: true,
+        rebaseWhen: 'auto',
+        exposeEnv: undefined,
+        upgradeInRange: false,
+        versionStrategy: undefined,
+        ignoreNodeModules: undefined,
+        baseBranch: [] as never,
+        depTypes: [{}],
+        commitMessage: 'test',
+        raiseDeprecationWarnings: undefined,
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+    });
   });
 });
