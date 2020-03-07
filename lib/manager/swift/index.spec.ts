@@ -73,31 +73,33 @@ describe('lib/manager/swift', () => {
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", .exact(]`
         )
       ).toBeNull();
+    });
+    it('parses packages with invalid versions', () => {
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from]`
         )
-      ).toBeNull();
+      ).not.toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from.package(`
         )
-      ).toBeNull();
+      ).not.toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from:]`
         )
-      ).toBeNull();
+      ).not.toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from:.package(`
         )
-      ).toBeNull();
+      ).not.toBeNull();
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]`
         )
-      ).toBeNull();
+      ).not.toBeNull();
     });
     it('parses package descriptions', () => {
       expect(

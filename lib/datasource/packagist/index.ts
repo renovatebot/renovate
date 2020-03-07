@@ -7,15 +7,16 @@ import { logger } from '../../logger';
 
 import got, { GotJSONOptions } from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { DatasourceError, PkgReleaseConfig, ReleaseResult } from '../common';
-import { DATASOURCE_PACKAGIST } from '../../constants/data-binary-source';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+
+export const id = 'packagist';
 
 function getHostOpts(url: string): GotJSONOptions {
   const opts: GotJSONOptions = {
     json: true,
   };
   const { username, password } = hostRules.find({
-    hostType: DATASOURCE_PACKAGIST,
+    hostType: id,
     url,
   });
   if (username && password) {
@@ -307,7 +308,7 @@ async function packageLookup(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`getPkgReleases(${lookupName})`);
 
   let res: ReleaseResult;

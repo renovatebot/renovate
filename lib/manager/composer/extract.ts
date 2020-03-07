@@ -3,10 +3,9 @@ import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
-import {
-  DATASOURCE_GIT_TAGS,
-  DATASOURCE_PACKAGIST,
-} from '../../constants/data-binary-source';
+
+import * as datasourceGitTags from '../../datasource/git-tags';
+import * as datasourcePackagist from '../../datasource/packagist';
 
 interface Repo {
   name?: string;
@@ -131,7 +130,7 @@ export async function extractPackageFile(
         )) {
           const currentValue = version.trim();
           // Default datasource and lookupName
-          let datasource = DATASOURCE_PACKAGIST;
+          let datasource = datasourcePackagist.id;
           let lookupName = depName;
 
           // Check custom repositories by type
@@ -140,7 +139,7 @@ export async function extractPackageFile(
             switch (repositories[depName].type) {
               case 'vcs':
               case 'git':
-                datasource = DATASOURCE_GIT_TAGS;
+                datasource = datasourceGitTags.id;
                 lookupName = repositories[depName].url;
                 break;
             }
@@ -156,9 +155,6 @@ export async function extractPackageFile(
           }
           if (!depName.includes('/')) {
             dep.skipReason = 'unsupported';
-          }
-          if (!semverComposer.isValid(currentValue)) {
-            dep.skipReason = 'unsupported-constraint';
           }
           if (currentValue === '*') {
             dep.skipReason = 'any-version';

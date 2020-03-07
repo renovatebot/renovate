@@ -2,6 +2,7 @@ import { remove } from 'fs-extra';
 import { dirname } from 'path';
 import { join } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 
 import { getLockedVersions } from './locked-versions';
@@ -14,14 +15,12 @@ import {
   PackageDependency,
   NpmLockFiles,
 } from '../../common';
-import { NpmPackage } from './common';
+import { NpmPackage, NpmPackageDependeny } from './common';
 import { platform } from '../../../platform';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as nodeVersioning from '../../../versioning/node';
-import {
-  DATASOURCE_GITHUB,
-  DATASOURCE_NPM,
-} from '../../../constants/data-binary-source';
+import * as datasourceNpm from '../../../datasource/npm';
+import * as datasourceGithubTags from '../../../datasource/github-tags';
 
 export async function extractPackageFile(
   content: string,
@@ -55,11 +54,11 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageJsonVersion = packageJson.version;
-  let yarnWorkspacesPackages;
-  if (packageJson.workspaces && packageJson.workspaces.packages) {
-    yarnWorkspacesPackages = packageJson.workspaces.packages;
-  } else {
+  let yarnWorkspacesPackages: string[];
+  if (is.array(packageJson.workspaces)) {
     yarnWorkspacesPackages = packageJson.workspaces;
+  } else {
+    yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
   const packageJsonType = mightBeABrowserLibrary(packageJson)
     ? 'library'
@@ -115,7 +114,7 @@ export async function extractPackageFile(
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
-  let lernaJson;
+  let lernaJson: { packages: string[]; npmClient: string };
   try {
     lernaJson = JSON.parse(
       await platform.getFile(join(dirname(fileName), 'lerna.json'))
@@ -156,14 +155,14 @@ export async function extractPackageFile(
     dep.currentValue = input.trim();
     if (depType === 'engines') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
       } else if (depName === 'npm') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
       } else {
         dep.skipReason = 'unknown-engines';
@@ -177,11 +176,11 @@ export async function extractPackageFile(
     // support for volta
     if (depType === 'volta') {
       if (depName === 'node') {
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
       } else if (depName === 'yarn') {
-        dep.datasource = DATASOURCE_NPM;
+        dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
       } else {
         dep.skipReason = 'unknown-volta';
@@ -211,7 +210,7 @@ export async function extractPackageFile(
       return dep;
     }
     if (isValid(dep.currentValue)) {
-      dep.datasource = DATASOURCE_NPM;
+      dep.datasource = datasourceNpm.id;
       if (dep.currentValue === '*') {
         dep.skipReason = 'any-version';
       }
@@ -248,7 +247,7 @@ export async function extractPackageFile(
     if (isVersion(depRefPart)) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
@@ -258,7 +257,7 @@ export async function extractPackageFile(
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
       dep.currentDigest = depRefPart;
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
     } else {
       dep.skipReason = 'unversioned-reference';
@@ -274,7 +273,7 @@ export async function extractPackageFile(
     if (packageJson[depType]) {
       try {
         for (const [depName, val] of Object.entries(
-          packageJson[depType] as Record<string, any>
+          packageJson[depType] as NpmPackageDependeny
         )) {
           const dep: PackageDependency = {
             depType,

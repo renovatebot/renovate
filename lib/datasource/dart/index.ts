@@ -1,10 +1,12 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { DatasourceError, ReleaseResult, PkgReleaseConfig } from '../common';
+import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+
+export const id = 'dart';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let result: ReleaseResult = null;
   const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
   interface DartResult {
@@ -21,6 +23,7 @@ export async function getPkgReleases({
   } = null;
   try {
     raw = await got(pkgUrl, {
+      hostType: id,
       json: true,
     });
   } catch (err) {

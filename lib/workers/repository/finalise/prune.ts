@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function cleanUpBranches(
@@ -11,7 +12,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: 'open',
+        state: PR_STATE_OPEN,
       });
       const branchPr = await platform.getBranchPr(branchName);
       const skipAutoclose = branchPr && branchPr.isModified;

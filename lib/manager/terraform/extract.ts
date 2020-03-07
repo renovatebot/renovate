@@ -1,12 +1,10 @@
 import { logger } from '../../logger';
 import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
-import {
-  DATASOURCE_GIT_TAGS,
-  DATASOURCE_GITHUB,
-  DATASOURCE_TERRAFORM,
-  DATASOURCE_TERRAFORM_PROVIDER,
-} from '../../constants/data-binary-source';
+import * as datasourceGitTags from '../../datasource/git-tags';
+import * as datasourceGithubTags from '../../datasource/github-tags';
+import * as datasourceTerraformModule from '../../datasource/terraform-module';
+import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
 
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
@@ -99,7 +97,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.depName = 'github.com/' + githubRefMatch[2];
         dep.depNameShort = githubRefMatch[2];
         dep.currentValue = githubRefMatch[3];
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = datasourceGithubTags.id;
         dep.lookupName = githubRefMatch[2];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
@@ -110,7 +108,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.depName = gitTagsRefMatch[2].replace('.git', '');
         dep.depNameShort = gitTagsRefMatch[3].replace('.git', '');
         dep.currentValue = gitTagsRefMatch[4];
-        dep.datasource = DATASOURCE_GIT_TAGS;
+        dep.datasource = datasourceGitTags.id;
         dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
@@ -125,14 +123,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.depName = moduleParts.join('/');
           dep.depNameShort = dep.depName;
           dep.managerData.lineNumber = dep.versionLine;
-          dep.datasource = DATASOURCE_TERRAFORM;
-        }
-        if (dep.managerData.lineNumber) {
-          if (!isValid(dep.currentValue)) {
-            dep.skipReason = 'unsupported-version';
-          }
-        } else if (!dep.skipReason) {
-          dep.skipReason = 'no-version';
+          dep.datasource = datasourceTerraformModule.id;
         }
       } else {
         logger.debug({ dep }, 'terraform dep has no source');
@@ -146,7 +137,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.depName = dep.moduleName;
       dep.depNameShort = dep.moduleName;
       dep.managerData.lineNumber = dep.versionLine;
-      dep.datasource = DATASOURCE_TERRAFORM_PROVIDER;
+      dep.datasource = datasourceTerraformProvider.id;
       if (dep.managerData.lineNumber) {
         if (!isValid(dep.currentValue)) {
           dep.skipReason = 'unsupported-version';

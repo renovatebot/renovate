@@ -1,6 +1,6 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy } from '../types';
-import { ValidationMessage } from '../config/common';
+import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -17,13 +17,21 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
-  global?: any;
+  global?: GlobalConfig;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
 
   skipInstalls?: boolean;
   versioning?: string;
+}
+
+export interface CustomExtractConfig extends ExtractConfig {
+  matchStrings: string[];
+  depNameTemplate?: string;
+  lookupNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
@@ -91,6 +99,7 @@ export interface PackageFile<T = Record<string, any>>
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
+  matchStrings?: string[];
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -132,9 +141,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  displayFrom?: string;
+  displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  lookupType?: string;
   moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
@@ -142,6 +152,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   skipReason?: string;
   source?: string;
   sourceLine?: number;
+  toVersion?: string;
   updates?: PackageUpdateResult[];
   versionLine?: number;
   autoReplaceData?: AutoReplaceData;
@@ -167,7 +178,7 @@ export interface Upgrade<T = Record<string, any>>
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
   toVersion?: string;
-  updateType?: string;
+  updateType?: UpdateType;
   version?: string;
 }
 
@@ -214,13 +225,13 @@ export interface ManagerApi {
     config: PackageUpdateConfig
   ): Result<PackageUpdateResult[]>;
 
-  getRangeStrategy(config: RangeConfig): RangeStrategy;
+  getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact
   ): Result<UpdateArtifactsResult[] | null>;
 
-  updateDependency(
+  updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }

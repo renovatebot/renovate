@@ -2,6 +2,7 @@ import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
 import { GotResponse, Pr } from '../common';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 
 export interface Config {
   baseBranch: string;
@@ -121,7 +122,7 @@ export function prInfo(pr: any): Pr {
     targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
-      ? /* istanbul ignore next */ 'closed'
+      ? /* istanbul ignore next */ PR_STATE_CLOSED
       : pr.state.toLowerCase(),
     createdAt: pr.created_on,
   };

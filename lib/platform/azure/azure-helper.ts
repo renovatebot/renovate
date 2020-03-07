@@ -8,6 +8,11 @@ import {
 import * as azureApi from './azure-got-wrapper';
 import { logger } from '../../logger';
 import { Pr } from '../common';
+import {
+  PR_STATE_CLOSED,
+  PR_STATE_MERGED,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
@@ -161,6 +166,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
   pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
+  pr.branchName = pr.targetBranch;
+  pr.createdAt = pr.creationDate;
 
   // status
   // export declare enum PullRequestStatus {
@@ -171,11 +178,11 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
   //   All = 4,
   // }
   if (azurePr.status === 2) {
-    pr.state = 'closed';
+    pr.state = PR_STATE_CLOSED;
   } else if (azurePr.status === 3) {
-    pr.state = 'merged';
+    pr.state = PR_STATE_MERGED;
   } else {
-    pr.state = 'open';
+    pr.state = PR_STATE_OPEN;
   }
 
   // mergeStatus

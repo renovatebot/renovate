@@ -158,7 +158,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -216,7 +216,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -301,7 +301,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -386,7 +386,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -444,7 +444,7 @@ Array [
       },
       Object {
         "currentValue": "3.9.0",
-        "datasource": "sbt",
+        "datasource": "sbt-package",
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
@@ -508,7 +508,7 @@ Array [
 exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
   Object {
-    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -536,7 +536,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",

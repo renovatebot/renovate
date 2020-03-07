@@ -84,7 +84,7 @@ Object {
     Object {
       "commitMessageTopic": "Node.js",
       "currentValue": ">= 8.9.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "node",
       "depType": "engines",
       "lookupName": "nodejs/node",
@@ -149,7 +149,7 @@ Object {
     Object {
       "currentRawValue": "github:owner/c#v1.1.0",
       "currentValue": "v1.1.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "c",
       "depType": "dependencies",
       "gitRef": true,
@@ -170,7 +170,7 @@ Object {
       "currentDigest": "49b5aca613b33c5b626ae68c03a385f25c142f55",
       "currentRawValue": "github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55",
       "currentValue": null,
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "e",
       "depType": "dependencies",
       "gitRef": true,
@@ -182,7 +182,7 @@ Object {
     Object {
       "currentRawValue": "owner/f#v2.0.0",
       "currentValue": "v2.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "f",
       "depType": "dependencies",
       "gitRef": true,
@@ -224,7 +224,7 @@ Object {
       "currentDigest": "49b5aca",
       "currentRawValue": "github:owner/k#49b5aca",
       "currentValue": null,
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "k",
       "depType": "dependencies",
       "gitRef": true,
@@ -237,7 +237,7 @@ Object {
       "currentDigest": "abcdef0",
       "currentRawValue": "github:owner/l.git#abcdef0",
       "currentValue": null,
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "l",
       "depType": "dependencies",
       "gitRef": true,
@@ -249,7 +249,7 @@ Object {
     Object {
       "currentRawValue": "https://github.com/owner/m.git#v1.0.0",
       "currentValue": "v1.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "m",
       "depType": "dependencies",
       "gitRef": true,
@@ -262,7 +262,7 @@ Object {
     Object {
       "currentRawValue": "git+https://github.com/owner/n#v2.0.0",
       "currentValue": "v2.0.0",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "n",
       "depType": "dependencies",
       "gitRef": true,
@@ -343,7 +343,7 @@ Object {
     Object {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "node",
       "depType": "engines",
       "lookupName": "nodejs/node",
@@ -356,7 +356,7 @@ Object {
     Object {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "node",
       "depType": "volta",
       "lookupName": "nodejs/node",
@@ -405,7 +405,7 @@ Object {
     Object {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "node",
       "depType": "engines",
       "lookupName": "nodejs/node",
@@ -418,7 +418,7 @@ Object {
     Object {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github",
+      "datasource": "github-tags",
       "depName": "node",
       "depType": "volta",
       "lookupName": "nodejs/node",
@@ -861,6 +861,28 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
+exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 1`] = `
+Object {
+  "deps": Array [],
+  "ignoreNpmrcFile": undefined,
+  "lernaClient": "npm",
+  "lernaDir": ".",
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": "@a/b",
+  "packageJsonType": "app",
+  "packageJsonVersion": "0.0.8",
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": Array [
+    "packages/*",
+  ],
   "yarnrc": undefined,
 }
 `;

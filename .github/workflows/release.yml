@@ -84,27 +84,16 @@ jobs:
       - name: Docker registry login
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
-      - name: Build the full Docker image
+      - name: Build the Docker images cache
         run: |
-          docker buildx build \
-            --platform=${PLATFORM} \
-            --load \
-            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
-            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-latest \
-            --tag=${DOCKER_REPO}:latest \
-            --file=./Dockerfile .
-
-      - name: Build the slim Docker image
-        run: |
-          docker buildx build \
-            --platform=${PLATFORM} \
-            --load \
-            --cache-from=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
-            --cache-to=${DOCKER_REPO}:${DOCKER_CACHE_TAG}-slim \
-            --tag=${DOCKER_REPO}:slim \
-            --file=./Dockerfile.slim .
+          docker buildx bake \
+            --file docker/bake.hcl \
+            --set latest.cache-to=renovate/renovate:_cache-latest \
+            --set slim.cache-to=renovate/renovate:_cache-slim \
+            default
 
       - run: yarn semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SHA: ${{github.sha}}

@@ -1,6 +1,7 @@
-import { getPkgReleases, Release, PkgReleaseConfig } from '../../../datasource';
+import { getPkgReleases, Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import { get, VersioningApi } from '../../../versioning';
+import { BranchUpgradeConfig } from '../../common';
 
 function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
   return (
@@ -18,15 +19,8 @@ function matchesUnstable(
   return !version.isStable(v1) && matchesMMP(version, v1, v2);
 }
 
-export type ReleaseConfig = PkgReleaseConfig & {
-  fromVersion: string;
-  releases?: Release[];
-  sourceUrl?: string;
-  toVersion: string;
-};
-
-export async function getReleases(
-  config: ReleaseConfig
+export async function getInRangeReleases(
+  config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
   const { versioning, fromVersion, toVersion, depName, datasource } = config;
   try {
@@ -54,7 +48,7 @@ export async function getReleases(
     }
     return releases;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'getReleases err');
+    logger.debug({ err }, 'getInRangeReleases err');
     logger.debug({ datasource, depName }, 'Error getting releases');
     return null;
   }

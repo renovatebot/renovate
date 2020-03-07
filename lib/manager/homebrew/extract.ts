@@ -1,8 +1,7 @@
-import { isValid } from '../../versioning/semver';
 import { skip, isSpace, removeComments } from './util';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GITHUB } from '../../constants/data-binary-source';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
@@ -97,9 +96,6 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
     if (!currentValue) {
       return null;
     }
-    if (!isValid(currentValue)) {
-      return null;
-    }
     return { currentValue, ownerName, repoName };
   } catch (_) {
     return null;
@@ -192,7 +188,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
-    datasource: DATASOURCE_GITHUB,
+    datasource: datasourceGithubTags.id,
   };
   if (skipReason) {
     dep.skipReason = skipReason;

@@ -40,6 +40,7 @@ export async function generateLockFile(
         config.upgrades &&
         config.upgrades.some(upgrade => upgrade.yarnIntegrity);
       if (!yarnIntegrity) {
+        logger.warn('Using yarn@1.9.4 for install is deprecated');
         try {
           const renovatePath = await getInstalledPath('renovate', {
             local: true,

@@ -1,8 +1,7 @@
 import { safeLoad } from 'js-yaml';
-import { isValid } from '../../versioning/npm/index';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_DART } from '../../constants/data-binary-source';
+import * as datasourceDart from '../../datasource/dart';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -13,14 +12,13 @@ function getDeps(
     if (depName === 'meta') return acc;
 
     const section = depsObj[depName];
-    let currentValue = null;
 
-    if (section && isValid(section.toString())) {
-      currentValue = section.toString();
-    }
-
-    if (section.version && isValid(section.version.toString())) {
+    let currentValue: string | null = null;
+    if (section && section.version) {
       currentValue = section.version.toString();
+    } else if (section) {
+      if (typeof section === 'string') currentValue = section;
+      if (typeof section === 'number') currentValue = section.toString();
     }
 
     const dep: PackageDependency = { ...preset, depName, currentValue };
@@ -50,7 +48,7 @@ export function extractPackageFile(
     if (deps.length) {
       return {
         packageFile,
-        datasource: DATASOURCE_DART,
+        datasource: datasourceDart.id,
         deps,
       };
     }

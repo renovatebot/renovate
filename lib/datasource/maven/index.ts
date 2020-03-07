@@ -5,9 +5,15 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { compare } from '../../versioning/maven/compare';
 import mavenVersion from '../../versioning/maven';
-import { containsPlaceholder } from '../../manager/maven/extract';
 import { downloadHttpProtocol } from './util';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
+import { MAVEN_REPO } from './common';
+
+export { id } from './common';
+
+function containsPlaceholder(str: string): boolean {
+  return /\${.*?}/g.test(str);
+}
 
 async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
   const pkgPath = pkgUrl.toString().replace('file://', '');
@@ -17,25 +23,26 @@ async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
   return fs.readFile(pkgPath, 'utf8');
 }
 
-async function downloadMavenXml(
+function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
-  dependencyFilePath: string
-): Promise<XmlDocument | null> {
-  let pkgUrl;
+  path: string
+): url.URL | null {
   try {
-    pkgUrl = new url.URL(
-      `${dependency.dependencyUrl}/${dependencyFilePath}`,
-      repoUrl
-    );
+    return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
   } catch (err) {
     logger.debug(
-      { err, dependency, repoUrl, dependencyFilePath },
+      { err, dependency, repoUrl, path },
       `Error constructing URL for ${dependency.display}`
     );
-    return null;
   }
+  return null;
+}
 
+async function downloadMavenXml(
+  pkgUrl: url.URL | null
+): Promise<XmlDocument | null> {
+  if (!pkgUrl) return null;
   let rawContent: string;
   switch (pkgUrl.protocol) {
     case 'file:':
@@ -50,20 +57,20 @@ async function downloadMavenXml(
       return null;
     default:
       logger.warn(
-        `Invalid protocol ${pkgUrl.protocol} in repository ${repoUrl}`
+        `Invalid protocol '${pkgUrl.protocol}' for Maven url: ${pkgUrl}`
       );
       return null;
   }
 
   if (!rawContent) {
-    logger.debug(`${dependency.display} not found in repository ${repoUrl}`);
+    logger.debug(`Content is not found for Maven url: ${pkgUrl}`);
     return null;
   }
 
   try {
     return new XmlDocument(rawContent);
   } catch (e) {
-    logger.debug(`Can not parse ${pkgUrl.href} for ${dependency.display}`);
+    logger.debug(`Can not parse ${pkgUrl.href}`);
     return null;
   }
 }
@@ -76,7 +83,8 @@ async function getDependencyInfo(
   const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
 
-  const pomContent = await downloadMavenXml(dependency, repoUrl, path);
+  const pomUrl = getMavenUrl(dependency, repoUrl, path);
+  const pomContent = await downloadMavenXml(pomUrl);
   if (!pomContent) return result;
 
   const homepage = pomContent.valueWithPath('url');
@@ -131,30 +139,23 @@ function extractVersions(metadata: XmlDocument): string[] {
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  const versions: string[] = [];
-  const dependency = getDependencyParts(lookupName);
-  if (!is.nonEmptyArray(registryUrls)) {
-    logger.warn(`No repositories defined for ${dependency.display}`);
-    return null;
-  }
-  const repositories = registryUrls.map(repository =>
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  const registries = is.nonEmptyArray(registryUrls)
+    ? registryUrls
+    : [MAVEN_REPO];
+  const repositories = registries.map(repository =>
     repository.replace(/\/?$/, '/')
   );
-  logger.debug(
-    `Found ${repositories.length} repositories for ${dependency.display}`
-  );
+  const dependency = getDependencyParts(lookupName);
+  const versions: string[] = [];
   const repoForVersions = {};
   for (let i = 0; i < repositories.length; i += 1) {
     const repoUrl = repositories[i];
     logger.debug(
       `Looking up ${dependency.display} in repository #${i} - ${repoUrl}`
     );
-    const mavenMetadata = await downloadMavenXml(
-      dependency,
-      repoUrl,
-      'maven-metadata.xml'
-    );
+    const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
+    const mavenMetadata = await downloadMavenXml(metadataUrl);
     if (mavenMetadata) {
       const newVersions = extractVersions(mavenMetadata).filter(
         version => !versions.includes(version)
