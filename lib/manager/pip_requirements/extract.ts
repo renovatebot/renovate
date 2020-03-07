@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
-import skipReasonConstants from '../../constants/skip-reason';
+import skipReasons from '../../constants/skip-reason';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -54,7 +54,7 @@ export function extractPackageFile(
       let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = skipReasonConstants.IGNORED;
+        dep.skipReason = skipReasons.IGNORED;
       }
       regex.lastIndex = 0;
       const matches = regex.exec(line);

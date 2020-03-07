@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceHex from '../../datasource/hex';
-import skipReasonConstants from '../../constants/skip-reason';
+import skipReasons from '../../constants/skip-reason';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
@@ -46,7 +46,7 @@ export function extractPackageFile(content: string): PackageFile {
           }
 
           if (dep.datasource !== datasourceHex.id) {
-            dep.skipReason = skipReasonConstants.NON_HEX_DEPTYPES;
+            dep.skipReason = skipReasons.NON_HEX_DEPTYPES;
           }
 
           // Find dep's line number

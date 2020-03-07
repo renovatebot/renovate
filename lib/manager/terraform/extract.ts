@@ -5,7 +5,7 @@ import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceTerraformModule from '../../datasource/terraform-module';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
-import skipReasonConstants from '../../constants/skip-reason';
+import skipReasons from '../../constants/skip-reason';
 
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
@@ -102,7 +102,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.lookupName = githubRefMatch[2];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
-          dep.skipReason = skipReasonConstants.UNSUPPORTED_VERSION;
+          dep.skipReason = skipReasons.UNSUPPORTED_VERSION;
         }
       } else if (gitTagsRefMatch) {
         dep.depType = 'gitTags';
@@ -113,12 +113,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
-          dep.skipReason = skipReasonConstants.UNSUPPORTED_VERSION;
+          dep.skipReason = skipReasons.UNSUPPORTED_VERSION;
         }
       } else if (dep.source) {
         const moduleParts = dep.source.split('//')[0].split('/');
         if (moduleParts[0] === '..') {
-          dep.skipReason = skipReasonConstants.LOCAL;
+          dep.skipReason = skipReasons.LOCAL;
         } else if (moduleParts.length >= 3) {
           dep.depType = 'terraform';
           dep.depName = moduleParts.join('/');
@@ -128,7 +128,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       } else {
         logger.debug({ dep }, 'terraform dep has no source');
-        dep.skipReason = skipReasonConstants.NO_SOURCE;
+        dep.skipReason = skipReasons.NO_SOURCE;
       }
     } else if (
       dep.managerData.terraformDependencyType ===
@@ -141,10 +141,10 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.datasource = datasourceTerraformProvider.id;
       if (dep.managerData.lineNumber) {
         if (!isValid(dep.currentValue)) {
-          dep.skipReason = skipReasonConstants.UNSUPPORTED_VERSION;
+          dep.skipReason = skipReasons.UNSUPPORTED_VERSION;
         }
       } else if (!dep.skipReason) {
-        dep.skipReason = skipReasonConstants.NO_VERSION;
+        dep.skipReason = skipReasons.NO_VERSION;
       }
     }
     delete dep.sourceLine;

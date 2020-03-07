@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import yaml from 'js-yaml';
-import skipReasonConstants from '../../constants/skip-reason';
+import skipReasons from '../../constants/skip-reason';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
 import { platform } from '../../platform';
@@ -59,20 +59,20 @@ export async function extractPackageFile(
           return res;
         }
 
-        res.skipReason = skipReasonConstants.PLACEHOLDER_URL;
+        res.skipReason = skipReasons.PLACEHOLDER_URL;
       } else {
         try {
           const url = new URL(dep.repository);
           if (url.protocol === 'file:') {
-            res.skipReason = skipReasonConstants.LOCAL_DEPENDENCY;
+            res.skipReason = skipReasons.LOCAL_DEPENDENCY;
           }
         } catch (err) {
           logger.debug({ err }, 'Error parsing url');
-          res.skipReason = skipReasonConstants.INVALID_URL;
+          res.skipReason = skipReasons.INVALID_URL;
         }
       }
     } else {
-      res.skipReason = skipReasonConstants.NO_REPOSITORY;
+      res.skipReason = skipReasons.NO_REPOSITORY;
     }
     return res;
   });

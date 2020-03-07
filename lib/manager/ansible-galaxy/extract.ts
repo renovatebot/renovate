@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGalaxy from '../../datasource/galaxy';
-import skipReasonConstants from '../../constants/skip-reason';
+import skipReasons from '../../constants/skip-reason';
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
@@ -41,7 +41,7 @@ function interpretLine(
 function finalize(dependency: PackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
-    dep.skipReason = skipReasonConstants.NO_VERSION;
+    dep.skipReason = skipReasons.NO_VERSION;
     return false;
   }
 
@@ -59,7 +59,7 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = dep.managerData.src;
     dep.lookupName = dep.managerData.src;
   } else {
-    dep.skipReason = skipReasonConstants.NO_SOURCE_MATCH;
+    dep.skipReason = skipReasons.NO_SOURCE_MATCH;
     return false;
   }
   if (dep.managerData.name !== null) {

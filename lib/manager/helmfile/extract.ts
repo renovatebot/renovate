@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
-import skipReasonConstants from '../../constants/skip-reason';
+import skipReasons from '../../constants/skip-reason';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
 import * as datasourceHelm from '../../datasource/helm';
@@ -65,18 +65,18 @@ export function extractPackageFile(
 
     // If version is null is probably a local chart
     if (!res.currentValue) {
-      res.skipReason = skipReasonConstants.LOCAL_CHART;
+      res.skipReason = skipReasons.LOCAL_CHART;
     }
 
     // By definition on helm the chart name should be lowecase letter + number + -
     // However helmfile support templating of that field
     if (!isValidChartName(res.depName)) {
-      res.skipReason = skipReasonConstants.UNSUPPORTED_CHART_TYPE;
+      res.skipReason = skipReasons.UNSUPPORTED_CHART_TYPE;
     }
 
     // Skip in case we cannot locate the registry
     if (is.emptyArray(res.registryUrls)) {
-      res.skipReason = skipReasonConstants.UNKNOWN_REGISTRY;
+      res.skipReason = skipReasons.UNKNOWN_REGISTRY;
     }
 
     return res;

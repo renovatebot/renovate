@@ -14,7 +14,7 @@ import { RangeConfig } from '../../../../manager/common';
 import { RenovateConfig, UpdateType } from '../../../../config';
 import { clone } from '../../../../util/clone';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
-import skipReasonConstants from '../../../../constants/skip-reason';
+import skipReasons from '../../../../constants/skip-reason';
 
 export interface LookupWarning {
   updateType: 'warning';
@@ -139,7 +139,7 @@ export async function lookupUpdates(
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
   const isValid = currentValue && version.isValid(currentValue);
-  if (!isValid) res.skipReason = skipReasonConstants.INVALID_VALUE;
+  if (!isValid) res.skipReason = skipReasons.INVALID_VALUE;
 
   if (isValid) {
     const dependency = clone(await getPkgReleases(config));
@@ -345,11 +345,11 @@ export async function lookupUpdates(
     }
     res.updates = res.updates.concat(Object.values(buckets));
   } else if (!currentValue) {
-    res.skipReason = skipReasonConstants.UNSUPPORTED_VALUE;
+    res.skipReason = skipReasons.UNSUPPORTED_VALUE;
   } else {
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
-      res.skipReason = skipReasonConstants.UNSUPPORTED_VALUE;
+      res.skipReason = skipReasons.UNSUPPORTED_VALUE;
     } else {
       delete res.skipReason;
     }
