@@ -65,7 +65,7 @@ describe('datasource/index', () => {
   it('trims sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
-      releases: [],
+      releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,

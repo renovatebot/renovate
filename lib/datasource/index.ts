@@ -80,22 +80,35 @@ export async function getPkgReleases(
       err.lookupName = lookupName;
       throw err;
     }
-    if (err.name === 'HTTPError') {
-      const { url, statusCode, statusMessage } = err;
-      logger.debug(
-        { datasource, lookupName, url, statusCode, statusMessage },
-        'Ignoring Datasource HTTP Error'
-      );
-    } else if (err.name === 'RequestError') {
-      logger.debug(
-        { datasource, lookupName, err },
-        'Ignoring Datasource Request Error'
-      );
+    const { name, url, code, statusCode, statusMessage } = err;
+    const logMeta = {
+      datasource,
+      lookupName,
+      url,
+      code,
+      statusCode,
+      statusMessage,
+    };
+    const debug = (reason: string): void =>
+      logger.debug({ ...logMeta, reason }, `Datasource Error (ignored)`);
+    if (name === 'UnsupportedProtocolError') {
+      debug('Unsupported Protocol');
+    } else if (name === 'SyntaxError') {
+      debug('Could not parse response');
+    } else if (code === 'ERR_INVALID_URL') {
+      debug('Invalid URL');
+    } else if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
+      debug('Connection Error');
+    } else if (statusCode === 401 || statusCode === 403) {
+      debug('Unauthorized');
+    } else if (statusCode === 404 || code === 'ENOTFOUND') {
+      debug('Not Found');
+    } else if (statusCode === 429) {
+      debug('Rate Limited');
+    } else if (statusCode >= 500 && statusCode < 600) {
+      debug('Server Error');
     } else {
-      logger.info(
-        { datasource, lookupName, err },
-        'Ignoring Datasource Unknown Error'
-      );
+      debug('Unknown');
     }
   }
   if (!res) {
