@@ -4,12 +4,13 @@ import { getOptions } from '../lib/config/definitions';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
-    interface Matchers<R, T extends Array<any>> {
+    type ContainsOption<T> = T extends ArrayLike<unknown> ? T[number] : unknown;
+    interface Matchers<R, T> {
       /**
        * only available in `test/website-docs.spec.js`
        * @param arg Value which current values should contain
        */
-      toContainOption<Y extends T[number]>(arg: Y): void;
+      toContainOption(arg: ContainsOption<T>): void;
     }
   }
 }
