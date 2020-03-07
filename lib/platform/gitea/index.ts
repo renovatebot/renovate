@@ -414,8 +414,7 @@ const platform: Platform = {
       branchName
     );
     const cs = ccs.statuses.find(s => s.context === context);
-    if (!cs) return null;
-    return helper.giteaToRenovateStatusMapping[cs.status] || null;
+    return helper.giteaToRenovateStatusMapping[cs?.status] || null;
   },
 
   async setBaseBranch(
