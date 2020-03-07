@@ -73,12 +73,30 @@ export async function getPkgReleases(
       ...config,
       lookupName,
     });
-  } catch (e) /* istanbul ignore next */ {
-    if (e instanceof DatasourceError) {
-      e.datasource = datasource;
-      e.lookupName = lookupName;
+  } catch (err) /* istanbul ignore next */ {
+    logger.trace({ err }, 'getPkgReleases err');
+    if (err instanceof DatasourceError) {
+      err.datasource = datasource;
+      err.lookupName = lookupName;
+      throw err;
     }
-    throw e;
+    if (err.name === 'HTTPError') {
+      const { url, statusCode, statusMessage } = err;
+      logger.debug(
+        { datasource, lookupName, url, statusCode, statusMessage },
+        'Ignoring Datasource HTTP Error'
+      );
+    } else if (err.name === 'RequestError') {
+      logger.debug(
+        { datasource, lookupName, err },
+        'Ignoring Datasource Request Error'
+      );
+    } else {
+      logger.info(
+        { datasource, lookupName, err },
+        'Ignoring Datasource Unknown Error'
+      );
+    }
   }
   if (!res) {
     return res;
