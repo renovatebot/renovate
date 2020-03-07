@@ -680,12 +680,6 @@ Object {
 }
 `;
 
-exports[`config/presets resolvePreset throws 1`] = `undefined`;
-
-exports[`config/presets resolvePreset throws 2`] = `"Preset package is missing a renovate-config entry (noconfig:base)"`;
-
-exports[`config/presets resolvePreset throws 3`] = `undefined`;
-
 exports[`config/presets resolvePreset throws if invalid preset 1`] = `undefined`;
 
 exports[`config/presets resolvePreset throws if invalid preset 2`] = `"Preset name not found within published preset config (wrongpreset:invalid-preset)"`;
