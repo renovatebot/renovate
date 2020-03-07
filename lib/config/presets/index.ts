@@ -164,7 +164,7 @@ export async function resolveConfigPresets(
         logger.debug(`Ignoring preset ${preset} in ${existingPresets}`);
       } else {
         logger.trace(`Resolving preset "${preset}"`);
-        let fetchedPreset;
+        let fetchedPreset: RenovateConfig;
         try {
           fetchedPreset = await getPreset(preset);
         } catch (err) {
@@ -180,7 +180,6 @@ export async function resolveConfigPresets(
           if (err.message === 'dep not found') {
             error.validationError = `Cannot find preset's package (${preset})`;
           } else if (err.message === 'preset renovate-config not found') {
-            // istanbul ignore next
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
           } else if (err.message === 'preset not found') {
             error.validationError = `Preset name not found within published preset config (${preset})`;
