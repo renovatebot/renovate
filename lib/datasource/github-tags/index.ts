@@ -111,7 +111,6 @@ export async function getDigest(
 export async function getPkgReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(repo, 'tags')
@@ -120,24 +119,17 @@ export async function getPkgReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  try {
-    // tag
-    const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
-    type GitHubTag = {
-      name: string;
-    }[];
+  // tag
+  const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
+  type GitHubTag = {
+    name: string;
+  }[];
 
-    versions = (
-      await ghGot<GitHubTag>(url, {
-        paginate: true,
-      })
-    ).body.map(o => o.name);
-  } catch (err) {
-    logger.debug({ repo, err }, 'Error retrieving from github');
-  }
-  if (!versions) {
-    return null;
-  }
+  const versions = (
+    await ghGot<GitHubTag>(url, {
+      paginate: true,
+    })
+  ).body.map(o => o.name);
   const dependency: ReleaseResult = {
     sourceUrl: 'https://github.com/' + repo,
     releases: null,

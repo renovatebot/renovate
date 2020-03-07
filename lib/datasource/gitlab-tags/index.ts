@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
-import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: glGot } = api;
@@ -21,7 +20,6 @@ export async function getPkgReleases({
   const depHost = is.nonEmptyArray(registryUrls)
     ? registryUrls[0].replace(/\/$/, '')
     : 'https://gitlab.com';
-  let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(depHost, repo)
@@ -33,22 +31,17 @@ export async function getPkgReleases({
 
   const urlEncodedRepo = encodeURIComponent(repo);
 
-  try {
-    // tag
-    const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
-    type GlTag = {
-      name: string;
-    }[];
+  // tag
+  const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
+  type GlTag = {
+    name: string;
+  }[];
 
-    versions = (
-      await glGot<GlTag>(url, {
-        paginate: true,
-      })
-    ).body.map(o => o.name);
-  } catch (err) {
-    // istanbul ignore next
-    logger.debug({ repo, err }, 'Error retrieving from Gitlab');
-  }
+  const versions = (
+    await glGot<GlTag>(url, {
+      paginate: true,
+    })
+  ).body.map(o => o.name);
 
   // istanbul ignore if
   if (!versions) {

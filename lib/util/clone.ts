@@ -1,3 +1,3 @@
 export function clone<T>(input: T): T {
-  return JSON.parse(JSON.stringify(input));
+  return input ? JSON.parse(JSON.stringify(input)) : input;
 }
