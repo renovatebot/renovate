@@ -72,7 +72,7 @@ Array [
       "body": Object {
         "context": "renovate/verify",
         "description": "Renovate verified pull request",
-        "state": "yellow",
+        "state": "green",
         "target_url": "https://github.com/renovatebot/renovate",
       },
     },

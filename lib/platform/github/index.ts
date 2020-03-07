@@ -1710,7 +1710,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: BRANCH_STATUS_YELLOW,
+      state: BRANCH_STATUS_GREEN,
       url: 'https://github.com/renovatebot/renovate',
     });
   }

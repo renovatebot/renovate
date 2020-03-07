@@ -1,7 +1,7 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
-import { GotResponse, Pr } from '../common';
+import { GotResponse, Pr, BranchStatus } from '../common';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 
 export interface Config {
@@ -59,7 +59,7 @@ export const prStates = {
   all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
 };
 
-export const buildStates = {
+export const buildStates: Record<BranchStatus, string> = {
   green: 'SUCCESSFUL',
   red: 'FAILED',
   yellow: 'INPROGRESS',
