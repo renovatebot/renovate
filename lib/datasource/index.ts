@@ -93,26 +93,26 @@ export async function getPkgReleases(
       statusCode,
       statusMessage,
     };
-    const debug = (reason: string): void =>
-      logger.debug({ ...logMeta, reason }, `Datasource Error (ignored)`);
+    const log = (reason: string, level = 'debug'): void =>
+      logger[level]({ ...logMeta, reason }, `Datasource Error (ignored)`);
     if (name === 'UnsupportedProtocolError') {
-      debug('Unsupported Protocol');
+      log('Unsupported Protocol');
     } else if (name === 'SyntaxError') {
-      debug('Could not parse response');
+      log('Could not parse response');
     } else if (code === 'ERR_INVALID_URL') {
-      debug('Invalid URL');
+      log('Invalid URL');
     } else if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
-      debug('Connection Error');
+      log('Connection Error');
     } else if (statusCode === 401 || statusCode === 403) {
-      debug('Unauthorized');
+      log('Unauthorized');
     } else if (statusCode === 404 || code === 'ENOTFOUND') {
-      debug('Not Found');
+      log('Not Found');
     } else if (statusCode === 429) {
-      debug('Rate Limited');
+      log('Rate Limited');
     } else if (statusCode >= 500 && statusCode < 600) {
-      debug('Server Error');
+      log('Server Error');
     } else {
-      debug('Unknown');
+      log('Unknown', 'info');
     }
   }
   if (!res) {
