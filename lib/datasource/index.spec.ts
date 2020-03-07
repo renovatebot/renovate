@@ -27,6 +27,13 @@ describe('datasource/index', () => {
       })
     ).toBeNull();
   });
+  it('returns null for no lookupName', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'npm',
+      })
+    ).toBeNull();
+  });
   it('returns null for unknown datasource', async () => {
     expect(
       await datasource.getPkgReleases({

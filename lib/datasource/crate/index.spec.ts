@@ -99,12 +99,5 @@ describe('datasource/crate', () => {
       const res = await getPkgReleases({ lookupName: 'some_crate' });
       expect(res).toBeNull();
     });
-    it('returns null if lookupName is undefined', async () => {
-      got.mockReturnValueOnce({
-        body: res1,
-      });
-      const res = await getPkgReleases({ lookupName: undefined });
-      expect(res).toBeNull();
-    });
   });
 });

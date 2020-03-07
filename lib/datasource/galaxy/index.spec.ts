@@ -51,12 +51,5 @@ describe('datasource/galaxy', () => {
       const res = await getPkgReleases({ lookupName: 'foo.bar' });
       expect(res).toBeNull();
     });
-    it('returns null if lookupName is undefined', async () => {
-      got.mockReturnValueOnce({
-        body: res1,
-      });
-      const res = await getPkgReleases({ lookupName: undefined });
-      expect(res).toBeNull();
-    });
   });
 });

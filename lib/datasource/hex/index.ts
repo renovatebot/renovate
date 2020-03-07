@@ -13,12 +13,6 @@ interface HexRelease {
 export async function getPkgReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('hex lookup failure: No lookupName');
-    return null;
-  }
-
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
   // hexPackageName:organizationName
