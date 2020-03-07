@@ -113,6 +113,7 @@ export async function getPkgReleases(
       log('Server Error');
     } else {
       log('Unknown', 'info');
+      logger.debug({ err }, 'Datasource Error err');
     }
   }
   if (!res) {
