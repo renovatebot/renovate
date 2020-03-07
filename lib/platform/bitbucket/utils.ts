@@ -59,7 +59,7 @@ export const prStates = {
   all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
 };
 
-export const buildStates: Record<BranchStatus, string> = {
+export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
   green: 'SUCCESSFUL',
   red: 'FAILED',
   yellow: 'INPROGRESS',
