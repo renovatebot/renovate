@@ -7,10 +7,6 @@ export const id = 'galaxy';
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    return null;
-  }
-
   const cacheNamespace = 'datasource-galaxy';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(

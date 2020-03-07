@@ -87,10 +87,6 @@ export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    logger.warn(`lookupName was not provided to getPkgReleases`);
-    return null;
-  }
   const [helmRepository] = registryUrls;
   if (!helmRepository) {
     logger.warn(`helmRepository was not provided to getPkgReleases`);
