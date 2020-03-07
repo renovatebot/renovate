@@ -12,7 +12,7 @@ import {
   BUNDLER_INVALID_CREDENTIALS,
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { HostRule } from '../../util/host-rules';
+import { HostRule } from '../../types';
 import {
   getAuthenticationHeaderValue,
   findAllAuthenticatable,
