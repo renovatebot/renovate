@@ -131,11 +131,6 @@ export async function getPkgReleases(
   registryUrls =
     registryUrls && registryUrls.length ? registryUrls : [defaultCDN];
 
-  if (!lookupName) {
-    logger.debug(config, `CocoaPods: invalid lookup name`);
-    return null;
-  }
-
   const podName = lookupName.replace(/\/.*$/, '');
 
   const cachedResult = await renovateCache.get<ReleaseResult>(

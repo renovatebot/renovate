@@ -1,6 +1,5 @@
 import { coerce } from 'semver';
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
 import got from '../../util/got';
 import {
   DatasourceError,
@@ -56,8 +55,7 @@ export async function getPkgReleases({
         if (err.host === 'services.gradle.org') {
           throw new DatasourceError(err);
         }
-        logger.debug({ err }, 'gradle-version err');
-        return null;
+        throw err;
       }
     })
   );

@@ -13,12 +13,6 @@ interface HexRelease {
 export async function getPkgReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('hex lookup failure: No lookupName');
-    return null;
-  }
-
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
   // hexPackageName:organizationName
@@ -60,23 +54,12 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    const errorData = { lookupName, err };
-
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-
-    if (err.statusCode === 401) {
-      logger.debug(errorData, 'Authorization error');
-    } else if (err.statusCode === 404) {
-      logger.debug(errorData, 'Package lookup error');
-    } else {
-      logger.warn(errorData, 'hex lookup failure: Unknown error');
-    }
+    throw err;
   }
-
-  return null;
 }

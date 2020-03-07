@@ -2,13 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import * as npmExtract from '.';
 import { getConfig } from '../../../config/defaults';
-import { platform as _platform } from '../../../platform';
+import { platform as _platform } from '../../../../test/util';
 
 // TODO: fix types
-const defaultConfig = getConfig() as any;
+const defaultConfig = getConfig();
 const platform: any = _platform;
 
-function readFixture(fixture) {
+function readFixture(fixture: string) {
   return fs.readFileSync(
     path.resolve(__dirname, `../__fixtures__/${fixture}`),
     'utf8'
@@ -17,6 +17,7 @@ function readFixture(fixture) {
 
 const input01Content = readFixture('inputs/01.json');
 const workspacesContent = readFixture('inputs/workspaces.json');
+const workspacesSimpleContent = readFixture('inputs/workspaces-simple.json');
 const vendorisedContent = readFixture('is-object.json');
 const invalidNameContent = readFixture('invalid-name.json');
 
@@ -162,6 +163,20 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds simple yarn workspaces', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{}';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        workspacesSimpleContent,
         'package.json',
         defaultConfig
       );

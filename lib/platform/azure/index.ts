@@ -27,6 +27,11 @@ import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
+  PR_STATE_ALL,
+  PR_STATE_NOT_OPEN,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
+import {
   BRANCH_STATUS_FAILED,
   BRANCH_STATUS_PENDING,
   BRANCH_STATUS_SUCCESS,
@@ -43,7 +48,7 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  azureWorkItemId: any;
+  azureWorkItemId: string;
   prList: Pr[];
   fileList: null;
   repository: string;
@@ -291,15 +296,12 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 
   return azurePr;
 }
-
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  // TODO: fix typing
-  let prsFiltered: any[] = [];
+  let prsFiltered: Pr[] = [];
   try {
     const prs = await getPrList();
 
@@ -312,11 +314,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case 'all':
+      case PR_STATE_ALL:
         // no more filter needed, we can go further...
         break;
-      case '!open':
-        prsFiltered = prsFiltered.filter(item => item.state !== 'open');
+      case PR_STATE_NOT_OPEN:
+        prsFiltered = prsFiltered.filter(item => item.state !== PR_STATE_OPEN);
         break;
       default:
         prsFiltered = prsFiltered.filter(item => item.state === state);
@@ -333,7 +335,10 @@ export async function findPr({
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, state: 'open' });
+  const existingPr = await findPr({
+    branchName,
+    state: PR_STATE_OPEN,
+  });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 
@@ -404,7 +409,7 @@ export async function getBranchStatusCheck(
 
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any
+  requiredStatusChecks: string[]
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
@@ -439,7 +444,7 @@ export async function createPr({
       id: config.azureWorkItemId,
     },
   ];
-  let pr: any = await azureApiGit.createPullRequest(
+  let pr: GitPullRequest = await azureApiGit.createPullRequest(
     {
       sourceRefName,
       targetRefName,
@@ -453,7 +458,7 @@ export async function createPr({
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
-          id: pr.createdBy!.id,
+          id: pr.createdBy.id,
         },
         completionOptions: {
           mergeStrategy: config.mergeMethod,
@@ -461,7 +466,7 @@ export async function createPr({
         },
       },
       config.repoId,
-      pr.pullRequestId!
+      pr.pullRequestId
     );
   }
   await Promise.all(
@@ -471,11 +476,10 @@ export async function createPr({
           name: label,
         },
         config.repoId,
-        pr.pullRequestId!
+        pr.pullRequestId
       )
     )
   );
-  pr.branchName = branchName;
   return azureHelper.getRenovatePRFormat(pr);
 }
 
@@ -486,7 +490,7 @@ export async function updatePr(
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const azureApiGit = await azureApi.gitApi();
-  const objToUpdate: any = {
+  const objToUpdate: GitPullRequest = {
     title,
   };
   if (body) {
@@ -512,7 +516,7 @@ export async function ensureComment({
   threads.forEach(thread => {
     const firstCommentContent = thread.comments[0].content;
     if (
-      (topic && firstCommentContent.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) ||
       (!topic && firstCommentContent === body)
     ) {
       threadIdFound = thread.id;
@@ -682,7 +686,7 @@ export async function addReviewers(
     )
   );
 
-  const ids: any[] = [];
+  const ids: { id: string; name: string }[] = [];
   members.forEach(listMembers => {
     listMembers.forEach(m => {
       reviewers.forEach(r => {

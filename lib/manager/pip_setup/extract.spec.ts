@@ -44,7 +44,7 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   // describe('Test for presence of mock lib', () => {
   //   it('should test if python mock lib is installed', async () => {
-  //     const cp = jest.requireActual('../../../lib/util/exec');
+  //     const cp = jest.requireActual('../../util/exec');
   //     let isMockInstalled = true;
   //     // when binarysource === docker
   //     try {

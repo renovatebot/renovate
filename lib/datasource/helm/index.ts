@@ -23,74 +23,43 @@ export async function getRepositoryData(
       return null;
     }
   } catch (err) {
-    // istanbul ignore if
-    if (err.code === 'ERR_INVALID_URL') {
-      logger.debug(
-        { helmRepository: repository },
-        'helm repository is not a valid URL - skipping'
-      );
-      return null;
-    }
-    // istanbul ignore if
-    if (err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN') {
-      logger.debug({ err }, 'Could not connect to helm repository');
-      return null;
-    }
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.warn({ err }, 'index.yaml lookup error');
-      return null;
-    }
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    // istanbul ignore if
-    if (err.name === 'UnsupportedProtocolError') {
-      logger.debug({ repository }, 'Unsupported protocol');
-      return null;
-    }
-    logger.warn(
-      { err },
-      `helm datasource ${repository} lookup failure: Unknown error`
-    );
-    return null;
+    throw err;
   }
+  let doc;
   try {
-    const doc = yaml.safeLoad(res.body, { json: true });
-    if (!doc) {
-      logger.warn(`Failed to parse index.yaml from ${repository}`);
-      return null;
-    }
-    const result: ReleaseResult[] = Object.entries(doc.entries).map(
-      ([k, v]: [string, any]): ReleaseResult => ({
-        name: k,
-        homepage: v[0].home,
-        sourceUrl: v[0].sources ? v[0].sources[0] : undefined,
-        releases: v.map((x: any) => ({
-          version: x.version,
-        })),
-      })
-    );
-    const cacheMinutes = 20;
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
-    return result;
+    doc = yaml.safeLoad(res.body, { json: true });
   } catch (err) {
-    logger.warn(`Failed to parse index.yaml from ${repository}`);
     logger.debug(err);
+  }
+  if (!doc) {
+    logger.warn(`Failed to parse index.yaml from ${repository}`);
     return null;
   }
+  const result: ReleaseResult[] = Object.entries(doc.entries).map(
+    ([k, v]: [string, any]): ReleaseResult => ({
+      name: k,
+      homepage: v[0].home,
+      sourceUrl: v[0].sources ? v[0].sources[0] : undefined,
+      releases: v.map((x: any) => ({
+        version: x.version,
+      })),
+    })
+  );
+  const cacheMinutes = 20;
+  await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+  return result;
 }
 
 export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    logger.warn(`lookupName was not provided to getPkgReleases`);
-    return null;
-  }
   const [helmRepository] = registryUrls;
   if (!helmRepository) {
     logger.warn(`helmRepository was not provided to getPkgReleases`);

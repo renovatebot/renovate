@@ -125,13 +125,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.managerData.lineNumber = dep.versionLine;
           dep.datasource = datasourceTerraformModule.id;
         }
-        if (dep.managerData.lineNumber) {
-          if (!isValid(dep.currentValue)) {
-            dep.skipReason = 'unsupported-version';
-          }
-        } else if (!dep.skipReason) {
-          dep.skipReason = 'no-version';
-        }
       } else {
         logger.debug({ dep }, 'terraform dep has no source');
         dep.skipReason = 'no-source';

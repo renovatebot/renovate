@@ -1,6 +1,5 @@
 import { api } from '../../platform/github/gh-got-wrapper';
 import { ReleaseResult, GetReleasesConfig } from '../common';
-import { logger } from '../../logger';
 
 const { get: ghGot } = api;
 
@@ -21,7 +20,6 @@ const cacheNamespace = 'datasource-github-releases';
 export async function getPkgReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     repo
@@ -30,20 +28,16 @@ export async function getPkgReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  try {
-    const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-    type GitHubRelease = {
-      tag_name: string;
-    }[];
+  const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
+  type GitHubRelease = {
+    tag_name: string;
+  }[];
 
-    versions = (
-      await ghGot<GitHubRelease>(url, {
-        paginate: true,
-      })
-    ).body.map(o => o.tag_name);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ repo, err }, 'Error retrieving from github');
-  }
+  const versions = (
+    await ghGot<GitHubRelease>(url, {
+      paginate: true,
+    })
+  ).body.map(o => o.tag_name);
   // istanbul ignore if
   if (!versions) {
     return null;

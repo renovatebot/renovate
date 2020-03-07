@@ -3,7 +3,7 @@ import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
 import { ChangeLogError, getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
-import { BranchStatus, platform, Pr } from '../../platform';
+import { BranchStatus, platform, Pr, PlatformPrOptions } from '../../platform';
 import { BranchConfig } from '../common';
 import {
   PLATFORM_FAILURE,
@@ -29,7 +29,7 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
+export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   if (config.assignees.length > 0) {
     try {
       let assignees = config.assignees.map(noLeadingAtSymbol);
@@ -343,7 +343,7 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        const platformOptions = {
+        const platformOptions: PlatformPrOptions = {
           azureAutoComplete: config.azureAutoComplete,
           statusCheckVerify: config.statusCheckVerify,
           gitLabAutomerge:

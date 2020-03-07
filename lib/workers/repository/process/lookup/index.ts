@@ -11,7 +11,7 @@ import {
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
-import { RenovateConfig } from '../../../../config';
+import { RenovateConfig, UpdateType } from '../../../../config';
 import { clone } from '../../../../util/clone';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 
@@ -55,7 +55,7 @@ function getType(
   config: LookupUpdateConfig,
   fromVersion: string,
   toVersion: string
-): string {
+): UpdateType {
   const { versioning, rangeStrategy, currentValue } = config;
   const version = allVersioning.get(versioning);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
@@ -136,7 +136,11 @@ export async function lookupUpdates(
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   const version = allVersioning.get(config.versioning);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
-  if (version.isValid(currentValue)) {
+
+  const isValid = currentValue && version.isValid(currentValue);
+  if (!isValid) res.skipReason = 'invalid-value';
+
+  if (isValid) {
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
@@ -345,6 +349,8 @@ export async function lookupUpdates(
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
       res.skipReason = 'unsupported-value';
+    } else {
+      delete res.skipReason;
     }
   }
   // Add digests if necessary

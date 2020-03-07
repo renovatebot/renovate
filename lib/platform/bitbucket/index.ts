@@ -28,6 +28,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import {
   BRANCH_STATUS_FAILED,
@@ -210,7 +211,7 @@ export function getFile(
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -235,7 +236,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -256,7 +257,7 @@ export async function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   if (closePr) {
-    const pr = await findPr({ branchName, state: 'open' });
+    const pr = await findPr({ branchName, state: PR_STATE_OPEN });
     if (pr) {
       await api.post(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
@@ -387,7 +388,10 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, state: 'open' });
+  const existingPr = await findPr({
+    branchName,
+    state: PR_STATE_OPEN,
+  });
   return existingPr ? getPr(existingPr.number) : null;
 }
 

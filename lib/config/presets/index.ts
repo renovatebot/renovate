@@ -164,7 +164,7 @@ export async function resolveConfigPresets(
         logger.debug(`Ignoring preset ${preset} in ${existingPresets}`);
       } else {
         logger.trace(`Resolving preset "${preset}"`);
-        let fetchedPreset;
+        let fetchedPreset: RenovateConfig;
         try {
           fetchedPreset = await getPreset(preset);
         } catch (err) {
@@ -180,7 +180,6 @@ export async function resolveConfigPresets(
           if (err.message === 'dep not found') {
             error.validationError = `Cannot find preset's package (${preset})`;
           } else if (err.message === 'preset renovate-config not found') {
-            // istanbul ignore next
             error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
           } else if (err.message === 'preset not found') {
             error.validationError = `Preset name not found within published preset config (${preset})`;
@@ -223,18 +222,22 @@ export async function resolveConfigPresets(
       config[key] = [];
       for (const element of val) {
         if (is.object(element)) {
-          config[key].push(
-            await resolveConfigPresets(element, ignorePresets, existingPresets)
+          (config[key] as RenovateConfig[]).push(
+            await resolveConfigPresets(
+              element as RenovateConfig,
+              ignorePresets,
+              existingPresets
+            )
           );
         } else {
-          config[key].push(element);
+          (config[key] as RenovateConfig[]).push(element);
         }
       }
     } else if (is.object(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
       config[key] = await resolveConfigPresets(
-        val,
+        val as RenovateConfig,
         ignorePresets,
         existingPresets
       );
