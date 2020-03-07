@@ -1,16 +1,17 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { GetReleasesConfig, ReleaseResult, Release } from '../common';
+import {
+  DatasourceError,
+  GetReleasesConfig,
+  ReleaseResult,
+  Release,
+} from '../common';
 
 export const id = 'galaxy';
 
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    return null;
-  }
-
   const cacheNamespace = 'datasource-galaxy';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(
@@ -34,7 +35,6 @@ export async function getPkgReleases({
     '&name=' +
     projectName;
   const galaxyProjectUrl = baseUrl + userName + '/' + projectName;
-
   try {
     let res: any = await got(galaxyAPIUrl, {
       hostType: id,
@@ -92,16 +92,16 @@ export async function getPkgReleases({
         return release;
       }
     );
-
     const cacheMinutes = 10;
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
-      return null;
+    if (
+      err.statusCode === 429 ||
+      (err.statusCode >= 500 && err.statusCode < 600)
+    ) {
+      throw new DatasourceError(err);
     }
-    logger.warn({ err, lookupName }, 'galaxy lookup failure: Unknown error');
-    return null;
+    throw err;
   }
 }

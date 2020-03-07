@@ -75,6 +75,15 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
 
 exports[`config/validation validateConfig(config) included managers of the wrong type 1`] = `

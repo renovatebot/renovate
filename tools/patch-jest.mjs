@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const shell = require('shelljs');
-const { existsSync, readFileSync, writeFileSync } = require('fs');
+import shell from 'shelljs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 const force = process.argv.some(s => s === '--force' || s === '-f');
 const restore = process.argv.some(s => s === '--restore' || s === '-r');

@@ -275,6 +275,8 @@ Object {
 }
 `;
 
+exports[`config/presets resolvePreset ignores presets 1`] = `Object {}`;
+
 exports[`config/presets resolvePreset migrates automerge in presets 1`] = `
 Object {
   "automergeType": "pr",
@@ -695,6 +697,18 @@ exports[`config/presets resolvePreset throws if valid and invalid 1`] = `undefin
 exports[`config/presets resolvePreset throws if valid and invalid 2`] = `"Preset name not found within published preset config (wrongpreset:invalid-preset)"`;
 
 exports[`config/presets resolvePreset throws if valid and invalid 3`] = `undefined`;
+
+exports[`config/presets resolvePreset throws noconfig 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws noconfig 2`] = `"Preset package is missing a renovate-config entry (noconfig:base)"`;
+
+exports[`config/presets resolvePreset throws noconfig 3`] = `undefined`;
+
+exports[`config/presets resolvePreset throws throw 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws throw 2`] = `undefined`;
+
+exports[`config/presets resolvePreset throws throw 3`] = `undefined`;
 
 exports[`config/presets resolvePreset works with valid 1`] = `
 Object {

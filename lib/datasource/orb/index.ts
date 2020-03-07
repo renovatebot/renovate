@@ -35,45 +35,35 @@ export async function getPkgReleases({
     query: `{orb(name:"${lookupName}"){name, homeUrl, versions {version, createdAt}}}`,
     variables: {},
   };
-  try {
-    const res: OrbRelease = (
-      await got.post(url, {
-        body,
-        hostType: id,
-        json: true,
-        retry: 5,
-      })
-    ).body.data.orb;
-    if (!res) {
-      logger.debug({ lookupName }, 'Failed to look up orb');
-      return null;
-    }
-    // Simplify response before caching and returning
-    const dep: ReleaseResult = {
-      name: lookupName,
-      versions: {},
-      releases: null,
-    };
-    if (res.homeUrl && res.homeUrl.length) {
-      dep.homepage = res.homeUrl;
-    }
-    dep.homepage =
-      dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
-    const releases = res.versions.map(v => v.version);
-    dep.releases = releases.map(version => ({
-      version,
-    }));
-    logger.trace({ dep }, 'dep');
-    const cacheMinutes = 15;
-    await renovateCache.set(cacheNamespace, cacheKey, dep, cacheMinutes);
-    return dep;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'CircleCI Orb lookup error');
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ lookupName }, `CircleCI Orb lookup failure: not found`);
-      return null;
-    }
-    logger.warn({ lookupName }, 'CircleCI Orb lookup failure: Unknown error');
+  const res: OrbRelease = (
+    await got.post(url, {
+      body,
+      hostType: id,
+      json: true,
+      retry: 5,
+    })
+  ).body.data.orb;
+  if (!res) {
+    logger.debug({ lookupName }, 'Failed to look up orb');
     return null;
   }
+  // Simplify response before caching and returning
+  const dep: ReleaseResult = {
+    name: lookupName,
+    versions: {},
+    releases: null,
+  };
+  if (res.homeUrl && res.homeUrl.length) {
+    dep.homepage = res.homeUrl;
+  }
+  dep.homepage =
+    dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
+  const releases = res.versions.map(v => v.version);
+  dep.releases = releases.map(version => ({
+    version,
+  }));
+  logger.trace({ dep }, 'dep');
+  const cacheMinutes = 15;
+  await renovateCache.set(cacheNamespace, cacheKey, dep, cacheMinutes);
+  return dep;
 }

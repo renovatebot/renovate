@@ -43,7 +43,6 @@ function validateManager(manager): boolean {
 }
 
 const managers = loadModules<ManagerApi>(__dirname, validateManager);
-
 const managerList = Object.keys(managers);
 
 const languageList = [

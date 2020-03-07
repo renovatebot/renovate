@@ -20,8 +20,7 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
     it('returns nested errors', async () => {
-      /** @type any */
-      const config = {
+      const config: RenovateConfig = {
         foo: 1,
         schedule: ['after 5pm'],
         timezone: 'Asia/Singapore',
@@ -34,6 +33,7 @@ describe('config/validation', () => {
         lockFileMaintenance: {
           bar: 2,
         },
+        major: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config
@@ -97,6 +97,7 @@ describe('config/validation', () => {
             enabled: false,
           },
         ],
+        major: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config
@@ -174,6 +175,136 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+    });
+    it('errors if no regexManager matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: [],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('validates regEx for each matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['***$}{]]['],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('passes if regexManager fields are present', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+    it('errors if extra regexManager fields are present', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('errors if regexManager fields are missing', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['ENV (.*?)\\s'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+      expect(errors).toHaveLength(1);
+    });
+    it('ignore keys', async () => {
+      const config = {
+        $schema: 'renovate.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('validates timezone preset', async () => {
+      const config = {
+        extends: [':timezone', ':timezone(Europe/Berlin)'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('does not validate compatibility children', async () => {
+      const config = {
+        compatibility: { packageRules: [{}] },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('validates object with ignored children', async () => {
+      const config = {
+        prBodyDefinitions: {},
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
   });
 });

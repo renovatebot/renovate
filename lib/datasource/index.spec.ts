@@ -27,6 +27,13 @@ describe('datasource/index', () => {
       })
     ).toBeNull();
   });
+  it('returns null for no lookupName', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'npm',
+      })
+    ).toBeNull();
+  });
   it('returns null for unknown datasource', async () => {
     expect(
       await datasource.getPkgReleases({
@@ -65,7 +72,7 @@ describe('datasource/index', () => {
   it('trims sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
-      releases: [],
+      releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,

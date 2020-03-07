@@ -26,6 +26,14 @@ export interface ExtractConfig extends ManagerConfig {
   versioning?: string;
 }
 
+export interface CustomExtractConfig extends ExtractConfig {
+  matchStrings: string[];
+  depNameTemplate?: string;
+  lookupNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
+}
+
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   compatibility?: Record<string, string>;
@@ -91,6 +99,7 @@ export interface PackageFile<T = Record<string, any>>
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
+  matchStrings?: string[];
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -216,13 +225,13 @@ export interface ManagerApi {
     config: PackageUpdateConfig
   ): Result<PackageUpdateResult[]>;
 
-  getRangeStrategy(config: RangeConfig): RangeStrategy;
+  getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact
   ): Result<UpdateArtifactsResult[] | null>;
 
-  updateDependency(
+  updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
