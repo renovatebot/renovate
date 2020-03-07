@@ -66,5 +66,13 @@ describe('datasource/galaxy', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
+    it('throws for 404', async () => {
+      const err = new Error();
+      err.statusCode = 404;
+      got.mockImplementationOnce(() => {
+        throw err;
+      });
+      await expect(getPkgReleases({ lookupName: 'foo.bar' })).rejects.toThrow();
+    });
   });
 });
