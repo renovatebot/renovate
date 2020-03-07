@@ -44,13 +44,13 @@ describe('datasource/crate', () => {
         await getPkgReleases({ lookupName: 'non_existent_crate' })
       ).toBeNull();
     });
-    it('returns null for 404', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      expect(await getPkgReleases({ lookupName: 'some_crate' })).toBeNull();
+    it('throws for 404', async () => {
+      const err = new Error();
+      err.statusCode = 404;
+      got.mockImplementationOnce(() => {
+        throw err;
+      });
+      await expect(getPkgReleases({ lookupName: 'foo/bar' })).rejects.toThrow();
     });
     it('throws for 5xx', async () => {
       got.mockImplementationOnce(() =>
@@ -66,12 +66,6 @@ describe('datasource/crate', () => {
       }
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
-    });
-    it('returns null for unknown error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
-      expect(await getPkgReleases({ lookupName: 'some_crate' })).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
@@ -103,13 +97,6 @@ describe('datasource/crate', () => {
         body: res3,
       });
       const res = await getPkgReleases({ lookupName: 'some_crate' });
-      expect(res).toBeNull();
-    });
-    it('returns null if lookupName is undefined', async () => {
-      got.mockReturnValueOnce({
-        body: res1,
-      });
-      const res = await getPkgReleases({ lookupName: undefined });
       expect(res).toBeNull();
     });
   });

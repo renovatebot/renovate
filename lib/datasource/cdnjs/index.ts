@@ -50,12 +50,6 @@ export async function getDigest(
 export async function getPkgReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('CDNJS lookup failure: empty lookupName');
-    return null;
-  }
-
   const [library, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 
@@ -94,23 +88,12 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    const errorData = { library, err };
-
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    if (err.statusCode === 401) {
-      logger.debug(errorData, 'Authorization error');
-    } else if (err.statusCode === 404) {
-      logger.debug(errorData, 'Package lookup error');
-    } else {
-      logger.debug(errorData, 'CDNJS lookup failure: Unknown error');
-      throw new DatasourceError(err);
-    }
+    throw err;
   }
-
-  return null;
 }

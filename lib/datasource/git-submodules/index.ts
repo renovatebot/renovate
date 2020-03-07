@@ -2,7 +2,6 @@ import Git from 'simple-git/promise';
 import { URL } from 'url';
 
 import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
-import { logger } from '../../logger';
 
 export const id = 'git-submodules';
 
@@ -22,31 +21,26 @@ export async function getPkgReleases({
   }
 
   const git = Git();
-  try {
-    const newHash = (
-      await git.listRemote(['--refs', registryUrls[0], registryUrls[1]])
-    )
-      .trim()
-      .split(/\t/)[0];
+  const newHash = (
+    await git.listRemote(['--refs', registryUrls[0], registryUrls[1]])
+  )
+    .trim()
+    .split(/\t/)[0];
 
-    const sourceUrl = new URL(registryUrls[0]);
-    sourceUrl.username = '';
+  const sourceUrl = new URL(registryUrls[0]);
+  sourceUrl.username = '';
 
-    const result = {
-      sourceUrl: sourceUrl.href,
-      releases: [
-        {
-          version: newHash,
-        },
-      ],
-    };
-    const cacheMinutes = 60;
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
-    return result;
-  } catch (err) {
-    logger.debug(`Error looking up tags in ${lookupName}`);
-  }
-  return null;
+  const result = {
+    sourceUrl: sourceUrl.href,
+    releases: [
+      {
+        version: newHash,
+      },
+    ],
+  };
+  const cacheMinutes = 60;
+  await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+  return result;
 }
 
 export const getDigest = (
