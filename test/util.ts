@@ -26,3 +26,8 @@ export type RenovateConfig = _RenovateConfig;
 export const defaultConfig = getConfig();
 
 export { getConfig };
+
+export function getName(file: string): string {
+  const [, name] = /lib\/(.*?)\.spec\.ts$/.exec(file.replace(/\\/g, '/'));
+  return name;
+}
