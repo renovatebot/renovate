@@ -1244,6 +1244,7 @@ describe('workers/repository/process/lookup', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles git submodule update', async () => {
+      config.depName = 'some-path';
       config.versioning = gitVersioning.id;
       config.datasource = datasourceGitSubmodules.id;
       gitSubmodules.getPkgReleases.mockResolvedValueOnce({

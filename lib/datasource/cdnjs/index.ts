@@ -50,12 +50,6 @@ export async function getDigest(
 export async function getPkgReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('CDNJS lookup failure: empty lookupName');
-    return null;
-  }
-
   const [library, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 
