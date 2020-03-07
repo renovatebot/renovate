@@ -1,7 +1,12 @@
 import { URLSearchParams } from 'url';
 import { api, GiteaGotOptions } from './gitea-got-wrapper';
-import { GotResponse } from '../common';
+import { GotResponse, BranchStatus } from '../common';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import {
+  BRANCH_STATUS_RED,
+  BRANCH_STATUS_YELLOW,
+  BRANCH_STATUS_GREEN,
+} from '../../constants/branch-constants';
 
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
@@ -473,6 +478,27 @@ export async function createCommitStatus(
 
   return res.body;
 }
+
+export const giteaToRenovateStatusMapping: Record<
+  CommitStatusType,
+  BranchStatus | null
+> = {
+  unknown: null,
+  success: BRANCH_STATUS_GREEN,
+  pending: BRANCH_STATUS_YELLOW,
+  warning: BRANCH_STATUS_RED,
+  failure: BRANCH_STATUS_RED,
+  error: BRANCH_STATUS_RED,
+};
+
+export const renovateToGiteaStatusMapping: Record<
+  BranchStatus,
+  CommitStatusType
+> = {
+  green: 'success',
+  yellow: 'pending',
+  red: 'failure',
+};
 
 export async function getCombinedCommitStatus(
   repoPath: string,

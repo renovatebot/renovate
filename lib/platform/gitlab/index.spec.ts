@@ -563,7 +563,7 @@ describe('platform/gitlab', () => {
         branchName: 'some-branch',
         context: 'some-context',
         description: 'some-description',
-        state: 'some-state',
+        state: BRANCH_STATUS_YELLOW,
         url: 'some-url',
       });
       expect(api.post).toHaveBeenCalledTimes(1);

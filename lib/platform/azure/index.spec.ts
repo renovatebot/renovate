@@ -856,7 +856,7 @@ describe('platform/azure', () => {
         branchName: 'test',
         context: 'test',
         description: 'test',
-        state: 'test',
+        state: BRANCH_STATUS_YELLOW,
         url: 'test',
       });
       expect(res).toBeUndefined();

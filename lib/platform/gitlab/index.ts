@@ -630,7 +630,7 @@ export function getRepoStatus(): Promise<StatusResult> {
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string> {
+): Promise<BranchStatus | null> {
   // cache-bust in case we have rebased
   const res = await getStatus(branchName, false);
   logger.debug(`Got res with ${res.length} results`);

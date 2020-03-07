@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
-import { platform } from '../../platform';
+import { platform, BranchStatus } from '../../platform';
 import {
   BRANCH_STATUS_GREEN,
   BRANCH_STATUS_YELLOW,
@@ -10,7 +10,7 @@ async function setStatusCheck(
   branchName: string,
   context: string,
   description: string,
-  state: string,
+  state: BranchStatus,
   url: string
 ): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
@@ -33,7 +33,7 @@ async function setStatusCheck(
 }
 
 export type StabilityConfig = RenovateConfig & {
-  stabilityStatus?: string;
+  stabilityStatus?: BranchStatus;
   branchName: string;
 };
 
@@ -43,7 +43,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   }
   const context = `renovate/stability-days`;
   const description =
-    config.stabilityStatus === 'success'
+    config.stabilityStatus === BRANCH_STATUS_GREEN
       ? 'Updates have met stability days requirement'
       : 'Updates have not met stability days requirement';
   await setStatusCheck(

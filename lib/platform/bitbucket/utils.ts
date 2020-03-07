@@ -59,12 +59,7 @@ export const prStates = {
   all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
 };
 
-export const buildStates: {
-  [key: string]: BitbucketBranchState;
-  green: BitbucketBranchState;
-  red: BitbucketBranchState;
-  yellow: BitbucketBranchState;
-} = {
+export const buildStates = {
   green: 'SUCCESSFUL',
   red: 'FAILED',
   yellow: 'INPROGRESS',

@@ -371,7 +371,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBranchStatus({
         branchName: 'some-branch',
-        state: 'some-state',
+        state: BRANCH_STATUS_GREEN,
         context: 'some-context',
         description: 'some-description',
         ...bsc,
@@ -386,7 +386,7 @@ describe('platform/gitea', () => {
         mockRepo.full_name,
         mockCommitHash,
         {
-          state: 'some-state',
+          state: 'success',
           context: 'some-context',
           description: 'some-description',
         }
@@ -416,7 +416,7 @@ describe('platform/gitea', () => {
         mockRepo.full_name,
         mockCommitHash,
         {
-          state: 'some-state',
+          state: 'success',
           context: 'some-context',
           description: 'some-description',
           target_url: 'some-url',
@@ -456,8 +456,8 @@ describe('platform/gitea', () => {
       );
     });
 
-    it('should return pending state for unknown result', async () => {
-      expect(await getBranchStatus('unknown')).toEqual(BRANCH_STATUS_YELLOW);
+    it('should return null for unknown result', async () => {
+      expect(await getBranchStatus('unknown')).toBeNull();
     });
 
     it('should return pending state for pending result', async () => {
@@ -468,8 +468,8 @@ describe('platform/gitea', () => {
       expect(await getBranchStatus('success')).toEqual(BRANCH_STATUS_GREEN);
     });
 
-    it('should return failed state for all other results', async () => {
-      expect(await getBranchStatus('invalid')).toEqual(BRANCH_STATUS_RED);
+    it('should return null for all other results', async () => {
+      expect(await getBranchStatus('invalid')).toBeNull();
     });
 
     it('should abort when branch status returns 404', async () => {
@@ -530,7 +530,7 @@ describe('platform/gitea', () => {
 
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
-      ).toEqual('success');
+      ).toEqual(BRANCH_STATUS_GREEN);
     });
   });
 

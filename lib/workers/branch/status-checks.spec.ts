@@ -5,7 +5,10 @@ import {
   UnpublishableConfig,
 } from './status-checks';
 import { defaultConfig, platform } from '../../../test/util';
-import { BRANCH_STATUS_GREEN } from '../../constants/branch-constants';
+import {
+  BRANCH_STATUS_GREEN,
+  BRANCH_STATUS_YELLOW,
+} from '../../constants/branch-constants';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {
@@ -23,14 +26,14 @@ describe('workers/branch/status-checks', () => {
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
-    it('sets status pending', async () => {
-      config.stabilityStatus = 'pending';
+    it('sets status yellow', async () => {
+      config.stabilityStatus = BRANCH_STATUS_YELLOW;
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
-    it('sets status success', async () => {
-      config.stabilityStatus = 'success';
+    it('sets status green', async () => {
+      config.stabilityStatus = BRANCH_STATUS_GREEN;
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);

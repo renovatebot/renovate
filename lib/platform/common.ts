@@ -121,7 +121,7 @@ export interface BranchStatusConfig {
   branchName: string;
   context: string;
   description: string;
-  state: string | null;
+  state: BranchStatus;
   url?: string;
 }
 export interface FindPRConfig {
@@ -170,7 +170,10 @@ export interface Platform {
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
-  getBranchStatusCheck(branchName: string, context: string): Promise<string>;
+  getBranchStatusCheck(
+    branchName: string,
+    context: string
+  ): Promise<BranchStatus | null>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;

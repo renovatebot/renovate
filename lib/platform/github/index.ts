@@ -1202,7 +1202,7 @@ const githubToRenovateStatusMapping = {
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string> {
+): Promise<BranchStatus | null> {
   try {
     const res = await getStatusCheck(branchName);
     for (const check of res) {
@@ -1710,7 +1710,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: 'success',
+      state: BRANCH_STATUS_YELLOW,
       url: 'https://github.com/renovatebot/renovate',
     });
   }

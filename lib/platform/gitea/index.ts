@@ -34,7 +34,6 @@ import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
 import {
   BRANCH_STATUS_GREEN,
-  BRANCH_STATUS_YELLOW,
   BRANCH_STATUS_RED,
 } from '../../constants/branch-constants';
 import * as helper from './gitea-helper';
@@ -360,7 +359,7 @@ const platform: Platform = {
       // Create new status for branch commit
       const branchCommit = await config.storage.getBranchCommit(branchName);
       await helper.createCommitStatus(config.repository, branchCommit, {
-        state: state ? (state as helper.CommitStatusType) : 'pending',
+        state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
         description,
         ...(target_url && { target_url }),
@@ -378,7 +377,7 @@ const platform: Platform = {
   async getBranchStatus(
     branchName: string,
     requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus> {
+  ): Promise<BranchStatus | null> {
     if (!requiredStatusChecks) {
       return BRANCH_STATUS_GREEN;
     }
@@ -404,28 +403,20 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
-    switch (ccs.worstStatus) {
-      case 'unknown':
-      case 'pending':
-        return BRANCH_STATUS_YELLOW;
-      case 'success':
-        return BRANCH_STATUS_GREEN;
-      default:
-        return BRANCH_STATUS_RED;
-    }
+    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] || null;
   },
 
   async getBranchStatusCheck(
     branchName: string,
     context: string
-  ): Promise<string> {
+  ): Promise<BranchStatus | null> {
     const ccs = await helper.getCombinedCommitStatus(
       config.repository,
       branchName
     );
     const cs = ccs.statuses.find(s => s.context === context);
-
-    return cs ? cs.status : null;
+    if (!cs) return null;
+    return helper.giteaToRenovateStatusMapping[cs.status] || null;
   },
 
   async setBaseBranch(

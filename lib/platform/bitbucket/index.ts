@@ -443,18 +443,19 @@ export async function getBranchStatus(
   return BRANCH_STATUS_GREEN;
 }
 
+const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
+  SUCCESSFUL: BRANCH_STATUS_GREEN,
+  INPROGRESS: BRANCH_STATUS_YELLOW,
+  FAILED: BRANCH_STATUS_RED,
+};
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = (statuses.find(status => status.key === context) || {}).state;
-
-  return (
-    Object.keys(utils.buildStates).find(
-      stateKey => utils.buildStates[stateKey] === bbState
-    ) || null
-  );
+  return bbToRenovateStatusMapping[bbState] || null;
 }
 
 export async function setBranchStatus({
