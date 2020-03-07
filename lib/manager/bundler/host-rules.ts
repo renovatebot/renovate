@@ -1,5 +1,6 @@
 import URL from 'url';
-import { findAll, HostRule } from '../../util/host-rules';
+import { HostRule } from '../../types';
+import { findAll } from '../../util/host-rules';
 
 function isAuthenticatable(rule: HostRule): boolean {
   return (
