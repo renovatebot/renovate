@@ -51,5 +51,28 @@ describe('datasource/galaxy', () => {
       const res = await getPkgReleases({ lookupName: 'foo.bar' });
       expect(res).toBeNull();
     });
+    it('throws for 5xx', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      let e;
+      try {
+        await getPkgReleases({ lookupName: 'some_crate' });
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e).toMatchSnapshot();
+    });
+    it('throws for 404', async () => {
+      const err = new Error();
+      err.statusCode = 404;
+      got.mockImplementationOnce(() => {
+        throw err;
+      });
+      await expect(getPkgReleases({ lookupName: 'foo.bar' })).rejects.toThrow();
+    });
   });
 });
