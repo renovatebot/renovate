@@ -80,5 +80,20 @@ describe('datasource/galaxy', () => {
       const res = await getPkgReleases({ lookupName: undefined });
       expect(res).toBeNull();
     });
+    it('throws for 5xx', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      let e;
+      try {
+        await getPkgReleases({ lookupName: 'some_crate' });
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e).toMatchSnapshot();
+    });
   });
 });

@@ -1,6 +1,11 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { GetReleasesConfig, ReleaseResult, Release } from '../common';
+import {
+  DatasourceError,
+  GetReleasesConfig,
+  ReleaseResult,
+  Release,
+} from '../common';
 
 export const id = 'galaxy';
 
@@ -100,6 +105,12 @@ export async function getPkgReleases({
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.debug({ lookupName }, `Dependency lookup failure: not found`);
       return null;
+    }
+    if (
+      err.statusCode === 429 ||
+      (err.statusCode >= 500 && err.statusCode < 600)
+    ) {
+      throw new DatasourceError(err);
     }
     logger.warn({ err, lookupName }, 'galaxy lookup failure: Unknown error');
     return null;
