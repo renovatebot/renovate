@@ -2,7 +2,6 @@ import URL from 'url';
 import GitStorage, { CommitFilesConfig, StatusResult } from '../git/storage';
 import * as hostRules from '../../util/host-rules';
 import {
-  BranchStatus,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -32,10 +31,7 @@ import { RenovateConfig } from '../../config';
 import { configFileNames } from '../../config/app-strings';
 import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
-import {
-  BRANCH_STATUS_GREEN,
-  BRANCH_STATUS_RED,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../constants/branch-constants';
 import * as helper from './gitea-helper';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 
@@ -379,12 +375,12 @@ const platform: Platform = {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus | null> {
     if (!requiredStatusChecks) {
-      return BRANCH_STATUS_GREEN;
+      return BranchStatus.green;
     }
 
     if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
       logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BRANCH_STATUS_RED;
+      return BranchStatus.red;
     }
 
     let ccs: helper.CombinedCommitStatus;

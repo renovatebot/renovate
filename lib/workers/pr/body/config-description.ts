@@ -1,7 +1,7 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
 import { BranchConfig } from '../../common';
-import { BRANCH_STATUS_RED } from '../../../constants/branch-constants';
+import { BranchStatus } from '../../../constants/branch-constants';
 
 export async function getPrConfigDescription(
   config: BranchConfig
@@ -31,7 +31,7 @@ export async function getPrConfigDescription(
       config.requiredStatusChecks
     );
     // istanbul ignore if
-    if (branchStatus === BRANCH_STATUS_RED) {
+    if (branchStatus === BranchStatus.red) {
       prBody += 'Disabled due to failing status checks.';
     } else {
       prBody += 'Enabled.';

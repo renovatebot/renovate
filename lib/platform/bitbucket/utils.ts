@@ -1,8 +1,9 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
-import { GotResponse, Pr, BranchStatus } from '../common';
+import { GotResponse, Pr } from '../common';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import { BranchStatus } from '../../constants/branch-constants';
 
 export interface Config {
   baseBranch: string;

@@ -10,11 +10,7 @@ import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import {
-  BRANCH_STATUS_GREEN,
-  BRANCH_STATUS_YELLOW,
-  BRANCH_STATUS_RED,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../constants/branch-constants';
 import { GotResponse, Platform } from '..';
 import { partial } from '../../../test/util';
 
@@ -437,11 +433,11 @@ describe('platform/gitlab', () => {
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('returns success if requiredStatusChecks null', async () => {
       const res = await gitlab.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BRANCH_STATUS_GREEN);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       const res = await gitlab.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BRANCH_STATUS_RED);
+      expect(res).toEqual(BranchStatus.red);
     });
     it('returns pending if no results', async () => {
       await initRepo();
@@ -451,7 +447,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_YELLOW);
+      expect(res).toEqual(BranchStatus.yellow);
     });
     it('returns success if all are success', async () => {
       await initRepo();
@@ -461,7 +457,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_GREEN);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('returns success if optional jobs fail', async () => {
       await initRepo();
@@ -474,7 +470,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_GREEN);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('returns failure if any mandatory jobs fails', async () => {
       await initRepo();
@@ -488,7 +484,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_RED);
+      expect(res).toEqual(BranchStatus.red);
     });
     it('maps custom statuses to yellow', async () => {
       await initRepo();
@@ -498,7 +494,7 @@ describe('platform/gitlab', () => {
         })
       );
       const res = await gitlab.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_YELLOW);
+      expect(res).toEqual(BranchStatus.yellow);
     });
     it('throws repository-changed', async () => {
       expect.assertions(1);
@@ -553,21 +549,24 @@ describe('platform/gitlab', () => {
         'somebranch',
         'some-context'
       );
-      expect(res).toEqual(BRANCH_STATUS_GREEN);
+      expect(res).toEqual(BranchStatus.green);
     });
   });
   describe('setBranchStatus', () => {
-    it('sets branch status', async () => {
-      await initRepo();
-      await gitlab.setBranchStatus({
-        branchName: 'some-branch',
-        context: 'some-context',
-        description: 'some-description',
-        state: BRANCH_STATUS_YELLOW,
-        url: 'some-url',
-      });
-      expect(api.post).toHaveBeenCalledTimes(1);
-    });
+    it.each([BranchStatus.green, BranchStatus.yellow, BranchStatus.red])(
+      'sets branch status yellow',
+      async state => {
+        await initRepo();
+        await gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state,
+          url: 'some-url',
+        });
+        expect(api.post).toHaveBeenCalledTimes(1);
+      }
+    );
   });
   describe('mergeBranch()', () => {
     it('sends to gitFs', async () => {

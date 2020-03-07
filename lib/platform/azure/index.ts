@@ -20,7 +20,6 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
-  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,11 +30,7 @@ import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import {
-  BRANCH_STATUS_GREEN,
-  BRANCH_STATUS_YELLOW,
-  BRANCH_STATUS_RED,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../constants/branch-constants';
 import { RenovateConfig } from '../../config';
 
 interface Config {
@@ -402,9 +397,9 @@ export async function getBranchStatusCheck(
     azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   if (branch.aheadCount === 0) {
-    return BRANCH_STATUS_GREEN;
+    return BranchStatus.green;
   }
-  return BRANCH_STATUS_YELLOW;
+  return BranchStatus.yellow;
 }
 
 export async function getBranchStatus(
@@ -414,12 +409,12 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return BRANCH_STATUS_GREEN;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_RED;
+    return BranchStatus.red;
   }
   const branchStatusCheck = await getBranchStatusCheck(branchName);
   return branchStatusCheck;

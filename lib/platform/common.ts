@@ -2,6 +2,7 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
+import { BranchStatus } from '../constants/branch-constants';
 
 export interface FileData {
   name: string;
@@ -95,9 +96,6 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-
-export type BranchStatus = 'green' | 'yellow' | 'red';
-
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
   statusCheckVerify?: boolean;

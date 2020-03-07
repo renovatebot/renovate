@@ -1,4 +1,5 @@
-// Branch Status
-export const BRANCH_STATUS_GREEN = 'green'; // 'success'
-export const BRANCH_STATUS_YELLOW = 'yellow'; // 'created', 'running'
-export const BRANCH_STATUS_RED = 'red'; //  'error', 'failed'
+export enum BranchStatus {
+  green = 'green', // 'success'
+  yellow = 'yellow', // 'created', 'running'
+  red = 'red', //  'error', 'failed'
+}

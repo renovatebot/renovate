@@ -1,10 +1,7 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
-import {
-  BRANCH_STATUS_RED,
-  BRANCH_STATUS_GREEN,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../constants/branch-constants';
 
 export type AutomergeResult =
   | 'automerged'
@@ -29,7 +26,7 @@ export async function tryBranchAutomerge(
     config.branchName,
     config.requiredStatusChecks
   );
-  if (branchStatus === BRANCH_STATUS_GREEN) {
+  if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);
     try {
       if (config.dryRun)
@@ -46,7 +43,7 @@ export async function tryBranchAutomerge(
       logger.info({ err }, `Failed to automerge branch`);
       return 'failed';
     }
-  } else if (branchStatus === BRANCH_STATUS_RED) {
+  } else if (branchStatus === BranchStatus.red) {
     return 'branch status error';
   } else {
     logger.debug(`Branch status is "${branchStatus}" - skipping automerge`);

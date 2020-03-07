@@ -1,10 +1,7 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
-import { platform, BranchStatus } from '../../platform';
-import {
-  BRANCH_STATUS_GREEN,
-  BRANCH_STATUS_YELLOW,
-} from '../../constants/branch-constants';
+import { platform } from '../../platform';
+import { BranchStatus } from '../../constants/branch-constants';
 
 async function setStatusCheck(
   branchName: string,
@@ -43,7 +40,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   }
   const context = `renovate/stability-days`;
   const description =
-    config.stabilityStatus === BRANCH_STATUS_GREEN
+    config.stabilityStatus === BranchStatus.green
       ? 'Updates have met stability days requirement'
       : 'Updates have not met stability days requirement';
   await setStatusCheck(
@@ -70,8 +67,8 @@ export async function setUnpublishable(
   const context = `renovate/unpublish-safe`;
   // Set canBeUnpublished status check
   const state = config.canBeUnpublished
-    ? BRANCH_STATUS_YELLOW
-    : BRANCH_STATUS_GREEN;
+    ? BranchStatus.yellow
+    : BranchStatus.green;
   const description = config.canBeUnpublished
     ? 'Packages < 24 hours old can be unpublished'
     : 'Packages cannot be unpublished';
