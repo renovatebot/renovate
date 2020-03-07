@@ -451,8 +451,8 @@ describe('platform/gitea', () => {
       );
     });
 
-    it('should return null for unknown result', async () => {
-      expect(await getBranchStatus('unknown')).toBeNull();
+    it('should return yellow for unknown result', async () => {
+      expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
     });
 
     it('should return pending state for pending result', async () => {
@@ -464,7 +464,7 @@ describe('platform/gitea', () => {
     });
 
     it('should return null for all other results', async () => {
-      expect(await getBranchStatus('invalid')).toBeNull();
+      expect(await getBranchStatus('invalid')).toEqual(BranchStatus.yellow);
     });
 
     it('should abort when branch status returns 404', async () => {

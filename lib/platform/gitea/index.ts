@@ -373,7 +373,7 @@ const platform: Platform = {
   async getBranchStatus(
     branchName: string,
     requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus | null> {
+  ): Promise<BranchStatus> {
     if (!requiredStatusChecks) {
       return BranchStatus.green;
     }
@@ -399,7 +399,10 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
-    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] || null;
+    return (
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ||
+      BranchStatus.yellow
+    );
   },
 
   async getBranchStatusCheck(

@@ -479,7 +479,7 @@ export const giteaToRenovateStatusMapping: Record<
   CommitStatusType,
   BranchStatus | null
 > = {
-  unknown: null,
+  unknown: BranchStatus.yellow,
   success: BranchStatus.green,
   pending: BranchStatus.yellow,
   warning: BranchStatus.red,
