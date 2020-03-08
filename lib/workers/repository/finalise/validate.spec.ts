@@ -1,10 +1,7 @@
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import * as validate from './validate';
 import { platform } from '../../../../test/util';
-import {
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_SUCCESS,
-} from '../../../constants/branch-constants';
+import { BranchStatus } from '../../../types';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -55,7 +52,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
-        BRANCH_STATUS_FAILURE
+        BranchStatus.red
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -73,7 +70,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
-        BRANCH_STATUS_FAILURE
+        BranchStatus.red
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -91,7 +88,7 @@ describe('workers/repository/validate', () => {
       await validate.validatePrs({});
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus.mock.calls[0][0].state).toEqual(
-        BRANCH_STATUS_SUCCESS
+        BranchStatus.green
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);

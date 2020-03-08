@@ -5,7 +5,7 @@ import {
   UnpublishableConfig,
 } from './status-checks';
 import { defaultConfig, platform } from '../../../test/util';
-import { BRANCH_STATUS_SUCCESS } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {
@@ -23,14 +23,14 @@ describe('workers/branch/status-checks', () => {
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
-    it('sets status pending', async () => {
-      config.stabilityStatus = 'pending';
+    it('sets status yellow', async () => {
+      config.stabilityStatus = BranchStatus.yellow;
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
-    it('sets status success', async () => {
-      config.stabilityStatus = 'success';
+    it('sets status green', async () => {
+      config.stabilityStatus = BranchStatus.green;
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -67,9 +67,7 @@ describe('workers/branch/status-checks', () => {
     it('finds canBeUnpublished false and skips status', async () => {
       config.unpublishSafe = true;
       config.canBeUnpublished = false;
-      platform.getBranchStatusCheck.mockResolvedValueOnce(
-        BRANCH_STATUS_SUCCESS
-      );
+      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);

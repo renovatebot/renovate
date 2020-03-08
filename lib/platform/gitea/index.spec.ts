@@ -10,7 +10,6 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
 import {
-  BranchStatus,
   BranchStatusConfig,
   GotResponse,
   RepoConfig,
@@ -18,11 +17,7 @@ import {
   Platform,
 } from '..';
 import { logger as _logger } from '../../logger';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import { GiteaGotApi } from './gitea-got-wrapper';
 import { CommitFilesConfig, File } from '../git/storage';
 
@@ -371,7 +366,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBranchStatus({
         branchName: 'some-branch',
-        state: 'some-state',
+        state: BranchStatus.green,
         context: 'some-context',
         description: 'some-description',
         ...bsc,
@@ -386,7 +381,7 @@ describe('platform/gitea', () => {
         mockRepo.full_name,
         mockCommitHash,
         {
-          state: 'some-state',
+          state: 'success',
           context: 'some-context',
           description: 'some-description',
         }
@@ -416,7 +411,7 @@ describe('platform/gitea', () => {
         mockRepo.full_name,
         mockCommitHash,
         {
-          state: 'some-state',
+          state: 'success',
           context: 'some-context',
           description: 'some-description',
           target_url: 'some-url',
@@ -446,30 +441,30 @@ describe('platform/gitea', () => {
 
     it('should return success if requiredStatusChecks null', async () => {
       expect(await gitea.getBranchStatus('some-branch', null)).toEqual(
-        BRANCH_STATUS_SUCCESS
+        BranchStatus.green
       );
     });
 
     it('should return failed if unsupported requiredStatusChecks', async () => {
       expect(await gitea.getBranchStatus('some-branch', ['foo'])).toEqual(
-        BRANCH_STATUS_FAILED
+        BranchStatus.red
       );
     });
 
-    it('should return pending state for unknown result', async () => {
-      expect(await getBranchStatus('unknown')).toEqual(BRANCH_STATUS_PENDING);
+    it('should return yellow for unknown result', async () => {
+      expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
     });
 
     it('should return pending state for pending result', async () => {
-      expect(await getBranchStatus('pending')).toEqual(BRANCH_STATUS_PENDING);
+      expect(await getBranchStatus('pending')).toEqual(BranchStatus.yellow);
     });
 
     it('should return success state for success result', async () => {
-      expect(await getBranchStatus('success')).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(await getBranchStatus('success')).toEqual(BranchStatus.green);
     });
 
-    it('should return failed state for all other results', async () => {
-      expect(await getBranchStatus('invalid')).toEqual(BRANCH_STATUS_FAILED);
+    it('should return null for all other results', async () => {
+      expect(await getBranchStatus('invalid')).toEqual(BranchStatus.yellow);
     });
 
     it('should abort when branch status returns 404', async () => {
@@ -515,8 +510,23 @@ describe('platform/gitea', () => {
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toBeNull();
     });
+    it('should return yellow with unknown status', async () => {
+      helper.getCombinedCommitStatus.mockResolvedValueOnce(
+        partial<ght.CombinedCommitStatus>({
+          statuses: [
+            partial<ght.CommitStatus>({
+              context: 'some-context',
+            }),
+          ],
+        })
+      );
 
-    it('should return status of matching result', async () => {
+      expect(
+        await gitea.getBranchStatusCheck('some-branch', 'some-context')
+      ).toEqual(BranchStatus.yellow);
+    });
+
+    it('should return green of matching result', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<ght.CombinedCommitStatus>({
           statuses: [
@@ -530,7 +540,7 @@ describe('platform/gitea', () => {
 
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
-      ).toEqual('success');
+      ).toEqual(BranchStatus.green);
     });
   });
 

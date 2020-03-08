@@ -2,6 +2,7 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
+import { BranchStatus } from '../types';
 
 export interface FileData {
   name: string;
@@ -95,14 +96,6 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-
-export type BranchStatus =
-  | 'pending'
-  | 'success'
-  | 'failed'
-  | 'running'
-  | 'failure';
-
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
   statusCheckVerify?: boolean;
@@ -126,7 +119,7 @@ export interface BranchStatusConfig {
   branchName: string;
   context: string;
   description: string;
-  state: string | null;
+  state: BranchStatus;
   url?: string;
 }
 export interface FindPRConfig {
@@ -175,7 +168,10 @@ export interface Platform {
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
-  getBranchStatusCheck(branchName: string, context: string): Promise<string>;
+  getBranchStatusCheck(
+    branchName: string,
+    context: string
+  ): Promise<BranchStatus | null>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
