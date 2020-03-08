@@ -472,6 +472,16 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual(BranchStatus.green);
     });
+    it('returns success if all are optional', async () => {
+      await initRepo();
+      api.get.mockResolvedValueOnce(
+        partial<GotResponse>({
+          body: [{ status: 'failed', allow_failure: true }],
+        })
+      );
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.green);
+    });
     it('returns failure if any mandatory jobs fails', async () => {
       await initRepo();
       api.get.mockResolvedValueOnce(

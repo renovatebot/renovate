@@ -510,8 +510,23 @@ describe('platform/gitea', () => {
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toBeNull();
     });
+    it('should return yellow with unknown status', async () => {
+      helper.getCombinedCommitStatus.mockResolvedValueOnce(
+        partial<ght.CombinedCommitStatus>({
+          statuses: [
+            partial<ght.CommitStatus>({
+              context: 'some-context',
+            }),
+          ],
+        })
+      );
 
-    it('should return status of matching result', async () => {
+      expect(
+        await gitea.getBranchStatusCheck('some-branch', 'some-context')
+      ).toEqual(BranchStatus.yellow);
+    });
+
+    it('should return green of matching result', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<ght.CombinedCommitStatus>({
           statuses: [

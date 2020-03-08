@@ -414,7 +414,14 @@ const platform: Platform = {
       branchName
     );
     const cs = ccs.statuses.find(s => s.context === context);
-    return helper.giteaToRenovateStatusMapping[cs?.status] || null;
+    if (!cs) return null; // no status check exists
+    const status = helper.giteaToRenovateStatusMapping[cs.status];
+    if (status) return status;
+    logger.warn(
+      { check: cs },
+      'Could not map Gitea status value to Renovate status'
+    );
+    return BranchStatus.yellow;
   },
 
   async setBaseBranch(

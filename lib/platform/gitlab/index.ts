@@ -343,20 +343,27 @@ export async function getBranchStatus(
     // Return 'pending' if we have no status checks
     return BranchStatus.yellow;
   }
-  let status: BranchStatus = BranchStatus.green;
-  // Return 'success' if all are success
-  res.forEach(check => {
-    // If one is failed then don't overwrite that
-    if (status !== BranchStatus.red) {
-      const mappedStatus: BranchStatus =
-        gitlabToRenovateStatusMapping[check.status] || BranchStatus.yellow;
-      if (!check.allow_failure) {
+  let status: BranchStatus = BranchStatus.green; // default to green
+  res
+    .filter(check => !check.allow_failure)
+    .forEach(check => {
+      if (status !== BranchStatus.red) {
+        // if red, stay red
+        let mappedStatus: BranchStatus =
+          gitlabToRenovateStatusMapping[check.status];
+        if (!mappedStatus) {
+          logger.warn(
+            { check },
+            'Could not map GitLab check.status to Renovate status'
+          );
+          mappedStatus = BranchStatus.yellow;
+        }
         if (mappedStatus !== BranchStatus.green) {
+          logger.trace({ check }, 'Found non-green check');
           status = mappedStatus;
         }
       }
-    }
-  });
+    });
   return status;
 }
 
