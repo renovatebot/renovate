@@ -388,7 +388,7 @@ export /* istanbul ignore next */ function getCommitMessages(): Promise<
 
 export async function getBranchStatusCheck(
   branchName: string,
-  context?: string
+  context: string
 ): Promise<BranchStatus> {
   logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
   const azureApiGit = await azureApi.gitApi();
@@ -416,7 +416,7 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return BranchStatus.red;
   }
-  const branchStatusCheck = await getBranchStatusCheck(branchName);
+  const branchStatusCheck = await getBranchStatusCheck(branchName, null);
   return branchStatusCheck;
 }
 
