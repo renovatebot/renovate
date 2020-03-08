@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { CargoConfig, CargoSection } from './types';
 import * as datasourceCrate from '../../datasource/crate';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedContent: CargoSection,
@@ -27,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = skipReasons.PATH_DEPENDENCY;
+          skipReason = SkipReason.PATH_DEPENDENCY;
         }
         if (git) {
-          skipReason = skipReasons.GIT_DEPENDENCY;
+          skipReason = SkipReason.GIT_DEPENDENCY;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = skipReasons.PATH_DEPENDENCY;
+        skipReason = SkipReason.PATH_DEPENDENCY;
       } else if (git) {
         currentValue = '';
-        skipReason = skipReasons.GIT_DEPENDENCY;
+        skipReason = SkipReason.GIT_DEPENDENCY;
       } else {
         currentValue = '';
-        skipReason = skipReasons.INVALID_DEPENDENCY_SPECIFICATION;
+        skipReason = SkipReason.INVALID_DEPENDENCY_SPECIFICATION;
       }
     }
     const dep: PackageDependency = {

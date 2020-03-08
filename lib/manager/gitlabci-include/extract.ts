@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 function extractDepFromInclude(includeObj: {
   file: any;
@@ -19,7 +19,7 @@ function extractDepFromInclude(includeObj: {
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = skipReasons.UNKNOWN_VERSION;
+    dep.skipReason = SkipReason.UNKNOWN_VERSION;
     return dep;
   }
   dep.currentValue = includeObj.ref;

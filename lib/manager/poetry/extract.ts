@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { PoetryFile, PoetrySection } from './types';
 import * as datasourcePypi from '../../datasource/pypi';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -27,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = skipReasons.PATH_DEPENDENCY;
+          skipReason = SkipReason.PATH_DEPENDENCY;
         }
         if (git) {
-          skipReason = skipReasons.GIT_DEPENDENCY;
+          skipReason = SkipReason.GIT_DEPENDENCY;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = skipReasons.PATH_DEPENDENCY;
+        skipReason = SkipReason.PATH_DEPENDENCY;
       } else if (git) {
         currentValue = '';
-        skipReason = skipReasons.GIT_DEPENDENCY;
+        skipReason = SkipReason.GIT_DEPENDENCY;
       } else {
         currentValue = '';
-        skipReason = skipReasons.MULTIPLE_CONSTRAINT_DEP;
+        skipReason = SkipReason.MULTIPLE_CONSTRAINT_DEP;
       }
     }
     const dep: PackageDependency = {
@@ -53,7 +53,7 @@ function extractFromSection(
     if (skipReason) {
       dep.skipReason = skipReason;
     } else if (!isValid(dep.currentValue)) {
-      dep.skipReason = skipReasons.UNKNOWN_VERSION;
+      dep.skipReason = SkipReason.UNKNOWN_VERSION;
     }
     deps.push(dep);
   });

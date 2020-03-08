@@ -3,7 +3,7 @@ import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
 import * as semverVersioning from '../../versioning/semver';
 import * as datasourceNuget from '../../datasource/nuget';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 export function extractPackageFile(
   content: string,
@@ -42,7 +42,7 @@ export function extractPackageFile(
         datasource: datasourceNuget.id,
       };
       if (!isVersion(currentValue)) {
-        dep.skipReason = skipReasons.NOT_A_VERSION;
+        dep.skipReason = SkipReason.NOT_A_VERSION;
       }
       deps.push(dep);
     }

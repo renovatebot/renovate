@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGo from '../../datasource/go';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 function getDep(
   lineNumber: number,
@@ -21,7 +21,7 @@ function getDep(
     currentValue,
   };
   if (!isVersion(currentValue)) {
-    dep.skipReason = skipReasons.UNSUPPORTED_VERSION;
+    dep.skipReason = SkipReason.UNSUPPORTED_VERSION;
   } else {
     if (depName.startsWith('gopkg.in/')) {
       const [pkg] = depName.replace('gopkg.in/', '').split('.');

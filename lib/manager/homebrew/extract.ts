@@ -2,7 +2,7 @@ import { skip, isSpace, removeComments } from './util';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
@@ -178,12 +178,12 @@ export function extractPackageFile(content: string): PackageFile | null {
     repoName = urlPathResult.repoName;
   } else {
     logger.debug('Error: Unsupported URL field');
-    skipReason = skipReasons.UNSUPPORTED_URL;
+    skipReason = SkipReason.UNSUPPORTED_URL;
   }
   const sha256 = extractSha256(cleanContent);
   if (!sha256 || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
-    skipReason = skipReasons.INVALID_SHA256;
+    skipReason = SkipReason.INVALID_SHA256;
   }
   const dep: PackageDependency = {
     depName: `${ownerName}/${repoName}`,

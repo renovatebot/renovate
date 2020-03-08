@@ -15,7 +15,7 @@ import {
   PackageDependency,
   PackageUpdateResult,
 } from '../../../manager/common';
-import skipReasons from '../../../constants/skip-reason';
+import { SkipReason } from '../../../types';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
@@ -33,7 +33,7 @@ async function fetchDepUpdates(
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
-    dep.skipReason = skipReasons.IGNORED;
+    dep.skipReason = SkipReason.IGNORED;
   } else if (
     depConfig.internalPackages &&
     depConfig.internalPackages.includes(depName)
@@ -42,10 +42,10 @@ async function fetchDepUpdates(
       { dependency: dep.depName },
       'Dependency is ignored due to being internal'
     );
-    dep.skipReason = skipReasons.INTERNAL_PACKAGE;
+    dep.skipReason = SkipReason.INTERNAL_PACKAGE;
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
-    dep.skipReason = skipReasons.DISABLED;
+    dep.skipReason = SkipReason.DISABLED;
   } else {
     let lookupResults: UpdateResult | PackageUpdateResult[];
     if (depConfig.datasource) {

@@ -6,7 +6,7 @@ import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
 import { BinarySource } from '../../util/exec/common';
-import skipReasons from '../../constants/skip-reason';
+import { SkipReason } from '../../types';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
@@ -128,7 +128,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {};
       const [, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = skipReasons.IGNORED;
+        dep.skipReason = SkipReason.IGNORED;
       }
       regex.lastIndex = 0;
       const matches = regex.exec(req);
