@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import * as _hostRules from '../../util/host-rules';
 import { RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import { BranchStatus } from '../../types/branch-status';
+import { BranchStatus } from '../../types';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;

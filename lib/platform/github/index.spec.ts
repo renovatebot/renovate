@@ -5,7 +5,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { BranchStatus } from '../../types/branch-status';
+import { BranchStatus } from '../../types';
 import { mocked } from '../../../test/util';
 
 describe('platform/github', () => {

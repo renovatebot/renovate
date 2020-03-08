@@ -17,7 +17,7 @@ import {
   Platform,
 } from '..';
 import { logger as _logger } from '../../logger';
-import { BranchStatus } from '../../types/branch-status';
+import { BranchStatus } from '../../types';
 import { GiteaGotApi } from './gitea-got-wrapper';
 import { CommitFilesConfig, File } from '../git/storage';
 

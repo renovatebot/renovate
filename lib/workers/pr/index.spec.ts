@@ -3,7 +3,7 @@ import * as _changelogHelper from './changelog';
 import { getConfig } from '../../config/defaults';
 import { platform as _platform, Pr } from '../../platform';
 import { mocked } from '../../../test/util';
-import { BranchStatus } from '../../types/branch-status';
+import { BranchStatus } from '../../types';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 
 const changelogHelper = mocked(_changelogHelper);

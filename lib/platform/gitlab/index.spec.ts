@@ -10,7 +10,7 @@ import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types/branch-status';
+import { BranchStatus } from '../../types';
 import { GotResponse, Platform } from '..';
 import { partial } from '../../../test/util';
 

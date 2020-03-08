@@ -2,7 +2,7 @@ import URL from 'url';
 import responses from './__fixtures__/responses';
 import { GotApi, RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import { BranchStatus } from '../../types/branch-status';
+import { BranchStatus } from '../../types';
 
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
