@@ -1,11 +1,12 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceDocker from '../../datasource/docker';
+import { SkipReason } from '../../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
     return {
-      skipReason: 'contains-variable',
+      skipReason: SkipReason.CONTAINS_VARIABLE,
     };
   }
   const [currentDepTag, currentDigest] = currentFrom.split('@');

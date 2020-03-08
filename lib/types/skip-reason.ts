@@ -1,5 +1,6 @@
 export enum SkipReason {
   ANY_VERSION = 'any-version',
+  CONTAINS_VARIABLE = 'contains-variable',
   DISABLED = 'disabled',
   EMPTY = 'empty',
   FILE_DEPENDENCY = 'file-dependency',
