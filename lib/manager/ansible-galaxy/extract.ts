@@ -41,7 +41,7 @@ function interpretLine(
 function finalize(dependency: PackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
-    dep.skipReason = SkipReason.NO_VERSION;
+    dep.skipReason = SkipReason.NoVersion;
     return false;
   }
 
@@ -59,7 +59,7 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = dep.managerData.src;
     dep.lookupName = dep.managerData.src;
   } else {
-    dep.skipReason = SkipReason.NO_SOURCE_MATCH;
+    dep.skipReason = SkipReason.NoSourceMatch;
     return false;
   }
   if (dep.managerData.name !== null) {

@@ -52,21 +52,21 @@ function extractFromSection(
       let nestedVersion: boolean;
       let skipReason: SkipReason;
       if (requirements.git) {
-        skipReason = SkipReason.GIT_DEPENDENCY;
+        skipReason = SkipReason.GitDependency;
       } else if (requirements.file) {
-        skipReason = SkipReason.FILE_DEPENDENCY;
+        skipReason = SkipReason.FileDependency;
       } else if (requirements.path) {
-        skipReason = SkipReason.LOCAL_DEPENDENCY;
+        skipReason = SkipReason.LocalDependency;
       } else if (requirements.version) {
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = SkipReason.ANY_VERSION;
+        skipReason = SkipReason.AnyVersion;
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = SkipReason.ANY_VERSION;
+        skipReason = SkipReason.AnyVersion;
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
@@ -74,14 +74,14 @@ function extractFromSection(
           logger.debug(
             `Skipping dependency with malformed package name "${depName}".`
           );
-          skipReason = SkipReason.INVALID_NAME;
+          skipReason = SkipReason.InvalidName;
         }
         const specifierMatches = specifierRegex.exec(currentValue);
         if (!specifierMatches) {
           logger.debug(
             `Skipping dependency with malformed version specifier "${currentValue}".`
           );
-          skipReason = SkipReason.INVALID_VERSION;
+          skipReason = SkipReason.InvalidVersion;
         }
       }
       const dep: PackageDependency = {

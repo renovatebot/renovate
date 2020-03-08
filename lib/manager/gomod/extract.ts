@@ -21,7 +21,7 @@ function getDep(
     currentValue,
   };
   if (!isVersion(currentValue)) {
-    dep.skipReason = SkipReason.UNSUPPORTED_VERSION;
+    dep.skipReason = SkipReason.UnsupportedVersion;
   } else {
     if (depName.startsWith('gopkg.in/')) {
       const [pkg] = depName.replace('gopkg.in/', '').split('.');

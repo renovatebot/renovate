@@ -19,7 +19,7 @@ function extractDepFromInclude(includeObj: {
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = SkipReason.UNKNOWN_VERSION;
+    dep.skipReason = SkipReason.UnknownVersion;
     return dep;
   }
   dep.currentValue = includeObj.ref;

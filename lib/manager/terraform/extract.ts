@@ -102,7 +102,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.lookupName = githubRefMatch[2];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
-          dep.skipReason = SkipReason.UNSUPPORTED_VERSION;
+          dep.skipReason = SkipReason.UnsupportedVersion;
         }
       } else if (gitTagsRefMatch) {
         dep.depType = 'gitTags';
@@ -113,12 +113,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
-          dep.skipReason = SkipReason.UNSUPPORTED_VERSION;
+          dep.skipReason = SkipReason.UnsupportedVersion;
         }
       } else if (dep.source) {
         const moduleParts = dep.source.split('//')[0].split('/');
         if (moduleParts[0] === '..') {
-          dep.skipReason = SkipReason.LOCAL;
+          dep.skipReason = SkipReason.Local;
         } else if (moduleParts.length >= 3) {
           dep.depType = 'terraform';
           dep.depName = moduleParts.join('/');
@@ -128,7 +128,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       } else {
         logger.debug({ dep }, 'terraform dep has no source');
-        dep.skipReason = SkipReason.NO_SOURCE;
+        dep.skipReason = SkipReason.NoSource;
       }
     } else if (
       dep.managerData.terraformDependencyType ===
@@ -141,10 +141,10 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.datasource = datasourceTerraformProvider.id;
       if (dep.managerData.lineNumber) {
         if (!isValid(dep.currentValue)) {
-          dep.skipReason = SkipReason.UNSUPPORTED_VERSION;
+          dep.skipReason = SkipReason.UnsupportedVersion;
         }
       } else if (!dep.skipReason) {
-        dep.skipReason = SkipReason.NO_VERSION;
+        dep.skipReason = SkipReason.NoVersion;
       }
     }
     delete dep.sourceLine;

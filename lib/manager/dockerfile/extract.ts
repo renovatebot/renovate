@@ -6,7 +6,7 @@ import { SkipReason } from '../../types';
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
     return {
-      skipReason: SkipReason.CONTAINS_VARIABLE,
+      skipReason: SkipReason.ContainsVariable,
     };
   }
   const [currentDepTag, currentDigest] = currentFrom.split('@');

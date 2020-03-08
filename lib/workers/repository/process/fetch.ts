@@ -33,7 +33,7 @@ async function fetchDepUpdates(
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
-    dep.skipReason = SkipReason.IGNORED;
+    dep.skipReason = SkipReason.Ignored;
   } else if (
     depConfig.internalPackages &&
     depConfig.internalPackages.includes(depName)
@@ -42,10 +42,10 @@ async function fetchDepUpdates(
       { dependency: dep.depName },
       'Dependency is ignored due to being internal'
     );
-    dep.skipReason = SkipReason.INTERNAL_PACKAGE;
+    dep.skipReason = SkipReason.InternalPackage;
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
-    dep.skipReason = SkipReason.DISABLED;
+    dep.skipReason = SkipReason.Disabled;
   } else {
     let lookupResults: UpdateResult | PackageUpdateResult[];
     if (depConfig.datasource) {

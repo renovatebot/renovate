@@ -97,7 +97,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: SkipReason.UNKNOWN_VERSION,
+        skipReason: SkipReason.UnknownVersion,
       };
 
       if (currentValue) {
@@ -116,14 +116,14 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep = {
             depName,
             groupName,
-            skipReason: SkipReason.GIT_DEPENDENCY,
+            skipReason: SkipReason.GitDependency,
           };
         }
       } else if (path) {
         dep = {
           depName,
           groupName,
-          skipReason: SkipReason.PATH_DEPENDENCY,
+          skipReason: SkipReason.PathDependency,
         };
       }
 

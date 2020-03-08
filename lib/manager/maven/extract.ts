@@ -126,9 +126,9 @@ function applyProps(
   }
 
   if (containsPlaceholder(depName)) {
-    result.skipReason = SkipReason.NAME_PLACEHOLDER;
+    result.skipReason = SkipReason.NamePlaceholder;
   } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = SkipReason.VERSION_PLACEHOLDER;
+    result.skipReason = SkipReason.VersionPlaceholder;
   }
 
   return result;

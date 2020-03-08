@@ -203,7 +203,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {
-          dep.skipReason = SkipReason.UNSUPPORTED_REMOTE;
+          dep.skipReason = SkipReason.UnsupportedRemote;
         }
       }
       if (commit) {

@@ -27,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = SkipReason.PATH_DEPENDENCY;
+          skipReason = SkipReason.PathDependency;
         }
         if (git) {
-          skipReason = SkipReason.GIT_DEPENDENCY;
+          skipReason = SkipReason.GitDependency;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = SkipReason.PATH_DEPENDENCY;
+        skipReason = SkipReason.PathDependency;
       } else if (git) {
         currentValue = '';
-        skipReason = SkipReason.GIT_DEPENDENCY;
+        skipReason = SkipReason.GitDependency;
       } else {
         currentValue = '';
-        skipReason = SkipReason.INVALID_DEPENDENCY_SPECIFICATION;
+        skipReason = SkipReason.InvalidDependencySpecification;
       }
     }
     const dep: PackageDependency = {

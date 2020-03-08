@@ -24,7 +24,7 @@ function getDeps(
 
     const dep: PackageDependency = { ...preset, depName, currentValue };
     if (!currentValue) {
-      dep.skipReason = SkipReason.NOT_A_VERSION;
+      dep.skipReason = SkipReason.NotAVersion;
     }
 
     return [...acc, dep];

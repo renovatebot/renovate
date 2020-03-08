@@ -59,20 +59,20 @@ export async function extractPackageFile(
           return res;
         }
 
-        res.skipReason = SkipReason.PLACEHOLDER_URL;
+        res.skipReason = SkipReason.PlaceholderUrl;
       } else {
         try {
           const url = new URL(dep.repository);
           if (url.protocol === 'file:') {
-            res.skipReason = SkipReason.LOCAL_DEPENDENCY;
+            res.skipReason = SkipReason.LocalDependency;
           }
         } catch (err) {
           logger.debug({ err }, 'Error parsing url');
-          res.skipReason = SkipReason.INVALID_URL;
+          res.skipReason = SkipReason.InvalidUrl;
         }
       }
     } else {
-      res.skipReason = SkipReason.NO_REPOSITORY;
+      res.skipReason = SkipReason.NoRepository;
     }
     return res;
   });

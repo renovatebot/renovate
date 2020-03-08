@@ -128,7 +128,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {};
       const [, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = SkipReason.IGNORED;
+        dep.skipReason = SkipReason.Ignored;
       }
       regex.lastIndex = 0;
       const matches = regex.exec(req);

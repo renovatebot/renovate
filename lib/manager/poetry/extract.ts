@@ -27,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = SkipReason.PATH_DEPENDENCY;
+          skipReason = SkipReason.PathDependency;
         }
         if (git) {
-          skipReason = SkipReason.GIT_DEPENDENCY;
+          skipReason = SkipReason.GitDependency;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = SkipReason.PATH_DEPENDENCY;
+        skipReason = SkipReason.PathDependency;
       } else if (git) {
         currentValue = '';
-        skipReason = SkipReason.GIT_DEPENDENCY;
+        skipReason = SkipReason.GitDependency;
       } else {
         currentValue = '';
-        skipReason = SkipReason.MULTIPLE_CONSTRAINT_DEP;
+        skipReason = SkipReason.MultipleConstraintDep;
       }
     }
     const dep: PackageDependency = {
@@ -53,7 +53,7 @@ function extractFromSection(
     if (skipReason) {
       dep.skipReason = skipReason;
     } else if (!isValid(dep.currentValue)) {
-      dep.skipReason = SkipReason.UNKNOWN_VERSION;
+      dep.skipReason = SkipReason.UnknownVersion;
     }
     deps.push(dep);
   });

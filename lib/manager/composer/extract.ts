@@ -154,10 +154,10 @@ export async function extractPackageFile(
             dep.lookupName = lookupName;
           }
           if (!depName.includes('/')) {
-            dep.skipReason = SkipReason.UNSUPPORTED;
+            dep.skipReason = SkipReason.Unsupported;
           }
           if (currentValue === '*') {
-            dep.skipReason = SkipReason.ANY_VERSION;
+            dep.skipReason = SkipReason.AnyVersion;
           }
           if (lockParsed) {
             const lockedDep = lockParsed.packages.find(

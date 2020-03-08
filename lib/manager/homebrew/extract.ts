@@ -178,12 +178,12 @@ export function extractPackageFile(content: string): PackageFile | null {
     repoName = urlPathResult.repoName;
   } else {
     logger.debug('Error: Unsupported URL field');
-    skipReason = SkipReason.UNSUPPORTED_URL;
+    skipReason = SkipReason.UnsupportedUrl;
   }
   const sha256 = extractSha256(cleanContent);
   if (!sha256 || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
-    skipReason = SkipReason.INVALID_SHA256;
+    skipReason = SkipReason.InvalidSha256;
   }
   const dep: PackageDependency = {
     depName: `${ownerName}/${repoName}`,

@@ -46,7 +46,7 @@ export function extractPackageFile(content: string): PackageFile {
           }
 
           if (dep.datasource !== datasourceHex.id) {
-            dep.skipReason = SkipReason.NON_HEX_DEPTYPES;
+            dep.skipReason = SkipReason.NonHexDeptypes;
           }
 
           // Find dep's line number

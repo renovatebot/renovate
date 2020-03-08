@@ -58,7 +58,7 @@ export async function extractPackageFile(
           .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
       } else {
-        dep.skipReason = SkipReason.NO_VERSION;
+        dep.skipReason = SkipReason.NoVersion;
       }
       if (!dep.skipReason) {
         dep.datasource = datasourceRubygems.id;

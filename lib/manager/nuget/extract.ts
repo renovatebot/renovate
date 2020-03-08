@@ -42,7 +42,7 @@ export function extractPackageFile(
         datasource: datasourceNuget.id,
       };
       if (!isVersion(currentValue)) {
-        dep.skipReason = SkipReason.NOT_A_VERSION;
+        dep.skipReason = SkipReason.NotAVersion;
       }
       deps.push(dep);
     }

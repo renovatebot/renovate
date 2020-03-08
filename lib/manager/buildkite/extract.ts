@@ -34,13 +34,13 @@ export function extractPackageFile(content: string): PackageFile | null {
           let repo: string;
           if (depName.startsWith('https://') || depName.startsWith('git@')) {
             logger.debug({ dependency: depName }, 'Skipping git plugin');
-            skipReason = SkipReason.GIT_PLUGIN;
+            skipReason = SkipReason.GitPlugin;
           } else if (!isVersion(currentValue)) {
             logger.debug(
               { currentValue },
               'Skipping non-pinned current version'
             );
-            skipReason = SkipReason.INVALID_VERSION;
+            skipReason = SkipReason.InvalidVersion;
           } else {
             const splitName = depName.split('/');
             if (splitName.length === 1) {
@@ -52,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
                 { dependency: depName },
                 'Something is wrong with buildkite plugin name'
               );
-              skipReason = SkipReason.UNKNOWN;
+              skipReason = SkipReason.Unknown;
             }
           }
           const dep: PackageDependency = {

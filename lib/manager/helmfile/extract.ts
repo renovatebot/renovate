@@ -65,18 +65,18 @@ export function extractPackageFile(
 
     // If version is null is probably a local chart
     if (!res.currentValue) {
-      res.skipReason = SkipReason.LOCAL_CHART;
+      res.skipReason = SkipReason.LocalChart;
     }
 
     // By definition on helm the chart name should be lowecase letter + number + -
     // However helmfile support templating of that field
     if (!isValidChartName(res.depName)) {
-      res.skipReason = SkipReason.UNSUPPORTED_CHART_TYPE;
+      res.skipReason = SkipReason.UnsupportedChartType;
     }
 
     // Skip in case we cannot locate the registry
     if (is.emptyArray(res.registryUrls)) {
-      res.skipReason = SkipReason.UNKNOWN_REGISTRY;
+      res.skipReason = SkipReason.UnknownRegistry;
     }
 
     return res;
