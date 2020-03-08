@@ -22,6 +22,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { StatusResult } from '../../platform/git/storage';
+import { PrResult } from '../pr';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');
@@ -291,7 +292,9 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce('needs-pr-approval');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.AwaitingApproval,
+      });
       expect(await branchWorker.processBranch(config)).toEqual(
         'needs-pr-approval'
       );
@@ -308,7 +311,9 @@ describe('workers/branch', () => {
       platform.branchExists.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce('pending');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.AwaitingNotPending,
+      });
       expect(await branchWorker.processBranch(config)).toEqual('pending');
     });
     it('returns if branch exists but updated', async () => {
@@ -341,7 +346,10 @@ describe('workers/branch', () => {
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -359,7 +367,10 @@ describe('workers/branch', () => {
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -378,7 +389,10 @@ describe('workers/branch', () => {
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -398,7 +412,10 @@ describe('workers/branch', () => {
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -418,7 +435,10 @@ describe('workers/branch', () => {
       } as never);
       platform.branchExists.mockResolvedValueOnce(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -436,7 +456,10 @@ describe('workers/branch', () => {
       config.recreateClosed = true;
       platform.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       prWorker.checkAutoMerge.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
@@ -547,7 +570,10 @@ describe('workers/branch', () => {
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      prWorker.ensurePr.mockResolvedValueOnce({} as never);
+      prWorker.ensurePr.mockResolvedValueOnce({
+        result: PrResult.Created,
+        pr: {},
+      } as never);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({

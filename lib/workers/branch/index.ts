@@ -15,7 +15,7 @@ import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
 import { setStability, setUnpublishable } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
-import { ensurePr, checkAutoMerge } from '../pr';
+import { ensurePr, checkAutoMerge, PrResult } from '../pr';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
@@ -546,12 +546,15 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const pr = await ensurePr(config);
+    const { result, pr } = await ensurePr(config);
     // TODO: ensurePr should check for automerge itself
-    if (pr === 'needs-pr-approval') {
+    if (result === PrResult.AwaitingApproval) {
       return 'needs-pr-approval';
     }
-    if (pr === 'pending') {
+    if (
+      result === PrResult.AwaitingGreenBranch ||
+      result === PrResult.AwaitingNotPending
+    ) {
       return 'pending';
     }
     if (pr) {
