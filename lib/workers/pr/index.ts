@@ -82,15 +82,13 @@ export enum PrResult {
   Updated = 'updated',
 }
 
-export interface EnsurePrResult {
-  result: PrResult;
-  pr?: Pr;
-}
-
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
-): Promise<EnsurePrResult> {
+): Promise<{
+  result: PrResult;
+  pr?: Pr;
+}> {
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
