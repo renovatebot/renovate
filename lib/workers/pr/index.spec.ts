@@ -390,7 +390,7 @@ describe('workers/pr', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(pr).toMatchObject(modifiedPr);
     });
-    it('should return unmodified existing PR', async () => {
+    it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
       config.automerge = true;
       config.schedule = 'before 5am';
