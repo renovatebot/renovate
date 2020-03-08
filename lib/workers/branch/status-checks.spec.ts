@@ -5,7 +5,7 @@ import {
   UnpublishableConfig,
 } from './status-checks';
 import { defaultConfig, platform } from '../../../test/util';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types/branch-status';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {

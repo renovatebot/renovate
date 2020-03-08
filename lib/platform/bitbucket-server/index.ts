@@ -30,7 +30,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)

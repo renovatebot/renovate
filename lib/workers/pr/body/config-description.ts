@@ -1,7 +1,7 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
 import { BranchConfig } from '../../common';
-import { BranchStatus } from '../../../constants/branch-constants';
+import { BranchStatus } from '../../../types/branch-status';
 
 export async function getPrConfigDescription(
   config: BranchConfig

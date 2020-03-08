@@ -40,7 +40,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import {
   PR_STATE_ALL,
   PR_STATE_CLOSED,

@@ -31,7 +31,7 @@ import { RenovateConfig } from '../../config';
 import { configFileNames } from '../../config/app-strings';
 import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import * as helper from './gitea-helper';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 

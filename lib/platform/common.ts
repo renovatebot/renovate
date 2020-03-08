@@ -2,7 +2,7 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
-import { BranchStatus } from '../constants/branch-constants';
+import { BranchStatus } from '../types/branch-status';
 
 export interface FileData {
   name: string;

@@ -6,7 +6,7 @@ import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import { BranchStatus } from '../../../constants/branch-constants';
+import { BranchStatus } from '../../../types/branch-status';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())

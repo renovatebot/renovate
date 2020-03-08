@@ -1,7 +1,7 @@
 import { tryBranchAutomerge } from './automerge';
 import { defaultConfig, platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types/branch-status';
 
 describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {

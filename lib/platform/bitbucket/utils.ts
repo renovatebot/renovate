@@ -3,7 +3,7 @@ import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
 import { GotResponse, Pr } from '../common';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 export interface Config {
   baseBranch: string;

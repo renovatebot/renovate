@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
-import { BranchStatus } from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 async function setStatusCheck(
   branchName: string,
