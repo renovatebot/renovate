@@ -29,7 +29,7 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string;
-  skipReason?: string;
+  skipReason: SkipReason;
   releases: Release[];
 
   updates: LookupUpdate[];

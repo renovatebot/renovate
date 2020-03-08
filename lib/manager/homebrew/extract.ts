@@ -168,7 +168,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     logger.debug('Invalid URL field');
   }
   const urlPathResult = parseUrlPath(url);
-  let skipReason: string;
+  let skipReason: SkipReason;
   let currentValue: string = null;
   let ownerName: string = null;
   let repoName: string = null;

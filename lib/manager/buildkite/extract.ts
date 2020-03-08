@@ -30,7 +30,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         } else if (depLineMatch) {
           const { depName, currentValue } = depLineMatch.groups;
           logger.trace('depLineMatch');
-          let skipReason: string;
+          let skipReason: SkipReason;
           let repo: string;
           if (depName.startsWith('https://') || depName.startsWith('git@')) {
             logger.debug({ dependency: depName }, 'Skipping git plugin');

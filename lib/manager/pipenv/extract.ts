@@ -50,7 +50,7 @@ function extractFromSection(
       const [depName, requirements] = x;
       let currentValue: string;
       let nestedVersion: boolean;
-      let skipReason: string;
+      let skipReason: SkipReason;
       if (requirements.git) {
         skipReason = SkipReason.GIT_DEPENDENCY;
       } else if (requirements.file) {
