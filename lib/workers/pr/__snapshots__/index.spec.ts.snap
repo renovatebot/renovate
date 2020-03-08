@@ -106,6 +106,15 @@ Array [
 ]
 `;
 
+exports[`workers/pr ensurePr should return modified existing PR 1`] = `
+Object {
+  "body": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or you tick the rebase/retry checkbox.\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+  "displayNumber": "Existing PR",
+  "isModified": false,
+  "title": "Update dependency dummy to v1.1.0",
+}
+`;
+
 exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
   "body": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or you tick the rebase/retry checkbox.\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
@@ -116,12 +125,3 @@ Object {
 `;
 
 exports[`workers/pr ensurePr should return unmodified existing PR 1`] = `Array []`;
-
-exports[`workers/pr ensurePr should return unmodified existing PR 2`] = `
-Object {
-  "body": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or you tick the rebase/retry checkbox.\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
-  "displayNumber": "Existing PR",
-  "isModified": false,
-  "title": "Update dependency dummy to v1.1.0",
-}
-`;
