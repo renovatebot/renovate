@@ -214,7 +214,7 @@
     "babel-jest": "25.1.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
     "copyfiles": "2.2.0",
-    "cross-env": "7.0.0",
+    "cross-env": "7.0.2",
     "eslint": "6.8.0",
     "eslint-config-airbnb-typescript": "6.3.2",
     "eslint-config-prettier": "6.10.0",
