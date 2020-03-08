@@ -2,11 +2,7 @@ import is from '@sindresorhus/is';
 import * as _hostRules from '../../util/host-rules';
 import { RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -416,12 +412,12 @@ describe('platform/azure', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BRANCH_STATUS_FAILED);
+      expect(res).toEqual(BranchStatus.red);
     });
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -432,7 +428,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('should pass through failed', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -443,7 +439,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_PENDING);
+      expect(res).toEqual(BranchStatus.yellow);
     });
   });
 
@@ -856,7 +852,7 @@ describe('platform/azure', () => {
         branchName: 'test',
         context: 'test',
         description: 'test',
-        state: 'test',
+        state: BranchStatus.yellow,
         url: 'test',
       });
       expect(res).toBeUndefined();

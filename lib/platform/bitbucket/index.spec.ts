@@ -2,11 +2,7 @@ import URL from 'url';
 import responses from './__fixtures__/responses';
 import { GotApi, RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
@@ -197,17 +193,15 @@ describe('platform/bitbucket', () => {
     const getBranchStatus = wrap('getBranchStatus');
     it('works', async () => {
       await initRepo();
-      expect(await getBranchStatus('master', null)).toBe(BRANCH_STATUS_SUCCESS);
-      expect(await getBranchStatus('master', ['foo'])).toBe(
-        BRANCH_STATUS_FAILED
-      );
-      expect(await getBranchStatus('master', true)).toBe(BRANCH_STATUS_FAILED);
-      expect(await getBranchStatus('branch', true)).toBe(BRANCH_STATUS_SUCCESS);
+      expect(await getBranchStatus('master', null)).toBe(BranchStatus.green);
+      expect(await getBranchStatus('master', ['foo'])).toBe(BranchStatus.red);
+      expect(await getBranchStatus('master', true)).toBe(BranchStatus.red);
+      expect(await getBranchStatus('branch', true)).toBe(BranchStatus.green);
       expect(await getBranchStatus('pending/branch', true)).toBe(
-        BRANCH_STATUS_PENDING
+        BranchStatus.yellow
       );
       expect(await getBranchStatus('branch-with-empty-status', true)).toBe(
-        BRANCH_STATUS_PENDING
+        BranchStatus.yellow
       );
     });
   });
@@ -217,7 +211,9 @@ describe('platform/bitbucket', () => {
     it('works', async () => {
       await initRepo();
       expect(await getBranchStatusCheck('master', null)).toBeNull();
-      expect(await getBranchStatusCheck('master', 'foo')).toBe('failed');
+      expect(await getBranchStatusCheck('master', 'foo')).toBe(
+        BranchStatus.red
+      );
       expect(await getBranchStatusCheck('master', 'bar')).toBeNull();
     });
   });
@@ -230,7 +226,7 @@ describe('platform/bitbucket', () => {
           branchName: 'branch',
           context: 'context',
           description: 'description',
-          state: BRANCH_STATUS_FAILED,
+          state: BranchStatus.red,
           url: 'targetUrl',
         });
         expect(api.post.mock.calls).toMatchSnapshot();

@@ -20,7 +20,6 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
-  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -30,11 +29,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
 
 let config: utils.Config = {} as any;
@@ -415,46 +410,47 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
   const noOfFailures = statuses.filter(
     (status: { state: string }) => status.state === 'FAILED'
   ).length;
   if (noOfFailures) {
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
-  return BRANCH_STATUS_SUCCESS;
+  return BranchStatus.green;
 }
+
+const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
+  SUCCESSFUL: BranchStatus.green,
+  INPROGRESS: BranchStatus.yellow,
+  FAILED: BranchStatus.red,
+};
 
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = (statuses.find(status => status.key === context) || {}).state;
-
-  return (
-    Object.keys(utils.buildStates).find(
-      stateKey => utils.buildStates[stateKey] === bbState
-    ) || null
-  );
+  return bbToRenovateStatusMapping[bbState] || null;
 }
 
 export async function setBranchStatus({
