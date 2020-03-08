@@ -232,7 +232,7 @@
     "prettier": "1.19.1",
     "pretty-quick": "2.0.1",
     "rimraf": "3.0.2",
-    "semantic-release": "15.14.0",
+    "semantic-release": "17.0.4",
     "shelljs": "0.8.3",
     "tmp-promise": "2.0.2",
     "type-fest": "0.11.0",
