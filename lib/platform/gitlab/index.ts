@@ -311,6 +311,7 @@ async function getStatus(
 
 const gitlabToRenovateStatusMapping: Record<string, BranchStatus> = {
   pending: BranchStatus.yellow,
+  created: BranchStatus.yellow,
   running: BranchStatus.yellow,
   success: BranchStatus.green,
   failed: BranchStatus.red,
