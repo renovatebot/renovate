@@ -100,6 +100,8 @@ export async function exec(
     env: childEnv,
     cwd,
   };
+  // Set default timeout to 15 minutes
+  rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
   if (execConfig.binarySource === BinarySource.Docker && docker) {

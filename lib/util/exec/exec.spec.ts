@@ -90,7 +90,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.basic }],
+        outOpts: [{ cwd, encoding, env: envMock.basic, timeout: 900000 }],
       },
     ],
 
@@ -103,9 +103,9 @@ describe(`Child process execution wrapper`, () => {
         inOpts: {},
         outCmd: ['echo "begin"', ...outCmd, "echo 'end'"],
         outOpts: [
-          { cwd, encoding, env: envMock.basic },
-          { cwd, encoding, env: envMock.basic },
-          { cwd, encoding, env: envMock.basic },
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -118,7 +118,14 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: { env: { FOO: 'BAR' } },
         outCmd,
-        outOpts: [{ cwd, encoding, env: { ...envMock.basic, FOO: 'BAR' } }],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: { ...envMock.basic, FOO: 'BAR' },
+            timeout: 900000,
+          },
+        ],
       },
     ],
 
@@ -130,7 +137,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.basic }],
+        outOpts: [{ cwd, encoding, env: envMock.basic, timeout: 900000 }],
       },
     ],
 
@@ -142,7 +149,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.full }],
+        outOpts: [{ cwd, encoding, env: envMock.full, timeout: 900000 }],
         trustLevel: 'high',
       },
     ],
@@ -158,7 +165,10 @@ describe(`Child process execution wrapper`, () => {
           dockerPullCmd,
           `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+        ],
       },
     ],
 
@@ -177,7 +187,7 @@ describe(`Child process execution wrapper`, () => {
           },
         },
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.filtered }],
+        outOpts: [{ cwd, encoding, env: envMock.filtered, timeout: 900000 }],
       },
     ],
 
@@ -201,7 +211,10 @@ describe(`Child process execution wrapper`, () => {
           dockerPullCmd,
           `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.filtered }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.filtered, timeout: 900000 },
+        ],
       },
     ],
 
@@ -218,6 +231,7 @@ describe(`Child process execution wrapper`, () => {
             cwd,
             encoding,
             env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
+            timeout: 900000,
           },
         ],
       },
@@ -244,6 +258,7 @@ describe(`Child process execution wrapper`, () => {
             cwd,
             encoding,
             env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
+            timeout: 900000,
           },
         ],
       },
@@ -260,7 +275,10 @@ describe(`Child process execution wrapper`, () => {
           `${dockerPullCmd}:${tag}`,
           `docker run --rm ${defaultVolumes} ${defaultCwd} ${image}:${tag} bash -l -c "${inCmd}"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+        ],
       },
     ],
 
@@ -275,7 +293,10 @@ describe(`Child process execution wrapper`, () => {
           dockerPullCmd,
           `docker run --rm ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+        ],
       },
     ],
 
@@ -294,7 +315,10 @@ describe(`Child process execution wrapper`, () => {
           dockerPullCmd,
           `docker run --rm --user=foobar ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+        ],
       },
     ],
 
@@ -318,7 +342,10 @@ describe(`Child process execution wrapper`, () => {
           dockerPullCmd,
           `docker run --rm ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+        ],
       },
     ],
 
@@ -342,7 +369,10 @@ describe(`Child process execution wrapper`, () => {
           dockerPullCmd,
           `docker run --rm ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
-        outOpts: [dockerPullOpts, { cwd, encoding, env: envMock.basic }],
+        outOpts: [
+          dockerPullOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+        ],
       },
     ],
   ];

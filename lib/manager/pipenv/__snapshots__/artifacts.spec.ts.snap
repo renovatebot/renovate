@@ -28,6 +28,7 @@ Array [
         "PATH": "/tmp/path",
         "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -50,6 +51,7 @@ Array [
         "PATH": "/tmp/path",
         "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -78,6 +80,7 @@ Array [
         "PATH": "/tmp/path",
         "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
       },
+      "timeout": 900000,
     },
   },
 ]

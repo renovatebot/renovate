@@ -27,6 +27,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -59,6 +60,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]

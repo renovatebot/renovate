@@ -521,7 +521,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": null,
+      "timeout": 900000,
     },
   },
 ]
