@@ -136,7 +136,7 @@ export async function removeDockerContainer(image): Promise<void> {
 export async function removeDanglingContainers(): Promise<void> {
   try {
     const res = await rawExec(
-      `docker ps --filter label=renovate_child -aq | xargs docker rm -f`,
+      `docker ps --filter label=renovate_child -aq | xargs ---no-run-if-empty docker rm -f`,
       { encoding: 'utf-8' }
     );
     if (res?.stdout?.trim().length) {

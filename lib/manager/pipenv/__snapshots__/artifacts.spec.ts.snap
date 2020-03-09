@@ -66,7 +66,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_pipenv -aq | xargs docker rm -f",
+    "cmd": "docker ps --filter name=renovate_pipenv -aq | xargs ---no-run-if-empty docker rm -f",
     "options": Object {
       "encoding": "utf-8",
     },
