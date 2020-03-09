@@ -114,7 +114,7 @@ export async function removeDockerContainer(image): Promise<void> {
   const containerName = getContainerName(image);
   try {
     const res = await rawExec(
-      `docker ps --filter name=${containerName} -aq | xargs docker rm -f`,
+      `docker ps --filter name=${containerName} -aq | xargs ---no-run-if-empty docker rm -f`,
       { encoding: 'utf-8' }
     );
     if (res?.stdout?.trim().length) {
