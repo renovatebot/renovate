@@ -35,6 +35,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -60,6 +61,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -74,7 +76,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+    "cmd": "docker ps --filter name=renovate_go -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -91,6 +99,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -105,27 +114,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
+    "cmd": "docker ps --filter name=renovate_go -aq | xargs docker rm -f",
     "options": Object {
-      "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go mod tidy\\"",
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -142,6 +137,34 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_go -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"git config --global url.\\\\\\"https://x-access-token:some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go mod tidy\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
     },
   },
 ]
@@ -156,7 +179,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"go get -d ./...\\"",
+    "cmd": "docker ps --filter name=renovate_go -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go bash -l -c \\"go get -d ./...\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -173,6 +202,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -198,6 +228,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]

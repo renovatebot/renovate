@@ -1,7 +1,7 @@
 import { dirname, join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { generateDockerCommand } from './docker';
+import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
@@ -100,9 +100,12 @@ export async function exec(
     env: childEnv,
     cwd,
   };
+  // Set default timeout to 15 minutes
+  rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  if (execConfig.binarySource === BinarySource.Docker && docker) {
+  const useDocker = execConfig.binarySource === BinarySource.Docker && docker;
+  if (useDocker) {
     logger.debug('Using docker to execute');
     const dockerOptions = {
       ...docker,
@@ -120,10 +123,28 @@ export async function exec(
 
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
+    const startTime = hrtime();
+    let timer;
+    const { timeout } = rawExecOptions;
+    if (useDocker) {
+      await removeDockerContainer(docker.image);
+      // istanbul ignore next
+      timer = setTimeout(() => {
+        removeDockerContainer(docker.image); // eslint-disable-line
+        logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
+      }, timeout);
+    }
     logger.debug({ command: rawExecCommand }, 'Executing command');
     logger.trace({ commandOptions: rawExecOptions }, 'Command options');
-    const startTime = hrtime();
-    res = await rawExec(rawExecCommand, rawExecOptions);
+    try {
+      res = await rawExec(rawExecCommand, rawExecOptions);
+    } catch (err) {
+      logger.trace({ err }, 'rawExec err');
+      clearTimeout(timer);
+      await removeDockerContainer(docker.image);
+      throw err;
+    }
+    clearTimeout(timer);
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (res) {
