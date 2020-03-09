@@ -118,6 +118,7 @@ export async function generateDockerCommand(
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
+  result.push(`--label renovate_child`);
   if (dockerUser) result.push(`--user=${dockerUser}`);
 
   result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
