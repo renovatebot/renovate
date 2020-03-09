@@ -20,7 +20,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
+    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -59,7 +65,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 --no-document && bundle lock --update foo bar\\"",
+    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 --no-document && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -98,7 +110,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
+    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler --no-document && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

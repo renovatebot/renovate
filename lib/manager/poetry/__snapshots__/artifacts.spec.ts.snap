@@ -65,7 +65,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/poetry bash -l -c \\"poetry update --lock --no-interaction dep1\\"",
+    "cmd": "docker ps --filter name=renovate_poetry -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_poetry --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/poetry bash -l -c \\"poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

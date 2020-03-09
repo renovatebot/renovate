@@ -22,7 +22,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -50,7 +56,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -129,6 +141,12 @@ Array [
       "timeout": 900000,
     },
   },
+  Object {
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
 ]
 `;
 
@@ -152,7 +170,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

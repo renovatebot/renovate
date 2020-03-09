@@ -1,7 +1,7 @@
 import { dirname, join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { generateDockerCommand, removeDockerChildren } from './docker';
+import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
@@ -123,19 +123,27 @@ export async function exec(
 
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
-    logger.debug({ command: rawExecCommand }, 'Executing command');
-    logger.trace({ commandOptions: rawExecOptions }, 'Command options');
     const startTime = hrtime();
     let timer;
     const { timeout } = rawExecOptions;
     if (useDocker) {
-      await removeDockerChildren();
+      await removeDockerContainer(docker.image);
+      // istanbul ignore next
       timer = setTimeout(() => {
-        removeDockerChildren(); // eslint-disable-line
+        removeDockerContainer(docker.image); // eslint-disable-line
         logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
       }, timeout);
     }
-    res = await rawExec(rawExecCommand, rawExecOptions);
+    logger.debug({ command: rawExecCommand }, 'Executing command');
+    logger.trace({ commandOptions: rawExecOptions }, 'Command options');
+    try {
+      res = await rawExec(rawExecCommand, rawExecOptions);
+    } catch (err) {
+      logger.trace({ err }, 'rawExec err');
+      clearTimeout(timer);
+      await removeDockerContainer(docker.image);
+      throw err;
+    }
     clearTimeout(timer);
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);

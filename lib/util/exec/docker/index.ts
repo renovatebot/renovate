@@ -106,14 +106,31 @@ async function getDockerTag(
   return 'latest';
 }
 
-export async function removeDockerChildren(): Promise<void> {
+function getContainerName(image: string): string {
+  return image.replace(/\//g, '_');
+}
+
+export async function removeDockerContainer(image): Promise<void> {
+  const containerName = getContainerName(image);
   try {
-    await rawExec(
-      'docker ps --filter label=renovate_child -aq | xargs docker rm -f',
+    const res = await rawExec(
+      `docker ps --filter name=${containerName} -aq | xargs docker rm -f`,
       { encoding: 'utf-8' }
     );
+    if (res?.stdout?.trim().length) {
+      const containerId = res.stdout.trim();
+      logger.info(
+        { image, containerName, containerId },
+        'Finished Docker container removal'
+      );
+    } else {
+      logger.trace({ image, containerName }, 'No running containers to remove');
+    }
   } catch (err) {
-    logger.warn({ err }, 'Error removing Docker children');
+    logger.warn(
+      { image, containerName, err },
+      'Error removing Docker container'
+    );
   }
 }
 
@@ -129,7 +146,9 @@ export async function generateDockerCommand(
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
-  result.push(`--label renovate_child`);
+  const containerName = getContainerName(image);
+  result.push(`--name=${containerName}`);
+  result.push(`--label=renovate_child`);
   if (dockerUser) result.push(`--user=${dockerUser}`);
 
   result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));

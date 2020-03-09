@@ -41,14 +41,6 @@ describe(`Child process execution wrapper`, () => {
     localDir: cwd,
   };
 
-  function repeat<T = unknown>(opts: T, count = 2): T[] {
-    const result = [];
-    for (let idx = 0; idx < count; idx += 1) {
-      result.push(opts);
-    }
-    return result;
-  }
-
   beforeEach(() => {
     resetPrefetchedImages();
     jest.resetAllMocks();
@@ -63,6 +55,7 @@ describe(`Child process execution wrapper`, () => {
   });
 
   const image = 'example/image';
+  const name = image.replace(/\//g, '_');
   const tag = '1.2.3';
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
@@ -79,7 +72,9 @@ describe(`Child process execution wrapper`, () => {
   const docker = { image };
   const processEnv = envMock.full;
   const dockerPullCmd = `docker pull ${image}`;
+  const dockerRemoveCmd = `docker ps --filter name=${name} -aq | xargs docker rm -f`;
   const dockerPullOpts = { encoding };
+  const dockerRemoveOpts = dockerPullOpts;
 
   const testInputs: [string, TestInput][] = [
     [
@@ -163,10 +158,12 @@ describe(`Child process execution wrapper`, () => {
         inOpts: { docker, cwd },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
@@ -209,10 +206,12 @@ describe(`Child process execution wrapper`, () => {
         },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.filtered, timeout: 900000 },
         ],
       },
@@ -250,10 +249,12 @@ describe(`Child process execution wrapper`, () => {
         },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR ${defaultCwd} ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           {
             cwd,
             encoding,
@@ -273,10 +274,12 @@ describe(`Child process execution wrapper`, () => {
         inOpts: { docker: { image, tag }, cwd },
         outCmd: [
           `${dockerPullCmd}:${tag}`,
-          `docker run --rm ${defaultVolumes} ${defaultCwd} ${image}:${tag} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} ${defaultCwd} ${image}:${tag} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
@@ -291,10 +294,12 @@ describe(`Child process execution wrapper`, () => {
         inOpts: { cwd, docker: { image, volumes } },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
@@ -313,10 +318,12 @@ describe(`Child process execution wrapper`, () => {
         inOpts: { docker },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm --user=foobar ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
@@ -340,10 +347,12 @@ describe(`Child process execution wrapper`, () => {
         },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
@@ -367,10 +376,12 @@ describe(`Child process execution wrapper`, () => {
         },
         outCmd: [
           dockerPullCmd,
-          `docker run --rm ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
+          dockerRemoveOpts,
           { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
@@ -433,12 +444,6 @@ describe(`Child process execution wrapper`, () => {
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    expect(actualCmd).toEqual([
-      ...repeat(inCmd),
-      dockerPullCmd,
-      ...repeat(`docker run --rm ${image} bash -l -c "${inCmd}"`),
-      ...repeat(inCmd),
-      ...repeat(`docker run --rm ${image} bash -l -c "${inCmd}"`),
-    ]);
+    expect(actualCmd).toMatchSnapshot();
   });
 });
