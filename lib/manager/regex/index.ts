@@ -41,7 +41,7 @@ export function extractPackageFile(
             );
             return null;
           }
-        } else {
+        } else if (groups[field]) {
           dep[field] = groups[field];
         }
       }
