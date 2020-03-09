@@ -9,7 +9,7 @@ interface HexRelease {
   meta?: { links?: Record<string, string> };
   releases?: {
     version: string;
-    inserted_at: string;
+    inserted_at?: string;
   }[];
 }
 
@@ -44,10 +44,14 @@ export async function getPkgReleases({
     }
 
     const result: ReleaseResult = {
-      releases: releases.map(({ version, inserted_at }) => ({
-        version,
-        releaseTimestamp: inserted_at,
-      })),
+      releases: releases.map(({ version, inserted_at }) =>
+        inserted_at
+          ? {
+              version,
+              releaseTimestamp: inserted_at,
+            }
+          : { version }
+      ),
     };
 
     if (homepage) {
