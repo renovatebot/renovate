@@ -4,6 +4,7 @@ exports[`Child process execution wrapper Supports image prefetch 1`] = `
 Array [
   "echo hello",
   "echo hello",
+  "docker ps --filter label=renovate_child -aq | xargs docker rm -f",
   "docker pull example/image",
   "docker ps --filter name=example_image -aq | xargs docker rm -f",
   "docker run --rm --name=example_image --label=renovate_child example/image bash -l -c \\"echo hello\\"",
@@ -11,6 +12,7 @@ Array [
   "docker run --rm --name=example_image --label=renovate_child example/image bash -l -c \\"echo hello\\"",
   "echo hello",
   "echo hello",
+  "docker ps --filter label=renovate_child -aq | xargs docker rm -f",
   "docker ps --filter name=example_image -aq | xargs docker rm -f",
   "docker run --rm --name=example_image --label=renovate_child example/image bash -l -c \\"echo hello\\"",
   "docker ps --filter name=example_image -aq | xargs docker rm -f",
