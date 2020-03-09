@@ -7,7 +7,10 @@ export const id = 'hex';
 interface HexRelease {
   html_url: string;
   meta?: { links?: Record<string, string> };
-  releases?: { version: string }[];
+  releases?: {
+    version: string;
+    inserted_at?: string;
+  }[];
 }
 
 export async function getPkgReleases({
@@ -41,7 +44,14 @@ export async function getPkgReleases({
     }
 
     const result: ReleaseResult = {
-      releases: releases.map(({ version }) => ({ version })),
+      releases: releases.map(({ version, inserted_at }) =>
+        inserted_at
+          ? {
+              version,
+              releaseTimestamp: inserted_at,
+            }
+          : { version }
+      ),
     };
 
     if (homepage) {
