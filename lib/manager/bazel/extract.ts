@@ -8,6 +8,7 @@ import * as dockerVersioning from '../../versioning/docker';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGo from '../../datasource/go';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
+import { SkipReason } from '../../types';
 
 interface UrlParsedResult {
   repo: string;
@@ -202,7 +203,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {
-          dep.skipReason = 'unsupported-remote';
+          dep.skipReason = SkipReason.UnsupportedRemote;
         }
       }
       if (commit) {
