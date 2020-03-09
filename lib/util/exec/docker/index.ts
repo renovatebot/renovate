@@ -106,6 +106,17 @@ async function getDockerTag(
   return 'latest';
 }
 
+export async function removeDockerChildren(): Promise<void> {
+  try {
+    await rawExec(
+      'docker ps --filter label=renovate_child -aq | xargs docker rm -f',
+      { encoding: 'utf-8' }
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Error removing Docker children');
+  }
+}
+
 export async function generateDockerCommand(
   commands: string[],
   options: DockerOptions,
