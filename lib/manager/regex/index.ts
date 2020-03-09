@@ -25,6 +25,7 @@ export function extractPackageFile(
         'depName',
         'lookupName',
         'currentValue',
+        'currentDigest',
         'datasource',
         'versioning',
       ];
