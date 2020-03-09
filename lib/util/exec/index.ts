@@ -120,6 +120,8 @@ export async function exec(
 
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
+    logger.debug({ command: rawExecCommand }, 'Executing command');
+    logger.trace({ commandOptions: rawExecOptions }, 'Command options');
     const startTime = hrtime();
     res = await rawExec(rawExecCommand, rawExecOptions);
     const duration = hrtime(startTime);

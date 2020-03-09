@@ -17,6 +17,7 @@ async function prefetchDockerImage(taggedImage: string): Promise<void> {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     prefetchedImages.add(taggedImage);
     await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
+    logger.debug(`Finished fetching Docker image`);
   }
 }
 
