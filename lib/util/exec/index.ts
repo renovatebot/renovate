@@ -1,7 +1,11 @@
 import { dirname, join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { generateDockerCommand, removeDockerContainer } from './docker';
+import {
+  generateDockerCommand,
+  removeDockerContainer,
+  removeDanglingContainers,
+} from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
@@ -22,10 +26,15 @@ const execConfig: ExecConfig = {
   cacheDir: null,
 };
 
-export function setExecConfig(config: Partial<RenovateConfig>): void {
+export async function setExecConfig(
+  config: Partial<RenovateConfig>
+): Promise<void> {
   for (const key of Object.keys(execConfig)) {
     const value = config[key];
     execConfig[key] = value || null;
+  }
+  if (execConfig.binarySource === 'docker') {
+    await removeDanglingContainers();
   }
 }
 
