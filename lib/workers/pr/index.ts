@@ -133,7 +133,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prResult: PrResult.AwaitingBranchAutomerge };
+      return { prResult: PrResult.BlockeddByBranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {

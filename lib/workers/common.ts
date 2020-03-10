@@ -46,10 +46,10 @@ export interface BranchUpgradeConfig
 }
 
 export enum PrResult {
-  AwaitingBranchAutomerge = 'AwaitingBranchAutomerge',
   AwaitingApproval = 'AwaitingApproval',
   AwaitingGreenBranch = 'AwaitingGreenBranch',
   AwaitingNotPending = 'AwaitingNotPending',
+  BlockeddByBranchAutomerge = 'BlockeddByBranchAutomerge',
   Created = 'Created',
   Error = 'Error',
   ErrorAlreadyExists = 'ErrorAlreadyExists',

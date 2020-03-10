@@ -433,7 +433,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       const { prResult, pr } = await prWorker.ensurePr(config);
-      expect(prResult).toEqual(PrResult.AwaitingBranchAutomerge);
+      expect(prResult).toEqual(PrResult.BlockeddByBranchAutomerge);
       expect(pr).toBeUndefined();
     });
     it('should not return no PR if branch automerging taking too long', async () => {
