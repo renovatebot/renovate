@@ -293,7 +293,7 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        result: PrResult.AwaitingApproval,
+        prResult: PrResult.AwaitingApproval,
       });
       expect(await branchWorker.processBranch(config)).toEqual(
         'needs-pr-approval'
@@ -312,7 +312,7 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        result: PrResult.AwaitingNotPending,
+        prResult: PrResult.AwaitingNotPending,
       });
       expect(await branchWorker.processBranch(config)).toEqual('pending');
     });

@@ -86,7 +86,7 @@ export enum PrResult {
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<{
-  result: PrResult;
+  prResult: PrResult;
   pr?: Pr;
 }> {
   const config: BranchConfig = { ...prConfig };
@@ -145,7 +145,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { result: PrResult.AwaitingBranchAutomerge };
+      return { prResult: PrResult.AwaitingBranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {
@@ -154,7 +154,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return { result: PrResult.AwaitingGreenBranch };
+      return { prResult: PrResult.AwaitingGreenBranch };
     }
     logger.debug('Branch status success');
   } else if (
@@ -162,7 +162,7 @@ export async function ensurePr(
     !existingPr &&
     masterIssueCheck !== 'approvePr'
   ) {
-    return { result: PrResult.AwaitingApproval };
+    return { prResult: PrResult.AwaitingApproval };
   } else if (
     config.prCreation === 'not-pending' &&
     !existingPr &&
@@ -183,7 +183,7 @@ export async function ensurePr(
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return { result: PrResult.AwaitingNotPending };
+        return { prResult: PrResult.AwaitingNotPending };
       }
       logger.debug(
         `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`
@@ -285,7 +285,7 @@ export async function ensurePr(
         noWhitespace(existingPrBody) === noWhitespace(prBody)
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
-        return { result: PrResult.NotUpdated, pr: existingPr };
+        return { prResult: PrResult.NotUpdated, pr: existingPr };
       }
       // PR must need updating
       if (existingPr.title !== prTitle) {
@@ -314,7 +314,7 @@ export async function ensurePr(
         await platform.updatePr(existingPr.number, prTitle, prBody);
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
-      return { result: PrResult.Updated, pr: existingPr };
+      return { prResult: PrResult.Updated, pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if
@@ -358,7 +358,7 @@ export async function ensurePr(
             )
           ) {
             logger.warn('A pull requests already exists');
-            return { result: PrResult.ErrorAlreadyExists };
+            return { prResult: PrResult.ErrorAlreadyExists };
           }
         }
       }
@@ -373,7 +373,7 @@ export async function ensurePr(
           await platform.deleteBranch(branchName);
         }
       }
-      return { result: PrResult.Error };
+      return { prResult: PrResult.Error };
     }
     if (
       config.branchAutomergeFailureMessage &&
@@ -410,7 +410,7 @@ export async function ensurePr(
       await addAssigneesReviewers(config, pr);
     }
     logger.debug(`Created ${pr.displayNumber}`);
-    return { result: PrResult.Created, pr };
+    return { prResult: PrResult.Created, pr };
   } catch (err) {
     // istanbul ignore if
     if (
@@ -424,7 +424,7 @@ export async function ensurePr(
     }
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
-  return { result: PrResult.Error };
+  return { prResult: PrResult.Error };
 }
 
 export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
