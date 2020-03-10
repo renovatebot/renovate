@@ -22,13 +22,6 @@ import * as nodeVersioning from '../../../versioning/node';
 import * as datasourceNpm from '../../../datasource/npm';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 
-function parseLookupname(depType: string, depName: string): string {
-  if (depType !== 'resolutions') return depName;
-
-  const [, name] = /((?:@[^/]+\/)?[^/@]+)$/.exec(depName);
-  return name;
-}
-
 export async function extractPackageFile(
   content: string,
   fileName: string,
@@ -143,7 +136,6 @@ export async function extractPackageFile(
     peerDependencies: 'peerDependency',
     engines: 'engine',
     volta: 'volta',
-    resolutions: 'resolutions',
   };
 
   function extractDependency(
@@ -283,16 +275,11 @@ export async function extractPackageFile(
         for (const [depName, val] of Object.entries(
           packageJson[depType] as NpmPackageDependeny
         )) {
-          const lookupName = parseLookupname(depType, depName);
           const dep: PackageDependency = {
             depType,
             depName,
-            lookupName,
           };
-          Object.assign(
-            dep,
-            extractDependency(depType, lookupName ?? depName, val)
-          );
+          Object.assign(dep, extractDependency(depType, depName, val));
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';

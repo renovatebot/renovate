@@ -36,6 +36,5 @@
   "repository": {
     "type": "git",
     "url": "http://github.com/singapore/renovate.git"
-  },
-  "workspaces": []
+  }
 }
