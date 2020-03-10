@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { SkipReason } from '../../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -29,17 +30,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         } else if (depLineMatch) {
           const { depName, currentValue } = depLineMatch.groups;
           logger.trace('depLineMatch');
-          let skipReason: string;
+          let skipReason: SkipReason;
           let repo: string;
           if (depName.startsWith('https://') || depName.startsWith('git@')) {
             logger.debug({ dependency: depName }, 'Skipping git plugin');
-            skipReason = 'git-plugin';
+            skipReason = SkipReason.GitPlugin;
           } else if (!isVersion(currentValue)) {
             logger.debug(
               { currentValue },
               'Skipping non-pinned current version'
             );
-            skipReason = 'invalid-version';
+            skipReason = SkipReason.InvalidVersion;
           } else {
             const splitName = depName.split('/');
             if (splitName.length === 1) {
@@ -51,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
                 { dependency: depName },
                 'Something is wrong with buildkite plugin name'
               );
-              skipReason = 'unknown';
+              skipReason = SkipReason.Unknown;
             }
           }
           const dep: PackageDependency = {

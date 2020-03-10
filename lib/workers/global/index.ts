@@ -77,7 +77,7 @@ export async function start(): Promise<0 | 1> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      setUtilConfig(repoConfig);
+      await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach(rule => hostRules.add(rule));

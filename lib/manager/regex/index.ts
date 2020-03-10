@@ -25,6 +25,7 @@ export function extractPackageFile(
         'depName',
         'lookupName',
         'currentValue',
+        'currentDigest',
         'datasource',
         'versioning',
       ];
@@ -40,7 +41,7 @@ export function extractPackageFile(
             );
             return null;
           }
-        } else {
+        } else if (groups[field]) {
           dep[field] = groups[field];
         }
       }

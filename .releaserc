@@ -1,16 +1,15 @@
 {
-  "branch": "master",
   "plugins": [
     "@semantic-release/commit-analyzer",
-    "@semantic-release/github",
-    "@semantic-release/npm",
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/exec",
       {
         "publishCmd": "./.github/workflows/release-docker.sh ${nextRelease.version} ${nextRelease.gitHead}"
       }
-    ]
+    ],
+    "@semantic-release/github",
+    "@semantic-release/npm"
   ],
   "analyzeCommits": {
     "preset": "angular",

@@ -311,10 +311,13 @@ async function getStatus(
 
 const gitlabToRenovateStatusMapping: Record<string, BranchStatus> = {
   pending: BranchStatus.yellow,
+  created: BranchStatus.yellow,
+  manual: BranchStatus.yellow,
   running: BranchStatus.yellow,
   success: BranchStatus.green,
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
+  skipped: BranchStatus.red,
 };
 
 // Returns the combined status for a branch.

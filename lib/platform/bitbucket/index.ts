@@ -424,7 +424,8 @@ export async function getBranchStatus(
     return BranchStatus.yellow;
   }
   const noOfFailures = statuses.filter(
-    (status: { state: string }) => status.state === 'FAILED'
+    (status: { state: string }) =>
+      status.state === 'FAILED' || status.state === 'STOPPED'
   ).length;
   if (noOfFailures) {
     return BranchStatus.red;

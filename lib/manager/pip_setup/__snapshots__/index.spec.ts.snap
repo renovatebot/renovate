@@ -16,6 +16,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -32,6 +33,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -48,6 +50,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -342,6 +345,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -358,6 +362,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -374,6 +379,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -412,6 +418,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -428,6 +435,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {
@@ -444,6 +452,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
   Object {

@@ -1237,8 +1237,13 @@ export async function setBranchStatus({
   try {
     const branchCommit = await config.storage.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    const renovateToGitHubStateMapping = {
+      green: 'success',
+      yellow: 'pending',
+      red: 'failure',
+    };
     const options: any = {
-      state,
+      state: renovateToGitHubStateMapping[state],
       description,
       context,
     };

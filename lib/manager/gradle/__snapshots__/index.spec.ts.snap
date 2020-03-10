@@ -508,7 +508,13 @@ Array [
 exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
   Object {
-    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker ps --filter name=renovate_gradle -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -521,7 +527,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": null,
+      "timeout": 900000,
     },
   },
 ]
@@ -536,7 +542,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker ps --filter name=renovate_gradle -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
