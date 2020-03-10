@@ -61,7 +61,8 @@ export function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  const { depType, depName } = upgrade;
+  const { depType, managerData } = upgrade;
+  const depName = managerData?.key || upgrade.depName;
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
     if (upgrade.currentDigest) {

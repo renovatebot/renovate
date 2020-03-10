@@ -22,11 +22,11 @@ import * as nodeVersioning from '../../../versioning/node';
 import * as datasourceNpm from '../../../datasource/npm';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 
-function parseLookupname(depType: string, depName: string): string {
-  if (depType !== 'resolutions') return depName;
+function parseDepName(depType: string, key: string): string {
+  if (depType !== 'resolutions') return key;
 
-  const [, name] = /((?:@[^/]+\/)?[^/@]+)$/.exec(depName);
-  return name;
+  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key);
+  return depName;
 }
 
 export async function extractPackageFile(
@@ -280,19 +280,18 @@ export async function extractPackageFile(
   for (const depType of Object.keys(depTypes)) {
     if (packageJson[depType]) {
       try {
-        for (const [depName, val] of Object.entries(
+        for (const [key, val] of Object.entries(
           packageJson[depType] as NpmPackageDependeny
         )) {
-          const lookupName = parseLookupname(depType, depName);
+          const depName = parseDepName(depType, key);
           const dep: PackageDependency = {
             depType,
             depName,
-            lookupName,
           };
-          Object.assign(
-            dep,
-            extractDependency(depType, lookupName ?? depName, val)
-          );
+          if (depName !== key) {
+            dep.managerData = { key };
+          }
+          Object.assign(dep, extractDependency(depType, depName, val));
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers
             dep.commitMessageTopic = 'Node.js';

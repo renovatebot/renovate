@@ -185,7 +185,7 @@
     "@types/global-agent": "2.1.0",
     "@types/got": "9.6.9",
     "@types/ini": "1.3.30",
-    "@types/jest": "25.1.3",
+    "@types/jest": "25.1.4",
     "@types/js-yaml": "3.12.2",
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
@@ -239,8 +239,10 @@
     "typescript": "3.8.3"
   },
   "resolutions": {
-    "lodash": "4.17.15",
-    "yargs": "13.3.0"
+    "jest-silent-reporter/jest-util":">=25.1.0",
+    "jest-junit/jest-validate": ">=25.1.0",
+    "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
+    "**/kind-of": ">=6.0.3"
   },
   "files": [
     "bin/config-validator.js",

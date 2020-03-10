@@ -136,7 +136,8 @@ describe('workers/branch/package-json', () => {
     it('updates glob resolutions without dep', () => {
       const upgrade = {
         depType: 'resolutions',
-        depName: '**/@angular/cli',
+        depName: '@angular/cli',
+        managerData: { key: '**/@angular/cli' },
         newValue: '8.1.0',
       };
       const testContent = npmUpdater.updateDependency({

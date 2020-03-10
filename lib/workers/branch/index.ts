@@ -19,7 +19,7 @@ import { ensurePr, checkAutoMerge } from '../pr';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
-import { BranchConfig, ProcessBranchResult } from '../common';
+import { BranchConfig, ProcessBranchResult, PrResult } from '../common';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -243,7 +243,7 @@ export async function processBranch(
     ) {
       // Only set a stability status check if one or more of the updates contain
       // both a stabilityDays setting and a releaseTimestamp
-      config.stabilityStatus = 'success';
+      config.stabilityStatus = BranchStatus.green;
       // Default to 'success' but set 'pending' if any update is pending
       const oneDay = 24 * 60 * 60 * 1000;
       for (const upgrade of config.upgrades) {
@@ -262,7 +262,7 @@ export async function processBranch(
               },
               'Update has not passed stability days'
             );
-            config.stabilityStatus = 'pending';
+            config.stabilityStatus = BranchStatus.yellow;
           }
         }
       }
@@ -270,7 +270,7 @@ export async function processBranch(
       if (
         !masterIssueCheck &&
         !branchExists &&
-        config.stabilityStatus === 'pending' &&
+        config.stabilityStatus === BranchStatus.yellow &&
         ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
         logger.debug('Skipping branch creation due to stability days not met');
@@ -416,7 +416,7 @@ export async function processBranch(
       }
     }
 
-    const commit = await commitFilesToBranch(config);
+    const commitHash = await commitFilesToBranch(config);
     // TODO: Remove lockFileMaintenance rule?
     if (
       config.updateType === 'lockFileMaintenance' &&
@@ -433,12 +433,12 @@ export async function processBranch(
       }
       return 'done';
     }
-    if (!commit && !branchExists) {
+    if (!commitHash && !branchExists) {
       return 'no-work';
     }
-    if (commit) {
+    if (commitHash) {
       const action = branchExists ? 'updated' : 'created';
-      logger.info({ commit }, `Branch ${action}`);
+      logger.info({ commitHash }, `Branch ${action}`);
     }
     // Set branch statuses
     await setStability(config);
@@ -446,10 +446,10 @@ export async function processBranch(
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
-      commit &&
+      commitHash &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
-      logger.debug({ commit }, `Branch status pending`);
+      logger.debug({ commitHash }, `Branch status pending`);
       return 'pending';
     }
 
@@ -546,12 +546,15 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const pr = await ensurePr(config);
+    const { prResult: result, pr } = await ensurePr(config);
     // TODO: ensurePr should check for automerge itself
-    if (pr === 'needs-pr-approval') {
+    if (result === PrResult.AwaitingApproval) {
       return 'needs-pr-approval';
     }
-    if (pr === 'pending') {
+    if (
+      result === PrResult.AwaitingGreenBranch ||
+      result === PrResult.AwaitingNotPending
+    ) {
       return 'pending';
     }
     if (pr) {
