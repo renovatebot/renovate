@@ -5,7 +5,7 @@ import { platform as _platform, Pr } from '../../platform';
 import { mocked } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import { PrResult } from '.';
+import { PrResult } from '../common';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);

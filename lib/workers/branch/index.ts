@@ -15,11 +15,11 @@ import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
 import { setStability, setUnpublishable } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
-import { ensurePr, checkAutoMerge, PrResult } from '../pr';
+import { ensurePr, checkAutoMerge } from '../pr';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
-import { BranchConfig, ProcessBranchResult } from '../common';
+import { BranchConfig, ProcessBranchResult, PrResult } from '../common';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,

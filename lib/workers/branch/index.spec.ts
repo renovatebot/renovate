@@ -11,7 +11,7 @@ import * as _prWorker from '../pr';
 import * as _getUpdated from './get-updated';
 import * as _exec from '../../util/exec';
 import { defaultConfig, platform, mocked } from '../../../test/util';
-import { BranchConfig } from '../common';
+import { BranchConfig, PrResult } from '../common';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -22,7 +22,6 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { StatusResult } from '../../platform/git/storage';
-import { PrResult } from '../pr';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');

@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { ChangeLogError, getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
 import { platform, Pr, PlatformPrOptions } from '../../platform';
-import { BranchConfig } from '../common';
+import { BranchConfig, PrResult } from '../common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -68,18 +68,6 @@ export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
       );
     }
   }
-}
-
-export enum PrResult {
-  AwaitingBranchAutomerge = 'awaiting-branch-automerge',
-  AwaitingApproval = 'awaiting-approval',
-  AwaitingGreenBranch = 'awaiting-green-branch',
-  AwaitingNotPending = 'awaiting-not-pending',
-  Created = 'created',
-  Error = 'error',
-  ErrorAlreadyExists = 'error-already-exists',
-  NotUpdated = 'not-updated',
-  Updated = 'updated',
 }
 
 // Ensures that PR exists with matching title/body
