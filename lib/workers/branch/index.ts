@@ -416,7 +416,7 @@ export async function processBranch(
       }
     }
 
-    const commit = await commitFilesToBranch(config);
+    const commitHash = await commitFilesToBranch(config);
     // TODO: Remove lockFileMaintenance rule?
     if (
       config.updateType === 'lockFileMaintenance' &&
@@ -433,12 +433,12 @@ export async function processBranch(
       }
       return 'done';
     }
-    if (!commit && !branchExists) {
+    if (!commitHash && !branchExists) {
       return 'no-work';
     }
-    if (commit) {
+    if (commitHash) {
       const action = branchExists ? 'updated' : 'created';
-      logger.info({ commit }, `Branch ${action}`);
+      logger.info({ commitHash }, `Branch ${action}`);
     }
     // Set branch statuses
     await setStability(config);
@@ -446,10 +446,10 @@ export async function processBranch(
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
-      commit &&
+      commitHash &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
-      logger.debug({ commit }, `Branch status pending`);
+      logger.debug({ commitHash }, `Branch status pending`);
       return 'pending';
     }
 
