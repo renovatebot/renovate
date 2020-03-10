@@ -238,6 +238,12 @@
     "type-fest": "0.11.0",
     "typescript": "3.8.3"
   },
+  "resolutions": {
+    "jest-silent-reporter/jest-util":">=25.1.0",
+    "jest-junit/jest-validate": ">=25.1.0",
+    "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
+    "**/kind-of": ">=6.0.3"
+  },
   "files": [
     "bin/config-validator.js",
     "bin/yarn-1.9.4.js",
