@@ -1,0 +1,16 @@
+name: release-npm
+on:
+  repository_dispatch:
+    types: [renovate-release]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.client_payload.ref }}
+
+      - run: echo 'npm release'
+      - run: echo ${{ github.event.client_payload.sha }}
+      - run: echo ${{ github.event.client_payload.version }}
