@@ -427,16 +427,16 @@ describe('workers/pr', () => {
       expect(result).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
-    it('should return null if branch automerging not failed', async () => {
+    it('should return no PR if branch automerging not failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       const { result, pr } = await prWorker.ensurePr(config);
-      expect(result).toEqual(PrResult.AutomergeBranchInstead);
+      expect(result).toEqual(PrResult.AwaitingBranchAutomerge);
       expect(pr).toBeUndefined();
     });
-    it('should not return null if branch automerging taking too long', async () => {
+    it('should not return no PR if branch automerging taking too long', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
