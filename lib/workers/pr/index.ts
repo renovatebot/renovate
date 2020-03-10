@@ -71,7 +71,7 @@ export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
 }
 
 export enum PrResult {
-  AutomergeBranchInstead = 'automerge-branch-instead',
+  AwaitingBranchAutomerge = 'awaiting-branch-automerge',
   AwaitingApproval = 'awaiting-approval',
   AwaitingGreenBranch = 'awaiting-green-branch',
   AwaitingNotPending = 'awaiting-not-pending',
@@ -145,7 +145,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { result: PrResult.AutomergeBranchInstead };
+      return { result: PrResult.AwaitingBranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {
