@@ -46,15 +46,15 @@ export interface BranchUpgradeConfig
 }
 
 export enum PrResult {
-  AwaitingBranchAutomerge = 'awaiting-branch-automerge',
-  AwaitingApproval = 'awaiting-approval',
-  AwaitingGreenBranch = 'awaiting-green-branch',
-  AwaitingNotPending = 'awaiting-not-pending',
-  Created = 'created',
-  Error = 'error',
-  ErrorAlreadyExists = 'error-already-exists',
-  NotUpdated = 'not-updated',
-  Updated = 'updated',
+  AwaitingBranchAutomerge = 'AwaitingBranchAutomerge',
+  AwaitingApproval = 'AwaitingApproval',
+  AwaitingGreenBranch = 'AwaitingGreenBranch',
+  AwaitingNotPending = 'AwaitingNotPending',
+  Created = 'Created',
+  Error = 'Error',
+  ErrorAlreadyExists = 'ErrorAlreadyExists',
+  NotUpdated = 'NotUpdated',
+  Updated = 'Updated',
 }
 
 export type ProcessBranchResult =
