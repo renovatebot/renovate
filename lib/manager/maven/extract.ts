@@ -6,6 +6,7 @@ import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
+import { SkipReason } from '../../types';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;
@@ -125,9 +126,9 @@ function applyProps(
   }
 
   if (containsPlaceholder(depName)) {
-    result.skipReason = 'name-placeholder';
+    result.skipReason = SkipReason.NamePlaceholder;
   } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = 'version-placeholder';
+    result.skipReason = SkipReason.VersionPlaceholder;
   }
 
   return result;

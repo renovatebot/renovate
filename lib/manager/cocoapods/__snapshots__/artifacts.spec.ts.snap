@@ -16,13 +16,25 @@ exports[`.updateArtifacts() catches write error 2`] = `Array []`;
 exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `
 Array [
   Object {
+    "cmd": "docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
     "cmd": "docker pull renovate/cocoapods:1.2.4",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -35,6 +47,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -43,13 +56,25 @@ Array [
 exports[`.updateArtifacts() falls back to the \`latest\` Docker image tag 1`] = `
 Array [
   Object {
+    "cmd": "docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
     "cmd": "docker pull renovate/cocoapods:latest",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -62,6 +87,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -89,6 +115,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -123,6 +150,13 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
     },
   },
 ]
@@ -142,13 +176,25 @@ Array [
 exports[`.updateArtifacts() returns updated Podfile 2`] = `
 Array [
   Object {
+    "cmd": "docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
     "cmd": "docker pull renovate/cocoapods",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -161,6 +207,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]

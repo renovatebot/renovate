@@ -73,7 +73,12 @@ export interface BitbucketCommitStatus {
   successful: number;
 }
 
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+export type BitbucketBranchState =
+  | 'SUCCESSFUL'
+  | 'FAILED'
+  | 'INPROGRESS'
+  | 'STOPPED';
+
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;

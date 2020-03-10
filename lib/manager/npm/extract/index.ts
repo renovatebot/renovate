@@ -4,7 +4,7 @@ import { join } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-
+import { SkipReason } from '../../../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -153,11 +153,11 @@ export async function extractPackageFile(
   ): PackageDependency {
     const dep: PackageDependency = {};
     if (!validateNpmPackageName(depName).validForOldPackages) {
-      dep.skipReason = 'invalid-name';
+      dep.skipReason = SkipReason.InvalidName;
       return dep;
     }
     if (typeof input !== 'string') {
-      dep.skipReason = 'invalid-value';
+      dep.skipReason = SkipReason.InvalidValue;
       return dep;
     }
     dep.currentValue = input.trim();
@@ -173,10 +173,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
       } else {
-        dep.skipReason = 'unknown-engines';
+        dep.skipReason = SkipReason.UnknownEngines;
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = SkipReason.UnknownVersion;
       }
       return dep;
     }
@@ -191,10 +191,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
       } else {
-        dep.skipReason = 'unknown-volta';
+        dep.skipReason = SkipReason.UnknownVolta;
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = SkipReason.UnknownVersion;
       }
       return dep;
     }
@@ -213,23 +213,23 @@ export async function extractPackageFile(
       }
     }
     if (dep.currentValue.startsWith('file:')) {
-      dep.skipReason = 'file';
+      dep.skipReason = SkipReason.File;
       hasFileRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = datasourceNpm.id;
       if (dep.currentValue === '*') {
-        dep.skipReason = 'any-version';
+        dep.skipReason = SkipReason.AnyVersion;
       }
       if (dep.currentValue === '') {
-        dep.skipReason = 'empty';
+        dep.skipReason = SkipReason.Empty;
       }
       return dep;
     }
     const hashSplit = dep.currentValue.split('#');
     if (hashSplit.length !== 2) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = SkipReason.UnknownVersion;
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
@@ -240,7 +240,7 @@ export async function extractPackageFile(
       .replace(/\.git$/, '');
     const githubRepoSplit = githubOwnerRepo.split('/');
     if (githubRepoSplit.length !== 2) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = SkipReason.UnknownVersion;
       return dep;
     }
     const [githubOwner, githubRepo] = githubRepoSplit;
@@ -249,7 +249,7 @@ export async function extractPackageFile(
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
     ) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = SkipReason.UnknownVersion;
       return dep;
     }
     if (isVersion(depRefPart)) {
@@ -268,7 +268,7 @@ export async function extractPackageFile(
       dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
     } else {
-      dep.skipReason = 'unversioned-reference';
+      dep.skipReason = SkipReason.UnversionedReference;
       return dep;
     }
     dep.githubRepo = githubOwnerRepo;

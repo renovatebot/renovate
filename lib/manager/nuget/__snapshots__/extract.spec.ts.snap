@@ -109,7 +109,7 @@ Array [
     "managerData": Object {
       "lineNumber": 23,
     },
-    "skipReason": "not-version",
+    "skipReason": "not-a-version",
   },
   Object {
     "currentValue": "1.2.3",

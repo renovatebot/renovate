@@ -17,7 +17,6 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
-  BranchStatus,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
@@ -36,12 +35,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];
@@ -315,6 +309,17 @@ async function getStatus(
   return (await api.get(url, { paginate: true, useCache })).body;
 }
 
+const gitlabToRenovateStatusMapping: Record<string, BranchStatus> = {
+  pending: BranchStatus.yellow,
+  created: BranchStatus.yellow,
+  manual: BranchStatus.yellow,
+  running: BranchStatus.yellow,
+  success: BranchStatus.green,
+  failed: BranchStatus.red,
+  canceled: BranchStatus.red,
+  skipped: BranchStatus.red,
+};
+
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -323,12 +328,12 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
 
   if (!(await branchExists(branchName))) {
@@ -339,22 +344,29 @@ export async function getBranchStatus(
   logger.debug(`Got res with ${res.length} results`);
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
-  let status: BranchStatus = BRANCH_STATUS_SUCCESS;
-  // Return 'success' if all are success
-  res.forEach(check => {
-    // If one is failed then don't overwrite that
-    if (status !== 'failure') {
-      if (!check.allow_failure) {
-        if (check.status === 'failed' || check.status === 'canceled') {
-          status = BRANCH_STATUS_FAILURE;
-        } else if (check.status !== 'success') {
-          ({ status } = check);
+  let status: BranchStatus = BranchStatus.green; // default to green
+  res
+    .filter(check => !check.allow_failure)
+    .forEach(check => {
+      if (status !== BranchStatus.red) {
+        // if red, stay red
+        let mappedStatus: BranchStatus =
+          gitlabToRenovateStatusMapping[check.status];
+        if (!mappedStatus) {
+          logger.warn(
+            { check },
+            'Could not map GitLab check.status to Renovate status'
+          );
+          mappedStatus = BranchStatus.yellow;
+        }
+        if (mappedStatus !== BranchStatus.green) {
+          logger.trace({ check }, 'Found non-green check');
+          status = mappedStatus;
         }
       }
-    }
-  });
+    });
   return status;
 }
 
@@ -430,7 +442,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.isConflicted = true;
   } else if (pr.state === PR_STATE_OPEN) {
     const branchStatus = await getBranchStatus(pr.branchName, []);
-    if (branchStatus === BRANCH_STATUS_SUCCESS) {
+    if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
     }
   }
@@ -623,13 +635,13 @@ export function getRepoStatus(): Promise<StatusResult> {
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   // cache-bust in case we have rebased
   const res = await getStatus(branchName, false);
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return check.status;
+      return gitlabToRenovateStatusMapping[check.status] || BranchStatus.yellow;
     }
   }
   return null;
@@ -639,15 +651,21 @@ export async function setBranchStatus({
   branchName,
   context,
   description,
-  state,
+  state: renovateState,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/statuses/${branchSha}`;
+  let state = 'success';
+  if (renovateState === BranchStatus.yellow) {
+    state = 'pending';
+  } else if (renovateState === BranchStatus.red) {
+    state = 'failed';
+  }
   const options: any = {
-    state: state.replace('failure', 'failed'), // GitLab uses 'failed', not 'failure'
+    state,
     description,
     context,
   };

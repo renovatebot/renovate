@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourcePod from '../../datasource/pod';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { SkipReason } from '../../types';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -96,7 +97,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: 'unknown-version',
+        skipReason: SkipReason.UnknownVersion,
       };
 
       if (currentValue) {
@@ -115,14 +116,14 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep = {
             depName,
             groupName,
-            skipReason: 'git-dependency',
+            skipReason: SkipReason.GitDependency,
           };
         }
       } else if (path) {
         dep = {
           depName,
           groupName,
-          skipReason: 'path-dependency',
+          skipReason: SkipReason.PathDependency,
         };
       }
 
