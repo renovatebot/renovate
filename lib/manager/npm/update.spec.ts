@@ -133,6 +133,20 @@ describe('workers/branch/package-json', () => {
         '1.22.0'
       );
     });
+    it('updates glob resolutions without dep', () => {
+      const upgrade = {
+        depType: 'resolutions',
+        depName: '**/@angular/cli',
+        newValue: '8.1.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toEqual(
+        '8.1.0'
+      );
+    });
     it('replaces only the first instance of a value', () => {
       const upgrade = {
         depType: 'devDependencies',
