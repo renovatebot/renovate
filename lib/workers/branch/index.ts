@@ -243,7 +243,7 @@ export async function processBranch(
     ) {
       // Only set a stability status check if one or more of the updates contain
       // both a stabilityDays setting and a releaseTimestamp
-      config.stabilityStatus = 'success';
+      config.stabilityStatus = BranchStatus.green;
       // Default to 'success' but set 'pending' if any update is pending
       const oneDay = 24 * 60 * 60 * 1000;
       for (const upgrade of config.upgrades) {
@@ -262,7 +262,7 @@ export async function processBranch(
               },
               'Update has not passed stability days'
             );
-            config.stabilityStatus = 'pending';
+            config.stabilityStatus = BranchStatus.yellow;
           }
         }
       }
@@ -270,7 +270,7 @@ export async function processBranch(
       if (
         !masterIssueCheck &&
         !branchExists &&
-        config.stabilityStatus === 'pending' &&
+        config.stabilityStatus === BranchStatus.yellow &&
         ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
         logger.debug('Skipping branch creation due to stability days not met');
