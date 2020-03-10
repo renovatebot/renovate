@@ -1,4 +1,5 @@
 import got from 'got';
+import shell from 'shelljs';
 
 const baseUrl = 'https://api.github.com/';
 
@@ -20,4 +21,7 @@ const baseUrl = 'https://api.github.com/';
       },
     },
   });
-})();
+})().catch(e => {
+  // Ignore for now
+  shell.echo(e.toString());
+});
