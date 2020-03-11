@@ -2,11 +2,9 @@ import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
-import * as hostRules from '../../../util/host-rules';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
+import { ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
-import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { BranchUpgradeConfig } from '../../common';
 
 const { get: ghGot } = api;
@@ -60,23 +58,6 @@ export async function getChangeLogJSON({
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseURL = 'https://gitlab.com/';
-  const url = sourceUrl;
-  const config = hostRules.find({
-    hostType: PLATFORM_TYPE_GITLAB,
-    url,
-  });
-  // istanbul ignore if
-  // if (!config.token) {
-  // // prettier-ignore
-  // if (URL.parse(sourceUrl).host.search(/gitlab/) !== -1) {
-  // logger.warn(
-  // {manager, depName, sourceUrl},
-  // 'No gitlab token has been configured. Skipping release notes retrieval'
-  // );
-  // return {error: ChangeLogError.MissingGitlabToken};
-  // }
-  // return null;
-  // }
   const apiBaseURL = 'https://gitlab.com/api/v4/';
   const repository = pathname
     .slice(1)
