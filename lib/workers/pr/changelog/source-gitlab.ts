@@ -2,6 +2,7 @@ import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
+import * as hostRules from '../../../util/host-rules';
 import { addReleaseNotes } from './release-notes';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
@@ -65,17 +66,17 @@ export async function getChangeLogJSON({
     url,
   });
   // istanbul ignore if
-  if (!config.token) {
-    // prettier-ignore
-    if (URL.parse(sourceUrl).host.search(/gitlab/) !== -1) {
-      logger.warn(
-        {manager, depName, sourceUrl},
-        'No gitlab token has been configured. Skipping release notes retrieval'
-      );
-      return {error: ChangeLogError.MissingGitlabToken};
-    }
-    return null;
-  }
+  // if (!config.token) {
+  // // prettier-ignore
+  // if (URL.parse(sourceUrl).host.search(/gitlab/) !== -1) {
+  // logger.warn(
+  // {manager, depName, sourceUrl},
+  // 'No gitlab token has been configured. Skipping release notes retrieval'
+  // );
+  // return {error: ChangeLogError.MissingGitlabToken};
+  // }
+  // return null;
+  // }
   const apiBaseURL = 'https://gitlab.com/api/v4/';
   const repository = pathname
     .slice(1)

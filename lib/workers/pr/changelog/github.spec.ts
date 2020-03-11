@@ -1,22 +1,20 @@
-import { api } from '../../../../lib/platform/github/gh-got-wrapper';
-import * as hostRules from '../../../../lib/util/host-rules';
-import {
-  getChangeLogJSON,
-  ChangeLogConfig,
-  ChangeLogError,
-} from '../../../../lib/workers/pr/changelog';
-import { mocked } from '../../../util';
-import { PLATFORM_TYPE_GITHUB } from '../../../../lib/constants/platforms';
-import * as semverVersioning from '../../../../lib/versioning/semver';
+import { api } from '../../../platform/github/gh-got-wrapper';
+import * as hostRules from '../../../util/host-rules';
+import { getChangeLogJSON, ChangeLogError } from '.';
+import { mocked } from '../../../../test/util';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import * as semverVersioning from '../../../versioning/semver';
+import { BranchUpgradeConfig } from '../../common';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
 const ghGot = mocked(api).get;
 
-const upgrade: ChangeLogConfig = {
-  endpoint: 'https://api.github.com/',
+const upgrade: BranchUpgradeConfig = {
+  branchName: undefined,
   depName: 'renovate',
+  endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
   fromVersion: '1.0.0',
   toVersion: '3.0.0',

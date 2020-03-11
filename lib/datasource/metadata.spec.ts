@@ -1,6 +1,7 @@
 import { addMetaData } from './metadata';
 import * as datasourceMaven from './maven';
 import * as datasourcePypi from './pypi';
+import * as datasourceNpm from './npm';
 
 describe('datasource/metadata', () => {
   it('Should do nothing if dep is not specified', () => {
@@ -78,7 +79,7 @@ describe('datasource/metadata', () => {
         },
       ],
     };
-    const datasource = DATASOURCE_NPM;
+    const datasource = datasourceNpm.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
@@ -116,7 +117,7 @@ describe('datasource/metadata', () => {
       sourceUrl: 'http://gitlab.com/meno/dropzone/',
       releases: [{ version: '5.7.0' }],
     };
-    const datasource = DATASOURCE_MAVEN;
+    const datasource = datasourceMaven.id;
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);

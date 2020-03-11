@@ -1,20 +1,18 @@
-import { api } from '../../../../lib/platform/gitlab/gl-got-wrapper';
-import * as hostRules from '../../../../lib/util/host-rules';
-import {
-  getChangeLogJSON,
-  ChangeLogConfig,
-  ChangeLogError,
-} from '../../../../lib/workers/pr/changelog';
-import { mocked } from '../../../util';
-import { PLATFORM_TYPE_GITLAB } from '../../../../lib/constants/platforms';
-import * as semverVersioning from '../../../../lib/versioning/semver';
+import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import * as hostRules from '../../../util/host-rules';
+import { getChangeLogJSON, ChangeLogError } from '.';
+import { mocked } from '../../../../test/util';
+import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
+import * as semverVersioning from '../../../versioning/semver';
+import { BranchUpgradeConfig } from '../../common';
 
 jest.mock('../../../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
 const glGot = mocked(api).get;
 
-const upgrade: ChangeLogConfig = {
+const upgrade: BranchUpgradeConfig = {
+  branchName: undefined,
   endpoint: 'https://gitlab.com/api/v4/ ',
   depName: 'renovate',
   versioning: semverVersioning.id,
