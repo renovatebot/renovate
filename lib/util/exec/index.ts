@@ -149,8 +149,10 @@ export async function exec(
       res = await rawExec(rawExecCommand, rawExecOptions);
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
-      clearTimeout(timer);
-      await removeDockerContainer(docker.image);
+      if (useDocker) {
+        clearTimeout(timer);
+        await removeDockerContainer(docker.image);
+      }
       throw err;
     }
     clearTimeout(timer);
