@@ -15,7 +15,9 @@ if (!exec(`./.github/workflows/release-docker.sh ${version} ${sha}`)) {
 
 shell.echo('Publishing npm package ...');
 if (
-  !exec(`yarn publish --non-interactive --new-version ${version} --verbose`)
+  !exec(
+    `yarn publish --non-interactive --new-version ${version} --verbose --registry https://registry.npmjs.org`
+  )
 ) {
   err = true;
 }
