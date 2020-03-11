@@ -150,7 +150,13 @@ export async function exec(
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
       clearTimeout(timer);
-      await removeDockerContainer(docker.image);
+      if (useDocker) {
+        await removeDockerContainer(docker.image).catch(removeErr => {
+          throw new Error(
+            `Error: ${removeErr.message}. Original Error: ${err.message}`
+          );
+        });
+      }
       throw err;
     }
     clearTimeout(timer);
