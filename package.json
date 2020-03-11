@@ -16,6 +16,7 @@
     "copy-static-files": "copyfiles -u 1 -e **/__fixtures__/**  -e **/__mocks__/** lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
+    "dispatch-release": "node --experimental-modules tools/dispatch-release.mjs",
     "eslint": "eslint --ext .js,.mjs,.ts lib/ test/ tools/",
     "eslint-fix": "eslint --ext .js,.mjs,.ts --fix lib/ test/ tools/",
     "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --expose-gc node_modules/jest/bin/jest.js",

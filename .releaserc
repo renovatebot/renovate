@@ -5,7 +5,7 @@
     [
       "@semantic-release/exec",
       {
-        "publishCmd": "./.github/workflows/release-docker.sh ${nextRelease.version} ${nextRelease.gitHead}"
+        "publishCmd": "./.github/workflows/release-docker.sh ${nextRelease.version} ${nextRelease.gitHead} && yarn dispatch-release ${nextRelease.version}"
       }
     ],
     "@semantic-release/github",
