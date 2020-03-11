@@ -1,9 +1,19 @@
 import got from 'got';
 import shell from 'shelljs';
+import program from './utils.mjs';
+
+const version = program.release;
+const dry = program.dryRun;
 
 const baseUrl = 'https://api.github.com/';
 
+shell.echo(`Dispatching version: ${version}`);
+
 (async () => {
+  if (dry) {
+    shell.echo('dry-run done.');
+    return;
+  }
   await got(`repos/${process.env.GITHUB_REPOSITORY}/dispatches`, {
     baseUrl,
     headers: {
@@ -18,6 +28,7 @@ const baseUrl = 'https://api.github.com/';
       client_payload: {
         sha: process.env.GITHUB_SHA,
         ref: process.env.GITHUB_REF,
+        version,
       },
     },
   });

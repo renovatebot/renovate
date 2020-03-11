@@ -5,11 +5,10 @@
     [
       "@semantic-release/exec",
       {
-        "publishCmd": "./.github/workflows/release-docker.sh ${nextRelease.version} ${nextRelease.gitHead} && yarn dispatch-release ${nextRelease.version}"
+        "publishCmd": "yarn release --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
       }
     ],
-    "@semantic-release/github",
-    "@semantic-release/npm"
+    "@semantic-release/github"
   ],
   "analyzeCommits": {
     "preset": "angular",
