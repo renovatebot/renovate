@@ -82,5 +82,12 @@ module.exports = {
         '@typescript-eslint/unbound-method': 0,
       },
     },
+    {
+      files: ['**/*.mjs'],
+
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': 0,
+      },
+    },
   ],
 };

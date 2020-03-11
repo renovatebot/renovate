@@ -1,6 +1,6 @@
 import got from 'got';
 import shell from 'shelljs';
-import program from './utils.mjs';
+import { program } from './utils.mjs';
 
 const version = program.release;
 const dry = program.dryRun;

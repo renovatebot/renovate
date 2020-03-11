@@ -1,4 +1,5 @@
 import commander from 'commander';
+import shell from 'shelljs';
 
 const program = new commander.Command();
 program
@@ -9,4 +10,23 @@ program
 
 program.parse(process.argv);
 
-export default program;
+export { program };
+
+/**
+ * Executes a shell command
+ * @param cmd {string} The command to execute
+ * @returns {boolean} Returns true on zero exit code otherwise false
+ */
+export function exec(cmd) {
+  try {
+    if (!program.dryRun) {
+      const res = shell.exec(cmd);
+      return res.code === 0;
+    }
+    shell.echo(`DRY-RUN: ${cmd}`);
+  } catch (e) {
+    shell.echo(e.toString());
+    return false;
+  }
+  return true;
+}

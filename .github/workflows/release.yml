@@ -40,6 +40,7 @@ jobs:
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
           yarn config set version-git-tag false
+          echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' > ~/.npmrc
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
