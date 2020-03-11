@@ -101,15 +101,18 @@ async function fetchManagerUpdates(
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
   );
   await pAll(queue, { concurrency: 5 });
+  logger.debug({ manager }, 'fetchManagerUpdates finished');
 }
 
 export async function fetchUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
-  logger.debug(`manager.fetchUpdates()`);
-  const allManagerJobs = Object.keys(packageFiles).map(manager =>
+  const managers = Object.keys(packageFiles);
+  logger.debug({ managers }, `process.fetchUpdates()`);
+  const allManagerJobs = managers.map(manager =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
+  logger.debug('fetchUpdates complete');
 }
