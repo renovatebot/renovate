@@ -234,7 +234,9 @@ export async function getDependency(
     if (uri.host === 'registry.npmjs.org') {
       // istanbul ignore if
       if (
-        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        (err.name === 'ParseError' ||
+          err.code === 'ECONNRESET' ||
+          err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
         logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
