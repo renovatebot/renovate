@@ -86,6 +86,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
       - name: Build the Docker images cache
+        continue-on-error: true
         run: |
           docker buildx bake \
             --file docker/bake.hcl \
