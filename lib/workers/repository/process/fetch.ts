@@ -75,6 +75,7 @@ async function fetchDepUpdates(
       currentValue,
       updates: dep.updates,
     });
+    logger.debug({ packageFile, depName }, 'fetchDepUpdates finished');
   }
   /* eslint-enable no-param-reassign */
 }
@@ -84,11 +85,17 @@ async function fetchManagerPackagerFileUpdates(
   managerConfig: ManagerConfig,
   pFile: PackageFile
 ): Promise<void> {
+  const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const queue = pFile.deps.map(dep => (): Promise<void> =>
     fetchDepUpdates(packageFileConfig, dep)
   );
+  logger.debug(
+    { packageFile, queueLength: queue.length },
+    'fetchManagerPackagerFileUpdates starting'
+  );
   await pAll(queue, { concurrency: 5 });
+  logger.debug({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
 async function fetchManagerUpdates(
@@ -99,6 +106,10 @@ async function fetchManagerUpdates(
   const managerConfig = getManagerConfig(config, manager);
   const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
+  );
+  logger.debug(
+    { manager, queueLength: queue.length },
+    'fetchManagerUpdates starting'
   );
   await pAll(queue, { concurrency: 5 });
   logger.debug({ manager }, 'fetchManagerUpdates finished');
