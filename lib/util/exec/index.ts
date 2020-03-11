@@ -153,7 +153,7 @@ export async function exec(
       if (useDocker) {
         await removeDockerContainer(docker.image).catch(removeErr => {
           throw new Error(
-            `Error: ${removeErr.message}. Original Error: ${err.message}`
+            `Error: "${removeErr.message}" - Original Error: "${err.message}"`
           );
         });
       }
