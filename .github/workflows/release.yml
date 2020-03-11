@@ -93,7 +93,8 @@ jobs:
             --set slim.cache-to=renovate/renovate:_cache-slim \
             default
 
-      - run: |
+      - name: semantic-release
+        run: |
           echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' > ~/.npmrc
           yarn semantic-release
         env:
