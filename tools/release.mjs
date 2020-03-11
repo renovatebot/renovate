@@ -10,9 +10,7 @@ shell.echo(`Publishing version: ${version}`);
 
 shell.echo('Publishing npm package ...');
 if (
-  !exec(
-    `yarn publish --non-interactive --new-version ${version} --verbose --registry https://registry.npmjs.org`
-  )
+  !exec(`yarn publish --non-interactive --new-version ${version} --verbose`)
 ) {
   err = true;
 }
