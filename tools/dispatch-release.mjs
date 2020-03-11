@@ -7,11 +7,6 @@ const dry = program.dryRun;
 
 const baseUrl = 'https://api.github.com/';
 
-if (!version) {
-  shell.echo('Missing version argument!');
-  shell.exit(2);
-}
-
 shell.echo(`Dispatching version: ${version}`);
 
 (async () => {

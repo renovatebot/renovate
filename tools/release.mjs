@@ -7,11 +7,6 @@ const dry = program.dryRun;
 
 let err = false;
 
-if (!version) {
-  shell.echo('Missing version argument!');
-  shell.exit(2);
-}
-
 shell.echo(`Publishing version: ${version}`);
 
 try {
