@@ -25,7 +25,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -51,7 +51,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -89,7 +89,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -127,7 +127,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -154,7 +154,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -192,7 +192,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -218,7 +218,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GONOSUMDB": "1",
-        "GOPATH": "/go",
+        "GOPATH": "/tmp/renovate/cache/others/go",
         "GOPROXY": "proxy.example.com",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

@@ -25,7 +25,7 @@ Array [
 exports[`generateLockFile finds pnpm embedded in renovate 1`] = `
 Array [
   Object {
-    "cmd": "node /node_modules/root/project/node_modules/pnpm/lib/bin/pnpm.js install --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "cmd": "node /node_modules/renovate/node_modules/pnpm/lib/bin/pnpm.js install --lockfile-only --ignore-scripts --ignore-pnpmfile",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
