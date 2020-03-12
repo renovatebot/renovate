@@ -95,11 +95,18 @@ async function fetchManagerPackagerFileUpdates(
       'fetchManagerPackagerFileUpdates starting sequentially'
     );
     for (const dep of pFile.deps) {
-      await fetchDepUpdates(packageFileConfig, dep);
-      logger.debug(
-        { manager, packageFile, dependency: dep.depName },
-        'fetchDepUpdates done'
-      );
+      try {
+        await fetchDepUpdates(packageFileConfig, dep);
+        logger.debug(
+          { manager, packageFile, dependency: dep.depName },
+          'fetchDepUpdates done'
+        );
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn(
+          { manager, packageFile, dependency: dep.depName, err },
+          'fetchDepUpdates error'
+        );
+      }
     }
   } else {
     const queue = pFile.deps.map(dep => (): Promise<void> =>
