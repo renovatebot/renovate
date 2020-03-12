@@ -102,6 +102,6 @@ export async function getPkgReleases({
     ) {
       throw new DatasourceError(err);
     }
-    throw err;
+    return null;
   }
 }

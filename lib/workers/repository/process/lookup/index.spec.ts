@@ -17,6 +17,7 @@ import * as datasourceNpm from '../../../../datasource/npm';
 import * as datasourcePypi from '../../../../datasource/pypi';
 import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourceDocker from '../../../../datasource/docker';
+import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 
 jest.mock('../../../../datasource/docker');
@@ -981,13 +982,23 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('handles github 404', async () => {
+      config.depName = 'foo';
+      config.datasource = datasourceGithubTags.id;
+      config.packageFile = 'package.json';
+      config.currentValue = '1.0.0';
+      nock('https://pypi.org')
+        .get('/pypi/foo/json')
+        .reply(404);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
     it('handles pypi 404', async () => {
       config.depName = 'foo';
       config.datasource = datasourcePypi.id;
       config.packageFile = 'requirements.txt';
       config.currentValue = '1.0.0';
-      nock('https://pypi.org')
-        .get('/pypi/foo/json')
+      nock('https://api.github.com')
+        .get('/repos/some/repo/git/refs/tags?per_page=100')
         .reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });

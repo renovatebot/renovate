@@ -45,8 +45,8 @@ describe('datasource/cdnjs', () => {
       jest.clearAllMocks();
       return global.renovateCache.rmAll();
     });
-    it('throws for 429', async () => {
-      got.mockRejectedValueOnce({ statusCode: 429 });
+    it('throws for empty result', async () => {
+      got.mockResolvedValueOnce(null);
       await expect(
         getPkgReleases({ lookupName: 'foo/bar' })
       ).rejects.toThrowError(DATASOURCE_FAILURE);
@@ -55,19 +55,38 @@ describe('datasource/cdnjs', () => {
       got.mockResolvedValueOnce({});
       expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
     });
-    it('throws for 404', async () => {
-      const err = new Error();
-      err.statusCode = 404;
-      got.mockImplementationOnce(() => {
-        throw err;
-      });
-      await expect(getPkgReleases({ lookupName: 'foo/bar' })).rejects.toThrow();
+    it('returns null for 404', async () => {
+      got.mockRejectedValueOnce({ statusCode: 404 });
+      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+    });
+    it('returns null for 401', async () => {
+      got.mockRejectedValueOnce({ statusCode: 401 });
+      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+    });
+    it('throws for 429', async () => {
+      got.mockRejectedValueOnce({ statusCode: 429 });
+      await expect(
+        getPkgReleases({ lookupName: 'foo/bar' })
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('throws for 5xx', async () => {
       got.mockRejectedValueOnce({ statusCode: 502 });
       await expect(
         getPkgReleases({ lookupName: 'foo/bar' })
       ).rejects.toThrowError(DATASOURCE_FAILURE);
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      await expect(
+        getPkgReleases({ lookupName: 'foo/bar' })
+      ).rejects.toThrowError(DATASOURCE_FAILURE);
+    });
+    it('returns null with wrong auth token', async () => {
+      got.mockRejectedValueOnce({ statusCode: 401 });
+      const res = await getPkgReleases({ lookupName: 'foo/bar' });
+      expect(res).toBeNull();
     });
     it('processes real data', async () => {
       got.mockResolvedValueOnce({ body: res1 });

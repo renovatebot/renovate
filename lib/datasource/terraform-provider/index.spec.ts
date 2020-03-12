@@ -17,6 +17,36 @@ describe('datasource/terraform', () => {
       global.repoCache = {};
       return global.renovateCache.rmAll();
     });
+    it('returns null for empty result', async () => {
+      got.mockReturnValueOnce({ body: {} });
+      expect(
+        await terraformProvider.getPkgReleases({
+          lookupName: 'azurerm',
+        })
+      ).toBeNull();
+    });
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      expect(
+        await terraformProvider.getPkgReleases({
+          lookupName: 'azurerm',
+        })
+      ).toBeNull();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await terraformProvider.getPkgReleases({
+          lookupName: 'azurerm',
+        })
+      ).toBeNull();
+    });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),

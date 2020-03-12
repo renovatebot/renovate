@@ -10,6 +10,24 @@ const lookupName = 'https://github.com/example/example.git';
 describe('datasource/git-tags', () => {
   beforeEach(() => global.renovateCache.rmAll());
   describe('getPkgReleases', () => {
+    it('returns nil if response is wrong', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(null);
+        },
+      });
+      const versions = await getPkgReleases({ lookupName });
+      expect(versions).toEqual(null);
+    });
+    it('returns nil if remote call throws exception', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          throw new Error();
+        },
+      });
+      const versions = await getPkgReleases({ lookupName });
+      expect(versions).toEqual(null);
+    });
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
