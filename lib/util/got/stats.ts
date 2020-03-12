@@ -42,17 +42,23 @@ export const printStats = (): void => {
 export const instance = create({
   options: {},
   handler: (options, next) => {
-    const request = `${options.method} ${options.href}`;
-    logger.info(request);
-    outstandingRequests[request] = true;
-    const start = new Date();
-    const nextPromise = next(options);
-    nextPromise.on('response', () => {
-      delete outstandingRequests[request];
-      const elapsed = new Date().getTime() - start.getTime();
-      stats[options.hostname] = stats[options.hostname] || [];
-      stats[options.hostname].push(elapsed);
+    const promise = new Promise((resolve, reject) => {
+      const request = `${options.method} ${options.href}`;
+      logger.info(request);
+      outstandingRequests[request] = true;
+      const start = new Date();
+      const nextPromise = next(options);
+      nextPromise.on('response', () => {
+        delete outstandingRequests[request];
+        const elapsed = new Date().getTime() - start.getTime();
+        stats[options.hostname] = stats[options.hostname] || [];
+        stats[options.hostname].push(elapsed);
+        resolve(nextPromise);
+      });
+      nextPromise.on('error', () => {
+        reject(nextPromise);
+      });
     });
-    return nextPromise;
+    return promise;
   },
 });
