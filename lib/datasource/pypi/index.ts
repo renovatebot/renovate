@@ -169,9 +169,10 @@ export async function getPkgReleases({
   if (process.env.PIP_INDEX_URL) {
     hostUrls = [process.env.PIP_INDEX_URL];
   }
-  for (let hostUrl of hostUrls) {
+  let dep: ReleaseResult;
+  for (let index = 0; index < hostUrls.length && !dep; index += 1) {
+    let hostUrl = hostUrls[index];
     hostUrl += hostUrl.endsWith('/') ? '' : '/';
-    let dep: ReleaseResult;
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
       logger.debug(
         { lookupName, hostUrl },
@@ -184,10 +185,9 @@ export async function getPkgReleases({
     }
     if (dep !== null) {
       logger.debug({ lookupName, hostUrl }, 'Found pypi result');
-      return dep;
     }
-    logger.debug({ lookupName, hostUrl }, 'No pypi result');
   }
-  logger.debug({ lookupName, registryUrls }, 'Pypi lookup returning null');
+  if (dep) return dep;
+  logger.debug({ lookupName, registryUrls }, 'No pypi result - returning null');
   return null;
 }
