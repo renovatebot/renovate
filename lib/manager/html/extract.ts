@@ -45,5 +45,6 @@ export function extractPackageFile(content: string): PackageFile {
       });
     }
   }
+  if (!deps.length) return null;
   return { deps };
 }

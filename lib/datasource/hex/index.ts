@@ -64,12 +64,23 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
+    const errorData = { lookupName, err };
+
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    throw err;
+
+    if (err.statusCode === 401) {
+      logger.debug(errorData, 'Authorization error');
+    } else if (err.statusCode === 404) {
+      logger.debug(errorData, 'Package lookup error');
+    } else {
+      logger.warn(errorData, 'hex lookup failure: Unknown error');
+    }
   }
+
+  return null;
 }
