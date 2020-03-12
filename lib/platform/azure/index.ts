@@ -751,7 +751,7 @@ export async function getPrFiles(prId: number): Promise<string[]> {
           )
         )
       )
-        .flat()
+        .reduce((acc, val) => acc.concat(val), [])
         .map(change => change.item.path.slice(1))
     ),
   ];
