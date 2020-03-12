@@ -183,8 +183,11 @@ export async function getPkgReleases({
       dep = await getDependency(lookupName, hostUrl, compatibility);
     }
     if (dep !== null) {
+      logger.debug({ lookupName, hostUrl }, 'Found pypi result');
       return dep;
     }
+    logger.debug({ lookupName, hostUrl }, 'No pypi result');
   }
+  logger.debug({ lookupName, registryUrls }, 'Pypi lookup returning null');
   return null;
 }
