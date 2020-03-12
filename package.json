@@ -159,7 +159,6 @@
     "traverse": "0.6.6",
     "upath": "1.2.0",
     "validate-npm-package-name": "3.0.0",
-    "validator": "12.2.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
     "yarn": "1.22.0",
@@ -242,7 +241,7 @@
     "typescript": "3.8.3"
   },
   "resolutions": {
-    "jest-silent-reporter/jest-util":">=25.1.0",
+    "jest-silent-reporter/jest-util": ">=25.1.0",
     "jest-junit/jest-validate": ">=25.1.0",
     "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
     "**/kind-of": ">=6.0.3"
