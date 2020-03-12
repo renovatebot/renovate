@@ -10,6 +10,24 @@ const registryUrls = [lookupName, 'master'];
 describe('datasource/git-submoduless', () => {
   beforeEach(() => global.renovateCache.rmAll());
   describe('getPkgReleases', () => {
+    it('returns null if response is wrong', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(null);
+        },
+      });
+      const versions = await getPkgReleases({ lookupName, registryUrls });
+      expect(versions).toEqual(null);
+    });
+    it('returns null if remote call throws exception', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          throw new Error();
+        },
+      });
+      const versions = await getPkgReleases({ lookupName, registryUrls });
+      expect(versions).toEqual(null);
+    });
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {

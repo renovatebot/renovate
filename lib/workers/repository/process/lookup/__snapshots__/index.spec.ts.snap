@@ -194,6 +194,8 @@ Object {
 }
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() handles github 404 1`] = `Array []`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() handles packagist 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;

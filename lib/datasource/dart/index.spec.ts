@@ -41,13 +41,15 @@ describe('datasource/dart', () => {
         await getPkgReleases({ lookupName: 'shared_preferences' })
       ).toBeNull();
     });
-    it('throws for 404', async () => {
-      const err = new Error();
-      err.statusCode = 404;
-      got.mockImplementationOnce(() => {
-        throw err;
-      });
-      await expect(getPkgReleases({ lookupName: 'foo/bar' })).rejects.toThrow();
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      expect(
+        await getPkgReleases({ lookupName: 'shared_preferences' })
+      ).toBeNull();
     });
     it('throws for 5xx', async () => {
       got.mockImplementationOnce(() =>
@@ -63,6 +65,14 @@ describe('datasource/dart', () => {
       }
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await getPkgReleases({ lookupName: 'shared_preferences' })
+      ).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({ body });
