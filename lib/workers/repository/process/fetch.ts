@@ -88,7 +88,7 @@ async function fetchManagerPackagerFileUpdates(
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
-  const problematicManagers = ['pip_requirements', 'maven'];
+  const problematicManagers = ['bundler', 'pip_requirements', 'maven'];
   if (problematicManagers.includes(manager)) {
     logger.debug(
       { manager, packageFile, queueLength: pFile.deps.length },
