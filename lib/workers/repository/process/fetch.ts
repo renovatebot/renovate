@@ -95,12 +95,11 @@ async function fetchManagerPackagerFileUpdates(
       'fetchManagerPackagerFileUpdates starting sequentially'
     );
     for (const dep of pFile.deps) {
+      const logMeta = { manager, packageFile, dependency: dep.depName };
       try {
+        logger.debug(logMeta, 'fetchDepUpdates next');
         await fetchDepUpdates(packageFileConfig, dep);
-        logger.debug(
-          { manager, packageFile, dependency: dep.depName },
-          'fetchDepUpdates done'
-        );
+        logger.debug(logMeta, 'fetchDepUpdates done');
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
           { manager, packageFile, dependency: dep.depName, err },
