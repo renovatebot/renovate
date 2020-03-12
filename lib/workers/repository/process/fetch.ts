@@ -87,14 +87,22 @@ async function fetchManagerPackagerFileUpdates(
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  const queue = pFile.deps.map(dep => (): Promise<void> =>
-    fetchDepUpdates(packageFileConfig, dep)
-  );
+  const { manager } = packageFileConfig;
   logger.debug(
-    { packageFile, queueLength: queue.length },
+    { manager, packageFile, queueLength: pFile.deps.length },
     'fetchManagerPackagerFileUpdates starting'
   );
-  await pAll(queue, { concurrency: 5 });
+  const problematicManagers = ['pip_requirements', 'maven'];
+  if (problematicManagers.includes(manager)) {
+    for (const dep of pFile.deps) {
+      await fetchDepUpdates(packageFileConfig, dep);
+    }
+  } else {
+    const queue = pFile.deps.map(dep => (): Promise<void> =>
+      fetchDepUpdates(packageFileConfig, dep)
+    );
+    await pAll(queue, { concurrency: 5 });
+  }
   logger.debug({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
