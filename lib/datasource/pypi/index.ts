@@ -35,9 +35,10 @@ async function getDependency(
   hostUrl: string,
   compatibility: Record<string, string>
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   try {
+    const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
     const dependency: ReleaseResult = { releases: null };
+    logger.debug({ lookupUrl }, 'Pypi api got lookup');
     const rep = await got(url.parse(lookupUrl), {
       json: true,
       hostType: id,
@@ -47,6 +48,7 @@ async function getDependency(
       logger.debug({ dependency: packageName }, 'pip package not found');
       return null;
     }
+    logger.debug({ lookupUrl }, 'Got pypi api result');
     if (
       !(dep.info && normalizeName(dep.info.name) === normalizeName(packageName))
     ) {
