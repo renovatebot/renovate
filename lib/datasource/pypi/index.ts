@@ -173,8 +173,13 @@ export async function getPkgReleases({
     hostUrl += hostUrl.endsWith('/') ? '' : '/';
     let dep: ReleaseResult;
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+      logger.debug(
+        { lookupName, hostUrl },
+        'Looking up pypi simple dependency'
+      );
       dep = await getSimpleDependency(lookupName, hostUrl);
     } else {
+      logger.debug({ lookupName, hostUrl }, 'Looking up pypi api dependency');
       dep = await getDependency(lookupName, hostUrl, compatibility);
     }
     if (dep !== null) {
