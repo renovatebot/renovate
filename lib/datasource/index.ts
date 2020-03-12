@@ -115,6 +115,7 @@ export async function getPkgReleases(
       log('Unknown', 'info');
       logger.debug({ err }, 'Datasource Error err');
     }
+    return null;
   }
   if (!res) {
     return res;
