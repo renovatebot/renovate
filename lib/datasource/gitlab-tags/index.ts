@@ -13,10 +13,6 @@ function getCacheKey(depHost: string, repo: string): string {
   return `${depHost}:${repo}:${type}`;
 }
 
-type GlTag = {
-  name: string;
-}[];
-
 type GitlabTag = {
   name: string;
   commit: {
