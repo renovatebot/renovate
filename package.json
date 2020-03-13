@@ -142,7 +142,7 @@
     "moment": "2.24.0",
     "moment-timezone": "0.5.28",
     "node-emoji": "1.10.0",
-    "node-html-parser": "1.2.8",
+    "node-html-parser": "1.2.12",
     "npm": "6.14.2",
     "p-all": "2.1.0",
     "parse-diff": "0.7.0",
@@ -161,7 +161,7 @@
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.22.0",
+    "yarn": "1.22.4",
     "yawn-yaml": "1.5.0"
   },
   "optionalDependencies": {
@@ -210,8 +210,8 @@
     "@types/validator": "12.0.1",
     "@types/xmldoc": "1.1.4",
     "@types/yawn-yaml": "1.4.0",
-    "@typescript-eslint/eslint-plugin": "2.22.0",
-    "@typescript-eslint/parser": "2.22.0",
+    "@typescript-eslint/eslint-plugin": "2.23.0",
+    "@typescript-eslint/parser": "2.23.0",
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "25.1.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
@@ -237,7 +237,7 @@
     "semantic-release": "17.0.4",
     "shelljs": "0.8.3",
     "tmp-promise": "2.0.2",
-    "type-fest": "0.11.0",
+    "type-fest": "0.12.0",
     "typescript": "3.8.3"
   },
   "resolutions": {

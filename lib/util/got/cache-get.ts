@@ -15,6 +15,9 @@ export default create({
     if (options.stream) {
       return next(options);
     }
+    if (!['github', 'npm'].includes(options.hostType)) {
+      return next(options);
+    }
     if (options.method === 'GET') {
       const cacheKey = crypto
         .createHash('md5')
@@ -24,7 +27,10 @@ export default create({
         )
         .digest('hex');
       if (!global.repoCache[cacheKey] || options.useCache === false) {
-        global.repoCache[cacheKey] = next(options);
+        global.repoCache[cacheKey] = next(options).catch(err => {
+          delete global.repoCache[cacheKey];
+          throw err;
+        });
       }
       return global.repoCache[cacheKey].then(response => ({
         ...response,

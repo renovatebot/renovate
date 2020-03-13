@@ -95,12 +95,18 @@ export async function getPkgReleases({
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
+    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
+      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
+      logger.debug({ err }, 'Crate lookup error');
+      return null;
+    }
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    throw err;
+    logger.warn({ err, lookupName }, 'crates.io lookup failure: Unknown error');
+    return null;
   }
 }

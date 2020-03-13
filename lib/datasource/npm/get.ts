@@ -116,7 +116,6 @@ export async function getDependency(
       retry: 5,
       headers,
       useCache,
-      readableHighWaterMark: 1024 * 1024 * 10, // https://github.com/sindresorhus/got/issues/1062#issuecomment-586580036
     };
     const raw = await got(pkgUrl, opts);
     if (retries < 3) {

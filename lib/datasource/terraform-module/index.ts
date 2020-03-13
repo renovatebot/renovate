@@ -71,34 +71,52 @@ export async function getPkgReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  const res: TerraformRelease = (
-    await got(pkgUrl, {
-      json: true,
-      hostType: id,
-    })
-  ).body;
-  const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
-  if (returnedName !== repository) {
-    logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
+  try {
+    const res: TerraformRelease = (
+      await got(pkgUrl, {
+        json: true,
+        hostType: id,
+      })
+    ).body;
+    const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
+    if (returnedName !== repository) {
+      logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
+      return null;
+    }
+    // Simplify response before caching and returning
+    const dep: ReleaseResult = {
+      name: repository,
+      versions: {},
+      releases: null,
+    };
+    if (res.source) {
+      dep.sourceUrl = res.source;
+    }
+    dep.releases = res.versions.map(version => ({
+      version,
+    }));
+    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
+      dep.homepage = `https://registry.terraform.io/modules/${repository}`;
+    }
+    logger.trace({ dep }, 'dep');
+    const cacheMinutes = 30;
+    await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+    return dep;
+  } catch (err) {
+    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
+      logger.debug(
+        { lookupName },
+        `Terraform registry lookup failure: not found`
+      );
+      logger.debug({
+        err,
+      });
+      return null;
+    }
+    logger.warn(
+      { err, lookupName },
+      'Terraform registry failure: Unknown error'
+    );
     return null;
   }
-  // Simplify response before caching and returning
-  const dep: ReleaseResult = {
-    name: repository,
-    versions: {},
-    releases: null,
-  };
-  if (res.source) {
-    dep.sourceUrl = res.source;
-  }
-  dep.releases = res.versions.map(version => ({
-    version,
-  }));
-  if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-    dep.homepage = `https://registry.terraform.io/modules/${repository}`;
-  }
-  logger.trace({ dep }, 'dep');
-  const cacheMinutes = 30;
-  await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
-  return dep;
 }

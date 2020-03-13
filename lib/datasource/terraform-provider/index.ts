@@ -34,29 +34,47 @@ export async function getPkgReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  const res: TerraformProvider = (
-    await got(pkgUrl, {
-      json: true,
-      hostType: id,
-    })
-  ).body;
-  // Simplify response before caching and returning
-  const dep: ReleaseResult = {
-    name: repository,
-    versions: {},
-    releases: null,
-  };
-  if (res.source) {
-    dep.sourceUrl = res.source;
+  try {
+    const res: TerraformProvider = (
+      await got(pkgUrl, {
+        json: true,
+        hostType: id,
+      })
+    ).body;
+    // Simplify response before caching and returning
+    const dep: ReleaseResult = {
+      name: repository,
+      versions: {},
+      releases: null,
+    };
+    if (res.source) {
+      dep.sourceUrl = res.source;
+    }
+    dep.releases = res.versions.map(version => ({
+      version,
+    }));
+    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
+      dep.homepage = `https://registry.terraform.io/providers/${repository}`;
+    }
+    logger.trace({ dep }, 'dep');
+    const cacheMinutes = 30;
+    await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+    return dep;
+  } catch (err) {
+    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
+      logger.debug(
+        { lookupName },
+        `Terraform registry lookup failure: not found`
+      );
+      logger.debug({
+        err,
+      });
+      return null;
+    }
+    logger.warn(
+      { err, lookupName },
+      'Terraform registry failure: Unknown error'
+    );
+    return null;
   }
-  dep.releases = res.versions.map(version => ({
-    version,
-  }));
-  if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-    dep.homepage = `https://registry.terraform.io/providers/${repository}`;
-  }
-  logger.trace({ dep }, 'dep');
-  const cacheMinutes = 30;
-  await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
-  return dep;
 }

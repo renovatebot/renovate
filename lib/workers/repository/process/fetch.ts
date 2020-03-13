@@ -87,14 +87,36 @@ async function fetchManagerPackagerFileUpdates(
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  const queue = pFile.deps.map(dep => (): Promise<void> =>
-    fetchDepUpdates(packageFileConfig, dep)
-  );
-  logger.debug(
-    { packageFile, queueLength: queue.length },
-    'fetchManagerPackagerFileUpdates starting'
-  );
-  await pAll(queue, { concurrency: 5 });
+  const { manager } = packageFileConfig;
+  const problematicManagers = ['bundler', 'pip_requirements', 'maven'];
+  if (problematicManagers.includes(manager)) {
+    logger.debug(
+      { manager, packageFile, queueLength: pFile.deps.length },
+      'fetchManagerPackagerFileUpdates starting sequentially'
+    );
+    for (const dep of pFile.deps) {
+      const logMeta = { manager, packageFile, dependency: dep.depName };
+      try {
+        logger.debug(logMeta, 'fetchDepUpdates next');
+        await fetchDepUpdates(packageFileConfig, dep);
+        logger.debug(logMeta, 'fetchDepUpdates done');
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn(
+          { manager, packageFile, dependency: dep.depName, err },
+          'fetchDepUpdates error'
+        );
+      }
+    }
+  } else {
+    const queue = pFile.deps.map(dep => (): Promise<void> =>
+      fetchDepUpdates(packageFileConfig, dep)
+    );
+    logger.debug(
+      { manager, packageFile, queueLength: queue.length },
+      'fetchManagerPackagerFileUpdates starting with concurrency'
+    );
+    await pAll(queue, { concurrency: 5 });
+  }
   logger.debug({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
@@ -120,7 +142,25 @@ export async function fetchUpdates(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
-  logger.debug({ managers }, `process.fetchUpdates()`);
+  const stats = {
+    managers: {},
+    fileCount: 0,
+    depCount: 0,
+  };
+  for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
+    const fileCount = managerPackageFiles.length;
+    let depCount = 0;
+    for (const file of managerPackageFiles) {
+      depCount += file.deps.length;
+    }
+    stats.managers[manager] = {
+      fileCount,
+      depCount,
+    };
+    stats.fileCount += fileCount;
+    stats.depCount += depCount;
+  }
+  logger.info({ stats }, `Extraction statistics`);
   const allManagerJobs = managers.map(manager =>
     fetchManagerUpdates(config, packageFiles, manager)
   );

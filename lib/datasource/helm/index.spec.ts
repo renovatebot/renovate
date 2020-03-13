@@ -55,18 +55,18 @@ describe('datasource/helm', () => {
         })
       ).toBeNull();
     });
-    it('throws for 404', async () => {
-      const err = new Error();
-      err.statusCode = 404;
-      got.mockImplementationOnce(() => {
-        throw err;
-      });
-      await expect(
-        getPkgReleases({
-          lookupName: 'foo/bar',
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      expect(
+        await getPkgReleases({
+          lookupName: 'some_chart',
           registryUrls: ['example-repository.com'],
         })
-      ).rejects.toThrow();
+      ).toBeNull();
     });
     it('throws for 5xx', async () => {
       got.mockImplementationOnce(() =>
@@ -85,6 +85,17 @@ describe('datasource/helm', () => {
       }
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await getPkgReleases({
+          lookupName: 'some_chart',
+          registryUrls: ['example-repository.com'],
+        })
+      ).toBeNull();
     });
     it('returns null if index.yaml in response is empty', async () => {
       const res = { body: '# A comment' };

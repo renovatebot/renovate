@@ -2,6 +2,21 @@
 
 exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
 Object {
+  "maven": Array [
+    Object {
+      "deps": Array [
+        Object {
+          "datasource": "maven",
+          "depName": "bbb",
+          "updates": Array [
+            "a",
+            "b",
+          ],
+        },
+      ],
+      "packageFile": "pom.xml",
+    },
+  ],
   "npm": Array [
     Object {
       "deps": Array [
