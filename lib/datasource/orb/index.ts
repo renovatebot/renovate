@@ -8,7 +8,7 @@ interface OrbRelease {
   homeUrl?: string;
   versions: {
     version: string;
-    createdAt: string;
+    createdAt?: string;
   }[];
 }
 
@@ -62,7 +62,7 @@ export async function getPkgReleases({
       dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
     dep.releases = res.versions.map(({ version, createdAt }) => ({
       version,
-      releaseTimestamp: createdAt,
+      releaseTimestamp: createdAt || null,
     }));
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 15;
