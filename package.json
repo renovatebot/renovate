@@ -142,7 +142,7 @@
     "moment": "2.24.0",
     "moment-timezone": "0.5.28",
     "node-emoji": "1.10.0",
-    "node-html-parser": "1.2.8",
+    "node-html-parser": "1.2.12",
     "npm": "6.14.2",
     "p-all": "2.1.0",
     "parse-diff": "0.7.0",
@@ -162,7 +162,7 @@
     "validator": "12.2.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.22.0",
+    "yarn": "1.22.4",
     "yawn-yaml": "1.5.0"
   },
   "optionalDependencies": {

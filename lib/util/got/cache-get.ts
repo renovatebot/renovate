@@ -8,11 +8,14 @@ import { clone } from '../clone';
 // istanbul ignore next
 export default create({
   options: {},
-  handler: async (options, next) => {
+  handler: (options, next) => {
     if (!global.repoCache) {
       return next(options);
     }
     if (options.stream) {
+      return next(options);
+    }
+    if (!['github', 'npm'].includes(options.hostType)) {
       return next(options);
     }
     if (options.method === 'GET') {
@@ -24,18 +27,15 @@ export default create({
         )
         .digest('hex');
       if (!global.repoCache[cacheKey] || options.useCache === false) {
-        global.repoCache[cacheKey] = next(options);
+        global.repoCache[cacheKey] = next(options).catch(err => {
+          delete global.repoCache[cacheKey];
+          throw err;
+        });
       }
-      try {
-        const response = await global.repoCache[cacheKey];
-        return {
-          ...response,
-          body: clone(response.body),
-        };
-      } catch (err) {
-        delete global.repoCache[cacheKey];
-        throw err;
-      }
+      return global.repoCache[cacheKey].then(response => ({
+        ...response,
+        body: clone(response.body),
+      }));
     }
     return next(options);
   },
