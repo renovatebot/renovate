@@ -8,7 +8,7 @@ import { clone } from '../clone';
 // istanbul ignore next
 export default create({
   options: {},
-  handler: async (options, next) => {
+  handler: (options, next) => {
     if (!global.repoCache) {
       return next(options);
     }
@@ -24,18 +24,14 @@ export default create({
         )
         .digest('hex');
       if (!global.repoCache[cacheKey] || options.useCache === false) {
-        global.repoCache[cacheKey] = next(options);
+        global.repoCache[cacheKey] = next(options).on('error', () => {
+          delete global.repoCache[cacheKey];
+        });
       }
-      try {
-        const response = await global.repoCache[cacheKey];
-        return {
-          ...response,
-          body: clone(response.body),
-        };
-      } catch (err) {
-        delete global.repoCache[cacheKey];
-        throw err;
-      }
+      return global.repoCache[cacheKey].then(response => ({
+        ...response,
+        body: clone(response.body),
+      }));
     }
     return next(options);
   },
