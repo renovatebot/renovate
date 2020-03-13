@@ -70,6 +70,7 @@ export async function getRepositoryData(
         sourceUrl: v[0].sources ? v[0].sources[0] : undefined,
         releases: v.map((x: any) => ({
           version: x.version,
+          releaseTimestamp: x.created ? x.created : null,
         })),
       })
     );
