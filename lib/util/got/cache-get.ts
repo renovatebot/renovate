@@ -5,13 +5,14 @@ import { clone } from '../clone';
 // global.repoCache is reset to {} every time a repository is initialized
 // With this caching, it means every GET request is cached during each repository run
 
-// istanbul ignore next
 export default create({
   options: {},
   handler: (options, next) => {
     if (!global.repoCache) {
       return next(options);
     }
+
+    // istanbul ignore if: never happen?
     if (options.stream) {
       return next(options);
     }
