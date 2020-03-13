@@ -7,13 +7,13 @@ Object {
     Object {
       "checksumUrl": "https://services.gradle.org/distributions/gradle-4.10.3-bin.zip.sha256",
       "downloadUrl": "https://services.gradle.org/distributions/gradle-4.10.3-bin.zip",
-      "releaseTimestamp": "2018-12-05T00:50:54+0000",
+      "releaseTimestamp": null,
       "version": "4.10.3",
     },
     Object {
       "checksumUrl": "https://services.gradle.org/distributions/gradle-5.0-bin.zip.sha256",
       "downloadUrl": "https://services.gradle.org/distributions/gradle-5.0-bin.zip",
-      "releaseTimestamp": "2018-11-26T11:48:43+0000",
+      "releaseTimestamp": null,
       "version": "5.0.0",
     },
     Object {
@@ -403,13 +403,13 @@ Object {
     Object {
       "checksumUrl": "https://services.gradle.org/distributions/gradle-4.10.3-bin.zip.sha256",
       "downloadUrl": "https://services.gradle.org/distributions/gradle-4.10.3-bin.zip",
-      "releaseTimestamp": "2018-12-05T00:50:54+0000",
+      "releaseTimestamp": null,
       "version": "4.10.3",
     },
     Object {
       "checksumUrl": "https://services.gradle.org/distributions/gradle-5.0-bin.zip.sha256",
       "downloadUrl": "https://services.gradle.org/distributions/gradle-5.0-bin.zip",
-      "releaseTimestamp": "2018-11-26T11:48:43+0000",
+      "releaseTimestamp": null,
       "version": "5.0.0",
     },
     Object {
@@ -808,13 +808,13 @@ Object {
     Object {
       "checksumUrl": "https://services.gradle.org/distributions/gradle-4.10.3-bin.zip.sha256",
       "downloadUrl": "https://services.gradle.org/distributions/gradle-4.10.3-bin.zip",
-      "releaseTimestamp": "2018-12-05T00:50:54+0000",
+      "releaseTimestamp": null,
       "version": "4.10.3",
     },
     Object {
       "checksumUrl": "https://services.gradle.org/distributions/gradle-5.0-bin.zip.sha256",
       "downloadUrl": "https://services.gradle.org/distributions/gradle-5.0-bin.zip",
-      "releaseTimestamp": "2018-11-26T11:48:43+0000",
+      "releaseTimestamp": null,
       "version": "5.0.0",
     },
     Object {
