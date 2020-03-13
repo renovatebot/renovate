@@ -15,6 +15,9 @@ export default create({
     if (options.stream) {
       return next(options);
     }
+    if (!['github', 'npm'].includes(options.hostType)) {
+      return next(options);
+    }
     if (options.method === 'GET') {
       const cacheKey = crypto
         .createHash('md5')
