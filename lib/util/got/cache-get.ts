@@ -24,8 +24,9 @@ export default create({
         )
         .digest('hex');
       if (!global.repoCache[cacheKey] || options.useCache === false) {
-        global.repoCache[cacheKey] = next(options).on('error', () => {
+        global.repoCache[cacheKey] = next(options).catch(err => {
           delete global.repoCache[cacheKey];
+          throw err;
         });
       }
       return global.repoCache[cacheKey].then(response => ({
