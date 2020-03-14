@@ -20,7 +20,7 @@ async function getTags(
   let url = endpoint
     ? endpoint.replace(/\/?$/, '/')
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://gitlab.com/api/v4/';
-  const repoid = repository.replace(/\.git/, '').replace(/\//, '%2F');
+  const repoid = repository.replace(/\.git/, '').replace(/\//g, '%2F');
   url += `projects/${repoid}/repository/tags`;
   try {
     const res = await ghGot<{ name: string }[]>(url, {

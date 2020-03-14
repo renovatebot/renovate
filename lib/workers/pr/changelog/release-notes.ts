@@ -48,7 +48,7 @@ export async function getReleaseList(
     if (apiBaseURL.search(/gitlab/) !== -1) {
       // not github, hopefully gitlab
       url += `projects/${repository.replace(
-        /\//,
+        /\//g,
         '%2f'
       )}/releases?per_page=100`;
       const res = await glGot<
@@ -296,7 +296,7 @@ export async function addReleaseNotes(
           );
         } else {
           releaseNotes = await getReleaseNotesMd(
-            repository.replace(/\//, '%2F'),
+            repository.replace(/\//g, '%2F'),
             v.version,
             input.project.baseURL,
             input.project.apiBaseURL
