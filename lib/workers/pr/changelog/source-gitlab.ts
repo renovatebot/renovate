@@ -1,10 +1,12 @@
 import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
+import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogRelease, ChangeLogResult } from './common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
+import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { BranchUpgradeConfig } from '../../common';
 
 const { get: ghGot } = api;
@@ -53,11 +55,32 @@ export async function getChangeLogJSON({
   depName,
   manager,
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
+  if (sourceUrl === 'https://gitlab.com/DefinitelyTyped/DefinitelyTyped') {
+    logger.debug('No release notes for @types');
+    return null;
+  }
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseURL = 'https://gitlab.com/';
+  const url = sourceUrl;
+  const config = hostRules.find({
+    hostType: PLATFORM_TYPE_GITLAB,
+    url,
+  });
+  // istanbul ignore if
+  if (!config.token) {
+    // prettier-ignore
+    if (URL.parse(sourceUrl).host.search(/gitlab/) !== -1) { // lgtm [js/incomplete-url-substring-sanitization]
+      logger.warn(
+        {manager, depName, sourceUrl},
+        'No gitlab token has been configured. Skipping release notes retrieval'
+      );
+      return {error: ChangeLogError.MissingGitlabToken};
+    }
+    return null;
+  }
   const apiBaseURL = 'https://gitlab.com/api/v4/';
   const repository = pathname
     .slice(1)

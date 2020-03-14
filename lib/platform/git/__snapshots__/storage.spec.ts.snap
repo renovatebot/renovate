@@ -4,6 +4,7 @@ exports[`platform/git/storage getBranchCommit(branchName) should throw if branch
 
 exports[`platform/git/storage getCommitMessages() returns commit messages 1`] = `
 Array [
+  "Add submodule",
   "master message",
   "past message",
 ]
@@ -39,6 +40,7 @@ Array [
 
 exports[`platform/git/storage initRepo()) should fetch latest 1`] = `
 Array [
+  "Add submodule",
   "master message",
   "past message",
 ]
@@ -47,7 +49,7 @@ Array [
 exports[`platform/git/storage initRepo()) should fetch latest 2`] = `
 Array [
   "past message2",
-  "master message",
+  "Add submodule",
 ]
 `;
 

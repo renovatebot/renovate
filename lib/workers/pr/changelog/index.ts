@@ -23,15 +23,12 @@ export async function getChangeLogJSON(
   const releases = args.releases || (await getInRangeReleases(args));
 
   try {
-    let res = null;
-    if (
-      args.sourceUrl === undefined ||
-      args.sourceUrl.search(/github/) !== -1
-    ) {
-      res = await sourceGithub.getChangeLogJSON({ ...args, releases });
-    }
-    if (res === null && args.sourceUrl.search(/gitlab/) !== -1) {
+    let res: ChangeLogResult | null = null;
+
+    if (args.sourceUrl?.search(/gitlab/) !== -1) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
+    } else {
+      res = await sourceGithub.getChangeLogJSON({ ...args, releases });
     }
     return res;
   } catch (err) /* istanbul ignore next */ {

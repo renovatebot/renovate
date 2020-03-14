@@ -3,12 +3,12 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
-// import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
+import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../../logger';
 import { ChangeLogResult, ChangeLogNotes } from './common';
 
 const { get: ghGot } = api;
-// const { get: glGot } = api_gitlab;
+const { get: glGot } = api_gitlab;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -51,7 +51,7 @@ export async function getReleaseList(
         /\//,
         '%2f'
       )}/releases?per_page=100`;
-      const res = await ghGot<
+      const res = await glGot<
         {
           name: string;
           release: string;

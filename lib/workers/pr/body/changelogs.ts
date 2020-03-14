@@ -1,10 +1,8 @@
 import handlebars from 'handlebars';
-import { logger } from '../../../logger';
 import releaseNotesHbs from '../changelog/hbs-template';
 import { BranchConfig } from '../../common';
 
 export function getChangelogs(config: BranchConfig): string {
-  logger.trace('getChangelogs for pr body');
   let releaseNotes = '';
   // istanbul ignore if
   if (!config.hasReleaseNotes) {

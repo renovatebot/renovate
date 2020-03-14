@@ -133,9 +133,7 @@ export function addMetaData(
       dep[url] = dep[url].trim();
       // istanbul ignore if
       if (!dep[url].match(/^https?:\/\//)) {
-        // logger.debug({ url, dep}, '(not) Deleting non https')
-        // TODO: I commented this out but I'm not sure we want to keep it this way
-        // delete dep[url];
+        delete dep[url];
       }
     } else {
       delete dep[url];
