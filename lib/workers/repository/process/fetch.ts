@@ -129,12 +129,12 @@ async function fetchManagerUpdates(
   const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
   );
-  logger.debug(
+  logger.trace(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
   await pAll(queue, { concurrency: 5 });
-  logger.debug({ manager }, 'fetchManagerUpdates finished');
+  logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 
 export async function fetchUpdates(
