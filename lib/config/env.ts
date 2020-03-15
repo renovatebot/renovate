@@ -5,6 +5,7 @@ import { RenovateConfig } from './common';
 import { logger } from '../logger';
 import * as datasourceDocker from '../datasource/docker';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { PLATFORM_TYPE_GITLAB } from '../constants/platforms';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
@@ -62,6 +63,14 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
       hostType: PLATFORM_TYPE_GITHUB,
       domainName: 'github.com',
       token: env.GITHUB_COM_TOKEN,
+    });
+  }
+
+  if (env.GITLAB_COM_TOKEN) {
+    config.hostRules.push({
+      hostType: PLATFORM_TYPE_GITLAB,
+      domainName: 'gitlab.com',
+      token: env.GITLAB_COM_TOKEN,
     });
   }
 
