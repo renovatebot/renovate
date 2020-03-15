@@ -11,7 +11,7 @@
     ]
   ],
   "analyzeCommits": {
-    "preset": "angular",
+    "preset": "conventionalcommits",
     "releaseRules": [
       {
         "type": "docs",
