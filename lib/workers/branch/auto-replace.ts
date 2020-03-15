@@ -87,9 +87,9 @@ export async function doAutoReplace(
     newValue,
     currentDigest,
     newDigest,
-    autoReplaceData = {},
+    autoReplaceData,
   } = upgrade;
-  const replaceString = autoReplaceData.replaceString || currentValue;
+  const replaceString = autoReplaceData?.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {

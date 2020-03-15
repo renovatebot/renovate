@@ -38,17 +38,17 @@ async function getDependency(
   try {
     const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
     const dependency: ReleaseResult = { releases: null };
-    logger.debug({ lookupUrl }, 'Pypi api got lookup');
+    logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await got(url.parse(lookupUrl), {
       json: true,
       hostType: id,
     });
     const dep = rep && rep.body;
     if (!dep) {
-      logger.debug({ dependency: packageName }, 'pip package not found');
+      logger.trace({ dependency: packageName }, 'pip package not found');
       return null;
     }
-    logger.debug({ lookupUrl }, 'Got pypi api result');
+    logger.trace({ lookupUrl }, 'Got pypi api result');
     if (
       !(dep.info && normalizeName(dep.info.name) === normalizeName(packageName))
     ) {
@@ -128,7 +128,7 @@ async function getSimpleDependency(
     });
     const dep = response && response.body;
     if (!dep) {
-      logger.debug({ dependency: packageName }, 'pip package not found');
+      logger.trace({ dependency: packageName }, 'pip package not found');
       return null;
     }
     const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
@@ -176,17 +176,17 @@ export async function getPkgReleases({
     let hostUrl = hostUrls[index];
     hostUrl += hostUrl.endsWith('/') ? '' : '/';
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
-      logger.debug(
+      logger.trace(
         { lookupName, hostUrl },
         'Looking up pypi simple dependency'
       );
       dep = await getSimpleDependency(lookupName, hostUrl);
     } else {
-      logger.debug({ lookupName, hostUrl }, 'Looking up pypi api dependency');
+      logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
       dep = await getDependency(lookupName, hostUrl, compatibility);
     }
     if (dep !== null) {
-      logger.debug({ lookupName, hostUrl }, 'Found pypi result');
+      logger.trace({ lookupName, hostUrl }, 'Found pypi result');
     }
   }
   if (dep) return dep;

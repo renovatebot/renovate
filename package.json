@@ -104,7 +104,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@sindresorhus/is": "1.2.0",
-    "@snyk/ruby-semver": "2.0.4",
+    "@snyk/ruby-semver": "2.1.0",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.621.0",
     "azure-devops-node-api": "9.0.1",
@@ -153,7 +153,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shortid": "2.2.15",
-    "simple-git": "1.131.0",
+    "simple-git": "1.132.0",
     "slugify": "1.4.0",
     "toml": "3.0.0",
     "traverse": "0.6.6",
@@ -216,6 +216,7 @@
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "25.1.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
+    "conventional-changelog-conventionalcommits": "4.2.3",
     "copyfiles": "2.2.0",
     "cross-env": "7.0.2",
     "eslint": "6.8.0",
@@ -242,7 +243,7 @@
     "typescript": "3.8.3"
   },
   "resolutions": {
-    "jest-silent-reporter/jest-util":">=25.1.0",
+    "jest-silent-reporter/jest-util": ">=25.1.0",
     "jest-junit/jest-validate": ">=25.1.0",
     "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
     "**/kind-of": ">=6.0.3"

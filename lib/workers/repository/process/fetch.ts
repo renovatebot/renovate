@@ -88,36 +88,15 @@ async function fetchManagerPackagerFileUpdates(
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
-  const problematicManagers = ['bundler', 'pip_requirements', 'maven'];
-  if (problematicManagers.includes(manager)) {
-    logger.debug(
-      { manager, packageFile, queueLength: pFile.deps.length },
-      'fetchManagerPackagerFileUpdates starting sequentially'
-    );
-    for (const dep of pFile.deps) {
-      const logMeta = { manager, packageFile, dependency: dep.depName };
-      try {
-        logger.debug(logMeta, 'fetchDepUpdates next');
-        await fetchDepUpdates(packageFileConfig, dep);
-        logger.debug(logMeta, 'fetchDepUpdates done');
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn(
-          { manager, packageFile, dependency: dep.depName, err },
-          'fetchDepUpdates error'
-        );
-      }
-    }
-  } else {
-    const queue = pFile.deps.map(dep => (): Promise<void> =>
-      fetchDepUpdates(packageFileConfig, dep)
-    );
-    logger.debug(
-      { manager, packageFile, queueLength: queue.length },
-      'fetchManagerPackagerFileUpdates starting with concurrency'
-    );
-    await pAll(queue, { concurrency: 5 });
-  }
-  logger.debug({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
+  const queue = pFile.deps.map(dep => (): Promise<void> =>
+    fetchDepUpdates(packageFileConfig, dep)
+  );
+  logger.trace(
+    { manager, packageFile, queueLength: queue.length },
+    'fetchManagerPackagerFileUpdates starting with concurrency'
+  );
+  await pAll(queue, { concurrency: 5 });
+  logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
 async function fetchManagerUpdates(
@@ -129,12 +108,12 @@ async function fetchManagerUpdates(
   const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
   );
-  logger.debug(
+  logger.trace(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
   await pAll(queue, { concurrency: 5 });
-  logger.debug({ manager }, 'fetchManagerUpdates finished');
+  logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 
 export async function fetchUpdates(
