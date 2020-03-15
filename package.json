@@ -216,6 +216,7 @@
     "aws-sdk-mock": "4.5.0",
     "babel-jest": "25.1.0",
     "babel-plugin-dynamic-import-node": "2.3.0",
+    "conventional-changelog-conventionalcommits": "4.2.3",
     "copyfiles": "2.2.0",
     "cross-env": "7.0.2",
     "eslint": "6.8.0",
@@ -242,7 +243,7 @@
     "typescript": "3.8.3"
   },
   "resolutions": {
-    "jest-silent-reporter/jest-util":">=25.1.0",
+    "jest-silent-reporter/jest-util": ">=25.1.0",
     "jest-junit/jest-validate": ">=25.1.0",
     "**/acorn": ">=6.4.1 <7.0.0 || >=7.1.1",
     "**/kind-of": ">=6.0.3"
