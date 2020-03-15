@@ -133,11 +133,12 @@ export async function generateLockFile(
         ? /* istanbul ignore next */ updateRes.stderr
         : '';
     }
-    if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.includes('yarnDedupeFewer')
-    ) {
-      if (yarnMajorVersion < 2) {
+
+    if (yarnMajorVersion < 2) {
+      if (
+        config.postUpdateOptions &&
+        config.postUpdateOptions.includes('yarnDedupeFewer')
+      ) {
         logger.debug('Performing yarn dedupe fewer');
         const dedupeCommand =
           'npx yarn-deduplicate@1.1.1 --strategy fewer && yarn';
@@ -151,15 +152,11 @@ export async function generateLockFile(
         stderr += dedupeRes.stderr
           ? /* istanbul ignore next */ dedupeRes.stderr
           : '';
-      } else {
-        logger.warn('yarn-deduplicate is not supported since yarn 2');
       }
-    }
-    if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.includes('yarnDedupeHighest')
-    ) {
-      if (yarnMajorVersion < 2) {
+      if (
+        config.postUpdateOptions &&
+        config.postUpdateOptions.includes('yarnDedupeHighest')
+      ) {
         logger.debug('Performing yarn dedupe highest');
         const dedupeCommand =
           'npx yarn-deduplicate@1.1.1 --strategy highest && yarn';
@@ -173,9 +170,13 @@ export async function generateLockFile(
         stderr += dedupeRes.stderr
           ? /* istanbul ignore next */ dedupeRes.stderr
           : '';
-      } else {
-        logger.warn('yarn-deduplicate is not supported since yarn 2');
       }
+    } else if (
+      config.postUpdateOptions &&
+      (config.postUpdateOptions.includes('yarnDedupeFewer') ||
+        config.postUpdateOptions.includes('yarnDedupeHighest'))
+    ) {
+      logger.warn('yarn-deduplicate is not supported since yarn 2');
     }
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
