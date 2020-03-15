@@ -23,7 +23,8 @@
       }
     ]
   },
-  "generateNotes": {
+  "preset": "conventionalcommits",
+  "presetConfig": {
     "types": [
       {
         "type": "feat",
@@ -75,6 +76,5 @@
       }
     ]
   },
-  "preset": "conventionalcommits",
   "tagFormat": "${version}"
 }
