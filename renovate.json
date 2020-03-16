@@ -10,7 +10,7 @@
   ],
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": "at any time",
+    "schedule": ["at any time"],
     "stabilityDays": 0,
     "masterIssueApproval": true
   },
@@ -59,36 +59,10 @@
   "regexManagers": [
     {
       "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV COMPOSER_VERSION=(?<currentValue>.*?)\n"],
-      "depNameTemplate": "composer/composer",
-      "datasourceTemplate": "github-releases"
-    },
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV GRADLE_VERSION=(?<currentValue>.*?)\n"],
-      "depNameTemplate": "gradle",
-      "datasourceTemplate": "gradle-version",
-      "versioningTemplate": "maven"
-    },
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV COCOAPODS_VERSION=(?<currentValue>.*?)\n"],
-      "depNameTemplate": "rubygems",
-      "datasourceTemplate": "cocoapods",
-      "versioningTemplate": "ruby"
-    },
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV DOCKER_VERSION=(?<currentValue>.*?)\n"],
-      "depNameTemplate": "docker/docker-ce",
-      "datasourceTemplate": "github-releases",
-      "versioningTemplate": "docker"
-    },
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV POETRY_VERSION=(?<currentValue>.*?)\n"],
-      "depNameTemplate": "python-poetry/poetry",
-      "datasourceTemplate": "github-releases"
+      "matchStrings": [
+        "# renovate: (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
     }
   ]
 }
