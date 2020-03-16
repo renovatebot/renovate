@@ -72,6 +72,7 @@ RUN apt-get update && \
 
 
 ## Gradle (needs java-jre, installed above)
+
 # renovate: gradle-version/gradle&versioning=maven
 ENV GRADLE_VERSION 6.2
 
