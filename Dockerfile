@@ -116,7 +116,7 @@ RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu bionic main" > /etc/apt
     rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-releases depName=composer/composer
-ENV COMPOSER_VERSION=1.9.3
+ENV COMPOSER_VERSION=1.10.1
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
