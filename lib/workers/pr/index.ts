@@ -289,6 +289,12 @@ export async function ensurePr(
         logger.debug(
           {
             prTitle,
+          },
+          'PR body changed'
+        );
+        logger.trace(
+          {
+            prTitle,
             oldPrBody: existingPrBody,
             newPrBody: prBody,
           },
