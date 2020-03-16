@@ -193,7 +193,7 @@ RUN pip install --user pipenv
 
 # Poetry
 
-# renovate: datasorce=github-releases depName=python-poetry/poetry
+# renovate: datasource=github-releases depName=python-poetry/poetry
 ENV POETRY_VERSION=1.0.0
 
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${POETRY_VERSION}
