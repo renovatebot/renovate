@@ -50,9 +50,11 @@ export function extractPackageFile(content: string): PackageFile {
           }
 
           // Find dep's line number
-          for (let i = 0; i < contentArr.length; i += 1)
-            if (contentArr[i].includes(`:${depName},`))
+          for (let i = 0; i < contentArr.length; i += 1) {
+            if (contentArr[i].includes(`:${depName},`)) {
               dep.managerData.lineNumber = i;
+            }
+          }
 
           deps.push(dep);
         }

@@ -26,8 +26,9 @@ export function check({
         }.
         Supported managers are: (${getManagerList().join(', ')}).`;
     }
-  } else if (typeof resolvedRule.managers !== 'undefined')
+  } else if (typeof resolvedRule.managers !== 'undefined') {
     managersErrMessage = `${currentPath}: Managers should be type of List. You have included ${typeof resolvedRule.managers}.`;
+  }
 
   return managersErrMessage
     ? [

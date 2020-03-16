@@ -26,7 +26,9 @@ async function cleanUpBranches(
             logger.info(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
-          } else await platform.updatePr(pr.number, `${pr.title} - autoclosed`);
+          } else {
+            await platform.updatePr(pr.number, `${pr.title} - autoclosed`);
+          }
         }
       }
       const closePr = true;
@@ -54,7 +56,9 @@ async function cleanUpBranches(
         logger.info(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
-      } else await platform.deleteBranch(branchName, closePr);
+      } else {
+        await platform.deleteBranch(branchName, closePr);
+      }
       if (pr && !skipAutoclose) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }

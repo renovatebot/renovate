@@ -20,4 +20,6 @@ if (!exec(`./.github/workflows/release-docker.sh ${version} ${sha}`)) {
   err = true;
 }
 
-if (err) shell.exit(1);
+if (err) {
+  shell.exit(1);
+}
