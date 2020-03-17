@@ -1,6 +1,6 @@
+import is from '@sindresorhus/is';
 import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
-import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import {
@@ -31,7 +31,9 @@ const buildTimeRegex = regEx(
 );
 
 function formatBuildTime(timeStr: string): string | null {
-  if (!timeStr) return null;
+  if (!timeStr) {
+    return null;
+  }
   if (buildTimeRegex.test(timeStr)) {
     return timeStr.replace(buildTimeRegex, '$1-$2-$3T$4:$5:$6$7');
   }
