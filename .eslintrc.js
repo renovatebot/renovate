@@ -58,7 +58,7 @@ module.exports = {
         args: 'none',
         ignoreRestSiblings: false,
       },
-    ], // disable until proper interfaced api,
+    ], // disable until proper interfaced api
     curly: [2, 'all'],
   },
   settings: {
