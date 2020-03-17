@@ -15,7 +15,9 @@ function patchJest() {
     shell.echo('Found backup, restore jest-runtime.');
     shell.cp(`${file}.bak`, file);
   }
-  if (restore) return;
+  if (restore) {
+    return;
+  }
 
   shell.echo('-n', 'Patching jest-runtime ... ');
 
@@ -23,12 +25,16 @@ function patchJest() {
 
   let idx = code.indexOf('_requireCoreModule(moduleName)');
 
-  if (idx < 0) return;
+  if (idx < 0) {
+    return;
+  }
 
   const orig = 'return require(moduleName);';
   idx = code.indexOf(orig);
 
-  if (idx < 0) return;
+  if (idx < 0) {
+    return;
+  }
 
   const patched = `if (!this._coreModulesProxyCache) {
       this._coreModulesProxyCache = Object.create(null);

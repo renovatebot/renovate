@@ -37,5 +37,15 @@ describe('datasource/gitlab-tags', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
     });
+
+    it('returns tags with default registry', async () => {
+      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      glGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await gitlab.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+    });
   });
 });

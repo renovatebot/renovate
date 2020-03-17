@@ -1,7 +1,9 @@
 const secrets = new Set<string>();
 
 export function sanitize(input: string): string {
-  if (!input) return input;
+  if (!input) {
+    return input;
+  }
   let output: string = input;
   secrets.forEach(secret => {
     while (output.includes(secret)) {

@@ -21,9 +21,15 @@ export async function resolvePackageReleases(
     const releases: string[] = [];
     const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, x => {
-        if (x === artifact) return true;
-        if (x.startsWith(`${artifact}_native`)) return false;
-        if (x.startsWith(`${artifact}_sjs`)) return false;
+        if (x === artifact) {
+          return true;
+        }
+        if (x.startsWith(`${artifact}_native`)) {
+          return false;
+        }
+        if (x.startsWith(`${artifact}_sjs`)) {
+          return false;
+        }
         return x.startsWith(`${artifact}_`);
       });
     const artifactSubdirs = parseSubdirs(indexContent);
@@ -46,7 +52,9 @@ export async function resolvePackageReleases(
         subdirReleases.forEach(x => releases.push(x));
       }
     }
-    if (releases.length) return [...new Set(releases)].sort(compare);
+    if (releases.length) {
+      return [...new Set(releases)].sort(compare);
+    }
   }
 
   return null;
