@@ -111,7 +111,9 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  for (const d of deps) d.depType = 'stage';
+  for (const d of deps) {
+    d.depType = 'stage';
+  }
   deps[deps.length - 1].depType = 'final';
   return { deps };
 }

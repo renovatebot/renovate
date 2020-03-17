@@ -64,7 +64,9 @@ export async function getPkgReleases(
     } while (pkgUrlList !== null);
 
     // dep not found if no release, so we can try next registry
-    if (dep.releases.length === 0) return null;
+    if (dep.releases.length === 0) {
+      return null;
+    }
 
     return dep;
   } catch (err) {
