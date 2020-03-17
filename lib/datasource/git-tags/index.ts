@@ -20,7 +20,9 @@ export async function getPkgReleases({
       lookupName
     );
     /* istanbul ignore next line */
-    if (cachedResult) return cachedResult;
+    if (cachedResult) {
+      return cachedResult;
+    }
 
     // fetch remote tags
     const lsRemote = await gitRefs.getPkgReleases({ lookupName });

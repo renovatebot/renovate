@@ -39,8 +39,12 @@ export function parseLine(line: string): ParsedLine {
       ? `${result.spec}/${result.subspec}`
       : result.spec;
     const groupName = result.spec;
-    if (depName) result.depName = depName;
-    if (groupName) result.groupName = groupName;
+    if (depName) {
+      result.depName = depName;
+    }
+    if (groupName) {
+      result.groupName = groupName;
+    }
     delete result.spec;
     delete result.subspec;
   }

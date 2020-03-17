@@ -63,8 +63,9 @@ function findBalancedParenIndex(longString: string): number {
         parenNestingDepth--;
         break;
       case '"':
-        if (i > 1 && arr.slice(i - 2, i).every(prev => char === prev))
+        if (i > 1 && arr.slice(i - 2, i).every(prev => char === prev)) {
           intShouldNotBeOdd++;
+        }
         break;
       default:
         break;

@@ -15,8 +15,12 @@ function relatePath(here: string, there: string): string {
   }
 
   const result = [];
-  for (let x = 0; x < hereParts.length - idx; x += 1) result.push('..');
-  for (let y = idx; y < thereParts.length; y += 1) result.push(thereParts[idx]);
+  for (let x = 0; x < hereParts.length - idx; x += 1) {
+    result.push('..');
+  }
+  for (let y = idx; y < thereParts.length; y += 1) {
+    result.push(thereParts[idx]);
+  }
   return result.join('/');
 }
 
@@ -37,8 +41,9 @@ export function loadModules<T>(
     const modulePath = join(relatePath(__dirname, dirname), moduleName);
     const module = require(modulePath); // eslint-disable-line
     // istanbul ignore if
-    if (!module || (validate && !validate(module, moduleName)))
+    if (!module || (validate && !validate(module, moduleName))) {
       throw new Error(`Invalid module: ${modulePath}`);
+    }
     result[moduleName] = module as T;
   }
 
