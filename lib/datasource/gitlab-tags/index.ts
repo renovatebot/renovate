@@ -66,7 +66,7 @@ export async function getPkgReleases({
   dependency.releases = gitlabTags.map(({ name, commit }) => ({
     version: name,
     gitRef: name,
-    releaseTimestamp: commit && commit.created_at ? commit.created_at : null,
+    releaseTimestamp: commit?.created_at,
   }));
 
   const cacheMinutes = 10;

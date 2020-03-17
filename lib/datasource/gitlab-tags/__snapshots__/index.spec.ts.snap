@@ -10,12 +10,12 @@ Object {
     },
     Object {
       "gitRef": "v1.1.0",
-      "releaseTimestamp": null,
+      "releaseTimestamp": undefined,
       "version": "v1.1.0",
     },
     Object {
       "gitRef": "v1.1.1",
-      "releaseTimestamp": null,
+      "releaseTimestamp": undefined,
       "version": "v1.1.1",
     },
   ],
@@ -28,10 +28,12 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v1.1.0",
+      "releaseTimestamp": undefined,
       "version": "v1.1.0",
     },
   ],
