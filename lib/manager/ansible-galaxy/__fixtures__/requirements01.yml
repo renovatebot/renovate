@@ -16,6 +16,20 @@
   src: git@gitlab.company.com:mygroup/ansible-base.git
   version: "0.1"
 
+# Git repo, url with protocol prefix
+## with user
+- scm: git
+  src:  ssh://git@gitlab.company.com/testGroup/testProject.git
+  version: "0.1"
+## without user
+- scm: git
+  src:  ssh://gitlab.company.com/testGroup/testProject2.git
+  version: "0.1"
+## with custom port
+- scm: git
+  src:  ssh://git@gitlab.company.com:23/testGroup/testProject3.git
+  version: "3.1"
+
 # include
 - include: <path_to_requirements>/webserver.yml
 

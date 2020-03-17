@@ -136,7 +136,9 @@ export function extractPackageFile(
   content: string,
   packageFile: string = null
 ): PackageFile | null {
-  if (!content) return null;
+  if (!content) {
+    return null;
+  }
 
   const result: PackageFile = {
     packageFile,
@@ -177,7 +179,9 @@ export function extractPackageFile(
     // eslint-disable-next-line default-case
     switch (state) {
       case null:
-        if (deps.length) break;
+        if (deps.length) {
+          break;
+        }
         if (label === DEPS) {
           state = 'dependencies';
         }

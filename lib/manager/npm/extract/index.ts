@@ -23,7 +23,9 @@ import * as datasourceNpm from '../../../datasource/npm';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 
 function parseDepName(depType: string, key: string): string {
-  if (depType !== 'resolutions') return key;
+  if (depType !== 'resolutions') {
+    return key;
+  }
 
   const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key);
   return depName;

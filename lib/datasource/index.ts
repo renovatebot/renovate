@@ -17,8 +17,12 @@ export * from './common';
 
 // istanbul ignore next
 function validateDatasource(module, name): boolean {
-  if (!module.getPkgReleases) return false;
-  if (module.id !== name) return false;
+  if (!module.getPkgReleases) {
+    return false;
+  }
+  if (module.id !== name) {
+    return false;
+  }
   return true;
 }
 

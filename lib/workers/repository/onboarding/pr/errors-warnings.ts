@@ -38,7 +38,7 @@ export function getDepWarnings(
     const warnings = [];
     const warningFiles = [];
     for (const files of Object.values(packageFiles || {})) {
-      for (const file of files || [])
+      for (const file of files || []) {
         if (file.deps) {
           for (const dep of file.deps || []) {
             if (dep.warnings && dep.warnings.length) {
@@ -52,6 +52,7 @@ export function getDepWarnings(
             }
           }
         }
+      }
     }
     if (!warnings.length) {
       return '';

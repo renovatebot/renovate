@@ -67,7 +67,9 @@ export async function getGraphqlNodes<T = Record<string, unknown>>(
 
   while (canIterate) {
     let replacement = `$1${fieldName}$2(first: ${count}`;
-    if (cursor) replacement += `, after: "${cursor}", `;
+    if (cursor) {
+      replacement += `, after: "${cursor}", `;
+    }
     const query = queryOrig.replace(regex, replacement);
     const gqlRes = await get<T>(query);
     if (

@@ -34,8 +34,12 @@ export function getConfig(input: string[]): RenovateCliConfig {
 
   const coersions = {
     boolean: (val: string): boolean => {
-      if (val === 'true' || val === '') return true;
-      if (val === 'false') return false;
+      if (val === 'true' || val === '') {
+        return true;
+      }
+      if (val === 'false') {
+        return false;
+      }
       throw new Error(
         "Invalid boolean value: expected 'true' or 'false', but got '" +
           val +

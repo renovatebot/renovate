@@ -48,6 +48,7 @@ FROM base as final-base
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
+# renovate: datasource=github-releases depName=docker/docker-ce versioning=docker
 ENV DOCKER_VERSION=19.03.5
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
@@ -71,6 +72,8 @@ RUN apt-get update && \
 
 
 ## Gradle (needs java-jre, installed above)
+
+# renovate: datasource=gradle-version depName=gradle versioning=maven
 ENV GRADLE_VERSION 6.2
 
 RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
@@ -106,10 +109,14 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
-RUN apt-get update && apt-get install -y php-cli php-mbstring && \
+RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu bionic main" > /etc/apt/sources.list.d/ondrej-php.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C && \
+    apt-get update && \
+    apt-get -y install php7.4-cli php7.4-mbstring && \
     rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_VERSION=1.9.3
+# renovate: datasource=github-releases depName=composer/composer
+ENV COMPOSER_VERSION=1.10.1
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
@@ -153,6 +160,8 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 # CocoaPods
 RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt/lists/*
 RUN ruby --version
+
+# renovate: datasource=rubygems depName=cocoapods versioning=ruby
 ENV COCOAPODS_VERSION 1.9.0
 RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
@@ -184,7 +193,8 @@ RUN pip install --user pipenv
 
 # Poetry
 
-ENV POETRY_VERSION=1.0.0
+# renovate: datasource=github-releases depName=python-poetry/poetry
+ENV POETRY_VERSION=1.0.5
 
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${POETRY_VERSION}
 
