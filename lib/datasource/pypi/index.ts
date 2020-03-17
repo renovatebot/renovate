@@ -189,7 +189,9 @@ export async function getPkgReleases({
       logger.trace({ lookupName, hostUrl }, 'Found pypi result');
     }
   }
-  if (dep) return dep;
+  if (dep) {
+    return dep;
+  }
   logger.debug({ lookupName, registryUrls }, 'No pypi result - returning null');
   return null;
 }

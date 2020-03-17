@@ -2,7 +2,7 @@ ARG IMAGE=latest
 
 # Base image
 #============
-FROM renovate/yarn:1.22.0@sha256:a7737a9182c1456ac089022a44bea22eb9d5069b3f8388cda06b473717a8dd41 AS base
+FROM renovate/yarn:1.22.4@sha256:e62f9d4b134c5016a819d3257ce7f0cc8f1a2a04998e59cdbb8e51309f56955e AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -116,7 +116,7 @@ RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu bionic main" > /etc/apt
     rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-releases depName=composer/composer
-ENV COMPOSER_VERSION=1.9.3
+ENV COMPOSER_VERSION=1.10.1
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 

@@ -31,8 +31,11 @@ function npm2hex(input: string): string {
     if (i < res.length - 1 && res[i + 1].includes('||')) {
       output += res[i] + ' or ';
       i += 1;
-    } else if (!operators.includes(res[i])) output += res[i] + ' and ';
-    else output += res[i] + ' ';
+    } else if (!operators.includes(res[i])) {
+      output += res[i] + ' and ';
+    } else {
+      output += res[i] + ' ';
+    }
   }
   return output;
 }

@@ -48,7 +48,9 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     url
   );
   /* istanbul ignore next line */
-  if (cachedResult) return cachedResult;
+  if (cachedResult) {
+    return cachedResult;
+  }
   try {
     const hash = await fromStream(got.stream(url), {
       algorithm: 'sha256',
