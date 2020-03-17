@@ -12,7 +12,6 @@ export default create({
       return next(options);
     }
 
-    // istanbul ignore if: never happen?
     if (options.stream) {
       return next(options);
     }

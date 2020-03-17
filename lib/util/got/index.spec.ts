@@ -109,4 +109,30 @@ describe(getName(__filename), () => {
     expect(req.isDone()).toBe(true);
     expect(global.repoCache).toEqual({});
   });
+
+  it('streams no cache', async () => {
+    const req = mock();
+
+    const stream = api.stream('/some', {
+      baseUrl,
+    });
+    expect(stream).toBeDefined();
+
+    let data = '';
+
+    stream.on('data', c => {
+      data += c;
+    });
+
+    const done = new Promise((resolve, reject) => {
+      stream.on('end', resolve);
+      stream.on('error', reject);
+    });
+
+    await done;
+
+    expect(data).toBe('{}');
+    expect(req.isDone()).toBe(true);
+    expect(global.repoCache).toEqual({});
+  });
 });
