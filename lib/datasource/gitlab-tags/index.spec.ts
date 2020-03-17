@@ -23,9 +23,10 @@ describe('datasource/gitlab-tags', () => {
         },
         {
           name: 'v1.1.0',
-          commit: {
-            created_at: '2020-03-04T12:12:13.000-06:00',
-          },
+          commit: {},
+        },
+        {
+          name: 'v1.1.1',
         },
       ];
       glGot.mockReturnValueOnce({ headers: {}, body });
@@ -34,7 +35,7 @@ describe('datasource/gitlab-tags', () => {
         lookupName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
+      expect(res.releases).toHaveLength(3);
     });
   });
 });
