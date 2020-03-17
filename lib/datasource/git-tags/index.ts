@@ -45,8 +45,8 @@ export async function getPkgReleases({
 
     await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
     return result;
-  } catch (e) {
-    logger.debug(`Error looking up tags in ${lookupName}`);
+  } catch (err) {
+    logger.debug({ err }, `Git-Tags lookup error in ${lookupName}`);
   }
   return null;
 }

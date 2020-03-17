@@ -4,7 +4,6 @@ import { getPkgReleases } from '.';
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
-// const lookupName = 'vapor';
 const lookupName = 'https://github.com/example/example.git';
 
 describe('datasource/git-refs', () => {

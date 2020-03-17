@@ -20,7 +20,9 @@ export async function getPkgReleases({
       lookupName
     );
     /* istanbul ignore next line */
-    if (cachedResult) return cachedResult;
+    if (cachedResult) {
+      return cachedResult;
+    }
 
     // fetch remote tags
     const lsRemote = await git.listRemote([lookupName, '--sort=-v:refname']);
@@ -43,8 +45,8 @@ export async function getPkgReleases({
 
     await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
     return result;
-  } catch (e) {
-    logger.debug(`Error looking up refs in ${lookupName}`);
+  } catch (err) {
+    logger.debug({ err }, `Git-Refs lookup error in ${lookupName}`);
   }
   return null;
 }
