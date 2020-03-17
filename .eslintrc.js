@@ -59,6 +59,7 @@ module.exports = {
         ignoreRestSiblings: false,
       },
     ], // disable until proper interfaced api
+    curly: [2, 'all'],
   },
   settings: {
     // https://github.com/benmosher/eslint-plugin-import/issues/1618

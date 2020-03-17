@@ -159,8 +159,11 @@ export async function initRepo({
       const { body } = await api.get<FileData>(
         `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
       );
-      if (!body.isLastPage) logger.warn('Renovate config to big: ' + body.size);
-      else renovateConfig = JSON.parse(body.lines.join());
+      if (!body.isLastPage) {
+        logger.warn('Renovate config to big: ' + body.size);
+      } else {
+        renovateConfig = JSON.parse(body.lines.join());
+      }
     } catch {
       // Do nothing
     }
@@ -542,8 +545,12 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return BranchStatus.red;
-    if (commitStatus.inProgress > 0) return BranchStatus.yellow;
+    if (commitStatus.failed > 0) {
+      return BranchStatus.red;
+    }
+    if (commitStatus.inProgress > 0) {
+      return BranchStatus.yellow;
+    }
     return commitStatus.successful > 0
       ? BranchStatus.green
       : BranchStatus.yellow;

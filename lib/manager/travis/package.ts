@@ -45,11 +45,15 @@ function generatePolicies(): void {
       policies.all.push(release);
       const isMaintenance =
         data.maintenance && new Date(data.maintenance) < now;
-      if (!isMaintenance) policies.active.push(release);
+      if (!isMaintenance) {
+        policies.active.push(release);
+      }
       const isLts = data.lts && new Date(data.lts) < now;
       if (isLts) {
         policies.lts.push(release);
-        if (!isMaintenance) policies.lts_active.push(release);
+        if (!isMaintenance) {
+          policies.lts_active.push(release);
+        }
       }
     }
   }

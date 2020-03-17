@@ -16,8 +16,12 @@ export function parsePom(raw: string): XmlDocument | null {
     return null;
   }
   const { name, attr, children } = project;
-  if (name !== 'project') return null;
-  if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') return project;
+  if (name !== 'project') {
+    return null;
+  }
+  if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') {
+    return project;
+  }
   if (
     is.nonEmptyArray(children) &&
     children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
@@ -38,7 +42,9 @@ interface MavenProp {
 }
 
 function depFromNode(node: XmlElement): PackageDependency | null {
-  if (!('valueWithPath' in node)) return null;
+  if (!('valueWithPath' in node)) {
+    return null;
+  }
   let groupId = node.valueWithPath('groupId');
   const artifactId = node.valueWithPath('artifactId');
   const currentValue = node.valueWithPath('version');
@@ -150,10 +156,14 @@ export function extractPackage(
   rawContent: string,
   packageFile: string | null = null
 ): PackageFile<Record<string, any>> | null {
-  if (!rawContent) return null;
+  if (!rawContent) {
+    return null;
+  }
 
   const project = parsePom(rawContent);
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   const result: PackageFile = {
     datasource: datasourceMaven.id,

@@ -24,7 +24,9 @@ export function updateDependency({
   const lines = fileContent.split('\n');
   const lineToChange = lines[managerData.lineNumber];
 
-  if (!lineContainsDep(lineToChange, depName)) return null;
+  if (!lineContainsDep(lineToChange, depName)) {
+    return null;
+  }
 
   const regex = new RegExp(`(['"])${currentValue.replace('.', '\\.')}\\1`);
   const newLine = lineToChange.replace(regex, `$1${newValue}$1`);

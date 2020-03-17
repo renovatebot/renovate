@@ -96,9 +96,13 @@ export default function extractPackageFile(
           }
           const line = lines[lineNumber + 1];
 
-          if (!line) break;
+          if (!line) {
+            break;
+          }
           lineMatch = blockLineRegEx.exec(line);
-          if (lineMatch) lineNumber += 1;
+          if (lineMatch) {
+            lineNumber += 1;
+          }
         } while (lineMatch);
         if (finalize(dep)) {
           delete dep.managerData;
