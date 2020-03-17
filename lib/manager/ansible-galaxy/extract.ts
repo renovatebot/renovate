@@ -47,7 +47,7 @@ function finalize(dependency: PackageDependency): boolean {
 
   const source: string = dep.managerData.src;
   const sourceMatch: RegExpMatchArray = new RegExp(
-    /^(git|http|git\+http)s?(:\/\/|@).*(\/|:)(.+\/[^.]+)\/?(\.git)?$/
+    /^(git|http|git\+http|ssh)s?(:\/\/|@).*(\/|:)(.+\/[^.]+)\/?(\.git)?$/
   ).exec(source);
   if (sourceMatch) {
     dep.datasource = datasourceGitTags.id;
