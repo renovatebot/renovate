@@ -22,6 +22,15 @@ import * as nodeVersioning from '../../../versioning/node';
 import * as datasourceNpm from '../../../datasource/npm';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 
+function parseDepName(depType: string, key: string): string {
+  if (depType !== 'resolutions') {
+    return key;
+  }
+
+  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key);
+  return depName;
+}
+
 export async function extractPackageFile(
   content: string,
   fileName: string,
@@ -136,6 +145,7 @@ export async function extractPackageFile(
     peerDependencies: 'peerDependency',
     engines: 'engine',
     volta: 'volta',
+    resolutions: 'resolutions',
   };
 
   function extractDependency(
@@ -272,13 +282,17 @@ export async function extractPackageFile(
   for (const depType of Object.keys(depTypes)) {
     if (packageJson[depType]) {
       try {
-        for (const [depName, val] of Object.entries(
+        for (const [key, val] of Object.entries(
           packageJson[depType] as NpmPackageDependeny
         )) {
+          const depName = parseDepName(depType, key);
           const dep: PackageDependency = {
             depType,
             depName,
           };
+          if (depName !== key) {
+            dep.managerData = { key };
+          }
           Object.assign(dep, extractDependency(depType, depName, val));
           if (depName === 'node') {
             // This is a special case for Node.js to group it together with other managers

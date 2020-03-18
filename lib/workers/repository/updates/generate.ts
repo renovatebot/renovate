@@ -297,8 +297,12 @@ export function generateBranchConfig(
         // This is because we need to replace from the bottom of the file up
         return a.fileReplacePosition > b.fileReplacePosition ? -1 : 1;
       }
-      if (a.depName < b.depName) return -1;
-      if (a.depName > b.depName) return 1;
+      if (a.depName < b.depName) {
+        return -1;
+      }
+      if (a.depName > b.depName) {
+        return 1;
+      }
       return 0;
     });
   }

@@ -52,7 +52,9 @@ export async function accumulateValues<T = any>(
     // TODO: fix typing
     const { body } = await (api as any)[lowerCaseMethod](nextUrl, options);
     accumulator = [...accumulator, ...body.values];
-    if (body.isLastPage !== false) break;
+    if (body.isLastPage !== false) {
+      break;
+    }
 
     const { search, ...parsedUrl } = url.parse(nextUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
     nextUrl = url.format({

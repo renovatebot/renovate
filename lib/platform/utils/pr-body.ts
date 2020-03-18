@@ -11,7 +11,9 @@ export function smartTruncate(input: string, len: number): string {
     const nonReleaseNotesLength =
       input.length - releaseNotes.length - divider.length;
     const availableLength = len - nonReleaseNotesLength;
-    if (availableLength <= 0) return input.substring(0, len);
+    if (availableLength <= 0) {
+      return input.substring(0, len);
+    }
     return input.replace(
       releaseNotes,
       releaseNotes.slice(0, availableLength) + divider

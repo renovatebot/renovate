@@ -39,9 +39,10 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
-          node --version
+          yarn config set version-git-tag false
+          echo "Node $(node --version)"
           python --version
-          yarn --version
+          echo "Yarn $(yarn --version)"
           pip --version
 
       - uses: actions/checkout@v2
@@ -85,6 +86,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
       - name: Build the Docker images cache
+        continue-on-error: true
         run: |
           docker buildx bake \
             --file docker/bake.hcl \
@@ -92,7 +94,10 @@ jobs:
             --set slim.cache-to=renovate/renovate:_cache-slim \
             default
 
-      - run: yarn semantic-release
+      - name: semantic-release
+        run: |
+          echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+          yarn semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

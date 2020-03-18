@@ -401,8 +401,12 @@ describe(`Child process execution wrapper`, () => {
     } = testOpts;
 
     process.env = procEnv;
-    if (trustLevel) global.trustLevel = trustLevel;
-    if (config) setExecConfig(config);
+    if (trustLevel) {
+      global.trustLevel = trustLevel;
+    }
+    if (config) {
+      setExecConfig(config);
+    }
 
     const actualCmd: string[] = [];
     const actualOpts: ChildProcessExecOptions[] = [];

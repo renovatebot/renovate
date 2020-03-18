@@ -43,7 +43,9 @@ export async function getDigest(
   const assets: CdnjsAsset[] = res.body && res.body.assets;
   const asset = assets && assets.find(({ version }) => version === newValue);
   const hash = asset && asset.sri && asset.sri[assetName];
-  if (hash) result = hash;
+  if (hash) {
+    result = hash;
+  }
   return result;
 }
 
@@ -59,7 +61,9 @@ export async function getPkgReleases({
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) return cachedResult;
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   const url = depUrl(library);
 
@@ -81,19 +85,34 @@ export async function getPkgReleases({
 
     const result: ReleaseResult = { releases };
 
-    if (homepage) result.homepage = homepage;
-    if (repository && repository.url) result.sourceUrl = repository.url;
+    if (homepage) {
+      result.homepage = homepage;
+    }
+    if (repository && repository.url) {
+      result.sourceUrl = repository.url;
+    }
 
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
 
     return result;
   } catch (err) {
+    const errorData = { library, err };
+
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    throw err;
+    if (err.statusCode === 401) {
+      logger.debug(errorData, 'Authorization error');
+    } else if (err.statusCode === 404) {
+      logger.debug(errorData, 'Package lookup error');
+    } else {
+      logger.debug(errorData, 'CDNJS lookup failure: Unknown error');
+      throw new DatasourceError(err);
+    }
   }
+
+  return null;
 }

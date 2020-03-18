@@ -51,8 +51,12 @@ function createChildEnv(
   extraEnv: ExtraEnv
 ): ExtraEnv<string> {
   const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
-    if (val === null) return false;
-    if (val === undefined) return false;
+    if (val === null) {
+      return false;
+    }
+    if (val === undefined) {
+      return false;
+    }
     return true;
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
@@ -68,8 +72,12 @@ function createChildEnv(
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
-    if (val === null) return;
-    if (val === undefined) return;
+    if (val === null) {
+      return;
+    }
+    if (val === undefined) {
+      return;
+    }
     result[key] = val.toString();
   });
   return result;

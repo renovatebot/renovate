@@ -29,9 +29,11 @@ export async function tryBranchAutomerge(
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);
     try {
-      if (config.dryRun)
+      if (config.dryRun) {
         logger.info('DRY-RUN: Would automerge branch' + config.branchName);
-      else await platform.mergeBranch(config.branchName);
+      } else {
+        await platform.mergeBranch(config.branchName);
+      }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
     } catch (err) {
