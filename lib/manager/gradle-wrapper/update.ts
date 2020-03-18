@@ -1,6 +1,7 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
+import { DISTRIBUTION_CHECKSUM_REGEX, DISTRIBUTION_URL_REGEX } from './search';
 
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
@@ -40,12 +41,12 @@ export async function updateDependency({
 
     lines[upgrade.managerData.lineNumber] = lines[
       upgrade.managerData.lineNumber
-    ].replace(/(distributionUrl\s*=\s*)\S*/, `$1${downloadUrl}`);
+    ].replace(DISTRIBUTION_URL_REGEX, `$<assignment>${downloadUrl}`);
 
     if (upgrade.managerData.checksumLineNumber) {
       lines[upgrade.managerData.checksumLineNumber] = lines[
         upgrade.managerData.checksumLineNumber
-      ].replace(/(distributionSha256Sum\s*=\s*)\S*/, `$1${checksum}`);
+      ].replace(DISTRIBUTION_CHECKSUM_REGEX, `$<assignment>${checksum}`);
     }
     // TODO: insert if not present
 
