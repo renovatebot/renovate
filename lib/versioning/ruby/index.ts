@@ -24,7 +24,9 @@ export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function vtrim<T = unknown>(version: T): string | T {
-  if (typeof version === 'string') return version.replace(/^v/, '');
+  if (typeof version === 'string') {
+    return version.replace(/^v/, '');
+  }
   return version;
 }
 

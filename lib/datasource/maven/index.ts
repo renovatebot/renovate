@@ -42,7 +42,9 @@ function getMavenUrl(
 async function downloadMavenXml(
   pkgUrl: url.URL | null
 ): Promise<XmlDocument | null> {
-  if (!pkgUrl) return null;
+  if (!pkgUrl) {
+    return null;
+  }
   let rawContent: string;
   switch (pkgUrl.protocol) {
     case 'file:':
@@ -85,7 +87,9 @@ async function getDependencyInfo(
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const pomContent = await downloadMavenXml(pomUrl);
-  if (!pomContent) return result;
+  if (!pomContent) {
+    return result;
+  }
 
   const homepage = pomContent.valueWithPath('url');
   if (homepage && !containsPlaceholder(homepage)) {
@@ -132,7 +136,9 @@ function getDependencyParts(lookupName: string): MavenDependency {
 function extractVersions(metadata: XmlDocument): string[] {
   const versions = metadata.descendantWithPath('versioning.versions');
   const elements = versions && versions.childrenNamed('version');
-  if (!elements) return [];
+  if (!elements) {
+    return [];
+  }
   return elements.map(el => el.val);
 }
 

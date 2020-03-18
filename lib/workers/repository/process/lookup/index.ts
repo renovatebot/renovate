@@ -139,7 +139,9 @@ export async function lookupUpdates(
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
   const isValid = currentValue && version.isValid(currentValue);
-  if (!isValid) res.skipReason = SkipReason.InvalidValue;
+  if (!isValid) {
+    res.skipReason = SkipReason.InvalidValue;
+  }
 
   if (isValid) {
     const dependency = clone(await getPkgReleases(config));
