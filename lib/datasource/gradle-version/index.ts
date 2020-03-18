@@ -1,5 +1,6 @@
-import { coerce } from 'semver';
 import is from '@sindresorhus/is';
+import { coerce } from 'semver';
+import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import {
@@ -21,7 +22,22 @@ interface GradleRelease {
     version: string;
     downloadUrl?: string;
     checksumUrl?: string;
+    buildTime?: string;
   }[];
+}
+
+const buildTimeRegex = regEx(
+  '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
+);
+
+function formatBuildTime(timeStr: string): string | null {
+  if (!timeStr) {
+    return null;
+  }
+  if (buildTimeRegex.test(timeStr)) {
+    return timeStr.replace(buildTimeRegex, '$1-$2-$3T$4:$5:$6$7');
+  }
+  return null;
 }
 
 export async function getPkgReleases({
@@ -49,6 +65,7 @@ export async function getPkgReleases({
             version: coerce(release.version).toString(),
             downloadUrl: release.downloadUrl,
             checksumUrl: release.checksumUrl,
+            releaseTimestamp: formatBuildTime(release.buildTime),
           }));
         return releases;
       } catch (err) /* istanbul ignore next */ {
