@@ -27,10 +27,11 @@ function parseJavaVersion(javaVersionOutput: string) {
   if (versionMatch !== null && versionMatch.length === 2) {
     return parseInt(versionMatch[1], 10);
   }
-  if (enforceJava)
+  if (enforceJava) {
     throw Error(`This test suite needs Java and ${failIfNoJavaEnv} is set. However, we cannot parse the Java version.
 The output of java -version was:
 ${javaVersionOutput}`);
+  }
   return 0;
 }
 
@@ -45,9 +46,13 @@ function determineJavaVersion(): number {
   } catch (e) {
     error = e;
   }
-  if (javaVersionCommand.error) error = javaVersionCommand.error;
+  if (javaVersionCommand.error) {
+    error = javaVersionCommand.error;
+  }
   if (error) {
-    if (!enforceJava) return 0;
+    if (!enforceJava) {
+      return 0;
+    }
     throw Error(
       `This test suite needs Java and ${failIfNoJavaEnv} is set.
 Result of java -version:
@@ -71,10 +76,11 @@ describe('lib/manager/gradle/gradle-updates-report', () => {
       const gradleSupportsThisJavaVersion =
         javaVersion >= supportedJavaVersions.min &&
         javaVersion <= supportedJavaVersions.max;
-      if (!gradleSupportsThisJavaVersion && enforceJava)
+      if (!gradleSupportsThisJavaVersion && enforceJava) {
         throw Error(
           `This test needs a Java version between ${supportedJavaVersions.min} and ${supportedJavaVersions.max}. The current Java version is ${javaVersion} and ${failIfNoJavaEnv} is set!`
         );
+      }
       (!gradleSupportsThisJavaVersion || skipJava ? it.skip : it)(
         `generates a report for Gradle version ${gradleVersion}`,
         // the function creation is correct and intended

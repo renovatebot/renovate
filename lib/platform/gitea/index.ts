@@ -2,7 +2,6 @@ import URL from 'url';
 import GitStorage, { CommitFilesConfig, StatusResult } from '../git/storage';
 import * as hostRules from '../../util/host-rules';
 import {
-  BranchStatus,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -32,11 +31,7 @@ import { RenovateConfig } from '../../config';
 import { configFileNames } from '../../config/app-strings';
 import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import * as helper from './gitea-helper';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 
@@ -360,7 +355,7 @@ const platform: Platform = {
       // Create new status for branch commit
       const branchCommit = await config.storage.getBranchCommit(branchName);
       await helper.createCommitStatus(config.repository, branchCommit, {
-        state: state ? (state as helper.CommitStatusType) : 'pending',
+        state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
         description,
         ...(target_url && { target_url }),
@@ -380,12 +375,12 @@ const platform: Platform = {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus> {
     if (!requiredStatusChecks) {
-      return BRANCH_STATUS_SUCCESS;
+      return BranchStatus.green;
     }
 
     if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
       logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BRANCH_STATUS_FAILED;
+      return BranchStatus.red;
     }
 
     let ccs: helper.CombinedCommitStatus;
@@ -404,28 +399,33 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
-    switch (ccs.worstStatus) {
-      case 'unknown':
-      case 'pending':
-        return BRANCH_STATUS_PENDING;
-      case 'success':
-        return BRANCH_STATUS_SUCCESS;
-      default:
-        return BRANCH_STATUS_FAILED;
-    }
+    return (
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ||
+      BranchStatus.yellow
+    );
   },
 
   async getBranchStatusCheck(
     branchName: string,
     context: string
-  ): Promise<string> {
+  ): Promise<BranchStatus | null> {
     const ccs = await helper.getCombinedCommitStatus(
       config.repository,
       branchName
     );
     const cs = ccs.statuses.find(s => s.context === context);
-
-    return cs ? cs.status : null;
+    if (!cs) {
+      return null;
+    } // no status check exists
+    const status = helper.giteaToRenovateStatusMapping[cs.status];
+    if (status) {
+      return status;
+    }
+    logger.warn(
+      { check: cs },
+      'Could not map Gitea status value to Renovate status'
+    );
+    return BranchStatus.yellow;
   },
 
   async setBaseBranch(

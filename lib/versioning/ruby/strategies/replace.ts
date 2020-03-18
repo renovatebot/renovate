@@ -38,7 +38,9 @@ function isCommonRubyMinorRange(range: string): boolean {
 function reduceOnePrecision(version: string): string {
   const versionParts = version.split('.');
   // istanbul ignore if
-  if (versionParts.length === 1) return version;
+  if (versionParts.length === 1) {
+    return version;
+  }
   versionParts.pop();
   return versionParts.join('.');
 }

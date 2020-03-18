@@ -59,6 +59,7 @@ module.exports = {
         ignoreRestSiblings: false,
       },
     ], // disable until proper interfaced api
+    curly: [2, 'all'],
   },
   settings: {
     // https://github.com/benmosher/eslint-plugin-import/issues/1618
@@ -80,6 +81,13 @@ module.exports = {
         '@typescript-eslint/no-object-literal-type-assertion': 0,
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/unbound-method': 0,
+      },
+    },
+    {
+      files: ['**/*.mjs'],
+
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': 0,
       },
     },
   ],

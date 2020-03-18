@@ -63,9 +63,9 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
-          node --version
+          echo "Node $(node --version)"
           python --version
-          yarn --version
+          echo "Yarn $(yarn --version)"
           pip --version
 
       - uses: actions/checkout@v2
@@ -161,9 +161,9 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
-          node --version
+          echo "Node $(node --version)"
           python --version
-          yarn --version
+          echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2
 

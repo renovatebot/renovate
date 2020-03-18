@@ -26,7 +26,9 @@ export class ErrorStream extends Stream {
 
   write(data: BunyanRecord): boolean {
     const err = { ...data };
-    for (const prop of excludeProps) delete err[prop];
+    for (const prop of excludeProps) {
+      delete err[prop];
+    }
     this._errors.push(err);
     return true;
   }
@@ -71,8 +73,9 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
 }
 
 export function withSanitizer(streamConfig): bunyan.Stream {
-  if (streamConfig.type === 'rotating-file')
+  if (streamConfig.type === 'rotating-file') {
     throw new Error("Rotating files aren't supported");
+  }
 
   const stream = streamConfig.stream;
   if (stream && stream.writable) {

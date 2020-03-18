@@ -113,7 +113,6 @@ export async function getDependency(
       retry: 5,
       headers,
       useCache,
-      readableHighWaterMark: 1024 * 1024 * 10, // https://github.com/sindresorhus/got/issues/1062#issuecomment-586580036
     };
     const raw = await got(pkgUrl, opts);
     // istanbul ignore if
@@ -234,7 +233,9 @@ export async function getDependency(
     if (uri.host === 'registry.npmjs.org') {
       // istanbul ignore if
       if (
-        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        (err.name === 'ParseError' ||
+          err.code === 'ECONNRESET' ||
+          err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
         logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');

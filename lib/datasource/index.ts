@@ -17,8 +17,12 @@ export * from './common';
 
 // istanbul ignore next
 function validateDatasource(module, name): boolean {
-  if (!module.getPkgReleases) return false;
-  if (module.id !== name) return false;
+  if (!module.getPkgReleases) {
+    return false;
+  }
+  if (module.id !== name) {
+    return false;
+  }
   return true;
 }
 
@@ -67,6 +71,10 @@ export async function getPkgReleases(
 ): Promise<ReleaseResult | null> {
   const { datasource } = config;
   const lookupName = config.lookupName || config.depName;
+  if (!lookupName) {
+    logger.error({ config }, 'Datasource getPkgReleases without lookupName');
+    return null;
+  }
   let res;
   try {
     res = await getRawReleases({

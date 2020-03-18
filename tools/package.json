@@ -2,6 +2,8 @@
   "private":true,
   "type": "module",
   "dependencies": {
+    "commander": "4.1.1",
+    "got": "9.6.0",
     "shelljs": "0.8.3"
   }
 }

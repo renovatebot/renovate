@@ -583,12 +583,9 @@ export async function getAdditionalFiles(
       config.binarySource
     );
     // istanbul ignore else
-    if (res.error) {
+    if (res.stderr) {
       // istanbul ignore if
-      if (
-        res.stderr &&
-        res.stderr.includes('ENOSPC: no space left on device')
-      ) {
+      if (res.stderr.includes('ENOSPC: no space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       for (const upgrade of config.upgrades) {

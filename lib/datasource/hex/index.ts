@@ -7,18 +7,15 @@ export const id = 'hex';
 interface HexRelease {
   html_url: string;
   meta?: { links?: Record<string, string> };
-  releases?: { version: string }[];
+  releases?: {
+    version: string;
+    inserted_at?: string;
+  }[];
 }
 
 export async function getPkgReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('hex lookup failure: No lookupName');
-    return null;
-  }
-
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
   // hexPackageName:organizationName
@@ -47,7 +44,14 @@ export async function getPkgReleases({
     }
 
     const result: ReleaseResult = {
-      releases: releases.map(({ version }) => ({ version })),
+      releases: releases.map(({ version, inserted_at }) =>
+        inserted_at
+          ? {
+              version,
+              releaseTimestamp: inserted_at,
+            }
+          : { version }
+      ),
     };
 
     if (homepage) {

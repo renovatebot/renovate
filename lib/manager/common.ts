@@ -1,5 +1,5 @@
 import { ReleaseType } from 'semver';
-import { RangeStrategy } from '../types';
+import { RangeStrategy, SkipReason } from '../types';
 import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
@@ -149,7 +149,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
-  skipReason?: string;
+  skipReason?: SkipReason;
   source?: string;
   sourceLine?: number;
   toVersion?: string;

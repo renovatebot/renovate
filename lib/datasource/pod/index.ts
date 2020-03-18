@@ -131,11 +131,6 @@ export async function getPkgReleases(
   registryUrls =
     registryUrls && registryUrls.length ? registryUrls : [defaultCDN];
 
-  if (!lookupName) {
-    logger.debug(config, `CocoaPods: invalid lookup name`);
-    return null;
-  }
-
   const podName = lookupName.replace(/\/.*$/, '');
 
   const cachedResult = await renovateCache.get<ReleaseResult>(
@@ -153,7 +148,9 @@ export async function getPkgReleases(
     let registryUrl = registryUrls[idx].replace(/\/+$/, '');
 
     // In order to not abuse github API limits, query CDN instead
-    if (isDefaultRepo(registryUrl)) registryUrl = defaultCDN;
+    if (isDefaultRepo(registryUrl)) {
+      registryUrl = defaultCDN;
+    }
 
     if (githubRegex.exec(registryUrl)) {
       result = await getReleasesFromGithub(podName, registryUrl);

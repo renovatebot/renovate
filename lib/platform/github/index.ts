@@ -19,7 +19,6 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
-  BranchStatus,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -41,11 +40,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import {
   PR_STATE_ALL,
   PR_STATE_CLOSED,
@@ -1095,12 +1090,12 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   let commitStatus;
   try {
@@ -1159,21 +1154,27 @@ export async function getBranchStatus(
     }
   }
   if (checkRuns.length === 0) {
-    return commitStatus.state;
+    if (commitStatus.state === 'success') {
+      return BranchStatus.green;
+    }
+    if (commitStatus.state === 'failed') {
+      return BranchStatus.red;
+    }
+    return BranchStatus.yellow;
   }
   if (
     commitStatus.state === 'failed' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
     checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
   ) {
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
-  return BRANCH_STATUS_PENDING;
+  return BranchStatus.yellow;
 }
 
 async function getStatusCheck(
@@ -1187,15 +1188,23 @@ async function getStatusCheck(
   return (await api.get(url, { useCache })).body;
 }
 
+const githubToRenovateStatusMapping = {
+  success: BranchStatus.green,
+  failed: BranchStatus.red,
+  pending: BranchStatus.yellow,
+};
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string> {
+): Promise<BranchStatus | null> {
   try {
     const res = await getStatusCheck(branchName);
     for (const check of res) {
       if (check.context === context) {
-        return check.state;
+        return (
+          githubToRenovateStatusMapping[check.state] || BranchStatus.yellow
+        );
       }
     }
     return null;
@@ -1228,8 +1237,13 @@ export async function setBranchStatus({
   try {
     const branchCommit = await config.storage.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    const renovateToGitHubStateMapping = {
+      green: 'success',
+      yellow: 'pending',
+      red: 'failure',
+    };
     const options: any = {
-      state,
+      state: renovateToGitHubStateMapping[state],
       description,
       context,
     };
@@ -1696,7 +1710,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: BRANCH_STATUS_SUCCESS,
+      state: BranchStatus.green,
       url: 'https://github.com/renovatebot/renovate',
     });
   }

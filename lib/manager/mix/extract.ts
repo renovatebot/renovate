@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceHex from '../../datasource/hex';
+import { SkipReason } from '../../types';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
@@ -45,13 +46,15 @@ export function extractPackageFile(content: string): PackageFile {
           }
 
           if (dep.datasource !== datasourceHex.id) {
-            dep.skipReason = 'non-hex depTypes';
+            dep.skipReason = SkipReason.NonHexDeptypes;
           }
 
           // Find dep's line number
-          for (let i = 0; i < contentArr.length; i += 1)
-            if (contentArr[i].includes(`:${depName},`))
+          for (let i = 0; i < contentArr.length; i += 1) {
+            if (contentArr[i].includes(`:${depName},`)) {
               dep.managerData.lineNumber = i;
+            }
+          }
 
           deps.push(dep);
         }

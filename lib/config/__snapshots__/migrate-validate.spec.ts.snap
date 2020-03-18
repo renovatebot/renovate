@@ -27,3 +27,9 @@ Object {
   "warnings": Array [],
 }
 `;
+
+exports[`config/migrate-validate migrateAndValidate() isOnboarded 1`] = `
+Object {
+  "errors": Array [],
+}
+`;

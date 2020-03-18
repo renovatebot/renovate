@@ -70,6 +70,7 @@ export async function getRepositoryData(
         sourceUrl: v[0].sources ? v[0].sources[0] : undefined,
         releases: v.map((x: any) => ({
           version: x.version,
+          releaseTimestamp: x.created ? x.created : null,
         })),
       })
     );
@@ -87,10 +88,6 @@ export async function getPkgReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    logger.warn(`lookupName was not provided to getPkgReleases`);
-    return null;
-  }
   const [helmRepository] = registryUrls;
   if (!helmRepository) {
     logger.warn(`helmRepository was not provided to getPkgReleases`);

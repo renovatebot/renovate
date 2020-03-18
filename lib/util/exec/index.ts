@@ -1,7 +1,11 @@
 import { dirname, join } from 'path';
 import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { generateDockerCommand } from './docker';
+import {
+  generateDockerCommand,
+  removeDockerContainer,
+  removeDanglingContainers,
+} from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
@@ -22,10 +26,15 @@ const execConfig: ExecConfig = {
   cacheDir: null,
 };
 
-export function setExecConfig(config: Partial<RenovateConfig>): void {
+export async function setExecConfig(
+  config: Partial<RenovateConfig>
+): Promise<void> {
   for (const key of Object.keys(execConfig)) {
     const value = config[key];
     execConfig[key] = value || null;
+  }
+  if (execConfig.binarySource === 'docker') {
+    await removeDanglingContainers();
   }
 }
 
@@ -42,8 +51,12 @@ function createChildEnv(
   extraEnv: ExtraEnv
 ): ExtraEnv<string> {
   const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
-    if (val === null) return false;
-    if (val === undefined) return false;
+    if (val === null) {
+      return false;
+    }
+    if (val === undefined) {
+      return false;
+    }
     return true;
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
@@ -59,8 +72,12 @@ function createChildEnv(
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
-    if (val === null) return;
-    if (val === undefined) return;
+    if (val === null) {
+      return;
+    }
+    if (val === undefined) {
+      return;
+    }
     result[key] = val.toString();
   });
   return result;
@@ -100,9 +117,12 @@ export async function exec(
     env: childEnv,
     cwd,
   };
+  // Set default timeout to 15 minutes
+  rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
-  if (execConfig.binarySource === BinarySource.Docker && docker) {
+  const useDocker = execConfig.binarySource === BinarySource.Docker && docker;
+  if (useDocker) {
     logger.debug('Using docker to execute');
     const dockerOptions = {
       ...docker,
@@ -121,7 +141,27 @@ export async function exec(
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
     const startTime = hrtime();
-    res = await rawExec(rawExecCommand, rawExecOptions);
+    let timer;
+    const { timeout } = rawExecOptions;
+    if (useDocker) {
+      await removeDockerContainer(docker.image);
+      // istanbul ignore next
+      timer = setTimeout(() => {
+        removeDockerContainer(docker.image); // eslint-disable-line
+        logger.info({ timeout, rawExecCommand }, 'Docker run timed out');
+      }, timeout);
+    }
+    logger.debug({ command: rawExecCommand }, 'Executing command');
+    logger.trace({ commandOptions: rawExecOptions }, 'Command options');
+    try {
+      res = await rawExec(rawExecCommand, rawExecOptions);
+    } catch (err) {
+      logger.trace({ err }, 'rawExec err');
+      clearTimeout(timer);
+      await removeDockerContainer(docker.image);
+      throw err;
+    }
+    clearTimeout(timer);
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     if (res) {

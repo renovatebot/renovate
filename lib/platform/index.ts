@@ -20,7 +20,9 @@ let _platform: Platform;
 
 const handler: ProxyHandler<Platform> = {
   get(_target: Platform, prop: keyof Platform) {
-    if (!_platform) throw new Error(PLATFORM_NOT_FOUND);
+    if (!_platform) {
+      throw new Error(PLATFORM_NOT_FOUND);
+    }
 
     // TODO: add more validation
 
@@ -31,12 +33,13 @@ const handler: ProxyHandler<Platform> = {
 export const platform = new Proxy<Platform>({} as any, handler);
 
 export async function setPlatformApi(name: string): Promise<void> {
-  if (!platformList.includes(name))
+  if (!platformList.includes(name)) {
     throw new Error(
       `Init: Platform "${name}" not found. Must be one of: ${platformList.join(
         ', '
       )}`
     );
+  }
   _platform = await import('./' + name);
 }
 
