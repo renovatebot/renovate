@@ -19,7 +19,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
-Only a config in a default branch is used by `renovate` even if in a configuration are specified multiple `baseBranches`.
+Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`. Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
