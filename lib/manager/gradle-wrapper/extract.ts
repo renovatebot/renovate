@@ -10,7 +10,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
   let lineNumber = 0;
   for (const line of lines) {
-    const match = /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/.exec(
+    const match = /^distributionUrl\s*=\s*\S*-((\d|\.)+)-(bin|all)\.zip\s*$/.exec(
       line
     );
     if (match) {
@@ -25,7 +25,9 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
       let shaLineNumber = 0;
       for (const shaLine of lines) {
-        const shaMatch = /^distributionSha256Sum=((\w){64}).*$/.test(shaLine);
+        const shaMatch = /^distributionSha256Sum\s*=\s*((\w){64}).*$/.test(
+          shaLine
+        );
         if (shaMatch) {
           dependency.managerData.checksumLineNumber = shaLineNumber;
           break;

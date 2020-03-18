@@ -38,12 +38,14 @@ export async function updateDependency({
     downloadUrl = downloadUrl.replace(':', '\\:');
     const checksum = await getChecksum(checksumUrl);
 
-    lines[upgrade.managerData.lineNumber] = `distributionUrl=${downloadUrl}`;
+    lines[upgrade.managerData.lineNumber] = lines[
+      upgrade.managerData.lineNumber
+    ].replace(/(distributionUrl\s*=\s*)\S*/, `$1${downloadUrl}`);
 
     if (upgrade.managerData.checksumLineNumber) {
-      lines[
+      lines[upgrade.managerData.checksumLineNumber] = lines[
         upgrade.managerData.checksumLineNumber
-      ] = `distributionSha256Sum=${checksum}`;
+      ].replace(/(distributionSha256Sum\s*=\s*)\S*/, `$1${checksum}`);
     }
     // TODO: insert if not present
 
