@@ -10,6 +10,10 @@ const propertiesFile2 = readFileSync(
   resolve(__dirname, './__fixtures__/gradle-wrapper-2.properties'),
   'utf8'
 );
+const whitespacePropertiesFile = readFileSync(
+  resolve(__dirname, './__fixtures__/gradle-wrapper-whitespace.properties'),
+  'utf8'
+);
 
 describe('lib/manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
@@ -24,6 +28,10 @@ describe('lib/manager/gradle-wrapper/extract', () => {
 
     it('extracts all version line', () => {
       const res = extractPackageFile(propertiesFile2);
+      expect(res.deps).toMatchSnapshot();
+    });
+    it('handles whitespace', () => {
+      const res = extractPackageFile(whitespacePropertiesFile);
       expect(res.deps).toMatchSnapshot();
     });
   });
