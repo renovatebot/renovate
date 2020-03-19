@@ -1,6 +1,6 @@
 import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import * as hostRules from '../../../util/host-rules';
-import { getChangeLogJSON, ChangeLogError } from '.';
+import { getChangeLogJSON } from '.';
 import { mocked } from '../../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';
