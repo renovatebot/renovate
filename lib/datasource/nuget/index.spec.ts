@@ -107,6 +107,17 @@ describe('datasource/nuget', () => {
       ).toBeNull();
     });
 
+    it('extracts feed version from registry URL hash', async () => {
+      const config = {
+        lookupName: 'nunit',
+        registryUrls: ['https://my-registry#protocolVersion=3'],
+      };
+      await nuget.getPkgReleases({
+        ...config,
+      });
+      expect(got.mock.calls[0][0]).toEqual('https://my-registry/');
+    });
+
     it('queries the default nuget feed if no registries are supplied', async () => {
       await nuget.getPkgReleases({
         ...configNoRegistryUrls,
