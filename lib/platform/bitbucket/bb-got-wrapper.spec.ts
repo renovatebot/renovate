@@ -32,6 +32,17 @@ describe('platform/gl-got-wrapper', () => {
     const res = await api.post('some-url');
     expect(res.body).toEqual(body);
   });
+  it('accepts custom baseUrl', async () => {
+    got.mockImplementation(() => ({} as any));
+
+    await api.post('some-url');
+    expect(got.mock.calls[0][1].baseUrl).toBe('https://api.bitbucket.org/');
+
+    const customBaseUrl = 'https://api-test.bitbucket.org';
+    api.setBaseUrl(customBaseUrl);
+    await api.post('some-url');
+    expect(got.mock.calls[1][1].baseUrl).toBe(customBaseUrl);
+  });
   it('returns cached', async () => {
     got.mockReturnValueOnce({
       body: {},
