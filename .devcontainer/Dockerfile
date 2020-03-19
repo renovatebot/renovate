@@ -10,7 +10,5 @@ FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0-12
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
    && apt-get -y install --no-install-recommends git python-minimal build-essential \
-   && apt-get autoremove -y \
-   && apt-get clean -y \
    && rm -rf /var/lib/apt/lists/*
 ENV DEBIAN_FRONTEND=dialog
