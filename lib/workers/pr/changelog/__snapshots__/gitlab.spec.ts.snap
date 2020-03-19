@@ -2,7 +2,7 @@
 
 exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 1`] = `
 Object {
-  "hasReleaseNotes": true,
+  "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
     "baseURL": "https://gitlab.com/",
@@ -131,7 +131,7 @@ Object {
 
 exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
 Object {
-  "hasReleaseNotes": true,
+  "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
     "baseURL": "https://gitlab.com/",
@@ -144,52 +144,28 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": Object {
-        "body": "See CHANGELOG for details
-",
-        "name": "v5.6.1",
-        "tag": "v5.6.1",
-        "url": "https://gitlab.com/meno/dropzone/tags/v5.6.1",
-      },
+      "releaseNotes": null,
       "version": "5.6.1",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
-      "releaseNotes": Object {
-        "body": "See CHANGELOG for details.
-",
-        "name": "v5.6.0",
-        "tag": "v5.6.0",
-        "url": "https://gitlab.com/meno/dropzone/tags/v5.6.0",
-      },
+      "releaseNotes": null,
       "version": "5.6.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": Object {
-        "body": "See CHANGELOG for details.
-",
-        "name": "v5.5.0",
-        "tag": "v5.5.0",
-        "url": "https://gitlab.com/meno/dropzone/tags/v5.5.0",
-      },
+      "releaseNotes": null,
       "version": "5.5.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
-      "releaseNotes": Object {
-        "body": "See CHANGELOG for details.
-",
-        "name": "v5.4.0",
-        "tag": "v5.4.0",
-        "url": "https://gitlab.com/meno/dropzone/tags/v5.4.0",
-      },
+      "releaseNotes": null,
       "version": "5.4.0",
     },
   ],
