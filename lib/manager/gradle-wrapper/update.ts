@@ -1,6 +1,7 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
+import { DISTRIBUTION_CHECKSUM_REGEX, DISTRIBUTION_URL_REGEX } from './search';
 
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
@@ -12,7 +13,7 @@ async function getChecksum(url: string): Promise<string> {
     return response.body as string;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info('Gradle checksum lookup failure: not found');
+      logger.debug('Gradle checksum lookup failure: not found');
       logger.debug({ err });
     } else {
       logger.warn({ err }, 'Gradle checksum lookup failure: Unknown error');
@@ -21,10 +22,10 @@ async function getChecksum(url: string): Promise<string> {
   }
 }
 
-export async function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): Promise<string | null> {
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
   try {
     logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');
@@ -38,18 +39,20 @@ export async function updateDependency(
     downloadUrl = downloadUrl.replace(':', '\\:');
     const checksum = await getChecksum(checksumUrl);
 
-    lines[upgrade.managerData.lineNumber] = `distributionUrl=${downloadUrl}`;
+    lines[upgrade.managerData.lineNumber] = lines[
+      upgrade.managerData.lineNumber
+    ].replace(DISTRIBUTION_URL_REGEX, `$<assignment>${downloadUrl}`);
 
     if (upgrade.managerData.checksumLineNumber) {
-      lines[
+      lines[upgrade.managerData.checksumLineNumber] = lines[
         upgrade.managerData.checksumLineNumber
-      ] = `distributionSha256Sum=${checksum}`;
+      ].replace(DISTRIBUTION_CHECKSUM_REGEX, `$<assignment>${checksum}`);
     }
     // TODO: insert if not present
 
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new Gradle Wrapper release value');
+    logger.debug({ err }, 'Error setting new Gradle Wrapper release value');
     return null;
   }
 }

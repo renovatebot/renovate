@@ -3,14 +3,9 @@ import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
 import { BranchConfig } from '../../../common';
 
-export type PrBranchConfig = Pick<
-  BranchConfig,
-  'upgrades' | 'baseBranch' | 'branchName' | 'schedule' | 'prTitle'
->;
-
 export function getPrList(
   config: RenovateConfig,
-  branches: PrBranchConfig[]
+  branches: BranchConfig[]
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });

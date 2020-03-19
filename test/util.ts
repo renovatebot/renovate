@@ -10,6 +10,14 @@ export function mocked<T>(module: T): jest.Mocked<T> {
   return module as never;
 }
 
+/**
+ * Simply wrapper to create partial mocks.
+ * @param obj Object to cast to final type
+ */
+export function partial<T>(obj: Partial<T>): T {
+  return obj as T;
+}
+
 export const platform = mocked(_platform);
 
 // Required because of isolatedModules
@@ -18,3 +26,8 @@ export type RenovateConfig = _RenovateConfig;
 export const defaultConfig = getConfig();
 
 export { getConfig };
+
+export function getName(file: string): string {
+  const [, name] = /lib\/(.*?)\.spec\.ts$/.exec(file.replace(/\\/g, '/'));
+  return name;
+}

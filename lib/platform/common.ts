@@ -2,10 +2,11 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
+import { BranchStatus } from '../types';
 
 export interface FileData {
   name: string;
-  contents: string;
+  contents: string | Buffer;
 }
 
 export interface GotApiOptions {
@@ -95,14 +96,6 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-
-export type BranchStatus =
-  | 'pending'
-  | 'success'
-  | 'failed'
-  | 'running'
-  | 'failure';
-
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
   statusCheckVerify?: boolean;
@@ -126,7 +119,7 @@ export interface BranchStatusConfig {
   branchName: string;
   context: string;
   description: string;
-  state: string | null;
+  state: BranchStatus;
   url?: string;
 }
 export interface FindPRConfig {
@@ -145,8 +138,10 @@ export interface EnsureCommentConfig {
  */
 export type VulnerabilityAlert = any;
 
+export type EnsureIssueResult = 'updated' | 'created';
+
 export interface Platform {
-  findIssue(title: string): Promise<Issue>;
+  findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   getCommitMessages(): Promise<string[]>;
@@ -160,7 +155,7 @@ export interface Platform {
   getFileList(): Promise<string[]>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
-  ): Promise<'updated' | 'created' | null>;
+  ): Promise<EnsureIssueResult | null>;
   getPrBody(prBody: string): string;
   updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
@@ -173,13 +168,16 @@ export interface Platform {
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
-  getBranchStatusCheck(branchName: string, context: string): Promise<string>;
+  getBranchStatusCheck(
+    branchName: string,
+    context: string
+  ): Promise<BranchStatus | null>;
   ensureCommentRemoval(number: number, subject: string): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  setBaseBranch(baseBranch: string): Promise<void>;
-  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<void>;
+  setBaseBranch(baseBranch?: string): Promise<void>;
+  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   mergeBranch(branchName: string): Promise<void>;

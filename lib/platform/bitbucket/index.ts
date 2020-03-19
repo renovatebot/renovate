@@ -1,3 +1,4 @@
+import URL from 'url';
 import parseDiff from 'parse-diff';
 import addrs from 'email-addresses';
 import { api } from './bb-got-wrapper';
@@ -19,6 +20,7 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -26,11 +28,12 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
+import { BranchStatus } from '../../types';
+import { RenovateConfig } from '../../config';
+
+const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
 
@@ -38,31 +41,27 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: {
-  endpoint?: string;
-  username: string;
-  password: string;
-}): PlatformConfig {
+}: RenovateConfig): Promise<PlatformConfig> {
   if (!(username && password)) {
     throw new Error(
       'Init: You must configure a Bitbucket username and password'
     );
   }
-  if (endpoint && endpoint !== 'https://api.bitbucket.org/') {
-    throw new Error(
-      'Init: Bitbucket Cloud endpoint can only be https://api.bitbucket.org/'
+  if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
+    logger.warn(
+      `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformConfig = {
-    endpoint: 'https://api.bitbucket.org/',
+    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering Bitbucket Cloud repositories');
+  logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
     const repos = await utils.accumulateValues<{ full_name: string }>(
       `/2.0/repositories/?role=contributor`
@@ -80,15 +79,17 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
+  endpoint = BITBUCKET_PROD_ENDPOINT,
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: 'bitbucket',
-    url: 'https://api.bitbucket.org/',
+    hostType: PLATFORM_TYPE_BITBUCKET,
+    url: endpoint,
   });
+  api.setBaseUrl(endpoint);
   config = {
     repository,
-    username: opts!.username,
+    username: opts.username,
     bbUseDefaultReviewers: bbUseDefaultReviewers !== false,
   } as any;
   let info: utils.RepoInfo;
@@ -130,14 +131,21 @@ export async function initRepo({
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    logger.info({ err }, 'Unknown Bitbucket initRepo error');
+    logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
 
+  const { hostname } = URL.parse(endpoint);
+
+  // Converts API hostnames to their respective HTTP git hosts:
+  // `api.bitbucket.org`  to `bitbucket.org`
+  // `api-staging.<host>` to `staging.<host>`
+  const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
+
   const url = GitStorage.getUrl({
     protocol: 'https',
-    auth: `${opts!.username}:${opts!.password}`,
-    hostname: 'bitbucket.org',
+    auth: `${opts.username}:${opts.password}`,
+    hostname: hostnameWithoutApiPrefix,
     repository,
   });
 
@@ -155,9 +163,9 @@ export async function initRepo({
 }
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
-export function getRepoForceRebase(): boolean {
+export function getRepoForceRebase(): Promise<boolean> {
   // BB doesnt have an option to flag staled branches
-  return false;
+  return Promise.resolve(false);
 }
 
 // Search
@@ -210,10 +218,10 @@ export function getFile(
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
-  if (desiredState[0] === '!') {
+  if (desiredState.startsWith('!')) {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
@@ -227,7 +235,7 @@ export async function getPrList(): Promise<Pr[]> {
     url += utils.prStates.all.map(state => 'state=' + state).join('&');
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
-    logger.info({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
 }
@@ -235,7 +243,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -256,7 +264,7 @@ export async function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   if (closePr) {
-    const pr = await findPr({ branchName, state: 'open' });
+    const pr = await findPr({ branchName, state: PR_STATE_OPEN });
     if (pr) {
       await api.post(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
@@ -284,7 +292,7 @@ export function commitFilesToBranch({
   files,
   message,
   parentBranch = config.baseBranch,
-}: CommitFilesConfig): Promise<void> {
+}: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
@@ -387,7 +395,10 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, state: 'open' });
+  const existingPr = await findPr({
+    branchName,
+    state: PR_STATE_OPEN,
+  });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
@@ -406,51 +417,53 @@ async function getStatus(
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks?: string[]
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
   const noOfFailures = statuses.filter(
-    (status: { state: string }) => status.state === 'FAILED'
+    (status: { state: string }) =>
+      status.state === 'FAILED' || status.state === 'STOPPED'
   ).length;
   if (noOfFailures) {
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
-  return BRANCH_STATUS_SUCCESS;
+  return BranchStatus.green;
 }
+
+const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
+  SUCCESSFUL: BranchStatus.green,
+  INPROGRESS: BranchStatus.yellow,
+  FAILED: BranchStatus.red,
+};
 
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = (statuses.find(status => status.key === context) || {}).state;
-
-  return (
-    Object.keys(utils.buildStates).find(
-      stateKey => utils.buildStates[stateKey] === bbState
-    ) || null
-  );
+  return bbToRenovateStatusMapping[bbState] || null;
 }
 
 export async function setBranchStatus({
@@ -536,6 +549,10 @@ async function closeIssue(issueNumber: number): Promise<void> {
 export function getPrBody(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 50000)
+    .replace(
+      'you tick the rebase/retry checkbox',
+      'rename PR to start with "rebase!"'
+    )
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
@@ -545,14 +562,14 @@ export function getPrBody(input: string): string {
 export async function ensureIssue({
   title,
   body,
-}: EnsureIssueConfig): Promise<string | null> {
+}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
 
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.info({ title }, 'Failed to ensure Issue');
+    logger.debug({ title }, 'Failed to ensure Issue');
     return null;
   }
   try {
@@ -564,7 +581,7 @@ export async function ensureIssue({
       }
       const [issue] = issues;
       if (String(issue.content.raw).trim() !== description.trim()) {
-        logger.info('Issue updated');
+        logger.debug('Issue updated');
         await api.put(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
@@ -590,7 +607,7 @@ export async function ensureIssue({
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.info(
+      logger.debug(
         `Issues are disabled, so could not create issue: ${err.message}`
       );
     } else {
@@ -740,22 +757,27 @@ export async function createPr({
     reviewers,
   };
 
-  const prInfo = (
-    await api.post(`/2.0/repositories/${config.repository}/pullrequests`, {
-      body,
-    })
-  ).body;
-  // TODO: fix types
-  const pr: Pr = {
-    number: prInfo.id,
-    displayNumber: `Pull Request #${prInfo.id}`,
-    isModified: false,
-  } as any;
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
+  try {
+    const prInfo = (
+      await api.post(`/2.0/repositories/${config.repository}/pullrequests`, {
+        body,
+      })
+    ).body;
+    // TODO: fix types
+    const pr: Pr = {
+      number: prInfo.id,
+      displayNumber: `Pull Request #${prInfo.id}`,
+      isModified: false,
+    } as any;
+    // istanbul ignore if
+    if (config.prList) {
+      config.prList.push(pr);
+    }
+    return pr;
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error creating pull request');
+    throw err;
   }
-  return pr;
 }
 
 interface Reviewer {
@@ -808,7 +830,7 @@ export async function mergePr(
       }
     );
     delete config.baseCommitSHA;
-    logger.info('Automerging succeeded');
+    logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
     return false;
   }
@@ -817,14 +839,15 @@ export async function mergePr(
 
 // Pull Request
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
   config = {} as any;
+  return Promise.resolve();
 }
 
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
-  return [];
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
 }

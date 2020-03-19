@@ -1,7 +1,7 @@
-import { isValid } from '../../versioning/hex';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_HEX } from '../../constants/data-binary-source';
+import * as datasourceHex from '../../datasource/hex';
+import { SkipReason } from '../../types';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
@@ -34,9 +34,9 @@ export function extractPackageFile(content: string): PackageFile {
             managerData: {},
           };
 
-          dep.datasource = datasource || DATASOURCE_HEX;
+          dep.datasource = datasource || datasourceHex.id;
 
-          if (dep.datasource === DATASOURCE_HEX) {
+          if (dep.datasource === datasourceHex.id) {
             dep.currentValue = currentValue;
             dep.lookupName = depName;
           }
@@ -45,18 +45,16 @@ export function extractPackageFile(content: string): PackageFile {
             dep.lookupName += ':' + organization;
           }
 
-          if (!isValid(currentValue)) {
-            dep.skipReason = 'unsupported-version';
-          }
-
-          if (dep.datasource !== DATASOURCE_HEX) {
-            dep.skipReason = 'non-hex depTypes';
+          if (dep.datasource !== datasourceHex.id) {
+            dep.skipReason = SkipReason.NonHexDeptypes;
           }
 
           // Find dep's line number
-          for (let i = 0; i < contentArr.length; i += 1)
-            if (contentArr[i].includes(`:${depName},`))
+          for (let i = 0; i < contentArr.length; i += 1) {
+            if (contentArr[i].includes(`:${depName},`)) {
               dep.managerData.lineNumber = i;
+            }
+          }
 
           deps.push(dep);
         }

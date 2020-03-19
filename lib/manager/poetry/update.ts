@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { PoetryFile } from './types';
 
 // TODO: Maybe factor out common code from pipenv.updateDependency and poetry.updateDependency
@@ -30,10 +30,10 @@ function replaceAt(
   );
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade<{ nestedVersion?: boolean }>
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return null;
@@ -42,7 +42,7 @@ export function updateDependency(
   const { nestedVersion } = managerData;
   const parsedContents: PoetryFile = parse(fileContent);
   if (!parsedContents.tool.poetry[depType]) {
-    logger.info(
+    logger.debug(
       { config: upgrade },
       `Error: Section tool.poetry.${depType} doesn't exist in pyproject.toml file, update failed`
     );
@@ -52,7 +52,7 @@ export function updateDependency(
   if (nestedVersion) {
     const oldDep = parsedContents.tool.poetry[depType][depName];
     if (!oldDep) {
-      logger.info(
+      logger.debug(
         { config: upgrade },
         `Could not get version of dependency ${depType}, update failed (most likely name is invalid)`
       );
@@ -63,14 +63,14 @@ export function updateDependency(
     oldVersion = parsedContents.tool.poetry[depType][depName];
   }
   if (!oldVersion) {
-    logger.info(
+    logger.debug(
       { config: upgrade },
       `Could not get version of dependency ${depType}, update failed (most likely name is invalid)`
     );
     return null;
   }
   if (oldVersion === newValue) {
-    logger.info('Version is already updated');
+    logger.debug('Version is already updated');
     return fileContent;
   }
   if (nestedVersion) {

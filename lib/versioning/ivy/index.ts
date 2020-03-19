@@ -7,6 +7,12 @@ import {
 } from './parse';
 import { VersioningApi } from '../common';
 
+export const id = 'ivy';
+export const displayName = 'Ivy';
+export const urls = ['https://ant.apache.org/ivy/'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const {
   equals,
   getMajor,
@@ -30,14 +36,22 @@ function isVersion(str: string): string | boolean {
 }
 
 function matches(a: string, b: string): boolean {
-  if (!a) return false;
-  if (!b) return false;
+  if (!a) {
+    return false;
+  }
+  if (!b) {
+    return false;
+  }
   const dynamicRevision = parseDynamicRevision(b);
-  if (!dynamicRevision) return equals(a, b);
+  if (!dynamicRevision) {
+    return equals(a, b);
+  }
   const { type, value } = dynamicRevision;
 
   if (type === REV_TYPE_LATEST) {
-    if (!value) return true;
+    if (!value) {
+      return true;
+    }
     const tokens = tokenize(a);
     if (tokens.length) {
       const token = tokens[tokens.length - 1];

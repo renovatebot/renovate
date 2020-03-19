@@ -1,23 +1,28 @@
+import fs from 'fs';
 import URL from 'url';
 import addrs from 'email-addresses';
 import * as hostRules from '../util/host-rules';
 import { logger } from '../logger';
 import { Platform } from './common';
 import { RenovateConfig } from '../config/common';
-import { getOptions } from '../config/definitions';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 
 export * from './common';
 
-const supportedPlatforms = getOptions().find(
-  option => option.name === 'platform'
-).allowedValues;
+export const platformList = fs
+  .readdirSync(__dirname, { withFileTypes: true })
+  .filter(dirent => dirent.isDirectory())
+  .map(dirent => dirent.name)
+  .filter(name => name !== 'git' && name !== 'utils') // TODO: should be cleaner
+  .sort();
 
 let _platform: Platform;
 
 const handler: ProxyHandler<Platform> = {
   get(_target: Platform, prop: keyof Platform) {
-    if (!_platform) throw new Error(PLATFORM_NOT_FOUND);
+    if (!_platform) {
+      throw new Error(PLATFORM_NOT_FOUND);
+    }
 
     // TODO: add more validation
 
@@ -28,12 +33,13 @@ const handler: ProxyHandler<Platform> = {
 export const platform = new Proxy<Platform>({} as any, handler);
 
 export async function setPlatformApi(name: string): Promise<void> {
-  if (!supportedPlatforms.includes(name))
+  if (!platformList.includes(name)) {
     throw new Error(
-      `Init: Platform "${name}" not found. Must be one of: ${supportedPlatforms.join(
+      `Init: Platform "${name}" not found. Must be one of: ${platformList.join(
         ', '
       )}`
     );
+  }
   _platform = await import('./' + name);
 }
 
@@ -46,13 +52,13 @@ export async function initPlatform(
   const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
   if (config && config.gitAuthor) {
-    logger.info(`Using configured gitAuthor (${config.gitAuthor})`);
+    logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
   } else if (!(platformInfo && platformInfo.gitAuthor)) {
-    logger.info('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
+    logger.debug('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
     gitAuthor = 'Renovate Bot <bot@renovateapp.com>';
   } /* istanbul ignore next */ else {
-    logger.info('Using platform gitAuthor: ' + platformInfo.gitAuthor);
+    logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;
   }
   let gitAuthorParsed: addrs.ParsedMailbox | null = null;

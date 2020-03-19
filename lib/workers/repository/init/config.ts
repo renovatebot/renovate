@@ -14,7 +14,7 @@ import { configFileNames } from '../../../config/app-strings';
 import { platform } from '../../../platform';
 import {
   CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
+  PLATFORM_FAILURE,
 } from '../../../constants/error-messages';
 
 // Check for repository config
@@ -29,7 +29,7 @@ export async function mergeRenovateConfig(
         try {
           const pJson = JSON.parse(await platform.getFile('package.json'));
           if (pJson.renovate) {
-            logger.info('Using package.json for global renovate config');
+            logger.debug('Using package.json for global renovate config');
             return 'package.json';
           }
         } catch (err) {
@@ -51,13 +51,13 @@ export async function mergeRenovateConfig(
   if (configFile === 'package.json') {
     // We already know it parses
     renovateJson = JSON.parse(await platform.getFile('package.json')).renovate;
-    logger.info({ config: renovateJson }, 'package.json>renovate config');
+    logger.debug({ config: renovateJson }, 'package.json>renovate config');
   } else {
     let renovateConfig = await platform.getFile(configFile);
     // istanbul ignore if
     if (renovateConfig === null) {
       logger.warn('Fetching renovate config returns null');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new Error(PLATFORM_FAILURE);
     }
     // istanbul ignore if
     if (!renovateConfig.length) {
@@ -116,7 +116,7 @@ export async function mergeRenovateConfig(
         throw error;
       }
     }
-    logger.info({ configFile, config: renovateJson }, 'Repository config');
+    logger.debug({ configFile, config: renovateJson }, 'Repository config');
   }
   const migratedConfig = await migrateAndValidate(config, renovateJson);
   if (migratedConfig.errors.length) {
@@ -161,7 +161,7 @@ export async function mergeRenovateConfig(
   }
   // istanbul ignore if
   if (resolvedConfig.hostRules) {
-    logger.info('Setting hostRules from config');
+    logger.debug('Setting hostRules from config');
     for (const rule of resolvedConfig.hostRules) {
       try {
         hostRules.add(rule);

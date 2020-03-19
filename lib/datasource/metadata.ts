@@ -72,15 +72,18 @@ export function addMetaData(
   if (!dep) {
     return;
   }
-  const depName = lookupName ? lookupName.toLowerCase() : null;
+  const lookupNameLowercase = lookupName ? lookupName.toLowerCase() : null;
   if (
     manualChangelogUrls[datasource] &&
-    manualChangelogUrls[datasource][depName]
+    manualChangelogUrls[datasource][lookupNameLowercase]
   ) {
-    dep.changelogUrl = manualChangelogUrls[datasource][depName];
+    dep.changelogUrl = manualChangelogUrls[datasource][lookupNameLowercase];
   }
-  if (manualSourceUrls[datasource] && manualSourceUrls[datasource][depName]) {
-    dep.sourceUrl = manualSourceUrls[datasource][depName];
+  if (
+    manualSourceUrls[datasource] &&
+    manualSourceUrls[datasource][lookupNameLowercase]
+  ) {
+    dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
   }
 
   /**
@@ -97,12 +100,13 @@ export function addMetaData(
   };
   if (
     dep.changelogUrl &&
-    dep.changelogUrl.includes('github.com') &&
+    dep.changelogUrl.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
-  if (dep.homepage && dep.homepage.includes('github.com')) {
+  // prettier-ignore
+  if (dep.homepage && dep.homepage.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
     }

@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function cleanUpBranches(
@@ -11,7 +12,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: 'open',
+        state: PR_STATE_OPEN,
       });
       const branchPr = await platform.getBranchPr(branchName);
       const skipAutoclose = branchPr && branchPr.isModified;
@@ -25,13 +26,15 @@ async function cleanUpBranches(
             logger.info(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
-          } else await platform.updatePr(pr.number, `${pr.title} - autoclosed`);
+          } else {
+            await platform.updatePr(pr.number, `${pr.title} - autoclosed`);
+          }
         }
       }
       const closePr = true;
-      logger.info({ branch: branchName }, `Deleting orphan branch`);
+      logger.debug({ branch: branchName }, `Deleting orphan branch`);
       if (skipAutoclose) {
-        logger.info(
+        logger.debug(
           { prNo: pr.number, prTitle: pr.title },
           'Skip PR autoclosing'
         );
@@ -53,7 +56,9 @@ async function cleanUpBranches(
         logger.info(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
-      } else await platform.deleteBranch(branchName, closePr);
+      } else {
+        await platform.deleteBranch(branchName, closePr);
+      }
       if (pr && !skipAutoclose) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }

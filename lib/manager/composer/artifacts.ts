@@ -2,18 +2,17 @@ import is from '@sindresorhus/is';
 import URL from 'url';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { exec } from '../../util/exec';
+import { exec, ExecOptions } from '../../util/exec';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/exec/env';
 import { platform } from '../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
+import * as datasourcePackagist from '../../datasource/packagist';
 import {
-  BINARY_SOURCE_AUTO,
-  BINARY_SOURCE_DOCKER,
-  BINARY_SOURCE_GLOBAL,
-} from '../../constants/data-binary-source';
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 
 export async function updateArtifacts({
   packageFileName,
@@ -22,11 +21,13 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
-  const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
-  env.COMPOSER_CACHE_DIR =
-    env.COMPOSER_CACHE_DIR || upath.join(config.cacheDir, './others/composer');
-  await fs.ensureDir(env.COMPOSER_CACHE_DIR);
-  logger.debug('Using composer cache ' + env.COMPOSER_CACHE_DIR);
+
+  const cacheDir =
+    process.env.COMPOSER_CACHE_DIR ||
+    upath.join(config.cacheDir, './others/composer');
+  await fs.ensureDir(cacheDir);
+  logger.debug(`Using composer cache ${cacheDir}`);
+
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await platform.getFile(lockFileName);
   if (!existingLockFileContent) {
@@ -44,7 +45,7 @@ export async function updateArtifacts({
     }
     const authJson = {};
     let credentials = hostRules.find({
-      hostType: 'github',
+      hostType: PLATFORM_TYPE_GITHUB,
       url: 'https://api.github.com/',
     });
     // istanbul ignore if
@@ -54,7 +55,7 @@ export async function updateArtifacts({
       };
     }
     credentials = hostRules.find({
-      hostType: 'gitlab',
+      hostType: PLATFORM_TYPE_GITLAB,
       url: 'https://gitlab.com/api/v4/',
     });
     // istanbul ignore if
@@ -66,11 +67,11 @@ export async function updateArtifacts({
     try {
       // istanbul ignore else
       if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls as string[]) {
+        for (const regUrl of config.registryUrls) {
           if (regUrl) {
             const { host } = URL.parse(regUrl);
             const hostRule = hostRules.find({
-              hostType: 'packagist',
+              hostType: datasourcePackagist.id,
               url: regUrl,
             });
             // istanbul ignore else
@@ -99,29 +100,16 @@ export async function updateArtifacts({
       const localAuthFileName = upath.join(cwd, 'auth.json');
       await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
     }
-    let cmd: string;
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
-      logger.info('Running composer via docker');
-      cmd = `docker run --rm `;
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [config.localDir, env.COMPOSER_CACHE_DIR];
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      const envVars = ['COMPOSER_CACHE_DIR'];
-      cmd += envVars.map(e => `-e ${e} `);
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/composer composer`;
-    } else if (
-      config.binarySource === BINARY_SOURCE_AUTO ||
-      config.binarySource === BINARY_SOURCE_GLOBAL
-    ) {
-      logger.info('Running composer via global composer');
-      cmd = 'composer';
-    } else {
-      logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'composer';
-    }
+    const execOptions: ExecOptions = {
+      cwd,
+      extraEnv: {
+        COMPOSER_CACHE_DIR: cacheDir,
+      },
+      docker: {
+        image: 'renovate/composer',
+      },
+    };
+    const cmd = 'composer';
     let args;
     if (config.isLockFileMaintenance) {
       args = 'install';
@@ -134,10 +122,7 @@ export async function updateArtifacts({
       args += ' --no-scripts --no-autoloader';
     }
     logger.debug({ cmd, args }, 'composer command');
-    await exec(`${cmd} ${args}`, {
-      cwd,
-      env,
-    });
+    await exec(`${cmd} ${args}`, execOptions);
     const status = await platform.getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;

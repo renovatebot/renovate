@@ -1,11 +1,10 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
-import { PrBodyConfig } from './common';
-import { BRANCH_STATUS_FAILED } from '../../../constants/branch-constants';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platfroms';
+import { BranchConfig } from '../../common';
+import { BranchStatus } from '../../../types';
 
 export async function getPrConfigDescription(
-  config: PrBodyConfig
+  config: BranchConfig
 ): Promise<string> {
   let prBody = `\n\n---\n\n### Renovate configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
@@ -32,7 +31,7 @@ export async function getPrConfigDescription(
       config.requiredStatusChecks
     );
     // istanbul ignore if
-    if (branchStatus === BRANCH_STATUS_FAILED) {
+    if (branchStatus === BranchStatus.red) {
       prBody += 'Disabled due to failing status checks.';
     } else {
       prBody += 'Enabled.';
@@ -43,16 +42,14 @@ export async function getPrConfigDescription(
   }
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
-  if (config.rebaseStalePrs) {
-    prBody += 'Whenever PR is stale';
+  if (config.rebaseWhen === 'behind-base-branch') {
+    prBody += 'Whenever PR is behind base branch';
+  } else if (config.rebaseWhen === 'never') {
+    prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';
   }
-  if (config.platform === PLATFORM_TYPE_GITHUB) {
-    prBody += `, or if you modify the PR title to begin with "\`rebase!\`".\n\n`;
-  } else {
-    prBody += '.\n\n';
-  }
+  prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
       `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks.help}) if that's undesired.\n\n`

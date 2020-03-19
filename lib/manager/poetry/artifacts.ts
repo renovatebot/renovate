@@ -1,11 +1,13 @@
 import is from '@sindresorhus/is';
-import { parse, join } from 'upath';
-import { outputFile, readFile } from 'fs-extra';
+import fs from 'fs-extra';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { platform } from '../../platform';
-import { BINARY_SOURCE_DOCKER } from '../../constants/data-binary-source';
+import {
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
 
 export async function updateArtifacts({
   packageFileName,
@@ -14,45 +16,41 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
-  if (!is.nonEmptyArray(updatedDeps)) {
+  if (!is.nonEmptyArray(updatedDeps) && !config.isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');
     return null;
   }
-  const subDirectory = parse(packageFileName).dir;
-  let lockFileName = join(subDirectory, 'poetry.lock');
-  let existingLockFileContent = await platform.getFile(lockFileName);
+  // Try poetry.lock first
+  let lockFileName = getSiblingFileName(packageFileName, 'poetry.lock');
+  let existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
-    lockFileName = join(subDirectory, 'pyproject.lock');
-    existingLockFileContent = await platform.getFile(lockFileName);
+    // Try pyproject.lock next
+    lockFileName = getSiblingFileName(packageFileName, 'pyproject.lock');
+    existingLockFileContent = await readLocalFile(lockFileName);
     if (!existingLockFileContent) {
       logger.debug(`No lock file found`);
       return null;
     }
   }
   logger.debug(`Updating ${lockFileName}`);
-  const localPackageFileName = join(config.localDir, packageFileName);
-  const localLockFileName = join(config.localDir, lockFileName);
   try {
-    await outputFile(localPackageFileName, newPackageFileContent);
-    const execOptions: ExecOptions = {
-      cwd: join(config.localDir, subDirectory),
-    };
-
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
-      logger.info('Running poetry via docker');
-      execOptions.docker = {
-        image: 'renovate/poetry',
-      };
-    } else {
-      logger.info('Running poetry via global poetry');
-    }
+    await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
-    for (let i = 0; i < updatedDeps.length; i += 1) {
-      const dep = updatedDeps[i];
-      cmd.push(`poetry update --lock --no-interaction ${dep}`);
+    if (config.isLockFileMaintenance) {
+      await fs.remove(lockFileName);
+      cmd.push('poetry update --lock --no-interaction');
+    } else {
+      for (let i = 0; i < updatedDeps.length; i += 1) {
+        const dep = updatedDeps[i];
+        cmd.push(`poetry update --lock --no-interaction ${dep}`);
+      }
     }
+    const execOptions: ExecOptions = {
+      cwdFile: packageFileName,
+      docker: { image: 'renovate/poetry' },
+    };
     await exec(cmd, execOptions);
-    const newPoetryLockContent = await readFile(localLockFileName, 'utf8');
+    const newPoetryLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);
       return null;
@@ -67,7 +65,7 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
-    logger.info({ err }, `Failed to update ${lockFileName} file`);
+    logger.debug({ err }, `Failed to update ${lockFileName} file`);
     return [
       {
         artifactError: {

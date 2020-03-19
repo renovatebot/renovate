@@ -1,6 +1,6 @@
 import { ReleaseType } from 'semver';
-import { RangeStrategy } from '../versioning';
-import { ValidationMessage } from '../config/common';
+import { RangeStrategy, SkipReason } from '../types';
+import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -17,13 +17,21 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
-  global?: any;
+  global?: GlobalConfig;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
 
   skipInstalls?: boolean;
-  versionScheme?: string;
+  versioning?: string;
+}
+
+export interface CustomExtractConfig extends ExtractConfig {
+  matchStrings: string[];
+  depNameTemplate?: string;
+  lookupNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
@@ -70,6 +78,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  autoReplace?: boolean;
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
   compatibility?: Record<string, string>;
@@ -90,6 +99,7 @@ export interface PackageFile<T = Record<string, any>>
   skipInstalls?: boolean;
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
+  matchStrings?: string[];
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -104,7 +114,7 @@ export interface Package<T> extends ManagerData<T> {
   lookupName?: string;
   repo?: string;
   target?: string;
-  versionScheme?: string;
+  versioning?: string;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
@@ -119,6 +129,11 @@ export interface Package<T> extends ManagerData<T> {
   prettyDepType?: any;
 }
 
+export interface AutoReplaceData {
+  replaceString: string;
+  depIndex?: number;
+}
+
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
@@ -126,18 +141,21 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  displayFrom?: string;
+  displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  lookupType?: string;
   moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
-  skipReason?: string;
+  skipReason?: SkipReason;
   source?: string;
   sourceLine?: number;
+  toVersion?: string;
   updates?: PackageUpdateResult[];
   versionLine?: number;
+  autoReplaceData?: AutoReplaceData;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -148,6 +166,7 @@ export interface Upgrade<T = Record<string, any>>
   checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
+  dockerRepository?: string;
   downloadUrl?: string;
   localDir?: string;
   name?: string;
@@ -159,7 +178,7 @@ export interface Upgrade<T = Record<string, any>>
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
   toVersion?: string;
-  updateType?: string;
+  updateType?: UpdateType;
   version?: string;
 }
 
@@ -179,7 +198,15 @@ export interface UpdateArtifact {
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
+
+export interface UpdateDependencyConfig {
+  fileContent: string;
+  upgrade: Upgrade;
+}
+
 export interface ManagerApi {
+  defaultConfig: object;
+  autoReplace?: boolean;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
@@ -198,15 +225,14 @@ export interface ManagerApi {
     config: PackageUpdateConfig
   ): Result<PackageUpdateResult[]>;
 
-  getRangeStrategy(config: RangeConfig): RangeStrategy;
+  getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact
   ): Result<UpdateArtifactsResult[] | null>;
 
-  updateDependency(
-    fileContent: string,
-    upgrade: Upgrade
+  updateDependency?(
+    updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
 }
 

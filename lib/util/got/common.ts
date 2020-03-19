@@ -4,6 +4,8 @@ import { Url } from 'url';
 export interface Options {
   hostType?: string;
   search?: string;
+  token?: string;
+  useCache?: boolean;
 }
 
 export type GotJSONOptions = Options & got.GotJSONOptions;

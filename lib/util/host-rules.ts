@@ -2,19 +2,7 @@ import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import * as sanitize from './sanitize';
-
-export interface HostRule {
-  hostType?: string;
-  domainName?: string;
-  hostName?: string;
-  json?: true;
-  baseUrl?: string;
-  token?: string;
-  username?: string;
-  password?: string;
-  insecureRegistry?: boolean;
-  timeout?: number;
-}
+import { HostRule } from '../types';
 
 let hostRules: HostRule[] = [];
 
@@ -32,7 +20,9 @@ export function add(params: HostRule): void {
   const confidentialFields = ['password', 'token'];
   confidentialFields.forEach(field => {
     const secret = params[field];
-    if (secret && secret.length > 3) sanitize.add(secret);
+    if (secret && secret.length > 3) {
+      sanitize.add(secret);
+    }
   });
   if (params.username && params.password) {
     const secret = Buffer.from(
@@ -157,11 +147,19 @@ export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter(rule => rule.hostType === hostType)
     .map(rule => {
-      if (rule.hostName) return rule.hostName;
-      if (rule.baseUrl) return URL.parse(rule.baseUrl).hostname;
+      if (rule.hostName) {
+        return rule.hostName;
+      }
+      if (rule.baseUrl) {
+        return URL.parse(rule.baseUrl).hostname;
+      }
       return null;
     })
     .filter(Boolean);
+}
+
+export function findAll({ hostType }: { hostType: string }): HostRule[] {
+  return hostRules.filter(rule => rule.hostType === hostType);
 }
 
 export function clear(): void {

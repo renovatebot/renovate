@@ -4,11 +4,11 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
-import {
-  DATASOURCE_DOCKER,
-  DATASOURCE_GITHUB,
-  DATASOURCE_GO,
-} from '../../constants/data-binary-source';
+import * as dockerVersioning from '../../versioning/docker';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGo from '../../datasource/go';
+import * as datasourceGithubReleases from '../../datasource/github-releases';
+import { SkipReason } from '../../types';
 
 interface UrlParsedResult {
   repo: string;
@@ -63,8 +63,9 @@ function findBalancedParenIndex(longString: string): number {
         parenNestingDepth--;
         break;
       case '"':
-        if (i > 1 && arr.slice(i - 2, i).every(prev => char === prev))
+        if (i > 1 && arr.slice(i - 2, i).every(prev => char === prev)) {
           intShouldNotBeOdd++;
+        }
         break;
       default:
         break;
@@ -119,48 +120,48 @@ export function extractPackageFile(content: string): PackageFile | null {
     let digest: string;
     let repository: string;
     let registry: string;
-    let match = def.match(/name\s*=\s*"([^"]+)"/);
+    let match = /name\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, depName] = match;
     }
-    match = def.match(/digest\s*=\s*"([^"]+)"/);
+    match = /digest\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, digest] = match;
     }
-    match = def.match(/registry\s*=\s*"([^"]+)"/);
+    match = /registry\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, registry] = match;
     }
-    match = def.match(/repository\s*=\s*"([^"]+)"/);
+    match = /repository\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, repository] = match;
     }
-    match = def.match(/remote\s*=\s*"([^"]+)"/);
+    match = /remote\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, remote] = match;
     }
-    match = def.match(/tag\s*=\s*"([^"]+)"/);
+    match = /tag\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, currentValue] = match;
     }
-    match = def.match(/url\s*=\s*"([^"]+)"/);
+    match = /url\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, url] = match;
     }
-    match = def.match(/urls\s*=\s*\[\s*"([^\]]+)",?\s*\]/);
+    match = /urls\s*=\s*\[\s*"([^\]]+)",?\s*\]/.exec(def);
     if (match) {
       const urls = match[1].replace(/\s/g, '').split('","');
       url = urls.find(parseUrl);
     }
-    match = def.match(/commit\s*=\s*"([^"]+)"/);
+    match = /commit\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, commit] = match;
     }
-    match = def.match(/sha256\s*=\s*"([^"]+)"/);
+    match = /sha256\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, sha256] = match;
     }
-    match = def.match(/importpath\s*=\s*"([^"]+)"/);
+    match = /importpath\s*=\s*"([^"]+)"/.exec(def);
     if (match) {
       [, importpath] = match;
     }
@@ -182,7 +183,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const githubURL = parse(remote);
       if (githubURL) {
         const repo = githubURL.substring('https://github.com/'.length);
-        dep.datasource = DATASOURCE_GITHUB;
+        dep.datasource = datasourceGithubReleases.id;
         dep.lookupName = repo;
         deps.push(dep);
       }
@@ -194,16 +195,16 @@ export function extractPackageFile(content: string): PackageFile | null {
     ) {
       dep.depName = depName;
       dep.currentValue = currentValue || commit.substr(0, 7);
-      dep.datasource = DATASOURCE_GO;
+      dep.datasource = datasourceGo.id;
       dep.lookupName = importpath;
       if (remote) {
-        const remoteMatch = remote.match(
-          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/
+        const remoteMatch = /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
+          remote
         );
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {
-          dep.skipReason = 'unsupported-remote';
+          dep.skipReason = SkipReason.UnsupportedRemote;
         }
       }
       if (commit) {
@@ -222,14 +223,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       const parsedUrl = parseUrl(url);
       dep.depName = depName;
       dep.repo = parsedUrl.repo;
-      if (parsedUrl.currentValue.match(/^[a-f0-9]{40}$/i)) {
+      if (/^[a-f0-9]{40}$/i.test(parsedUrl.currentValue)) {
         dep.currentDigest = parsedUrl.currentValue;
       } else {
         dep.currentValue = parsedUrl.currentValue;
       }
-      dep.datasource = DATASOURCE_GITHUB;
+      dep.datasource = datasourceGithubReleases.id;
       dep.lookupName = dep.repo;
-      dep.lookupType = 'releases';
       deps.push(dep);
     } else if (
       depType === 'container_pull' &&
@@ -241,12 +241,12 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.currentDigest = digest;
       dep.currentValue = currentValue;
       dep.depName = depName;
-      dep.datasource = DATASOURCE_DOCKER;
-      dep.versionScheme = 'docker';
+      dep.versioning = dockerVersioning.id;
+      dep.datasource = datasourceDocker.id;
       dep.lookupName = repository;
       deps.push(dep);
     } else {
-      logger.info(
+      logger.debug(
         { def },
         'Failed to find dependency in bazel WORKSPACE definition'
       );

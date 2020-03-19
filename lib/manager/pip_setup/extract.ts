@@ -4,10 +4,9 @@ import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
-import {
-  BINARY_SOURCE_DOCKER,
-  DATASOURCE_PYPI,
-} from '../../constants/data-binary-source';
+import * as datasourcePypi from '../../datasource/pypi';
+import { BinarySource } from '../../util/exec/common';
+import { SkipReason } from '../../types';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
@@ -53,8 +52,8 @@ export async function extractSetupFile(
   const cwd = config.localDir;
   let cmd: string;
   const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
-  if (config.binarySource === BINARY_SOURCE_DOCKER) {
-    logger.info('Running python via docker');
+  if (config.binarySource === BinarySource.Docker) {
+    logger.debug('Running python via docker');
     await exec(`docker pull renovate/pip`);
     cmd = 'docker';
     args.unshift(
@@ -74,7 +73,7 @@ export async function extractSetupFile(
       'python'
     );
   } else {
-    logger.info('Running python via global command');
+    logger.debug('Running python via global command');
     cmd = await getPythonAlias();
   }
   logger.debug({ cmd, args }, 'python command');
@@ -129,7 +128,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {};
       const [, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = 'ignored';
+        dep.skipReason = SkipReason.Ignored;
       }
       regex.lastIndex = 0;
       const matches = regex.exec(req);
@@ -142,7 +141,7 @@ export async function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_PYPI,
+        datasource: datasourcePypi.id,
       };
       return dep;
     })

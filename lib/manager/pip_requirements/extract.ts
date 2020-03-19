@@ -2,9 +2,9 @@
 import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
-import { isValid, isSingleVersion } from '../../versioning/pep440';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import * as datasourcePypi from '../../datasource/pypi';
+import { SkipReason } from '../../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -54,7 +54,7 @@ export function extractPackageFile(
       let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = 'ignored';
+        dep.skipReason = SkipReason.Ignored;
       }
       regex.lastIndex = 0;
       const matches = regex.exec(line);
@@ -67,13 +67,9 @@ export function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_PYPI,
+        datasource: datasourcePypi.id,
       };
-      if (
-        isValid(currentValue) &&
-        isSingleVersion(currentValue) &&
-        currentValue.startsWith('==')
-      ) {
+      if (currentValue && currentValue.startsWith('==')) {
         dep.fromVersion = currentValue.replace(/^==/, '');
       }
       return dep;

@@ -2,16 +2,18 @@ import URL from 'url';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
-import * as versioning from '../../../versioning';
+import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { BranchUpgradeConfig } from '../../common';
 
-const ghGot = api.get;
+const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,
-  versionScheme: string,
+  versioning: string,
   repository: string
 ): Promise<string[]> {
   let url = endpoint
@@ -31,7 +33,7 @@ async function getTags(
 
     return tags.map(tag => tag.name).filter(Boolean);
   } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Github tags');
+    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });
     // istanbul ignore if
     if (err.message && err.message.includes('Bad credentials')) {
@@ -44,30 +46,42 @@ async function getTags(
 
 export async function getChangeLogJSON({
   endpoint,
-  versionScheme,
+  versioning,
   fromVersion,
   toVersion,
   sourceUrl,
   releases,
   depName,
   manager,
-}: ChangeLogConfig): Promise<ChangeLogResult | null> {
+}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.debug('No release notes for @types');
     return null;
   }
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   const githubBaseURL = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
   const config = hostRules.find({
-    hostType: 'github',
+    hostType: PLATFORM_TYPE_GITHUB,
     url,
   });
+  // istanbul ignore if
   if (!config.token) {
-    logger.debug('Repository URL does not match any known hosts');
+    // prettier-ignore
+    if (URL.parse(sourceUrl).host.endsWith('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+      logger.warn(
+        { manager, depName, sourceUrl },
+        'No github.com token has been configured. Skipping release notes retrieval'
+      );
+      return { error: ChangeLogError.MissingGithubToken };
+    }
+    logger.debug(
+      { manager, depName, sourceUrl },
+      'Repository URL does not match any known hosts - skipping changelog retrieval'
+    );
     return null;
   }
   const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
@@ -75,7 +89,7 @@ export async function getChangeLogJSON({
     : endpoint; // TODO FIX
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
-    logger.info({ sourceUrl }, 'Invalid github URL found');
+    logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
   if (!(releases && releases.length)) {
@@ -96,7 +110,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versionScheme, repository);
+      tags = await getTags(endpoint, versioning, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags

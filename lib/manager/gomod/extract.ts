@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_GO } from '../../constants/data-binary-source';
+import * as datasourceGo from '../../datasource/go';
+import { SkipReason } from '../../types';
 
 function getDep(
   lineNumber: number,
@@ -20,7 +21,7 @@ function getDep(
     currentValue,
   };
   if (!isVersion(currentValue)) {
-    dep.skipReason = 'unsupported-version';
+    dep.skipReason = SkipReason.UnsupportedVersion;
   } else {
     if (depName.startsWith('gopkg.in/')) {
       const [pkg] = depName.replace('gopkg.in/', '').split('.');
@@ -30,9 +31,9 @@ function getDep(
     } else {
       dep.depNameShort = depName;
     }
-    dep.datasource = DATASOURCE_GO;
+    dep.datasource = datasourceGo.id;
   }
-  const digestMatch = currentValue.match(/v0\.0.0-\d{14}-([a-f0-9]{12})/);
+  const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
   if (digestMatch) {
     [, dep.currentDigest] = digestMatch;
     dep.digestOneAndOnly = true;
@@ -47,14 +48,14 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const replaceMatch = line.match(
-        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
+      const replaceMatch = /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(
+        line
       );
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
         deps.push(dep);
       }
-      const requireMatch = line.match(/^require\s+([^\s]+)\s+([^\s]+)/);
+      const requireMatch = /^require\s+([^\s]+)\s+([^\s]+)/.exec(line);
       if (requireMatch && !line.endsWith('// indirect')) {
         logger.trace({ lineNumber }, `require line: "${line}"`);
         const dep = getDep(lineNumber, requireMatch, 'require');
@@ -65,7 +66,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         do {
           lineNumber += 1;
           line = lines[lineNumber];
-          const multiMatch = line.match(/^\s+([^\s]+)\s+([^\s]+)/);
+          const multiMatch = /^\s+([^\s]+)\s+([^\s]+)/.exec(line);
           logger.trace(`reqLine: "${line}"`);
           if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);

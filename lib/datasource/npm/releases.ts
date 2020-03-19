@@ -1,11 +1,11 @@
 import { getDependency } from './get';
 import { setNpmrc } from './npmrc';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export async function getPkgReleases({
   lookupName,
   npmrc,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   if (npmrc) {
     setNpmrc(npmrc);
   }

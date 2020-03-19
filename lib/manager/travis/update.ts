@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { logger } from '../../logger';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`travis.updateDependency(): ${upgrade.newValue}`);
     const indent = detectIndent(fileContent).indent || '  ';
@@ -26,7 +26,7 @@ export function updateDependency(
     });
     return fileContent.replace(/node_js:(\n\s+-[^\n]+)+\n/, newString);
   } catch (err) {
-    logger.info({ err }, 'Error setting new .travis.yml node versions');
+    logger.debug({ err }, 'Error setting new .travis.yml node versions');
     return null;
   }
 }

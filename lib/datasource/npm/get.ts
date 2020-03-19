@@ -1,3 +1,4 @@
+import delay from 'delay';
 import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
@@ -6,12 +7,11 @@ import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
-import { Release, ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { DATASOURCE_NPM } from '../../constants/data-binary-source';
+import { DatasourceError, Release, ReleaseResult } from '../common';
+import { id } from './common';
 
 let memcache = {};
 
@@ -42,17 +42,18 @@ export interface NpmDependency extends ReleaseResult {
 }
 
 export async function getDependency(
-  name: string
+  packageName: string,
+  retries = 3
 ): Promise<NpmDependency | null> {
-  logger.trace(`npm.getDependency(${name})`);
+  logger.trace(`npm.getDependency(${packageName})`);
 
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
-  if (memcache[name]) {
+  if (memcache[packageName]) {
     logger.trace('Returning cached result');
-    return JSON.parse(memcache[name]);
+    return JSON.parse(memcache[packageName]);
   }
 
-  const scope = name.split('/')[0];
+  const scope = packageName.split('/')[0];
   let regUrl: string;
   const npmrc = getNpmrc();
   try {
@@ -62,7 +63,7 @@ export async function getDependency(
   }
   const pkgUrl = url.resolve(
     regUrl,
-    encodeURIComponent(name).replace(/^%40/, '@')
+    encodeURIComponent(packageName).replace(/^%40/, '@')
   );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
@@ -85,17 +86,16 @@ export async function getDependency(
     }
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
-      { token: maskToken(authInfo.token), npmName: name },
+      { token: maskToken(authInfo.token), npmName: packageName },
       'Using auth for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
   }
 
-  if (
-    pkgUrl.startsWith('https://registry.npmjs.org') &&
-    !pkgUrl.startsWith('https://registry.npmjs.org/@')
-  ) {
+  const uri = url.parse(pkgUrl);
+
+  if (uri.host === 'registry.npmjs.org' && !uri.pathname.startsWith('/@')) {
     // Delete the authorization header for non-scoped public packages to improve http caching
     // Otherwise, authenticated requests are not cacheable until the registry adds "public" to Cache-Control
     // Ref: https://greenbytes.de/tech/webdav/rfc7234.html#caching.authenticated.responses
@@ -106,36 +106,32 @@ export async function getDependency(
   headers['Cache-Control'] = 'no-cache';
 
   try {
-    const raw = await got(pkgUrl, {
+    const useCache = retries === 3; // Disable cache if we're retrying
+    const opts: GotJSONOptions = {
+      hostType: id,
       json: true,
-      retry: {
-        errorCodes: [
-          'ECONNRESET',
-          'ETIMEDOUT',
-          'ECONNRESET',
-          'EADDRINUSE',
-          'ECONNREFUSED',
-          'EPIPE',
-          'ENOTFOUND',
-          'ENETUNREACH',
-          'EAI_AGAIN',
-        ],
-      },
+      retry: 5,
       headers,
-    });
+      useCache,
+    };
+    const raw = await got(pkgUrl, opts);
+    // istanbul ignore if
+    if (retries < 3) {
+      logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
+    }
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
     const returnedName = res.name ? res.name : res._id || '';
-    if (returnedName.toLowerCase() !== name.toLowerCase()) {
+    if (returnedName.toLowerCase() !== packageName.toLowerCase()) {
       logger.warn(
-        { lookupName: name, returnedName: res.name, regUrl },
+        { lookupName: packageName, returnedName: res.name, regUrl },
         'Returned name does not match with requested name'
       );
       return null;
     }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.info({ dependency: name }, 'No versions returned');
+      logger.debug({ dependency: packageName }, 'No versions returned');
       return null;
     }
 
@@ -168,8 +164,8 @@ export async function getDependency(
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
-      dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${name}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-      dep.deprecationSource = DATASOURCE_NPM;
+      dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
+      dep.deprecationSource = id;
     }
     dep.releases = Object.keys(res.versions).map(version => {
       const release: NpmRelease = {
@@ -188,24 +184,24 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    memcache[name] = JSON.stringify(dep);
+    memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 5;
-    if (!name.startsWith('@')) {
+    if (!packageName.startsWith('@')) {
       await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         {
           pkgUrl,
           authInfoType: authInfo ? authInfo.type : undefined,
           authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
           err,
           statusCode: err.statusCode,
-          depName: name,
+          packageName,
         },
         `Dependency lookup failure: unauthorized`
       );
@@ -213,30 +209,44 @@ export async function getDependency(
     }
     // istanbul ignore if
     if (err.statusCode === 402) {
-      logger.info(
+      logger.debug(
         {
           pkgUrl,
           authInfoType: authInfo ? authInfo.type : undefined,
           authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
           err,
           statusCode: err.statusCode,
-          depName: name,
+          packageName,
         },
         `Dependency lookup failure: payent required`
       );
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ depName: name }, `Dependency lookup failure: not found`);
+      logger.debug({ packageName }, `Dependency lookup failure: not found`);
       logger.debug({
         err,
         token: authInfo ? maskToken(authInfo.token) : 'none',
       });
       return null;
     }
-    if (regUrl.startsWith('https://registry.npmjs.org')) {
-      logger.warn({ err, regUrl, depName: name }, 'npm registry failure');
-      throw new Error(DATASOURCE_FAILURE);
+    if (uri.host === 'registry.npmjs.org') {
+      // istanbul ignore if
+      if (
+        (err.name === 'ParseError' ||
+          err.code === 'ECONNRESET' ||
+          err.code === 'ETIMEDOUT') &&
+        retries > 0
+      ) {
+        logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
+        await delay(5000);
+        return getDependency(packageName, retries - 1);
+      }
+      // istanbul ignore if
+      if (err.name === 'ParseError' && err.body) {
+        err.body = 'err.body deleted by Renovate';
+      }
+      throw new DatasourceError(err);
     }
     // istanbul ignore next
     return null;

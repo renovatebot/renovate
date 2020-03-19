@@ -1,6 +1,12 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'hex';
+export const displayName = 'Hex';
+export const urls = ['https://hexdocs.pm/elixir/Version.html'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function hex2npm(input: string): string {
   return input
     .replace(/~>\s*(\d+\.\d+)$/, '^$1')
@@ -25,8 +31,11 @@ function npm2hex(input: string): string {
     if (i < res.length - 1 && res[i + 1].includes('||')) {
       output += res[i] + ' or ';
       i += 1;
-    } else if (!operators.includes(res[i])) output += res[i] + ' and ';
-    else output += res[i] + ' ';
+    } else if (!operators.includes(res[i])) {
+      output += res[i] + ' and ';
+    } else {
+      output += res[i] + ' ';
+    }
   }
   return output;
 }
@@ -59,7 +68,7 @@ const getNewValue = ({
     toVersion,
   });
   newSemver = npm2hex(newSemver);
-  if (currentValue.match(/~>\s*(\d+\.\d+)$/)) {
+  if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
     newSemver = newSemver.replace(
       /\^\s*(\d+\.\d+(\.\d)?)/,
       (_str, p1) => '~> ' + p1.slice(0, -2)

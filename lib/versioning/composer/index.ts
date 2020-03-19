@@ -3,6 +3,17 @@ import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
 
+export const id = 'composer';
+export const displayName = 'Composer';
+export const urls = [
+  'https://getcomposer.org/doc/articles/versions.md',
+  'https://packagist.org/packages/composer/semver',
+  'https://madewithlove.be/tilde-and-caret-constraints/',
+  'https://semver.mwl.be',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 function padZeroes(input: string): string {
   const sections = input.split('.');
   while (sections.length < 3) {
@@ -11,14 +22,19 @@ function padZeroes(input: string): string {
   return sections.join('.');
 }
 
+function removeLeadingV(input: string): string {
+  return input.replace(/^v/i, '');
+}
+
 function composer2npm(input: string): string {
-  if (npm.isVersion(input)) {
-    return input;
+  const cleanInput = removeLeadingV(input);
+  if (npm.isVersion(cleanInput)) {
+    return cleanInput;
   }
-  if (npm.isVersion(padZeroes(input))) {
-    return padZeroes(input);
+  if (npm.isVersion(padZeroes(cleanInput))) {
+    return padZeroes(cleanInput);
   }
-  let output = input;
+  let output = cleanInput;
   // ~4 to ^4 and ~4.1 to ^4.1
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
   // ~0.4 to >=0.4 <1
@@ -82,7 +98,7 @@ function getNewValue({
   } else if (
     npm.isVersion(padZeroes(toVersion)) &&
     npm.isValid(currentValue) &&
-    composer2npm(currentValue) === currentValue
+    composer2npm(currentValue) === removeLeadingV(currentValue)
   ) {
     newValue = npm.getNewValue({
       currentValue,
@@ -90,17 +106,17 @@ function getNewValue({
       fromVersion,
       toVersion: padZeroes(toVersion),
     });
-  } else if (currentValue.match(/^~(0\.[1-9][0-9]*)$/)) {
+  } else if (/^~(0\.[1-9][0-9]*)$/.test(currentValue)) {
     // handle ~0.4 case first
     if (toMajor === 0) {
       newValue = `~0.${toMinor}`;
     } else {
       newValue = `~${toMajor}.0`;
     }
-  } else if (currentValue.match(/^~([0-9]*)$/)) {
+  } else if (/^~([0-9]*)$/.test(currentValue)) {
     // handle ~4 case
     newValue = `~${toMajor}`;
-  } else if (currentValue.match(/^~([0-9]*(?:\.[0-9]*)?)$/)) {
+  } else if (/^~([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
     // handle ~4.1 case
     if (fromVersion && toMajor > getMajor(fromVersion)) {
       newValue = `~${toMajor}.0`;

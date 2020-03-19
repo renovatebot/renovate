@@ -1,5 +1,3 @@
-import { Release } from '../../../datasource';
-
 export interface ChangeLogNotes {
   body?: string;
   id?: number;
@@ -30,20 +28,13 @@ export interface ChangeLogProject {
   repository: string;
 }
 
-export interface ChangeLogResult {
-  hasReleaseNotes?: boolean;
-  project: ChangeLogProject;
-  versions: ChangeLogRelease[];
+export enum ChangeLogError {
+  MissingGithubToken = 1,
 }
 
-export interface ChangeLogConfig {
-  depName: string;
-  depType?: string;
-  endpoint: string;
-  fromVersion: string;
-  manager?: string;
-  releases: Release[];
-  sourceUrl?: string;
-  toVersion: string;
-  versionScheme: string;
+export interface ChangeLogResult {
+  hasReleaseNotes?: boolean;
+  project?: ChangeLogProject;
+  versions?: ChangeLogRelease[];
+  error?: ChangeLogError;
 }

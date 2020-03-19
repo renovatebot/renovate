@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import * as handlebars from 'handlebars';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -67,13 +68,32 @@ export async function validateConfig(
           message: getDeprecationMessage(key),
         });
       }
+      const templateKeys = [
+        'branchName',
+        'commitBody',
+        'commitMessage',
+        'prTitle',
+        'semanticCommitScope',
+      ];
+      if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
+        try {
+          let res = handlebars.compile(val)(config);
+          res = handlebars.compile(res)(config);
+          handlebars.compile(res)(config);
+        } catch (err) {
+          errors.push({
+            depName: 'Configuration Error',
+            message: `Invalid handlebars template in config path: ${currentPath}`,
+          });
+        }
+      }
       if (!optionTypes[key]) {
         errors.push({
           depName: 'Configuration Error',
           message: `Invalid configuration option: ${currentPath}`,
         });
       } else if (key === 'schedule') {
-        const [validSchedule, errorMessage] = hasValidSchedule(val);
+        const [validSchedule, errorMessage] = hasValidSchedule(val as string[]);
         if (!validSchedule) {
           errors.push({
             depName: 'Configuration Error',
@@ -81,7 +101,7 @@ export async function validateConfig(
           });
         }
       } else if (key === 'timezone' && val !== null) {
-        const [validTimezone, errorMessage] = hasValidTimezone(val);
+        const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
           errors.push({
             depName: 'Configuration Error',
@@ -118,9 +138,10 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
+              const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && subval.match(/^:timezone(.+)$/)) {
-                  const [, timezone] = subval.match(/^:timezone\((.+)\)$/);
+                if (is.string(subval) && tzRe.test(subval)) {
+                  const [, timezone] = tzRe.exec(subval);
                   const [validTimezone, errorMessage] = hasValidTimezone(
                     timezone
                   );
@@ -152,7 +173,9 @@ export async function validateConfig(
               for (const packageRule of val) {
                 let hasSelector = false;
                 if (is.object(packageRule)) {
-                  const resolvedRule = await resolveConfigPresets(packageRule);
+                  const resolvedRule = await resolveConfigPresets(
+                    packageRule as RenovateConfig
+                  );
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
@@ -175,6 +198,72 @@ export async function validateConfig(
                     depName: 'Configuration Error',
                     message: `${currentPath} must contain JSON objects`,
                   });
+                }
+              }
+            }
+            if (key === 'regexManagers') {
+              const allowedKeys = [
+                'fileMatch',
+                'matchStrings',
+                'depNameTemplate',
+                'lookupNameTemplate',
+                'datasourceTemplate',
+                'versioningTemplate',
+              ];
+              for (const regexManager of val) {
+                if (
+                  Object.keys(regexManager).some(k => !allowedKeys.includes(k))
+                ) {
+                  const disallowedKeys = Object.keys(regexManager).filter(
+                    k => !allowedKeys.includes(k)
+                  );
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
+                      ', '
+                    )}`,
+                  });
+                } else if (
+                  !regexManager.matchStrings ||
+                  regexManager.matchStrings.length !== 1
+                ) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                  });
+                } else {
+                  let validRegex = false;
+                  for (const matchString of regexManager.matchStrings) {
+                    try {
+                      regEx(matchString);
+                      validRegex = true;
+                    } catch (e) {
+                      errors.push({
+                        depName: 'Configuration Error',
+                        message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+                      });
+                    }
+                  }
+                  if (validRegex) {
+                    const mandatoryFields = [
+                      'depName',
+                      'currentValue',
+                      'datasource',
+                    ];
+                    for (const field of mandatoryFields) {
+                      if (
+                        !regexManager[`${field}Template`] &&
+                        !regexManager.matchStrings.some(matchString =>
+                          matchString.includes(`(?<${field}>`)
+                        )
+                      ) {
+                        errors.push({
+                          depName: 'Configuration Error',
+                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                        });
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -206,7 +295,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !(parentPath && parentPath.match(/p.*Rules\[\d+\]$/)) && // Inside a packageRule
+              !/p.*Rules\[\d+\]$/.test(parentPath) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
@@ -247,10 +336,11 @@ export async function validateConfig(
     }
   }
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
+    // istanbul ignore else: currently never happen
     if (a.depName === b.depName) {
       return a.message > b.message ? 1 : -1;
     }
-    // istanbul ignore next
+    // istanbul ignore next: currently never happen
     return a.depName > b.depName ? 1 : -1;
   }
   errors.sort(sortAll);

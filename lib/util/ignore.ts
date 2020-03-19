@@ -1,7 +1,7 @@
 import { logger } from '../logger';
 
 export function isSkipComment(comment?: string): boolean {
-  if (comment && comment.match(/^(renovate|pyup):/)) {
+  if (/^(renovate|pyup):/.test(comment)) {
     const command = comment
       .split('#')[0]
       .split(':')[1]
@@ -9,7 +9,7 @@ export function isSkipComment(comment?: string): boolean {
     if (command === 'ignore') {
       return true;
     }
-    logger.info('Unknown comment command: ' + command);
+    logger.debug('Unknown comment command: ' + command);
   }
   return false;
 }

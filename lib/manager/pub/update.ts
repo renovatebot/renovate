@@ -1,13 +1,15 @@
 import { load } from 'js-yaml';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   const { depName, depType, currentValue, newValue } = upgrade;
 
-  if (currentValue === newValue) return fileContent;
+  if (currentValue === newValue) {
+    return fileContent;
+  }
 
   const sectionBeginRegExp = new RegExp(`^${depType}:`);
   const isSectionBegin = (line: string): boolean =>
@@ -43,7 +45,9 @@ export function updateDependency(
       isSection = false;
     } else if (isSection) {
       if (isOneLineDep(line)) {
-        if (!isValidVersion(line)) return null;
+        if (!isValidVersion(line)) {
+          return null;
+        }
         lines[idx] = line.replace(currentValue, newValue);
         break;
       } else if (isMultilineDepRegExp(line)) {
@@ -53,7 +57,9 @@ export function updateDependency(
         if (currentIndent <= indent) {
           indent = null;
         } else if (isVersionLine(line)) {
-          if (!isValidVersion(line)) return null;
+          if (!isValidVersion(line)) {
+            return null;
+          }
           lines[idx] = line.replace(currentValue, newValue);
           break;
         }

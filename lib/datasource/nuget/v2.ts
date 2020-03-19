@@ -3,6 +3,8 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult } from '../common';
 
+import { id } from './common';
+
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
 }
@@ -18,7 +20,9 @@ export async function getPkgReleases(
   try {
     let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
     do {
-      const pkgVersionsListRaw = await got(pkgUrlList, { hostType: 'nuget' });
+      const pkgVersionsListRaw = await got(pkgUrlList, {
+        hostType: id,
+      });
       if (pkgVersionsListRaw.statusCode !== 200) {
         logger.debug(
           { dependency: pkgName, pkgVersionsListRaw },
@@ -60,7 +64,9 @@ export async function getPkgReleases(
     } while (pkgUrlList !== null);
 
     // dep not found if no release, so we can try next registry
-    if (dep.releases.length === 0) return null;
+    if (dep.releases.length === 0) {
+      return null;
+    }
 
     return dep;
   } catch (err) {

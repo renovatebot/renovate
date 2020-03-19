@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/go getPkgReleases processes real data 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "v1.0.0",
+    },
+    Object {
+      "version": "v2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`datasource/go getPkgReleases works for known servers 1`] = `
+Array [
+  Array [
+    Object {
+      "datasource": "github-tags",
+      "lookupName": "x/text",
+    },
+  ],
+  Array [
+    Object {
+      "datasource": "github-tags",
+      "lookupName": "x/text",
+    },
+  ],
+  Array [
+    Object {
+      "datasource": "github-tags",
+      "lookupName": "go-x/x",
+    },
+  ],
+]
+`;

@@ -11,7 +11,9 @@ export interface Revision {
 }
 
 function parseDynamicRevision(str: string): Revision {
-  if (!str) return null;
+  if (!str) {
+    return null;
+  }
 
   const LATEST_REGEX = /^latest\.|^latest$/i;
   if (LATEST_REGEX.test(str)) {
@@ -23,7 +25,7 @@ function parseDynamicRevision(str: string): Revision {
   }
 
   const SUBREV_REGEX = /\.\+$/;
-  if (SUBREV_REGEX.test(str)) {
+  if (str.endsWith('.+')) {
     const value = str.replace(SUBREV_REGEX, '');
     if (isSingleVersion(value)) {
       return {

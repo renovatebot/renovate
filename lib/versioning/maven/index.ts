@@ -14,15 +14,33 @@ import {
 } from './compare';
 import { NewValueConfig, VersioningApi } from '../common';
 
+export const id = 'maven';
+export const displayName = 'Maven';
+export const urls = [
+  'https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification',
+  'https://octopus.com/blog/maven-versioning-explained',
+  'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
+
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 function matches(a: string, b: string): boolean {
-  if (!b) return false;
-  if (isVersion(b)) return equals(a, b);
+  if (!b) {
+    return false;
+  }
+  if (isVersion(b)) {
+    return equals(a, b);
+  }
   const ranges = parseRange(b);
-  if (!ranges) return false;
+  if (!ranges) {
+    return false;
+  }
   return ranges.reduce((result, range): any => {
-    if (result) return result;
+    if (result) {
+      return result;
+    }
 
     const { leftType, leftValue, rightType, rightValue } = range;
 
@@ -107,8 +125,12 @@ const maxSatisfyingVersion = (versions: string[], range: string): string => {
   // istanbul ignore next
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
-      if (!result) return version;
-      if (isGreaterThan(version, result)) return version;
+      if (!result) {
+        return version;
+      }
+      if (isGreaterThan(version, result)) {
+        return version;
+      }
     }
     return result;
   }, null);

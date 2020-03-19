@@ -1,7 +1,9 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_GRADLE_VERSION } from '../../constants/data-binary-source';
+import * as semverVersioning from '../../versioning/semver';
+import * as datasourceGradleVersion from '../../datasource/gradle-version';
+import { DISTRIBUTION_CHECKSUM_REGEX, DISTRIBUTION_URL_REGEX } from './search';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
@@ -9,22 +11,23 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
   let lineNumber = 0;
   for (const line of lines) {
-    const match = line.match(
-      /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/
-    );
-    if (match) {
+    const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
+    if (distributionUrlMatch) {
       const dependency: PackageDependency = {
-        datasource: DATASOURCE_GRADLE_VERSION,
+        datasource: datasourceGradleVersion.id,
         depType: 'gradle-wrapper',
         depName: 'gradle',
-        currentValue: coerce(match[1]).toString(),
-        managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: 'semver',
+        currentValue: coerce(distributionUrlMatch.groups.version).toString(),
+        managerData: {
+          lineNumber,
+          gradleWrapperType: distributionUrlMatch.groups.type,
+        },
+        versioning: semverVersioning.id,
       };
 
       let shaLineNumber = 0;
       for (const shaLine of lines) {
-        const shaMatch = shaLine.match(/^distributionSha256Sum=((\w){64}).*$/);
+        const shaMatch = DISTRIBUTION_CHECKSUM_REGEX.test(shaLine);
         if (shaMatch) {
           dependency.managerData.checksumLineNumber = shaLineNumber;
           break;
@@ -32,7 +35,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
         shaLineNumber += 1;
       }
 
-      logger.info(dependency, 'Gradle Wrapper');
+      logger.debug(dependency, 'Gradle Wrapper');
       return { deps: [dependency] };
     }
     lineNumber += 1;

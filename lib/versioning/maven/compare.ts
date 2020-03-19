@@ -101,7 +101,8 @@ function isNull(token: Token): boolean {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   );
 }
 
@@ -192,7 +193,8 @@ export function qualifierType(token: Token): number {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   ) {
     return QualifierTypes.Release;
   }
@@ -206,16 +208,28 @@ function qualifierCmp(left: Token, right: Token): number {
   const leftOrder = qualifierType(left);
   const rightOrder = qualifierType(right);
   if (leftOrder && rightOrder) {
-    if (leftOrder < rightOrder) return -1;
-    if (leftOrder > rightOrder) return 1;
+    if (leftOrder < rightOrder) {
+      return -1;
+    }
+    if (leftOrder > rightOrder) {
+      return 1;
+    }
     return 0;
   }
 
-  if (leftOrder && leftOrder < QualifierTypes.Release) return -1;
-  if (rightOrder && rightOrder < QualifierTypes.Release) return 1;
+  if (leftOrder && leftOrder < QualifierTypes.Release) {
+    return -1;
+  }
+  if (rightOrder && rightOrder < QualifierTypes.Release) {
+    return 1;
+  }
 
-  if (left.val < right.val) return -1;
-  if (left.val > right.val) return 1;
+  if (left.val < right.val) {
+    return -1;
+  }
+  if (left.val > right.val) {
+    return 1;
+  }
   return 0;
 }
 
@@ -223,12 +237,20 @@ function tokenCmp(left: Token, right: Token): number {
   const leftOrder = commonOrder(left);
   const rightOrder = commonOrder(right);
 
-  if (leftOrder < rightOrder) return -1;
-  if (leftOrder > rightOrder) return 1;
+  if (leftOrder < rightOrder) {
+    return -1;
+  }
+  if (leftOrder > rightOrder) {
+    return 1;
+  }
 
   if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
-    if (left.val < right.val) return -1;
-    if (left.val > right.val) return 1;
+    if (left.val < right.val) {
+      return -1;
+    }
+    if (left.val > right.val) {
+      return 1;
+    }
     return 0;
   }
 
@@ -243,16 +265,26 @@ function compare(left: string, right: string): number {
     const leftToken = leftTokens[idx] || nullFor(rightTokens[idx]);
     const rightToken = rightTokens[idx] || nullFor(leftTokens[idx]);
     const cmpResult = tokenCmp(leftToken, rightToken);
-    if (cmpResult !== 0) return cmpResult;
+    if (cmpResult !== 0) {
+      return cmpResult;
+    }
   }
   return 0;
 }
 
 function isVersion(version: string): boolean {
-  if (!version) return false;
-  if (!/^[a-z0-9.-]+$/i.test(version)) return false;
-  if (/^[.-]/.test(version)) return false;
-  if (/[.-]$/.test(version)) return false;
+  if (!version) {
+    return false;
+  }
+  if (!/^[a-z0-9.-]+$/i.test(version)) {
+    return false;
+  }
+  if (/^[.-]/.test(version)) {
+    return false;
+  }
+  if (/[.-]$/.test(version)) {
+    return false;
+  }
   const tokens = tokenize(version);
   return !!tokens.length;
 }
@@ -277,7 +309,9 @@ function parseRange(rangeStr: string): any {
   let interval = emptyInterval();
 
   commaSplit.forEach(subStr => {
-    if (!result) return;
+    if (!result) {
+      return;
+    }
     if (interval.leftType === null) {
       if (/^\[.*]$/.test(subStr)) {
         const ver = subStr.slice(1, -1);
@@ -290,12 +324,12 @@ function parseRange(rangeStr: string): any {
           rightBracket: ']',
         });
         interval = emptyInterval();
-      } else if (subStr[0] === '[') {
+      } else if (subStr.startsWith('[')) {
         const ver = subStr.slice(1);
         interval.leftType = INCLUDING_POINT;
         interval.leftValue = ver;
         interval.leftBracket = '[';
-      } else if (subStr[0] === '(' || subStr[0] === ']') {
+      } else if (subStr.startsWith('(') || subStr.startsWith(']')) {
         const ver = subStr.slice(1);
         interval.leftType = EXCLUDING_POINT;
         interval.leftValue = ver;
@@ -303,18 +337,18 @@ function parseRange(rangeStr: string): any {
       } else {
         result = null;
       }
-    } else if (/]$/.test(subStr)) {
+    } else if (subStr.endsWith(']')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = INCLUDING_POINT;
       interval.rightValue = ver;
       interval.rightBracket = ']';
       result.push(interval);
       interval = emptyInterval();
-    } else if (/\)$/.test(subStr) || /\[$/.test(subStr)) {
+    } else if (subStr.endsWith(')') || subStr.endsWith('[')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = EXCLUDING_POINT;
       interval.rightValue = ver;
-      interval.rightBracket = /\)$/.test(subStr) ? ')' : '[';
+      interval.rightBracket = subStr.endsWith(')') ? ')' : '[';
       result.push(interval);
       interval = emptyInterval();
     } else {
@@ -322,8 +356,12 @@ function parseRange(rangeStr: string): any {
     }
   });
 
-  if (interval.leftType) return null; // something like '[1,2],[3'
-  if (!result || !result.length) return null;
+  if (interval.leftType) {
+    return null;
+  } // something like '[1,2],[3'
+  if (!result || !result.length) {
+    return null;
+  }
 
   const lastIdx = result.length - 1;
   let prevValue: string = null;
@@ -339,14 +377,20 @@ function parseRange(rangeStr: string): any {
     }
     if (idx === lastIdx && rightValue === '') {
       if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
-        if (prevValue && compare(prevValue, leftValue) === 1) return null;
+        if (prevValue && compare(prevValue, leftValue) === 1) {
+          return null;
+        }
         return [...acc, { ...range, rightValue: null }];
       }
       return null;
     }
     if (isVersion(leftValue) && isVersion(rightValue)) {
-      if (compare(leftValue, rightValue) === 1) return null;
-      if (prevValue && compare(prevValue, leftValue) === 1) return null;
+      if (compare(leftValue, rightValue) === 1) {
+        return null;
+      }
+      if (prevValue && compare(prevValue, leftValue) === 1) {
+        return null;
+      }
       prevValue = rightValue;
       return [...acc, range];
     }
@@ -371,7 +415,9 @@ export interface Range {
 }
 
 function rangeToStr(fullRange: Range[]): string | null {
-  if (fullRange === null) return null;
+  if (fullRange === null) {
+    return null;
+  }
 
   const valToStr = (val: string): string => (val === null ? '' : val);
 
@@ -403,9 +449,13 @@ function autoExtendMavenRange(
   newValue: string
 ): string | null {
   const range = parseRange(currentRepresentation);
-  if (!range) return currentRepresentation;
+  if (!range) {
+    return currentRepresentation;
+  }
   const isPoint = (vals: Range[]): boolean => {
-    if (vals.length !== 1) return false;
+    if (vals.length !== 1) {
+      return false;
+    }
     const { leftType, leftValue, rightType, rightValue } = vals[0];
     return (
       leftType === 'INCLUDING_POINT' &&

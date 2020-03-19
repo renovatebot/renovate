@@ -1,19 +1,19 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { regEx } from '../../util/regex';
 
-export default function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export default function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const newFrom = getNewFrom(upgrade);
     logger.debug(`ansible.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     const imageLine = regEx(`^(\\s*image:\\s*'?"?)[^\\s'"]+('?"?\\s*)$`);
-    if (!lineToChange.match(imageLine)) {
+    if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }
@@ -25,7 +25,7 @@ export default function updateDependency(
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new Dockerfile value');
+    logger.debug({ err }, 'Error setting new Dockerfile value');
     return null;
   }
 }

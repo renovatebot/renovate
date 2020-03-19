@@ -1,11 +1,14 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
+
+export const id = 'orb';
 
 interface OrbRelease {
   homeUrl?: string;
   versions: {
     version: string;
+    createdAt?: string;
   }[];
 }
 
@@ -16,7 +19,7 @@ interface OrbRelease {
  */
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.debug({ lookupName }, 'orb.getPkgReleases()');
   const cacheNamespace = 'orb';
   const cacheKey = lookupName;
@@ -37,12 +40,13 @@ export async function getPkgReleases({
     const res: OrbRelease = (
       await got.post(url, {
         body,
+        hostType: id,
         json: true,
         retry: 5,
       })
     ).body.data.orb;
     if (!res) {
-      logger.info({ lookupName }, 'Failed to look up orb');
+      logger.debug({ lookupName }, 'Failed to look up orb');
       return null;
     }
     // Simplify response before caching and returning
@@ -56,9 +60,9 @@ export async function getPkgReleases({
     }
     dep.homepage =
       dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
-    const releases = res.versions.map(v => v.version);
-    dep.releases = releases.map(version => ({
+    dep.releases = res.versions.map(({ version, createdAt }) => ({
       version,
+      releaseTimestamp: createdAt || null,
     }));
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 15;
@@ -67,7 +71,7 @@ export async function getPkgReleases({
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'CircleCI Orb lookup error');
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `CircleCI Orb lookup failure: not found`);
+      logger.debug({ lookupName }, `CircleCI Orb lookup failure: not found`);
       return null;
     }
     logger.warn({ lookupName }, 'CircleCI Orb lookup failure: Unknown error');

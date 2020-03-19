@@ -4,17 +4,15 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
 import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_SUCCESS,
-} from '../../../constants/branch-constants';
+import { BranchStatus } from '../../../types';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
-    .filter(pr => pr.state === 'open')
+    .filter(pr => pr.state === PR_STATE_OPEN)
     .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
-    .filter(pr => pr.title && pr.title.match(new RegExp('renovate', 'i')));
+    .filter(pr => new RegExp('renovate', 'i').test(pr.title));
 }
 
 async function getRenovateFiles(prNo: number): Promise<string[]> {
@@ -40,7 +38,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       if (!renovateFiles.length) {
         continue; // eslint-disable-line no-continue
       }
-      logger.info(
+      logger.debug(
         { prNo: pr.number, title: pr.title, renovateFiles },
         'PR has renovate files'
       );
@@ -90,7 +88,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
         }
       }
       // if the PR has renovate files then we set a status no matter what
-      let status: 'failure' | 'success';
+      let status: BranchStatus;
       let description: string;
       const topic = `Renovate Configuration Errors`;
       if (validations.length) {
@@ -102,16 +100,16 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
           topic,
           content,
         });
-        status = BRANCH_STATUS_FAILURE;
+        status = BranchStatus.red;
         description = `Renovate config validation failed`; // GitHub limit
       } else {
         description = `Renovate config is valid`;
-        status = BRANCH_STATUS_SUCCESS;
+        status = BranchStatus.green;
         await platform.ensureCommentRemoval(pr.number, topic);
       }
       // istanbul ignore else
       if (pr.sourceRepo === config.repository) {
-        logger.info({ status, description }, 'Setting PR validation status');
+        logger.debug({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
         await platform.setBranchStatus({
           branchName: pr.branchName,
@@ -125,7 +123,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
     } catch (err) {
       // istanbul ignore if
       if (err.message === REPOSITORY_CHANGED) {
-        logger.info('Cannot access PR files to check them');
+        logger.debug('Cannot access PR files to check them');
       } else {
         logger.warn(
           {

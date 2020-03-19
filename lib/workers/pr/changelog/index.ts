@@ -1,24 +1,25 @@
 import { logger } from '../../../logger';
-import * as versioning from '../../../versioning';
+import * as allVersioning from '../../../versioning';
 import * as sourceGithub from './source-github';
-import { getReleases } from './releases';
-import { ChangeLogConfig, ChangeLogResult } from './common';
+import { getInRangeReleases } from './releases';
+import { ChangeLogResult } from './common';
+import { BranchUpgradeConfig } from '../../common';
 
 export * from './common';
 
 export async function getChangeLogJSON(
-  args: ChangeLogConfig
+  args: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const { sourceUrl, versionScheme, fromVersion, toVersion } = args;
+  const { sourceUrl, versioning, fromVersion, toVersion } = args;
   if (!sourceUrl) {
     return null;
   }
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   if (!fromVersion || version.equals(fromVersion, toVersion)) {
     return null;
   }
 
-  const releases = args.releases || (await getReleases(args));
+  const releases = args.releases || (await getInRangeReleases(args));
 
   try {
     const res = await sourceGithub.getChangeLogJSON({ ...args, releases });

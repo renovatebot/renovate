@@ -3,12 +3,8 @@ import { DateTime } from 'luxon';
 import semver from 'semver';
 import mdTable from 'markdown-table';
 import { logger } from '../../../logger';
-import {
-  mergeChildConfig,
-  ManagerConfig,
-  RenovateConfig,
-} from '../../../config';
-import { PackageDependency } from '../../../manager/common';
+import { mergeChildConfig } from '../../../config';
+import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
 function ifTypesGroup(
   depNames: string[],
@@ -28,7 +24,7 @@ function ifTypesGroup(
 }
 
 function getTableValues(
-  upgrade: PackageDependency & ManagerConfig
+  upgrade: BranchUpgradeConfig
 ): [string, string, string, string] | null {
   if (!upgrade.commitBodyTable) {
     return null;
@@ -63,12 +59,14 @@ function getTableValues(
   return null;
 }
 
-export function generateBranchConfig(branchUpgrades): RenovateConfig {
+export function generateBranchConfig(
+  branchUpgrades: BranchUpgradeConfig[]
+): BranchConfig {
   logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
   logger.trace({ config: branchUpgrades });
-  let config: any = {
+  let config: BranchConfig = {
     upgrades: [],
-  };
+  } as any;
   const hasGroupName = branchUpgrades[0].groupName !== null;
   logger.debug(`hasGroupName: ${hasGroupName}`);
   // Use group settings only if multiple upgrades or lazy grouping is disabled
@@ -101,9 +99,9 @@ export function generateBranchConfig(branchUpgrades): RenovateConfig {
   logger.debug(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
   logger.debug(`useGroupSettings: ${useGroupSettings}`);
-  let releaseTimestamp;
+  let releaseTimestamp: string;
   for (const branchUpgrade of branchUpgrades) {
-    let upgrade = { ...branchUpgrade };
+    let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
     if (upgrade.currentDigest) {
       upgrade.currentDigestShort =
         upgrade.currentDigestShort ||
@@ -142,7 +140,7 @@ export function generateBranchConfig(branchUpgrades): RenovateConfig {
       upgrade.updateType !== 'lockFileMaintenance' &&
       upgrade.displayFrom.length * upgrade.displayTo.length === 0
     ) {
-      logger.info({ config: upgrade }, 'empty displayFrom/displayTo');
+      logger.debug({ config: upgrade }, 'empty displayFrom/displayTo');
     }
     if (upgrade.depName) {
       upgrade.depNameEscaped = (upgrade.lookupName || upgrade.depName).replace(
@@ -205,6 +203,7 @@ export function generateBranchConfig(branchUpgrades): RenovateConfig {
       upgrade.commitMessagePrefix = semanticPrefix;
       upgrade.commitMessagePrefix += semanticPrefix.endsWith(':') ? ' ' : ': ';
       upgrade.toLowerCase =
+        // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
         upgrade.semanticCommitType.match(/[A-Z]/) === null &&
         !upgrade.semanticCommitType.startsWith(':');
     }
@@ -298,13 +297,17 @@ export function generateBranchConfig(branchUpgrades): RenovateConfig {
         // This is because we need to replace from the bottom of the file up
         return a.fileReplacePosition > b.fileReplacePosition ? -1 : 1;
       }
-      if (a.depName < b.depName) return -1;
-      if (a.depName > b.depName) return 1;
+      if (a.depName < b.depName) {
+        return -1;
+      }
+      if (a.depName > b.depName) {
+        return 1;
+      }
       return 0;
     });
   }
   // Now assign first upgrade's config as branch config
-  config = { ...config, ...config.upgrades[0], releaseTimestamp };
+  config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme
   config.canBeUnpublished = config.upgrades.some(
     upgrade => upgrade.canBeUnpublished
   );

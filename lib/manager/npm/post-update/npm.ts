@@ -5,10 +5,7 @@ import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
-import {
-  BINARY_SOURCE_DOCKER,
-  BINARY_SOURCE_GLOBAL,
-} from '../../../constants/data-binary-source';
+import { BinarySource } from '../../../util/exec/common';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -67,12 +64,12 @@ export async function generateLockFile(
         }
       }
     }
-    if (binarySource === BINARY_SOURCE_GLOBAL) {
+    if (binarySource === BinarySource.Global) {
       cmd = 'npm';
     }
     // istanbul ignore if
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
-      logger.info('Running npm via docker');
+    if (config.binarySource === BinarySource.Docker) {
+      logger.debug('Running npm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if
       if (config.dockerUser) {
@@ -115,7 +112,7 @@ export async function generateLockFile(
     }
     const lockUpdates = upgrades.filter(upgrade => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
-      logger.info('Performing lockfileUpdate (npm)');
+      logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
         `${cmd} ${args}` +
         lockUpdates
@@ -129,7 +126,7 @@ export async function generateLockFile(
       stderr += updateRes.stderr ? updateRes.stderr : '';
     }
     if (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) {
-      logger.info('Performing npm dedupe');
+      logger.debug('Performing npm dedupe');
       const dedupeRes = await exec(`${cmd} dedupe`, {
         cwd,
         env,
@@ -152,7 +149,7 @@ export async function generateLockFile(
     }
     lockFile = await readFile(join(cwd, filename), 'utf8');
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    logger.debug(
       {
         cmd,
         args,

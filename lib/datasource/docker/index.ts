@@ -8,12 +8,14 @@ import AWS from 'aws-sdk';
 import { logger } from '../../logger';
 import got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { GotResponse } from '../../platform';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { HostRule } from '../../types';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
+
+export const id = 'docker';
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
@@ -39,10 +41,10 @@ export function getRegistryRepository(
   if (!registry || registry === 'docker.io') {
     registry = 'index.docker.io';
   }
-  if (!registry.match('^https?://')) {
+  if (!/^https?:\/\//.exec(registry)) {
     registry = `https://${registry}`;
   }
-  const opts = hostRules.find({ hostType: 'docker', url: registry });
+  const opts = hostRules.find({ hostType: id, url: registry });
   if (opts && opts.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
@@ -57,7 +59,7 @@ export function getRegistryRepository(
 
 function getECRAuthToken(
   region: string,
-  opts: hostRules.HostRule
+  opts: HostRule
 ): Promise<string | null> {
   const config = { region, accessKeyId: undefined, secretAccessKey: undefined };
   if (opts.username && opts.password) {
@@ -69,7 +71,7 @@ function getECRAuthToken(
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
         logger.trace({ err }, 'err');
-        logger.info('ECR getAuthorizationToken error');
+        logger.debug('ECR getAuthorizationToken error');
         resolve(null);
       } else {
         const authorizationToken =
@@ -104,12 +106,12 @@ async function getAuthHeaders(
       apiCheckResponse.headers['www-authenticate']
     );
 
-    const opts: hostRules.HostRule & {
+    const opts: HostRule & {
       headers?: Record<string, string>;
-    } = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
+    } = hostRules.find({ hostType: id, url: apiCheckUrl });
     opts.json = true;
     if (ecrRegex.test(registry)) {
-      const region = registry.match(ecrRegex)[1];
+      const [, region] = ecrRegex.exec(registry);
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
@@ -134,7 +136,9 @@ async function getAuthHeaders(
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
-    const { token } = (await got(authUrl, opts)).body;
+    const authResponse = (await got(authUrl, opts)).body;
+
+    const token = authResponse.token || authResponse.access_token;
     // istanbul ignore if
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
@@ -145,7 +149,7 @@ async function getAuthHeaders(
     };
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 401) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Unauthorized docker lookup'
       );
@@ -153,25 +157,23 @@ async function getAuthHeaders(
       return null;
     }
     if (err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Not allowed to access docker registry'
       );
       logger.debug({ err });
       return null;
     }
-    if (err.name === 'RequestError' && registry.endsWith('docker.io')) {
-      logger.debug({ err }, 'err');
-      logger.info('Docker registry error: RequestError');
-      throw new Error(DATASOURCE_FAILURE);
+    // prettier-ignore
+    if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+      throw new DatasourceError(err);
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
-      logger.warn({ err }, 'docker registry failure: too many requests');
-      throw new Error(DATASOURCE_FAILURE);
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+      throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.warn({ err }, 'docker registry failure: internal error');
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -201,7 +203,7 @@ async function getManifestResponse(
   try {
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
-      logger.info('No docker auth found - returning');
+      logger.debug('No docker auth found - returning');
       return null;
     }
     headers.accept = 'application/vnd.docker.distribution.manifest.v2+json';
@@ -211,11 +213,11 @@ async function getManifestResponse(
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     if (err.statusCode === 401) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Unauthorized docker lookup'
       );
@@ -223,7 +225,7 @@ async function getManifestResponse(
       return null;
     }
     if (err.statusCode === 404) {
-      logger.info(
+      logger.debug(
         {
           err,
           registry,
@@ -234,31 +236,22 @@ async function getManifestResponse(
       );
       return null;
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
-      logger.warn({ err }, 'docker registry failure: too many requests');
-      throw new Error(DATASOURCE_FAILURE);
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
+      throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.info(
-        {
-          err,
-          registry,
-          dockerRepository: repository,
-          tag,
-        },
-        'docker registry failure: internal error'
-      );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.code === 'ETIMEDOUT') {
-      logger.info(
+      logger.debug(
         { registry },
         'Timeout when attempting to connect to docker registry'
       );
       logger.debug({ err });
       return null;
     }
-    logger.info(
+    logger.debug(
       {
         err,
         registry,
@@ -281,7 +274,7 @@ async function getManifestResponse(
  *  - Return the digest as a string
  */
 export async function getDigest(
-  { registryUrls, lookupName }: PkgReleaseConfig,
+  { registryUrls, lookupName }: GetReleasesConfig,
   newValue?: string
 ): Promise<string | null> {
   const { registry, repository } = getRegistryRepository(
@@ -312,10 +305,10 @@ export async function getDigest(
     await renovateCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
-    logger.info(
+    logger.debug(
       {
         err,
         lookupName,
@@ -367,7 +360,7 @@ async function getTags(
     await renovateCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     logger.debug(
@@ -377,34 +370,35 @@ async function getTags(
       'docker.getTags() error'
     );
     if (err.statusCode === 404 && !repository.includes('/')) {
-      logger.info(
+      logger.debug(
         `Retrying Tags for ${registry}/${repository} using library/ prefix`
       );
       return getTags(registry, 'library/' + repository);
     }
     if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository, err },
         'Not authorised to look up docker tags'
       );
       return null;
     }
-    if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    // prettier-ignore
+    if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
       );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: internal error'
       );
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     if (err.code === 'ETIMEDOUT') {
-      logger.info(
+      logger.debug(
         { registry },
         'Timeout when attempting to connect to docker registry'
       );
@@ -483,7 +477,7 @@ async function getLabels(
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
     if (!manifestResponse) {
-      logger.info(
+      logger.debug(
         {
           registry,
           dockerRepository: repository,
@@ -497,7 +491,7 @@ async function getLabels(
     // istanbul ignore if
     if (manifest.schemaVersion !== 2) {
       logger.debug(
-        { registry, dockerRepository: repository, tag, manifest },
+        { registry, dockerRepository: repository, tag },
         'Manifest schema version is not 2'
       );
       return {};
@@ -506,7 +500,7 @@ async function getLabels(
     const configDigest = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
-      logger.info('No docker auth found - returning');
+      logger.debug('No docker auth found - returning');
       return {};
     }
     const url = `${registry}/v2/${repository}/blobs/${configDigest}`;
@@ -525,11 +519,11 @@ async function getLabels(
     await renovateCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
-    if (err.message === DATASOURCE_FAILURE) {
+    if (err instanceof DatasourceError) {
       throw err;
     }
     if (err.statusCode === 401) {
-      logger.info(
+      logger.debug(
         { registry, dockerRepository: repository },
         'Unauthorized docker lookup'
       );
@@ -544,7 +538,10 @@ async function getLabels(
         },
         'Config Manifest is unknown'
       );
-    } else if (err.statusCode === 429 && registry.endsWith('docker.io')) {
+    } else if (
+      err.statusCode === 429 &&
+      registry.endsWith('docker.io') // lgtm [js/incomplete-url-substring-sanitization]
+    ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
@@ -557,13 +554,21 @@ async function getLabels(
         'docker registry failure: internal error'
       );
     } else if (err.code === 'ETIMEDOUT') {
-      logger.info(
+      logger.debug(
         { registry },
         'Timeout when attempting to connect to docker registry'
       );
       logger.debug({ err });
+    } else if (registry === 'https://quay.io') {
+      // istanbul ignore next
+      logger.debug(
+        'Ignoring quay.io errors until they fully support v2 schema'
+      );
     } else {
-      logger.warn({ err }, 'Unknown error getting Docker labels');
+      logger.warn(
+        { registry, dockerRepository: repository, tag, err },
+        'Unknown error getting Docker labels'
+      );
     }
     return {};
   }
@@ -583,7 +588,7 @@ async function getLabels(
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls

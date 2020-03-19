@@ -3,6 +3,7 @@ import { platform } from '../../../../platform';
 import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
 import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
+import { PR_STATE_NOT_OPEN } from '../../../../constants/pull-requests';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
@@ -38,7 +39,7 @@ const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
   platform.findPr({
     branchName: config.onboardingBranch,
     prTitle: config.onboardingPrTitle,
-    state: '!open',
+    state: PR_STATE_NOT_OPEN,
   });
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
@@ -78,7 +79,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
   }
-  logger.info('Repo is not onboarded and no merged PRs exist');
+  logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications.includes('onboardingClose')) {
     // ensure PR comment
     await platform.ensureComment({

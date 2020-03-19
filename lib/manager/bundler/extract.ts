@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
-import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
-import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
+import * as datasourceRubygems from '../../datasource/rubygems';
+import { SkipReason } from '../../types';
 
 export async function extractPackageFile(
   content: string,
@@ -22,8 +22,8 @@ export async function extractPackageFile(
     for (const delimiter of delimiters) {
       sourceMatch =
         sourceMatch ||
-        line.match(
-          regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`)
+        regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
+          line
         );
     }
     if (sourceMatch) {
@@ -33,7 +33,7 @@ export async function extractPackageFile(
     for (const delimiter of delimiters) {
       rubyMatch =
         rubyMatch ||
-        line.match(regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`));
+        regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
     }
     if (rubyMatch) {
       res.compatibility = { ruby: rubyMatch[1] };
@@ -42,9 +42,9 @@ export async function extractPackageFile(
     let gemDelimiter: string;
     for (const delimiter of delimiters) {
       const gemMatchRegex = `^gem ${delimiter}([^${delimiter}]+)${delimiter}(,\\s+${delimiter}([^${delimiter}]+)${delimiter}){0,2}`;
-      if (line.match(regEx(gemMatchRegex))) {
+      if (regEx(gemMatchRegex).test(line)) {
         gemDelimiter = delimiter;
-        gemMatch = gemMatch || line.match(regEx(gemMatchRegex));
+        gemMatch = gemMatch || regEx(gemMatchRegex).exec(line);
       }
     }
     if (gemMatch) {
@@ -57,18 +57,15 @@ export async function extractPackageFile(
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
           .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = 'invalid-value';
-        }
       } else {
-        dep.skipReason = 'no-version';
+        dep.skipReason = SkipReason.NoVersion;
       }
       if (!dep.skipReason) {
-        dep.datasource = DATASOURCE_RUBYGEMS;
+        dep.datasource = datasourceRubygems.id;
       }
       res.deps.push(dep);
     }
-    const groupMatch = line.match(/^group\s+(.*?)\s+do/);
+    const groupMatch = /^group\s+(.*?)\s+do/.exec(line);
     if (groupMatch) {
       const depTypes = groupMatch[1]
         .split(',')
@@ -98,19 +95,19 @@ export async function extractPackageFile(
       }
     }
     for (const delimiter of delimiters) {
-      const sourceBlockMatch = line.match(
-        regEx(`^source\\s+${delimiter}(.*?)${delimiter}\\s+do`)
-      );
+      const sourceBlockMatch = regEx(
+        `^source\\s+${delimiter}(.*?)${delimiter}\\s+do`
+      ).exec(line);
       if (sourceBlockMatch) {
         const repositoryUrl = sourceBlockMatch[1];
         const sourceLineNumber = lineNumber;
         let sourceContent = '';
         let sourceLine = '';
-        while (lineNumber < lines.length && sourceLine !== 'end') {
+        while (lineNumber < lines.length && sourceLine.trim() !== 'end') {
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if
-          if (!sourceLine) {
+          if (sourceLine === null || sourceLine === undefined) {
             logger.error({ content, fileName }, 'Undefined sourceLine');
             sourceLine = 'end';
           }
@@ -132,7 +129,7 @@ export async function extractPackageFile(
         }
       }
     }
-    const platformsMatch = line.match(/^platforms\s+(.*?)\s+do/);
+    const platformsMatch = /^platforms\s+(.*?)\s+do/.test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -157,7 +154,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = line.match(/^if\s+(.*?)/);
+    const ifMatch = /^if\s+(.*?)/.test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
@@ -199,7 +196,7 @@ export async function extractPackageFile(
           dep.lockedVersion = lockedDepValue;
         }
       }
-      const bundledWith = lockContent.match(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/);
+      const bundledWith = /\nBUNDLED WITH\n\s+(.*?)(\n|$)/.exec(lockContent);
       if (bundledWith) {
         res.compatibility = res.compatibility || {};
         res.compatibility.bundler = bundledWith[1];

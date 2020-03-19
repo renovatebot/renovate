@@ -1,4 +1,4 @@
-import { logger, levels, addStream } from '../logger';
+import { logger, levels, addStream, setContext } from '../logger';
 import * as definitions from './definitions';
 import * as defaultsParser from './defaults';
 import * as fileParser from './file';
@@ -69,6 +69,11 @@ export async function parseConfigs(
   // Set log level
   levels('stdout', config.logLevel);
 
+  if (config.logContext) {
+    // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
+    setContext(config.logContext);
+  }
+
   // Add file logger
   // istanbul ignore if
   if (config.logFile) {
@@ -111,7 +116,8 @@ export async function parseConfigs(
     config.global[key] = config[key];
     delete config[key];
   });
-  global.trustLevel = config.trustLevel || 'low';
+  global.trustLevel =
+    config.trustLevel || /* istanbul ignore next: never happen? */ 'low';
   delete config.trustLevel;
 
   return config;

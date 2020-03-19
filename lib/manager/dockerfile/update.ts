@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig, Upgrade } from '../common';
 
 export function getNewFrom(upgrade: Upgrade): string {
   const { depName, newValue, newDigest } = upgrade;
@@ -13,10 +13,10 @@ export function getNewFrom(upgrade: Upgrade): string {
   return newFrom;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const { lineNumber, fromSuffix } = upgrade.managerData;
     let { fromPrefix } = upgrade.managerData;
@@ -24,8 +24,8 @@ export function updateDependency(
     logger.debug(`docker.updateDependency(): ${newFrom}`);
     const lines = fileContent.split('\n');
     const lineToChange = lines[lineNumber];
-    const imageLine = new RegExp(/^(FROM |COPY --from=)/i);
-    if (!lineToChange.match(imageLine)) {
+    const imageLine = /^(FROM |COPY --from=)/i;
+    if (!imageLine.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }
@@ -40,7 +40,7 @@ export function updateDependency(
     lines[lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new Dockerfile value');
+    logger.debug({ err }, 'Error setting new Dockerfile value');
     return null;
   }
 }

@@ -1,33 +1,14 @@
 import { isEqual } from 'lodash';
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 import { CargoConfig, CargoSection } from './types';
+import { matchAt, replaceAt } from '../../util/string';
 
-// Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
-
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade<{ nestedVersion?: boolean }>
-): string {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return fileContent;
@@ -52,12 +33,12 @@ export function updateDependency(
   }
   if (!section) {
     if (target) {
-      logger.info(
+      logger.debug(
         { config: upgrade },
         `Error: Section [target.${target}.${depType}] doesn't exist in Cargo.toml file, update failed`
       );
     } else {
-      logger.info(
+      logger.debug(
         { config: upgrade },
         `Error: Section [${depType}] doesn't exist in Cargo.toml file, update failed`
       );
@@ -67,7 +48,7 @@ export function updateDependency(
   let oldVersion: any;
   const oldDep = section[depName];
   if (!oldDep) {
-    logger.info(
+    logger.debug(
       { config: upgrade },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
@@ -85,14 +66,14 @@ export function updateDependency(
     oldVersion = oldVersion.version;
   }
   if (!oldVersion) {
-    logger.info(
+    logger.debug(
       { config: upgrade },
       `Could not get version of dependency ${depName}, update failed (most likely name is invalid)`
     );
     return fileContent;
   }
   if (oldVersion === newValue) {
-    logger.info('Version is already updated');
+    logger.debug('Version is already updated');
     return fileContent;
   }
   if (nestedVersion) {

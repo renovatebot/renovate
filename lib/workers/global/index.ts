@@ -10,9 +10,8 @@ import * as cache from './cache';
 import { autodiscoverRepositories } from './autodiscover';
 import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
-import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
-import { setExecConfig } from '../../util/exec';
+import { setUtilConfig } from '../../util';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -71,13 +70,13 @@ export async function start(): Promise<0 | 1> {
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
-        logger.info(
+        logger.debug(
           'Max commits created for this run. Skipping all remaining repositories.'
         );
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      setExecConfig(repoConfig);
+      await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach(rule => hostRules.add(rule));
@@ -86,8 +85,7 @@ export async function start(): Promise<0 | 1> {
       await repositoryWorker.renovateRepository(repoConfig);
     }
     setMeta({});
-    printStats();
-    logger.info(`Renovate finished`);
+    logger.debug(`Renovate existing successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));

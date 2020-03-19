@@ -1,27 +1,8 @@
 import { isEqual } from 'lodash';
 import { inc, ReleaseType } from 'semver';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
-
-// Return true if the match string is found at index in content
-function matchAt(content: string, index: number, match: string): boolean {
-  return content.substring(index, index + match.length) === match;
-}
-
-// Replace oldString with newString at location index of content
-function replaceAt(
-  content: string,
-  index: number,
-  oldString: string,
-  newString: string
-): string {
-  logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
-  return (
-    content.substr(0, index) +
-    newString +
-    content.substr(index + oldString.length)
-  );
-}
+import { UpdateDependencyConfig } from '../common';
+import { matchAt, replaceAt } from '../../util/string';
 
 export function bumpPackageVersion(
   content: string,
@@ -35,7 +16,7 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
-  let newPjVersion;
+  let newPjVersion: string;
   try {
     if (bumpVersion.startsWith('mirror:')) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
@@ -60,7 +41,7 @@ export function bumpPackageVersion(
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');
     } else {
-      logger.info('Bumped package.json version');
+      logger.debug('Bumped package.json version');
     }
     return bumpedContent;
   } catch (err) {
@@ -76,21 +57,22 @@ export function bumpPackageVersion(
   }
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
-  const { depType, depName } = upgrade;
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
+  const { depType, managerData } = upgrade;
+  const depName = managerData?.key || upgrade.depName;
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
     if (upgrade.currentDigest) {
-      logger.info('Updating package.json git digest');
+      logger.debug('Updating package.json git digest');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentDigest,
         upgrade.newDigest.substring(0, upgrade.currentDigest.length)
       );
     } else {
-      logger.info('Updating package.json git version tag');
+      logger.debug('Updating package.json git version tag');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentValue,
         upgrade.newValue
@@ -143,14 +125,14 @@ export function updateDependency(
     }
     // istanbul ignore if
     if (!newFileContent) {
-      logger.info(
+      logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
         'Warning: updateDependency error'
       );
       return fileContent;
     }
     if (parsedContents && parsedContents.resolutions) {
-      let depKey;
+      let depKey: string;
       if (parsedContents.resolutions[depName]) {
         depKey = depName;
       } else if (parsedContents.resolutions[`**/${depName}`]) {
@@ -159,7 +141,7 @@ export function updateDependency(
       if (depKey) {
         // istanbul ignore if
         if (parsedContents.resolutions[depKey] !== oldVersion) {
-          logger.info(
+          logger.debug(
             {
               depName,
               depKey,
@@ -204,7 +186,7 @@ export function updateDependency(
       upgrade.bumpVersion
     );
   } catch (err) {
-    logger.info({ err }, 'updateDependency error');
+    logger.debug({ err }, 'updateDependency error');
     return null;
   }
 }

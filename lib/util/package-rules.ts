@@ -1,12 +1,12 @@
 import minimatch from 'minimatch';
 import { logger } from '../logger';
-import * as versioning from '../versioning';
+import * as allVersioning from '../versioning';
 import { mergeChildConfig, PackageRule, UpdateType } from '../config';
 import { regEx } from './regex';
 
 // TODO: move to `../config`
 export interface Config extends Record<string, any> {
-  versionScheme?: string;
+  versioning?: string;
   packageFile?: string;
   depType?: string;
   depTypes?: string[];
@@ -26,7 +26,7 @@ export interface Config extends Record<string, any> {
 
 function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const {
-    versionScheme,
+    versioning,
     packageFile,
     depType,
     depTypes,
@@ -146,7 +146,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
             ? '.*'
             : packagePattern
         );
-        if (depName && depName.match(packageRegex)) {
+        if (packageRegex.test(depName)) {
           logger.trace(`${depName} matches against ${packageRegex}`);
           isMatch = true;
         }
@@ -170,7 +170,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
       const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
       );
-      if (depName && depName.match(packageRegex)) {
+      if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${packageRegex}`);
         isMatch = true;
       }
@@ -190,7 +190,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     positiveMatch = true;
   }
   if (matchCurrentVersion) {
-    const version = versioning.get(versionScheme);
+    const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
@@ -221,7 +221,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
           return false;
         }
       } else {
-        logger.info(
+        logger.debug(
           { matchCurrentVersionStr, currentValue },
           'Could not find a version to compare'
         );

@@ -1,9 +1,9 @@
 import { parse } from 'toml';
 import { logger } from '../../logger';
-import { isValid } from '../../versioning/cargo';
 import { PackageDependency, PackageFile } from '../common';
 import { CargoConfig, CargoSection } from './types';
-import { DATASOURCE_CARGO } from '../../constants/data-binary-source';
+import * as datasourceCrate from '../../datasource/crate';
+import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedContent: CargoSection,
@@ -16,7 +16,7 @@ function extractFromSection(
     return [];
   }
   Object.keys(sectionContent).forEach(depName => {
-    let skipReason: string;
+    let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     if (typeof currentValue !== 'string') {
@@ -27,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = 'path-dependency';
+          skipReason = SkipReason.PathDependency;
         }
         if (git) {
-          skipReason = 'git-dependency';
+          skipReason = SkipReason.GitDependency;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = 'path-dependency';
+        skipReason = SkipReason.PathDependency;
       } else if (git) {
         currentValue = '';
-        skipReason = 'git-dependency';
+        skipReason = SkipReason.GitDependency;
       } else {
         currentValue = '';
-        skipReason = 'invalid-dependency-specification';
+        skipReason = SkipReason.InvalidDependencySpecification;
       }
     }
     const dep: PackageDependency = {
@@ -48,12 +48,10 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as any,
       managerData: { nestedVersion },
-      datasource: DATASOURCE_CARGO,
+      datasource: datasourceCrate.id,
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!isValid(dep.currentValue)) {
-      dep.skipReason = 'unknown-version';
     }
     if (target) {
       dep.target = target;

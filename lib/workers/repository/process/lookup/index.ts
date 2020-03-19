@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
+import * as allVersioning from '../../../../versioning';
 import { getRollbackUpdate, RollbackConfig } from './rollback';
 import { getRangeStrategy } from '../../../../manager';
 import { filterVersions, FilterConfig } from './filter';
@@ -11,9 +11,10 @@ import {
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
-import { RenovateConfig } from '../../../../config';
+import { RenovateConfig, UpdateType } from '../../../../config';
 import { clone } from '../../../../util/clone';
-import { DATASOURCE_GIT_SUBMODULES } from '../../../../constants/data-binary-source';
+import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { SkipReason } from '../../../../types';
 
 export interface LookupWarning {
   updateType: 'warning';
@@ -28,7 +29,7 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string;
-  skipReason?: string;
+  skipReason: SkipReason;
   releases: Release[];
 
   updates: LookupUpdate[];
@@ -55,9 +56,9 @@ function getType(
   config: LookupUpdateConfig,
   fromVersion: string,
   toVersion: string
-): string {
-  const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = versioning.get(versionScheme);
+): UpdateType {
+  const { versioning, rangeStrategy, currentValue } = config;
+  const version = allVersioning.get(versioning);
   if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
     return 'bump';
   }
@@ -82,8 +83,8 @@ function getFromVersion(
   latestVersion: string,
   allVersions: string[]
 ): string | null {
-  const { currentValue, lockedVersion, versionScheme } = config;
-  const version = versioning.get(versionScheme);
+  const { currentValue, lockedVersion, versioning } = config;
+  const version = allVersioning.get(versioning);
   if (version.isVersion(currentValue)) {
     return currentValue;
   }
@@ -134,9 +135,15 @@ export async function lookupUpdates(
 ): Promise<UpdateResult> {
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = versioning.get(config.versionScheme);
+  const version = allVersioning.get(config.versioning);
   const res: UpdateResult = { updates: [], warnings: [] } as any;
-  if (version.isValid(currentValue)) {
+
+  const isValid = currentValue && version.isValid(currentValue);
+  if (!isValid) {
+    res.skipReason = SkipReason.InvalidValue;
+  }
+
+  if (isValid) {
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
@@ -144,7 +151,7 @@ export async function lookupUpdates(
         updateType: 'warning',
         message: `Failed to look up dependency ${depName}`,
       };
-      logger.info(
+      logger.debug(
         { dependency: depName, packageFile: config.packageFile },
         result.message
       );
@@ -153,7 +160,7 @@ export async function lookupUpdates(
       return res;
     }
     if (dependency.deprecationMessage) {
-      logger.info({ dependency: depName }, 'Found deprecationMessage');
+      logger.debug({ dependency: depName }, 'Found deprecationMessage');
       res.deprecationMessage = dependency.deprecationMessage;
     }
     res.sourceUrl =
@@ -172,7 +179,7 @@ export async function lookupUpdates(
       res.dockerRepository = dependency.dockerRepository;
     }
     const { latestVersion, releases } = dependency;
-    // Filter out any results from datasource that don't comply with our versioning scheme
+    // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases
       .map(release => release.version)
       .filter(v => version.isVersion(v));
@@ -340,18 +347,20 @@ export async function lookupUpdates(
     }
     res.updates = res.updates.concat(Object.values(buckets));
   } else if (!currentValue) {
-    res.skipReason = 'unsupported-value';
+    res.skipReason = SkipReason.UnsupportedValue;
   } else {
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
-      res.skipReason = 'unsupported-value';
+      res.skipReason = SkipReason.UnsupportedValue;
+    } else {
+      delete res.skipReason;
     }
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
     if (
       config.currentDigest &&
-      config.datasource !== DATASOURCE_GIT_SUBMODULES
+      config.datasource !== datasourceGitSubmodules.id
     ) {
       if (!config.digestOneAndOnly || !res.updates.length) {
         // digest update
@@ -369,7 +378,7 @@ export async function lookupUpdates(
           newValue: config.currentValue,
         });
       }
-    } else if (config.datasource === DATASOURCE_GIT_SUBMODULES) {
+    } else if (config.datasource === datasourceGitSubmodules.id) {
       const dependency = clone(await getPkgReleases(config));
       res.updates.push({
         updateType: 'digest',
@@ -392,7 +401,7 @@ export async function lookupUpdates(
             .replace('sha256:', '')
             .substring(0, 7);
         } else {
-          logger.info({ newValue: update.newValue }, 'Could not getDigest');
+          logger.debug({ newValue: update.newValue }, 'Could not getDigest');
         }
       }
     }

@@ -1,15 +1,15 @@
 import YAWN from 'yawn-yaml/cjs';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const { depName, newValue } = upgrade;
 
-    const yawn = new YAWN(currentFileContent);
+    const yawn = new YAWN(fileContent);
 
     const doc = yawn.json;
 
@@ -27,7 +27,7 @@ export function updateDependency(
 
     return yawn.yaml;
   } catch (err) {
-    logger.info({ err }, 'Error setting new .gitlab-ci.yml include value');
+    logger.debug({ err }, 'Error setting new .gitlab-ci.yml include value');
     return null;
   }
 }

@@ -1,5 +1,5 @@
+import fs from 'fs';
 import { logger } from '../logger';
-import { getOptions } from '../config/definitions';
 import {
   VersioningApi,
   VersioningApiConstructor,
@@ -8,39 +8,55 @@ import {
 
 export * from './common';
 
-const supportedSchemes = getOptions().find(
-  option => option.name === 'versionScheme'
-).allowedValues;
+const allVersioning: Record<
+  string,
+  VersioningApi | VersioningApiConstructor
+> = {};
 
-const schemes: Record<string, VersioningApi | VersioningApiConstructor> = {};
+const versioningList: string[] = [];
 
-for (const scheme of supportedSchemes) {
-  schemes[scheme] = require('./' + scheme).api; // eslint-disable-line
+export const getVersioningList = (): string[] => versioningList;
+
+const versionings = fs
+  .readdirSync(__dirname, { withFileTypes: true })
+  .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
+  .map(dirent => dirent.name)
+  .sort();
+
+for (const versioning of versionings) {
+  try {
+    allVersioning[versioning] = require('./' + versioning).api; // eslint-disable-line
+    versioningList.push(versioning);
+  } catch (err) /* istanbul ignore next */ {
+    logger.fatal({ err }, `Can not load versioning "${versioning}".`);
+    process.exit(1);
+  }
 }
 
-export function get(versionScheme: string): VersioningApi {
-  if (!versionScheme) {
-    logger.debug('Missing versionScheme');
-    return schemes.semver as VersioningApi;
+export function get(versioning: string): VersioningApi {
+  if (!versioning) {
+    logger.debug('Missing versioning');
+    return allVersioning.semver as VersioningApi;
   }
-  let schemeName: string;
-  let schemeConfig: string;
-  if (versionScheme.includes(':')) {
-    const versionSplit = versionScheme.split(':');
-    schemeName = versionSplit.shift();
-    schemeConfig = versionSplit.join(':');
+  let versioningName: string;
+  let versioningConfig: string;
+
+  if (versioning.includes(':')) {
+    const versionSplit = versioning.split(':');
+    versioningName = versionSplit.shift();
+    versioningConfig = versionSplit.join(':');
   } else {
-    schemeName = versionScheme;
+    versioningName = versioning;
   }
-  const scheme = schemes[schemeName];
-  if (!scheme) {
-    logger.warn({ versionScheme }, 'Unknown version scheme');
-    return schemes.semver as VersioningApi;
+  const theVersioning = allVersioning[versioningName];
+  if (!theVersioning) {
+    logger.warn({ versioning }, 'Unknown versioning');
+    return allVersioning.semver as VersioningApi;
   }
   // istanbul ignore if: needs an implementation
-  if (isVersioningApiConstructor(scheme)) {
+  if (isVersioningApiConstructor(theVersioning)) {
     // eslint-disable-next-line new-cap
-    return new scheme(schemeConfig);
+    return new theVersioning(versioningConfig);
   }
-  return scheme;
+  return theVersioning;
 }

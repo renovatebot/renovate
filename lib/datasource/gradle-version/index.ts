@@ -1,9 +1,16 @@
-import { coerce } from 'semver';
 import is from '@sindresorhus/is';
+import { coerce } from 'semver';
+import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import {
+  DatasourceError,
+  GetReleasesConfig,
+  ReleaseResult,
+  Release,
+} from '../common';
+
+export const id = 'gradle-version';
 
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
@@ -15,12 +22,27 @@ interface GradleRelease {
     version: string;
     downloadUrl?: string;
     checksumUrl?: string;
+    buildTime?: string;
   }[];
+}
+
+const buildTimeRegex = regEx(
+  '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
+);
+
+function formatBuildTime(timeStr: string): string | null {
+  if (!timeStr) {
+    return null;
+  }
+  if (buildTimeRegex.test(timeStr)) {
+    return timeStr.replace(buildTimeRegex, '$1-$2-$3T$4:$5:$6$7');
+  }
+  return null;
 }
 
 export async function getPkgReleases({
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   const versionsUrls = is.nonEmptyArray(registryUrls)
     ? registryUrls
     : [GradleVersionsServiceUrl];
@@ -29,6 +51,7 @@ export async function getPkgReleases({
     versionsUrls.map(async url => {
       try {
         const response: GradleRelease = await got(url, {
+          hostType: id,
           json: true,
         });
         const releases = response.body
@@ -42,22 +65,28 @@ export async function getPkgReleases({
             version: coerce(release.version).toString(),
             downloadUrl: release.downloadUrl,
             checksumUrl: release.checksumUrl,
+            releaseTimestamp: formatBuildTime(release.buildTime),
           }));
         return releases;
-      } catch (err) {
-        logger.debug({ err });
-        if (!(err.statusCode === 404 || err.code === 'ENOTFOUND')) {
-          logger.warn({ err }, 'Gradle release lookup failure: Unknown error');
+      } catch (err) /* istanbul ignore next */ {
+        // istanbul ignore if
+        if (err.host === 'services.gradle.org') {
+          throw new DatasourceError(err);
         }
-        throw new Error(DATASOURCE_FAILURE);
+        logger.debug({ err }, 'gradle-version err');
+        return null;
       }
     })
   );
 
-  const gradle: ReleaseResult = {
-    releases: Array.prototype.concat.apply([], allReleases),
+  const res: ReleaseResult = {
+    releases: Array.prototype.concat.apply([], allReleases).filter(Boolean),
     homepage: 'https://gradle.org',
     sourceUrl: 'https://github.com/gradle/gradle',
   };
-  return gradle;
+  if (res.releases.length) {
+    return res;
+  }
+  // istanbul ignore next
+  return null;
 }

@@ -1,11 +1,11 @@
 import { logger } from '../../logger';
 import { dependencyPattern } from './extract';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`pip_requirements.updateDependency(): ${upgrade.newValue}`);
     const lines = fileContent.split('\n');
@@ -35,7 +35,7 @@ export function updateDependency(
     lines[upgrade.managerData.lineNumber] = newValue;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new package version');
+    logger.debug({ err }, 'Error setting new package version');
     return null;
   }
 }

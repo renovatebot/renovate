@@ -1,7 +1,7 @@
+import { hrtime } from 'process';
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { ReleaseResult } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, ReleaseResult } from '../common';
 
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
@@ -21,13 +21,18 @@ async function updateRubyGemsVersions(): Promise<void> {
   let newLines: string;
   try {
     logger.debug('Rubygems: Fetching rubygems.org versions');
+    const startTime = hrtime();
     newLines = (await got(url, options)).body;
+    const duration = hrtime(startTime);
+    const seconds = Math.round(duration[0] + duration[1] / 1e9);
+    logger.debug({ seconds }, 'Rubygems: Fetched rubygems.org versions');
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode !== 416) {
-      logger.warn({ err }, 'Rubygems error - resetting cache');
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(
+        new Error('Rubygems fetch error - need to reset cache')
+      );
     }
     logger.debug('Rubygems: No update');
     lastSync = new Date();
@@ -83,6 +88,7 @@ function isDataStale(): boolean {
 async function syncVersions(): Promise<void> {
   if (isDataStale()) {
     global.updateRubyGemsVersions =
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       global.updateRubyGemsVersions || updateRubyGemsVersions();
     await global.updateRubyGemsVersions;
     delete global.updateRubyGemsVersions;

@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
 import { logger } from '../../../logger';
 import { emojify } from '../../../util/emoji';
-import { PrBodyConfig } from './common';
+import { BranchConfig } from '../../common';
 
-export function getPrNotes(config: PrBodyConfig): string {
+export function getPrNotes(config: BranchConfig): string {
   const notes = [];
   for (const upgrade of config.upgrades) {
     if (is.nonEmptyArray(upgrade.prBodyNotes)) {
@@ -26,7 +26,7 @@ export function getPrNotes(config: PrBodyConfig): string {
   return uniqueNotes.join('\n\n') + '\n\n';
 }
 
-export function getPrExtraNotes(config: PrBodyConfig): string {
+export function getPrExtraNotes(config: BranchConfig): string {
   let res = '';
   if (config.upgrades.some(upgrade => upgrade.gitRef)) {
     res += emojify(

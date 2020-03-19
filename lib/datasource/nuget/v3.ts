@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 import got from '../../util/got';
 import { ReleaseResult } from '../common';
 
+import { id } from './common';
+
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';
 const cacheNamespace = 'datasource-nuget';
@@ -27,7 +29,10 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   }
 
   try {
-    const servicesIndexRaw = await got(url, { json: true, hostType: 'nuget' });
+    const servicesIndexRaw = await got(url, {
+      json: true,
+      hostType: id,
+    });
     if (servicesIndexRaw.statusCode !== 200) {
       logger.debug(
         { dependency: url, servicesIndexRaw },
@@ -75,7 +80,7 @@ export async function getPkgReleases(
   try {
     const pkgUrlListRaw = await got(queryUrl, {
       json: true,
-      hostType: 'nuget',
+      hostType: id,
     });
     if (pkgUrlListRaw.statusCode !== 200) {
       logger.debug(
@@ -116,7 +121,7 @@ export async function getPkgReleases(
         const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
         let metaresult: { body: string };
         try {
-          metaresult = await got(nugetOrgApi, { hostType: 'nuget' });
+          metaresult = await got(nugetOrgApi, { hostType: id });
         } catch (err) /* istanbul ignore next */ {
           logger.debug(
             `Cannot fetch metadata for ${pkgName} using popped version ${lastVersion}`

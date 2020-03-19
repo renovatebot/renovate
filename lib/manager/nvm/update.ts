@@ -1,10 +1,7 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  _fileContent: string,
-  upgrade: Upgrade
-): string {
+export function updateDependency({ upgrade }: UpdateDependencyConfig): string {
   logger.debug(`nvm.updateDependency(): ${upgrade.newVersion}`);
   return `${upgrade.newValue}\n`;
 }

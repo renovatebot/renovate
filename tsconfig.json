@@ -5,8 +5,6 @@
     "strictNullChecks": false /* required for js files */,
     "outDir": "./dist",
     "target": "es2018",
-    "allowJs": true,
-    "checkJs": true,
     "module": "commonjs",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
@@ -16,6 +14,6 @@
     "lib": ["es2018"],
     "types": ["node", "jest"]
   },
-  "include": ["lib/**/*", "test/**/*"],
+  "include": ["lib/**/*", "test/**/*", "tools/**/*.mjs"],
   "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
 }

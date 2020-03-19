@@ -2,12 +2,17 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Pr } from '../common';
+import {
+  PR_STATE_CLOSED,
+  PR_STATE_MERGED,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
-  MERGED: 'merged',
-  DECLINED: 'closed',
-  OPEN: 'open',
+  MERGED: PR_STATE_MERGED,
+  DECLINED: PR_STATE_CLOSED,
+  OPEN: PR_STATE_OPEN,
 };
 
 export function prInfo(pr: any): Pr {
@@ -47,7 +52,9 @@ export async function accumulateValues<T = any>(
     // TODO: fix typing
     const { body } = await (api as any)[lowerCaseMethod](nextUrl, options);
     accumulator = [...accumulator, ...body.values];
-    if (body.isLastPage !== false) break;
+    if (body.isLastPage !== false) {
+      break;
+    }
 
     const { search, ...parsedUrl } = url.parse(nextUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
     nextUrl = url.format({
@@ -68,7 +75,12 @@ export interface BitbucketCommitStatus {
   successful: number;
 }
 
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+export type BitbucketBranchState =
+  | 'SUCCESSFUL'
+  | 'FAILED'
+  | 'INPROGRESS'
+  | 'STOPPED';
+
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;

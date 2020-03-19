@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_NPM } from '../../constants/data-binary-source';
+import * as datasourceNpm from '../../datasource/npm';
 
 export function extractPackageFile(content: string): PackageFile | null {
   let deps: PackageDependency[] = [];
-  const npmDepends = content.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
+  const npmDepends = /\nNpm\.depends\({([\s\S]*?)}\);/.exec(content);
   if (!npmDepends) {
     return null;
   }
@@ -24,7 +24,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         return {
           depName,
           currentValue,
-          datasource: DATASOURCE_NPM,
+          datasource: datasourceNpm.id,
         };
       })
       .filter(dep => dep.depName && dep.currentValue);

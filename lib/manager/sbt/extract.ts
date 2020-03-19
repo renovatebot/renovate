@@ -1,7 +1,9 @@
-import { DEFAULT_MAVEN_REPO } from '../maven/extract';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { PackageFile, PackageDependency } from '../common';
 import { get } from '../../versioning';
-import { DATASOURCE_SBT } from '../../constants/data-binary-source';
+import * as mavenVersioning from '../../versioning/maven';
+import * as datasourceSbtPackage from '../../datasource/sbt-package';
+import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 
@@ -27,16 +29,23 @@ const getScalaVersion = (str: string): string =>
  */
 const normalizeScalaVersion = (str: string): string => {
   // istanbul ignore if
-  if (!str) return str;
-  const versioning = get('maven');
+  if (!str) {
+    return str;
+  }
+  const versioning = get(mavenVersioning.id);
   if (versioning.isVersion(str)) {
     // Do not normalize unstable versions
-    if (!versioning.isStable(str)) return str;
+    if (!versioning.isStable(str)) {
+      return str;
+    }
     // Do not normalize versions prior to 2.10
-    if (!versioning.isGreaterThan(str, '2.10.0')) return str;
+    if (!versioning.isGreaterThan(str, '2.10.0')) {
+      return str;
+    }
   }
-  if (/^\d+\.\d+\.\d+$/.test(str))
+  if (/^\d+\.\d+\.\d+$/.test(str)) {
     return str.replace(/^(\d+)\.(\d+)\.\d+$/, '$1.$2');
+  }
   // istanbul ignore next
   return str;
 };
@@ -115,17 +124,33 @@ function parseDepExpr(
     rawScope,
   ] = tokens;
 
-  if (!rawGroupId) return null;
-  if (!isValidToken(rawGroupId)) return null;
+  if (!rawGroupId) {
+    return null;
+  }
+  if (!isValidToken(rawGroupId)) {
+    return null;
+  }
 
-  if (!rawArtifactId) return null;
-  if (!isValidToken(rawArtifactId)) return null;
-  if (artifactOp !== '%') return null;
+  if (!rawArtifactId) {
+    return null;
+  }
+  if (!isValidToken(rawArtifactId)) {
+    return null;
+  }
+  if (artifactOp !== '%') {
+    return null;
+  }
 
-  if (!rawVersion) return null;
-  if (!isValidToken(rawVersion)) return null;
+  if (!rawVersion) {
+    return null;
+  }
+  if (!isValidToken(rawVersion)) {
+    return null;
+  }
 
-  if (scopeOp && scopeOp !== '%') return null;
+  if (scopeOp && scopeOp !== '%') {
+    return null;
+  }
 
   const groupId = resolveToken(rawGroupId);
   const artifactId =
@@ -249,14 +274,19 @@ function parseSbtLine(
     }
   }
 
-  if (dep)
+  if (dep) {
+    if (dep.depType === 'plugin') {
+      dep.datasource = datasourceSbtPlugin.id;
+    } else {
+      dep.datasource = datasourceSbtPackage.id;
+    }
     deps.push({
-      datasource: DATASOURCE_SBT,
-      registryUrls: registryUrls as string[],
+      registryUrls,
       ...dep,
     });
+  }
 
-  if (lineIndex + 1 < lines.length)
+  if (lineIndex + 1 < lines.length) {
     return {
       ...acc,
       fileOffset: fileOffset + line.length + 1, // inc. newline
@@ -267,16 +297,21 @@ function parseSbtLine(
           variables[scalaVersionVariable] &&
           normalizeScalaVersion(variables[scalaVersionVariable].val)),
     };
-  if (deps.length) return { deps };
+  }
+  if (deps.length) {
+    return { deps };
+  }
   return null;
 }
 
 export function extractPackageFile(content: string): PackageFile {
-  if (!content) return null;
+  if (!content) {
+    return null;
+  }
   const lines = content.split(/\n/);
   return lines.reduce(parseSbtLine, {
     fileOffset: 0,
-    registryUrls: [DEFAULT_MAVEN_REPO],
+    registryUrls: [MAVEN_REPO],
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,

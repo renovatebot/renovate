@@ -1,7 +1,9 @@
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
-import { DATASOURCE_NUGET } from '../../constants/data-binary-source';
+import * as semverVersioning from '../../versioning/semver';
+import * as datasourceNuget from '../../datasource/nuget';
+import { SkipReason } from '../../types';
 
 export function extractPackageFile(
   content: string,
@@ -9,7 +11,7 @@ export function extractPackageFile(
   config: ExtractConfig = {}
 ): PackageFile {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
-  const { isVersion } = get(config.versionScheme || 'semver');
+  const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
   let lineNumber = 0;
@@ -26,8 +28,8 @@ export function extractPackageFile(
      * so we don't include it in the extracting regexp
      */
 
-    const match = line.match(
-      /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/
+    const match = /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/.exec(
+      line
     );
     if (match) {
       const depName = match[1];
@@ -37,10 +39,10 @@ export function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: DATASOURCE_NUGET,
+        datasource: datasourceNuget.id,
       };
       if (!isVersion(currentValue)) {
-        dep.skipReason = 'not-version';
+        dep.skipReason = SkipReason.NotAVersion;
       }
       deps.push(dep);
     }

@@ -1,7 +1,9 @@
 import simpleGit from 'simple-git/promise';
 import * as semver from '../../versioning/semver';
 import { logger } from '../../logger';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { ReleaseResult, GetReleasesConfig } from '../common';
+
+export const id = 'git-tags';
 
 const cacheNamespace = 'git-tags';
 const cacheMinutes = 10;
@@ -11,7 +13,7 @@ process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const git = simpleGit();
   try {
     const cachedResult = await renovateCache.get<ReleaseResult>(
@@ -19,7 +21,9 @@ export async function getPkgReleases({
       lookupName
     );
     /* istanbul ignore next line */
-    if (cachedResult) return cachedResult;
+    if (cachedResult) {
+      return cachedResult;
+    }
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
@@ -36,7 +40,7 @@ export async function getPkgReleases({
     const result: ReleaseResult = {
       sourceUrl,
       releases: tags.map(tag => ({
-        version: semver.isValid(tag),
+        version: tag,
         gitRef: tag,
       })),
     };

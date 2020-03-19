@@ -1,0 +1,154 @@
+{
+  "docs_html_url": null,
+  "downloads": {
+    "all": 20861717,
+    "day": 5846,
+    "recent": 3725020,
+    "week": 438801
+  },
+  "html_url": "https://hex.pm/packages/certifi",
+  "inserted_at": "2015-09-10T13:58:43.376194Z",
+  "meta": {
+    "description": "CA bundle adapted from Mozilla by https://certifi.io",
+    "licenses": [
+      "BSD"
+    ],
+    "links": {
+      "Github": "https://github.com/certifi/erlang-certifi"
+    },
+    "maintainers": []
+  },
+  "name": "certifi",
+  "owners": [
+    {
+      "email": "bchesneau@gmail.com",
+      "url": "https://hex.pm/api/users/benoitc",
+      "username": "benoitc"
+    }
+  ],
+  "releases": [
+    {
+      "has_docs": false,
+      "inserted_at": "2020-03-04T14:54:16.283323Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.5.2",
+      "version": "2.5.2"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2019-01-24T15:14:25.991190Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.5.1",
+      "version": "2.5.1"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2018-08-30T08:21:29.349366Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.4.2",
+      "version": "2.4.2"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2018-08-23T08:18:39.658169Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.4.1",
+      "version": "2.4.1"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2018-03-01T12:09:47.479620Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.3.1",
+      "version": "2.3.1"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2018-02-27T21:20:24.804583Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.3.0",
+      "version": "2.3.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2018-02-15T14:40:54.249660Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.2.0",
+      "version": "2.2.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2018-02-15T14:24:33.990296Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.1.0",
+      "version": "2.1.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2017-07-29T10:26:25.887395Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/2.0.0",
+      "version": "2.0.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2017-05-22T10:05:04.091548Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/1.2.1",
+      "version": "1.2.1"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2017-05-20T17:36:20.704236Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/1.2.0",
+      "version": "1.2.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2017-04-20T03:47:25.151946Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/1.1.0",
+      "version": "1.1.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2017-01-24T11:14:00.415180Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/1.0.0",
+      "version": "1.0.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2016-10-02T23:16:44.504184Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/0.7.0",
+      "version": "0.7.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2016-09-12T10:05:24.327928Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/0.6.0",
+      "version": "0.6.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2016-08-25T14:22:42.043018Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/0.5.0",
+      "version": "0.5.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2016-03-02T20:37:38.856702Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/0.4.0",
+      "version": "0.4.0"
+    },
+    {
+      "has_docs": false,
+      "url": "https://hex.pm/api/packages/certifi/releases/0.3.0",
+      "version": "0.3.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2015-11-19T11:25:06.024607Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/0.2.0",
+      "version": "0.2.0"
+    },
+    {
+      "has_docs": false,
+      "inserted_at": "2015-09-10T13:58:55.620634Z",
+      "url": "https://hex.pm/api/packages/certifi/releases/0.1.1",
+      "version": "0.1.1"
+    }
+  ],
+  "repository": "hexpm",
+  "retirements": {},
+  "updated_at": "2020-03-04T14:54:16.279054Z",
+  "url": "https://hex.pm/api/packages/certifi"
+}

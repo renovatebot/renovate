@@ -4,10 +4,7 @@ import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig } from '../../common';
-import {
-  BINARY_SOURCE_DOCKER,
-  BINARY_SOURCE_GLOBAL,
-} from '../../../constants/data-binary-source';
+import { BinarySource } from '../../../util/exec/common';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -64,11 +61,11 @@ export async function generateLockFile(
         }
       }
     }
-    if (config.binarySource === BINARY_SOURCE_GLOBAL) {
+    if (config.binarySource === BinarySource.Global) {
       cmd = 'pnpm';
     }
-    if (config.binarySource === BINARY_SOURCE_DOCKER) {
-      logger.info('Running pnpm via docker');
+    if (config.binarySource === BinarySource.Docker) {
+      logger.debug('Running pnpm via docker');
       cmd = `docker run --rm `;
       // istanbul ignore if
       if (config.dockerUser) {
@@ -105,7 +102,7 @@ export async function generateLockFile(
     }));
     lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
-    logger.info(
+    logger.debug(
       {
         cmd,
         err,

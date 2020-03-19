@@ -1,11 +1,11 @@
 import { logger } from '../../logger';
 import { getNewFrom } from '../dockerfile/update';
-import { Upgrade } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
@@ -13,7 +13,7 @@ export function updateDependency(
       const newFrom = getNewFrom(upgrade);
       logger.debug(`circleci.updateDependency(): ${newFrom}`);
       const imageLine = new RegExp(/^(\s*- image:\s*'?"?)[^\s'"]+('?"?\s*)$/);
-      if (!lineToChange.match(imageLine)) {
+      if (!imageLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }
@@ -27,7 +27,7 @@ export function updateDependency(
     }
     if (upgrade.depType === 'orb') {
       const orbLine = new RegExp(`^(\\s+${upgrade.depName}:\\s[^@]+@).+$`);
-      if (!lineToChange.match(orbLine)) {
+      if (!orbLine.test(lineToChange)) {
         logger.debug('No image line found');
         return null;
       }
@@ -42,7 +42,7 @@ export function updateDependency(
     logger.error('Unknown circleci depType');
     return null;
   } catch (err) {
-    logger.info({ err }, 'Error setting new CircleCI image value');
+    logger.debug({ err }, 'Error setting new CircleCI image value');
     return null;
   }
 }

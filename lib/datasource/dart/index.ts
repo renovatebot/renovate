@@ -1,11 +1,12 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+
+export const id = 'dart';
 
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   let result: ReleaseResult = null;
   const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
   interface DartResult {
@@ -22,11 +23,12 @@ export async function getPkgReleases({
   } = null;
   try {
     raw = await got(pkgUrl, {
+      hostType: id,
       json: true,
     });
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `Dependency lookup failure: not found`);
+      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
       logger.debug({ err }, 'Dart lookup error');
       return null;
     }
@@ -34,8 +36,7 @@ export async function getPkgReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      logger.warn({ lookupName, err }, `pub.dartlang.org registry failure`);
-      throw new Error(DATASOURCE_FAILURE);
+      throw new DatasourceError(err);
     }
     logger.warn(
       { err, lookupName },

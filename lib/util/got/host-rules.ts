@@ -5,10 +5,10 @@ import { create } from './util';
 
 // Apply host rules to requests
 
-// istanbul ignore next
 export default create({
   options: {},
   handler: (options, next) => {
+    // istanbul ignore if: never happen?
     if (!options.hostname) {
       return next(options);
     }
