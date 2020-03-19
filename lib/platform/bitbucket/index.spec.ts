@@ -3,21 +3,25 @@ import responses from './__fixtures__/responses';
 import { GotApi, RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
+import { logger as _logger } from '../../logger';
 
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
   let api: jest.Mocked<GotApi>;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let GitStorage: jest.Mocked<import('../git/storage').Storage> & jest.Mock;
+  let logger: jest.Mocked<typeof _logger>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('./bb-got-wrapper');
     jest.mock('../git/storage');
     jest.mock('../../util/host-rules');
+    jest.mock('../../logger');
     hostRules = require('../../util/host-rules');
     api = require('./bb-got-wrapper').api;
     bitbucket = await import('.');
+    logger = (await import('../../logger')).logger as any;
     GitStorage = require('../git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
@@ -86,15 +90,15 @@ describe('platform/bitbucket', () => {
       expect.assertions(1);
       expect(() => bitbucket.initPlatform({})).toThrow();
     });
-    it('should throw if wrong endpoint', () => {
-      expect.assertions(1);
-      expect(() =>
-        bitbucket.initPlatform({
-          endpoint: 'endpoint',
-          username: 'abc',
-          password: '123',
-        })
-      ).toThrow();
+    it('should show warning message if custom endpoint', async () => {
+      await bitbucket.initPlatform({
+        endpoint: 'endpoint',
+        username: 'abc',
+        password: '123',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?'
+      );
     });
     it('should init', async () => {
       expect(
