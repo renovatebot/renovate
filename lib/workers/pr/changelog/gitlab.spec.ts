@@ -139,14 +139,6 @@ describe('workers/pr/changelog', () => {
         })
       ).toBeNull();
     });
-    it('handles missing GitLab token', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://gitlab.com',
-        })
-      ).toEqual({ error: ChangeLogError.MissingGitlabToken });
-    });
     it('handles no releases', async () => {
       expect(
         await getChangeLogJSON({
