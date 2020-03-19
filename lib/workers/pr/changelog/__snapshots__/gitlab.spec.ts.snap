@@ -178,7 +178,7 @@ Object {
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
     "baseURL": "https://gitlab.com/",
-    "depName": "@renovate/no",
+    "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab.com/meno/dropzone/",
   },
