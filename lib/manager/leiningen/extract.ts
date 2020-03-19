@@ -5,10 +5,14 @@ import * as datasourceMaven from '../../datasource/maven';
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
   const keyOffset = str.search(regex);
-  if (keyOffset < 0) return null;
+  if (keyOffset < 0) {
+    return null;
+  }
   const withSpaces = str.slice(keyOffset + kwName.length + 1);
   const valueOffset = withSpaces.search(/[^\s]/);
-  if (valueOffset < 0) return null;
+  if (valueOffset < 0) {
+    return null;
+  }
   return withSpaces.slice(valueOffset);
 }
 
@@ -26,7 +30,9 @@ export function extractFromVectors(
   offset = 0,
   ctx: ExtractContext = {}
 ): PackageDependency[] {
-  if (!str.startsWith('[')) return [];
+  if (!str.startsWith('[')) {
+    return [];
+  }
   let balance = 0;
   const result: PackageDependency[] = [];
   let idx = 0;

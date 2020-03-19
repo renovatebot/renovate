@@ -89,13 +89,17 @@ function extractFromSection(
         depName,
         managerData: {},
       };
-      if (currentValue) dep.currentValue = currentValue;
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      }
       if (skipReason) {
         dep.skipReason = skipReason;
       } else {
         dep.datasource = datasourcePypi.id;
       }
-      if (nestedVersion) dep.managerData.nestedVersion = nestedVersion;
+      if (nestedVersion) {
+        dep.managerData.nestedVersion = nestedVersion;
+      }
       if (requirements.index) {
         if (is.array(pipfile.source)) {
           const source = pipfile.source.find(

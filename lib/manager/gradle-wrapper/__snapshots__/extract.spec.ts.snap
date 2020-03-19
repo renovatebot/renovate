@@ -32,3 +32,20 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/gradle-wrapper/extract extractPackageFile() handles whitespace 1`] = `
+Array [
+  Object {
+    "currentValue": "4.10.3",
+    "datasource": "gradle-version",
+    "depName": "gradle",
+    "depType": "gradle-wrapper",
+    "managerData": Object {
+      "checksumLineNumber": 6,
+      "gradleWrapperType": "all",
+      "lineNumber": 5,
+    },
+    "versioning": "semver",
+  },
+]
+`;

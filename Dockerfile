@@ -2,7 +2,7 @@ ARG IMAGE=latest
 
 # Base image
 #============
-FROM renovate/yarn:1.22.0@sha256:a7737a9182c1456ac089022a44bea22eb9d5069b3f8388cda06b473717a8dd41 AS base
+FROM renovate/yarn:1.22.4@sha256:6f559c0e98e931b0650e35418d385f13726244ec20b4dac6de3dfa808ad49319 AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"

@@ -76,7 +76,7 @@
   },
   {
     "version": "4.10.3",
-    "buildTime": "20181205005054+0000",
+    "buildTime": "20181205005054+0000asdf",
     "current": false,
     "snapshot": false,
     "nightly": false,
@@ -106,7 +106,6 @@
   },
   {
     "version": "5.0",
-    "buildTime": "20181126114843+0000",
     "current": true,
     "snapshot": false,
     "nightly": false,

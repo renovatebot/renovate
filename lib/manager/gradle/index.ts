@@ -48,8 +48,12 @@ async function getGradleCommandLine(
   const gradlewPath = upath.join(cwd, 'gradlew');
   const gradlewExists = await exists(gradlewPath);
   const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
-  if (gradlewExecutable) return `./gradlew ${args}`;
-  if (gradlewExists) return `sh gradlew ${args}`;
+  if (gradlewExecutable) {
+    return `./gradlew ${args}`;
+  }
+  if (gradlewExists) {
+    return `sh gradlew ${args}`;
+  }
 
   return `gradle ${args}`;
 }

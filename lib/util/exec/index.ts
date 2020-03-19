@@ -51,8 +51,12 @@ function createChildEnv(
   extraEnv: ExtraEnv
 ): ExtraEnv<string> {
   const extraEnvEntries = Object.entries({ ...extraEnv }).filter(([_, val]) => {
-    if (val === null) return false;
-    if (val === undefined) return false;
+    if (val === null) {
+      return false;
+    }
+    if (val === undefined) {
+      return false;
+    }
     return true;
   });
   const extraEnvKeys = Object.keys(extraEnvEntries);
@@ -68,8 +72,12 @@ function createChildEnv(
 
   const result: ExtraEnv<string> = {};
   Object.entries(childEnv).forEach(([key, val]) => {
-    if (val === null) return;
-    if (val === undefined) return;
+    if (val === null) {
+      return;
+    }
+    if (val === undefined) {
+      return;
+    }
     result[key] = val.toString();
   });
   return result;
@@ -150,7 +158,13 @@ export async function exec(
     } catch (err) {
       logger.trace({ err }, 'rawExec err');
       clearTimeout(timer);
-      await removeDockerContainer(docker.image);
+      if (useDocker) {
+        await removeDockerContainer(docker.image).catch(removeErr => {
+          throw new Error(
+            `Error: "${removeErr.message}" - Original Error: "${err.message}"`
+          );
+        });
+      }
       throw err;
     }
     clearTimeout(timer);

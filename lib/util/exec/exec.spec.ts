@@ -10,7 +10,7 @@ import {
   VolumeOption,
 } from './common';
 import { envMock } from '../../../test/execUtil';
-import { resetPrefetchedImages } from './docker';
+import * as dockerModule from './docker';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
@@ -42,8 +42,9 @@ describe(`Child process execution wrapper`, () => {
   };
 
   beforeEach(() => {
-    resetPrefetchedImages();
+    dockerModule.resetPrefetchedImages();
     jest.resetAllMocks();
+    jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
     trustLevelOrig = global.trustLevel;
@@ -400,8 +401,12 @@ describe(`Child process execution wrapper`, () => {
     } = testOpts;
 
     process.env = procEnv;
-    if (trustLevel) global.trustLevel = trustLevel;
-    if (config) setExecConfig(config);
+    if (trustLevel) {
+      global.trustLevel = trustLevel;
+    }
+    if (config) {
+      setExecConfig(config);
+    }
 
     const actualCmd: string[] = [];
     const actualOpts: ChildProcessExecOptions[] = [];
@@ -445,5 +450,54 @@ describe(`Child process execution wrapper`, () => {
     await exec(inCmd, { docker });
 
     expect(actualCmd).toMatchSnapshot();
+  });
+
+  it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+
+    const removeDockerContainerSpy = jest.spyOn(
+      dockerModule,
+      'removeDockerContainer'
+    );
+
+    const promise = exec('foobar', {});
+    await expect(promise).rejects.toThrow('some error occurred');
+    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('wraps error if removeDockerContainer throws an error', async () => {
+    setExecConfig({ binarySource: BinarySource.Docker });
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    jest
+      .spyOn(dockerModule, 'generateDockerCommand')
+      .mockImplementation((): any => 'asdf');
+
+    // The `removeDockerContainer` function is called once before it's used in the `catch` block.
+    // We want it to fail in the catch block so we can assert the error is wrapped.
+    let calledOnce = false;
+    const removeDockerContainerSpy = jest.spyOn(
+      dockerModule,
+      'removeDockerContainer'
+    );
+    removeDockerContainerSpy.mockImplementation((): any => {
+      if (!calledOnce) {
+        calledOnce = true;
+        return Promise.resolve();
+      }
+
+      return Promise.reject(new Error('removeDockerContainer failed'));
+    });
+
+    const promise = exec('foobar', { docker });
+    await expect(promise).rejects.toThrow(
+      new Error(
+        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"'
+      )
+    );
+    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
 });
