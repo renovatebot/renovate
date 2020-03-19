@@ -207,7 +207,9 @@ Object {
     },
     Object {
       "changes": Array [],
-      "compare": Object {},
+      "compare": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
+      },
       "date": undefined,
       "releaseNotes": Object {
         "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
