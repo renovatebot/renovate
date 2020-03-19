@@ -1,5 +1,5 @@
 import URL from 'url';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
 import { addReleaseNotes } from './release-notes';
@@ -7,7 +7,7 @@ import { ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
 import { BranchUpgradeConfig } from '../../common';
 
-const { get: ghGot } = api;
+const { get: glGot } = api;
 
 async function getTags(
   endpoint: string,
@@ -21,7 +21,7 @@ async function getTags(
   const repoid = repository.replace(/\.git/, '').replace(/\//g, '%2F');
   url += `projects/${repoid}/repository/tags`;
   try {
-    const res = await ghGot<{ name: string }[]>(url, {
+    const res = await glGot<{ name: string }[]>(url, {
       paginate: true,
     });
 
