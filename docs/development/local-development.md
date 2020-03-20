@@ -77,7 +77,7 @@ The following steps work to set up a brand new Windows 10 installation for devel
   OpenJDK 64-Bit Server VM 18.9 (build 11.0.6+10, mixed mode)
   ```
 
-_VSCode_
+_VS Code Remote Development_
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
 
