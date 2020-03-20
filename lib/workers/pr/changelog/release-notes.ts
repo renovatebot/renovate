@@ -66,6 +66,8 @@ export async function getReleaseList(
         tag: release.tag_name,
       }));
     }
+
+    return null;
   } catch (err) /* istanbul ignore next */ {
     logger.info({ repository, err }, 'getReleaseList error');
     return [];
