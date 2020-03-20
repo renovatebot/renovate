@@ -5,6 +5,7 @@ export interface GetReleasesConfig {
   registryUrls?: string[];
   compatibility?: Record<string, string>;
   npmrc?: string;
+  filterByTags?: string;
 }
 
 export interface Config {

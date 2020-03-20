@@ -31,7 +31,7 @@ describe('datasource/git-refs', () => {
       simpleGit.mockReturnValue({
         listRemote() {
           return Promise.resolve(
-            'commithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\tcommithash4\trefs/heads/v0.0.3\n'
+            'commithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3'
           );
         },
       });
