@@ -1,9 +1,45 @@
+import * as findUp from 'find-up';
+import * as path from 'path';
+import { XmlDocument } from 'xmldoc';
+import * as fs from 'fs';
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
 import * as semverVersioning from '../../versioning/semver';
 import * as datasourceNuget from '../../datasource/nuget';
 import { SkipReason } from '../../types';
+
+function determineRegistryUrls(packageFile: string): string[] {
+  const registryUrls = [datasourceNuget.getDefaultFeed()];
+  const nuGetConfigPath = findUp.sync('NuGet.config', {
+    cwd: path.dirname(packageFile),
+  });
+  if (nuGetConfigPath) {
+    logger.info(`found NuGet.config at '${nuGetConfigPath}'`);
+    const nuGetConfig = new XmlDocument(
+      fs.readFileSync(nuGetConfigPath).toString()
+    );
+    const packageSources = nuGetConfig.childNamed('packageSources');
+    if (packageSources) {
+      for (const child of packageSources.children) {
+        if (child.type === 'element') {
+          if (child.name === 'clear') {
+            logger.info(`clearing registry URLs`);
+            registryUrls.length = 0;
+          } else if (child.name === 'add') {
+            let registryUrl = child.attr.value;
+            if (child.attr.protocolVersion) {
+              registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+            }
+            logger.info(`adding registry URL ${registryUrl}`);
+            registryUrls.push(registryUrl);
+          }
+        }
+      }
+    }
+  }
+  return registryUrls;
+}
 
 export function extractPackageFile(
   content: string,
@@ -13,6 +49,8 @@ export function extractPackageFile(
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
   const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
+
+  const registryUrls = determineRegistryUrls(packageFile);
 
   let lineNumber = 0;
   for (const line of content.split('\n')) {
@@ -40,6 +78,7 @@ export function extractPackageFile(
         currentValue,
         managerData: { lineNumber },
         datasource: datasourceNuget.id,
+        registryUrls,
       };
       if (!isVersion(currentValue)) {
         dep.skipReason = SkipReason.NotAVersion;
