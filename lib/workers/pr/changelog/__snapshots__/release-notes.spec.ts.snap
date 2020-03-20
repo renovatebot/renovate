@@ -33,6 +33,12 @@ Object {
 }
 `;
 
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 1`] = `null`;
+
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 2`] = `null`;
+
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 3`] = `null`;
+
 exports[`workers/pr/release-notes getReleaseNotesMd() parses angular.js 1`] = `
 Object {
   "body": "#### Bug Fixes

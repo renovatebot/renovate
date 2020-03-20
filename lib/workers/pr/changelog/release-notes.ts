@@ -133,7 +133,7 @@ export async function getReleaseNotes(
         releaseNotes = null;
       } else {
         releaseNotes.body = linkify(releaseNotes.body, {
-          repository: `https://github.com/${repository}`,
+          repository: `${baseURL}${repository}`,
         });
       }
     }

@@ -75,6 +75,29 @@ describe('workers/pr/release-notes', () => {
       }
     );
     it.each([[''], ['v'], ['other-']])(
+      'gets release notes with body from gitlab repo',
+      async prefix => {
+        ghGot.mockResolvedValueOnce({
+          body: [
+            { tag_name: `${prefix}1.0.0` },
+            {
+              tag_name: `${prefix}1.0.1`,
+              body:
+                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+            },
+          ],
+        });
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://gitlab.com/',
+          'https://api.gitlab.com/'
+        );
+        expect(res).toMatchSnapshot();
+      }
+    );
+    it.each([[''], ['v'], ['other-']])(
       'gets null from repository without gitlab/github in domain',
       async prefix => {
         const res = await getReleaseNotes(
