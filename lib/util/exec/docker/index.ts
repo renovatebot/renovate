@@ -128,7 +128,7 @@ export async function removeDockerContainer(image): Promise<void> {
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.trace({ err }, 'removeDockerContainer err');
     logger.info({ image, containerName }, 'Could not remove Docker container');
   }

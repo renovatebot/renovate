@@ -1,3 +1,4 @@
+import URL from 'url';
 import parseDiff from 'parse-diff';
 import addrs from 'email-addresses';
 import { api } from './bb-got-wrapper';
@@ -32,6 +33,8 @@ import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
 
+const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
+
 let config: utils.Config = {} as any;
 
 export function initPlatform({
@@ -44,14 +47,14 @@ export function initPlatform({
       'Init: You must configure a Bitbucket username and password'
     );
   }
-  if (endpoint && endpoint !== 'https://api.bitbucket.org/') {
-    throw new Error(
-      'Init: Bitbucket Cloud endpoint can only be https://api.bitbucket.org/'
+  if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
+    logger.warn(
+      `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformConfig = {
-    endpoint: 'https://api.bitbucket.org/',
+    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
 }
@@ -76,12 +79,14 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
+  endpoint = BITBUCKET_PROD_ENDPOINT,
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: 'https://api.bitbucket.org/',
+    url: endpoint,
   });
+  api.setBaseUrl(endpoint);
   config = {
     repository,
     username: opts.username,
@@ -130,10 +135,17 @@ export async function initRepo({
     throw err;
   }
 
+  const { hostname } = URL.parse(endpoint);
+
+  // Converts API hostnames to their respective HTTP git hosts:
+  // `api.bitbucket.org`  to `bitbucket.org`
+  // `api-staging.<host>` to `staging.<host>`
+  const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
+
   const url = GitStorage.getUrl({
     protocol: 'https',
     auth: `${opts.username}:${opts.password}`,
-    hostname: 'bitbucket.org',
+    hostname: hostnameWithoutApiPrefix,
     repository,
   });
 

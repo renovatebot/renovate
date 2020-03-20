@@ -19,6 +19,8 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
+Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`. Renovate does not read/override the config from within each base branch if present.
+
 Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
@@ -1183,7 +1185,7 @@ Users can define custom managers for cases such as:
 
 The custom manager concept is based on using Regular Expression named capture groups. For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`). It's not recommended to do both, due to the potential for confusion. It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
 
-For more details and examples, see the documentation page the for the regex manager [here](/modules/managers/regex/).
+For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
 
 ### matchStrings
 
