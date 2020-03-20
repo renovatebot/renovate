@@ -8,9 +8,6 @@ export const id = 'git-tags';
 const cacheNamespace = 'git-tags';
 const cacheMinutes = 10;
 
-// git will prompt for known hosts or passwords, unless we activate BatchMode
-process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
-
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

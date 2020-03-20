@@ -1,4 +1,5 @@
 import simpleGit from 'simple-git/promise';
+import * as semver from '../../versioning/semver';
 import { logger } from '../../logger';
 import { ReleaseResult, GetReleasesConfig } from '../common';
 
@@ -31,7 +32,11 @@ export async function getPkgReleases({
       return null;
     }
 
-    const refs = lsRemote.replace(/^.+?refs\//gm, '').split('\n');
+    const refs = lsRemote
+      .replace(/^.+?refs\/tags\//gm, '')
+      .replace(/^.+?refs\/heads\//gm, '')
+      .split('\n')
+      .filter(tag => semver.isVersion(tag));
 
     const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
 
