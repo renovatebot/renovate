@@ -83,7 +83,7 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 
 - Install [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension and [requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements). On Windows you can alternatively use WSL. For this you need [Remote - WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) extension. To get it fully working, you need to install the Linuy dependencies above to the WSL distro.
 - Open the repository folder in VS Code
-- Reopen Project in Container (small little green button on lower left of VSCode)
+- Choose "Reopen in Container" via the command palette or the small button in the lower left corner. 
 
 VSCode [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) should be running in container to run additional commands below.
 
