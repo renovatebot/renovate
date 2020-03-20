@@ -26,7 +26,7 @@ const upgrade: BranchUpgradeConfig = {
       version: '5.4.0',
       releaseTimestamp: '2018-08-24T14:23:00.000Z',
     },
-    { version: '5.5.0' },
+    { version: '5.5.0', gitRef: 'eba303e91c930292198b2fc57040145682162a1b' },
     { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
     { version: '5.6.1' },
   ],
