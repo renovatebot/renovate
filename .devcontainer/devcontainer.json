@@ -6,9 +6,6 @@
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
   },
-  "extensions": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
-  ],
+  "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
   "postCreateCommand": "yarn install"
 }
