@@ -81,7 +81,6 @@ _VSCode_
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
 
-- Install [git](https://git-scm.com/downloads), make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension and [requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements). On Windows you can alternatively use WSL. For this you need [Remote - WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) extension. To get it fully working, you need to install the Linuy dependencies above to the WSL distro.
 - Open source code folder with VSCode
 - Reopen Project in Container (small little green button on lower left of VSCode)
