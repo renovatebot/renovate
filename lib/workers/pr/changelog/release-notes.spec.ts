@@ -74,6 +74,19 @@ describe('workers/pr/release-notes', () => {
         expect(res).toMatchSnapshot();
       }
     );
+    it.each([[''], ['v'], ['other-']])(
+      'gets null from repository without gitlab/github in domain',
+      async prefix => {
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://lol.lol/',
+          'https://api.lol.lol/'
+        );
+        expect(res).toBeNull();
+      }
+    );
   });
   describe('getReleaseNotesMd()', () => {
     it('handles not found', async () => {

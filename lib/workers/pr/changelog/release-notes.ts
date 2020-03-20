@@ -112,6 +112,9 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getReleaseList(apiBaseURL, repository);
+  if (releaseList == null) {
+    return null;
+  }
   logger.debug({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach(release => {
