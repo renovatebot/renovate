@@ -15,7 +15,7 @@ function findModules(dirname) {
     .sort();
 }
 
-const oldFiles = new Set(shell.find('lib/**/*.generated.ts'));
+const newFiles = new Set();
 
 shell.echo('generating imports');
 
@@ -32,8 +32,10 @@ const oldCode = fs.readFileSync('lib/datasource/api.generated.ts');
 if (code !== oldCode) {
   fs.writeFileSync('lib/datasource/api.generated.ts', code);
 }
-oldFiles.delete('lib/datasource/api.generated.ts');
+newFiles.add('lib/datasource/api.generated.ts');
 
-for (const f of oldFiles) {
-  fs.removeSync(f);
+for (const file of shell
+  .find('lib/**/*.generated.ts')
+  .filter(f => !newFiles.has(f))) {
+  fs.removeSync(file);
 }
