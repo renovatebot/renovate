@@ -192,6 +192,9 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile --link-duplicates
 
+      - name: Generate
+        run: yarn generate
+
       - name: Lint
         run: yarn lint
 
