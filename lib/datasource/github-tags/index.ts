@@ -170,6 +170,8 @@ async function getReleasesWithTimestamp(
           });
       }
       finalize(cached[commitHash]);
+    } else {
+      finalize();
     }
     return null;
   });

@@ -1,19 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/github-tags getPkgReleases caches commit timestamps 1`] = `
+exports[`datasource/github-tags getPkgReleases returns tags  1`] = `
 Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": "2019-04-18T20:13:57Z",
       "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
     },
   ],
   "sourceUrl": "https://github.com/some/dep2",
 }
 `;
 
-exports[`datasource/github-tags getPkgReleases returns tags 1`] = `
+exports[`datasource/github-tags getPkgReleases returns tags with timestamp 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -24,6 +27,19 @@ Object {
     Object {
       "gitRef": "v1.1.0",
       "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/some/dep2",
+}
+`;
+
+exports[`datasource/github-tags getPkgReleases caches commit timestamps 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": "2019-04-18T20:13:57Z",
+      "version": "v1.0.0",
     },
   ],
   "sourceUrl": "https://github.com/some/dep2",

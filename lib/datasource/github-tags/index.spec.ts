@@ -67,6 +67,15 @@ describe('datasource/github-tags', () => {
       jest.resetAllMocks();
       return global.renovateCache.rmAll();
     });
+    it('returns tags ', async () => {
+      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      ghGot.mockResolvedValueOnce({ headers: {}, body });
+      const res = await github.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+    });
     it('returns null for errors', async () => {
       ghGot.mockImplementationOnce(() => {
         throw new Error();
@@ -76,7 +85,7 @@ describe('datasource/github-tags', () => {
       });
       expect(res).toBeNull();
     });
-    it('returns tags', async () => {
+    it('returns tags with timestamp', async () => {
       ghGot.mockResolvedValueOnce({
         headers: {},
         body: [
