@@ -19,7 +19,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 9,
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json'],
+    project: ['./tsconfig.lint.json'],
     extraFileExtensions: ['.mjs'],
   },
   rules: {

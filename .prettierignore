@@ -13,4 +13,5 @@ package.json
 **/__mocks__/
 bin/yarn*
 
+# generated typescript code
 **/*.generated.ts
