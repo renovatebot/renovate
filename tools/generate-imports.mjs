@@ -15,11 +15,9 @@ function findModules(dirname) {
     .sort();
 }
 
-shell.echo('generating imports');
+const oldFiles = new Set(shell.find('lib/**/*.generated.ts'));
 
-for (const f of shell.find('lib/**/*.generated.ts')) {
-  fs.removeSync(f);
-}
+shell.echo('generating imports');
 
 let code = `
 import { Datasource } from './common';
@@ -30,4 +28,12 @@ for (const ds of findModules('lib/datasource')) {
   code += `api.set('${ds}', import('./${ds}'));\n`;
 }
 
-fs.writeFileSync('lib/datasource/api.generated.ts', code);
+const oldCode = fs.readFileSync('lib/datasource/api.generated.ts');
+if (code !== oldCode) {
+  fs.writeFileSync('lib/datasource/api.generated.ts', code);
+}
+oldFiles.delete('lib/datasource/api.generated.ts');
+
+for (const f of oldFiles) {
+  fs.removeSync(f);
+}
