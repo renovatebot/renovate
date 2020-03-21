@@ -1,5 +1,11 @@
+import pAll from 'p-all';
 import { api } from '../../platform/github/gh-got-wrapper';
-import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
+import {
+  ReleaseResult,
+  GetReleasesConfig,
+  DigestConfig,
+  Release,
+} from '../common';
 import { logger } from '../../logger';
 
 const { get: ghGot } = api;
@@ -98,6 +104,85 @@ export async function getDigest(
   return digest;
 }
 
+type GithubTag = {
+  name: string;
+  commit?: {
+    sha?: string;
+    url?: string;
+  };
+};
+
+type GithubCommit = {
+  commit?: {
+    author?: {
+      date?: string;
+    };
+  };
+};
+
+type GithubCommitTimestamps = Record<string, string | null>;
+
+async function getReleases(
+  repo: string,
+  tags: GithubTag[] | null
+): Promise<Release[]> | null {
+  const result: Release[] = [];
+
+  const cached =
+    (await renovateCache.get<GithubCommitTimestamps>(
+      cacheNamespace,
+      getCacheKey(repo, 'commit-timestamps')
+    )) || {};
+
+  const queue = tags.map(tag => (): Promise<void> => {
+    const release: Release = {
+      version: tag.name,
+      gitRef: tag.name,
+    };
+
+    const commitHash = tag?.commit?.sha;
+
+    const finalize = (releaseTimestamp: string = null): void => {
+      cached[commitHash] = releaseTimestamp;
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+      result.push(release);
+    };
+
+    const commitUrl = tag?.commit?.url;
+
+    if (commitUrl && commitHash) {
+      if (cached[commitHash] === undefined) {
+        return ghGot<GithubCommit>(commitUrl, {
+          paginate: true,
+        })
+          .then<void>(res => {
+            const releaseTimestamp = res.body.commit?.author?.date;
+            return finalize(releaseTimestamp);
+          })
+          .catch(err => {
+            logger.debug({ repo, err }, 'Error retrieving github commit');
+            finalize();
+          });
+      }
+      finalize(cached[commitHash]);
+    }
+    return null;
+  });
+
+  await pAll(queue, { concurrency: 5 });
+
+  await renovateCache.set<GithubCommitTimestamps>(
+    cacheNamespace,
+    getCacheKey(repo, 'commit-timestamps'),
+    cached,
+    2 * 24 * 60
+  );
+
+  return result;
+}
+
 /**
  * github.getPkgReleases
  *
@@ -111,7 +196,6 @@ export async function getDigest(
 export async function getPkgReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let versions: string[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(repo, 'tags')
@@ -120,32 +204,28 @@ export async function getPkgReleases({
   if (cachedResult) {
     return cachedResult;
   }
+  let tags: GithubTag[];
   try {
     // tag
     const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
-    type GitHubTag = {
-      name: string;
-    }[];
 
-    versions = (
-      await ghGot<GitHubTag>(url, {
-        paginate: true,
-      })
-    ).body.map(o => o.name);
+    const res = await ghGot<GithubTag[]>(url, {
+      paginate: true,
+    });
+    tags = res.body;
   } catch (err) {
     logger.debug({ repo, err }, 'Error retrieving from github');
   }
-  if (!versions) {
+  if (!tags) {
     return null;
   }
+
+  const releases = await getReleases(repo, tags);
   const dependency: ReleaseResult = {
     sourceUrl: 'https://github.com/' + repo,
-    releases: null,
+    releases,
   };
-  dependency.releases = versions.map(version => ({
-    version,
-    gitRef: version,
-  }));
+
   const cacheMinutes = 10;
   await renovateCache.set(
     cacheNamespace,

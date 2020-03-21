@@ -7,7 +7,10 @@ jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
-const ghGot: any = api.get;
+const ghGot: jest.Mock<Promise<{
+  headers?: unknown;
+  body?: unknown;
+}>> = api.get as never;
 const hostRules: any = _hostRules;
 
 describe('datasource/github-tags', () => {
@@ -20,55 +23,133 @@ describe('datasource/github-tags', () => {
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
-      ghGot.mockReturnValueOnce({ body: [] });
+      ghGot.mockResolvedValueOnce({ body: [] });
       const res = await github.getDigest({ lookupName: 'some/dep' }, null);
       expect(res).toBeNull();
     });
     it('returns digest', async () => {
-      ghGot.mockReturnValueOnce({ body: [{ sha: 'abcdef' }] });
+      ghGot.mockResolvedValueOnce({ body: [{ sha: 'abcdef' }] });
       const res = await github.getDigest({ lookupName: 'some/dep' }, null);
       expect(res).toBe('abcdef');
     });
     it('returns commit digest', async () => {
-      ghGot.mockReturnValueOnce({
+      ghGot.mockResolvedValueOnce({
         body: { object: { type: 'commit', sha: 'ddd111' } },
       });
       const res = await github.getDigest({ lookupName: 'some/dep' }, 'v1.2.0');
       expect(res).toBe('ddd111');
     });
     it('returns tagged commit digest', async () => {
-      ghGot.mockReturnValueOnce({
+      ghGot.mockResolvedValueOnce({
         body: { object: { type: 'tag', url: 'some-url' } },
       });
-      ghGot.mockReturnValueOnce({
+      ghGot.mockResolvedValueOnce({
         body: { object: { type: 'commit', sha: 'ddd111' } },
       });
       const res = await github.getDigest({ lookupName: 'some/dep' }, 'v1.2.0');
       expect(res).toBe('ddd111');
     });
     it('warns if unknown ref', async () => {
-      ghGot.mockReturnValueOnce({
+      ghGot.mockResolvedValueOnce({
         body: { object: { sha: 'ddd111' } },
       });
       const res = await github.getDigest({ lookupName: 'some/dep' }, 'v1.2.0');
       expect(res).toBeNull();
     });
     it('returns null for missed tagged digest', async () => {
-      ghGot.mockReturnValueOnce({});
+      ghGot.mockResolvedValueOnce({});
       const res = await github.getDigest({ lookupName: 'some/dep' }, 'v1.2.0');
       expect(res).toBeNull();
     });
   });
   describe('getPkgReleases', () => {
-    beforeAll(() => global.renovateCache.rmAll());
-    it('returns tags', async () => {
-      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
+    beforeEach(() => {
+      jest.resetAllMocks();
+      return global.renovateCache.rmAll();
+    });
+    it('returns null for errors', async () => {
+      ghGot.mockImplementationOnce(() => {
+        throw new Error();
+      });
       const res = await github.getPkgReleases({
         lookupName: 'some/dep2',
       });
+      expect(res).toBeNull();
+    });
+    it('returns tags', async () => {
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: [
+          {
+            name: 'v1.0.0',
+            commit: {
+              sha: 'foo',
+              url: 'foo',
+            },
+          },
+          {
+            name: 'v1.1.0',
+            commit: {
+              sha: 'bar',
+              url: 'bar',
+            },
+          },
+        ],
+      });
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: { commit: { author: { date: '2019-04-18T20:13:57Z' } } },
+      });
+      ghGot.mockRejectedValueOnce(() => new Error());
+
+      const res = await github.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(ghGot).toBeCalledTimes(3);
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
+    });
+    it('caches commit timestamps', async () => {
+      const reset = async () => {
+        jest.resetAllMocks();
+
+        // reset only first cache layer
+        await global.renovateCache.rm(
+          'datasource-github-tags',
+          'some/dep2:tags'
+        );
+
+        ghGot.mockResolvedValueOnce({
+          headers: {},
+          body: [
+            {
+              name: 'v1.0.0',
+              commit: {
+                sha: 'foo',
+                url: 'foo',
+              },
+            },
+          ],
+        });
+        ghGot.mockResolvedValueOnce({
+          headers: {},
+          body: { commit: { author: { date: '2019-04-18T20:13:57Z' } } },
+        });
+      };
+
+      await reset();
+      const res1 = await github.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(ghGot).toBeCalledTimes(2);
+      expect(res1).toMatchSnapshot();
+
+      await reset();
+      const res2 = await github.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(ghGot).toBeCalledTimes(1);
+      expect(res2).toEqual(res1);
     });
   });
 });
