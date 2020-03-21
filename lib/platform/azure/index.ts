@@ -19,16 +19,19 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+  PR_STATE_ALL,
+  PR_STATE_NOT_OPEN,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
+import { BranchStatus } from '../../types';
+import { RenovateConfig } from '../../config';
 
 interface Config {
   storage: GitStorage;
@@ -40,7 +43,7 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  azureWorkItemId: any;
+  azureWorkItemId: string;
   prList: Pr[];
   fileList: null;
   repository: string;
@@ -55,10 +58,7 @@ const defaults: any = {
 export function initPlatform({
   endpoint,
   token,
-}: {
-  endpoint: string;
-  token: string;
-}): PlatformConfig {
+}: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
@@ -74,7 +74,7 @@ export function initPlatform({
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -163,14 +163,14 @@ export async function initRepo({
   return repoConfig;
 }
 
-export function getRepoForceRebase(): boolean {
-  return false;
+export function getRepoForceRebase(): Promise<boolean> {
+  return Promise.resolve(config.repoForceRebase === true);
 }
 
 // Search
 
 export /* istanbul ignore next */ function getFileList(
-  branchName: string
+  branchName?: string
 ): Promise<string[]> {
   return config.storage.getFileList(branchName);
 }
@@ -291,15 +291,12 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 
   return azurePr;
 }
-
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  // TODO: fix typing
-  let prsFiltered: any[] = [];
+  let prsFiltered: Pr[] = [];
   try {
     const prs = await getPrList();
 
@@ -312,11 +309,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case 'all':
+      case PR_STATE_ALL:
         // no more filter needed, we can go further...
         break;
-      case '!open':
-        prsFiltered = prsFiltered.filter(item => item.state !== 'open');
+      case PR_STATE_NOT_OPEN:
+        prsFiltered = prsFiltered.filter(item => item.state !== PR_STATE_OPEN);
         break;
       default:
         prsFiltered = prsFiltered.filter(item => item.state === state);
@@ -333,7 +330,10 @@ export async function findPr({
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, state: 'open' });
+  const existingPr = await findPr({
+    branchName,
+    state: PR_STATE_OPEN,
+  });
   return existingPr ? getPr(existingPr.pullRequestId) : null;
 }
 
@@ -388,8 +388,8 @@ export /* istanbul ignore next */ function getCommitMessages(): Promise<
 
 export async function getBranchStatusCheck(
   branchName: string,
-  context?: string
-): Promise<string> {
+  context: string
+): Promise<BranchStatus> {
   logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
@@ -397,26 +397,26 @@ export async function getBranchStatusCheck(
     azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   if (branch.aheadCount === 0) {
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
-  return BRANCH_STATUS_PENDING;
+  return BranchStatus.yellow;
 }
 
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any
-): Promise<string> {
+  requiredStatusChecks: string[]
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
-  const branchStatusCheck = await getBranchStatusCheck(branchName);
+  const branchStatusCheck = await getBranchStatusCheck(branchName, null);
   return branchStatusCheck;
 }
 
@@ -439,7 +439,7 @@ export async function createPr({
       id: config.azureWorkItemId,
     },
   ];
-  let pr: any = await azureApiGit.createPullRequest(
+  let pr: GitPullRequest = await azureApiGit.createPullRequest(
     {
       sourceRefName,
       targetRefName,
@@ -453,7 +453,7 @@ export async function createPr({
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
-          id: pr.createdBy!.id,
+          id: pr.createdBy.id,
         },
         completionOptions: {
           mergeStrategy: config.mergeMethod,
@@ -461,7 +461,7 @@ export async function createPr({
         },
       },
       config.repoId,
-      pr.pullRequestId!
+      pr.pullRequestId
     );
   }
   await Promise.all(
@@ -471,11 +471,10 @@ export async function createPr({
           name: label,
         },
         config.repoId,
-        pr.pullRequestId!
+        pr.pullRequestId
       )
     )
   );
-  pr.branchName = branchName;
   return azureHelper.getRenovatePRFormat(pr);
 }
 
@@ -486,7 +485,7 @@ export async function updatePr(
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const azureApiGit = await azureApi.gitApi();
-  const objToUpdate: any = {
+  const objToUpdate: GitPullRequest = {
     title,
   };
   if (body) {
@@ -499,7 +498,7 @@ export async function ensureComment({
   number,
   topic,
   content,
-}: EnsureCommentConfig): Promise<void> {
+}: EnsureCommentConfig): Promise<boolean> {
   logger.debug(`ensureComment(${number}, ${topic}, content)`);
   const header = topic ? `### ${topic}\n\n` : '';
   const body = `${header}${sanitize(content)}`;
@@ -512,7 +511,7 @@ export async function ensureComment({
   threads.forEach(thread => {
     const firstCommentContent = thread.comments[0].content;
     if (
-      (topic && firstCommentContent.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) ||
       (!topic && firstCommentContent === body)
     ) {
       threadIdFound = thread.id;
@@ -554,6 +553,8 @@ export async function ensureComment({
       'Comment is already update-to-date'
     );
   }
+
+  return true;
 }
 
 export async function ensureCommentRemoval(
@@ -591,15 +592,16 @@ export function setBranchStatus({
   description,
   state,
   url: targetUrl,
-}: BranchStatusConfig): void {
+}: BranchStatusConfig): Promise<void> {
   logger.debug(
     `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
   );
+  return Promise.resolve();
 }
 
-export async function mergePr(pr: number): Promise<void> {
+export function mergePr(pr: number, branchName: string): Promise<boolean> {
   logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  await Promise.resolve();
+  return Promise.resolve(false);
 }
 
 export function getPrBody(input: string): string {
@@ -616,22 +618,24 @@ export function getPrBody(input: string): string {
     .replace('</details>', '');
 }
 
-export /* istanbul ignore next */ function findIssue(): Issue | null {
+export /* istanbul ignore next */ function findIssue(): Promise<Issue | null> {
   logger.warn(`findIssue() is not implemented`);
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue(): void {
+export /* istanbul ignore next */ function ensureIssue(): Promise<EnsureIssueResult | null> {
   logger.warn(`ensureIssue() is not implemented`);
+  return Promise.resolve(null);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export /* istanbul ignore next */ function ensureIssueClosing(): void {}
+export /* istanbul ignore next */ function ensureIssueClosing(): Promise<void> {
+  return Promise.resolve();
+}
 
-export /* istanbul ignore next */ function getIssueList(): Issue[] {
+export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
-  return [];
+  return Promise.resolve([]);
 }
 
 /**
@@ -677,7 +681,7 @@ export async function addReviewers(
     )
   );
 
-  const ids: any[] = [];
+  const ids: { id: string; name: string }[] = [];
   members.forEach(listMembers => {
     listMembers.forEach(m => {
       reviewers.forEach(r => {
@@ -725,22 +729,43 @@ export /* istanbul ignore next */ async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-// to become async?
-export function getPrFiles(prNo: number): string[] {
-  logger.debug(
-    `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
+export async function getPrFiles(prId: number): Promise<string[]> {
+  const azureApiGit = await azureApi.gitApi();
+  const prIterations = await azureApiGit.getPullRequestIterations(
+    config.repoId,
+    prId
   );
-  return [];
+  return [
+    ...new Set(
+      (
+        await Promise.all(
+          prIterations.map(
+            async iteration =>
+              (
+                await azureApiGit.getPullRequestIterationChanges(
+                  config.repoId,
+                  prId,
+                  iteration.id
+                )
+              ).changeEntries
+          )
+        )
+      )
+        .reduce((acc, val) => acc.concat(val), [])
+        .map(change => change.item.path.slice(1))
+    ),
+  ];
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
   config = {} as any;
+  return Promise.resolve();
 }

@@ -2,36 +2,45 @@ import urlApi from 'url';
 import { logger } from '../../logger';
 import * as v2 from './v2';
 import * as v3 from './v3';
-import { PkgReleaseConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
-function detectFeedVersion(url: string): 2 | 3 | null {
+export { id } from './common';
+
+function parseRegistryUrl(
+  registryUrl: string
+): { feedUrl: string; protocolVersion: number } {
   try {
-    const parsecUrl = urlApi.parse(url);
-    // Official client does it in the same way
-    if (parsecUrl.pathname.endsWith('.json')) {
-      return 3;
+    const parsedUrl = urlApi.parse(registryUrl);
+    let protocolVersion = 2;
+    const protolVersionRegExp = /#protocolVersion=(2|3)/;
+    const protocolVersionMatch = protolVersionRegExp.exec(parsedUrl.hash);
+    if (protocolVersionMatch) {
+      parsedUrl.hash = '';
+      protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);
+    } else if (parsedUrl.pathname.endsWith('.json')) {
+      protocolVersion = 3;
     }
-    return 2;
+    return { feedUrl: urlApi.format(parsedUrl), protocolVersion };
   } catch (e) {
-    logger.debug({ e }, `nuget registry failure: can't parse ${url}`);
-    return null;
+    logger.debug({ e }, `nuget registry failure: can't parse ${registryUrl}`);
+    return { feedUrl: registryUrl, protocolVersion: null };
   }
 }
 
 export async function getPkgReleases({
   lookupName,
   registryUrls,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`nuget.getPkgReleases(${lookupName})`);
   let dep: ReleaseResult = null;
   for (const feed of registryUrls || [v3.getDefaultFeed()]) {
-    const feedVersion = detectFeedVersion(feed);
-    if (feedVersion === 2) {
-      dep = await v2.getPkgReleases(feed, lookupName);
-    } else if (feedVersion === 3) {
-      const queryUrl = await v3.getQueryUrl(feed);
+    const { feedUrl, protocolVersion } = parseRegistryUrl(feed);
+    if (protocolVersion === 2) {
+      dep = await v2.getPkgReleases(feedUrl, lookupName);
+    } else if (protocolVersion === 3) {
+      const queryUrl = await v3.getQueryUrl(feedUrl);
       if (queryUrl !== null) {
-        dep = await v3.getPkgReleases(feed, queryUrl, lookupName);
+        dep = await v3.getPkgReleases(feedUrl, queryUrl, lookupName);
       }
     }
     if (dep != null) {

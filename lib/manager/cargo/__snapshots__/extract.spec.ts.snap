@@ -4,7 +4,7 @@ exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple depend
 Array [
   Object {
     "currentValue": "=0.2.43",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "libc",
     "depType": "dependencies",
     "managerData": Object {
@@ -13,7 +13,7 @@ Array [
   },
   Object {
     "currentValue": "1.0.4",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "bitflags",
     "depType": "dependencies",
     "managerData": Object {
@@ -22,7 +22,7 @@ Array [
   },
   Object {
     "currentValue": "=0.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "pcap-sys",
     "depType": "dependencies",
     "managerData": Object {
@@ -32,7 +32,7 @@ Array [
   },
   Object {
     "currentValue": "0.21.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "pnet",
     "depType": "dependencies",
     "managerData": Object {
@@ -41,7 +41,7 @@ Array [
   },
   Object {
     "currentValue": "0.1.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "git_dep_with_version",
     "depType": "dependencies",
     "managerData": Object {
@@ -51,7 +51,7 @@ Array [
   },
   Object {
     "currentValue": "",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "git_dep",
     "depType": "dependencies",
     "managerData": Object {
@@ -61,7 +61,7 @@ Array [
   },
   Object {
     "currentValue": "0.0.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "same_version_1__",
     "depType": "dependencies",
     "managerData": Object {
@@ -70,7 +70,7 @@ Array [
   },
   Object {
     "currentValue": "0.0.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "same_version_1_",
     "depType": "dependencies",
     "managerData": Object {
@@ -79,7 +79,7 @@ Array [
   },
   Object {
     "currentValue": "0.0.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "same_version_1",
     "depType": "dependencies",
     "managerData": Object {
@@ -88,7 +88,7 @@ Array [
   },
   Object {
     "currentValue": "0.4.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep1",
     "depType": "dependencies",
     "managerData": Object {
@@ -97,7 +97,7 @@ Array [
   },
   Object {
     "currentValue": "=0.3.6",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "winapi",
     "depType": "dependencies",
     "managerData": Object {
@@ -107,7 +107,7 @@ Array [
   },
   Object {
     "currentValue": "0.2.37",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "managerData": Object {
@@ -117,7 +117,7 @@ Array [
   },
   Object {
     "currentValue": "0.3.14",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "js-sys",
     "depType": "dependencies",
     "managerData": Object {
@@ -127,7 +127,7 @@ Array [
   },
   Object {
     "currentValue": "",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "js_relative_import",
     "depType": "dependencies",
     "managerData": Object {
@@ -138,7 +138,7 @@ Array [
   },
   Object {
     "currentValue": "0.3.14",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "web-sys",
     "depType": "dependencies",
     "managerData": Object {
@@ -153,7 +153,7 @@ exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple depend
 Array [
   Object {
     "currentValue": "0.2.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_animation",
     "depType": "dependencies",
     "managerData": Object {
@@ -163,7 +163,7 @@ Array [
   },
   Object {
     "currentValue": "0.3.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_assets",
     "depType": "dependencies",
     "managerData": Object {
@@ -173,7 +173,7 @@ Array [
   },
   Object {
     "currentValue": "0.2.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_audio",
     "depType": "dependencies",
     "managerData": Object {
@@ -183,7 +183,7 @@ Array [
   },
   Object {
     "currentValue": "0.6.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_config",
     "depType": "dependencies",
     "managerData": Object {
@@ -193,7 +193,7 @@ Array [
   },
   Object {
     "currentValue": "0.2.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_core",
     "depType": "dependencies",
     "managerData": Object {
@@ -203,7 +203,7 @@ Array [
   },
   Object {
     "currentValue": "0.1.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_controls",
     "depType": "dependencies",
     "managerData": Object {
@@ -213,7 +213,7 @@ Array [
   },
   Object {
     "currentValue": "0.1.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_locale",
     "depType": "dependencies",
     "managerData": Object {
@@ -223,7 +223,7 @@ Array [
   },
   Object {
     "currentValue": "0.7",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_renderer",
     "depType": "dependencies",
     "managerData": Object {
@@ -233,7 +233,7 @@ Array [
   },
   Object {
     "currentValue": "0.3",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_input",
     "depType": "dependencies",
     "managerData": Object {
@@ -243,7 +243,7 @@ Array [
   },
   Object {
     "currentValue": "0.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_ui",
     "depType": "dependencies",
     "managerData": Object {
@@ -253,7 +253,7 @@ Array [
   },
   Object {
     "currentValue": "0.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_utils",
     "depType": "dependencies",
     "managerData": Object {
@@ -263,7 +263,7 @@ Array [
   },
   Object {
     "currentValue": "1.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "derivative",
     "depType": "dependencies",
     "managerData": Object {
@@ -272,7 +272,7 @@ Array [
   },
   Object {
     "currentValue": "0.5",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "fern",
     "depType": "dependencies",
     "managerData": Object {
@@ -281,7 +281,7 @@ Array [
   },
   Object {
     "currentValue": "0.4",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "log",
     "depType": "dependencies",
     "managerData": Object {
@@ -290,7 +290,7 @@ Array [
   },
   Object {
     "currentValue": "1.0.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "rayon",
     "depType": "dependencies",
     "managerData": Object {
@@ -299,7 +299,7 @@ Array [
   },
   Object {
     "currentValue": "0.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "rustc_version_runtime",
     "depType": "dependencies",
     "managerData": Object {
@@ -308,7 +308,7 @@ Array [
   },
   Object {
     "currentValue": "0.15",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "winit",
     "depType": "dependencies",
     "managerData": Object {
@@ -317,7 +317,7 @@ Array [
   },
   Object {
     "currentValue": "0.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "thread_profiler",
     "depType": "dependencies",
     "managerData": Object {
@@ -326,7 +326,7 @@ Array [
   },
   Object {
     "currentValue": "0.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "amethyst_gltf",
     "depType": "dev-dependencies",
     "managerData": Object {
@@ -336,7 +336,7 @@ Array [
   },
   Object {
     "currentValue": "0.5.10",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "env_logger",
     "depType": "dev-dependencies",
     "managerData": Object {
@@ -345,7 +345,7 @@ Array [
   },
   Object {
     "currentValue": "0.6",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "genmesh",
     "depType": "dev-dependencies",
     "managerData": Object {
@@ -354,7 +354,7 @@ Array [
   },
   Object {
     "currentValue": "0.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "ron",
     "depType": "dev-dependencies",
     "managerData": Object {
@@ -363,7 +363,7 @@ Array [
   },
   Object {
     "currentValue": "1.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "serde",
     "depType": "dev-dependencies",
     "managerData": Object {
@@ -372,7 +372,7 @@ Array [
   },
   Object {
     "currentValue": "1.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "serde_derive",
     "depType": "dev-dependencies",
     "managerData": Object {
@@ -381,7 +381,7 @@ Array [
   },
   Object {
     "currentValue": "0.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "vergen",
     "depType": "build-dependencies",
     "managerData": Object {
@@ -395,7 +395,7 @@ exports[`lib/manager/cargo/extract extractPackageFile() extracts platform specif
 Array [
   Object {
     "currentValue": "0.2.37",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "managerData": Object {
@@ -405,7 +405,7 @@ Array [
   },
   Object {
     "currentValue": "0.3.14",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "js-sys",
     "depType": "dependencies",
     "managerData": Object {
@@ -415,7 +415,7 @@ Array [
   },
   Object {
     "currentValue": "",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "js_relative_import",
     "depType": "dependencies",
     "managerData": Object {
@@ -426,7 +426,7 @@ Array [
   },
   Object {
     "currentValue": "0.3.14",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "web-sys",
     "depType": "dependencies",
     "managerData": Object {
@@ -441,7 +441,7 @@ exports[`lib/manager/cargo/extract extractPackageFile() handles inline tables 1`
 Array [
   Object {
     "currentValue": "0.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "pcap-sys",
     "depType": "dependencies",
     "managerData": Object {
@@ -451,7 +451,7 @@ Array [
   },
   Object {
     "currentValue": "0.21.0",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "pnet",
     "depType": "dependencies",
     "managerData": Object {
@@ -460,7 +460,7 @@ Array [
   },
   Object {
     "currentValue": "1.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep1",
     "depType": "dependencies",
     "managerData": Object {
@@ -470,7 +470,7 @@ Array [
   },
   Object {
     "currentValue": "3.4",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep2",
     "depType": "dependencies",
     "managerData": Object {
@@ -480,7 +480,7 @@ Array [
   },
   Object {
     "currentValue": "~12.3.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep3",
     "depType": "dependencies",
     "managerData": Object {
@@ -490,17 +490,16 @@ Array [
   },
   Object {
     "currentValue": "INVALID 3.3.1 VERSION",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep4",
     "depType": "dependencies",
     "managerData": Object {
       "nestedVersion": true,
     },
-    "skipReason": "unknown-version",
   },
   Object {
     "currentValue": "3.2.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep5",
     "depType": "dependencies",
     "managerData": Object {
@@ -509,7 +508,7 @@ Array [
   },
   Object {
     "currentValue": "",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep6",
     "depType": "dependencies",
     "managerData": Object {
@@ -524,7 +523,7 @@ exports[`lib/manager/cargo/extract extractPackageFile() handles standard tables 
 Array [
   Object {
     "currentValue": "1.2",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep1",
     "depType": "dependencies",
     "managerData": Object {
@@ -534,7 +533,7 @@ Array [
   },
   Object {
     "currentValue": "3.4",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep2",
     "depType": "dependencies",
     "managerData": Object {
@@ -544,7 +543,7 @@ Array [
   },
   Object {
     "currentValue": "~12.3.1",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep3",
     "depType": "dependencies",
     "managerData": Object {
@@ -554,7 +553,7 @@ Array [
   },
   Object {
     "currentValue": "INVALID 1.3.1 VERSION",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep4",
     "depType": "dependencies",
     "managerData": Object {
@@ -564,7 +563,7 @@ Array [
   },
   Object {
     "currentValue": "",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep5",
     "depType": "dependencies",
     "managerData": Object {
@@ -574,7 +573,7 @@ Array [
   },
   Object {
     "currentValue": "",
-    "datasource": "cargo",
+    "datasource": "crate",
     "depName": "dep7",
     "depType": "dependencies",
     "managerData": Object {

@@ -1,5 +1,5 @@
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_CDNJS } from '../../constants/data-binary-source';
+import * as datasourceCdnjs from '../../datasource/cdnjs';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
 
 const regex = /<\s*(script|link)\s+[^>]*?\/?>/i;
@@ -13,7 +13,7 @@ export function extractDep(tag: string): PackageDependency | null {
   }
   const { depName, currentValue, asset } = match.groups;
   const dep: PackageDependency = {
-    datasource: DATASOURCE_CDNJS,
+    datasource: datasourceCdnjs.id,
     depName,
     lookupName: `${depName}/${asset}`,
     currentValue,
@@ -44,6 +44,9 @@ export function extractPackageFile(content: string): PackageFile {
         },
       });
     }
+  }
+  if (!deps.length) {
+    return null;
   }
   return { deps };
 }

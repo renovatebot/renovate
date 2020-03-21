@@ -1,16 +1,18 @@
-import { DEFAULT_MAVEN_REPO } from '../maven/extract';
+import { CLOJARS_REPO, MAVEN_REPO } from '../../datasource/maven/common';
 import { PackageDependency, PackageFile } from '../common';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
-
-export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
+import * as datasourceMaven from '../../datasource/maven';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
   const keyOffset = str.search(regex);
-  if (keyOffset < 0) return null;
+  if (keyOffset < 0) {
+    return null;
+  }
   const withSpaces = str.slice(keyOffset + kwName.length + 1);
   const valueOffset = withSpaces.search(/[^\s]/);
-  if (valueOffset < 0) return null;
+  if (valueOffset < 0) {
+    return null;
+  }
   return withSpaces.slice(valueOffset);
 }
 
@@ -28,7 +30,9 @@ export function extractFromVectors(
   offset = 0,
   ctx: ExtractContext = {}
 ): PackageDependency[] {
-  if (!str.startsWith('[')) return [];
+  if (!str.startsWith('[')) {
+    return [];
+  }
   let balance = 0;
   const result: PackageDependency[] = [];
   let idx = 0;
@@ -46,7 +50,7 @@ export function extractFromVectors(
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
-        datasource: DATASOURCE_MAVEN,
+        datasource: datasourceMaven.id,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
         fileReplacePosition,
@@ -92,7 +96,7 @@ export function extractFromVectors(
 }
 
 function extractLeinRepos(content: string): string[] {
-  const result = [DEFAULT_CLOJARS_REPO, DEFAULT_MAVEN_REPO];
+  const result = [CLOJARS_REPO, MAVEN_REPO];
 
   const repoContent = trimAtKey(
     content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments

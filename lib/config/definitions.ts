@@ -28,7 +28,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
 
   // used by tests
   relatedOptions?: string[];
@@ -1675,9 +1675,66 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'regexManagers',
+    description: 'Custom managers using regex matching.',
+    type: 'array',
+    subType: 'object',
+    default: [],
+    stage: 'package',
+    cli: true,
+    mergeable: true,
+  },
+  {
+    name: 'matchStrings',
+    description:
+      'Regex capture rule to use. Valid only within `regexManagers` object.',
+    type: 'array',
+    subType: 'string',
+    format: 'regex',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'depNameTemplate',
+    description:
+      'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'lookupNameTemplate',
+    description:
+      'Optional lookupName for extracted dependencies, else defaults to depName value. Valid only within `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'datasourceTemplate',
+    description:
+      'Optional datasource for extracted dependencies. Valid only within `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'versioningTemplate',
+    description:
+      'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
 ];
 
-export function getOptions(): any {
+export function getOptions(): RenovateOptions[] {
   return options;
 }
 

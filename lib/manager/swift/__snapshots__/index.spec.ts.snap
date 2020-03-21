@@ -4,6 +4,14 @@ exports[`lib/manager/swift extractPackageFile() parses multiple packages 1`] = `
 Object {
   "deps": Array [
     Object {
+      "currentValue": "\\"master\\"
+        ",
+      "datasource": "git-tags",
+      "depName": "0x7fs/CountedSet",
+      "fileReplacePosition": 939,
+      "lookupName": "https://github.com/0x7fs/CountedSet",
+    },
+    Object {
       "currentValue": "0.1.0",
       "datasource": "git-tags",
       "depName": "avito-tech/GraphiteClient",
@@ -16,6 +24,14 @@ Object {
       "depName": "IBM-Swift/BlueSignals",
       "fileReplacePosition": 1268,
       "lookupName": "https://github.com/IBM-Swift/BlueSignals.git",
+    },
+    Object {
+      "currentValue": "\\"UpdateSocket\\"
+        ",
+      "datasource": "git-tags",
+      "depName": "beefon/Shout",
+      "fileReplacePosition": 1345,
+      "lookupName": "https://github.com/beefon/Shout",
     },
     Object {
       "currentValue": "3.0.6",
@@ -37,6 +53,14 @@ Object {
       "depName": "weichsel/ZIPFoundation",
       "fileReplacePosition": 1626,
       "lookupName": "https://github.com/weichsel/ZIPFoundation/",
+    },
+    Object {
+      "currentValue": "\\"swift-5.0-branch\\"
+    ",
+      "datasource": "git-tags",
+      "depName": "apple/swift-package-manager",
+      "fileReplacePosition": 1726,
+      "lookupName": "https://github.com/apple/swift-package-manager.git",
     },
   ],
   "packageFile": null,

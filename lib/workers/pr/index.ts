@@ -3,23 +3,15 @@ import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
 import { ChangeLogError, getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
-import { BranchStatus, platform, Pr } from '../../platform';
-import { BranchConfig } from '../common';
+import { platform, Pr, PlatformPrOptions } from '../../platform';
+import { BranchConfig, PrResult } from '../common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import {
-  BRANCH_STATUS_CREATED,
-  BRANCH_STATUS_ERROR,
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_RUNNING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -29,7 +21,7 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
+export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
   if (config.assignees.length > 0) {
     try {
       let assignees = config.assignees.map(noLeadingAtSymbol);
@@ -81,7 +73,10 @@ async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
-): Promise<Pr | 'needs-pr-approval' | 'pending'> {
+): Promise<{
+  prResult: PrResult;
+  pr?: Pr;
+}> {
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
@@ -121,13 +116,7 @@ export async function ensurePr(
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
-    if (
-      [
-        BRANCH_STATUS_CREATED,
-        BRANCH_STATUS_PENDING,
-        BRANCH_STATUS_RUNNING,
-      ].includes(await getBranchStatus())
-    ) {
+    if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -140,26 +129,20 @@ export async function ensurePr(
         config.forcePr = true;
       }
     }
-    if (
-      config.forcePr ||
-      [
-        BRANCH_STATUS_FAILURE,
-        BRANCH_STATUS_ERROR,
-        BRANCH_STATUS_FAILED,
-      ].includes(await getBranchStatus())
-    ) {
+    if (config.forcePr || (await getBranchStatus()) === BranchStatus.red) {
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
-      return null;
+      // Branch should be automerged, so we don't want to create a PR
+      return { prResult: PrResult.BlockeddByBranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) !== BRANCH_STATUS_SUCCESS) {
+    if ((await getBranchStatus()) !== BranchStatus.green) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - not creating PR`
       );
-      return BRANCH_STATUS_PENDING;
+      return { prResult: PrResult.AwaitingGreenBranch };
     }
     logger.debug('Branch status success');
   } else if (
@@ -167,17 +150,14 @@ export async function ensurePr(
     !existingPr &&
     masterIssueCheck !== 'approvePr'
   ) {
-    return 'needs-pr-approval';
+    return { prResult: PrResult.AwaitingApproval };
   } else if (
     config.prCreation === 'not-pending' &&
     !existingPr &&
     !config.forcePr
   ) {
     logger.debug('Checking branch combined status');
-    if (
-      (await getBranchStatus()) === BRANCH_STATUS_PENDING ||
-      (await getBranchStatus()) === BRANCH_STATUS_RUNNING
-    ) {
+    if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
       );
@@ -191,7 +171,7 @@ export async function ensurePr(
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
-        return BRANCH_STATUS_PENDING;
+        return { prResult: PrResult.AwaitingNotPending };
       }
       logger.debug(
         `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`
@@ -218,7 +198,9 @@ export async function ensurePr(
 
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
-        if (logJSON.project) upgrade.githubName = logJSON.project.github;
+        if (logJSON.project) {
+          upgrade.githubName = logJSON.project.github;
+        }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
         if (
@@ -274,14 +256,7 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
       // istanbul ignore if
-      if (
-        config.automerge &&
-        [
-          BRANCH_STATUS_FAILURE,
-          BRANCH_STATUS_ERROR,
-          BRANCH_STATUS_FAILED,
-        ].includes(await getBranchStatus())
-      ) {
+      if (config.automerge && (await getBranchStatus()) === BranchStatus.red) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
       }
@@ -300,7 +275,7 @@ export async function ensurePr(
         noWhitespace(existingPrBody) === noWhitespace(prBody)
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
-        return existingPr;
+        return { prResult: PrResult.NotUpdated, pr: existingPr };
       }
       // PR must need updating
       if (existingPr.title !== prTitle) {
@@ -316,6 +291,12 @@ export async function ensurePr(
         logger.debug(
           {
             prTitle,
+          },
+          'PR body changed'
+        );
+        logger.trace(
+          {
+            prTitle,
             oldPrBody: existingPrBody,
             newPrBody: prBody,
           },
@@ -329,7 +310,7 @@ export async function ensurePr(
         await platform.updatePr(existingPr.number, prTitle, prBody);
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
-      return existingPr;
+      return { prResult: PrResult.Updated, pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if
@@ -343,7 +324,7 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        const platformOptions = {
+        const platformOptions: PlatformPrOptions = {
           azureAutoComplete: config.azureAutoComplete,
           statusCheckVerify: config.statusCheckVerify,
           gitLabAutomerge:
@@ -373,7 +354,7 @@ export async function ensurePr(
             )
           ) {
             logger.warn('A pull requests already exists');
-            return null;
+            return { prResult: PrResult.ErrorAlreadyExists };
           }
         }
       }
@@ -388,7 +369,7 @@ export async function ensurePr(
           await platform.deleteBranch(branchName);
         }
       }
-      return null;
+      return { prResult: PrResult.Error };
     }
     if (
       config.branchAutomergeFailureMessage &&
@@ -416,11 +397,7 @@ export async function ensurePr(
     if (
       config.automerge &&
       !config.assignAutomerge &&
-      ![
-        BRANCH_STATUS_FAILURE,
-        BRANCH_STATUS_ERROR,
-        BRANCH_STATUS_FAILED,
-      ].includes(await getBranchStatus())
+      (await getBranchStatus()) !== BranchStatus.red
     ) {
       logger.debug(
         `Skipping assignees and reviewers as automerge=${config.automerge}`
@@ -429,7 +406,7 @@ export async function ensurePr(
       await addAssigneesReviewers(config, pr);
     }
     logger.debug(`Created ${pr.displayNumber}`);
-    return pr;
+    return { prResult: PrResult.Created, pr };
   } catch (err) {
     // istanbul ignore if
     if (
@@ -443,7 +420,7 @@ export async function ensurePr(
     }
     logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
   }
-  return null;
+  return { prResult: PrResult.Error };
 }
 
 export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
@@ -478,7 +455,7 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
       branchName,
       requiredStatusChecks
     );
-    if (branchStatus !== BRANCH_STATUS_SUCCESS) {
+    if (branchStatus !== BranchStatus.green) {
       logger.debug(
         `PR is not ready for merge (branch status is ${branchStatus})`
       );

@@ -13,6 +13,17 @@ if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
   exit 1
 fi
 
+# build final images
+docker buildx bake \
+  --file docker/bake.hcl \
+  --set settings.args.SHA=${SHA}} \
+  --set settings.labels.org.opencontainers.image.version=${VERSION} \
+  --set settings.labels.org.opencontainers.image.revision=${SHA} \
+  --set latest.cache-to=renovate/renovate:_cache-latest \
+  --set slim.cache-to=renovate/renovate:_cache-slim \
+  --set settings.output=type=docker \
+  default
+
 major=${BASH_REMATCH[1]}
 minor=${BASH_REMATCH[2]}
 patch=${BASH_REMATCH[3]}

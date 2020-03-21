@@ -17,3 +17,4 @@ junit.xml
 renovate-schema.json
 
 **/*.generated.ts
+test/datasource/nuget/_fixtures/obj

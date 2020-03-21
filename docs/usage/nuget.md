@@ -40,6 +40,18 @@ Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json
 
 If this example we defined 3 nuget feeds. Packages resolving will process feeds consequentially. It means that if package will be resolved in second feed renovate won't look in last one.
 
+### Protocol versions
+
+NuGet supports two protocol versions, `v2` and `v3`, which NuGet client and server need to agree on. Renovate as a NuGet client supports both versions and will use `v2` unless the configured feed URL ends with `index.json` (which mirrors the behavior of the official NuGet client). If you have `v3` feed that does not match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
+
+```json
+"nuget": {
+  "registryUrls": [
+    "http://myV3feed#protocolVersion=3"
+  ]
+}
+```
+
 ## Authenticated feeds
 
 Credentials for authenticated/private feeds can be provided via host rules in the configuration options (file or command line parameter).

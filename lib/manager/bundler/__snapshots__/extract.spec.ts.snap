@@ -2172,11 +2172,11 @@ Object {
     },
     Object {
       "currentValue": "latest",
+      "datasource": "rubygems",
       "depName": "ruby-debug",
       "managerData": Object {
         "lineNumber": 9,
       },
-      "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",

@@ -10,7 +10,6 @@ import * as cache from './cache';
 import { autodiscoverRepositories } from './autodiscover';
 import { initPlatform } from '../../platform';
 import * as hostRules from '../../util/host-rules';
-import { printStats } from '../../util/got/stats';
 import * as limits from './limits';
 import { setUtilConfig } from '../../util';
 
@@ -77,7 +76,7 @@ export async function start(): Promise<0 | 1> {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      setUtilConfig(repoConfig);
+      await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach(rule => hostRules.add(rule));
@@ -86,7 +85,6 @@ export async function start(): Promise<0 | 1> {
       await repositoryWorker.renovateRepository(repoConfig);
     }
     setMeta({});
-    printStats();
     logger.debug(`Renovate existing successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

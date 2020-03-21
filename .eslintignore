@@ -7,7 +7,6 @@ coverage
 
 # don't lint test stuff
 **/__fixtures__/**
-**/_fixtures/**
 **/__mocks__/**
 **/*.d.ts
 /config.js

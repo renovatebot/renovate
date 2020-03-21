@@ -11,7 +11,7 @@ import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { DatasourceError, Release, ReleaseResult } from '../common';
-import { DATASOURCE_NPM } from '../../constants/data-binary-source';
+import { id } from './common';
 
 let memcache = {};
 
@@ -42,18 +42,18 @@ export interface NpmDependency extends ReleaseResult {
 }
 
 export async function getDependency(
-  name: string,
+  packageName: string,
   retries = 3
 ): Promise<NpmDependency | null> {
-  logger.trace(`npm.getDependency(${name})`);
+  logger.trace(`npm.getDependency(${packageName})`);
 
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
-  if (memcache[name]) {
+  if (memcache[packageName]) {
     logger.trace('Returning cached result');
-    return JSON.parse(memcache[name]);
+    return JSON.parse(memcache[packageName]);
   }
 
-  const scope = name.split('/')[0];
+  const scope = packageName.split('/')[0];
   let regUrl: string;
   const npmrc = getNpmrc();
   try {
@@ -63,7 +63,7 @@ export async function getDependency(
   }
   const pkgUrl = url.resolve(
     regUrl,
-    encodeURIComponent(name).replace(/^%40/, '@')
+    encodeURIComponent(packageName).replace(/^%40/, '@')
   );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
@@ -86,7 +86,7 @@ export async function getDependency(
     }
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
-      { token: maskToken(authInfo.token), npmName: name },
+      { token: maskToken(authInfo.token), npmName: packageName },
       'Using auth for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
@@ -108,11 +108,11 @@ export async function getDependency(
   try {
     const useCache = retries === 3; // Disable cache if we're retrying
     const opts: GotJSONOptions = {
+      hostType: id,
       json: true,
       retry: 5,
       headers,
       useCache,
-      readableHighWaterMark: 1024 * 1024 * 10, // https://github.com/sindresorhus/got/issues/1062#issuecomment-586580036
     };
     const raw = await got(pkgUrl, opts);
     // istanbul ignore if
@@ -122,16 +122,16 @@ export async function getDependency(
     const res = raw.body;
     // eslint-disable-next-line no-underscore-dangle
     const returnedName = res.name ? res.name : res._id || '';
-    if (returnedName.toLowerCase() !== name.toLowerCase()) {
+    if (returnedName.toLowerCase() !== packageName.toLowerCase()) {
       logger.warn(
-        { lookupName: name, returnedName: res.name, regUrl },
+        { lookupName: packageName, returnedName: res.name, regUrl },
         'Returned name does not match with requested name'
       );
       return null;
     }
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.debug({ dependency: name }, 'No versions returned');
+      logger.debug({ dependency: packageName }, 'No versions returned');
       return null;
     }
 
@@ -164,8 +164,8 @@ export async function getDependency(
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
-      dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${name}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-      dep.deprecationSource = DATASOURCE_NPM;
+      dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
+      dep.deprecationSource = id;
     }
     dep.releases = Object.keys(res.versions).map(version => {
       const release: NpmRelease = {
@@ -184,11 +184,11 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    memcache[name] = JSON.stringify(dep);
+    memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 5;
-    if (!name.startsWith('@')) {
+    if (!packageName.startsWith('@')) {
       await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
@@ -201,7 +201,7 @@ export async function getDependency(
           authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
           err,
           statusCode: err.statusCode,
-          depName: name,
+          packageName,
         },
         `Dependency lookup failure: unauthorized`
       );
@@ -216,14 +216,14 @@ export async function getDependency(
           authInfoToken: authInfo ? maskToken(authInfo.token) : undefined,
           err,
           statusCode: err.statusCode,
-          depName: name,
+          packageName,
         },
         `Dependency lookup failure: payent required`
       );
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ depName: name }, `Dependency lookup failure: not found`);
+      logger.debug({ packageName }, `Dependency lookup failure: not found`);
       logger.debug({
         err,
         token: authInfo ? maskToken(authInfo.token) : 'none',
@@ -233,12 +233,14 @@ export async function getDependency(
     if (uri.host === 'registry.npmjs.org') {
       // istanbul ignore if
       if (
-        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        (err.name === 'ParseError' ||
+          err.code === 'ECONNRESET' ||
+          err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
         logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
         await delay(5000);
-        return getDependency(name, retries - 1);
+        return getDependency(packageName, retries - 1);
       }
       // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {

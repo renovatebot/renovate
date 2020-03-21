@@ -2,6 +2,8 @@ import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
 import { GotResponse, Pr } from '../common';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import { BranchStatus } from '../../types';
 
 export interface Config {
   baseBranch: string;
@@ -58,15 +60,10 @@ export const prStates = {
   all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
 };
 
-export const buildStates: {
-  [key: string]: BitbucketBranchState;
-  success: BitbucketBranchState;
-  failed: BitbucketBranchState;
-  pending: BitbucketBranchState;
-} = {
-  success: 'SUCCESSFUL',
-  failed: 'FAILED',
-  pending: 'INPROGRESS',
+export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
+  green: 'SUCCESSFUL',
+  red: 'FAILED',
+  yellow: 'INPROGRESS',
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
@@ -121,7 +118,7 @@ export function prInfo(pr: any): Pr {
     targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
-      ? /* istanbul ignore next */ 'closed'
+      ? /* istanbul ignore next */ PR_STATE_CLOSED
       : pr.state.toLowerCase(),
     createdAt: pr.created_on,
   };

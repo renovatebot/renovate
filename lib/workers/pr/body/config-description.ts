@@ -1,10 +1,10 @@
 import { platform } from '../../../platform';
 import { emojify } from '../../../util/emoji';
-import { PrBodyConfig } from './common';
-import { BRANCH_STATUS_FAILED } from '../../../constants/branch-constants';
+import { BranchConfig } from '../../common';
+import { BranchStatus } from '../../../types';
 
 export async function getPrConfigDescription(
-  config: PrBodyConfig
+  config: BranchConfig
 ): Promise<string> {
   let prBody = `\n\n---\n\n### Renovate configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
@@ -31,7 +31,7 @@ export async function getPrConfigDescription(
       config.requiredStatusChecks
     );
     // istanbul ignore if
-    if (branchStatus === BRANCH_STATUS_FAILED) {
+    if (branchStatus === BranchStatus.red) {
       prBody += 'Disabled due to failing status checks.';
     } else {
       prBody += 'Enabled.';

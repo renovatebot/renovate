@@ -4,15 +4,17 @@ import { logger } from '../../../../logger';
 import { getConfigDesc } from './config-description';
 import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
 import { getBaseBranchDesc } from './base-branch';
-import { getPrList, PrBranchConfig } from './pr-list';
+import { getPrList } from './pr-list';
 import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
 import { PackageFile } from '../../../../manager/common';
+import { addAssigneesReviewers } from '../../../pr';
+import { BranchConfig } from '../../../common';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
-  branches: PrBranchConfig[]
+  branches: BranchConfig[]
 ): Promise<void> {
   if (config.repoIsOnboarded) {
     return;
@@ -128,6 +130,7 @@ If you need any further assistance then you can also [request help here](${confi
         useDefaultBranch,
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
+      await addAssigneesReviewers(config, pr);
     }
   } catch (err) /* istanbul ignore next */ {
     if (

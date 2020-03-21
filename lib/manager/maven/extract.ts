@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
 import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
-import { isValid } from '../../versioning/maven';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
-import { DATASOURCE_MAVEN } from '../../constants/data-binary-source';
-
-export const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
+import * as datasourceMaven from '../../datasource/maven';
+import { MAVEN_REPO } from '../../datasource/maven/common';
+import { SkipReason } from '../../types';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;
@@ -17,8 +16,12 @@ export function parsePom(raw: string): XmlDocument | null {
     return null;
   }
   const { name, attr, children } = project;
-  if (name !== 'project') return null;
-  if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') return project;
+  if (name !== 'project') {
+    return null;
+  }
+  if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') {
+    return project;
+  }
   if (
     is.nonEmptyArray(children) &&
     children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
@@ -28,7 +31,7 @@ export function parsePom(raw: string): XmlDocument | null {
   return null;
 }
 
-export function containsPlaceholder(str: string): boolean {
+function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
 }
 
@@ -39,7 +42,9 @@ interface MavenProp {
 }
 
 function depFromNode(node: XmlElement): PackageDependency | null {
-  if (!('valueWithPath' in node)) return null;
+  if (!('valueWithPath' in node)) {
+    return null;
+  }
   let groupId = node.valueWithPath('groupId');
   const artifactId = node.valueWithPath('artifactId');
   const currentValue = node.valueWithPath('version');
@@ -52,8 +57,8 @@ function depFromNode(node: XmlElement): PackageDependency | null {
     const depName = `${groupId}:${artifactId}`;
     const versionNode = node.descendantWithPath('version');
     const fileReplacePosition = versionNode.position;
-    const datasource = DATASOURCE_MAVEN;
-    const registryUrls = [DEFAULT_MAVEN_REPO];
+    const datasource = datasourceMaven.id;
+    const registryUrls = [MAVEN_REPO];
     return {
       datasource,
       depName,
@@ -127,11 +132,9 @@ function applyProps(
   }
 
   if (containsPlaceholder(depName)) {
-    result.skipReason = 'name-placeholder';
+    result.skipReason = SkipReason.NamePlaceholder;
   } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = 'version-placeholder';
-  } else if (!isValid(currentValue)) {
-    result.skipReason = 'not-a-version';
+    result.skipReason = SkipReason.VersionPlaceholder;
   }
 
   return result;
@@ -153,13 +156,17 @@ export function extractPackage(
   rawContent: string,
   packageFile: string | null = null
 ): PackageFile<Record<string, any>> | null {
-  if (!rawContent) return null;
+  if (!rawContent) {
+    return null;
+  }
 
   const project = parsePom(rawContent);
-  if (!project) return null;
+  if (!project) {
+    return null;
+  }
 
   const result: PackageFile = {
-    datasource: DATASOURCE_MAVEN,
+    datasource: datasourceMaven.id,
     packageFile,
     deps: [],
   };

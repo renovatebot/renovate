@@ -5,6 +5,7 @@ import { getPkgReleases } from '../../datasource';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import nodeJsSchedule from '../../../data/node-js-schedule.json';
 import { PackageUpdateConfig, PackageUpdateResult } from '../common';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 
 interface NodeJsPolicies {
   all: number[];
@@ -44,11 +45,15 @@ function generatePolicies(): void {
       policies.all.push(release);
       const isMaintenance =
         data.maintenance && new Date(data.maintenance) < now;
-      if (!isMaintenance) policies.active.push(release);
+      if (!isMaintenance) {
+        policies.active.push(release);
+      }
       const isLts = data.lts && new Date(data.lts) < now;
       if (isLts) {
         policies.lts.push(release);
-        if (!isMaintenance) policies.lts_active.push(release);
+        if (!isMaintenance) {
+          policies.lts_active.push(release);
+        }
       }
     }
   }
@@ -101,7 +106,7 @@ export async function getPackageUpdates(
     const versions = (
       await getPkgReleases({
         ...config,
-        datasource: 'github',
+        datasource: datasourceGithubTags.id,
         depName: 'nodejs/node',
       })
     ).releases.map(release => release.version);

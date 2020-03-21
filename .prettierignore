@@ -10,7 +10,6 @@
 /*.log
 package.json
 **/__fixtures__/
-**/_fixtures/
 **/__mocks__/
 bin/yarn*
 

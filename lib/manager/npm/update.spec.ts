@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as npmUpdater from './update';
 
-function readFixture(fixture) {
+function readFixture(fixture: string) {
   return fs.readFileSync(
     path.resolve(__dirname, `./__fixtures__/${fixture}`),
     'utf8'
@@ -131,6 +131,21 @@ describe('workers/branch/package-json', () => {
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
         '1.22.0'
+      );
+    });
+    it('updates glob resolutions without dep', () => {
+      const upgrade = {
+        depType: 'resolutions',
+        depName: '@angular/cli',
+        managerData: { key: '**/@angular/cli' },
+        newValue: '8.1.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toEqual(
+        '8.1.0'
       );
     });
     it('replaces only the first instance of a value', () => {

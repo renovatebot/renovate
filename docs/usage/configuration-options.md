@@ -11,11 +11,15 @@ You can store your Renovate configuration file in one of the following locations
 
 - `.github/renovate.json`
 - `.github/renovate.json5`
+- `.gitlab/renovate.json`
+- `.gitlab/renovate.json5`
 - `.renovaterc.json`
 - `renovate.json`
 - `renovate.json5`
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
+
+Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`. Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
@@ -333,7 +337,7 @@ Finally, there are cases where Renovate's default `fileMatch` is good, but you m
 ```json
 {
   "dockerfile": {
-    "fileMatch": ["^ACTUALLY_A_DOCKERFILE.template$"]
+    "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"]
   }
 }
 ```
@@ -1169,6 +1173,49 @@ By default, Renovate will detect if it has proposed an update to a project befor
 - Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
+
+## regexManagers
+
+`regexManagers` entries are used to configure the `regex` Manager in Renovate.
+
+Users can define custom managers for cases such as:
+
+- Proprietary file formats or conventions
+- Popular file formats not yet supported as a manager by Renovate
+
+The custom manager concept is based on using Regular Expression named capture groups. For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`). It's not recommended to do both, due to the potential for confusion. It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
+
+For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
+
+### matchStrings
+
+`matchStrings` should each be a valid regular expression, optionally with named capture groups. Currently only a length of one `matchString` is supported.
+
+Example:
+
+```json
+{
+  "matchStrings": [
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  ]
+}
+```
+
+### depNameTemplate
+
+If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field. It will be compiled using `handlebars` and the regex `groups` result.
+
+### lookupNameTemplate
+
+`lookupName` is used for looking up dependency versions. It will be compiled using `handlebars` and the regex `groups` result. It will default to the value of `depName` if left unconfigured/undefined.
+
+### datasourceTemplate
+
+If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field. It will be compiled using `handlebars` and the regex `groups` result.
+
+### versioningTemplate
+
+If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field. It will be compiled using `handlebars` and the regex `groups` result.
 
 ## registryUrls
 

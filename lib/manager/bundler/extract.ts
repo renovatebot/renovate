@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
-import { isValid } from '../../versioning/ruby';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
-import { DATASOURCE_RUBYGEMS } from '../../constants/data-binary-source';
+import * as datasourceRubygems from '../../datasource/rubygems';
+import { SkipReason } from '../../types';
 
 export async function extractPackageFile(
   content: string,
@@ -57,14 +57,11 @@ export async function extractPackageFile(
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
           .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = 'invalid-value';
-        }
       } else {
-        dep.skipReason = 'no-version';
+        dep.skipReason = SkipReason.NoVersion;
       }
       if (!dep.skipReason) {
-        dep.datasource = DATASOURCE_RUBYGEMS;
+        dep.datasource = datasourceRubygems.id;
       }
       res.deps.push(dep);
     }

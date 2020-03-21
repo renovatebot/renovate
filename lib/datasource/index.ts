@@ -15,7 +15,18 @@ import { loadModules } from '../util/modules';
 
 export * from './common';
 
-const datasources = loadModules<Datasource>(__dirname);
+// istanbul ignore next
+function validateDatasource(module, name): boolean {
+  if (!module.getPkgReleases) {
+    return false;
+  }
+  if (module.id !== name) {
+    return false;
+  }
+  return true;
+}
+
+const datasources = loadModules<Datasource>(__dirname, validateDatasource);
 export const getDatasources = (): Record<string, Datasource> => datasources;
 const datasourceList = Object.keys(datasources);
 export const getDatasourceList = (): string[] => datasourceList;
@@ -60,6 +71,10 @@ export async function getPkgReleases(
 ): Promise<ReleaseResult | null> {
   const { datasource } = config;
   const lookupName = config.lookupName || config.depName;
+  if (!lookupName) {
+    logger.error({ config }, 'Datasource getPkgReleases without lookupName');
+    return null;
+  }
   let res;
   try {
     res = await getRawReleases({

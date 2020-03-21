@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import yaml from 'js-yaml';
-
+import { SkipReason } from '../../types';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
 import { platform } from '../../platform';
-import { DATASOURCE_HELM } from '../../constants/data-binary-source';
+import * as datasourceHelm from '../../datasource/helm';
 
 export async function extractPackageFile(
   content: string,
@@ -59,26 +59,26 @@ export async function extractPackageFile(
           return res;
         }
 
-        res.skipReason = 'placeholder-url';
+        res.skipReason = SkipReason.PlaceholderUrl;
       } else {
         try {
           const url = new URL(dep.repository);
           if (url.protocol === 'file:') {
-            res.skipReason = 'local-dependency';
+            res.skipReason = SkipReason.LocalDependency;
           }
         } catch (err) {
           logger.debug({ err }, 'Error parsing url');
-          res.skipReason = 'invalid-url';
+          res.skipReason = SkipReason.InvalidUrl;
         }
       }
     } else {
-      res.skipReason = 'no-repository';
+      res.skipReason = SkipReason.NoRepository;
     }
     return res;
   });
   const res = {
     deps,
-    datasource: DATASOURCE_HELM,
+    datasource: datasourceHelm.id,
   };
   return res;
 }

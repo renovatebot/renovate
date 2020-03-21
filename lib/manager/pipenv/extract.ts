@@ -3,7 +3,8 @@ import toml from 'toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import * as datasourcePypi from '../../datasource/pypi';
+import { SkipReason } from '../../types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
@@ -49,23 +50,23 @@ function extractFromSection(
       const [depName, requirements] = x;
       let currentValue: string;
       let nestedVersion: boolean;
-      let skipReason: string;
+      let skipReason: SkipReason;
       if (requirements.git) {
-        skipReason = 'git-dependency';
+        skipReason = SkipReason.GitDependency;
       } else if (requirements.file) {
-        skipReason = 'file-dependency';
+        skipReason = SkipReason.FileDependency;
       } else if (requirements.path) {
-        skipReason = 'local-dependency';
+        skipReason = SkipReason.LocalDependency;
       } else if (requirements.version) {
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = 'any-version';
+        skipReason = SkipReason.AnyVersion;
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = 'any-version';
+        skipReason = SkipReason.AnyVersion;
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
@@ -73,14 +74,14 @@ function extractFromSection(
           logger.debug(
             `Skipping dependency with malformed package name "${depName}".`
           );
-          skipReason = 'invalid-name';
+          skipReason = SkipReason.InvalidName;
         }
         const specifierMatches = specifierRegex.exec(currentValue);
         if (!specifierMatches) {
           logger.debug(
             `Skipping dependency with malformed version specifier "${currentValue}".`
           );
-          skipReason = 'invalid-version';
+          skipReason = SkipReason.InvalidVersion;
         }
       }
       const dep: PackageDependency = {
@@ -88,13 +89,17 @@ function extractFromSection(
         depName,
         managerData: {},
       };
-      if (currentValue) dep.currentValue = currentValue;
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      }
       if (skipReason) {
         dep.skipReason = skipReason;
       } else {
-        dep.datasource = DATASOURCE_PYPI;
+        dep.datasource = datasourcePypi.id;
       }
-      if (nestedVersion) dep.managerData.nestedVersion = nestedVersion;
+      if (nestedVersion) {
+        dep.managerData.nestedVersion = nestedVersion;
+      }
       if (requirements.index) {
         if (is.array(pipfile.source)) {
           const source = pipfile.source.find(

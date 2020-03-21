@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
+import { regEx } from '../../util/regex';
 
 export async function confirmIfDepUpdated(
   upgrade,
@@ -59,6 +60,10 @@ export async function checkBranchDepsMatchBaseDeps(
   }
 }
 
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 export async function doAutoReplace(
   upgrade,
   existingContent: string,
@@ -77,27 +82,33 @@ export async function doAutoReplace(
     return existingContent;
   }
   const {
+    depName,
     currentValue,
     newValue,
     currentDigest,
     newDigest,
     autoReplaceData,
   } = upgrade;
-  const { replaceString } = autoReplaceData;
+  const replaceString = autoReplaceData?.replaceString || currentValue;
+  logger.trace({ depName, replaceString }, 'autoReplace replaceString');
+  let searchIndex = existingContent.indexOf(replaceString);
+  if (searchIndex === -1) {
+    logger.error(
+      { depName },
+      'Cannot find replaceString in current file content'
+    );
+    throw new Error(WORKER_FILE_UPDATE_FAILED);
+  }
   try {
-    let newString = replaceString;
-    do {
-      newString = newString.replace(currentValue, newValue);
-    } while (newString.includes(currentValue));
-    if (currentDigest) {
-      do {
-        newString = newString.replace(currentDigest, newDigest);
-      } while (newString.includes(currentDigest));
-    }
-    let searchIndex = existingContent.indexOf(replaceString);
-    if (searchIndex === -1) {
-      logger.error('Cannot find replaceString in current file content');
-      throw new Error(WORKER_FILE_UPDATE_FAILED);
+    let newString = replaceString.replace(
+      regEx(escapeRegExp(currentValue), 'g'),
+      newValue
+    );
+    if (currentDigest && newDigest) {
+      newString = newString.replace(
+        regEx(escapeRegExp(currentDigest), 'g'),
+        newDigest
+      );
     }
     logger.debug(`Starting search at index ${searchIndex}`);
     // Iterate through the rest of the file
@@ -117,9 +128,9 @@ export async function doAutoReplace(
         }
       }
     }
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'doAutoReplace error');
   }
-  logger.error('Could not autoReplace');
+  // istanbul ignore next
   throw new Error(WORKER_FILE_UPDATE_FAILED);
 }

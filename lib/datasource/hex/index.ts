@@ -1,52 +1,57 @@
 import { logger } from '../../logger';
 import got from '../../util/got';
-import { DatasourceError, ReleaseResult, PkgReleaseConfig } from '../common';
-import { DATASOURCE_HEX } from '../../constants/data-binary-source';
+import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+
+export const id = 'hex';
 
 interface HexRelease {
   html_url: string;
   meta?: { links?: Record<string, string> };
-  releases?: { version: string }[];
+  releases?: {
+    version: string;
+    inserted_at?: string;
+  }[];
 }
 
 export async function getPkgReleases({
   lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('hex lookup failure: No lookupName');
-    return null;
-  }
-
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
-  // depName:organizationName
-  // depName is used to pass it in hex dep url
+  // hexPackageName:organizationName
+  // hexPackageName is used to pass it in hex dep url
   // organizationName is used for accessing to private deps
-  const depName = lookupName.split(':')[0];
-  const hexUrl = `https://hex.pm/api/packages/${depName}`;
+  const hexPackageName = lookupName.split(':')[0];
+  const hexUrl = `https://hex.pm/api/packages/${hexPackageName}`;
   try {
     const response = await got(hexUrl, {
       json: true,
-      hostType: DATASOURCE_HEX,
+      hostType: id,
     });
 
     const hexRelease: HexRelease = response.body;
 
     if (!hexRelease) {
-      logger.warn({ depName }, `Invalid response body`);
+      logger.warn({ datasource: 'hex', lookupName }, `Invalid response body`);
       return null;
     }
 
     const { releases = [], html_url: homepage, meta } = hexRelease;
 
     if (releases.length === 0) {
-      logger.debug(`No versions found for ${depName} (${hexUrl})`); // prettier-ignore
+      logger.debug(`No versions found for ${hexPackageName} (${hexUrl})`); // prettier-ignore
       return null;
     }
 
     const result: ReleaseResult = {
-      releases: releases.map(({ version }) => ({ version })),
+      releases: releases.map(({ version, inserted_at }) =>
+        inserted_at
+          ? {
+              version,
+              releaseTimestamp: inserted_at,
+            }
+          : { version }
+      ),
     };
 
     if (homepage) {
@@ -59,7 +64,7 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    const errorData = { depName, err };
+    const errorData = { lookupName, err };
 
     if (
       err.statusCode === 429 ||

@@ -17,6 +17,7 @@ async function prefetchDockerImage(taggedImage: string): Promise<void> {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     prefetchedImages.add(taggedImage);
     await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
+    logger.debug(`Finished fetching Docker image`);
   }
 }
 
@@ -25,7 +26,9 @@ export function resetPrefetchedImages(): void {
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
-  if (typeof x === 'string') return [x, x];
+  if (typeof x === 'string') {
+    return [x, x];
+  }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
     if (typeof from === 'string' && typeof to === 'string') {
@@ -105,6 +108,54 @@ async function getDockerTag(
   return 'latest';
 }
 
+function getContainerName(image: string): string {
+  return image.replace(/\//g, '_');
+}
+
+export async function removeDockerContainer(image): Promise<void> {
+  const containerName = getContainerName(image);
+  try {
+    const res = await rawExec(
+      `docker ps --filter name=${containerName} -aq | xargs --no-run-if-empty docker rm -f`,
+      { encoding: 'utf-8' }
+    );
+    if (res?.stdout?.trim().length) {
+      const containerId = res.stdout.trim();
+      logger.info(
+        { image, containerName, containerId },
+        'Finished Docker container removal'
+      );
+    } else {
+      logger.trace({ image, containerName }, 'No running containers to remove');
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.trace({ err }, 'removeDockerContainer err');
+    logger.info({ image, containerName }, 'Could not remove Docker container');
+  }
+}
+
+// istanbul ignore next
+export async function removeDanglingContainers(): Promise<void> {
+  try {
+    const res = await rawExec(
+      `docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f`,
+      { encoding: 'utf-8' }
+    );
+    if (res?.stdout?.trim().length) {
+      const containerIds = res.stdout
+        .trim()
+        .split('\n')
+        .map(container => container.trim())
+        .filter(Boolean);
+      logger.debug({ containerIds }, 'Removed dangling child containers');
+    } else {
+      logger.trace('No dangling containers to remove');
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Error removing dangling containers');
+  }
+}
+
 export async function generateDockerCommand(
   commands: string[],
   options: DockerOptions,
@@ -117,7 +168,12 @@ export async function generateDockerCommand(
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
-  if (dockerUser) result.push(`--user=${dockerUser}`);
+  const containerName = getContainerName(image);
+  result.push(`--name=${containerName}`);
+  result.push(`--label=renovate_child`);
+  if (dockerUser) {
+    result.push(`--user=${dockerUser}`);
+  }
 
   result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
 
@@ -129,7 +185,9 @@ export async function generateDockerCommand(
     );
   }
 
-  if (cwd) result.push(`-w "${cwd}"`);
+  if (cwd) {
+    result.push(`-w "${cwd}"`);
+  }
 
   let tag;
   if (options.tag) {

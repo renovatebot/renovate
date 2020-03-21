@@ -10,7 +10,7 @@
   ],
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": "at any time",
+    "schedule": ["at any time"],
     "stabilityDays": 0,
     "masterIssueApproval": true
   },
@@ -54,6 +54,15 @@
     {
       "paths": ["**/__fixtures__/**"],
       "enabled": false
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
     }
   ]
 }

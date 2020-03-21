@@ -1,6 +1,8 @@
 import { URLSearchParams } from 'url';
 import { api, GiteaGotOptions } from './gitea-got-wrapper';
 import { GotResponse } from '../common';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import { BranchStatus } from '../../types';
 
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
@@ -287,7 +289,7 @@ export async function closePR(
 ): Promise<void> {
   await updatePR(repoPath, idx, {
     ...options,
-    state: 'closed',
+    state: PR_STATE_CLOSED,
   });
 }
 
@@ -472,6 +474,27 @@ export async function createCommitStatus(
 
   return res.body;
 }
+
+export const giteaToRenovateStatusMapping: Record<
+  CommitStatusType,
+  BranchStatus | null
+> = {
+  unknown: BranchStatus.yellow,
+  success: BranchStatus.green,
+  pending: BranchStatus.yellow,
+  warning: BranchStatus.red,
+  failure: BranchStatus.red,
+  error: BranchStatus.red,
+};
+
+export const renovateToGiteaStatusMapping: Record<
+  BranchStatus,
+  CommitStatusType
+> = {
+  green: 'success',
+  yellow: 'pending',
+  red: 'failure',
+};
 
 export async function getCombinedCommitStatus(
   repoPath: string,

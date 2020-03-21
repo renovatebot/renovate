@@ -16,12 +16,6 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["lib/**/*", "test/**/*", "tools"],
-  "exclude": [
-    "node_modules",
-    "./.cache",
-    "./dist",
-    "**/__mocks__/*",
-    "**/__fixtures__/*"
-  ]
+  "include": ["lib/**/*", "test/**/*", "tools/**/*.mjs"],
+  "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
 }

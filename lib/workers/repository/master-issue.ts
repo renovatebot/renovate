@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { platform, Pr } from '../../platform';
 import { BranchConfig } from '../common';
 import { RenovateConfig } from '../../config';
+import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';
@@ -182,7 +183,7 @@ export async function ensureMasterIssue(
       const pr = await platform.findPr({
         branchName: branch.branchName,
         prTitle: branch.prTitle,
-        state: '!open',
+        state: PR_STATE_NOT_OPEN,
       });
       issueBody += getListItem(branch, 'recreate', pr);
     }

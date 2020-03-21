@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { getOptions, RenovateOptions } from './definitions';
 import { RenovateConfig } from './common';
 import { logger } from '../logger';
-import { DATASOURCE_DOCKER } from '../constants/data-binary-source';
+import * as datasourceDocker from '../datasource/docker';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
@@ -67,7 +67,7 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
 
   if (env.DOCKER_USERNAME && env.DOCKER_PASSWORD) {
     config.hostRules.push({
-      hostType: DATASOURCE_DOCKER,
+      hostType: datasourceDocker.id,
       username: env.DOCKER_USERNAME,
       password: env.DOCKER_PASSWORD,
     });

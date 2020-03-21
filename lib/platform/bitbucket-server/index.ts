@@ -18,6 +18,8 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
+  EnsureIssueConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -27,12 +29,9 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { BranchStatus } from '../../types';
+import { RenovateConfig } from '../../config';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -78,11 +77,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: {
-  endpoint: string;
-  username: string;
-  password: string;
-}): PlatformConfig {
+}: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
@@ -97,7 +92,7 @@ export function initPlatform({
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
   };
-  return platformConfig;
+  return Promise.resolve(platformConfig);
 }
 
 // Get all repositories that the user has access to
@@ -119,12 +114,13 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   logger.debug(`cleanRepo()`);
   if (config.storage) {
     config.storage.cleanRepo();
   }
   config = {} as any;
+  return Promise.resolve();
 }
 
 // Initialize GitLab by getting base branch
@@ -163,8 +159,11 @@ export async function initRepo({
       const { body } = await api.get<FileData>(
         `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
       );
-      if (!body.isLastPage) logger.warn('Renovate config to big: ' + body.size);
-      else renovateConfig = JSON.parse(body.lines.join());
+      if (!body.isLastPage) {
+        logger.warn('Renovate config to big: ' + body.size);
+      } else {
+        renovateConfig = JSON.parse(body.lines.join());
+      }
     } catch {
       // Do nothing
     }
@@ -235,13 +234,13 @@ export async function initRepo({
   }
 }
 
-export function getRepoForceRebase(): boolean {
+export function getRepoForceRebase(): Promise<boolean> {
   logger.debug(`getRepoForceRebase()`);
   // TODO if applicable
   // This function should return true only if the user has enabled a setting on the repo that enforces PRs to be kept up to date with master
   // In such cases we rebase Renovate branches every time they fall behind
   // In GitHub this is part of "branch protection"
-  return false;
+  return Promise.resolve(false);
 }
 
 export async function setBaseBranch(
@@ -306,7 +305,7 @@ export async function getPr(
 
   pr.version = updatePrVersion(pr.number, pr.version);
 
-  if (pr.state === 'open') {
+  if (pr.state === PR_STATE_OPEN) {
     const mergeRes = await api.get(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
       { useCache: !refreshCache }
@@ -351,7 +350,7 @@ export async function getPr(
 // TODO: coverage
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -399,7 +398,7 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
@@ -421,7 +420,7 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: 'open',
+    state: PR_STATE_OPEN,
   });
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
@@ -525,8 +524,8 @@ async function getStatus(
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks?: string[] | boolean | null
-): Promise<string> {
+  requiredStatusChecks?: string[] | null
+): Promise<BranchStatus> {
   logger.debug(
     `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
   );
@@ -534,7 +533,7 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
 
   if (!(await branchExists(branchName))) {
@@ -546,14 +545,18 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return BRANCH_STATUS_FAILED;
-    if (commitStatus.inProgress > 0) return BRANCH_STATUS_PENDING;
+    if (commitStatus.failed > 0) {
+      return BranchStatus.red;
+    }
+    if (commitStatus.inProgress > 0) {
+      return BranchStatus.yellow;
+    }
     return commitStatus.successful > 0
-      ? BRANCH_STATUS_SUCCESS
-      : BRANCH_STATUS_PENDING;
+      ? BranchStatus.green
+      : BranchStatus.yellow;
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
 }
 
@@ -574,7 +577,7 @@ async function getStatusCheck(
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
   try {
@@ -584,12 +587,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return BRANCH_STATUS_SUCCESS;
+            return BranchStatus.green;
           case 'INPROGRESS':
-            return BRANCH_STATUS_PENDING;
+            return BranchStatus.yellow;
           case 'FAILED':
           default:
-            return BRANCH_STATUS_FAILURE;
+            return BranchStatus.red;
         }
       }
     }
@@ -624,13 +627,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case BRANCH_STATUS_SUCCESS:
+      case BranchStatus.green:
         body.state = 'SUCCESSFUL';
         break;
-      case BRANCH_STATUS_PENDING:
+      case BranchStatus.yellow:
         body.state = 'INPROGRESS';
         break;
-      case BRANCH_STATUS_FAILURE:
+      case BranchStatus.red:
       default:
         body.state = 'FAILED';
         break;
@@ -658,7 +661,7 @@ export async function setBranchStatus({
 
 export /* istanbul ignore next */ function findIssue(
   title: string
-): Issue | null {
+): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -666,10 +669,9 @@ export /* istanbul ignore next */ function findIssue(
   return null;
 }
 
-export /* istanbul ignore next */ function ensureIssue(
-  title: string,
-  body: string
-): Promise<'updated' | 'created' | null> {
+export /* istanbul ignore next */ function ensureIssue({
+  title,
+}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"

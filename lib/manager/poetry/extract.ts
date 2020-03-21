@@ -3,7 +3,8 @@ import { isValid } from '../../versioning/poetry';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import { PoetryFile, PoetrySection } from './types';
-import { DATASOURCE_PYPI } from '../../constants/data-binary-source';
+import * as datasourcePypi from '../../datasource/pypi';
+import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -15,7 +16,7 @@ function extractFromSection(
     return [];
   }
   Object.keys(sectionContent).forEach(depName => {
-    let skipReason: string;
+    let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     if (typeof currentValue !== 'string') {
@@ -26,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = 'path-dependency';
+          skipReason = SkipReason.PathDependency;
         }
         if (git) {
-          skipReason = 'git-dependency';
+          skipReason = SkipReason.GitDependency;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = 'path-dependency';
+        skipReason = SkipReason.PathDependency;
       } else if (git) {
         currentValue = '';
-        skipReason = 'git-dependency';
+        skipReason = SkipReason.GitDependency;
       } else {
         currentValue = '';
-        skipReason = 'multiple-constraint-dep';
+        skipReason = SkipReason.MultipleConstraintDep;
       }
     }
     const dep: PackageDependency = {
@@ -47,12 +48,12 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as string,
       managerData: { nestedVersion },
-      datasource: DATASOURCE_PYPI,
+      datasource: datasourcePypi.id,
     };
     if (skipReason) {
       dep.skipReason = skipReason;
     } else if (!isValid(dep.currentValue)) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = SkipReason.UnknownVersion;
     }
     deps.push(dep);
   });

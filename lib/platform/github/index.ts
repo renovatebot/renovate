@@ -18,6 +18,7 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  EnsureIssueResult,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -39,11 +40,12 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { BranchStatus } from '../../types';
 import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+  PR_STATE_ALL,
+  PR_STATE_CLOSED,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -178,13 +180,14 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): void {
+export function cleanRepo(): Promise<void> {
   // istanbul ignore if
   if (config.storage) {
     config.storage.cleanRepo();
   }
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
+  return Promise.resolve();
 }
 
 async function getBranchProtection(
@@ -756,7 +759,7 @@ async function getOpenPrs(): Promise<PrList> {
       for (const pr of res.data.repository.pullRequests.nodes) {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = 'open';
+        pr.state = PR_STATE_OPEN;
         pr.branchName = pr.headRefName;
         const branchName = pr.branchName;
         const prNo = pr.number;
@@ -879,7 +882,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   }
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === 'open') {
+  if (pr.state === PR_STATE_OPEN) {
     pr.isModified = true;
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
@@ -972,7 +975,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
+  if (desiredState === PR_STATE_ALL) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -1011,7 +1014,7 @@ export async function getPrList(): Promise<Pr[]> {
         sha: pr.head.sha,
         title: pr.title,
         state:
-          pr.state === 'closed' && pr.merged_at && pr.merged_at.length
+          pr.state === PR_STATE_CLOSED && pr.merged_at && pr.merged_at.length
             ? /* istanbul ignore next */ 'merged'
             : pr.state,
         createdAt: pr.created_at,
@@ -1028,7 +1031,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = 'all',
+  state = PR_STATE_ALL,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -1048,20 +1051,23 @@ export async function findPr({
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({ branchName, state: 'open' });
+  const existingPr = await findPr({
+    branchName,
+    state: PR_STATE_OPEN,
+  });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
 type BranchState = 'failure' | 'pending' | 'success';
 
-interface BranchStatus {
+interface GhBranchStatus {
   context: string;
   state: BranchState;
 }
 
 interface CombinedBranchStatus {
   state: BranchState;
-  statuses: BranchStatus[];
+  statuses: GhBranchStatus[];
 }
 
 async function getStatus(
@@ -1079,17 +1085,17 @@ async function getStatus(
 export async function getBranchStatus(
   branchName: string,
   requiredStatusChecks: any
-): Promise<string> {
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   let commitStatus;
   try {
@@ -1148,27 +1154,33 @@ export async function getBranchStatus(
     }
   }
   if (checkRuns.length === 0) {
-    return commitStatus.state;
+    if (commitStatus.state === 'success') {
+      return BranchStatus.green;
+    }
+    if (commitStatus.state === 'failed') {
+      return BranchStatus.red;
+    }
+    return BranchStatus.yellow;
   }
   if (
     commitStatus.state === 'failed' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
     checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
   ) {
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
-  return BRANCH_STATUS_PENDING;
+  return BranchStatus.yellow;
 }
 
 async function getStatusCheck(
   branchName: string,
   useCache = true
-): Promise<BranchStatus[]> {
+): Promise<GhBranchStatus[]> {
   const branchCommit = await config.storage.getBranchCommit(branchName);
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
@@ -1176,15 +1188,23 @@ async function getStatusCheck(
   return (await api.get(url, { useCache })).body;
 }
 
+const githubToRenovateStatusMapping = {
+  success: BranchStatus.green,
+  failed: BranchStatus.red,
+  pending: BranchStatus.yellow,
+};
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string> {
+): Promise<BranchStatus | null> {
   try {
     const res = await getStatusCheck(branchName);
     for (const check of res) {
       if (check.context === context) {
-        return check.state;
+        return (
+          githubToRenovateStatusMapping[check.state] || BranchStatus.yellow
+        );
       }
     }
     return null;
@@ -1217,8 +1237,13 @@ export async function setBranchStatus({
   try {
     const branchCommit = await config.storage.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    const renovateToGitHubStateMapping = {
+      green: 'success',
+      yellow: 'pending',
+      red: 'failure',
+    };
     const options: any = {
-      state,
+      state: renovateToGitHubStateMapping[state],
       description,
       context,
     };
@@ -1346,7 +1371,7 @@ export async function ensureIssue({
   body: rawBody,
   once = false,
   shouldReOpen = true,
-}: EnsureIssueConfig): Promise<string | null> {
+}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   const body = sanitize(rawBody);
   try {
@@ -1685,7 +1710,7 @@ export async function createPr({
       branchName,
       context: `renovate/verify`,
       description: `Renovate verified pull request`,
-      state: BRANCH_STATUS_SUCCESS,
+      state: BranchStatus.green,
       url: 'https://github.com/renovatebot/renovate',
     });
   }
