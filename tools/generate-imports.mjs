@@ -1,11 +1,9 @@
 import shell from 'shelljs';
 import fs from 'fs-extra';
 
-/**
- *
- * @param {string} dirname
- * @returns string[]
- */
+shell.echo('generating imports');
+const newFiles = new Set();
+
 function findModules(dirname) {
   return fs
     .readdirSync(dirname, { withFileTypes: true })
@@ -14,10 +12,13 @@ function findModules(dirname) {
     .filter(name => !name.startsWith('__'))
     .sort();
 }
-
-const newFiles = new Set();
-
-shell.echo('generating imports');
+function updateFile(file, code) {
+  const oldCode = fs.existsSync(file) ? fs.readFileSync(file) : null;
+  if (code !== oldCode) {
+    fs.writeFileSync(file, code);
+  }
+  newFiles.add(file);
+}
 
 let code = `
 import { Datasource } from './common';
@@ -28,11 +29,7 @@ for (const ds of findModules('lib/datasource')) {
   code += `api.set('${ds}', import('./${ds}'));\n`;
 }
 
-const oldCode = fs.readFileSync('lib/datasource/api.generated.ts');
-if (code !== oldCode) {
-  fs.writeFileSync('lib/datasource/api.generated.ts', code);
-}
-newFiles.add('lib/datasource/api.generated.ts');
+updateFile('lib/datasource/api.generated.ts', code);
 
 for (const file of shell
   .find('lib/**/*.generated.ts')
