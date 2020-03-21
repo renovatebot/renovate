@@ -1,7 +1,7 @@
 import * as findUp from 'find-up';
 import * as path from 'path';
 import { XmlDocument } from 'xmldoc';
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
@@ -9,15 +9,19 @@ import * as semverVersioning from '../../versioning/semver';
 import * as datasourceNuget from '../../datasource/nuget';
 import { SkipReason } from '../../types';
 
-function determineRegistryUrls(packageFile: string): string[] {
+function determineRegistryUrls(
+  packageFile: string,
+  localDir: string
+): string[] {
   const registryUrls = [datasourceNuget.getDefaultFeed()];
   const nuGetConfigPath = findUp.sync('NuGet.config', {
     cwd: path.dirname(packageFile),
+    type: 'file',
   });
-  if (nuGetConfigPath) {
+  if (nuGetConfigPath && nuGetConfigPath.startsWith(localDir)) {
     logger.info(`found NuGet.config at '${nuGetConfigPath}'`);
     const nuGetConfig = new XmlDocument(
-      fs.readFileSync(nuGetConfigPath).toString()
+      readFileSync(nuGetConfigPath).toString()
     );
     const packageSources = nuGetConfig.childNamed('packageSources');
     if (packageSources) {
@@ -50,7 +54,7 @@ export function extractPackageFile(
   const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
-  const registryUrls = determineRegistryUrls(packageFile);
+  const registryUrls = determineRegistryUrls(packageFile, config.localDir);
 
   let lineNumber = 0;
   for (const line of content.split('\n')) {

@@ -1,11 +1,14 @@
 import { readFileSync } from 'fs';
+import * as path from 'path';
 import { extractPackageFile } from './extract';
 
 describe('lib/manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
-      config = {};
+      config = {
+        localDir: path.resolve('lib/manager/nuget/__fixtures__'),
+      };
     });
     it('returns empty for invalid csproj', () => {
       expect(

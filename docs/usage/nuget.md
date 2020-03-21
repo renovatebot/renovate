@@ -26,7 +26,7 @@ To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style p
 
 ## Alternate feeds
 
-Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative nuget feeds. Alternative feeds can be specified either [in the `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) or in Renovate configuration options:
+Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative nuget feeds. Alternative feeds can be specified either [in a `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository) or in Renovate configuration options:
 
 ```json
 "nuget": {
