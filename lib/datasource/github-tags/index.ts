@@ -134,6 +134,8 @@ async function getReleases(
       getCacheKey(repo, 'commit-timestamps')
     )) || {};
 
+  let updateCache = false;
+
   const queue = tags.map(tag => (): Promise<void> => {
     const release: Release = {
       version: tag.name,
@@ -154,6 +156,7 @@ async function getReleases(
 
     if (commitUrl && commitHash) {
       if (cached[commitHash] === undefined) {
+        updateCache = true;
         return ghGot<GithubCommit>(commitUrl, {
           paginate: true,
         })
@@ -173,12 +176,14 @@ async function getReleases(
 
   await pAll(queue, { concurrency: 5 });
 
-  await renovateCache.set<GithubCommitTimestamps>(
-    cacheNamespace,
-    getCacheKey(repo, 'commit-timestamps'),
-    cached,
-    2 * 24 * 60
-  );
+  if (updateCache) {
+    await renovateCache.set<GithubCommitTimestamps>(
+      cacheNamespace,
+      getCacheKey(repo, 'commit-timestamps'),
+      cached,
+      2 * 24 * 60
+    );
+  }
 
   return result;
 }
