@@ -122,7 +122,7 @@ type GithubCommit = {
 
 type GithubCommitTimestamps = Record<string, string | null>;
 
-async function getReleases(
+async function getReleasesWithTimestamp(
   repo: string,
   tags: GithubTag[] | null
 ): Promise<Release[]> | null {
@@ -225,7 +225,7 @@ export async function getPkgReleases({
     return null;
   }
 
-  const releases = await getReleases(repo, tags);
+  const releases = await getReleasesWithTimestamp(repo, tags);
   const dependency: ReleaseResult = {
     sourceUrl: 'https://github.com/' + repo,
     releases,
