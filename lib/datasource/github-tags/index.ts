@@ -136,7 +136,7 @@ async function getReleasesWithTimestamp(
 
   let updateCache = false;
 
-  const queue = tags.map(tag => (): Promise<void> => {
+  const queue = tags.map(tag => async (): Promise<void> => {
     const release: Release = {
       version: tag.name,
       gitRef: tag.name,
@@ -144,7 +144,7 @@ async function getReleasesWithTimestamp(
 
     const commitHash = tag?.commit?.sha;
 
-    const finalize = (releaseTimestamp: string = null): void => {
+    const setReleaseTimestamp = (releaseTimestamp: string): void => {
       cached[commitHash] = releaseTimestamp;
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
@@ -155,25 +155,22 @@ async function getReleasesWithTimestamp(
     const commitUrl = tag?.commit?.url;
 
     if (commitUrl && commitHash) {
-      if (cached[commitHash] === undefined) {
-        updateCache = true;
-        return ghGot<GithubCommit>(commitUrl, {
-          paginate: true,
-        })
-          .then<void>(res => {
-            const releaseTimestamp = res.body.commit?.author?.date;
-            return finalize(releaseTimestamp);
-          })
-          .catch(err => {
-            logger.debug({ repo, err }, 'Error retrieving github commit');
-            finalize();
-          });
+      if (cached[commitHash] !== undefined) {
+        return setReleaseTimestamp(cached[commitHash]);
       }
-      finalize(cached[commitHash]);
-    } else {
-      finalize();
+
+      updateCache = true;
+      try {
+        const res = await ghGot<GithubCommit>(commitUrl, {
+          paginate: true,
+        });
+        const releaseTimestamp = res.body.commit?.author?.date;
+        return setReleaseTimestamp(releaseTimestamp);
+      } catch (err) {
+        logger.debug({ repo, err }, 'Error retrieving github commit');
+      }
     }
-    return null;
+    return setReleaseTimestamp(null);
   });
 
   await pAll(queue, { concurrency: 5 });
