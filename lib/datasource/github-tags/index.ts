@@ -133,9 +133,12 @@ async function getReleasesWithTimestamp(
     cacheNamespace,
     repoCacheKey
   );
-  repoTimestamps = repoTimestamps || {};
 
-  let updateCache = false;
+  let newCache = false;
+  if (!repoTimestamps) {
+    newCache = true;
+    repoTimestamps = {};
+  }
 
   const queue = tags.map(tag => async (): Promise<void> => {
     const release: Release = {
@@ -146,7 +149,10 @@ async function getReleasesWithTimestamp(
     const commitHash = tag?.commit?.sha;
 
     const setReleaseTimestamp = (releaseTimestamp: string): void => {
-      repoTimestamps[commitHash] = releaseTimestamp;
+      if (newCache) {
+        repoTimestamps[commitHash] = releaseTimestamp;
+      }
+
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
@@ -160,7 +166,6 @@ async function getReleasesWithTimestamp(
         return setReleaseTimestamp(repoTimestamps[commitHash]);
       }
 
-      updateCache = true;
       try {
         const res = await ghGot<GithubCommit>(commitUrl);
         const releaseTimestamp = res.body.commit?.author?.date;
@@ -174,7 +179,7 @@ async function getReleasesWithTimestamp(
 
   await pAll(queue, { concurrency: 5 });
 
-  if (updateCache) {
+  if (newCache) {
     await renovateCache.set<CachedRepoTimestamps>(
       cacheNamespace,
       getCacheKey(repo, 'commit-timestamps'),
