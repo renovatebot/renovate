@@ -4,6 +4,11 @@ import fs from 'fs-extra';
 shell.echo('generating imports');
 const newFiles = new Set();
 
+if (!fs.existsSync('lib')) {
+  shell.echo('> missing sources');
+  shell.exit(0);
+}
+
 function findModules(dirname) {
   return fs
     .readdirSync(dirname, { withFileTypes: true })
