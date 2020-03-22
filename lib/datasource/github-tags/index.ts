@@ -120,7 +120,7 @@ type GithubCommit = {
   };
 };
 
-type GithubCommitTimestamps = Record<string, string | null>;
+type CachedRepoTimestamps = Record<string, string | null>;
 
 async function getReleasesWithTimestamp(
   repo: string,
@@ -128,11 +128,12 @@ async function getReleasesWithTimestamp(
 ): Promise<Release[]> | null {
   const result: Release[] = [];
 
-  const cached =
-    (await renovateCache.get<GithubCommitTimestamps>(
-      cacheNamespace,
-      getCacheKey(repo, 'commit-timestamps')
-    )) || {};
+  const repoCacheKey = getCacheKey(repo, 'commit-timestamps');
+  let repoTimestamps = await renovateCache.get<CachedRepoTimestamps>(
+    cacheNamespace,
+    repoCacheKey
+  );
+  repoTimestamps = repoTimestamps || {};
 
   let updateCache = false;
 
@@ -145,7 +146,7 @@ async function getReleasesWithTimestamp(
     const commitHash = tag?.commit?.sha;
 
     const setReleaseTimestamp = (releaseTimestamp: string): void => {
-      cached[commitHash] = releaseTimestamp;
+      repoTimestamps[commitHash] = releaseTimestamp;
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
@@ -155,15 +156,13 @@ async function getReleasesWithTimestamp(
     const commitUrl = tag?.commit?.url;
 
     if (commitUrl && commitHash) {
-      if (cached[commitHash] !== undefined) {
-        return setReleaseTimestamp(cached[commitHash]);
+      if (repoTimestamps[commitHash] !== undefined) {
+        return setReleaseTimestamp(repoTimestamps[commitHash]);
       }
 
       updateCache = true;
       try {
-        const res = await ghGot<GithubCommit>(commitUrl, {
-          paginate: true,
-        });
+        const res = await ghGot<GithubCommit>(commitUrl);
         const releaseTimestamp = res.body.commit?.author?.date;
         return setReleaseTimestamp(releaseTimestamp);
       } catch (err) {
@@ -176,10 +175,10 @@ async function getReleasesWithTimestamp(
   await pAll(queue, { concurrency: 5 });
 
   if (updateCache) {
-    await renovateCache.set<GithubCommitTimestamps>(
+    await renovateCache.set<CachedRepoTimestamps>(
       cacheNamespace,
       getCacheKey(repo, 'commit-timestamps'),
-      cached,
+      repoTimestamps,
       2 * 24 * 60
     );
   }
