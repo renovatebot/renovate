@@ -198,7 +198,9 @@ export async function ensurePr(
 
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
-        if (logJSON.project) upgrade.githubName = logJSON.project.github;
+        if (logJSON.project) {
+          upgrade.githubName = logJSON.project.github;
+        }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
         if (

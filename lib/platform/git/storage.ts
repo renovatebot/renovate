@@ -518,7 +518,9 @@ export class Storage {
       if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
         fileNames.unshift('-f');
       }
-      if (fileNames.length) await this._git.add(fileNames);
+      if (fileNames.length) {
+        await this._git.add(fileNames);
+      }
       if (deleted.length) {
         for (const f of deleted) {
           try {

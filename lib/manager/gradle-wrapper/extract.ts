@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import * as semverVersioning from '../../versioning/semver';
 import * as datasourceGradleVersion from '../../datasource/gradle-version';
+import { DISTRIBUTION_CHECKSUM_REGEX, DISTRIBUTION_URL_REGEX } from './search';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.debug('gradle-wrapper.extractPackageFile()');
@@ -10,22 +11,23 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
   let lineNumber = 0;
   for (const line of lines) {
-    const match = /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/.exec(
-      line
-    );
-    if (match) {
+    const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
+    if (distributionUrlMatch) {
       const dependency: PackageDependency = {
         datasource: datasourceGradleVersion.id,
         depType: 'gradle-wrapper',
         depName: 'gradle',
-        currentValue: coerce(match[1]).toString(),
-        managerData: { lineNumber, gradleWrapperType: match[3] },
+        currentValue: coerce(distributionUrlMatch.groups.version).toString(),
+        managerData: {
+          lineNumber,
+          gradleWrapperType: distributionUrlMatch.groups.type,
+        },
         versioning: semverVersioning.id,
       };
 
       let shaLineNumber = 0;
       for (const shaLine of lines) {
-        const shaMatch = /^distributionSha256Sum=((\w){64}).*$/.test(shaLine);
+        const shaMatch = DISTRIBUTION_CHECKSUM_REGEX.test(shaLine);
         if (shaMatch) {
           dependency.managerData.checksumLineNumber = shaLineNumber;
           break;

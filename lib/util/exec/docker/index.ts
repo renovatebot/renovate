@@ -26,7 +26,9 @@ export function resetPrefetchedImages(): void {
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
-  if (typeof x === 'string') return [x, x];
+  if (typeof x === 'string') {
+    return [x, x];
+  }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
     if (typeof from === 'string' && typeof to === 'string') {
@@ -126,7 +128,7 @@ export async function removeDockerContainer(image): Promise<void> {
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.trace({ err }, 'removeDockerContainer err');
     logger.info({ image, containerName }, 'Could not remove Docker container');
   }
@@ -169,7 +171,9 @@ export async function generateDockerCommand(
   const containerName = getContainerName(image);
   result.push(`--name=${containerName}`);
   result.push(`--label=renovate_child`);
-  if (dockerUser) result.push(`--user=${dockerUser}`);
+  if (dockerUser) {
+    result.push(`--user=${dockerUser}`);
+  }
 
   result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
 
@@ -181,7 +185,9 @@ export async function generateDockerCommand(
     );
   }
 
-  if (cwd) result.push(`-w "${cwd}"`);
+  if (cwd) {
+    result.push(`-w "${cwd}"`);
+  }
 
   let tag;
   if (options.tag) {
