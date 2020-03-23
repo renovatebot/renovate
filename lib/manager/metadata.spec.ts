@@ -1,7 +1,5 @@
 import * as fs from 'fs-extra';
 
-const codeRe = /^```/;
-
 describe('manager metadata', () => {
   const managerList: string[] = fs
     .readdirSync(__dirname, { withFileTypes: true })
