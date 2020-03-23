@@ -83,7 +83,7 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 
 - Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements).
 - Open the repository folder in VS Code
-- Choose "Reopen in Container" via the command palette or the small button in the lower left corner. 
+- Choose "Reopen in Container" via the command palette or the small button in the lower left corner.
 
 VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
