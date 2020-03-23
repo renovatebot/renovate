@@ -49,7 +49,7 @@ RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
 # renovate: datasource=github-releases depName=docker/docker-ce versioning=docker
-ENV DOCKER_VERSION=19.03.5
+ENV DOCKER_VERSION=v19.03.8
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
     && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
