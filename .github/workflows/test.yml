@@ -30,7 +30,7 @@ jobs:
             node-version: 10
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 && github.ref != 'refs/heads/master' }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
 
     steps:
       - name: Set up Node.js ${{ matrix.node-version }}
