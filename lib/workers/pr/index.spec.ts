@@ -56,7 +56,7 @@ function setupGitlabChangelogMock() {
   const resultValue = {
     project: {
       baseURL: 'https://gitlab.com/',
-      github: 'renovateapp/gitlabdummy',
+      gitlab: 'renovateapp/gitlabdummy',
       repository: 'https://gitlab.com/renovateapp/gitlabdummy',
     },
     hasReleaseNotes: true,
@@ -221,16 +221,8 @@ describe('workers/pr', () => {
     it('should create PR if success for gitlab deps', async () => {
       setupGitlabChangelogMock();
       config.branchName = 'renovate/gitlabdummy-1.x';
-      config.prTitle = 'Update dependency dummy to v1.1.0';
-      config.depType = 'devDependencies';
       config.depName = 'gitlabdummy';
-      config.privateRepo = true;
-      config.displayFrom = '1.0.0';
-      config.displayTo = '1.1.0';
-      config.updateType = 'minor';
-      config.homepage = 'https://dummy.com';
       config.sourceUrl = 'https://gitlab.com/renovateapp/gitlabdummy';
-      config.sourceDirectory = 'packages/a';
       config.changelogUrl =
         'https://gitlab.com/renovateapp/gitlabdummy/changelog.md';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
@@ -243,16 +235,8 @@ describe('workers/pr', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
       config.branchName = 'renovate/dummy-1.x';
-      config.prTitle = 'Update dependency dummy to v1.1.0';
-      config.depType = 'devDependencies';
       config.depName = 'dummy';
-      config.privateRepo = true;
-      config.displayFrom = '1.0.0';
-      config.displayTo = '1.1.0';
-      config.updateType = 'minor';
-      config.homepage = 'https://dummy.com';
       config.sourceUrl = 'https://github.com/renovateapp/dummy';
-      config.sourceDirectory = 'packages/a';
       config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
     });
     it('should create PR if success', async () => {
