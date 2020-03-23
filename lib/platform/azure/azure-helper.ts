@@ -14,7 +14,7 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { HostRule } from '../../util/host-rules';
+import { HostRule } from '../../types';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 

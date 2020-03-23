@@ -6,7 +6,7 @@ import { getHandlerFromToken, getBasicHandler } from 'azure-devops-node-api';
 import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
 import * as hostRules from '../../util/host-rules';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
-import { HostRule } from '../../util/host-rules';
+import { HostRule } from '../../types';
 
 const hostType = PLATFORM_TYPE_AZURE;
 let endpoint: string;
@@ -20,6 +20,9 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
 
 export function azureObj(): azure.WebApi {
   const config = hostRules.find({ hostType, url: endpoint });
+  if (!config.token && !(config.username && config.password)) {
+    throw new Error(`No config found for azure`);
+  }
   const authHandler = getAuthenticationHandler(config);
   return new azure.WebApi(endpoint, authHandler);
 }
