@@ -17,12 +17,7 @@ Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accom
 
 ## Enabling
 
-Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
-
-If you are using the hosted Renovate App, then either:
-
-(a) if Renovate doesn't onboard the repo because it doesn't find package files, add your `renovate.json` to `master` branch manually, or
-(b) Contact support@renovatebot.com to ask that Bundler support be added on the server side so that you can receive an onboarding PR
+Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted. Bundler support is now enabled by default in both.
 
 ## Future work
 
