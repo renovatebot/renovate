@@ -58,12 +58,16 @@ const defaults: any = {
 export function initPlatform({
   endpoint,
   token,
+  username,
+  password,
 }: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
-  if (!token) {
-    throw new Error('Init: You must configure an Azure DevOps token');
+  if (!token && !(username && password)) {
+    throw new Error(
+      'Init: You must configure an Azure DevOps token, or a username and password'
+    );
   }
   // TODO: Add a connection check that endpoint/token combination are valid
   const res = {
@@ -149,12 +153,13 @@ export async function initRepo({
     url: defaults.endpoint,
   });
   const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+    defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
   await config.storage.initRepo({
     ...config,
     localDir,
     url,
+    extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,

@@ -82,11 +82,29 @@ describe('platform/azure', () => {
       expect.assertions(1);
       expect(() => azure.initPlatform({})).toThrow();
     });
-    it('should throw if no token', () => {
+    it('should throw if no token nor a username and password', () => {
       expect.assertions(1);
       expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
+        })
+      ).toThrow();
+    });
+    it('should throw if a username but no password', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          username: 'user',
+        })
+      ).toThrow();
+    });
+    it('should throw if a password but no username', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          password: 'pass',
         })
       ).toThrow();
     });
