@@ -259,10 +259,7 @@ export async function getReleaseNotesMd(
 export async function addReleaseNotes(
   input: ChangeLogResult
 ): Promise<ChangeLogResult> {
-  if (
-    !(input && input.project && input.project.github && input.versions) &&
-    !(input && input.project && input.project.gitlab && input.versions)
-  ) {
+  if (!input?.versions || (!input?.project?.github && !input?.project?.gitlab)) {
     logger.debug('Missing project or versions');
     return input;
   }
