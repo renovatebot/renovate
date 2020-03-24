@@ -357,7 +357,7 @@ export async function lookupUpdates(
     }
   }
   // Add digests if necessary
-  if (supportsDigests(config)) {
+  if (await supportsDigests(config)) {
     if (
       config.currentDigest &&
       config.datasource !== datasourceGitSubmodules.id
