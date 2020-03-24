@@ -25,7 +25,7 @@ export async function getReleaseList(
   }
   try {
     let url = apiBaseURL.replace(/\/?$/, '/');
-    if (apiBaseURL.search(/github/) !== -1) {
+    if (apiBaseURL.includes('github')) {
       // github repo
       url += `repos/${repository}/releases?per_page=100`;
       const res = await ghGot<
@@ -45,7 +45,7 @@ export async function getReleaseList(
         body: release.body,
       }));
     }
-    if (apiBaseURL.search(/gitlab/) !== -1) {
+    if (apiBaseURL.includes('gitlab')) {
       // not github, hopefully gitlab
       url += `projects/${repository.replace(
         /\//g,
@@ -60,7 +60,9 @@ export async function getReleaseList(
         }[]
       >(url);
       return res.body.map(release => ({
-        url: undefined, // FIXME: url should be set
+        url: `${apiBaseURL}/${repository.replace(/\//g, '%2f')}/releases/${
+          release.tag_name
+        }`,
         name: release.name,
         body: release.description,
         tag: release.tag_name,
@@ -124,10 +126,9 @@ export async function getReleaseNotes(
       release.tag === `${depName}-${version}`
     ) {
       releaseNotes = release;
-      releaseNotes.url =
-        baseURL.search(/github/) !== -1
-          ? `${baseURL}${repository}/releases/${release.tag}`
-          : `${baseURL}${repository}/tags/${release.tag}`;
+      releaseNotes.url = baseURL.includes('github')
+        ? `${baseURL}${repository}/releases/${release.tag}`
+        : `${baseURL}${repository}/tags/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseURL);
       if (!releaseNotes.body.length) {
         releaseNotes = null;
@@ -182,10 +183,9 @@ export async function getReleaseNotesMd(
   let changelogMd = '';
   try {
     let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
-    apiPrefix +=
-      apiBaseUrl.search(/gitlab/) !== -1
-        ? `projects/${repository}/repository/tree`
-        : `repos/${repository}/contents/`;
+    apiPrefix += apiBaseUrl.includes('gitlab')
+      ? `projects/${repository}/repository/tree`
+      : `repos/${repository}/contents/`;
     // in gitlab, will look something like projects/meno%2fdropzone/releases/
     const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
@@ -259,7 +259,10 @@ export async function getReleaseNotesMd(
 export async function addReleaseNotes(
   input: ChangeLogResult
 ): Promise<ChangeLogResult> {
-  if (!input?.versions || (!input?.project?.github && !input?.project?.gitlab)) {
+  if (
+    !input?.versions ||
+    (!input?.project?.github && !input?.project?.gitlab)
+  ) {
     logger.debug('Missing project or versions');
     return input;
   }
