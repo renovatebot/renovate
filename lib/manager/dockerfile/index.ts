@@ -7,5 +7,5 @@ const language = LANGUAGE_DOCKER;
 export { extractPackageFile, language, updateDependency };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$', '(^|/)[^/]*\\.Dockerfile$'],
+  fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$'],
 };
