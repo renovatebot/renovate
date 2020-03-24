@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import semver from 'semver';
 import URL from 'url';
 
 import { logger } from '../../logger';
@@ -1264,7 +1263,7 @@ export async function setBranchStatus({
 // Issue
 
 /* istanbul ignore next */
-async function getGraphqlIssues(): Promise<Issue[]> {
+async function getIssues(): Promise<Issue[]> {
   // prettier-ignore
   const query = `
     query {
@@ -1294,44 +1293,10 @@ async function getGraphqlIssues(): Promise<Issue[]> {
   }));
 }
 
-// istanbul ignore next
-async function getRestIssues(): Promise<Issue[]> {
-  logger.debug('Retrieving issueList');
-  const res = await api.get<
-    {
-      pull_request: boolean;
-      number: number;
-      state: string;
-      title: string;
-    }[]
-  >(
-    `repos/${config.repository}/issues?creator=${config.renovateUsername}&state=all&per_page=100&sort=created&direction=asc`,
-    { paginate: 'all', useCache: false }
-  );
-  // istanbul ignore if
-  if (!is.array(res.body)) {
-    logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
-    return [];
-  }
-  return res.body
-    .filter(issue => !issue.pull_request)
-    .map(i => ({
-      number: i.number,
-      state: i.state,
-      title: i.title,
-    }));
-}
-
 export async function getIssueList(): Promise<Issue[]> {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
-    const filterBySupportMinimumGheVersion = '2.17.0';
-    // istanbul ignore next
-    config.issueList =
-      config.enterpriseVersion &&
-      semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
-        ? await getRestIssues()
-        : await getGraphqlIssues();
+    config.issueList = await getIssues();
   }
   return config.issueList;
 }
@@ -1879,13 +1844,6 @@ export function getPrBody(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql vulnerabilityAlerts query on GHE'
-    );
-    return [];
-  }
   const headers = {
     accept: 'application/vnd.github.vixen-preview+json',
   };
