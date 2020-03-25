@@ -50,6 +50,7 @@ export interface ReleaseResult {
 }
 
 export interface Datasource {
+  id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
 }
