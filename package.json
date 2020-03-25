@@ -211,7 +211,7 @@
     "@types/semver": "7.1.0",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.0",
-    "@types/shelljs": "0.8.6",
+    "@types/shelljs": "0.8.7",
     "@types/tmp": "0.1.0",
     "@types/traverse": "0.6.32",
     "@types/validator": "12.0.1",
