@@ -767,28 +767,25 @@ describe('platform/gitea/gitea-helper', () => {
     });
 
     it('should properly determine worst commit status', async () => {
-      const cases: {
-        status: ght.CommitStatusType;
-        expected: ght.CommitStatusType;
-      }[] = [
-        { status: 'unknown', expected: 'unknown' },
-        { status: 'success', expected: 'success' },
-        { status: 'pending', expected: 'pending' },
-        { status: 'warning', expected: 'warning' },
-        { status: 'failure', expected: 'failure' },
-        { status: 'error', expected: 'error' },
-        { status: 'failure', expected: 'failure' },
-        { status: 'warning', expected: 'warning' },
-        { status: 'pending', expected: 'pending' },
-        { status: 'success', expected: 'success' },
-        { status: 'unknown', expected: 'unknown' },
+      const statutes: ght.CommitStatusType[] = [
+        'unknown',
+        'success',
+        'pending',
+        'warning',
+        'failure',
+        'error',
+        'failure',
+        'warning',
+        'pending',
+        'success',
+        'unknown',
       ];
 
       const commitStatuses: ght.CommitStatus[] = [
         { ...mockCommitStatus, status: 'unknown' },
       ];
       const now = new Date();
-      for (const { status, expected } of cases) {
+      for (const status of statutes) {
         // Avoid same timestamp.
         now.setMinutes(now.getMinutes() + 1);
         // Add current status ot list of commit statuses, then mock the API to return the whole list
@@ -810,7 +807,7 @@ describe('platform/gitea/gitea-helper', () => {
           mockRepo.full_name,
           mockBranch.name
         );
-        expect(res.worstStatus).toEqual(expected);
+        expect(res.worstStatus).toEqual(status);
       }
     });
   });
