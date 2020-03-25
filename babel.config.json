@@ -17,7 +17,6 @@
   "sourceMaps": true,
   "retainLines": true,
 
-  // https://github.com/facebook/jest/issues/5920
   "env": {
     "test": {
       "plugins": ["dynamic-import-node"]
