@@ -787,13 +787,15 @@ describe('platform/gitea/gitea-helper', () => {
       const commitStatuses: ght.CommitStatus[] = [
         { ...mockCommitStatus, status: 'unknown' },
       ];
-
+      const now = new Date();
       for (const { status, expected } of cases) {
+        // Avoid same timestamp.
+        now.setMinutes(now.getMinutes() + 1);
         // Add current status ot list of commit statuses, then mock the API to return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
           status,
-          created_at: new Date().toISOString(),
+          created_at: now.toISOString(),
         });
         mockAPI<ght.CommitStatus[]>(
           {

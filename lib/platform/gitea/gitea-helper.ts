@@ -501,10 +501,8 @@ function filterStatus(data: CommitStatus[]): CommitStatus[] {
   const ret: Record<string, CommitStatus>  = {};
   for (const i of data) {
     if (
-      !(
-        ret[i.context] &&
-        new Date(ret[i.context].created_at) >= new Date(i.created_at)
-      )
+      !ret[i.context] ||
+      new Date(ret[i.context].created_at) < new Date(i.created_at)
     ) {
       ret[i.context] = i;
     }
