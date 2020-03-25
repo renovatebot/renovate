@@ -103,7 +103,7 @@ describe('platform/gitea/gitea-helper', () => {
     context: 'some-context',
     description: 'some-description',
     target_url: 'https://gitea.renovatebot.com/commit-status',
-    created_at: new Date().toISOString(),
+    created_at: '2020-03-25T00:00:00Z',
   };
 
   const otherMockCommitStatus: ght.CommitStatus = {
@@ -767,33 +767,103 @@ describe('platform/gitea/gitea-helper', () => {
     });
 
     it('should properly determine worst commit status', async () => {
-      const statuses: ght.CommitStatusType[] = [
-        'unknown',
-        'success',
-        'pending',
-        'warning',
-        'failure',
-        'error',
-        'failure',
-        'warning',
-        'pending',
-        'success',
-        'unknown',
+      const statuses: {
+        status: ght.CommitStatusType;
+        created_at: string;
+        expected: ght.CommitStatusType;
+      }[] = [
+        {
+          status: 'unknown',
+          created_at: '2020-03-25T01:00:00Z',
+          expected: 'unknown',
+        },
+        {
+          status: 'success',
+          created_at: '2020-03-25T02:00:00Z',
+          expected: 'success',
+        },
+        {
+          status: 'pending',
+          created_at: '2020-03-25T03:00:00Z',
+          expected: 'pending',
+        },
+        {
+          status: 'warning',
+          created_at: '2020-03-25T04:00:00Z',
+          expected: 'warning',
+        },
+        {
+          status: 'failure',
+          created_at: '2020-03-25T05:00:00Z',
+          expected: 'failure',
+        },
+        {
+          status: 'error',
+          created_at: '2020-03-25T06:00:00Z',
+          expected: 'error',
+        },
+        {
+          status: 'failure',
+          created_at: '2020-03-25T07:00:00Z',
+          expected: 'failure',
+        },
+        {
+          status: 'warning',
+          created_at: '2020-03-25T08:00:00Z',
+          expected: 'warning',
+        },
+        {
+          status: 'pending',
+          created_at: '2020-03-25T09:00:00Z',
+          expected: 'pending',
+        },
+        {
+          status: 'success',
+          created_at: '2020-03-25T10:00:00Z',
+          expected: 'success',
+        },
+        {
+          status: 'unknown',
+          created_at: '2020-03-25T11:00:00Z',
+          expected: 'unknown',
+        },
+        {
+          status: 'success',
+          created_at: '2020-03-25T02:00:00Z',
+          expected: 'unknown',
+        },
+        {
+          status: 'pending',
+          created_at: '2020-03-25T03:00:00Z',
+          expected: 'unknown',
+        },
+        {
+          status: 'warning',
+          created_at: '2020-03-25T04:00:00Z',
+          expected: 'unknown',
+        },
+        {
+          status: 'failure',
+          created_at: '2020-03-25T05:00:00Z',
+          expected: 'unknown',
+        },
+        {
+          status: 'error',
+          created_at: '2020-03-25T06:00:00Z',
+          expected: 'unknown',
+        },
       ];
 
       const commitStatuses: ght.CommitStatus[] = [
         { ...mockCommitStatus, status: 'unknown' },
       ];
-      const now = new Date();
 
-      for (const status of statuses) {
-        // Avoid same timestamp.
-        now.setMinutes(now.getMinutes() + 1);
+      for (const { status, created_at, expected } of statuses) {
         // Add current status ot list of commit statuses, then mock the API to return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
           status,
-          created_at: now.toISOString(),
+          created_at,
         });
         mockAPI<ght.CommitStatus[]>(
           {
@@ -808,7 +878,7 @@ describe('platform/gitea/gitea-helper', () => {
           mockRepo.full_name,
           mockBranch.name
         );
-        expect(res.worstStatus).toEqual(status);
+        expect(res.worstStatus).toEqual(expected);
       }
     });
   });
