@@ -28,6 +28,7 @@ jobs:
         with:
           command: github-cleanup
           token: ${{ secrets.GH_TOKEN }}
+          dry-run: ${{github.ref == 'refs/heads/master'}}
 
   test:
     needs: [cleanup]
@@ -226,7 +227,6 @@ jobs:
 
     steps:
       - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
-        id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           version: ${{ env.BUILDX_VERSION }}
