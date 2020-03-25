@@ -92,8 +92,8 @@ jobs:
         run: |
           docker buildx bake \
             --file docker/bake.hcl \
-            --set latest.cache-to=renovate/docker-build-cache:renovate-latest,mode=max \
-            --set slim.cache-to=renovate/docker-build-cache:renovate-slim,mode=max \
+            --set latest.cache-to=type=registry,ref=renovate/docker-build-cache:renovate-latest,mode=max \
+            --set slim.cache-to=type=registry,ref=renovate/docker-build-cache:renovate-slim,mode=max \
             default
 
       - name: semantic-release
