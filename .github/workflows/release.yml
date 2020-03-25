@@ -7,9 +7,11 @@ on:
 
 env:
   PLATFORM: linux/amd64
-  DOCKER_CACHE_TAG: _cache
   DOCKER_REPO: renovate/renovate
   SKIP_JAVA_TESTS: true
+  BUILDX_VERSION: v0.3.1
+  # https://github.com/chalk/supports-color/issues/106
+  FORCE_COLOR: true
 
 jobs:
   semantic-release:
@@ -76,11 +78,11 @@ jobs:
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverageReporters=text-summary
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
         id: buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
-          version: v0.3.1
+          version: ${{ env.BUILDX_VERSION }}
 
       - name: Docker registry login
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
@@ -90,8 +92,8 @@ jobs:
         run: |
           docker buildx bake \
             --file docker/bake.hcl \
-            --set latest.cache-to=renovate/renovate:_cache-latest \
-            --set slim.cache-to=renovate/renovate:_cache-slim \
+            --set latest.cache-to=renovate/docker-build-cache:renovate-latest,mode=max \
+            --set slim.cache-to=renovate/docker-build-cache:renovate-slim,mode=max \
             default
 
       - name: semantic-release
@@ -99,6 +101,6 @@ jobs:
           echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' > ~/.npmrc
           yarn semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           SHA: ${{github.sha}}

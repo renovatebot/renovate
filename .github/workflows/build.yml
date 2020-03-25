@@ -1,4 +1,4 @@
-name: Test CI
+name: build
 
 on:
   push:
@@ -10,10 +10,27 @@ on:
 
 env:
   CI: true
+  DOCKER_REPO: renovate/renovate
+  YARN_CACHE_KEY: v1
+  BUILDX_VERSION: v0.3.1
+  # https://github.com/chalk/supports-color/issues/106
+  FORCE_COLOR: true
 
 jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: github-cleanup
+        uses: renovatebot/gh-action@v0
+        continue-on-error: true
+        with:
+          command: github-cleanup
+          token: ${{ secrets.GH_TOKEN }}
+
   test:
-    name: test
+    needs: [cleanup]
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more than 15 min
@@ -75,9 +92,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ${{ steps.init.outputs.yarn_cache }}
-          key: v1-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            v1-${{ runner.os }}-yarn_cache-
+            ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
       - name: Cache node_modules
         uses: actions/cache@v1
@@ -172,9 +189,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ${{ steps.init.outputs.yarn_cache }}
-          key: v1-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            v1-${{ runner.os }}-yarn_cache-
+            ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
       - name: Cache node_modules
         uses: actions/cache@v1
@@ -200,3 +217,59 @@ jobs:
 
       - name: Type check
         run: yarn type-check
+
+  test-docker:
+    needs: cleanup
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: ${{ env.BUILDX_VERSION }}
+
+      - uses: actions/checkout@v2
+
+      - name: docker cache
+        id: docker-cache
+        uses: actions/cache@v1
+        with:
+          path: .cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      - name: Build the Docker images
+        run: |
+          cache="--set latest.cache-from=type=local,src=.cache/latest --set slim.cache-from=type=local,src=.cache/slim"
+          cache_from=$([ -d .cache ] && echo -n $cache || echo -n '')
+          docker buildx bake \
+            --file docker/bake.hcl \
+            --set settings.output=type=docker \
+            --set slim.cache-to=type=local,dest=.cache/slim,mode=max \
+            --set latest.cache-to=type=local,dest=.cache/latest,mode=max \
+            $cache_from \
+            default
+
+      - name: Test the Docker images
+        run: |
+          docker run --rm -t ${DOCKER_REPO} --version
+          docker run --rm -t ${DOCKER_REPO}:slim --version
+
+      - name: Image history latest
+        run: docker history ${DOCKER_REPO}
+      - name: Image history slim
+        run: docker history ${DOCKER_REPO}:slim
+
+      - name: Images size
+        run: docker image ls | grep ${DOCKER_REPO}
+
+  release:
+    needs: [lint, test, test-docker]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo "Release"
