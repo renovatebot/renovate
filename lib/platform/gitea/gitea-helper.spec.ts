@@ -1,7 +1,7 @@
 import { URL } from 'url';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { GotResponse } from '..';
 import { partial } from '../../../test/util';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { GiteaGotApi, GiteaGotOptions } from './gitea-got-wrapper';
 import * as ght from './gitea-helper';
 import { PRSearchParams } from './gitea-helper';
@@ -767,7 +767,7 @@ describe('platform/gitea/gitea-helper', () => {
     });
 
     it('should properly determine worst commit status', async () => {
-      const statutes: ght.CommitStatusType[] = [
+      const statuses: ght.CommitStatusType[] = [
         'unknown',
         'success',
         'pending',
@@ -785,7 +785,8 @@ describe('platform/gitea/gitea-helper', () => {
         { ...mockCommitStatus, status: 'unknown' },
       ];
       const now = new Date();
-      for (const status of statutes) {
+
+      for (const status of statuses) {
         // Avoid same timestamp.
         now.setMinutes(now.getMinutes() + 1);
         // Add current status ot list of commit statuses, then mock the API to return the whole list
