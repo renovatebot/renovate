@@ -160,5 +160,71 @@ describe('datasource/github-tags', () => {
       expect(ghGot).toBeCalledTimes(1);
       expect(res2).toEqual(res1);
     });
+    it('updates cache for new tags', async () => {
+      // First call
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: [
+          {
+            name: 'v1.0.0',
+            commit: {
+              sha: 'foo',
+              url: 'foo',
+            },
+          },
+        ],
+      });
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: { commit: { author: { date: '2019-04-18T20:13:57Z' } } },
+      });
+
+      const res1 = await github.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(ghGot).toBeCalledTimes(2);
+      expect(res1).toMatchSnapshot();
+
+      // Second call
+
+      jest.resetAllMocks();
+
+      // reset only first cache layer
+      await global.renovateCache.rm('datasource-github-tags', 'some/dep2:tags');
+
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: [
+          {
+            name: 'v1.0.0',
+            commit: {
+              sha: 'foo',
+              url: 'foo',
+            },
+          },
+          {
+            name: 'v1.1.0',
+            commit: {
+              sha: 'bar',
+              url: 'bar',
+            },
+          },
+        ],
+      });
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: { commit: { author: { date: '2019-04-18T20:13:57Z' } } },
+      });
+      ghGot.mockResolvedValueOnce({
+        headers: {},
+        body: { commit: { author: { date: '2020-04-18T20:13:57Z' } } },
+      });
+
+      const res2 = await github.getPkgReleases({
+        lookupName: 'some/dep2',
+      });
+      expect(ghGot).toBeCalledTimes(3);
+      expect(res2).toMatchSnapshot();
+    });
   });
 });

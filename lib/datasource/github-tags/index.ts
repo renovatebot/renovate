@@ -13,6 +13,7 @@ const { get: ghGot } = api;
 export const id = 'github-tags';
 
 const cacheNamespace = 'datasource-github-tags';
+
 function getCacheKey(repo: string, type: string): string {
   return `${repo}:${type}`;
 }
@@ -120,75 +121,90 @@ type GithubCommit = {
   };
 };
 
-type CachedRepoTimestamps = Record<string, string | null>;
+type ReleaseTimestamps = Record<string, string | null>;
+
+async function fetchReleaseTimestamps(
+  repo: string,
+  tags: GithubTag[]
+): Promise<ReleaseTimestamps> | null {
+  const result: ReleaseTimestamps = {};
+
+  const queue = tags.map(tag => async (): Promise<void> => {
+    const commitHash = tag?.commit?.sha;
+
+    const commitUrl = tag?.commit?.url;
+    let releaseTimestamp = null;
+    if (commitUrl && commitHash) {
+      try {
+        const res = await ghGot<GithubCommit>(commitUrl);
+        releaseTimestamp = res.body.commit?.author?.date;
+      } catch (err) {
+        logger.debug({ repo, err }, 'Error retrieving github commit');
+      }
+    }
+    result[commitHash] = releaseTimestamp;
+  });
+
+  await pAll(queue, { concurrency: 5 });
+
+  return result;
+}
+
+function tagsToReleases(
+  tags: GithubTag[],
+  timestamps: ReleaseTimestamps,
+  ignoreMissing = true
+): Release[] | null {
+  let missingTag = false;
+  const result: Release[] = tags.map(tag => {
+    const version = tag.name;
+    const gitRef = version;
+    const commitHash = tag.commit?.sha;
+    if (commitHash) {
+      const releaseTimestamp = timestamps[commitHash];
+      if (releaseTimestamp === undefined) {
+        missingTag = true;
+      }
+      if (releaseTimestamp) {
+        return { gitRef, version, releaseTimestamp };
+      }
+    }
+    return { gitRef, version };
+  });
+
+  return !ignoreMissing && missingTag ? null : result;
+}
 
 async function getReleasesWithTimestamp(
   repo: string,
   tags: GithubTag[] | null
 ): Promise<Release[]> | null {
-  const result: Release[] = [];
-
-  const repoCacheKey = getCacheKey(repo, 'commit-timestamps');
-  let repoTimestamps = await renovateCache.get<CachedRepoTimestamps>(
+  const repoCacheKey = getCacheKey(repo, 'release-timestamps');
+  const cachedTimestamps = await renovateCache.get<ReleaseTimestamps>(
     cacheNamespace,
     repoCacheKey
   );
 
-  let newCache = false;
-  if (!repoTimestamps) {
-    newCache = true;
-    repoTimestamps = {};
-  }
-
-  const queue = tags.map(tag => async (): Promise<void> => {
-    const release: Release = {
-      version: tag.name,
-      gitRef: tag.name,
-    };
-
-    const commitHash = tag?.commit?.sha;
-
-    const setReleaseTimestamp = (releaseTimestamp: string): void => {
-      if (newCache) {
-        repoTimestamps[commitHash] = releaseTimestamp;
-      }
-
-      if (releaseTimestamp) {
-        release.releaseTimestamp = releaseTimestamp;
-      }
-      result.push(release);
-    };
-
-    const commitUrl = tag?.commit?.url;
-
-    if (commitUrl && commitHash) {
-      if (repoTimestamps[commitHash] !== undefined) {
-        return setReleaseTimestamp(repoTimestamps[commitHash]);
-      }
-
-      try {
-        const res = await ghGot<GithubCommit>(commitUrl);
-        const releaseTimestamp = res.body.commit?.author?.date;
-        return setReleaseTimestamp(releaseTimestamp);
-      } catch (err) {
-        logger.debug({ repo, err }, 'Error retrieving github commit');
-      }
-    }
-    return setReleaseTimestamp(null);
-  });
-
-  await pAll(queue, { concurrency: 5 });
-
-  if (newCache) {
-    await renovateCache.set<CachedRepoTimestamps>(
+  const freshReleases = async (): Promise<Release[]> => {
+    const fetchedTimestamps = await fetchReleaseTimestamps(repo, tags);
+    await renovateCache.set<ReleaseTimestamps>(
       cacheNamespace,
-      getCacheKey(repo, 'commit-timestamps'),
-      repoTimestamps,
+      getCacheKey(repo, 'release-timestamps'),
+      fetchedTimestamps,
       2 * 24 * 60
     );
+    return tagsToReleases(tags, fetchedTimestamps);
+  };
+
+  if (!cachedTimestamps) {
+    return freshReleases();
   }
 
-  return result;
+  const cacheBasedResult = tagsToReleases(tags, cachedTimestamps, false);
+  if (!cacheBasedResult) {
+    return freshReleases();
+  }
+  return cacheBasedResult;
 }
 
 /**
