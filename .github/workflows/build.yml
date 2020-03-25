@@ -233,25 +233,11 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: docker cache
-        id: docker-cache
-        uses: actions/cache@v1
-        with:
-          path: .cache
-          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
-
       - name: Build the Docker images
         run: |
-          cache="--set latest.cache-from=type=local,src=.cache/latest --set slim.cache-from=type=local,src=.cache/slim"
-          cache_from=$([ -d .cache ] && echo -n $cache || echo -n '')
           docker buildx bake \
             --file docker/bake.hcl \
             --set settings.output=type=docker \
-            --set slim.cache-to=type=local,dest=.cache/slim,mode=max \
-            --set latest.cache-to=type=local,dest=.cache/latest,mode=max \
-            $cache_from \
             default
 
       - name: Test the Docker images
