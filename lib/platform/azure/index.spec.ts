@@ -820,12 +820,25 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
+            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
             createThread: jest.fn(() => [{ id: 123 }]),
             getThreads: jest.fn(() => []),
           } as any)
       );
-      await azure.addAssignees(123, ['test@bonjour.fr']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      azureApi.coreApi.mockImplementation(
+        () =>
+          ({
+            getTeams: jest.fn(() => [
+              { id: 3, name: 'abc' },
+              { id: 4, name: 'def' },
+            ]),
+            getTeamMembersWithExtendedProperties: jest.fn(() => [
+              { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
+            ]),
+          } as any)
+      );
+      await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -852,7 +865,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
