@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import got from '../../../util/got';
 import {
   addReleaseNotes,
+  getReleaseList,
   getReleaseNotes,
   getReleaseNotesMd,
 } from './release-notes';
@@ -35,6 +36,46 @@ describe('workers/pr/release-notes', () => {
     it('returns input if invalid', async () => {
       const input = { a: 1 };
       expect(await addReleaseNotes(input as never)).toEqual(input);
+    });
+  });
+  describe('getReleaseList()', () => {
+    it('should return empty array if no apiBaseURL', async () => {
+      const res = await getReleaseList('', 'some/yet-other-repository');
+      expect(res).toEqual([]);
+    });
+    it('should return release list for github repo', async () => {
+      ghGot.mockResolvedValueOnce({
+        body: [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body:
+              'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ],
+      });
+      const res = await getReleaseList(
+        'https://api.github.com/',
+        'some/yet-other-repository'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('should return release list for gitlab.com project', async () => {
+      ghGot.mockResolvedValueOnce({
+        body: [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ],
+      });
+      const res = await getReleaseList(
+        'https://gitlab.com/api/v4/',
+        'some/yet-other-repository'
+      );
+      expect(res).toMatchSnapshot();
     });
   });
   describe('getReleaseNotes()', () => {

@@ -60,9 +60,10 @@ export async function getReleaseList(
         }[]
       >(url);
       return res.body.map(release => ({
-        url: `${apiBaseURL}/${repository.replace(/\//g, '%2f')}/releases/${
-          release.tag_name
-        }`,
+        url: `${apiBaseURL}projects/${repository.replace(
+          /\//g,
+          '%2f'
+        )}/releases/${release.tag_name}`,
         name: release.name,
         body: release.description,
         tag: release.tag_name,

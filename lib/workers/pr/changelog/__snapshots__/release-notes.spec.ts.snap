@@ -1,5 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/pr/release-notes getReleaseList() should return release list for github repo 1`] = `
+Array [
+  Object {
+    "body": undefined,
+    "id": undefined,
+    "name": undefined,
+    "tag": "v1.0.0",
+    "url": undefined,
+  },
+  Object {
+    "body": "some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)",
+    "id": undefined,
+    "name": undefined,
+    "tag": "v1.0.1",
+    "url": undefined,
+  },
+]
+`;
+
+exports[`workers/pr/release-notes getReleaseList() should return release list for gitlab.com project 1`] = `
+Array [
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.0",
+    "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
+  },
+  Object {
+    "body": undefined,
+    "name": undefined,
+    "tag": "v1.0.1",
+    "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
+  },
+]
+`;
+
 exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 1`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
