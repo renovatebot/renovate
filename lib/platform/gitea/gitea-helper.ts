@@ -498,7 +498,7 @@ export const renovateToGiteaStatusMapping: Record<
 };
 
 function filterStatus(data: CommitStatus[]): CommitStatus[] {
-  const ret = {};
+  const ret: Record<string, CommitStatus>  = {};
   for (const i of data) {
     if (
       !(
