@@ -1,7 +1,7 @@
 import { URL } from 'url';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { GotResponse } from '..';
 import { partial } from '../../../test/util';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { GiteaGotApi, GiteaGotOptions } from './gitea-got-wrapper';
 import * as ght from './gitea-helper';
 import { PRSearchParams } from './gitea-helper';
@@ -788,7 +788,7 @@ describe('platform/gitea/gitea-helper', () => {
         { ...mockCommitStatus, status: 'unknown' },
       ];
 
-      for (const { status, expected: result } of cases) {
+      for (const { status, expected } of cases) {
         // Add current status ot list of commit statuses, then mock the API to return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
@@ -808,7 +808,7 @@ describe('platform/gitea/gitea-helper', () => {
           mockRepo.full_name,
           mockBranch.name
         );
-        expect(res.worstStatus).toEqual(result);
+        expect(res.worstStatus).toEqual(expected);
       }
     });
   });
