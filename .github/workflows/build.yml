@@ -269,6 +269,9 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - name: Docker registry login
+        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
+
       - name: Build the Docker images
         run: |
           docker buildx bake \
