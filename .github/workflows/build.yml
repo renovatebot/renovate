@@ -303,6 +303,7 @@ jobs:
           version: ${{ env.BUILDX_VERSION }}
 
       - name: Docker registry login
+        if: github.ref == 'refs/heads/master'
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
       - name: Update Docker images cache
