@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12, 11]
+        node-version: [12, 10]
         python-version: [3.8]
         java-version: [11]
         exclude:
