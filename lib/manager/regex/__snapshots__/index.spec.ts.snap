@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/custom/extract extracts multiple dependencies 1`] = `
+exports[`manager/regex/index extracts multiple dependencies 1`] = `
 Object {
   "deps": Array [
     Object {
