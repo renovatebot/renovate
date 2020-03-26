@@ -1,0 +1,62 @@
+import { compare } from './compare';
+
+describe('versioning/gradle/compare', () => {
+  it('returns equality', () => {
+    expect(compare('1', '1')).toEqual(0);
+    expect(compare('a', 'a')).toEqual(0);
+    expect(compare('1a1', '1.a.1')).toEqual(0);
+    expect(compare('1.a.1', '1-a+1')).toEqual(0);
+    expect(compare('1-a+1', '1.a-1')).toEqual(0);
+    expect(compare('1.a-1', '1a1')).toEqual(0);
+    expect(compare('dev', 'dev')).toEqual(0);
+    expect(compare('rc', 'rc')).toEqual(0);
+    expect(compare('release', 'release')).toEqual(0);
+    expect(compare('final', 'final')).toEqual(0);
+    expect(compare('snapshot', 'SNAPSHOT')).toEqual(0);
+    expect(compare('SNAPSHOT', 'snapshot')).toEqual(0);
+  });
+  it('returns less than', () => {
+    expect(compare('1.1', '1.2')).toEqual(-1);
+    expect(compare('1.a', '1.1')).toEqual(-1);
+    expect(compare('1.A', '1.B')).toEqual(-1);
+    expect(compare('1.B', '1.a')).toEqual(-1);
+    expect(compare('1.a', '1.b')).toEqual(-1);
+    expect(compare('1.1', '1.1.0')).toEqual(-1);
+    expect(compare('1.1.a', '1.1')).toEqual(-1);
+    expect(compare('1.0-dev', '1.0-alpha')).toEqual(-1);
+    expect(compare('1.0-alpha', '1.0-rc')).toEqual(-1);
+    expect(compare('1.0-zeta', '1.0-rc')).toEqual(-1);
+    expect(compare('1.0-rc', '1.0-release')).toEqual(-1);
+    expect(compare('1.0-release', '1.0-final')).toEqual(-1);
+    expect(compare('1.0-final', '1.0')).toEqual(-1);
+    expect(compare('1.0-alpha', '1.0-SNAPSHOT')).toEqual(-1);
+    expect(compare('1.0-SNAPSHOT', '1.0-zeta')).toEqual(-1);
+    expect(compare('1.0-zeta', '1.0-rc')).toEqual(-1);
+    expect(compare('1.0-rc', '1.0')).toEqual(-1);
+    expect(compare('1.0', '1.0-20150201.121010-123')).toEqual(-1);
+    expect(compare('1.0-20150201.121010-123', '1.1')).toEqual(-1);
+    expect(compare('sNaPsHoT', 'snapshot')).toEqual(-1);
+  });
+  it('returns greater than', () => {
+    expect(compare('1.2', '1.1')).toEqual(1);
+    expect(compare('1.1', '1.1.a')).toEqual(1);
+    expect(compare('1.B', '1.A')).toEqual(1);
+    expect(compare('1.a', '1.B')).toEqual(1);
+    expect(compare('1.b', '1.a')).toEqual(1);
+    expect(compare('1.1.0', '1.1')).toEqual(1);
+    expect(compare('1.1', '1.a')).toEqual(1);
+    expect(compare('1.0-alpha', '1.0-dev')).toEqual(1);
+    expect(compare('1.0-rc', '1.0-alpha')).toEqual(1);
+    expect(compare('1.0-rc', '1.0-zeta')).toEqual(1);
+    expect(compare('1.0-release', '1.0-rc')).toEqual(1);
+    expect(compare('1.0-final', '1.0-release')).toEqual(1);
+    expect(compare('1.0', '1.0-final')).toEqual(1);
+    expect(compare('1.0-SNAPSHOT', '1.0-alpha')).toEqual(1);
+    expect(compare('1.0-zeta', '1.0-SNAPSHOT')).toEqual(1);
+    expect(compare('1.0-rc', '1.0-zeta')).toEqual(1);
+    expect(compare('1.0', '1.0-rc')).toEqual(1);
+    expect(compare('1.0-20150201.121010-123', '1.0')).toEqual(1);
+    expect(compare('1.1', '1.0-20150201.121010-123')).toEqual(1);
+    expect(compare('snapshot', 'sNaPsHoT')).toEqual(1);
+  });
+});
