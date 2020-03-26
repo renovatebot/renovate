@@ -312,6 +312,7 @@ jobs:
           docker buildx bake \
             --progress plain \
             --file docker/bake.hcl \
+            --file docker/cache.hcl \
             cache
 
       - name: semantic-release
