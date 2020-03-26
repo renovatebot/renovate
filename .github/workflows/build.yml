@@ -254,31 +254,6 @@ jobs:
       - name: Images size
         run: docker image ls | grep ${DOCKER_REPO}
 
-  cache-docker:
-    needs: cleanup
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/chore/refactor-ci' || github.head_ref == 'chore/refactor-ci'
-
-    timeout-minutes: 15
-
-    steps:
-      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: ${{ env.BUILDX_VERSION }}
-
-      - uses: actions/checkout@v2
-
-      - name: Docker registry login
-        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
-
-      - name: Build the Docker images
-        run: |
-          docker buildx bake \
-            --progress plain \
-            --file docker/bake.hcl \
-            cache
-
   release:
     needs: [lint, test, test-docker]
     runs-on: ubuntu-latest
