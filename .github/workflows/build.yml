@@ -307,7 +307,7 @@ jobs:
 
       - name: Update Docker images cache
         continue-on-error: true
-        if: ${{github.ref == 'refs/heads/master' || github.ref == 'refs/heads/chore/refactor-ci' || github.head_ref == 'refs/heads/chore/refactor-ci'}}
+        if: github.ref == 'refs/heads/master'
         run: |
           docker buildx bake \
             --progress plain \
@@ -321,3 +321,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  cache-docker:
+    needs: cleanup
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/chore/refactor-ci' || github.head_ref == 'refs/heads/chore/refactor-ci'
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: ${{ env.BUILDX_VERSION }}
+
+      - uses: actions/checkout@v2
+
+      - name: Build the Docker images
+        run: |
+          docker buildx bake \
+            --progress plain \
+            --file docker/bake.hcl \
+            cache
