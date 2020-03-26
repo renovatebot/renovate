@@ -1,13 +1,22 @@
 group "default" {
 	targets = ["latest", "slim"]
 }
+
 group "cache" {
-	targets = ["cache-tsbuild", "cache-latest", "cache-slim"]
+	targets = ["cache-base", "cache-tsbuild", "cache-latest", "cache-slim"]
+}
+
+target "base" {
+  cache-from = ["renovate/docker-build-cache:renovate-base"]
+}
+
+target "tsbuild" {
+  cache-from = [ "renovate/docker-build-cache:renovate-tsbuild"]
 }
 
 target "settings" {
+  inherits = ["base", "tsbuild"]
   target = "final"
-  cache-from = ["renovate/docker-build-cache:renovate-tsbuild"]
 }
 
 target "slim" {
@@ -23,9 +32,16 @@ target "latest" {
   cache-from = ["renovate/docker-build-cache:renovate-latest"]
 }
 
+target "cache-base" {
+  inherits = ["base"]
+  target = "base"
+  cache-to = ["renovate/docker-build-cache:renovate-base"]
+
+}
+
 target "cache-tsbuild" {
+  inherits = ["tsbuild"]
   target = "tsbuild"
-  cache-from = ["renovate/docker-build-cache:renovate-tsbuild"]
   cache-to = ["renovate/docker-build-cache:renovate-tsbuild"]
 
 }
