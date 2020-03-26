@@ -307,7 +307,7 @@ jobs:
 
       - name: Update Docker images cache
         continue-on-error: true
-        if: ${{github.ref == 'refs/heads/master' || github.ref == 'refs/heads/chore/refactor-ci'}}
+        if: ${{github.ref == 'refs/heads/master' || github.ref == 'refs/heads/chore/refactor-ci' || github.head_ref == 'refs/heads/chore/refactor-ci'}}
         run: |
           docker buildx bake \
             --progress plain \
