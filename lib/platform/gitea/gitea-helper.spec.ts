@@ -778,11 +778,6 @@ describe('platform/gitea/gitea-helper', () => {
           expected: 'unknown',
         },
         {
-          status: 'success',
-          created_at: '2020-03-25T02:00:00Z',
-          expected: 'success',
-        },
-        {
           status: 'pending',
           created_at: '2020-03-25T03:00:00Z',
           expected: 'pending',
@@ -798,59 +793,14 @@ describe('platform/gitea/gitea-helper', () => {
           expected: 'failure',
         },
         {
-          status: 'error',
-          created_at: '2020-03-25T06:00:00Z',
-          expected: 'error',
-        },
-        {
-          status: 'failure',
-          created_at: '2020-03-25T07:00:00Z',
+          status: 'success',
+          created_at: '2020-03-25T02:00:00Z',
           expected: 'failure',
         },
         {
-          status: 'warning',
-          created_at: '2020-03-25T08:00:00Z',
-          expected: 'warning',
-        },
-        {
-          status: 'pending',
-          created_at: '2020-03-25T09:00:00Z',
-          expected: 'pending',
-        },
-        {
           status: 'success',
-          created_at: '2020-03-25T10:00:00Z',
-          expected: 'success',
-        },
-        {
-          status: 'unknown',
-          created_at: '2020-03-25T11:00:00Z',
-          expected: 'unknown',
-        },
-        {
-          status: 'success',
-          created_at: '2020-03-25T02:00:00Z',
-          expected: 'unknown',
-        },
-        {
-          status: 'pending',
-          created_at: '2020-03-25T03:00:00Z',
-          expected: 'unknown',
-        },
-        {
-          status: 'warning',
-          created_at: '2020-03-25T04:00:00Z',
-          expected: 'unknown',
-        },
-        {
-          status: 'failure',
-          created_at: '2020-03-25T05:00:00Z',
-          expected: 'unknown',
-        },
-        {
-          status: 'error',
           created_at: '2020-03-25T06:00:00Z',
-          expected: 'unknown',
+          expected: 'success',
         },
       ];
 
