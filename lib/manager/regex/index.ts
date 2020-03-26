@@ -5,7 +5,9 @@ import { logger } from '../../logger';
 
 export const autoReplace = true;
 
-export const defaultConfig = {};
+export const defaultConfig = {
+  pinDigests: false,
+};
 
 export function extractPackageFile(
   content: string,
