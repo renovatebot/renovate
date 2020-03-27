@@ -158,7 +158,7 @@ describe('datasource/go', () => {
       ];
 
       const releases = {
-        releases: [{ version: 'a/v1.0.0' }, { version: 'b/v2.0.0' }],
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
       };
       for (const pkg of packages) {
         github.getPkgReleases.mockResolvedValueOnce(releases);
