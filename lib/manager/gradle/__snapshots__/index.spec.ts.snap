@@ -22,6 +22,28 @@ Array [
 ]
 `;
 
+exports[`manager/gradle extractPackageFile should execute gradle if gradlew is not available 1`] = `
+Array [
+  Object {
+    "cmd": "gradle --init-script renovate-plugin.gradle renovate",
+    "options": Object {
+      "cwd": "localDir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 20000,
+    },
+  },
+]
+`;
+
 exports[`manager/gradle extractPackageFile should execute gradlew when available 1`] = `
 Array [
   Object {
@@ -91,7 +113,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   Object {
-    "cmd": "gradle --init-script renovate-plugin.gradle renovate",
+    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -482,28 +504,6 @@ Array [
 `;
 
 exports[`manager/gradle extractPackageFile should return null and gradle should not be executed if no root build.gradle 1`] = `Array []`;
-
-exports[`manager/gradle extractPackageFile should run gradlew through \`sh\` when available but not executable 1`] = `
-Array [
-  Object {
-    "cmd": "sh gradlew --init-script renovate-plugin.gradle renovate",
-    "options": Object {
-      "cwd": "localDir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 20000,
-    },
-  },
-]
-`;
 
 exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [

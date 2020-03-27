@@ -1,6 +1,6 @@
 import { toUnix } from 'upath';
 import _fs from 'fs-extra';
-import fsReal from 'fs';
+import fsReal, { Stats } from 'fs';
 import { exec as _exec } from 'child_process';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as path from 'path';
@@ -8,9 +8,11 @@ import { platform as _platform } from '../../platform';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';
 import { BinarySource } from '../../util/exec/common';
+import * as _docker from '../../util/exec/docker';
 import * as _util from '../../util';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as _manager from '.';
+import { ExtractConfig } from '../common';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 
@@ -64,17 +66,25 @@ describe('manager/gradle', () => {
     let exec: jest.Mock<typeof _exec>;
     let fs: jest.Mocked<typeof _fs>;
     let util: jest.Mocked<typeof _util>;
+    let docker: typeof _docker;
 
     beforeAll(async () => {
       [manager, exec, fs, util] = await setupMocks();
+      docker = require('../../util/exec/docker');
     });
+
     afterAll(resetMocks);
+
     beforeEach(() => {
       fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
       fs.mkdir.mockResolvedValue();
       fs.exists.mockResolvedValue(true);
-      fs.access.mockResolvedValue(undefined);
+      fs.stat.mockResolvedValue({
+        mode: 0o755,
+        isFile: () => true,
+      } as Stats);
       exec.mockReset();
+      docker.resetPrefetchedImages();
     });
 
     it('should return gradle dependencies', async () => {
@@ -166,10 +176,10 @@ describe('manager/gradle', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
 
-    it('should run gradlew through `sh` when available but not executable', async () => {
+    it('should execute gradle if gradlew is not available', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.access.mockRejectedValue(undefined);
+      fs.stat.mockResolvedValue({ isFile: () => false } as Stats);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -177,7 +187,7 @@ describe('manager/gradle', () => {
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.exists.mockResolvedValue(false);
+      fs.stat.mockResolvedValue({ isFile: () => false } as Stats);
 
       const packageFiles = ['foo/build.gradle'];
       expect(
@@ -340,11 +350,13 @@ describe('manager/gradle', () => {
   describe('executeGradle integration', () => {
     const SUCCES_FILE = 'success.indicator';
     let workingDir: DirectoryResult;
+    let testRunConfig: ExtractConfig;
 
     const manager = require('.');
 
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
+      testRunConfig = { ...config, localDir: workingDir.path };
       await _fs.copy(`${fixtures}/minimal-project`, workingDir.path);
       await _fs.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
 
@@ -352,8 +364,7 @@ describe('manager/gradle', () => {
 allprojects {
   tasks.register("renovate") {
     doLast {
-      def outputFile = new File('${SUCCES_FILE}')
-      outputFile.write 'success'
+      new File('${SUCCES_FILE}').write 'success'
     }
   }
 }`;
@@ -366,7 +377,10 @@ allprojects {
     ifSystemSupportsGradle(6).it(
       'executes an executable gradle wrapper',
       async () => {
-        await manager.executeGradle(config, workingDir.path);
+        const gradlew = await fsReal.promises.stat(
+          path.join(workingDir.path, 'gradlew')
+        );
+        await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
         await expect(
           fsReal.promises.readFile(
             path.join(workingDir.path, SUCCES_FILE),
@@ -383,7 +397,10 @@ allprojects {
           path.join(workingDir.path, 'gradlew'),
           '444'
         );
-        await manager.executeGradle(config, workingDir.path);
+        const gradlew = await fsReal.promises.stat(
+          path.join(workingDir.path, 'gradlew')
+        );
+        await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
         await expect(
           fsReal.promises.readFile(
             path.join(workingDir.path, SUCCES_FILE),
