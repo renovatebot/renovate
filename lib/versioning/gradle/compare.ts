@@ -1,19 +1,11 @@
-enum TokenType {
+export enum TokenType {
   Number = 1,
   String,
-}
-
-enum Separator {
-  Hyphen = '-',
-  Dot = '.',
-  Underscore = '',
-  Plus = '+',
 }
 
 type Token = {
   type: TokenType;
   val: string | number;
-  separator: Separator | null;
 };
 
 function iterateChars(str: string, cb: (p: string, n: string) => void): void {
@@ -27,7 +19,7 @@ function iterateChars(str: string, cb: (p: string, n: string) => void): void {
   cb(prev, null);
 }
 
-function isSeparator(char: string): char is Separator {
+function isSeparator(char: string): boolean {
   return /^[-._+]$/i.test(char);
 }
 
@@ -46,12 +38,11 @@ function isTransition(prevChar: string, nextChar: string): boolean {
   );
 }
 
-function tokenize(versionStr: string): Token[] {
+export function tokenize(versionStr: string): Token[] | null {
   let result = [];
   let currentVal = '';
 
   function yieldToken(): void {
-    // istanbul ignore if
     if (currentVal === '') {
       result = null;
     }
@@ -195,4 +186,116 @@ export function compare(left: string, right: string): number {
   return 0;
 }
 
-export {};
+export function isVersion(input: string): boolean {
+  if (!input) {
+    return false;
+  }
+
+  if (!/^[-._+a-zA-Z0-9]+$/i.test(input)) {
+    return false;
+  }
+
+  if (/^latest\.?/i.test(input)) {
+    return false;
+  }
+
+  const tokens = tokenize(input);
+  return !!tokens && !!tokens.length;
+}
+
+interface PrefixRange {
+  tokens: Token[];
+}
+
+export enum RangeBound {
+  Inclusive = 1,
+  Exclusive,
+}
+
+interface MavenBasedRange {
+  leftBound: RangeBound;
+  leftBoundStr: string;
+  leftVal: string | null;
+  separator: string;
+  rightBound: RangeBound;
+  rightBoundStr: string;
+  rightVal: string | null;
+}
+
+export function parsePrefixRange(input: string): PrefixRange | null {
+  if (!input) {
+    return null;
+  }
+
+  if (input.trim() === '+') {
+    return { tokens: [] };
+  }
+
+  const postfixRegex = /[-._]\+$/;
+  if (postfixRegex.test(input)) {
+    const prefixValue = input.replace(/[-._]\+$/, '');
+    const tokens = tokenize(prefixValue);
+    return tokens ? { tokens } : null;
+  }
+
+  return null;
+}
+
+const mavenBasedRangeRegex = /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/;
+
+export function parseMavenBasedRange(input: string): MavenBasedRange | null {
+  if (!input) {
+    return null;
+  }
+
+  const match = mavenBasedRangeRegex.exec(input);
+  if (match) {
+    const { leftBoundStr, separator, rightBoundStr } = match.groups;
+    let { leftVal, rightVal } = match.groups;
+    if (!leftVal) {
+      leftVal = null;
+    }
+    if (!rightVal) {
+      rightVal = null;
+    }
+    const isVersionLeft = isVersion(leftVal);
+    const isVersionRight = isVersion(rightVal);
+    if (
+      (leftVal === null || isVersionLeft) &&
+      (rightVal === null || isVersionRight)
+    ) {
+      if (isVersionLeft && isVersionRight && compare(leftVal, rightVal) === 1) {
+        return null;
+      }
+      const leftBound =
+        leftBoundStr.trim() === '['
+          ? RangeBound.Inclusive
+          : RangeBound.Exclusive;
+      const rightBound =
+        rightBoundStr.trim() === ']'
+          ? RangeBound.Inclusive
+          : RangeBound.Exclusive;
+      return {
+        leftBound,
+        leftBoundStr,
+        leftVal,
+        separator,
+        rightBound,
+        rightBoundStr,
+        rightVal,
+      };
+    }
+  }
+
+  return null;
+}
+
+export function isValid(str: string): boolean {
+  if (!str) {
+    return false;
+  }
+
+  return (
+    isVersion(str) || !!parsePrefixRange(str) || !!parseMavenBasedRange(str)
+  );
+}
