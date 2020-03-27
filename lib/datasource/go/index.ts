@@ -96,8 +96,7 @@ export async function getPkgReleases({
      * the old behaviour stays the same.
      */
     const nameParts = lookupName.split('/');
-    logger.trace(`go.getPkgReleases.nameParts:${nameParts}`);
-    logger.trace(`go.getPkgReleases.releases:${JSON.stringify(res.releases)}`);
+    logger.trace({ nameParts, releases: res.releases }, 'go.getPkgReleases');
     if (nameParts.length > 3) {
       const prefix = nameParts.slice(3, nameParts.length).join('/');
       logger.trace(`go.getPkgReleases.prefix:${prefix}`);
