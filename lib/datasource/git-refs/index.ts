@@ -10,7 +10,7 @@ const cacheMinutes = 10;
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
-interface RawRefs {
+export interface RawRefs {
   type: string;
   value: string;
 }
@@ -57,7 +57,7 @@ export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   try {
-    const rawRefs = await getRawRefs({ lookupName });
+    const rawRefs: RawRefs[] = await getRawRefs({ lookupName });
 
     const refs = rawRefs
       .filter(ref => ref.type === 'tags' || ref.type === 'heads')

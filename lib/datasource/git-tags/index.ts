@@ -10,7 +10,7 @@ export async function getPkgReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   try {
     // fetch remote tags
-    const rawRefs = await gitRefs.getRawRefs({ lookupName });
+    const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
 
     const tags = rawRefs
       .filter(ref => ref.type === 'tags')
