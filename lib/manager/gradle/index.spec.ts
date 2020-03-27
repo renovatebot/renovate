@@ -387,7 +387,8 @@ allprojects {
             'utf8'
           )
         ).resolves.toBe('success');
-      }
+      },
+      120000
     );
 
     ifSystemSupportsGradle(6).it(
@@ -407,7 +408,8 @@ allprojects {
             'utf8'
           )
         ).resolves.toBe('success');
-      }
+      },
+      120000
     );
   });
 });
