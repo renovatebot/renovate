@@ -109,9 +109,7 @@ export async function getPkgReleases({
           r2.version = r2.version.replace(`${prefix}/`, '');
           return r2;
         });
-      logger.trace(
-        `go.getPkgReleases.filteredReleases:${JSON.stringify(submodReleases)}`
-      );
+      logger.trace({ submodReleases }, 'go.getPkgReleases');
       if (submodReleases.length > 0) {
         res.releases = submodReleases;
         return res;
