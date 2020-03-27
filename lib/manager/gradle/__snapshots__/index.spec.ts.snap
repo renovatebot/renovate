@@ -508,6 +508,12 @@ Array [
 exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
   Object {
+    "cmd": "docker pull renovate/gradle",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
     "cmd": "docker ps --filter name=renovate_gradle -aq | xargs --no-run-if-empty docker rm -f",
     "options": Object {
       "encoding": "utf-8",

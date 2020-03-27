@@ -58,7 +58,7 @@ async function getGradleCommandLine(
   return `gradle ${args}`;
 }
 
-async function executeGradle(
+export async function executeGradle(
   config: ExtractConfig,
   cwd: string
 ): Promise<void> {
