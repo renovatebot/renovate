@@ -8,7 +8,7 @@ Although Renovate is now best known as a "service" via the GitHub App, that serv
 
 #### npmjs
 
-```
+```sh
 $ npm install -g renovate
 ```
 
@@ -16,18 +16,18 @@ $ npm install -g renovate
 
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
 
-```
+```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:13.1.1
-$ docker run --rm renovate/renovate:13.1
-$ docker run --rm renovate/renovate:13
+$ docker run --rm renovate/renovate:19.181.2
+$ docker run --rm renovate/renovate:19.181
+$ docker run --rm renovate/renovate:19
 ```
 
 (Please look up what the latest actual tags are though, do not use the above literally).
 
 If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes. For example:
 
-```
+```sh
 $ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
 ```
 
@@ -50,7 +50,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:13.153.0
+              image: renovate/renovate:19.181.2
               # Environment Variables
               env:
                 - name: RENOVATE_PLATFORM
@@ -229,13 +229,13 @@ host gitlab.com
 
 To easily create the secret, you can do the following (see [docs](https://kubernetes.io/docs/concepts/configuration/secret/#use-case-pod-with-ssh-keys))
 
-```
+```sh
 kubectl create secret generic ssh-key-secret --from-file=config=/path/to/config --from-file=id_rsa=/path/to/.ssh/id_rsa --from-file=id_rsa.pub=/path/to/.ssh/id_rsa.pub
 ```
 
 It creates something like this
 
-```
+```yml
 apiVersion: v1
 data:
   config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
@@ -250,7 +250,7 @@ metadata:
 Then you just need to add Git author, and mount volumes
 The final configuration should look like something like this :
 
-```
+```yml
 ---
 apiVersion: v1
 kind: Namespace
@@ -304,7 +304,7 @@ spec:
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
-                  mountPath: "/home/ubuntu/.ssh"
+                  mountPath: '/home/ubuntu/.ssh'
               args:
                 - <repository>
               # Environment Variables

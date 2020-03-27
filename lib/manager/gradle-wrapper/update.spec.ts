@@ -11,6 +11,10 @@ const propertiesFile2 = fs.readFileSync(
   'lib/manager/gradle-wrapper/__fixtures__/gradle-wrapper-2.properties',
   'utf8'
 );
+const propertiesFileCustomDistUrl = fs.readFileSync(
+  'lib/manager/gradle-wrapper/__fixtures__/gradle-wrapper-custom-distribution-url.properties',
+  'utf8'
+);
 const whitespacePropertiesFile = readFileSync(
   resolve(__dirname, './__fixtures__/gradle-wrapper-whitespace.properties'),
   'utf8'
@@ -71,6 +75,23 @@ describe('manager/gradle-wrapper/update', () => {
       expect(res).not.toEqual(propertiesFile2);
       expect(res).toMatch(
         'https\\://services.gradle.org/distributions/gradle-5.0-all.zip'
+      );
+      expect(res).toMatch(testUpgrades[5].checksum);
+    });
+
+    it('replaces existing value (custom distributionUrl)', async () => {
+      got.mockReturnValueOnce({
+        body: testUpgrades[5].checksum,
+      });
+      const res = await dcUpdate.updateDependency({
+        fileContent: propertiesFileCustomDistUrl,
+        upgrade: testUpgrades[5].data,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).not.toEqual(propertiesFileCustomDistUrl);
+      expect(res).toMatch(
+        'https\\://artifactory/gradle-wrapper-cache/distributions/gradle-5.0-bin.zip'
       );
       expect(res).toMatch(testUpgrades[5].checksum);
     });
