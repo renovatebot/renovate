@@ -22,6 +22,7 @@ Configuration-wise, it works like this:
 - You can optionally have a `lookupName` capture group or a `lookupNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
+- You can optionally have a `currentDigest` capture group.
 
 ### Regular Expression Capture Groups
 
@@ -29,7 +30,7 @@ To be fully effective with the regex manager, you will need to understand regula
 
 Consider this `Dockerfile`:
 
-```
+```Dockerfile
 FROM node:12
 ENV YARN_VERSION=1.19.1
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
@@ -60,11 +61,17 @@ In many cases, named capture groups alone won't be enough and you'll need to con
 
 Let's say that your `Dockerfile` has many `ENV` variables you want to keep updated and you prefer not to write one `regexManagers` rule per variable. Instead you could enhance your `Dockerfile` like the following:
 
-```
-ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
-ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer
-ENV DOCKER_VERSION=19.03.1 # github-releases/docker/docker-ce&versioning=docker
-ENV YARN_VERSION=1.19.1 # npm/yarn
+```Dockerfile
+ARG IMAGE=node:12@sha256:6e5264cd4cfaefd7174b2bc10c7f9a1c2b99d98d127fc57a802d264da9fb43bd
+FROM ${IMAGE}
+ # renovate: datasource=github-tags depName=nodejs/node versioning=node
+ENV NODE_VERSION=10.19.0
+ # renovate: datasource=github-releases depName=composer/composer
+ENV COMPOSER_VERSION=1.9.3
+# renovate: datasource=docker depName=docker versioning=docker
+ENV DOCKER_VERSION=19.03.1
+# renovate: datasource=npm depName=yarn
+ENV YARN_VERSION=1.19.1
 ```
 
 The above (obviously not a complete `Dockerfile`, but abbreviated for this example), could then be supported accordingly:
@@ -75,9 +82,16 @@ The above (obviously not a complete `Dockerfile`, but abbreviated for this examp
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
+    },
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "ARG IMAGE=(?<depName>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)s"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }

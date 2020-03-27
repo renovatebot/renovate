@@ -332,7 +332,7 @@ Sometimes file matches are really simple - for example with Go Modules Renovate 
 
 At other times, the possible files is too vague for Renovate to have any default. For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them contain a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile` or `Dockerfile.base`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
+Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
 ```json
 {

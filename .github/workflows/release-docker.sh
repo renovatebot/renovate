@@ -16,11 +16,8 @@ fi
 # build final images
 docker buildx bake \
   --file docker/bake.hcl \
-  --set settings.args.SHA=${SHA}} \
   --set settings.labels.org.opencontainers.image.version=${VERSION} \
-  --set settings.labels.org.opencontainers.image.revision=${SHA} \
-  --set latest.cache-to=renovate/renovate:_cache-latest \
-  --set slim.cache-to=renovate/renovate:_cache-slim \
+  --set settings.labels.org.opencontainers.image.revision=${GIT_HASH} \
   --set settings.output=type=docker \
   default
 

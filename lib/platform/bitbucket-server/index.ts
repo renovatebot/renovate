@@ -234,13 +234,23 @@ export async function initRepo({
   }
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
+export async function getRepoForceRebase(): Promise<boolean> {
   logger.debug(`getRepoForceRebase()`);
-  // TODO if applicable
-  // This function should return true only if the user has enabled a setting on the repo that enforces PRs to be kept up to date with master
-  // In such cases we rebase Renovate branches every time they fall behind
-  // In GitHub this is part of "branch protection"
-  return Promise.resolve(false);
+
+  // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
+  const res = await api.get(
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`
+  );
+
+  // If the default merge strategy contains `ff-only` the PR can only be merged
+  // if it is up to date with the base branch.
+  // The current options for id are:
+  // no-ff, ff, ff-only, rebase-no-ff, rebase-ff-only, squash, squash-ff-only
+  return Boolean(
+    res.body.mergeConfig &&
+      res.body.mergeConfig.defaultStrategy &&
+      res.body.mergeConfig.defaultStrategy.id.indexOf('ff-only') >= 0
+  );
 }
 
 export async function setBaseBranch(

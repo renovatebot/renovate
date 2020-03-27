@@ -12,8 +12,17 @@
     "resolveJsonModule": false,
     "isolatedModules": true,
     "lib": ["es2018"],
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "allowJs": true,
+    "checkJs": true
   },
-  "include": ["lib/**/*", "test/**/*", "tools/**/*.mjs"],
-  "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
+  "exclude": [
+    "node_modules",
+    "./.cache",
+    "./dist",
+    "**/__mocks__/*",
+    "bin",
+    "coverage",
+    "config.js"
+  ]
 }
