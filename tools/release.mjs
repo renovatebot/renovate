@@ -10,7 +10,8 @@ shell.echo(`Publishing version: ${version}`);
 
 shell.echo('Publishing npm package ...');
 if (
-  !exec(`yarn publish --non-interactive --new-version ${version} --verbose`)
+  !exec(`npm --no-git-tag-version version ${version}`) ||
+  !exec(`npm publish`)
 ) {
   err = true;
 }

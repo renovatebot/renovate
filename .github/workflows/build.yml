@@ -319,6 +319,7 @@ jobs:
       - name: semantic-release
         run: |
           echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
           yarn semantic-release --dry-run ${{github.ref != 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
