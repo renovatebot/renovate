@@ -236,6 +236,7 @@ jobs:
       - name: Build the Docker images
         run: |
           docker buildx bake \
+            --progress plain \
             --file docker/bake.hcl \
             --set settings.output=type=docker \
             default
@@ -302,17 +303,18 @@ jobs:
           version: ${{ env.BUILDX_VERSION }}
 
       - name: Docker registry login
+        if: github.ref == 'refs/heads/master'
         run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
 
       - name: Update Docker images cache
         continue-on-error: true
-        if: ${{github.ref == 'refs/heads/master'}}
+        if: github.ref == 'refs/heads/master'
         run: |
           docker buildx bake \
+            --progress plain \
             --file docker/bake.hcl \
-            --set latest.cache-to=type=registry,ref=renovate/docker-build-cache:renovate-latest,mode=max \
-            --set slim.cache-to=type=registry,ref=renovate/docker-build-cache:renovate-slim,mode=max \
-            default
+            --file docker/cache.hcl \
+            cache
 
       - name: semantic-release
         run: |
