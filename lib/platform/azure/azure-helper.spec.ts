@@ -13,6 +13,26 @@ describe('platform/azure/helpers', () => {
     azureApi = require('./azure-got-wrapper');
   });
 
+  describe('getStorageExtraCloneOpts', () => {
+    it('should configure basic auth', () => {
+      const res = azureHelper.getStorageExtraCloneOpts({
+        username: 'user',
+        password: 'pass',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure personal access token', () => {
+      const res = azureHelper.getStorageExtraCloneOpts({
+        token: '1234567890123456789012345678901234567890123456789012',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure bearer token', () => {
+      const res = azureHelper.getStorageExtraCloneOpts({ token: 'token' });
+      expect(res).toMatchSnapshot();
+    });
+  });
+
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
       const res = azureHelper.getNewBranchName('testBB');

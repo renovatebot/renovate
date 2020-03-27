@@ -54,6 +54,9 @@ describe('platform/git/storage', () => {
     await git.initRepo({
       localDir: tmpDir.path,
       url: origin.path,
+      extraCloneOpts: {
+        '--config': 'extra.clone.config=test-extra-config-value',
+      },
     });
   });
 
@@ -399,6 +402,12 @@ describe('platform/git/storage', () => {
       });
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
+    });
+
+    it('should use extra clone configuration', async () => {
+      const repo = Git(tmpDir.path).silent(true);
+      const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
+      expect(res).toBe('test-extra-config-value');
     });
   });
 });
