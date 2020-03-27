@@ -49,10 +49,6 @@ export interface ReleaseResult {
   versions?: any;
 }
 
-export interface RawRefs {
-  type: string;
-  value: string;
-}
 export interface Datasource {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
