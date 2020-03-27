@@ -30,26 +30,23 @@ describe('platform/gitea/gitea-got-wrapper', () => {
   });
 
   it('supports root-level pagination', async () => {
-    got.mockImplementationOnce((url: string) => {
-      expect(url).toEqual(`${baseURL}/pagination-example-1`);
-      return partial<GotResponse>({
+    got.mockResolvedValueOnce(
+      partial<GotResponse>({
         body: ['abc', 'def', 'ghi'],
         headers: { 'x-total-count': '5' },
         url: `${baseURL}/pagination-example-1`,
-      });
-    });
-    got.mockImplementationOnce((url: string) => {
-      expect(url).toEqual(`${baseURL}/pagination-example-1?page=2`);
-      return partial<GotResponse>({
+      })
+    );
+    got.mockResolvedValueOnce(
+      partial<GotResponse>({
         body: ['jkl'],
-      });
-    });
-    got.mockImplementationOnce((url: string) => {
-      expect(url).toEqual(`${baseURL}/pagination-example-1?page=3`);
-      return partial<GotResponse>({
+      })
+    );
+    got.mockResolvedValueOnce(
+      partial<GotResponse>({
         body: ['mno', 'pqr'],
-      });
-    });
+      })
+    );
 
     const res = await api.get(`${baseURL}/pagination-example-1`, {
       paginate: true,
@@ -57,6 +54,7 @@ describe('platform/gitea/gitea-got-wrapper', () => {
 
     expect(res.body).toHaveLength(6);
     expect(res.body).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
+    expect(got.mock.calls).toMatchSnapshot();
     expect(got).toHaveBeenCalledTimes(3);
   });
 
