@@ -129,5 +129,25 @@ describe('datasource/go', () => {
       expect(got).toHaveBeenCalledTimes(0);
       expect(github.getPkgReleases.mock.calls).toMatchSnapshot();
     });
+    it('works for nested modules on github', async () => {
+      got.mockClear();
+      github.getPkgReleases.mockClear();
+      const packages = [
+        { lookupName: 'github.com/x/text/a' },
+        { lookupName: 'github.com/x/text/b' },
+      ];
+      const githubRes = { releases: ['a/1', 'b/2'] } as any;
+      for (const pkg of packages) {
+        github.getPkgReleases.mockResolvedValueOnce(
+          partial<ReleaseResult>(githubRes)
+        );
+        const prefix = pkg.lookupName.split('/')[3];
+        const releses = await go.getPkgReleases(pkg);
+        expect(releses).toHaveLength(1);
+        expect(releses[0].version.startsWith(prefix));
+      }
+      expect(got).toHaveBeenCalledTimes(0);
+      expect(github.getPkgReleases.mock.calls).toMatchSnapshot();
+    });
   });
 });

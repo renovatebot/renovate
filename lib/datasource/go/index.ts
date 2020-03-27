@@ -80,6 +80,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  * This function will:
  *  - Determine the source URL for the module
  *  - Call the respective getPkgReleases in github to retrieve the tags
+ *  - Filter module tags according to the module path
  */
 export async function getPkgReleases({
   lookupName,
@@ -88,6 +89,35 @@ export async function getPkgReleases({
   const source = await getDatasource(lookupName);
   if (source && source.datasource === github.id) {
     const res = await github.getPkgReleases(source);
+
+    /**
+     * github.com/org/mod/submodule should be tagged as submodule/va.b.c
+     * and that tag should be used instead of just va.b.c, although for compatibility
+     * the old behaviour stays the same.
+     */
+    const nameParts = lookupName.split('/');
+    logger.trace(`go.getPkgReleases.nameParts:${nameParts}`);
+    logger.trace(`go.getPkgReleases.releases:${JSON.stringify(res.releases)}`);
+    if (nameParts.length > 3) {
+      const prefix = nameParts.slice(3, nameParts.length).join('/');
+      logger.trace(`go.getPkgReleases.prefix:${prefix}`);
+      const submodReleases = res.releases
+        .filter(
+          release => release.version && release.version.startsWith(prefix)
+        )
+        .map(release => {
+          const r2 = release;
+          r2.version = r2.version.replace(`${prefix}/`, '');
+          return r2;
+        });
+      logger.trace(
+        `go.getPkgReleases.filteredReleases:${JSON.stringify(submodReleases)}`
+      );
+      if (submodReleases.length > 0) {
+        res.releases = submodReleases;
+        return res;
+      }
+    }
     if (res && res.releases) {
       res.releases = res.releases.filter(
         release => release.version && release.version.startsWith('v')
