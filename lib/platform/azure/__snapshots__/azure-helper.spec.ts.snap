@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/azure/helpers getStorageExtraCloneOpts should configure basic auth 1`] = `
+Object {
+  "--config": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
+}
+`;
+
+exports[`platform/azure/helpers getStorageExtraCloneOpts should configure personal access token 1`] = `
+Object {
+  "--config": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+}
+`;
+
+exports[`platform/azure/helpers getStorageExtraCloneOpts should configure bearer token 1`] = `
+Object {
+  "--config": "http.extraheader=AUTHORIZATION: bearer token",
+}
+`;
+
 exports[`platform/azure/helpers getAzureBranchObj should be the branch object formated 1`] = `
 Object {
   "name": "refs/heads/branchName",

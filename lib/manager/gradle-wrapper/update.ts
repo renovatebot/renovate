@@ -1,7 +1,11 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
-import { DISTRIBUTION_CHECKSUM_REGEX, DISTRIBUTION_URL_REGEX } from './search';
+import {
+  DISTRIBUTION_CHECKSUM_REGEX,
+  DOWNLOAD_URL_REGEX,
+  VERSION_REGEX,
+} from './search';
 
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
@@ -41,7 +45,10 @@ export async function updateDependency({
 
     lines[upgrade.managerData.lineNumber] = lines[
       upgrade.managerData.lineNumber
-    ].replace(DISTRIBUTION_URL_REGEX, `$<assignment>${downloadUrl}`);
+    ].replace(
+      VERSION_REGEX,
+      `-${DOWNLOAD_URL_REGEX.exec(downloadUrl).groups.version}-`
+    );
 
     if (upgrade.managerData.checksumLineNumber) {
       lines[upgrade.managerData.checksumLineNumber] = lines[
