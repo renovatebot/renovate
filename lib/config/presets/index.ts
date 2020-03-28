@@ -114,7 +114,8 @@ export async function getPreset(
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset(
     packageName,
-    presetName
+    presetName,
+    inputConfig
   );
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
