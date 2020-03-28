@@ -31,6 +31,21 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           dry-run: ${{github.ref == 'refs/heads/master'}}
 
+  node-test:
+    needs: [cleanup]
+    runs-on: ubuntu-latest
+    # release shouldn't need more than 30 min
+    timeout-minutes: 5
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: env | grep NODE_
+
   test:
     needs: [cleanup]
     runs-on: ${{ matrix.os }}
@@ -319,6 +334,7 @@ jobs:
 
       - name: semantic-release
         run: |
+          npm config set scripts-prepend-node-path true
           npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
