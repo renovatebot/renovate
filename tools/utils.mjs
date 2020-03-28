@@ -1,4 +1,5 @@
 import commander from 'commander';
+import core from '@actions/core';
 import shell from 'shelljs';
 
 const program = new commander.Command();
@@ -17,16 +18,33 @@ export { program };
  * @param cmd {string} The command to execute
  * @returns {boolean} Returns true on zero exit code otherwise false
  */
-export function exec(cmd) {
+export function exec(cmd, ignores = []) {
   try {
-    if (!program.dryRun) {
-      const res = shell.exec(cmd);
-      return res.code === 0;
+    if (program.dryRun) {
+      core.warning(`DRY-RUN: ${cmd}`);
+      return true;
     }
-    shell.echo(`DRY-RUN: ${cmd}`);
-  } catch (e) {
-    shell.echo(e.toString());
+
+    core.startGroup(cmd);
+    const res = shell.exec(cmd);
+    if (res.code === 0) {
+      return true;
+    }
+
+    if (
+      ignores.length &&
+      ignores.some(s => res.stdout.includes(s) || res.stderr.includes(s))
+    ) {
+      core.warning(`Ignoring code: ${res.code}`);
+      return true;
+    }
+
+    core.warning(`Failed with code: ${res.code}`);
     return false;
+  } catch (e) {
+    core.error(e.toString());
+    return false;
+  } finally {
+    core.endGroup(cmd);
   }
-  return true;
 }

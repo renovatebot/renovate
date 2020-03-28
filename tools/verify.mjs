@@ -1,8 +1,14 @@
-import shell from 'shelljs';
+import core from '@actions/core';
+import exec from '@actions/exec';
 
-shell.echo(`Verifying ...`);
-
-const res = shell.exec(`npm whoami`);
-if (res.code !== 0) {
-  shell.exit(2);
-}
+core.info(`Verifying ...`);
+(async () => {
+  try {
+    core.groupStart('npm whoami');
+    await exec.exec(`npm`, ['whoami']);
+  } catch (e) {
+    core.setFailed('npm auth error');
+  } finally {
+    core.endGroup('npm whoami');
+  }
+})();

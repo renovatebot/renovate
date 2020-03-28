@@ -173,6 +173,8 @@
     "re2": "1.10.5"
   },
   "devDependencies": {
+    "@actions/core": "1.2.3",
+    "@actions/exec": "1.0.3",
     "@babel/cli": "7.8.4",
     "@babel/core": "7.9.0",
     "@babel/node": "7.8.7",
