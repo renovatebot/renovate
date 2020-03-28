@@ -49,7 +49,7 @@ jobs:
           npm config set scripts-prepend-node-path true
           npm config ls
           npx npm config ls
-          npm run verify
+          npm whoami
 
   test:
     needs: [cleanup]
