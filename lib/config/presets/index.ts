@@ -5,6 +5,7 @@ import * as migration from '../migration';
 import * as github from './github';
 import * as npm from './npm';
 import * as gitlab from './gitlab';
+import * as local from './local';
 import { RenovateConfig } from '../common';
 import { mergeChildConfig } from '../utils';
 import { regEx } from '../../util/regex';
@@ -18,6 +19,7 @@ const presetSources = {
   github,
   npm,
   gitlab,
+  local,
 };
 
 export function replaceArgs(
@@ -61,6 +63,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('local>')) {
+    presetSource = 'local';
+    str = str.substring('local>'.length);
   }
   str = str.replace(/^npm>/, '');
   presetSource = presetSource || 'npm';
