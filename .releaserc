@@ -6,6 +6,7 @@
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "yarn verify",
         "publishCmd": "yarn release --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
       }
     ]

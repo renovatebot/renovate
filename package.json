@@ -42,7 +42,8 @@
     "test-schema": "babel-node --extensions \".ts,.js\" -- test/json-schema.ts",
     "test": "run-s lint test-schema type-check jest",
     "tsc": "tsc",
-    "type-check": "run-s generate:* \"tsc --noEmit\""
+    "type-check": "run-s generate:* \"tsc --noEmit\"",
+    "verify": "node --experimental-modules tools/verify.mjs"
   },
   "repository": {
     "type": "git",
