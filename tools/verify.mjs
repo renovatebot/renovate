@@ -3,7 +3,7 @@ import shell from 'shelljs';
 shell.echo(`Verifying ...`);
 
 shell.exec(`npm config ls`);
-shell.exec(`cat /home/runner/work/_temp/.npmrc`);
+shell.exec(`cat /home/runner/work/_temp/.npmrc | grep NODE_`);
 shell.exec(`env | grep NPM_`);
 shell.exec(`env | grep NODE_`);
 
