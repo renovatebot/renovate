@@ -1,11 +1,9 @@
 import * as os from 'os';
 import * as fs from 'fs-extra';
 import { Stats } from 'fs';
-
 import upath from 'upath';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-
 import * as mavenVersioning from '../../versioning/maven';
 import {
   init,
