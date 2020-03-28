@@ -6,16 +6,6 @@ import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import * as mavenVersioning from '../../versioning/maven';
 import {
-  init,
-  collectVersionVariables,
-  updateGradleVersion,
-  GradleDependency,
-} from './build-gradle';
-import {
-  createRenovateGradlePlugin,
-  extractDependenciesFromUpdatesReport,
-} from './gradle-updates-report';
-import {
   PackageFile,
   ExtractConfig,
   Upgrade,
@@ -26,6 +16,16 @@ import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
 import { BinarySource } from '../../util/exec/common';
+import {
+  init,
+  collectVersionVariables,
+  updateGradleVersion,
+  GradleDependency,
+} from './build-gradle';
+import {
+  createRenovateGradlePlugin,
+  extractDependenciesFromUpdatesReport,
+} from './gradle-updates-report';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
