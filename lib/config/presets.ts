@@ -5,6 +5,7 @@ import * as migration from './migration';
 import * as github from '../datasource/github';
 import * as npm from '../datasource/npm';
 import * as gitlab from '../datasource/gitlab';
+import * as platform from '../platform';
 import { RenovateConfig } from './common';
 import { mergeChildConfig } from './utils';
 
@@ -12,6 +13,7 @@ const datasources = {
   github,
   npm,
   gitlab,
+  platform,
 };
 
 export async function resolveConfigPresets(
@@ -167,6 +169,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     datasource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('local')) {
+    datasource = 'platform';
+    str = str.substring('local>'.length);
   }
   str = str.replace(/^npm>/, '');
   datasource = datasource || 'npm';
