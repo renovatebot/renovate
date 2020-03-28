@@ -121,6 +121,7 @@ export interface RenovateConfig
   branchList?: string[];
   description?: string[];
 
+  platform?: string;
   endpoint?: string;
   errors?: ValidationMessage[];
   extends?: string[];

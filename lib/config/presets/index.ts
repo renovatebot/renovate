@@ -106,7 +106,10 @@ export function parsePreset(input: string): ParsedPreset {
   return { presetSource, packageName, presetName, params };
 }
 
-export async function getPreset(preset: string): Promise<RenovateConfig> {
+export async function getPreset(
+  preset: string,
+  inputConfig: RenovateConfig
+): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset(
@@ -171,7 +174,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset);
+          fetchedPreset = await getPreset(preset, inputConfig);
         } catch (err) {
           logger.debug({ err }, 'Preset fetch error');
           // istanbul ignore if

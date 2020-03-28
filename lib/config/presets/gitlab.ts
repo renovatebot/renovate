@@ -4,12 +4,11 @@ import { Preset } from './common';
 
 const { get: glGot } = api;
 
-const GitLabApiUrl = 'https://gitlab.com/api/v4/projects';
-
 async function getDefaultBranchName(
-  urlEncodedPkgName: string
+  urlEncodedPkgName: string,
+  endpoint: string
 ): Promise<string> {
-  const branchesUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/branches`;
+  const branchesUrl = `${endpoint}/projects/${urlEncodedPkgName}/repository/branches`;
   type GlBranch = {
     default: boolean;
     name: string;
@@ -30,7 +29,8 @@ async function getDefaultBranchName(
 
 export async function getPreset(
   pkgName: string,
-  presetName = 'default'
+  presetName = 'default',
+  endpoint = 'https://gitlab.com/api/v4'
 ): Promise<Preset> {
   if (presetName !== 'default') {
     // TODO: proper error contructor
@@ -42,9 +42,12 @@ export async function getPreset(
   let res: string;
   try {
     const urlEncodedPkgName = encodeURIComponent(pkgName);
-    const defautlBranchName = await getDefaultBranchName(urlEncodedPkgName);
+    const defautlBranchName = await getDefaultBranchName(
+      urlEncodedPkgName,
+      endpoint
+    );
 
-    const presetUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/files/renovate.json?ref=${defautlBranchName}`;
+    const presetUrl = `${endpoint}/projects/${urlEncodedPkgName}/repository/files/renovate.json?ref=${defautlBranchName}`;
     res = Buffer.from(
       (await glGot(presetUrl)).body.content,
       'base64'

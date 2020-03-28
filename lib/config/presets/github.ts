@@ -3,8 +3,12 @@ import { Preset } from './common';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
-async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
-  const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
+async function fetchJSONFile(
+  repo: string,
+  fileName: string,
+  endpoint: string
+): Promise<Preset> {
+  const url = `${endpoint}/repos/${repo}/contents/${fileName}`;
   const opts: GotJSONOptions = {
     headers: {
       accept: global.appMode
@@ -38,11 +42,16 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
 
 export async function getPreset(
   pkgName: string,
-  presetName = 'default'
+  presetName = 'default',
+  endpoint = 'https://api.github.com'
 ): Promise<Preset> {
   if (presetName === 'default') {
     try {
-      const defaultJson = await fetchJSONFile(pkgName, 'default.json');
+      const defaultJson = await fetchJSONFile(
+        pkgName,
+        'default.json',
+        endpoint
+      );
       return defaultJson;
     } catch (err) {
       if (err.message === PLATFORM_FAILURE) {
@@ -50,10 +59,10 @@ export async function getPreset(
       }
       if (err.message === 'dep not found') {
         logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json');
+        return fetchJSONFile(pkgName, 'renovate.json', endpoint);
       }
       throw err;
     }
   }
-  return fetchJSONFile(pkgName, `${presetName}.json`);
+  return fetchJSONFile(pkgName, `${presetName}.json`, endpoint);
 }
