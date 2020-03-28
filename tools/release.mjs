@@ -1,29 +1,31 @@
-import shell from 'shelljs';
+import core from '@actions/core';
 import { program, exec } from './utils.mjs';
+import dispatch from './dispatch-release.mjs';
 
 const version = program.release;
 const sha = program.sha;
 
 let err = false;
 
-shell.echo(`Publishing version: ${version}`);
+core.info(`Publishing version: ${version}`);
 
-shell.echo('Publishing npm package ...');
+core.info('Publishing npm package ...');
 if (
   !exec(`npm --no-git-tag-version version ${version}`) ||
-  !exec(`npm publish`)
+  !exec(`npm publish`, [
+    'You cannot publish over the previously published versions',
+  ])
 ) {
   err = true;
 }
 
-shell.echo('Publishing docker images ...');
+core.info('Publishing docker images ...');
 if (!exec(`./.github/workflows/release-docker.sh ${version} ${sha}`)) {
   err = true;
 }
 
-// eslint-disable-next-line promise/valid-params
-import('./dispatch-release.mjs').catch();
+dispatch();
 
 if (err) {
-  shell.exit(2);
+  core.setFailed('release failed partially');
 }
