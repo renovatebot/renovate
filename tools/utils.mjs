@@ -8,7 +8,7 @@ program
   .option('-s, --sha <type>', 'Sha to use')
   .option('-d, --dry-run');
 
-console.error('args: ', process.argv);
+process.stderr.write('args: ' + process.argv.join(' '));
 program.parse(process.argv);
 
 export { program };
