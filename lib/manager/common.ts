@@ -1,6 +1,6 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy, SkipReason } from '../types';
-import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
+import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -100,6 +100,10 @@ export interface PackageFile<T = Record<string, any>>
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
+}
+
+export interface AdditionalPackageFiles {
+  npm?: Partial<PackageFile>[];
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -249,4 +253,14 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   yarnLock?: string;
   branchName?: string;
   parentBranch?: string;
+}
+
+export interface UpdatedArtifacts {
+  name: string;
+  contents: string | Buffer;
+}
+
+export interface WriteExistingFilesResult {
+  artifactErrors: ArtifactError[];
+  updatedArtifacts: UpdatedArtifacts[];
 }

@@ -6,10 +6,7 @@ import { join } from 'upath';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
-import {
-  getAdditionalFiles,
-  AdditionalPackageFiles,
-} from '../../manager/npm/post-update';
+import { getAdditionalFiles as getNpmAdditionalFiles } from '../../manager/npm/post-update';
 import { commitFilesToBranch } from './commit';
 import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
@@ -40,6 +37,11 @@ import {
 import { BranchStatus } from '../../types';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
+import {
+  AdditionalPackageFiles,
+  PostUpdateConfig,
+  WriteExistingFilesResult,
+} from '../../manager/common';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -50,6 +52,13 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
     branchPr.body && branchPr.body.includes(`- [x] <!-- rebase-check -->`);
 
   return titleRebase || labelRebase || prRebaseChecked;
+}
+
+async function getAllAdditionalFiles(
+  config: PostUpdateConfig,
+  packageFiles: AdditionalPackageFiles
+): Promise<WriteExistingFilesResult> {
+  return getNpmAdditionalFiles(config, packageFiles);
 }
 
 export async function processBranch(
@@ -299,7 +308,7 @@ export async function processBranch(
     } else {
       logger.debug('No package files need updating');
     }
-    const additionalFiles = await getAdditionalFiles(config, packageFiles);
+    const additionalFiles = await getAllAdditionalFiles(config, packageFiles);
     config.artifactErrors = (config.artifactErrors || []).concat(
       additionalFiles.artifactErrors
     );

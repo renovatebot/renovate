@@ -1,10 +1,9 @@
-import { logger, addMeta, removeMeta } from '../../../logger';
+import { addMeta, logger, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
 import { getPrsRemaining } from './limits';
 import { getLimitRemaining } from '../../global/limits';
 import { RenovateConfig } from '../../../config';
-import { PackageFile } from '../../../manager/common';
-import { AdditionalPackageFiles } from '../../../manager/npm/post-update';
+import { AdditionalPackageFiles, PackageFile } from '../../../manager/common';
 import { BranchConfig } from '../../common';
 
 export type WriteUpdateResult = 'done' | 'automerged';

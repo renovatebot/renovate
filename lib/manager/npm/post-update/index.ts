@@ -10,7 +10,15 @@ import * as yarn from './yarn';
 import * as pnpm from './pnpm';
 import * as hostRules from '../../../util/host-rules';
 import { getChildProcessEnv } from '../../../util/exec/env';
-import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
+import {
+  AdditionalPackageFiles,
+  ArtifactError,
+  PackageFile,
+  PostUpdateConfig,
+  UpdatedArtifacts,
+  Upgrade,
+  WriteExistingFilesResult,
+} from '../../common';
 import { platform } from '../../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource/common';
@@ -284,20 +292,6 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile>[];
-}
-
-interface ArtifactError {
-  lockFile: string;
-  stderr: string;
-}
-
-interface UpdatedArtifacts {
-  name: string;
-  contents: string | Buffer;
-}
-
 // istanbul ignore next
 async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
@@ -354,10 +348,6 @@ async function resetNpmrcContent(
   }
 }
 
-export interface WriteExistingFilesResult {
-  artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifacts[];
-}
 // istanbul ignore next
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
