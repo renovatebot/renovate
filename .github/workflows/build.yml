@@ -44,11 +44,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
-      - run: |
+      - name: test
+        run: |
           env | grep NODE_
           npm config set scripts-prepend-node-path true
           npx npm config ls
           npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   test:
     needs: [cleanup]
