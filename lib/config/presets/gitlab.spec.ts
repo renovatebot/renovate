@@ -9,6 +9,7 @@ const glGot: jest.Mock<Promise<Partial<GotResponse>>> = api.get as never;
 
 describe('config/presets/gitlab', () => {
   beforeEach(() => {
+    glGot.mockReset();
     global.repoCache = {};
     return global.renovateCache.rmAll();
   });
@@ -51,6 +52,20 @@ describe('config/presets/gitlab', () => {
       });
       const content = await gitlab.getPreset('some/repo');
       expect(content).toEqual({ foo: 'bar' });
+    });
+    it('uses default endpoint', async () => {
+      await gitlab.getPreset('some/repo', 'default').catch(_ => {});
+      expect(glGot.mock.calls[0][0]).toEqual(
+        'https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches'
+      );
+    });
+    it('uses custom endpoint', async () => {
+      await gitlab
+        .getPreset('some/repo', 'default', 'https://gitlab.example.org/api/v4')
+        .catch(_ => {});
+      expect(glGot.mock.calls[0][0]).toEqual(
+        'https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/branches'
+      );
     });
   });
 });

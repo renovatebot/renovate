@@ -11,7 +11,10 @@ const got: any = _got;
 const hostRules: any = _hostRules;
 
 describe('config/presets/github', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(() => {
+    global.renovateCache.rmAll();
+    got.mockReset();
+  });
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
@@ -65,6 +68,21 @@ describe('config/presets/github', () => {
       } finally {
         delete global.appMode;
       }
+    });
+
+    it('uses default endpoint', async () => {
+      await github.getPreset('some/repo', 'default').catch(_ => {});
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://api.github.com/repos/some/repo/contents/default.json'
+      );
+    });
+    it('uses custom endpoint', async () => {
+      await github
+        .getPreset('some/repo', 'default', 'https://api.github.example.org')
+        .catch(_ => {});
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://api.github.example.org/repos/some/repo/contents/default.json'
+      );
     });
   });
 });
