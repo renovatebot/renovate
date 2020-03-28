@@ -22,5 +22,8 @@ if (!exec(`./.github/workflows/release-docker.sh ${version} ${sha}`)) {
 }
 
 if (err) {
-  shell.exit(1);
+  shell.exit(2);
 }
+
+// eslint-disable-next-line promise/valid-params
+import('./dispatch-release.mjs').catch();
