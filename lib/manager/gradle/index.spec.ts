@@ -20,7 +20,7 @@ const fixtures = 'lib/manager/gradle/__fixtures__';
 const config = {
   localDir: 'localDir',
   gradle: {
-    timeout: 20,
+    timeout: 60,
   },
 };
 

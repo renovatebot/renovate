@@ -16,7 +16,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -38,7 +38,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -60,7 +60,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -82,7 +82,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -104,7 +104,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -126,7 +126,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -148,7 +148,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -291,7 +291,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -376,7 +376,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -519,7 +519,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -623,7 +623,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
@@ -685,7 +685,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 20000,
+      "timeout": 60000,
     },
   },
 ]
