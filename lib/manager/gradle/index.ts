@@ -54,10 +54,10 @@ async function prepareGradleCommandLine(
   const gradlewName = gradleWrapperFileName(config);
 
   if (gradlew.isFile()) {
-    // if is executable by others
+    // if the file is not executable by others
     // eslint-disable-next-line no-bitwise
     if ((gradlew.mode & 0o1) === 0) {
-      // add execution permission to owner, group and others
+      // add the execution permission to the owner, group and others
       // eslint-disable-next-line no-bitwise
       await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
     }
