@@ -1,12 +1,18 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile } from '.';
+import { extractPackageFile, defaultConfig } from '.';
+import { getName } from '../../../test/util';
 
 const dockerfileContent = readFileSync(
   resolve(__dirname, `./__fixtures__/Dockerfile`),
   'utf8'
 );
-describe('manager/custom/extract', () => {
+describe(getName(__filename), () => {
+  it('has default config', () => {
+    expect(defaultConfig).toEqual({
+      pinDigests: false,
+    });
+  });
   it('extracts multiple dependencies', async () => {
     const config = {
       matchStrings: [

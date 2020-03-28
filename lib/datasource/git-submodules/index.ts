@@ -44,7 +44,7 @@ export async function getPkgReleases({
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
-    logger.debug(`Error looking up tags in ${lookupName}`);
+    logger.debug({ err }, `Git-SubModules lookup error in ${lookupName}`);
   }
   return null;
 }

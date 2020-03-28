@@ -1,8 +1,8 @@
 import { URLSearchParams } from 'url';
-import { api, GiteaGotOptions } from './gitea-got-wrapper';
-import { GotResponse } from '../common';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
+import { GotResponse } from '../common';
+import { api, GiteaGotOptions } from './gitea-got-wrapper';
 
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
@@ -116,6 +116,7 @@ export interface CommitStatus {
   context: string;
   description: string;
   target_url: string;
+  created_at: string;
 }
 
 export interface CombinedCommitStatus {
@@ -496,6 +497,19 @@ export const renovateToGiteaStatusMapping: Record<
   red: 'failure',
 };
 
+function filterStatus(data: CommitStatus[]): CommitStatus[] {
+  const ret: Record<string, CommitStatus> = {};
+  for (const i of data) {
+    if (
+      !ret[i.context] ||
+      new Date(ret[i.context].created_at) < new Date(i.created_at)
+    ) {
+      ret[i.context] = i;
+    }
+  }
+  return Object.values(ret);
+}
+
 export async function getCombinedCommitStatus(
   repoPath: string,
   branchName: string,
@@ -508,7 +522,7 @@ export async function getCombinedCommitStatus(
   });
 
   let worstState = 0;
-  for (const cs of res.body) {
+  for (const cs of filterStatus(res.body)) {
     worstState = Math.max(worstState, commitStatusStates.indexOf(cs.status));
   }
 

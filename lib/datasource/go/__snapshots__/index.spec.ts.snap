@@ -35,3 +35,20 @@ Array [
   ],
 ]
 `;
+
+exports[`datasource/go getPkgReleases works for nested modules on github 1`] = `
+Array [
+  Array [
+    Object {
+      "datasource": "github-tags",
+      "lookupName": "x/text",
+    },
+  ],
+  Array [
+    Object {
+      "datasource": "github-tags",
+      "lookupName": "x/text",
+    },
+  ],
+]
+`;
