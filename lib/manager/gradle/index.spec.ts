@@ -2,6 +2,7 @@ import { toUnix } from 'upath';
 import _fs from 'fs-extra';
 import fsReal, { Stats } from 'fs';
 import { exec as _exec } from 'child_process';
+import * as _os from 'os';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as path from 'path';
 import { platform as _platform } from '../../platform';
@@ -15,15 +16,6 @@ import * as _manager from '.';
 import { ExtractConfig } from '../common';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
-
-expect.addSnapshotSerializer({
-  test(value) {
-    return typeof value === 'string' && value.startsWith('gradlew.bat');
-  },
-  print(value, serialize) {
-    return serialize((value as string).replace('gradlew.bat', './gradlew'));
-  },
-});
 
 const config = {
   localDir: 'localDir',
@@ -54,10 +46,12 @@ async function setupMocks() {
   jest.mock('child_process');
   jest.mock('../../util/exec/env');
   jest.mock('../../platform');
+  jest.mock('os');
 
+  const fs: jest.Mocked<typeof _fs> = require('fs-extra');
+  const os: jest.Mocked<typeof _os> = require('os');
   const platform: jest.Mocked<typeof _platform> = require('../../platform')
     .platform;
-  const fs: jest.Mocked<typeof _fs> = require('fs-extra');
   const env: jest.Mocked<typeof _env> = require('../../util/exec/env');
   const exec: jest.Mock<typeof _exec> = require('child_process').exec;
   const util: jest.Mocked<typeof _util> = require('../../util');
@@ -66,7 +60,7 @@ async function setupMocks() {
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(config);
 
-  return [require('.'), exec, fs, util];
+  return [require('.'), exec, fs, util, os];
 }
 
 describe('manager/gradle', () => {
@@ -75,10 +69,11 @@ describe('manager/gradle', () => {
     let exec: jest.Mock<typeof _exec>;
     let fs: jest.Mocked<typeof _fs>;
     let util: jest.Mocked<typeof _util>;
+    let os: jest.Mocked<typeof _os>;
     let docker: typeof _docker;
 
     beforeAll(async () => {
-      [manager, exec, fs, util] = await setupMocks();
+      [manager, exec, fs, util, os] = await setupMocks();
       docker = require('../../util/exec/docker');
     });
 
@@ -94,6 +89,7 @@ describe('manager/gradle', () => {
       } as Stats);
       exec.mockReset();
       docker.resetPrefetchedImages();
+      os.platform.mockReturnValue('linux');
     });
 
     it('should return gradle dependencies', async () => {
@@ -185,6 +181,14 @@ describe('manager/gradle', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
 
+    it('should execute gradlew.bat when available on Windows', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+      os.platform.mockReturnValue('win32');
+
+      await manager.extractAllPackageFiles(config, ['build.gradle']);
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
     it('should execute gradle if gradlew is not available', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
@@ -243,6 +247,20 @@ describe('manager/gradle', () => {
 
     it('should use docker even if gradlew is available', async () => {
       util.setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
+      const configWithDocker = {
+        binarySource: BinarySource.Docker,
+        ...config,
+        gradle: {},
+      };
+      await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
+
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
+    it('should use docker even if gradlew.bat is available on Windows', async () => {
+      os.platform.mockReturnValue('win32');
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {

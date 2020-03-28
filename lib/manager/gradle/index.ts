@@ -36,7 +36,6 @@ function gradleWrapperFileName(config: ExtractConfig): string {
     os.platform() === 'win32' &&
     config.binarySource !== BinarySource.Docker
   ) {
-    /* istanbul ignore next */
     return 'gradlew.bat';
   }
   return './gradlew';
