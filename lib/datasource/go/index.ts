@@ -89,7 +89,10 @@ export async function getPkgReleases({
   const source = await getDatasource(lookupName);
   if (source && source.datasource === github.id) {
     const res = await github.getPkgReleases(source);
-
+    // istanbul ignore if
+    if (!res) {
+      return res;
+    }
     /**
      * github.com/org/mod/submodule should be tagged as submodule/va.b.c
      * and that tag should be used instead of just va.b.c, although for compatibility
