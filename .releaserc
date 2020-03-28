@@ -6,8 +6,8 @@
     [
       "@semantic-release/exec",
       {
-        "verifyConditionsCmd": "yarn verify",
-        "publishCmd": "yarn release --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
+        "verifyConditionsCmd": "run-s verify -- --release=${nextRelease.version} --sha=${nextRelease.gitHead}",
+        "publishCmd": "run-s -- release --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
       }
     ]
   ],
