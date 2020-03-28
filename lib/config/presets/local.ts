@@ -3,16 +3,16 @@ import * as gitlab from './gitlab';
 import * as github from './github';
 import { RenovateConfig } from '../common';
 
-export function getPreset(
+export async function getPreset(
   pkgName: string,
   presetName = 'default',
   config: RenovateConfig
 ): Promise<Preset> {
-  if (config.platform === 'gitlab') {
+  if (config.platform?.toLowerCase() === 'gitlab') {
     return gitlab.getPreset(pkgName, presetName, config.endpoint);
   }
-  if (config.platform === 'github') {
+  if (config.platform?.toLowerCase() === 'github') {
     return github.getPreset(pkgName, presetName, config.endpoint);
   }
-  throw new Error('Not supported');
+  throw new Error(`Unsupport platform ${config.platform} for local preset.`);
 }

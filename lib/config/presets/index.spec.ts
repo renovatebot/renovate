@@ -257,6 +257,9 @@ describe('config/presets', () => {
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
     });
+    it('parses local', () => {
+      expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
+    });
     it('returns default package name with params', () => {
       expect(
         presets.parsePreset(':group(packages/eslint, eslint)')
@@ -323,27 +326,30 @@ describe('config/presets', () => {
   });
   describe('getPreset', () => {
     it('gets linters', async () => {
-      const res = await presets.getPreset('packages:linters');
+      const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
       expect(res.extends).toHaveLength(2);
     });
     it('gets parameterised configs', async () => {
-      const res = await presets.getPreset(':group(packages:eslint, eslint)');
+      const res = await presets.getPreset(
+        ':group(packages:eslint, eslint)',
+        {}
+      );
       expect(res).toMatchSnapshot();
     });
     it('handles missing params', async () => {
-      const res = await presets.getPreset(':group()');
+      const res = await presets.getPreset(':group()', {});
       expect(res).toMatchSnapshot();
     });
     it('ignores irrelevant params', async () => {
-      const res = await presets.getPreset(':pinVersions(foo, bar)');
+      const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toMatchSnapshot();
     });
     it('handles 404 packages', async () => {
       let e: Error;
       try {
-        await presets.getPreset('notfound:foo');
+        await presets.getPreset('notfound:foo', {});
       } catch (err) {
         e = err;
       }
@@ -355,7 +361,7 @@ describe('config/presets', () => {
     it('handles no config', async () => {
       let e: Error;
       try {
-        await presets.getPreset('noconfig:foo');
+        await presets.getPreset('noconfig:foo', {});
       } catch (err) {
         e = err;
       }
@@ -367,7 +373,7 @@ describe('config/presets', () => {
     it('handles throw errors', async () => {
       let e: Error;
       try {
-        await presets.getPreset('throw:foo');
+        await presets.getPreset('throw:foo', {});
       } catch (err) {
         e = err;
       }
@@ -379,7 +385,7 @@ describe('config/presets', () => {
     it('handles preset not found', async () => {
       let e: Error;
       try {
-        await presets.getPreset('wrongpreset:foo');
+        await presets.getPreset('wrongpreset:foo', {});
       } catch (err) {
         e = err;
       }
