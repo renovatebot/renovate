@@ -293,7 +293,7 @@ interface ArtifactError {
   stderr: string;
 }
 
-interface UpdatedArtifcats {
+interface UpdatedArtifacts {
   name: string;
   contents: string | Buffer;
 }
@@ -356,7 +356,7 @@ async function resetNpmrcContent(
 
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifcats[];
+  updatedArtifacts: UpdatedArtifacts[];
 }
 // istanbul ignore next
 export async function getAdditionalFiles(
@@ -365,7 +365,7 @@ export async function getAdditionalFiles(
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
-  const updatedArtifacts: UpdatedArtifcats[] = [];
+  const updatedArtifacts: UpdatedArtifacts[] = [];
   if (!(packageFiles.npm && packageFiles.npm.length)) {
     return { artifactErrors, updatedArtifacts };
   }
