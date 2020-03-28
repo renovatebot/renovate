@@ -323,7 +323,7 @@ jobs:
 
       - name: semantic-release
         run: |
-          echo "me: $(npm whoami)"
+          [ "${NODE_AUTH_TOKEN}" = "XXXXX-XXXXX-XXXXX-XXXXX" ] && echo fail || echo success
           npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
