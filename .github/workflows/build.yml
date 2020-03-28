@@ -85,6 +85,7 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
@@ -179,6 +180,7 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
@@ -265,7 +267,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Init platform
         id: init
@@ -276,6 +277,7 @@ jobs:
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
           yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
 
       - uses: actions/checkout@v2
 
@@ -319,7 +321,8 @@ jobs:
 
       - name: semantic-release
         run: |
-          npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}}
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
