@@ -47,7 +47,6 @@ jobs:
       - run: |
           env | grep NODE_
           npm config set scripts-prepend-node-path true
-          npm config ls
           npx npm config ls
           npm whoami
 
