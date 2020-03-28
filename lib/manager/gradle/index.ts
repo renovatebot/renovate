@@ -41,7 +41,6 @@ function gradleWrapperFileName(config: ExtractConfig): string {
     /* istanbul ignore next */
     return 'gradlew.bat';
   }
-  /* istanbul ignore next */
   return './gradlew';
 }
 
