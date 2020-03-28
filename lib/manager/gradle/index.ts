@@ -1,11 +1,12 @@
+import * as os from 'os';
 import * as fs from 'fs-extra';
 import { Stats } from 'fs';
-import upath from 'upath';
 
+import upath from 'upath';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import * as mavenVersioning from '../../versioning/maven';
 
+import * as mavenVersioning from '../../versioning/maven';
 import {
   init,
   collectVersionVariables,
@@ -26,10 +27,21 @@ import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
+import { BinarySource } from '../../util/exec/common';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
+
+function gradleWrapperFileName(config: ExtractConfig): string {
+  if (
+    os.platform() === 'win32' &&
+    config.binarySource !== BinarySource.Docker
+  ) {
+    return 'gradlew.bat';
+  }
+  return './gradlew';
+}
 
 async function prepareGradleCommandLine(
   config: ExtractConfig,
@@ -37,6 +49,7 @@ async function prepareGradleCommandLine(
   gradlew: Stats
 ): Promise<string> {
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
+  const gradlewName = gradleWrapperFileName(config);
 
   if (gradlew.isFile()) {
     // if is executable by others
@@ -44,10 +57,10 @@ async function prepareGradleCommandLine(
     if ((gradlew.mode & 0o1) === 0) {
       // add execution permission to owner, group and others
       // eslint-disable-next-line no-bitwise
-      await fs.chmod(upath.join(cwd, 'gradlew'), gradlew.mode | 0o111);
+      await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
     }
 
-    return `./gradlew ${args}`;
+    return `${gradlewName} ${args}`;
   }
 
   return `gradle ${args}`;
@@ -96,7 +109,7 @@ export async function extractAllPackageFiles(
   let gradlew: Stats;
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
-    const gradlewPath = upath.join(dirname, 'gradlew');
+    const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
     gradlew = await fs.stat(upath.join(config.localDir, gradlewPath));
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {

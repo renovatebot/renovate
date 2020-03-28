@@ -16,6 +16,15 @@ import { ExtractConfig } from '../common';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 
+expect.addSnapshotSerializer({
+  test(value) {
+    return typeof value === 'string' && value.startsWith('gradlew.bat');
+  },
+  print(value, serialize) {
+    return serialize((value as string).replace('gradlew.bat', './gradlew'));
+  },
+});
+
 const config = {
   localDir: 'localDir',
   gradle: {
@@ -348,7 +357,7 @@ describe('manager/gradle', () => {
   });
 
   describe('executeGradle integration', () => {
-    const SUCCES_FILE = 'success.indicator';
+    const SUCCESS_FILE = 'success.indicator';
     let workingDir: DirectoryResult;
     let testRunConfig: ExtractConfig;
 
@@ -364,7 +373,7 @@ describe('manager/gradle', () => {
 allprojects {
   tasks.register("renovate") {
     doLast {
-      new File('${SUCCES_FILE}').write 'success'
+      new File('${SUCCESS_FILE}').write 'success'
     }
   }
 }`;
@@ -383,7 +392,7 @@ allprojects {
         await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
         await expect(
           fsReal.promises.readFile(
-            path.join(workingDir.path, SUCCES_FILE),
+            path.join(workingDir.path, SUCCESS_FILE),
             'utf8'
           )
         ).resolves.toBe('success');
@@ -404,7 +413,7 @@ allprojects {
         await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
         await expect(
           fsReal.promises.readFile(
-            path.join(workingDir.path, SUCCES_FILE),
+            path.join(workingDir.path, SUCCESS_FILE),
             'utf8'
           )
         ).resolves.toBe('success');
