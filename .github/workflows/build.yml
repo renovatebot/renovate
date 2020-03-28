@@ -268,7 +268,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Init platform
         id: init
@@ -323,8 +322,9 @@ jobs:
 
       - name: semantic-release
         run: |
-          [ "${NODE_AUTH_TOKEN}" = "XXXXX-XXXXX-XXXXX-XXXXX" ] && echo fail || echo success
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          echo "me: $(npm whoami)"
           npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
