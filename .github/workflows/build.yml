@@ -31,234 +31,233 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           dry-run: ${{github.ref == 'refs/heads/master'}}
 
-  # test:
-  #   needs: [cleanup]
-  #   runs-on: ${{ matrix.os }}
+  test:
+    needs: [cleanup]
+    runs-on: ${{ matrix.os }}
 
-  #   # tests shouldn't need more than 15 min
-  #   timeout-minutes: 15
+    # tests shouldn't need more than 15 min
+    timeout-minutes: 15
 
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, macos-latest, windows-latest]
-  #       node-version: [12, 10]
-  #       python-version: [3.8]
-  #       java-version: [11]
-  #       exclude:
-  #         - os: windows-latest
-  #           node-version: 10
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [12, 10]
+        python-version: [3.8]
+        java-version: [11]
+        exclude:
+          - os: windows-latest
+            node-version: 10
 
-  #   env:
-  #     coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
-  #     NODE_VERSION: ${{ matrix.node-version }}
-  #     PYTHON_VERSION: ${{ matrix.python-version }}
-  #     JAVA_VERSION: ${{ matrix.java-version }}
+    env:
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
+      NODE_VERSION: ${{ matrix.node-version }}
+      PYTHON_VERSION: ${{ matrix.python-version }}
+      JAVA_VERSION: ${{ matrix.java-version }}
 
-  #   steps:
-  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-  #     - name: Set up Python ${{ env.PYTHON_VERSION }}
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-  #     - name: Set up Java  ${{ env.JAVA_VERSION }}
-  #       if: env.NODE_VERSION == '12'
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: ${{ env.JAVA_VERSION }}
+      - name: Set up Java  ${{ env.JAVA_VERSION }}
+        if: env.NODE_VERSION == '12'
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
 
-  #     - name: Skip Java tests
-  #       if: env.NODE_VERSION != '12'
-  #       run: echo "::set-env name=SKIP_JAVA_TESTS::true"
+      - name: Skip Java tests
+        if: env.NODE_VERSION != '12'
+        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
-  #     - name: Init platform
-  #       id: init
-  #       shell: bash
-  #       run: |
-  #         echo "::set-output name=yarn_cache::$(yarn cache dir)"
-  #         python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=pip_cache::' + USER_CACHE_DIR)"
-  #         git config --global core.autocrlf false
-  #         git config --global core.symlinks true
-  #         git config --global user.email 'bot@renovateapp.com'
-  #         git config --global user.name  'Renovate Bot'
-  #         npm config set scripts-prepend-node-path true
-  #         echo "Node $(node --version)"
-  #         python --version
-  #         echo "Yarn $(yarn --version)"
-  #         pip --version
+      - name: Init platform
+        id: init
+        shell: bash
+        run: |
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
+          python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=pip_cache::' + USER_CACHE_DIR)"
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          python --version
+          echo "Yarn $(yarn --version)"
+          pip --version
 
-  #     - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-  #     - name: Cache Yarn packages
-  #       id: yarn_cache_packages
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: ${{ steps.init.outputs.yarn_cache }}
-  #         key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-  #         restore-keys: |
-  #           ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
-  #     - name: Cache node_modules
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: node_modules
-  #         key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
-  #     - name: Cache pip packages
-  #       id: pip_cache_packages
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: ${{ steps.init.outputs.pip_cache }}
-  #         key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-${{ hashFiles('**/requirements.txt') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-
+      - name: Cache pip packages
+        id: pip_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.pip_cache }}
+          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-
 
-  #     # Clear caches on cache miss, otherwise they will grow indefinitely
-  #     - name: Clear yarn cache
-  #       if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-  #       run: yarn cache clean
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
 
-  #     - name: Clear pip cache
-  #       if: steps.pip_cache_packages.outputs.cache-hit != 'true'
-  #       run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
+      - name: Clear pip cache
+        if: steps.pip_cache_packages.outputs.cache-hit != 'true'
+        run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
 
-  #     - name: Installing dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         yarn install --frozen-lockfile --link-duplicates
-  #         pip install --user -r requirements.txt
+      - name: Installing dependencies
+        run: |
+          python -m pip install --upgrade pip
+          yarn install --frozen-lockfile --link-duplicates
+          pip install --user -r requirements.txt
 
-  #     - name: Build
-  #       run: yarn build
+      - name: Build
+        run: yarn build
 
-  #     - name: Unit tests
-  #       run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+      - name: Unit tests
+        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
-  #     - name: Upload coverage
-  #       uses: actions/upload-artifact@v1
-  #       if: always() && env.coverage == 'true'
-  #       with:
-  #         name: coverage
-  #         path: coverage
+      - name: Upload coverage
+        uses: actions/upload-artifact@v1
+        if: always() && env.coverage == 'true'
+        with:
+          name: coverage
+          path: coverage
 
-  #     - name: Codecov
-  #       shell: bash
-  #       if: always() && env.coverage == 'true'
-  #       continue-on-error: true
-  #       run: bash <(curl -s https://codecov.io/bash)
-  #       env:
-  #         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Codecov
+        shell: bash
+        if: always() && env.coverage == 'true'
+        continue-on-error: true
+        run: bash <(curl -s https://codecov.io/bash)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  #     - name: E2E Test
-  #       run: yarn test-e2e
+      - name: E2E Test
+        run: yarn test-e2e
 
-  # lint:
-  #   needs: [cleanup]
-  #   runs-on: ubuntu-latest
+  lint:
+    needs: [cleanup]
+    runs-on: ubuntu-latest
 
-  #   # lint shouldn't need more than 10 min
-  #   timeout-minutes: 10
+    # lint shouldn't need more than 10 min
+    timeout-minutes: 10
 
-  #   steps:
-  #     - name: Set up Node.js ${{ env.NODE_VERSION }}
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-  #     - name: Init platform
-  #       id: init
-  #       shell: bash
-  #       run: |
-  #         echo "::set-output name=yarn_cache::$(yarn cache dir)"
-  #         git config --global core.autocrlf false
-  #         git config --global core.symlinks true
-  #         git config --global user.email 'bot@renovateapp.com'
-  #         git config --global user.name  'Renovate Bot'
-  #         npm config set scripts-prepend-node-path true
-  #         echo "Node $(node --version)"
-  #         python --version
-  #         echo "Yarn $(yarn --version)"
+      - name: Init platform
+        id: init
+        shell: bash
+        run: |
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          python --version
+          echo "Yarn $(yarn --version)"
 
-  #     - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-  #     - name: Cache Yarn packages
-  #       id: yarn_cache_packages
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: ${{ steps.init.outputs.yarn_cache }}
-  #         key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-  #         restore-keys: |
-  #           ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
-  #     - name: Cache node_modules
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: node_modules
-  #         key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
-  #     # Clear caches on cache miss, otherwise they will grow indefinitely
-  #     - name: Clear yarn cache
-  #       if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
-  #       run: yarn cache clean
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
 
-  #     - name: Installing dependencies
-  #       run: yarn install --frozen-lockfile --link-duplicates
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile --link-duplicates
 
-  #     - name: Lint
-  #       run: yarn lint
+      - name: Lint
+        run: yarn lint
 
-  #     - name: Test schema
-  #       run: yarn test-schema
+      - name: Test schema
+        run: yarn test-schema
 
-  #     - name: Type check
-  #       run: yarn type-check
+      - name: Type check
+        run: yarn type-check
 
-  # test-docker:
-  #   needs: cleanup
-  #   runs-on: ubuntu-latest
+  test-docker:
+    needs: cleanup
+    runs-on: ubuntu-latest
 
-  #   timeout-minutes: 15
+    timeout-minutes: 15
 
-  #   steps:
-  #     - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
-  #       uses: crazy-max/ghaction-docker-buildx@v1
-  #       with:
-  #         version: ${{ env.BUILDX_VERSION }}
+    steps:
+      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: ${{ env.BUILDX_VERSION }}
 
-  #     - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-  #     - name: Build the Docker images
-  #       run: |
-  #         docker buildx bake \
-  #           --progress plain \
-  #           --file docker/bake.hcl \
-  #           --set settings.output=type=docker \
-  #           default
+      - name: Build the Docker images
+        run: |
+          docker buildx bake \
+            --progress plain \
+            --file docker/bake.hcl \
+            --set settings.output=type=docker \
+            default
 
-  #     - name: Test the Docker images
-  #       run: |
-  #         docker run --rm -t ${DOCKER_REPO} --version
-  #         docker run --rm -t ${DOCKER_REPO}:slim --version
+      - name: Test the Docker images
+        run: |
+          docker run --rm -t ${DOCKER_REPO} --version
+          docker run --rm -t ${DOCKER_REPO}:slim --version
 
-  #     - name: Image history latest
-  #       run: docker history ${DOCKER_REPO}
-  #     - name: Image history slim
-  #       run: docker history ${DOCKER_REPO}:slim
+      - name: Image history latest
+        run: docker history ${DOCKER_REPO}
+      - name: Image history slim
+        run: docker history ${DOCKER_REPO}:slim
 
-  #     - name: Images size
-  #       run: docker image ls | grep ${DOCKER_REPO}
+      - name: Images size
+        run: docker image ls | grep ${DOCKER_REPO}
 
   release:
-    # needs: [lint, test, test-docker]
-    needs: [cleanup]
+    needs: [lint, test, test-docker]
     runs-on: ubuntu-latest
     # release shouldn't need more than 30 min
     timeout-minutes: 30
@@ -323,7 +322,6 @@ jobs:
       - name: semantic-release
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-          echo "me: $(npm whoami)"
           npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
