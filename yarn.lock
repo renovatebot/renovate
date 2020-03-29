@@ -1483,10 +1483,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.149.tgz#1342d63d948c6062838fbf961012f74d4e638440"
   integrity sha512-ijGqzZt/b7BfzcK9vTrS6MFljQRPn5BFWOx8oE0GYxribu6uV+aA9zZuXI1zc/etK9E8nrgdoF2+LgUw7+9tJQ==
 
-"@types/luxon@1.21.0":
-  version "1.21.0"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.21.0.tgz#db792d29f535d49522cb6d94dd9da053efc950a1"
-  integrity sha512-Zhrf65tpjOlVIYrUhX9eu1VzRo8iixQDLFPbfqFxPpG4pBTNNPZ2BFhYE0IAsDfW9GWg+RcrUqiLwrGJH4rq4w==
+"@types/luxon@1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.22.0.tgz#dbdf2cc7ba3dfce98c57a3f0e003791122cba009"
+  integrity sha512-riAvdx85rU7OXCrjW3f7dIf7fuJDrxck2Dkjd0weh6ul7q+wumrwe6+/tD8v7yOKnZAuEnTFF4FU7b+5W/I3bw==
 
 "@types/markdown-it@0.0.9":
   version "0.0.9"
@@ -6154,10 +6154,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-luxon@1.22.0:
-  version "1.22.0"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.22.0.tgz#639525c7c69e594953c7b142794466b8ea85b868"
-  integrity sha512-3sLvlfbFo+AxVEY3IqxymbumtnlgBwjDExxK60W3d+trrUzErNAz/PfvPT+mva+vEUrdIodeCOs7fB6zHtRSrw==
+luxon@1.22.2:
+  version "1.22.2"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.22.2.tgz#799d65cc1ed0ba85b4cb3f7dd38fc08a8d1a6750"
+  integrity sha512-vq6eSaOOw1fKob+JXwfu0e3/UFUT4G4HTFRJab7dch8J1OdOGW/vXqCiJsY7rm2In+5gKNYx0EtnYT0Tc5V4Qw==
 
 macos-release@^2.2.0:
   version "2.3.0"
