@@ -21,5 +21,6 @@ Important notes regarding the above:
 `hostType=bundler` is essential. If the registry is used for multiple package types then you may need multiple `hostRules`. You cannot leave off `hostType`.
 
 If you don't want to commit raw secrets to your repository, either:
- - If self hosting, add the `hostRules` to your bot's configuration file rather than the repository's configuration file, or
- - If using the hosted WhiteSource Renovate app, make use of the [`encrypted`](https://docs.renovatebot.com/configuration-options/#encrypted) capability
+
+- If self hosting, add the `hostRules` to your bot's configuration file rather than the repository's configuration file, or
+- If using the hosted WhiteSource Renovate app, make use of the [`encrypted`](https://docs.renovatebot.com/configuration-options/#encrypted) capability
