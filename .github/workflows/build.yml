@@ -271,6 +271,7 @@ jobs:
       - name: Init platform
         id: init
         run: |
+          echo "::set-output name=yarn_cache::$(yarn cache dir)"
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
@@ -281,7 +282,6 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Cache Yarn packages
-        id: yarn_cache_packages
         uses: actions/cache@v1
         with:
           path: ${{ steps.init.outputs.yarn_cache }}
