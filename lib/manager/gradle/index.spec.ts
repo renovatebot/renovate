@@ -191,16 +191,15 @@ describe('manager/gradle', () => {
 
     it('should execute gradle if gradlew is not available', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
+      fs.stat.mockRejectedValue(new Error());
 
-      fs.stat.mockResolvedValue({ isFile: () => false } as Stats);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
-
-      fs.stat.mockResolvedValue({ isFile: () => false } as Stats);
+      fs.stat.mockRejectedValue(new Error());
 
       const packageFiles = ['foo/build.gradle'];
       expect(

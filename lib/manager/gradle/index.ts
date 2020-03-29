@@ -6,10 +6,10 @@ import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import * as mavenVersioning from '../../versioning/maven';
 import {
-  PackageFile,
   ExtractConfig,
-  Upgrade,
+  PackageFile,
   UpdateDependencyConfig,
+  Upgrade,
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
@@ -17,10 +17,10 @@ import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
 import { BinarySource } from '../../util/exec/common';
 import {
-  init,
   collectVersionVariables,
-  updateGradleVersion,
   GradleDependency,
+  init,
+  updateGradleVersion,
 } from './build-gradle';
 import {
   createRenovateGradlePlugin,
@@ -44,12 +44,12 @@ function gradleWrapperFileName(config: ExtractConfig): string {
 async function prepareGradleCommandLine(
   config: ExtractConfig,
   cwd: string,
-  gradlew: Stats
+  gradlew: Stats | null
 ): Promise<string> {
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
   const gradlewName = gradleWrapperFileName(config);
 
-  if (gradlew.isFile()) {
+  if (gradlew?.isFile() === true) {
     // if the file is not executable by others
     // eslint-disable-next-line no-bitwise
     if ((gradlew.mode & 0o1) === 0) {
@@ -67,7 +67,7 @@ async function prepareGradleCommandLine(
 export async function executeGradle(
   config: ExtractConfig,
   cwd: string,
-  gradlew: Stats
+  gradlew: Stats | null
 ): Promise<void> {
   let stdout: string;
   let stderr: string;
@@ -104,11 +104,13 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
-  let gradlew: Stats;
+  let gradlew: Stats | null;
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await fs.stat(upath.join(config.localDir, gradlewPath));
+    gradlew = await fs
+      .stat(upath.join(config.localDir, gradlewPath))
+      .catch(() => null);
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;
@@ -116,7 +118,7 @@ export async function extractAllPackageFiles(
     }
 
     // If there is gradlew in the same directory, the directory should be a Gradle project root
-    if (gradlew.isFile()) {
+    if (gradlew?.isFile() === true) {
       rootBuildGradle = packageFile;
       break;
     }
