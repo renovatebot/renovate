@@ -1,21 +1,10 @@
-import * as os from 'os';
-import * as fs from 'fs-extra';
-import { Stats } from 'fs';
+import { access, constants, exists } from 'fs-extra';
 import upath from 'upath';
+
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import * as mavenVersioning from '../../versioning/maven';
-import {
-  PackageFile,
-  ExtractConfig,
-  Upgrade,
-  UpdateDependencyConfig,
-} from '../common';
-import { platform } from '../../platform';
-import { LANGUAGE_JAVA } from '../../constants/languages';
-import * as datasourceMaven from '../../datasource/maven';
-import { DatasourceError } from '../../datasource';
-import { BinarySource } from '../../util/exec/common';
+
 import {
   init,
   collectVersionVariables,
@@ -26,48 +15,52 @@ import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
+import {
+  PackageFile,
+  ExtractConfig,
+  Upgrade,
+  UpdateDependencyConfig,
+} from '../common';
+import { platform } from '../../platform';
+import { LANGUAGE_JAVA } from '../../constants/languages';
+import * as datasourceMaven from '../../datasource/maven';
+import { DatasourceError } from '../../datasource';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
-function gradleWrapperFileName(config: ExtractConfig): string {
-  if (
-    os.platform() === 'win32' &&
-    config.binarySource !== BinarySource.Docker
-  ) {
-    return 'gradlew.bat';
+async function canExecute(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.X_OK);
+    return true;
+  } catch {
+    return false;
   }
-  return './gradlew';
 }
 
-async function prepareGradleCommandLine(
+async function getGradleCommandLine(
   config: ExtractConfig,
-  cwd: string,
-  gradlew: Stats
+  cwd: string
 ): Promise<string> {
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
-  const gradlewName = gradleWrapperFileName(config);
 
-  if (gradlew.isFile()) {
-    // if the file is not executable by others
-    // eslint-disable-next-line no-bitwise
-    if ((gradlew.mode & 0o1) === 0) {
-      // add the execution permission to the owner, group and others
-      // eslint-disable-next-line no-bitwise
-      await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
-    }
-
-    return `${gradlewName} ${args}`;
+  const gradlewPath = upath.join(cwd, 'gradlew');
+  const gradlewExists = await exists(gradlewPath);
+  const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
+  if (gradlewExecutable) {
+    return `./gradlew ${args}`;
+  }
+  if (gradlewExists) {
+    return `sh gradlew ${args}`;
   }
 
   return `gradle ${args}`;
 }
 
-export async function executeGradle(
+async function executeGradle(
   config: ExtractConfig,
-  cwd: string,
-  gradlew: Stats
+  cwd: string
 ): Promise<void> {
   let stdout: string;
   let stderr: string;
@@ -75,7 +68,7 @@ export async function executeGradle(
     config.gradle && config.gradle.timeout
       ? config.gradle.timeout * 1000
       : undefined;
-  const cmd = await prepareGradleCommandLine(config, cwd, gradlew);
+  const cmd = await getGradleCommandLine(config, cwd);
   const execOptions: ExecOptions = {
     timeout,
     cwd,
@@ -104,19 +97,19 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
-  let gradlew: Stats;
   for (const packageFile of packageFiles) {
-    const dirname = upath.dirname(packageFile);
-    const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await fs.stat(upath.join(config.localDir, gradlewPath));
-
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;
       break;
     }
 
     // If there is gradlew in the same directory, the directory should be a Gradle project root
-    if (gradlew.isFile()) {
+    const dirname = upath.dirname(packageFile);
+    const gradlewPath = upath.join(dirname, 'gradlew');
+    const gradlewExists = await exists(
+      upath.join(config.localDir, gradlewPath)
+    );
+    if (gradlewExists) {
       rootBuildGradle = packageFile;
       break;
     }
@@ -130,7 +123,7 @@ export async function extractAllPackageFiles(
   const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
 
   await createRenovateGradlePlugin(cwd);
-  await executeGradle(config, cwd, gradlew);
+  await executeGradle(config, cwd);
 
   init();
 
