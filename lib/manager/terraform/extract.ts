@@ -5,6 +5,7 @@ import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceTerraformModule from '../../datasource/terraform-module';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
+import { SkipReason } from '../../types';
 
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
@@ -101,7 +102,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.lookupName = githubRefMatch[2];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
-          dep.skipReason = 'unsupported-version';
+          dep.skipReason = SkipReason.UnsupportedVersion;
         }
       } else if (gitTagsRefMatch) {
         dep.depType = 'gitTags';
@@ -112,12 +113,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.sourceLine;
         if (!isVersion(dep.currentValue)) {
-          dep.skipReason = 'unsupported-version';
+          dep.skipReason = SkipReason.UnsupportedVersion;
         }
       } else if (dep.source) {
         const moduleParts = dep.source.split('//')[0].split('/');
         if (moduleParts[0] === '..') {
-          dep.skipReason = 'local';
+          dep.skipReason = SkipReason.Local;
         } else if (moduleParts.length >= 3) {
           dep.depType = 'terraform';
           dep.depName = moduleParts.join('/');
@@ -127,7 +128,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       } else {
         logger.debug({ dep }, 'terraform dep has no source');
-        dep.skipReason = 'no-source';
+        dep.skipReason = SkipReason.NoSource;
       }
     } else if (
       dep.managerData.terraformDependencyType ===
@@ -140,10 +141,10 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.datasource = datasourceTerraformProvider.id;
       if (dep.managerData.lineNumber) {
         if (!isValid(dep.currentValue)) {
-          dep.skipReason = 'unsupported-version';
+          dep.skipReason = SkipReason.UnsupportedVersion;
         }
       } else if (!dep.skipReason) {
-        dep.skipReason = 'no-version';
+        dep.skipReason = SkipReason.NoVersion;
       }
     }
     delete dep.sourceLine;

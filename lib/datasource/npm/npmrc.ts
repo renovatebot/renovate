@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import isBase64 from 'validator/lib/isBase64';
 import { logger } from '../../logger';
 
 let npmrc: Record<string, any> | null = null;
@@ -36,7 +35,6 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(/\\n/g, '\n'));
-    // massage _auth to _authToken
     for (const [key, val] of Object.entries(npmrc)) {
       // istanbul ignore if
       if (
@@ -52,20 +50,12 @@ export function setNpmrc(input?: string): void {
         npmrc = existingNpmrc;
         return;
       }
-      if (key !== '_auth' && key.endsWith('_auth') && isBase64(val)) {
-        logger.debug('Massaging _auth to _authToken');
-        npmrc[key + 'Token'] = val;
-        npmrc.massagedAuth = true;
-        delete npmrc[key];
-      }
     }
     if (global.trustLevel !== 'high') {
       return;
     }
-    for (const key in npmrc) {
-      if (Object.prototype.hasOwnProperty.call(npmrc, key)) {
-        npmrc[key] = envReplace(npmrc[key]);
-      }
+    for (const key of Object.keys(npmrc)) {
+      npmrc[key] = envReplace(npmrc[key]);
     }
   } else if (npmrc) {
     logger.debug('Resetting npmrc');

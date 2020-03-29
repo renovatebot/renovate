@@ -49,7 +49,9 @@ async function resolvePluginReleases(
         }
       }
     }
-    if (releases.length) return [...new Set(releases)].sort(compare);
+    if (releases.length) {
+      return [...new Set(releases)].sort(compare);
+    }
   }
   return resolvePackageReleases(rootUrl, artifact, scalaVersion);
 }

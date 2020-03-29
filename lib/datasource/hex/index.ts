@@ -7,7 +7,10 @@ export const id = 'hex';
 interface HexRelease {
   html_url: string;
   meta?: { links?: Record<string, string> };
-  releases?: { version: string }[];
+  releases?: {
+    version: string;
+    inserted_at?: string;
+  }[];
 }
 
 export async function getPkgReleases({
@@ -41,7 +44,14 @@ export async function getPkgReleases({
     }
 
     const result: ReleaseResult = {
-      releases: releases.map(({ version }) => ({ version })),
+      releases: releases.map(({ version, inserted_at }) =>
+        inserted_at
+          ? {
+              version,
+              releaseTimestamp: inserted_at,
+            }
+          : { version }
+      ),
     };
 
     if (homepage) {
@@ -54,12 +64,23 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
+    const errorData = { lookupName, err };
+
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    throw err;
+
+    if (err.statusCode === 401) {
+      logger.debug(errorData, 'Authorization error');
+    } else if (err.statusCode === 404) {
+      logger.debug(errorData, 'Package lookup error');
+    } else {
+      logger.warn(errorData, 'hex lookup failure: Unknown error');
+    }
   }
+
+  return null;
 }

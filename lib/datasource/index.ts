@@ -11,23 +11,19 @@ import {
   DigestConfig,
 } from './common';
 import * as semverVersioning from '../versioning/semver';
-import { loadModules } from '../util/modules';
+import datasources from './api.generated';
 
 export * from './common';
 
-// istanbul ignore next
-function validateDatasource(module, name): boolean {
-  if (!module.getPkgReleases) return false;
-  if (module.id !== name) return false;
-  return true;
-}
-
-const datasources = loadModules<Datasource>(__dirname, validateDatasource);
-export const getDatasources = (): Record<string, Datasource> => datasources;
-const datasourceList = Object.keys(datasources);
-export const getDatasourceList = (): string[] => datasourceList;
+export const getDatasources = (): Map<string, Promise<Datasource>> =>
+  datasources;
+export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
+
+function load(datasource: string): Promise<Datasource> {
+  return datasources.get(datasource);
+}
 
 async function fetchReleases(
   config: PkgReleaseConfig
@@ -37,11 +33,11 @@ async function fetchReleases(
     logger.warn('No datasource found');
     return null;
   }
-  if (!datasources[datasource]) {
+  if (!datasources.has(datasource)) {
     logger.warn('Unknown datasource: ' + datasource);
     return null;
   }
-  const dep = await datasources[datasource].getPkgReleases(config);
+  const dep = await (await load(datasource)).getPkgReleases(config);
   addMetaData(dep, datasource, config.lookupName);
   return dep;
 }
@@ -71,50 +67,18 @@ export async function getPkgReleases(
     logger.error({ config }, 'Datasource getPkgReleases without lookupName');
     return null;
   }
-  let res;
+  let res: ReleaseResult;
   try {
     res = await getRawReleases({
       ...config,
       lookupName,
     });
-  } catch (err) /* istanbul ignore next */ {
-    logger.trace({ err }, 'getPkgReleases err');
-    if (err instanceof DatasourceError) {
-      err.datasource = datasource;
-      err.lookupName = lookupName;
-      throw err;
+  } catch (e) /* istanbul ignore next */ {
+    if (e instanceof DatasourceError) {
+      e.datasource = datasource;
+      e.lookupName = lookupName;
     }
-    const { name, url, code, statusCode, statusMessage } = err;
-    const logMeta = {
-      datasource,
-      lookupName,
-      url,
-      code,
-      statusCode,
-      statusMessage,
-    };
-    const log = (reason: string, level = 'debug'): void =>
-      logger[level]({ ...logMeta, reason }, `Datasource Error (ignored)`);
-    if (name === 'UnsupportedProtocolError') {
-      log('Unsupported Protocol');
-    } else if (name === 'SyntaxError') {
-      log('Could not parse response');
-    } else if (code === 'ERR_INVALID_URL') {
-      log('Invalid URL');
-    } else if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
-      log('Connection Error');
-    } else if (statusCode === 401 || statusCode === 403) {
-      log('Unauthorized');
-    } else if (statusCode === 404 || code === 'ENOTFOUND') {
-      log('Not Found');
-    } else if (statusCode === 429) {
-      log('Rate Limited');
-    } else if (statusCode >= 500 && statusCode < 600) {
-      log('Server Error');
-    } else {
-      log('Unknown', 'info');
-      logger.debug({ err }, 'Datasource Error err');
-    }
+    throw e;
   }
   if (!res) {
     return res;
@@ -135,17 +99,17 @@ export async function getPkgReleases(
   return res;
 }
 
-export function supportsDigests(config: DigestConfig): boolean {
-  return 'getDigest' in datasources[config.datasource];
+export async function supportsDigests(config: DigestConfig): Promise<boolean> {
+  return 'getDigest' in (await load(config.datasource));
 }
 
-export function getDigest(
+export async function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {
   const lookupName = config.lookupName || config.depName;
   const { registryUrls } = config;
-  return datasources[config.datasource].getDigest(
+  return (await load(config.datasource)).getDigest(
     { lookupName, registryUrls },
     value
   );

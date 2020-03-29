@@ -10,7 +10,9 @@ export function updateDependency({
   const lines = fileContent.split('\n');
   const lineToChange = lines[upgrade.managerData.lineNumber];
 
-  if (!lineToChange.includes(upgrade.depName)) return null;
+  if (!lineToChange.includes(upgrade.depName)) {
+    return null;
+  }
 
   const newLine = lineToChange.replace(/"(.*?)"/, `"${upgrade.newValue}"`);
 

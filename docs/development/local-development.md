@@ -77,6 +77,16 @@ The following steps work to set up a brand new Windows 10 installation for devel
   OpenJDK 64-Bit Server VM 18.9 (build 11.0.6+10, mixed mode)
   ```
 
+_VS Code Remote Development_
+
+If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
+
+- Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements).
+- Open the repository folder in VS Code
+- Choose "Reopen in Container" via the command palette or the small button in the lower left corner.
+
+VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+
 #### Fork and Clone
 
 If you will contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.

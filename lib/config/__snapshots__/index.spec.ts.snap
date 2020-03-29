@@ -44,6 +44,7 @@ Object {
   "groupName": null,
   "groupSlug": null,
   "ignoreNpmrcFile": false,
+  "ignoreScripts": false,
   "labels": Array [],
   "lazyGrouping": true,
   "managerBranchPrefix": "",

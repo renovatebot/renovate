@@ -1,6 +1,11 @@
 import got from '../../util/got';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
+import {
+  DISTRIBUTION_CHECKSUM_REGEX,
+  DOWNLOAD_URL_REGEX,
+  VERSION_REGEX,
+} from './search';
 
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
@@ -38,12 +43,17 @@ export async function updateDependency({
     downloadUrl = downloadUrl.replace(':', '\\:');
     const checksum = await getChecksum(checksumUrl);
 
-    lines[upgrade.managerData.lineNumber] = `distributionUrl=${downloadUrl}`;
+    lines[upgrade.managerData.lineNumber] = lines[
+      upgrade.managerData.lineNumber
+    ].replace(
+      VERSION_REGEX,
+      `-${DOWNLOAD_URL_REGEX.exec(downloadUrl).groups.version}-`
+    );
 
     if (upgrade.managerData.checksumLineNumber) {
-      lines[
+      lines[upgrade.managerData.checksumLineNumber] = lines[
         upgrade.managerData.checksumLineNumber
-      ] = `distributionSha256Sum=${checksum}`;
+      ].replace(DISTRIBUTION_CHECKSUM_REGEX, `$<assignment>${checksum}`);
     }
     // TODO: insert if not present
 

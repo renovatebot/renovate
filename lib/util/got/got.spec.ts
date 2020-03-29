@@ -1,6 +1,7 @@
 import nock from 'nock';
-import { getConfigResponse } from '.';
+import { getConfigResponse } from '../../datasource/docker';
 
+// TODO: move to datasource/docker ?
 describe('getConfigResponse', () => {
   beforeEach(() => {
     nock.disableNetConnect();

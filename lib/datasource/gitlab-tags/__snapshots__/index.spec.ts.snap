@@ -1,33 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gitlab-tags getPkgReleases defaults to gitlab.com 1`] = `
-Object {
-  "releases": Array [
-    Object {
-      "gitRef": "v1.0.0",
-      "version": "v1.0.0",
-    },
-    Object {
-      "gitRef": "v1.1.0",
-      "version": "v1.1.0",
-    },
-  ],
-  "sourceUrl": "https://gitlab.com/some/dep2",
-}
-`;
-
 exports[`datasource/gitlab-tags getPkgReleases returns tags 1`] = `
 Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "releaseTimestamp": "2020-03-04T12:01:37.000-06:00",
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v1.1.0",
+      "releaseTimestamp": undefined,
       "version": "v1.1.0",
+    },
+    Object {
+      "gitRef": "v1.1.1",
+      "releaseTimestamp": undefined,
+      "version": "v1.1.1",
     },
   ],
   "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+}
+`;
+
+exports[`datasource/gitlab-tags getPkgReleases returns tags with default registry 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "releaseTimestamp": undefined,
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/some/dep2",
 }
 `;

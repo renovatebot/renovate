@@ -3,7 +3,6 @@ import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
@@ -76,16 +75,19 @@ export async function getDependency(
   if (cachedResult) {
     return cachedResult;
   }
-
-  const authInfo = registryAuthToken(regUrl, { npmrc });
   const headers: OutgoingHttpHeaders = {};
+  let authInfo = registryAuthToken(regUrl, { npmrc, recursive: true });
+
+  if (
+    !authInfo &&
+    npmrc &&
+    npmrc._authToken &&
+    regUrl.replace(/\/?$/, '/') === npmrc.registry?.replace(/\/?$/, '/')
+  ) {
+    authInfo = { type: 'Bearer', token: npmrc._authToken };
+  }
 
   if (authInfo && authInfo.type && authInfo.token) {
-    // istanbul ignore if
-    if (npmrc && npmrc.massagedAuth && isBase64(authInfo.token)) {
-      logger.debug('Massaging authorization type to Basic');
-      authInfo.type = 'Basic';
-    }
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: packageName },
@@ -131,10 +133,8 @@ export async function getDependency(
       retry: 5,
       headers,
       useCache,
-      readableHighWaterMark: 1024 * 1024 * 10, // https://github.com/sindresorhus/got/issues/1062#issuecomment-586580036
     };
     const raw = await got(pkgUrl, opts);
-    // istanbul ignore if
     if (retries < 3) {
       logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
@@ -226,7 +226,6 @@ export async function getDependency(
       );
       return null;
     }
-    // istanbul ignore if
     if (err.statusCode === 402) {
       logger.debug(
         {
@@ -250,22 +249,21 @@ export async function getDependency(
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
-      // istanbul ignore if
       if (
-        (err.name === 'ParseError' || err.code === 'ECONNRESET') &&
+        (err.name === 'ParseError' ||
+          err.code === 'ECONNRESET' ||
+          err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
         logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
         await delay(5000);
         return getDependency(packageName, retries - 1);
       }
-      // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }
       throw new DatasourceError(err);
     }
-    // istanbul ignore next
     return null;
   }
 }

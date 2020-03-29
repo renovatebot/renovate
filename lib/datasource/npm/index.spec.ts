@@ -4,11 +4,12 @@ import moment from 'moment';
 import * as npm from '.';
 import * as hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { getName } from '../../../test/util';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-const registryAuthToken: any = _registryAuthToken;
+const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registryAuthToken as never;
 let npmResponse: any;
 
 function getRelease(
@@ -20,13 +21,14 @@ function getRelease(
   );
 }
 
-describe('api/npm', () => {
+describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
     global.repoCache = {};
     global.trustLevel = 'low';
     npm.resetCache();
+    npm.setNpmrc();
     npmResponse = {
       name: 'foobar',
       versions: {

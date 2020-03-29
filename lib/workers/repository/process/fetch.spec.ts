@@ -4,6 +4,7 @@ import * as lookup from './lookup';
 import { getConfig, mocked, RenovateConfig } from '../../../../test/util';
 import { ManagerApi } from '../../../manager/common';
 import * as datasourceNpm from '../../../datasource/npm';
+import * as datasourceMaven from '../../../datasource/maven';
 
 const npm: ManagerApi = _npm;
 const lookupUpdates = mocked(lookup).lookupUpdates;
@@ -60,6 +61,12 @@ describe('workers/repository/process/fetch', () => {
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [{ datasource: datasourceMaven.id, depName: 'bbb' }],
+          },
+        ],
         npm: [
           {
             packageFile: 'package.json',

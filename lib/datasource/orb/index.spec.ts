@@ -33,11 +33,41 @@ describe('datasource/orb', () => {
       global.repoCache = {};
       return global.renovateCache.rmAll();
     });
+    it('returns null for empty result', async () => {
+      got.post.mockReturnValueOnce({ body: {} });
+      expect(
+        await datasource.getPkgReleases({
+          lookupName: 'hyper-expanse/library-release-workflows',
+        })
+      ).toBeNull();
+    });
     it('returns null for missing orb', async () => {
       got.post.mockReturnValueOnce({ body: { data: {} } });
       expect(
         await datasource.getPkgReleases({
           lookupName: 'hyper-expanse/library-release-wonkflows',
+        })
+      ).toBeNull();
+    });
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      expect(
+        await datasource.getPkgReleases({
+          lookupName: 'hyper-expanse/library-release-workflows',
+        })
+      ).toBeNull();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await datasource.getPkgReleases({
+          lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
     });

@@ -25,6 +25,28 @@ describe('datasource/terraform-module', () => {
         })
       ).toBeNull();
     });
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      expect(
+        await terraform.getPkgReleases({
+          lookupName: 'hashicorp/consul/aws',
+        })
+      ).toBeNull();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await terraform.getPkgReleases({
+          lookupName: 'hashicorp/consul/aws',
+        })
+      ).toBeNull();
+    });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),

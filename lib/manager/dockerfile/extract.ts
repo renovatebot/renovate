@@ -1,11 +1,12 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceDocker from '../../datasource/docker';
+import { SkipReason } from '../../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
     return {
-      skipReason: 'contains-variable',
+      skipReason: SkipReason.ContainsVariable,
     };
   }
   const [currentDepTag, currentDigest] = currentFrom.split('@');
@@ -110,7 +111,9 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  for (const d of deps) d.depType = 'stage';
+  for (const d of deps) {
+    d.depType = 'stage';
+  }
   deps[deps.length - 1].depType = 'final';
   return { deps };
 }

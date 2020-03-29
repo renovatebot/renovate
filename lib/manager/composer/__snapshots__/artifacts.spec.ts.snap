@@ -39,6 +39,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -61,6 +62,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -83,6 +85,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -97,7 +100,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
+    "cmd": "docker ps --filter name=renovate_composer -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_composer --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/composer bash -l -c \\"composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -111,6 +120,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -133,6 +143,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]
@@ -155,6 +166,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "timeout": 900000,
     },
   },
 ]

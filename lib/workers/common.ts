@@ -45,6 +45,18 @@ export interface BranchUpgradeConfig
   updatedArtifacts?: FileData[];
 }
 
+export enum PrResult {
+  AwaitingApproval = 'AwaitingApproval',
+  AwaitingGreenBranch = 'AwaitingGreenBranch',
+  AwaitingNotPending = 'AwaitingNotPending',
+  BlockeddByBranchAutomerge = 'BlockeddByBranchAutomerge',
+  Created = 'Created',
+  Error = 'Error',
+  ErrorAlreadyExists = 'ErrorAlreadyExists',
+  NotUpdated = 'NotUpdated',
+  Updated = 'Updated',
+}
+
 export type ProcessBranchResult =
   | 'already-existed'
   | 'automerged'

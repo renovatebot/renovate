@@ -1,4 +1,5 @@
 import got from '../../util/got';
+import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
 export const id = 'dart';
@@ -26,13 +27,22 @@ export async function getPkgReleases({
       json: true,
     });
   } catch (err) {
+    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
+      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
+      logger.debug({ err }, 'Dart lookup error');
+      return null;
+    }
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new DatasourceError(err);
     }
-    throw err;
+    logger.warn(
+      { err, lookupName },
+      'pub.dartlang.org lookup failure: Unknown error'
+    );
+    return null;
   }
 
   const body = raw && raw.body;

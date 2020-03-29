@@ -6,10 +6,7 @@ import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_SUCCESS,
-} from '../../../constants/branch-constants';
+import { BranchStatus } from '../../../types';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
@@ -91,7 +88,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
         }
       }
       // if the PR has renovate files then we set a status no matter what
-      let status: 'failure' | 'success';
+      let status: BranchStatus;
       let description: string;
       const topic = `Renovate Configuration Errors`;
       if (validations.length) {
@@ -103,11 +100,11 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
           topic,
           content,
         });
-        status = BRANCH_STATUS_FAILURE;
+        status = BranchStatus.red;
         description = `Renovate config validation failed`; // GitHub limit
       } else {
         description = `Renovate config is valid`;
-        status = BRANCH_STATUS_SUCCESS;
+        status = BranchStatus.green;
         await platform.ensureCommentRemoval(pr.number, topic);
       }
       // istanbul ignore else
