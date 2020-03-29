@@ -36,6 +36,7 @@ import {
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { BranchStatus } from '../../types';
+import { ensureTrailingSlash } from '../../util/url';
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];
