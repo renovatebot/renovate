@@ -555,7 +555,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 900000,
+      "timeout": 60000,
     },
   },
 ]
@@ -589,7 +589,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 900000,
+      "timeout": 60000,
     },
   },
 ]
@@ -610,7 +610,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
