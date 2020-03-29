@@ -9,7 +9,7 @@
   "scripts": {
     "build": "run-s clean generate:* compile:* copy-static-files",
     "build:docker": "run-s generate:* compile:ts copy-static-files",
-    "clean": "rimraf dist lib/**/*.generated.ts",
+    "clean": "rimraf dist tools/dist lib/**/*.generated.ts",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
     "compile:dts": "tsc -p tsconfig.dts.json",
