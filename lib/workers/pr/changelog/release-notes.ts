@@ -136,7 +136,7 @@ function isUrl(url: string): boolean {
     return !!URL.parse(url).hostname;
   } catch (err) {
     // istanbul ignore next
-    logger.warn({ err }, `Error parsing ${url} in URL.parse`);
+    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
   }
   // istanbul ignore next
   return false;
