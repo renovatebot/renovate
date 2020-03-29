@@ -47,7 +47,7 @@ Alias values must be properly formatted URIs.
 
 ## assignAutomerge
 
-By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renvoate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 
 ## assignees
 

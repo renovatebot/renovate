@@ -10,7 +10,8 @@ shell.echo(`Publishing version: ${version}`);
 
 shell.echo('Publishing npm package ...');
 if (
-  !exec(`yarn publish --non-interactive --new-version ${version} --verbose`)
+  !exec(`npm --no-git-tag-version version ${version}`) ||
+  !exec(`npm publish`)
 ) {
   err = true;
 }
@@ -20,6 +21,9 @@ if (!exec(`./.github/workflows/release-docker.sh ${version} ${sha}`)) {
   err = true;
 }
 
+// eslint-disable-next-line promise/valid-params
+import('./dispatch-release.mjs').catch();
+
 if (err) {
-  shell.exit(1);
+  shell.exit(2);
 }

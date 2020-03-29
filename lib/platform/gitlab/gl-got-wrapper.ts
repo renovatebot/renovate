@@ -33,7 +33,10 @@ async function get(path: string, options: any): Promise<GotResponse> {
     }
     return res;
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode >= 500 && err.statusCode < 600) {
+    if (
+      err.statusCode === 429 ||
+      (err.statusCode >= 500 && err.statusCode < 600)
+    ) {
       throw new Error(PLATFORM_FAILURE);
     }
     const platformFailureCodes = [

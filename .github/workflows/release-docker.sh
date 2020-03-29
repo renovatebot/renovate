@@ -15,6 +15,7 @@ fi
 
 # build final images
 docker buildx bake \
+  --progress plain \
   --file docker/bake.hcl \
   --set settings.labels.org.opencontainers.image.version=${VERSION} \
   --set settings.labels.org.opencontainers.image.revision=${GIT_HASH} \
