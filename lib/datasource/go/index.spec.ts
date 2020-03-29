@@ -129,5 +129,41 @@ describe('datasource/go', () => {
       expect(got).toHaveBeenCalledTimes(0);
       expect(github.getPkgReleases.mock.calls).toMatchSnapshot();
     });
+    it('works for nested modules on github', async () => {
+      got.mockClear();
+      github.getPkgReleases.mockClear();
+      const packages = [
+        { lookupName: 'github.com/x/text/a' },
+        { lookupName: 'github.com/x/text/b' },
+      ];
+
+      for (const pkg of packages) {
+        github.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: 'a/v1.0.0' }, { version: 'b/v2.0.0' }],
+        });
+        const prefix = pkg.lookupName.split('/')[3];
+        const result = await go.getPkgReleases(pkg);
+        expect(result.releases).toHaveLength(1);
+        expect(result.releases[0].version.startsWith(prefix));
+      }
+      expect(got).toHaveBeenCalledTimes(0);
+      expect(github.getPkgReleases.mock.calls).toMatchSnapshot();
+    });
+    it('falls back to old behaviour', async () => {
+      got.mockClear();
+      github.getPkgReleases.mockClear();
+      const packages = [
+        { lookupName: 'github.com/x/text/a' },
+        { lookupName: 'github.com/x/text/b' },
+      ];
+
+      const releases = {
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      };
+      for (const pkg of packages) {
+        github.getPkgReleases.mockResolvedValueOnce(releases);
+        expect(await go.getPkgReleases(pkg)).toBe(releases);
+      }
+    });
   });
 });

@@ -82,11 +82,29 @@ describe('platform/azure', () => {
       expect.assertions(1);
       expect(() => azure.initPlatform({})).toThrow();
     });
-    it('should throw if no token', () => {
+    it('should throw if no token nor a username and password', () => {
       expect.assertions(1);
       expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
+        })
+      ).toThrow();
+    });
+    it('should throw if a username but no password', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          username: 'user',
+        })
+      ).toThrow();
+    });
+    it('should throw if a password but no username', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          password: 'pass',
         })
       ).toThrow();
     });
@@ -802,12 +820,25 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
+            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
             createThread: jest.fn(() => [{ id: 123 }]),
             getThreads: jest.fn(() => []),
           } as any)
       );
-      await azure.addAssignees(123, ['test@bonjour.fr']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      azureApi.coreApi.mockImplementation(
+        () =>
+          ({
+            getTeams: jest.fn(() => [
+              { id: 3, name: 'abc' },
+              { id: 4, name: 'def' },
+            ]),
+            getTeamMembersWithExtendedProperties: jest.fn(() => [
+              { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
+            ]),
+          } as any)
+      );
+      await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -834,7 +865,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -843,6 +874,56 @@ describe('platform/azure', () => {
       const input =
         '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(azure.getPrBody(input)).toMatchSnapshot();
+    });
+  });
+
+  describe('getPrFiles', () => {
+    it('single change', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestIterations: jest.fn(() => [{ id: 1 }]),
+            getPullRequestIterationChanges: jest.fn(() => ({
+              changeEntries: [{ item: { path: '/index.js' } }],
+            })),
+          } as any)
+      );
+      const res = await azure.getPrFiles(46);
+      expect(res).toHaveLength(1);
+      expect(res).toEqual(['index.js']);
+    });
+    it('multiple changes', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
+            getPullRequestIterationChanges: jest
+              .fn()
+              .mockResolvedValueOnce({
+                changeEntries: [{ item: { path: '/index.js' } }],
+              })
+              .mockResolvedValueOnce({
+                changeEntries: [{ item: { path: '/package.json' } }],
+              }),
+          } as any)
+      );
+      const res = await azure.getPrFiles(46);
+      expect(res).toHaveLength(2);
+      expect(res).toEqual(['index.js', 'package.json']);
+    });
+    it('deduplicate changes', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
+            getPullRequestIterationChanges: jest.fn().mockResolvedValue({
+              changeEntries: [{ item: { path: '/index.js' } }],
+            }),
+          } as any)
+      );
+      const res = await azure.getPrFiles(46);
+      expect(res).toHaveLength(1);
+      expect(res).toEqual(['index.js']);
     });
   });
 
@@ -861,12 +942,6 @@ describe('platform/azure', () => {
     it('mergePr', async () => {
       const res = await azure.mergePr(0, undefined);
       expect(res).toBe(false);
-    });
-
-    // to become async?
-    it('getPrFiles', async () => {
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(0);
     });
   });
 

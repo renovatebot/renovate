@@ -2,7 +2,7 @@ ARG IMAGE=latest
 
 # Base image
 #============
-FROM renovate/yarn:1.22.4@sha256:e62f9d4b134c5016a819d3257ce7f0cc8f1a2a04998e59cdbb8e51309f56955e AS base
+FROM renovate/yarn:1.22.4@sha256:6f559c0e98e931b0650e35418d385f13726244ec20b4dac6de3dfa808ad49319 AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -48,8 +48,8 @@ FROM base as final-base
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-# renovate: datasource=github-releases depName=docker/docker-ce versioning=docker
-ENV DOCKER_VERSION=19.03.5
+# renovate: datasource=docker depName=docker versioning=docker
+ENV DOCKER_VERSION=19.03.8
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
     && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
@@ -112,7 +112,7 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu bionic main" > /etc/apt/sources.list.d/ondrej-php.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C && \
     apt-get update && \
-    apt-get -y install php7.4-cli php7.4-mbstring && \
+    apt-get -y install php7.4-cli php7.4-mbstring php7.4-curl && \
     rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-releases depName=composer/composer

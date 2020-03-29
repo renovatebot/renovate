@@ -53,6 +53,7 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
 
+    delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     setUtilConfig(config);
     resetPrefetchedImages();
