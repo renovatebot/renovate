@@ -280,6 +280,22 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.init.outputs.yarn_cache }}
+          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile --link-duplicates
+
       - name: semantic-release
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
