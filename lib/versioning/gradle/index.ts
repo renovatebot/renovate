@@ -78,6 +78,7 @@ const unstable = new Set([
   'b',
   'beta',
   'm',
+  'mt',
   'milestone',
   'rc',
   'cr',

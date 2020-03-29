@@ -169,6 +169,7 @@ describe('versioning/gradle', () => {
     expect(api.isStable('Hoxton.RELEASE')).toBe(true);
     expect(api.isStable('Hoxton.SR')).toBe(true);
     expect(api.isStable('Hoxton.SR1')).toBe(true);
+    expect(api.isStable('1.3.5-native-mt-1.3.71-release-429')).toBe(false);
   });
   it('returns major version', () => {
     expect(api.getMajor('')).toBeNull();
