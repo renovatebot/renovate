@@ -259,8 +259,8 @@ jobs:
   release:
     needs: [lint, test, test-docker]
     runs-on: ubuntu-latest
-    # release shouldn't need more than 30 min
-    timeout-minutes: 30
+    # release shouldn't need more than 5 min
+    timeout-minutes: 5
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
@@ -271,7 +271,6 @@ jobs:
       - name: Init platform
         id: init
         run: |
-          echo "::set-output name=yarn_cache::$(yarn cache dir)"
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
@@ -280,44 +279,6 @@ jobs:
           npm config set scripts-prepend-node-path true
 
       - uses: actions/checkout@v2
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.init.outputs.yarn_cache }}
-          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Cache node_modules
-        uses: actions/cache@v1
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
-
-      - name: Build
-        run: yarn build
-
-      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: ${{ env.BUILDX_VERSION }}
-
-      - name: Docker registry login
-        if: github.ref == 'refs/heads/master'
-        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
-
-      - name: Update Docker images cache
-        continue-on-error: true
-        if: github.ref == 'refs/heads/master'
-        run: |
-          docker buildx bake \
-            --progress plain \
-            --file docker/bake.hcl \
-            --file docker/cache.hcl \
-            cache
 
       - name: semantic-release
         run: |
