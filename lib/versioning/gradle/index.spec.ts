@@ -169,6 +169,8 @@ describe('versioning/gradle', () => {
     expect(api.isStable('Hoxton.RELEASE')).toBe(true);
     expect(api.isStable('Hoxton.SR')).toBe(true);
     expect(api.isStable('Hoxton.SR1')).toBe(true);
+
+    // https://github.com/renovatebot/renovate/pull/5789
     expect(api.isStable('1.3.5-native-mt-1.3.71-release-429')).toBe(false);
   });
   it('returns major version', () => {
