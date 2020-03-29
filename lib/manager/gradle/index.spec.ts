@@ -1,26 +1,28 @@
 import { toUnix } from 'upath';
 import _fs from 'fs-extra';
-import fsReal, { Stats } from 'fs';
+import fsReal from 'fs';
 import { exec as _exec } from 'child_process';
-import * as _os from 'os';
-import tmp, { DirectoryResult } from 'tmp-promise';
-import * as path from 'path';
-import { platform as _platform } from '../../platform';
+import * as manager from '.';
+import { platform as _platform, Platform } from '../../platform';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';
+import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
-import * as _docker from '../../util/exec/docker';
-import * as _util from '../../util';
-import { ifSystemSupportsGradle } from './__testutil__/gradle';
-import * as _manager from '.';
-import { ExtractConfig } from '../common';
+import { setUtilConfig } from '../../util';
 
-const fixtures = 'lib/manager/gradle/__fixtures__';
+jest.mock('fs-extra');
+jest.mock('child_process');
+jest.mock('../../util/exec/env');
+
+const platform: jest.Mocked<Platform> = _platform as any;
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 
 const config = {
   localDir: 'localDir',
   gradle: {
-    timeout: 60,
+    timeout: 20,
   },
 };
 
@@ -34,64 +36,22 @@ const gradleOutput = {
   stderr: '',
 };
 
-function resetMocks() {
-  jest.resetAllMocks();
-  jest.resetModules();
-}
-
-async function setupMocks() {
-  resetMocks();
-
-  jest.mock('fs-extra');
-  jest.mock('child_process');
-  jest.mock('../../util/exec/env');
-  jest.mock('../../platform');
-  jest.mock('os');
-
-  const fs: jest.Mocked<typeof _fs> = require('fs-extra');
-  const os: jest.Mocked<typeof _os> = require('os');
-  const platform: jest.Mocked<typeof _platform> = require('../../platform')
-    .platform;
-  const env: jest.Mocked<typeof _env> = require('../../util/exec/env');
-  const exec: jest.Mock<typeof _exec> = require('child_process').exec;
-  const util: jest.Mocked<typeof _util> = require('../../util');
-
-  platform.getFile.mockResolvedValue('some content');
-  env.getChildProcessEnv.mockReturnValue(envMock.basic);
-  await util.setUtilConfig(config);
-
-  return [require('.'), exec, fs, util, os];
-}
-
 describe('manager/gradle', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+
+    fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
+    fs.mkdir.mockResolvedValue();
+    fs.exists.mockResolvedValue(true);
+    fs.access.mockResolvedValue(undefined);
+    platform.getFile.mockResolvedValue('some content');
+
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setUtilConfig(config);
+  });
+
   describe('extractPackageFile', () => {
-    let manager: typeof _manager;
-    let exec: jest.Mock<typeof _exec>;
-    let fs: jest.Mocked<typeof _fs>;
-    let util: jest.Mocked<typeof _util>;
-    let os: jest.Mocked<typeof _os>;
-    let docker: typeof _docker;
-
-    beforeAll(async () => {
-      [manager, exec, fs, util, os] = await setupMocks();
-      docker = require('../../util/exec/docker');
-    });
-
-    afterAll(resetMocks);
-
-    beforeEach(() => {
-      fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
-      fs.mkdir.mockResolvedValue();
-      fs.exists.mockResolvedValue(true);
-      fs.stat.mockResolvedValue({
-        mode: 0o755,
-        isFile: () => true,
-      } as Stats);
-      exec.mockReset();
-      docker.resetPrefetchedImages();
-      os.platform.mockReturnValue('linux');
-    });
-
     it('should return gradle dependencies', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
@@ -181,18 +141,10 @@ describe('manager/gradle', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
 
-    it('should execute gradlew.bat when available on Windows', async () => {
-      const execSnapshots = mockExecAll(exec, gradleOutput);
-      os.platform.mockReturnValue('win32');
-
-      await manager.extractAllPackageFiles(config, ['build.gradle']);
-      expect(execSnapshots).toMatchSnapshot();
-    });
-
-    it('should execute gradle if gradlew is not available', async () => {
+    it('should run gradlew through `sh` when available but not executable', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.stat.mockResolvedValue({ isFile: () => false } as Stats);
+      fs.access.mockRejectedValue(undefined);
       await manager.extractAllPackageFiles(config, ['build.gradle']);
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -200,7 +152,7 @@ describe('manager/gradle', () => {
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      fs.stat.mockResolvedValue({ isFile: () => false } as Stats);
+      fs.exists.mockResolvedValue(false);
 
       const packageFiles = ['foo/build.gradle'];
       expect(
@@ -233,7 +185,7 @@ describe('manager/gradle', () => {
     });
 
     it('should use docker if required', async () => {
-      util.setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
@@ -246,21 +198,7 @@ describe('manager/gradle', () => {
     });
 
     it('should use docker even if gradlew is available', async () => {
-      util.setUtilConfig({ ...config, binarySource: BinarySource.Docker });
-      const execSnapshots = mockExecAll(exec, gradleOutput);
-
-      const configWithDocker = {
-        binarySource: BinarySource.Docker,
-        ...config,
-        gradle: {},
-      };
-      await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
-
-      expect(execSnapshots).toMatchSnapshot();
-    });
-
-    it('should use docker even if gradlew.bat is available on Windows', async () => {
-      os.platform.mockReturnValue('win32');
+      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
       const configWithDocker = {
@@ -275,14 +213,6 @@ describe('manager/gradle', () => {
   });
 
   describe('updateDependency', () => {
-    let manager: typeof _manager;
-    let exec: jest.Mock<typeof _exec>;
-
-    beforeAll(async () => {
-      [manager, exec] = await setupMocks();
-    });
-    afterAll(resetMocks);
-
     it('should update an existing module dependency', () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
@@ -372,71 +302,5 @@ describe('manager/gradle', () => {
 
       expect(execSnapshots).toMatchSnapshot();
     });
-  });
-
-  describe('executeGradle integration', () => {
-    const SUCCESS_FILE = 'success.indicator';
-    let workingDir: DirectoryResult;
-    let testRunConfig: ExtractConfig;
-
-    const manager = require('.');
-
-    beforeEach(async () => {
-      workingDir = await tmp.dir({ unsafeCleanup: true });
-      testRunConfig = { ...config, localDir: workingDir.path };
-      await _fs.copy(`${fixtures}/minimal-project`, workingDir.path);
-      await _fs.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
-
-      const mockPluginContent = `
-allprojects {
-  tasks.register("renovate") {
-    doLast {
-      new File('${SUCCESS_FILE}').write 'success'
-    }
-  }
-}`;
-      await _fs.writeFile(
-        path.join(workingDir.path, 'renovate-plugin.gradle'),
-        mockPluginContent
-      );
-    });
-
-    ifSystemSupportsGradle(6).it(
-      'executes an executable gradle wrapper',
-      async () => {
-        const gradlew = await fsReal.promises.stat(
-          path.join(workingDir.path, 'gradlew')
-        );
-        await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-        await expect(
-          fsReal.promises.readFile(
-            path.join(workingDir.path, SUCCESS_FILE),
-            'utf8'
-          )
-        ).resolves.toBe('success');
-      },
-      120000
-    );
-
-    ifSystemSupportsGradle(6).it(
-      'executes a not-executable gradle wrapper',
-      async () => {
-        await fsReal.promises.chmod(
-          path.join(workingDir.path, 'gradlew'),
-          '444'
-        );
-        const gradlew = await fsReal.promises.stat(
-          path.join(workingDir.path, 'gradlew')
-        );
-        await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-        await expect(
-          fsReal.promises.readFile(
-            path.join(workingDir.path, SUCCESS_FILE),
-            'utf8'
-          )
-        ).resolves.toBe('success');
-      },
-      120000
-    );
   });
 });

@@ -16,29 +16,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
-    },
-  },
-]
-`;
-
-exports[`manager/gradle extractPackageFile should execute gradle if gradlew is not available 1`] = `
-Array [
-  Object {
-    "cmd": "gradle --init-script renovate-plugin.gradle renovate",
-    "options": Object {
-      "cwd": "localDir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -60,29 +38,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
-    },
-  },
-]
-`;
-
-exports[`manager/gradle extractPackageFile should execute gradlew.bat when available on Windows 1`] = `
-Array [
-  Object {
-    "cmd": "gradlew.bat --init-script renovate-plugin.gradle renovate",
-    "options": Object {
-      "cwd": "localDir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -104,7 +60,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -126,7 +82,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -135,7 +91,7 @@ Array [
 exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "gradle --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -148,7 +104,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -291,7 +247,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -376,7 +332,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -519,7 +475,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -527,22 +483,10 @@ Array [
 
 exports[`manager/gradle extractPackageFile should return null and gradle should not be executed if no root build.gradle 1`] = `Array []`;
 
-exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
+exports[`manager/gradle extractPackageFile should run gradlew through \`sh\` when available but not executable 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/gradle",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq | xargs --no-run-if-empty docker rm -f",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "sh gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -555,20 +499,14 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 900000,
+      "timeout": 20000,
     },
   },
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should use docker even if gradlew.bat is available on Windows 1`] = `
+exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
-  Object {
-    "cmd": "docker pull renovate/gradle",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
   Object {
     "cmd": "docker ps --filter name=renovate_gradle -aq | xargs --no-run-if-empty docker rm -f",
     "options": Object {
@@ -623,7 +561,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
@@ -685,7 +623,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 60000,
+      "timeout": 20000,
     },
   },
 ]
