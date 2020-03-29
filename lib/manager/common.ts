@@ -238,6 +238,11 @@ export interface ManagerApi {
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig
   ): Result<string | null>;
+
+  getAdditionalFiles?(
+    config: PostUpdateConfig,
+    packageFiles: AdditionalPackageFiles
+  ): Promise<WriteExistingFilesResult>;
 }
 
 // TODO: name and properties used by npm manager

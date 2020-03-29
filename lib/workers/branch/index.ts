@@ -3,10 +3,10 @@ import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { join } from 'upath';
+import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
-import { getAdditionalFiles as getNpmAdditionalFiles } from '../../manager/npm/post-update';
 import { commitFilesToBranch } from './commit';
 import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
@@ -39,9 +39,11 @@ import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
 import {
   AdditionalPackageFiles,
-  PostUpdateConfig,
+  ArtifactError,
+  UpdatedArtifacts,
   WriteExistingFilesResult,
 } from '../../manager/common';
+import { get } from '../../manager';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -54,11 +56,29 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
   return titleRebase || labelRebase || prRebaseChecked;
 }
 
-async function getAllAdditionalFiles(
-  config: PostUpdateConfig,
+async function getAdditionalFiles(
+  config: BranchConfig,
   packageFiles: AdditionalPackageFiles
 ): Promise<WriteExistingFilesResult> {
-  return getNpmAdditionalFiles(config, packageFiles);
+  let artifactErrors: ArtifactError[] = [];
+  let updatedArtifacts: UpdatedArtifacts[] = [];
+
+  const managers = uniq(config.upgrades.map(upgrade => upgrade.manager));
+  for (const manager of managers) {
+    const getAdditionalFilesFromManager = get(manager, 'getAdditionalFiles');
+    if (getAdditionalFilesFromManager) {
+      const additionalFiles = await getAdditionalFilesFromManager(
+        config,
+        packageFiles
+      );
+      artifactErrors = artifactErrors.concat(additionalFiles.artifactErrors);
+      updatedArtifacts = updatedArtifacts.concat(
+        additionalFiles.updatedArtifacts
+      );
+    }
+  }
+
+  return { artifactErrors, updatedArtifacts };
 }
 
 export async function processBranch(
@@ -308,7 +328,7 @@ export async function processBranch(
     } else {
       logger.debug('No package files need updating');
     }
-    const additionalFiles = await getAllAdditionalFiles(config, packageFiles);
+    const additionalFiles = await getAdditionalFiles(config, packageFiles);
     config.artifactErrors = (config.artifactErrors || []).concat(
       additionalFiles.artifactErrors
     );

@@ -3,7 +3,7 @@ import * as branchWorker from '.';
 import * as _schedule from './schedule';
 import * as _checkExisting from './check-existing';
 import * as _parent from './parent';
-import * as _npmPostExtract from '../../manager/npm/post-update';
+import * as _npm from '../../manager/npm';
 import * as _commit from './commit';
 import * as _statusChecks from './status-checks';
 import * as _automerge from './automerge';
@@ -27,7 +27,7 @@ jest.mock('./get-updated');
 jest.mock('./schedule');
 jest.mock('./check-existing');
 jest.mock('./parent');
-jest.mock('../../manager/npm/post-update');
+jest.mock('../../manager/npm');
 jest.mock('./status-checks');
 jest.mock('./automerge');
 jest.mock('./commit');
@@ -39,7 +39,7 @@ const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
 const checkExisting = mocked(_checkExisting);
 const parent = mocked(_parent);
-const npmPostExtract = mocked(_npmPostExtract);
+const npm = mocked(_npm);
 const statusChecks = mocked(_statusChecks);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
@@ -63,7 +63,7 @@ describe('workers/branch', () => {
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
-        upgrades: [{ depName: 'some-dep-name' } as never],
+        upgrades: [{ manager: 'npm', depName: 'some-dep-name' } as never],
       } as never;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('abc123');
@@ -207,7 +207,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [],
       });
@@ -220,7 +220,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [],
       });
@@ -232,7 +232,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+      npm.getAdditionalFiles.mockReturnValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -249,7 +249,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+      npm.getAdditionalFiles.mockReturnValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -268,7 +268,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -284,7 +284,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -303,7 +303,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -320,7 +320,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -339,7 +339,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+      npm.getAdditionalFiles.mockReturnValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -360,7 +360,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
@@ -382,7 +382,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
@@ -405,7 +405,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
@@ -428,7 +428,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
@@ -448,7 +448,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
@@ -477,7 +477,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
@@ -487,7 +487,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -525,7 +525,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
         artifactErrors: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -556,7 +556,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
         artifactErrors: [{}],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -588,7 +588,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
         artifactErrors: [],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
@@ -617,7 +617,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
         artifactErrors: [],
       } as never);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+      npm.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);

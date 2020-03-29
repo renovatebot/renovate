@@ -4,6 +4,7 @@ import * as npmVersioning from '../../versioning/npm';
 export { extractAllPackageFiles } from './extract';
 export { updateDependency } from './update';
 export { getRangeStrategy } from './range';
+export { getAdditionalFiles } from './post-update';
 
 export const language = LANGUAGE_JAVASCRIPT;
 export const supportsLockFileMaintenance = true;
