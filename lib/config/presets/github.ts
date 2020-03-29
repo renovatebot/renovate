@@ -2,13 +2,14 @@ import { logger } from '../../logger';
 import { Preset } from './common';
 import got, { GotJSONOptions } from '../../util/got';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { ensureTrailingSlash } from '../../util/url';
 
 async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string
 ): Promise<Preset> {
-  const url = `${endpoint}/repos/${repo}/contents/${fileName}`;
+  const url = `${endpoint}repos/${repo}/contents/${fileName}`;
   const opts: GotJSONOptions = {
     headers: {
       accept: global.appMode
@@ -43,8 +44,10 @@ async function fetchJSONFile(
 export async function getPreset(
   pkgName: string,
   presetName = 'default',
-  endpoint = 'https://api.github.com'
+  endpoint = 'https://api.github.com/'
 ): Promise<Preset> {
+  // eslint-disable-next-line no-param-reassign
+  endpoint = ensureTrailingSlash(endpoint);
   if (presetName === 'default') {
     try {
       const defaultJson = await fetchJSONFile(

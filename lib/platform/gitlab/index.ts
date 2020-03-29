@@ -71,7 +71,7 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitLab personal access token');
   }
   if (endpoint) {
-    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    defaults.endpoint = ensureTrailingSlash(endpoint);
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);

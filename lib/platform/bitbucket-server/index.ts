@@ -32,6 +32,7 @@ import {
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
+import { ensureTrailingSlash } from '../../util/url';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -87,7 +88,7 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+  defaults.endpoint = ensureTrailingSlash(endpoint);
   api.setBaseUrl(defaults.endpoint);
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
