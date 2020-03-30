@@ -68,14 +68,6 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
     });
   }
 
-  if (env.GITLAB_COM_TOKEN) {
-    config.hostRules.push({
-      hostType: PLATFORM_TYPE_GITLAB,
-      domainName: 'gitlab.com',
-      token: env.GITLAB_COM_TOKEN,
-    });
-  }
-
   if (env.DOCKER_USERNAME && env.DOCKER_PASSWORD) {
     config.hostRules.push({
       hostType: datasourceDocker.id,
