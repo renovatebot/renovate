@@ -198,7 +198,9 @@ describe('config/presets', () => {
 
     it('ignores presets', async () => {
       config.extends = ['config:base'];
-      const res = await presets.resolveConfigPresets(config, ['config:base']);
+      const res = await presets.resolveConfigPresets(config, {}, [
+        'config:base',
+      ]);
       expect(config).toMatchObject(res);
       expect(res).toMatchSnapshot();
     });
