@@ -108,14 +108,14 @@ export function parsePreset(input: string): ParsedPreset {
 
 export async function getPreset(
   preset: string,
-  inputConfig: RenovateConfig
+  baseConfig?: RenovateConfig
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset(
     packageName,
     presetName,
-    inputConfig
+    baseConfig
   );
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
@@ -151,6 +151,7 @@ export async function getPreset(
 
 export async function resolveConfigPresets(
   inputConfig: RenovateConfig,
+  baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<RenovateConfig> {
@@ -175,7 +176,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset, inputConfig);
+          fetchedPreset = await getPreset(preset, baseConfig);
         } catch (err) {
           logger.debug({ err }, 'Preset fetch error');
           // istanbul ignore if
@@ -203,6 +204,7 @@ export async function resolveConfigPresets(
         }
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
+          baseConfig,
           ignorePresets,
           existingPresets.concat([preset])
         );
@@ -234,6 +236,7 @@ export async function resolveConfigPresets(
           (config[key] as RenovateConfig[]).push(
             await resolveConfigPresets(
               element as RenovateConfig,
+              baseConfig,
               ignorePresets,
               existingPresets
             )
@@ -247,6 +250,7 @@ export async function resolveConfigPresets(
       logger.trace(`Resolving object "${key}"`);
       config[key] = await resolveConfigPresets(
         val as RenovateConfig,
+        baseConfig,
         ignorePresets,
         existingPresets
       );

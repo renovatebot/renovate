@@ -6,13 +6,15 @@ import { RenovateConfig } from '../common';
 export async function getPreset(
   pkgName: string,
   presetName = 'default',
-  config: RenovateConfig
+  baseConfig: RenovateConfig
 ): Promise<Preset> {
-  if (config.platform?.toLowerCase() === 'gitlab') {
-    return gitlab.getPreset(pkgName, presetName, config.endpoint);
+  if (baseConfig.platform?.toLowerCase() === 'gitlab') {
+    return gitlab.getPreset(pkgName, presetName, baseConfig.endpoint);
   }
-  if (config.platform?.toLowerCase() === 'github') {
-    return github.getPreset(pkgName, presetName, config.endpoint);
+  if (baseConfig.platform?.toLowerCase() === 'github') {
+    return github.getPreset(pkgName, presetName, baseConfig.endpoint);
   }
-  throw new Error(`Unsupport platform ${config.platform} for local preset.`);
+  throw new Error(
+    `Unsupported platform '${baseConfig.platform}' for local preset.`
+  );
 }

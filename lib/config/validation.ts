@@ -174,7 +174,8 @@ export async function validateConfig(
                 let hasSelector = false;
                 if (is.object(packageRule)) {
                   const resolvedRule = await resolveConfigPresets(
-                    packageRule as RenovateConfig
+                    packageRule as RenovateConfig,
+                    config
                   );
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
