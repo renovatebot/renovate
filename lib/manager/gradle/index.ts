@@ -49,17 +49,18 @@ async function prepareGradleCommandLine(
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
   const gradlewName = gradleWrapperFileName(config);
 
+  /* eslint-disable no-bitwise */
+  // istanbul ignore if
   if (gradlew?.isFile() === true) {
     // if the file is not executable by others
-    // eslint-disable-next-line no-bitwise
     if ((gradlew.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      // eslint-disable-next-line no-bitwise
       await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
     }
 
     return `${gradlewName} ${args}`;
   }
+  /* eslint-enable no-bitwise */
 
   return `gradle ${args}`;
 }
