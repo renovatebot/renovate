@@ -15,7 +15,7 @@ function determineRegistryUrls(
 ): string[] {
   const registryUrls = [datasourceNuget.getDefaultFeed()];
   const nuGetConfigPath = findUp.sync('NuGet.config', {
-    cwd: path.dirname(packageFile),
+    cwd: path.dirname(path.join(localDir, packageFile)),
     type: 'file',
   });
   if (nuGetConfigPath && nuGetConfigPath.startsWith(localDir)) {
