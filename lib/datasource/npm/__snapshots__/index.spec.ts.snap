@@ -305,3 +305,59 @@ Object {
   "versions": Object {},
 }
 `;
+
+exports[`datasource/npm/index should use host rules by baseUrl if provided 1`] = `
+Object {
+  "homepage": "https://github.com/renovateapp/dummy",
+  "latestVersion": "0.0.1",
+  "name": "foobar",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
+  "sourceDirectory": "src/a",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "tags": Object {
+    "latest": "0.0.1",
+  },
+  "versions": Object {},
+}
+`;
+
+exports[`datasource/npm/index should use host rules by hostName if provided 1`] = `
+Object {
+  "homepage": "https://github.com/renovateapp/dummy",
+  "latestVersion": "0.0.1",
+  "name": "foobar",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
+  "sourceDirectory": "src/a",
+  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "tags": Object {
+    "latest": "0.0.1",
+  },
+  "versions": Object {},
+}
+`;

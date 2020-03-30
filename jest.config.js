@@ -7,7 +7,7 @@ module.exports = {
   collectCoverageFrom: [
     'lib/**/*.{js,ts}',
     '!lib/**/*.{d,spec}.ts',
-    '!lib/**/{__fixtures__,__mocks__}/**/*.{js,ts}',
+    '!lib/**/{__fixtures__,__mocks__,__testutil__}/**/*.{js,ts}',
   ],
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']

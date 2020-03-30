@@ -8,6 +8,7 @@ import * as _datasource from '../../datasource/docker';
 import { mocked } from '../../../test/util';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';
+import * as _bundlerHostRules from './host-rules';
 import { BinarySource } from '../../util/exec/common';
 import { setUtilConfig } from '../../util';
 import { resetPrefetchedImages } from '../../util/exec/docker';
@@ -17,12 +18,15 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const platform = mocked(_platform);
 const datasource = mocked(_datasource);
+const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('../../util/exec/env');
-jest.mock('../../platform');
-jest.mock('../../datasource/docker');
+jest.mock('../../../lib/util/exec/env');
+jest.mock('../../../lib/platform');
+jest.mock('../../../lib/datasource/docker');
+jest.mock('../../../lib/util/host-rules');
+jest.mock('./host-rules');
 
 let config;
 
@@ -38,6 +42,7 @@ describe('bundler.updateArtifacts()', () => {
     };
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     resetPrefetchedImages();
     setUtilConfig(config);
   });
@@ -202,6 +207,48 @@ describe('bundler.updateArtifacts()', () => {
               ruby: 'foo',
               bundler: 'bar',
             },
+          },
+        })
+      ).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
+    it('injects bundler host configuration environment variables', async () => {
+      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.outputFile.mockResolvedValueOnce(null as never);
+      platform.getFile.mockResolvedValueOnce('1.2.0');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.0.0' },
+          { version: '1.2.0' },
+          { version: '1.3.0' },
+        ],
+      });
+      bundlerHostRules.findAllAuthenticatable.mockReturnValue([
+        {
+          hostType: 'bundler',
+          hostName: 'gems.private.com',
+          username: 'some-user',
+          password: 'some-password',
+        },
+      ]);
+      bundlerHostRules.getDomain.mockReturnValue('gems.private.com');
+      bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
+        'some-user:some-password'
+      );
+      const execSnapshots = mockExecAll(exec);
+      platform.getRepoStatus.mockResolvedValueOnce({
+        modified: ['Gemfile.lock'],
+      } as Git.StatusResult);
+      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: ['foo', 'bar'],
+          newPackageFileContent: 'Updated Gemfile content',
+          config: {
+            ...config,
+            binarySource: BinarySource.Docker,
           },
         })
       ).toMatchSnapshot();
