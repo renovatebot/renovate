@@ -79,62 +79,60 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
-function isSpecial(str: string, special: string): boolean {
-  return str.toLowerCase() === special;
+export enum QualifierRank {
+  Dev = -1,
+  Default = 0,
+  RC,
+  Release,
+  Final,
 }
 
-function checkSpecial(left: string, right: string, tag: string): number | null {
-  if (isSpecial(left, tag) && isSpecial(right, tag)) {
-    return 0;
+export function qualifierRank(input: string): number {
+  const val = input.toLowerCase();
+  if (val === 'dev') {
+    return QualifierRank.Dev;
   }
-  if (isSpecial(left, tag)) {
-    return 1;
+  if (val === 'rc' || val === 'cr') {
+    return QualifierRank.RC;
   }
-  if (isSpecial(right, tag)) {
-    return -1;
+  if (val === 'ga' || val === 'release' || val === 'latest' || val === 'sr') {
+    return QualifierRank.Release;
   }
-  return null;
+  if (val === 'final') {
+    return QualifierRank.Final;
+  }
+  return QualifierRank.Default;
 }
 
 function stringTokenCmp(left: string, right: string): number {
-  const dev = checkSpecial(left, right, 'dev');
-  if (dev !== null) {
-    return dev ? -dev : 0;
-  }
+  const leftRank = qualifierRank(left);
+  const rightRank = qualifierRank(right);
+  if (leftRank === 0 && rightRank === 0) {
+    if (left === 'SNAPSHOT' || right === 'SNAPSHOT') {
+      if (left.toLowerCase() < right.toLowerCase()) {
+        return -1;
+      }
 
-  const final = checkSpecial(left, right, 'final');
-  if (final !== null) {
-    return final;
-  }
+      if (left.toLowerCase() > right.toLowerCase()) {
+        return 1;
+      }
+    } else {
+      if (left < right) {
+        return -1;
+      }
 
-  const release = checkSpecial(left, right, 'release');
-  if (release !== null) {
-    return release;
-  }
-
-  const rc = checkSpecial(left, right, 'rc');
-  if (rc !== null) {
-    return rc;
-  }
-
-  if (left === 'SNAPSHOT' || right === 'SNAPSHOT') {
-    if (left.toLowerCase() < right.toLowerCase()) {
-      return -1;
-    }
-
-    if (left.toLowerCase() > right.toLowerCase()) {
-      return 1;
+      if (left > right) {
+        return 1;
+      }
     }
   } else {
-    if (left < right) {
+    if (leftRank < rightRank) {
       return -1;
     }
-
-    if (left > right) {
+    if (leftRank > rightRank) {
       return 1;
     }
   }
-
   return 0;
 }
 

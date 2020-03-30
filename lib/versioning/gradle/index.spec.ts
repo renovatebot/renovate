@@ -25,6 +25,7 @@ describe('versioning/gradle/compare', () => {
     expect(compare('final', 'final')).toEqual(0);
     expect(compare('snapshot', 'SNAPSHOT')).toEqual(0);
     expect(compare('SNAPSHOT', 'snapshot')).toEqual(0);
+    expect(compare('Hoxton.SR1', 'Hoxton.sr-1')).toEqual(0);
   });
   it('returns less than', () => {
     expect(compare('1.1', '1.2')).toEqual(-1);
@@ -47,6 +48,7 @@ describe('versioning/gradle/compare', () => {
     expect(compare('1.0', '1.0-20150201.121010-123')).toEqual(-1);
     expect(compare('1.0-20150201.121010-123', '1.1')).toEqual(-1);
     expect(compare('sNaPsHoT', 'snapshot')).toEqual(-1);
+    expect(compare('Hoxton.RELEASE', 'Hoxton.SR1')).toEqual(-1);
   });
   it('returns greater than', () => {
     expect(compare('1.2', '1.1')).toEqual(1);
@@ -69,6 +71,7 @@ describe('versioning/gradle/compare', () => {
     expect(compare('1.0-20150201.121010-123', '1.0')).toEqual(1);
     expect(compare('1.1', '1.0-20150201.121010-123')).toEqual(1);
     expect(compare('snapshot', 'sNaPsHoT')).toEqual(1);
+    expect(compare('Hoxton.SR1', 'Hoxton.RELEASE')).toEqual(1);
   });
 
   const invalidPrefixRanges = [
