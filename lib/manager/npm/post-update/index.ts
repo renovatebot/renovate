@@ -325,7 +325,9 @@ async function updateNpmrcContent(
     : additionalLines;
   try {
     const newContent = newNpmrc.join('\n');
-    await fs.writeFile(npmrcFilePath, newContent);
+    if (newContent !== originalContent) {
+      await fs.writeFile(npmrcFilePath, newContent);
+    }
   } catch {
     logger.warn('Unable to write custom npmrc file');
   }
