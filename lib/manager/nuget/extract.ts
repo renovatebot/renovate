@@ -11,7 +11,7 @@ import { SkipReason } from '../../types';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
-    return new XmlDocument((await readFile(file)).toString());
+    return new XmlDocument(await readFile(file, 'utf8'));
   } catch (err) {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;
