@@ -1,5 +1,18 @@
 import got from './got';
 
+export interface HttpOptions {
+  dummy?: any; // to be defined
+}
+
+export interface HttpResponse<T = unknown> {
+  body: T;
+}
+
+interface GotOptions extends HttpOptions {
+  json: true;
+  hostType: string;
+}
+
 export class Http {
   readonly hostType: string;
 
