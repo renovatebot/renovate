@@ -1,31 +1,43 @@
-import { GotOptions } from 'got';
-import got from '../got';
+import got from 'got';
+import gotUtil from '../got';
 
-export interface HttpOptions extends GotOptions<string | null> {
+interface GotOptions extends got.GotOptions<string | null> {
+  json?: boolean;
+  useCache?: boolean;
+  hostType: string;
+}
+
+export interface HttpOptions extends got.GotOptions<string | null> {
   useCache?: boolean;
 }
 
-export class Http {
-  hostType: string;
+export interface HttpResponse<T = unknown> {
+  body: T;
+}
 
-  options: GotOptions<string | null>;
+export class Http {
+  readonly hostType: string;
+
+  readonly options: HttpOptions;
 
   constructor(hostType: string, options?: HttpOptions) {
     this.hostType = hostType;
     this.options = options;
   }
 
-  combineOptions(options: any): any {
+  private combineOptions(options: HttpOptions): GotOptions {
     return {
-      json: true,
       ...this.options,
-      options,
+      ...options,
       hostType: this.hostType,
     };
   }
 
-  async get(url: string, options?: HttpOptions): Promise<any> {
-    const res = await got(url, this.combineOptions(options));
+  async get<T = unknown>(
+    url: string | URL,
+    options?: HttpOptions
+  ): Promise<HttpResponse<T>> {
+    const res = await gotUtil(url, this.combineOptions(options));
     return res;
   }
 }
