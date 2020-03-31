@@ -19,7 +19,7 @@ function determineRegistryUrls(
     type: 'file',
   });
   if (nuGetConfigPath && nuGetConfigPath.startsWith(localDir)) {
-    logger.info(`found NuGet.config at '${nuGetConfigPath}'`);
+    logger.debug(`found NuGet.config at '${nuGetConfigPath}'`);
     const nuGetConfig = new XmlDocument(
       readFileSync(nuGetConfigPath).toString()
     );
