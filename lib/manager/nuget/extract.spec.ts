@@ -47,5 +47,17 @@ describe('lib/manager/nuget/extract', () => {
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
     });
+    it('handles NuGet.config without package sources', async () => {
+      const packageFile =
+        'without-package-sources/without-package-sources.csproj';
+      const contents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
   });
 });

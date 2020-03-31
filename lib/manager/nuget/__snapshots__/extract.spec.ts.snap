@@ -161,6 +161,22 @@ Array [
 ]
 `;
 
+exports[`lib/manager/nuget/extract extractPackageFile() handles NuGet.config without package sources 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "managerData": Object {
+        "lineNumber": 8,
+      },
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() handles malformed NuGet.config 1`] = `
 Object {
   "deps": Array [
