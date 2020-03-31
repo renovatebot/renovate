@@ -1,7 +1,7 @@
-import * as findUp from 'find-up';
+import findUp from 'find-up';
 import * as path from 'path';
 import { XmlDocument } from 'xmldoc';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs-extra';
 import { logger } from '../../logger';
 import { get } from '../../versioning';
 import { PackageDependency, ExtractConfig, PackageFile } from '../common';
@@ -9,19 +9,19 @@ import * as semverVersioning from '../../versioning/semver';
 import * as datasourceNuget from '../../datasource/nuget';
 import { SkipReason } from '../../types';
 
-function determineRegistryUrls(
+async function determineRegistryUrls(
   packageFile: string,
   localDir: string
-): string[] {
+): Promise<string[]> {
   const registryUrls = [datasourceNuget.getDefaultFeed()];
-  const nuGetConfigPath = findUp.sync('NuGet.config', {
+  const nuGetConfigPath = await findUp('NuGet.config', {
     cwd: path.dirname(path.join(localDir, packageFile)),
     type: 'file',
   });
   if (nuGetConfigPath && nuGetConfigPath.startsWith(localDir)) {
     logger.debug(`found NuGet.config at '${nuGetConfigPath}'`);
     const nuGetConfig = new XmlDocument(
-      readFileSync(nuGetConfigPath).toString()
+      (await readFile(nuGetConfigPath)).toString()
     );
     const packageSources = nuGetConfig.childNamed('packageSources');
     if (packageSources) {
@@ -45,16 +45,19 @@ function determineRegistryUrls(
   return registryUrls;
 }
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig = {}
-): PackageFile {
+): Promise<PackageFile> {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
   const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
-  const registryUrls = determineRegistryUrls(packageFile, config.localDir);
+  const registryUrls = await determineRegistryUrls(
+    packageFile,
+    config.localDir
+  );
 
   let lineNumber = 0;
   for (const line of content.split('\n')) {

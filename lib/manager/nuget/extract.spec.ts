@@ -10,21 +10,21 @@ describe('lib/manager/nuget/extract', () => {
         localDir: path.resolve('lib/manager/nuget/__fixtures__'),
       };
     });
-    it('returns empty for invalid csproj', () => {
+    it('returns empty for invalid csproj', async () => {
       expect(
-        extractPackageFile('nothing here', 'bogus', config)
+        await extractPackageFile('nothing here', 'bogus', config)
       ).toMatchSnapshot();
     });
-    it('extracts all dependencies', () => {
+    it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
       const sample = readFileSync(
         path.join(config.localDir, packageFile),
         'utf8'
       );
-      const res = extractPackageFile(sample, packageFile, config).deps;
-      expect(res).toMatchSnapshot();
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res.deps).toMatchSnapshot();
     });
-    it('considers NuGet.config', () => {
+    it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
       const contents = readFileSync(
         path.join(config.localDir, packageFile),
@@ -32,7 +32,7 @@ describe('lib/manager/nuget/extract', () => {
       );
 
       expect(
-        extractPackageFile(contents, packageFile, config)
+        await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
     });
   });
