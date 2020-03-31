@@ -10,7 +10,7 @@ export class Http {
     this.options = options;
   }
 
-  combineOptions(options: any): any {
+  private combineOptions(options: HttpOptions): GotOptions {
     return {
       json: true,
       ...this.options,
