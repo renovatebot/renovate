@@ -17,33 +17,38 @@ async function determineRegistryUrls(
     cwd: path.dirname(path.join(localDir, packageFile)),
     type: 'file',
   });
-  if (nuGetConfigPath && nuGetConfigPath.startsWith(localDir)) {
-    logger.debug(`found NuGet.config at '${nuGetConfigPath}'`);
-    const nuGetConfig = new XmlDocument(
-      (await readFile(nuGetConfigPath)).toString()
-    );
-    const packageSources = nuGetConfig.childNamed('packageSources');
-    if (packageSources) {
-      const registryUrls = [datasourceNuget.getDefaultFeed()];
-      for (const child of packageSources.children) {
-        if (child.type === 'element') {
-          if (child.name === 'clear') {
-            logger.info(`clearing registry URLs`);
-            registryUrls.length = 0;
-          } else if (child.name === 'add') {
-            let registryUrl = child.attr.value;
-            if (child.attr.protocolVersion) {
-              registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
-            }
-            logger.debug(`adding registry URL ${registryUrl}`);
-            registryUrls.push(registryUrl);
-          }
+
+  if (nuGetConfigPath?.startsWith(localDir) !== true) {
+    return undefined;
+  }
+
+  logger.debug(`found NuGet.config at '${nuGetConfigPath}'`);
+  const nuGetConfig = new XmlDocument(
+    (await readFile(nuGetConfigPath)).toString()
+  );
+
+  const packageSources = nuGetConfig.childNamed('packageSources');
+  if (!packageSources) {
+    return undefined;
+  }
+
+  const registryUrls = [datasourceNuget.getDefaultFeed()];
+  for (const child of packageSources.children) {
+    if (child.type === 'element') {
+      if (child.name === 'clear') {
+        logger.info(`clearing registry URLs`);
+        registryUrls.length = 0;
+      } else if (child.name === 'add') {
+        let registryUrl = child.attr.value;
+        if (child.attr.protocolVersion) {
+          registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
         }
+        logger.debug(`adding registry URL ${registryUrl}`);
+        registryUrls.push(registryUrl);
       }
-      return registryUrls;
     }
   }
-  return undefined;
+  return registryUrls;
 }
 
 export async function extractPackageFile(
