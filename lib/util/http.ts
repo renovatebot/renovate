@@ -19,7 +19,7 @@ export class Http {
     };
   }
 
-  async get(url: string, options?: any): Promise<any> {
+  async get<T = unknown>(url: string, options?: HttpOptions): Promise<HttpResponse<T>> {
     const res = await got(url, this.combineOptions(options));
     return res;
   }
