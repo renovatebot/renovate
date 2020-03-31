@@ -13,7 +13,6 @@ async function determineRegistryUrls(
   packageFile: string,
   localDir: string
 ): Promise<string[]> {
-  const registryUrls = [datasourceNuget.getDefaultFeed()];
   const nuGetConfigPath = await findUp('NuGet.config', {
     cwd: path.dirname(path.join(localDir, packageFile)),
     type: 'file',
@@ -25,6 +24,7 @@ async function determineRegistryUrls(
     );
     const packageSources = nuGetConfig.childNamed('packageSources');
     if (packageSources) {
+      const registryUrls = [datasourceNuget.getDefaultFeed()];
       for (const child of packageSources.children) {
         if (child.type === 'element') {
           if (child.name === 'clear') {
@@ -40,9 +40,10 @@ async function determineRegistryUrls(
           }
         }
       }
+      return registryUrls;
     }
   }
-  return registryUrls;
+  return undefined;
 }
 
 export async function extractPackageFile(
@@ -85,8 +86,10 @@ export async function extractPackageFile(
         currentValue,
         managerData: { lineNumber },
         datasource: datasourceNuget.id,
-        registryUrls,
       };
+      if (registryUrls) {
+        dep.registryUrls = registryUrls;
+      }
       if (!isVersion(currentValue)) {
         dep.skipReason = SkipReason.NotAVersion;
       }

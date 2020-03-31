@@ -30,9 +30,6 @@ Array [
     "managerData": Object {
       "lineNumber": 12,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "4.1.0",
@@ -42,9 +39,6 @@ Array [
     "managerData": Object {
       "lineNumber": 13,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.1.2",
@@ -54,9 +48,6 @@ Array [
     "managerData": Object {
       "lineNumber": 14,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.1.3",
@@ -66,9 +57,6 @@ Array [
     "managerData": Object {
       "lineNumber": 15,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.1.2",
@@ -78,9 +66,6 @@ Array [
     "managerData": Object {
       "lineNumber": 16,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.1.2",
@@ -90,9 +75,6 @@ Array [
     "managerData": Object {
       "lineNumber": 17,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.1.2",
@@ -102,9 +84,6 @@ Array [
     "managerData": Object {
       "lineNumber": 18,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "10.0.2",
@@ -114,9 +93,6 @@ Array [
     "managerData": Object {
       "lineNumber": 19,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "2.4.0",
@@ -126,9 +102,6 @@ Array [
     "managerData": Object {
       "lineNumber": 20,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.4.0",
@@ -138,9 +111,6 @@ Array [
     "managerData": Object {
       "lineNumber": 21,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "2.1.0",
@@ -150,9 +120,6 @@ Array [
     "managerData": Object {
       "lineNumber": 22,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "3.1.0.5",
@@ -162,9 +129,6 @@ Array [
     "managerData": Object {
       "lineNumber": 23,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
     "skipReason": "not-a-version",
   },
   Object {
@@ -175,9 +139,6 @@ Array [
     "managerData": Object {
       "lineNumber": 24,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.2.3",
@@ -187,9 +148,6 @@ Array [
     "managerData": Object {
       "lineNumber": 25,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
   Object {
     "currentValue": "1.2.3",
@@ -199,9 +157,6 @@ Array [
     "managerData": Object {
       "lineNumber": 26,
     },
-    "registryUrls": Array [
-      "https://api.nuget.org/v3/index.json",
-    ],
   },
 ]
 `;
