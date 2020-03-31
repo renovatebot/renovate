@@ -9,6 +9,15 @@ import * as semverVersioning from '../../versioning/semver';
 import * as datasourceNuget from '../../datasource/nuget';
 import { SkipReason } from '../../types';
 
+async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
+  try {
+    return new XmlDocument((await readFile(file)).toString());
+  } catch (err) {
+    logger.debug({ err }, `failed to parse '${file}' as XML document`);
+    return undefined;
+  }
+}
+
 async function determineRegistryUrls(
   packageFile: string,
   localDir: string
@@ -23,9 +32,10 @@ async function determineRegistryUrls(
   }
 
   logger.debug(`found NuGet.config at '${nuGetConfigPath}'`);
-  const nuGetConfig = new XmlDocument(
-    (await readFile(nuGetConfigPath)).toString()
-  );
+  const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
+  if (!nuGetConfig) {
+    return undefined;
+  }
 
   const packageSources = nuGetConfig.childNamed('packageSources');
   if (!packageSources) {

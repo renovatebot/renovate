@@ -35,5 +35,17 @@ describe('lib/manager/nuget/extract', () => {
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
     });
+    it('handles malformed NuGet.config', async () => {
+      const packageFile =
+        'with-malformed-config-file/with-malformed-config-file.csproj';
+      const contents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
   });
 });
