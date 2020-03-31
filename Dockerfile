@@ -74,7 +74,7 @@ RUN apt-get update && \
 ## Gradle (needs java-jre, installed above)
 
 # renovate: datasource=gradle-version depName=gradle versioning=maven
-ENV GRADLE_VERSION=6.2
+ENV GRADLE_VERSION=6.3
 
 RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
     unzip -q -d /opt/ gradle-$GRADLE_VERSION-bin.zip && \
