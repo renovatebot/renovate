@@ -16,5 +16,7 @@ junit.xml
 /test-results
 renovate-schema.json
 
+# generated code
 **/*.generated.ts
+tools/dist
 test/datasource/nuget/_fixtures/obj

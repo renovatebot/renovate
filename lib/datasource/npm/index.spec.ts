@@ -2,6 +2,7 @@ import _registryAuthToken from 'registry-auth-token';
 import nock from 'nock';
 import moment from 'moment';
 import * as npm from '.';
+import * as hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { getName } from '../../../test/util';
 
@@ -267,6 +268,36 @@ describe(getName(__filename), () => {
     process.env.NPM_TOKEN = 'some-token';
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
     process.env.NPM_TOKEN = oldToken;
+    expect(res).toMatchSnapshot();
+  });
+  it('should use host rules by hostName if provided', async () => {
+    hostRules.add({
+      hostType: 'npm',
+      hostName: 'npm.mycustomregistry.com',
+      token: 'abcde',
+    });
+    nock('https://npm.mycustomregistry.com')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const npmrc = 'registry=https://npm.mycustomregistry.com/';
+    const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
+    expect(res).toMatchSnapshot();
+  });
+  it('should use host rules by baseUrl if provided', async () => {
+    hostRules.add({
+      hostType: 'npm',
+      baseUrl:
+        'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
+      token: 'abcde',
+    });
+    nock(
+      'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry'
+    )
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const npmrc =
+      'registry=https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/';
+    const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('resets npmrc', () => {

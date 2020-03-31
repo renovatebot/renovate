@@ -6,6 +6,7 @@ import registryAuthToken from 'registry-auth-token';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
+import { find } from '../../util/host-rules';
 import got, { GotJSONOptions } from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
@@ -90,10 +91,26 @@ export async function getDependency(
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: packageName },
-      'Using auth for npm lookup'
+      'Using auth (via npmrc) for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
+    logger.trace(
+      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
+      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
+    );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
+  } else {
+    const opts = find({
+      hostType: 'npm',
+      url: regUrl,
+    });
+    if (opts.token) {
+      logger.trace(
+        { token: maskToken(opts.token), npmName: packageName },
+        'Using auth (via hostRules) for npm lookup'
+      );
+      headers.authorization = `Bearer ${opts.token}`;
+    }
   }
 
   const uri = url.parse(pkgUrl);

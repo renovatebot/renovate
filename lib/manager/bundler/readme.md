@@ -8,7 +8,7 @@ If you need Bundler to authenticate with a private registry - and it's not the s
 {
   "hostRules": [
     {
-      "hostname": "private-registry.company.com",
+      "hostName": "private-registry.company.com",
       "hostType": "bundler",
       "token": "abc123"
     }
@@ -19,6 +19,8 @@ If you need Bundler to authenticate with a private registry - and it's not the s
 Important notes regarding the above:
 
 `hostType=bundler` is essential. If the registry is used for multiple package types then you may need multiple `hostRules`. You cannot leave off `hostType`.
+
+Instead of `token`, you may also supply `username` and `password` instead.
 
 If you don't want to commit raw secrets to your repository, either:
 
