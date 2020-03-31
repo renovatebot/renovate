@@ -1,11 +1,16 @@
-import got from './got';
+import { GotOptions } from 'got';
+import got from '../got';
+
+export interface HttpOptions extends GotOptions<string | null> {
+  useCache?: boolean;
+}
 
 export class Http {
   hostType: string;
 
-  options: any;
+  options: GotOptions<string | null>;
 
-  constructor(hostType: string, options?: any) {
+  constructor(hostType: string, options?: HttpOptions) {
     this.hostType = hostType;
     this.options = options;
   }
@@ -19,7 +24,7 @@ export class Http {
     };
   }
 
-  async get(url: string, options?: any): Promise<any> {
+  async get(url: string, options?: HttpOptions): Promise<any> {
     const res = await got(url, this.combineOptions(options));
     return res;
   }
