@@ -1,7 +1,7 @@
 import got from './got';
 
 export class Http {
-  hostType: string;
+  readonly hostType: string;
 
   options: any;
 
