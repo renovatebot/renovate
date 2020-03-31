@@ -66,7 +66,7 @@ export async function extractPackageFile(
   packageFile: string,
   config: ExtractConfig = {}
 ): Promise<PackageFile> {
-  logger.trace(`nuget.extractPackageFile(${packageFile})`);
+  logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
