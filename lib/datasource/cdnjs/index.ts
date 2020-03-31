@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
 export interface CdnjsAsset {
@@ -9,6 +9,8 @@ export interface CdnjsAsset {
 }
 
 export const id = 'cdnjs';
+
+const http = new Http(id);
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 60;
@@ -36,7 +38,7 @@ export async function getDigest(
   const assetName = lookupName.replace(`${library}/`, '');
   let res = null;
   try {
-    res = await got(url, { hostType: id, json: true });
+    res = await http.get(url);
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
@@ -68,7 +70,7 @@ export async function getPkgReleases({
   const url = depUrl(library);
 
   try {
-    const res = await got(url, { hostType: id, json: true });
+    const res = await http.get(url);
 
     const cdnjsResp: CdnjsResponse = res.body;
 
