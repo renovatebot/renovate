@@ -1,1 +1,2 @@
 * text=auto eol=lf
+gradlew.bat text eol=crlf
