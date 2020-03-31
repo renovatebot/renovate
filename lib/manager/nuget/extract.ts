@@ -53,7 +53,7 @@ async function determineRegistryUrls(
         if (child.attr.protocolVersion) {
           registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
         }
-        logger.debug(`adding registry URL ${registryUrl}`);
+        logger.debug({ registryUrl }, 'adding registry URL');
         registryUrls.push(registryUrl);
       }
     }
