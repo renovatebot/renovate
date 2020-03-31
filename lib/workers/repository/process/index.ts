@@ -2,7 +2,6 @@ import { logger } from '../../../logger';
 import { mergeChildConfig, RenovateConfig } from '../../../config';
 import { extract, ExtractResult, update, UpdateResult } from './extract-update';
 import { platform } from '../../../platform';
-import { WriteUpdateResult } from './write';
 import { BranchConfig } from '../../common';
 import { PackageFile } from '../../../manager/common';
 
