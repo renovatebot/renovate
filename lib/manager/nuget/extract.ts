@@ -31,7 +31,7 @@ async function determineRegistryUrls(
     return undefined;
   }
 
-  logger.debug(`found NuGet.config at '${nuGetConfigPath}'`);
+  logger.debug({ nuGetConfigPath }, 'found NuGet.config');
   const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
   if (!nuGetConfig) {
     return undefined;
