@@ -16,7 +16,7 @@ interface GotOptions extends HttpOptions {
 export class Http {
   readonly hostType: string;
 
-  options: any;
+  readonly options: HttpOptions;
 
   constructor(hostType: string, options?: HttpOptions) {
     this.hostType = hostType;
