@@ -20,7 +20,7 @@ export class Http {
   }
 
   async get<T = unknown>(url: string, options?: HttpOptions): Promise<HttpResponse<T>> {
-    const res = await got(url, this.combineOptions(options));
+    const res = await got<T>(url, this.combineOptions(options));
     return res;
   }
 }
