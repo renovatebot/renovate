@@ -38,7 +38,7 @@ export async function getDigest(
   const assetName = lookupName.replace(`${library}/`, '');
   let res = null;
   try {
-    res = await http.get(url);
+    res = await http.get<CdnjsResponse>(url);
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
