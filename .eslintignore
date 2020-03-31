@@ -13,3 +13,4 @@ coverage
 
 # generated typescript code
 **/*.generated.ts
+

@@ -85,6 +85,7 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
@@ -179,6 +180,7 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
@@ -257,8 +259,8 @@ jobs:
   release:
     needs: [lint, test, test-docker]
     runs-on: ubuntu-latest
-    # release shouldn't need more than 30 min
-    timeout-minutes: 30
+    # release shouldn't need more than 5 min
+    timeout-minutes: 5
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
@@ -275,11 +277,11 @@ jobs:
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
           yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
 
       - uses: actions/checkout@v2
 
       - name: Cache Yarn packages
-        id: yarn_cache_packages
         uses: actions/cache@v1
         with:
           path: ${{ steps.init.outputs.yarn_cache }}
@@ -294,32 +296,10 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile --link-duplicates
 
-      - name: Build
-        run: yarn build
-
-      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: ${{ env.BUILDX_VERSION }}
-
-      - name: Docker registry login
-        if: github.ref == 'refs/heads/master'
-        run: echo "${{ secrets.DOCKER_RENOVATERELEASE_TOKEN }}" | docker login -u renovaterelease --password-stdin
-
-      - name: Update Docker images cache
-        continue-on-error: true
-        if: github.ref == 'refs/heads/master'
-        run: |
-          docker buildx bake \
-            --progress plain \
-            --file docker/bake.hcl \
-            --file docker/cache.hcl \
-            cache
-
       - name: semantic-release
         run: |
-          echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' > ~/.npmrc
-          yarn semantic-release --dry-run ${{github.ref != 'refs/heads/master'}}
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

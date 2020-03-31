@@ -15,3 +15,4 @@ bin/yarn*
 
 # generated typescript code
 **/*.generated.ts
+tools/dist

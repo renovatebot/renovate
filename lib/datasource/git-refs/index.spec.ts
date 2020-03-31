@@ -6,7 +6,7 @@ const simpleGit: any = _simpleGit;
 
 const lookupName = 'https://github.com/example/example.git';
 
-describe('datasource/git-tags', () => {
+describe('datasource/git-refs', () => {
   beforeEach(() => global.renovateCache.rmAll());
   describe('getPkgReleases', () => {
     it('returns nil if response is wrong', async () => {
@@ -31,7 +31,7 @@ describe('datasource/git-tags', () => {
       simpleGit.mockReturnValue({
         listRemote() {
           return Promise.resolve(
-            'commithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}'
+            'commithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3'
           );
         },
       });
@@ -39,8 +39,9 @@ describe('datasource/git-tags', () => {
       const versions = await getPkgReleases({
         lookupName,
       });
+
       const result = versions.releases.map(x => x.version).sort();
-      expect(result).toEqual(['0.0.1', 'v0.0.2']);
+      expect(result).toEqual(['0.0.1', 'v0.0.2', 'v0.0.3']);
     });
   });
 });
