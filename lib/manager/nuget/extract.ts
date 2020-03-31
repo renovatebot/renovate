@@ -46,7 +46,7 @@ async function determineRegistryUrls(
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
-        logger.info(`clearing registry URLs`);
+        logger.debug(`clearing registry URLs`);
         registryUrls.length = 0;
       } else if (child.name === 'add') {
         let registryUrl = child.attr.value;
