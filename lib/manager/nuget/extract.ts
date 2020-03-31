@@ -35,7 +35,7 @@ function determineRegistryUrls(
             if (child.attr.protocolVersion) {
               registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
             }
-            logger.info(`adding registry URL ${registryUrl}`);
+            logger.debug(`adding registry URL ${registryUrl}`);
             registryUrls.push(registryUrl);
           }
         }
