@@ -70,7 +70,7 @@ export async function getPkgReleases({
   const url = depUrl(library);
 
   try {
-    const res = await http.get(url);
+    const res = await http.get<CdnjsResponse>(url);
 
     const cdnjsResp: CdnjsResponse = res.body;
 
