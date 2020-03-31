@@ -5,7 +5,7 @@ export class Http {
 
   options: any;
 
-  constructor(hostType: string, options?: any) {
+  constructor(hostType: string, options?: HttpOptions) {
     this.hostType = hostType;
     this.options = options;
   }
