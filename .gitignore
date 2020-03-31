@@ -15,6 +15,7 @@ renovate-0.0.0-semantic-release.tgz
 junit.xml
 /test-results
 renovate-schema.json
+**/*/.gradle
 
 # generated code
 **/*.generated.ts
