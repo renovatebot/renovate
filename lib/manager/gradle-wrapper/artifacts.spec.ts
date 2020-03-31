@@ -189,7 +189,7 @@ describe('manager/gradle-wrapper/update', () => {
 
         expect(res).toEqual(null);
 
-        // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
+        // 5.6.4 => 5.6.4 (updates execs) -  unexpected behavior (looks like a bug in Gradle)
         ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
           expect(
             readFileSync(
