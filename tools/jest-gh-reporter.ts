@@ -1,11 +1,13 @@
 import { AggregatedResult, BaseReporter, Context } from '@jest/reporters';
-import { AssertionResult } from '@jest/test-result';
+import { AssertionResult, TestResult } from '@jest/test-result';
 import { error, info } from '@actions/core';
 import { GitHub } from '@actions/github';
 import { Octokit } from '@octokit/rest';
+import { relative } from 'path';
 import { getEnv } from './utils';
 
 const name = 'jest-results';
+const ROOT = process.cwd();
 
 type Level = 'notice' | 'warning' | 'failure';
 
@@ -19,6 +21,10 @@ function getLevel(test: AssertionResult): Level {
     default:
       return 'notice';
   }
+}
+
+function getPath(suite: TestResult): string {
+  return relative(ROOT, suite.testFilePath).replace(/\\/g, '/');
 }
 
 const ignoreStates = new Set(['passed']);
@@ -49,6 +55,7 @@ class GitHubReporter extends BaseReporter {
       const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = [];
 
       for (const suite of testResult.testResults) {
+        const path = getPath(suite);
         for (const test of suite.testResults.filter(t =>
           ignoreStates.has(t.status)
         )) {
@@ -58,9 +65,9 @@ class GitHubReporter extends BaseReporter {
             break;
           }
           annotations.push({
-            title: test.fullName,
+            title: test.fullName.substr(0, 255),
             message: test.failureMessages?.join('\n '),
-            path: suite.testFilePath,
+            path,
             annotation_level: getLevel(test),
             start_line: test.location?.line ?? 0,
             start_column: test.location?.column ?? 0,
@@ -90,8 +97,10 @@ class GitHubReporter extends BaseReporter {
     const output: Octokit.ChecksCreateParamsOutput = {
       title: 'Jest test results',
       summary: '',
-      annotations,
     };
+    if (annotations.length) {
+      output.annotations = annotations;
+    }
     const checks = await this._api.checks.listForRef({
       ...checkArgs,
       ref,
@@ -107,7 +116,7 @@ class GitHubReporter extends BaseReporter {
         completed_at: new Date().toISOString(),
         conclusion: status ? 'success' : 'failure',
         status: 'completed',
-        output: { ...run.output, annotations },
+        output,
       });
 
       return;
