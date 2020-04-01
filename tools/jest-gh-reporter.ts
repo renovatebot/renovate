@@ -76,9 +76,9 @@ class GitHubReporter extends BaseReporter {
             message: test.failureMessages?.join('\n '),
             path: suite.testFilePath,
             annotation_level: getLevel(test),
-            start_line: test.location.line,
-            start_column: test.location.column,
-            end_line: test.location.line,
+            start_line: test.location?.line ?? 0,
+            start_column: test.location?.column ?? 0,
+            end_line: test.location?.line ?? 0,
           });
         }
       }
