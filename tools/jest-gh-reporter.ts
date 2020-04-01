@@ -124,14 +124,15 @@ class GitHubReporter extends BaseReporter {
       owner,
       repo,
     };
+
+    info(`repo: ${owner} / ${repo}`);
+    info(`sha: ${ref}`);
     const output: Octokit.ChecksUpdateParamsOutput = {
       summary: 'Jest test results',
     };
     if (annotations.length) {
       output.annotations = annotations;
     }
-
-    console.dir(output);
 
     const { data } = await this._api.checks.listForRef({
       ...checkArgs,
