@@ -44,13 +44,13 @@ function getPos(
   }
 
   const line = parseInt(pos.groups.line, 10);
-  const col = parseInt(pos.groups.col, 10);
+  // const col = parseInt(pos.groups.col, 10);
 
   return {
     start_line: line,
     end_line: line,
-    start_column: col,
-    end_column: col,
+    // start_column: col,
+    // end_column: col,
   };
 }
 
