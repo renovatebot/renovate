@@ -2,6 +2,7 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
+  deleteLocalFile,
 } from '../../util/fs';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
@@ -85,10 +86,21 @@ export async function updateArtifacts(
     logger.debug('No Gemfile.lock found');
     return null;
   }
+
+  if (config.isLockFileMaintenance) {
+    await deleteLocalFile(lockFileName);
+  }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+    let cmd;
+
+    if (config.isLockFileMaintenance) {
+      cmd = 'bundle lock';
+    } else {
+      cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+    }
 
     let bundlerVersion = '';
     const { bundler } = compatibility;
@@ -171,7 +183,7 @@ export async function updateArtifacts(
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
-    if (output.match(resolveMatchRe)) {
+    if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
       logger.debug({ err }, 'Bundler has a resolve error');
       const resolveMatches = [];
       let resolveMatch;

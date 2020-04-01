@@ -12,6 +12,7 @@ import * as _bundlerHostRules from './host-rules';
 import { BinarySource } from '../../util/exec/common';
 import { setUtilConfig } from '../../util';
 import { resetPrefetchedImages } from '../../util/exec/docker';
+import { BUNDLER_UNKNOWN_ERROR } from '../../constants/error-messages';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -257,6 +258,53 @@ describe('bundler.updateArtifacts()', () => {
           },
         })
       ).toMatchSnapshot();
+      expect(execSnapshots).toMatchSnapshot();
+    });
+  });
+
+  describe('lock file maintenance', () => {
+    it('performs lockFileMaintenance', async () => {
+      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.outputFile.mockResolvedValueOnce(null as never);
+      const execSnapshots = mockExecAll(exec);
+      platform.getRepoStatus.mockResolvedValueOnce({
+        modified: ['Gemfile.lock'],
+      } as Git.StatusResult);
+      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+          },
+        })
+      ).not.toBeNull();
+      expect(execSnapshots).toMatchSnapshot();
+    });
+    it('throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true', async () => {
+      const execError = new Error();
+      (execError as any).stdout = ' foo was resolved to';
+      (execError as any).stderr = '';
+      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.outputFile.mockResolvedValueOnce(null as never);
+      const execSnapshots = mockExecAll(exec, execError);
+      platform.getRepoStatus.mockResolvedValueOnce({
+        modified: ['Gemfile.lock'],
+      } as Git.StatusResult);
+      await expect(
+        updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+          },
+        })
+      ).rejects.toThrowError(BUNDLER_UNKNOWN_ERROR);
       expect(execSnapshots).toMatchSnapshot();
     });
   });
