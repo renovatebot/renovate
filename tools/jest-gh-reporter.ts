@@ -72,7 +72,7 @@ class GitHubReporter extends BaseReporter {
     testResult: AggregatedResult
   ): Promise<void> {
     try {
-      if (getEnv('GITHUB_ACTIONS') !== 'true') {
+      if (getEnv('GITHUB_ACTIONS') !== 'true' || !this._api) {
         return;
       }
 
@@ -115,7 +115,7 @@ class GitHubReporter extends BaseReporter {
     status: boolean,
     annotations: Octokit.ChecksCreateParamsOutputAnnotations[]
   ): Promise<void> {
-    if (this._api == null) {
+    if (!this._api) {
       return;
     }
     const ref = getEnv('GITHUB_SHA');
