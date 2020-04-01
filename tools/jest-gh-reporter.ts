@@ -123,13 +123,14 @@ class GitHubReporter extends BaseReporter {
       owner,
       repo,
     };
-    const output: Octokit.ChecksCreateParamsOutput = {
-      title: 'Jest test results',
-      summary: '',
+    const output: Octokit.ChecksUpdateParamsOutput = {
+      summary: 'Jest test results',
     };
     if (annotations.length) {
       output.annotations = annotations;
     }
+
+    console.dir(output);
 
     const { data } = await this._api.checks.listForRef({
       ...checkArgs,
@@ -161,7 +162,7 @@ class GitHubReporter extends BaseReporter {
       completed_at: new Date().toISOString(),
       conclusion: status ? 'success' : 'failure',
       status: 'completed',
-      output,
+      output: { ...output, title: 'Jest test results' },
     });
   }
 }
