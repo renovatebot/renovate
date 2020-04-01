@@ -32,7 +32,7 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    logger.debug({ err }, `Git-Tags lookup error in ${lookupName}`);
+    logger.error({ err }, `Git-Tags lookup error in ${lookupName}`);
   }
   return null;
 }
