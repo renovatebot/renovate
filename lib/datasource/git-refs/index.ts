@@ -36,6 +36,7 @@ export async function getRawRefs({
       '--sort=-v:refname',
       '--tags',
       '--heads',
+      '--refs',
       lookupName,
     ]);
 
