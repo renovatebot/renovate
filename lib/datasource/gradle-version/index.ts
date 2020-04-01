@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
@@ -11,6 +11,8 @@ import {
 } from '../common';
 
 export const id = 'gradle-version';
+
+const http = new Http(id);
 
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
@@ -50,10 +52,7 @@ export async function getPkgReleases({
   const allReleases: Release[][] = await Promise.all(
     versionsUrls.map(async url => {
       try {
-        const response: GradleRelease = await got(url, {
-          hostType: id,
-          json: true,
-        });
+        const response: GradleRelease = await http.getJson(url);
         const releases = response.body
           .filter(release => !release.snapshot && !release.nightly)
           .filter(

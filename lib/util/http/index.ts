@@ -2,11 +2,15 @@ import is from '@sindresorhus/is/dist';
 import URL from 'url';
 import got from '../got';
 
+interface OutgoingHttpHeaders {
+  [header: string]: number | string | string[] | undefined;
+}
+
 export interface HttpOptions {
+  auth?: string;
   baseUrl?: string;
-  headers?: {
-    'accept-encoding'?: string;
-  };
+  headers?: OutgoingHttpHeaders;
+  useCache?: boolean;
 }
 
 interface InternalHttpOptions extends HttpOptions {

@@ -1,8 +1,10 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
 export const id = 'hex';
+
+const http = new Http(id);
 
 interface HexRelease {
   html_url: string;
@@ -24,10 +26,7 @@ export async function getPkgReleases({
   const hexPackageName = lookupName.split(':')[0];
   const hexUrl = `https://hex.pm/api/packages/${hexPackageName}`;
   try {
-    const response = await got(hexUrl, {
-      json: true,
-      hostType: id,
-    });
+    const response = await http.getJson(hexUrl);
 
     const hexRelease: HexRelease = response.body;
 

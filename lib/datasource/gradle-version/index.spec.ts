@@ -15,7 +15,9 @@ let config: any = {};
 describe('datasource/gradle-version', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
-      config = {};
+      config = {
+        lookupName: 'abc',
+      };
       jest.clearAllMocks();
       global.repoCache = {};
       return global.renovateCache.rmAll();

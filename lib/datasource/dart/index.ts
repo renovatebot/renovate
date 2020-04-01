@@ -1,8 +1,10 @@
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
 export const id = 'dart';
+
+const http = new Http(id);
 
 export async function getPkgReleases({
   lookupName,
@@ -22,10 +24,7 @@ export async function getPkgReleases({
     body: DartResult;
   } = null;
   try {
-    raw = await got(pkgUrl, {
-      hostType: id,
-      json: true,
-    });
+    raw = await http.getJson(pkgUrl);
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.debug({ lookupName }, `Dependency lookup failure: not found`);
