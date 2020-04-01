@@ -101,6 +101,10 @@ class GitHubReporter extends BaseReporter {
     if (annotations.length) {
       output.annotations = annotations;
     }
+
+    console.log('\nannotations:');
+    console.dir(annotations);
+
     const checks = await this._api.checks.listForRef({
       ...checkArgs,
       ref,
