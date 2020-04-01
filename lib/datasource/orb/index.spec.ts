@@ -34,7 +34,7 @@ describe('datasource/orb', () => {
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
-      got.post.mockReturnValueOnce({ body: {} });
+      got.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
@@ -42,7 +42,7 @@ describe('datasource/orb', () => {
       ).toBeNull();
     });
     it('returns null for missing orb', async () => {
-      got.post.mockReturnValueOnce({ body: { data: {} } });
+      got.mockReturnValueOnce({ body: { data: {} } });
       expect(
         await datasource.getPkgReleases({
           lookupName: 'hyper-expanse/library-release-wonkflows',
@@ -72,7 +72,7 @@ describe('datasource/orb', () => {
       ).toBeNull();
     });
     it('processes real data', async () => {
-      got.post.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
@@ -83,7 +83,7 @@ describe('datasource/orb', () => {
     });
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
-      got.post.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: orbData,
       });
       const res = await datasource.getPkgReleases({

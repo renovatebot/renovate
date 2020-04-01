@@ -13,8 +13,13 @@ export interface HttpOptions {
   useCache?: boolean;
 }
 
+export interface HttpPostOptions extends HttpOptions {
+  body: any;
+}
+
 interface InternalHttpOptions extends HttpOptions {
   json?: boolean;
+  method?: 'get' | 'post';
 }
 
 export interface HttpResponse<T = unknown> {
@@ -44,6 +49,7 @@ export class Http {
       resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
     }
     const combinedOptions = {
+      method: 'get',
       ...this.options,
       hostType: this.hostType,
       ...options,
@@ -64,6 +70,15 @@ export class Http {
     options: HttpOptions = {}
   ): Promise<HttpJsonResponse> {
     const res = await this.request(url, options);
+    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
+    return { body };
+  }
+
+  async postJson<T = unknown>(
+    url: string | URL,
+    options: HttpPostOptions
+  ): Promise<HttpJsonResponse> {
+    const res = await this.request(url, { ...options, method: 'post' });
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { body };
   }

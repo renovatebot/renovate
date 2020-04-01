@@ -1,8 +1,10 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'orb';
+
+const http = new Http(id);
 
 interface OrbRelease {
   homeUrl?: string;
@@ -38,11 +40,8 @@ export async function getPkgReleases({
   };
   try {
     const res: OrbRelease = (
-      await got.post(url, {
+      await http.postJson(url, {
         body,
-        hostType: id,
-        json: true,
-        retry: 5,
       })
     ).body.data.orb;
     if (!res) {
