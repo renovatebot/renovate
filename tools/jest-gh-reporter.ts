@@ -109,6 +109,7 @@ class GitHubReporter extends BaseReporter {
     if (checks.data.check_runs.length) {
       const [run] = checks.data.check_runs;
       info(`Update check run: ${run.id}`);
+      console.dir(run);
 
       await this._api.checks.update({
         ...checkArgs,
