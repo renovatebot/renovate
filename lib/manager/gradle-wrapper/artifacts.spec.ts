@@ -4,6 +4,7 @@ import Git from 'simple-git/promise';
 import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
 import { mocked } from '../../../test/util';
+import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 
 const platform = mocked(_platform);
 
@@ -30,7 +31,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.clearAllMocks();
     });
 
-    it('replaces existing value', async () => {
+    ifSystemSupportsGradle(6).it('replaces existing value', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
         platform.getRepoStatus.mockResolvedValue({
@@ -111,7 +112,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.clearAllMocks();
     });
 
-    it('up to date', async () => {
+    ifSystemSupportsGradle(6).it('up to date', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
         platform.getRepoStatus.mockResolvedValue({
@@ -164,7 +165,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.clearAllMocks();
     });
 
-    it('error handling', async () => {
+    ifSystemSupportsGradle(6).it('error handling', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
         platform.getRepoStatus.mockImplementation(() => {
