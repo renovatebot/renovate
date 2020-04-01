@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "allowJs": false,
+    "checkJs": false,
+    "isolatedModules": false,
+    "sourceMap": false
+  }
+}

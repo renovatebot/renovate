@@ -26,6 +26,7 @@
     "lint": "run-s eslint prettier",
     "lint-fix": "run-s eslint-fix prettier-fix",
     "prepare": "run-s prepare:*",
+    "prepare:tools": "tsc -p tools",
     "prepare:jest": "node --experimental-modules tools/patch-jest.mjs",
     "prepare:re2": "node --experimental-modules tools/check-re2.mjs",
     "prepare:generate": "run-s generate:*",
@@ -174,6 +175,8 @@
     "re2": "1.10.5"
   },
   "devDependencies": {
+    "@actions/core": "1.2.3",
+    "@actions/github": "2.1.1",
     "@babel/cli": "7.8.4",
     "@babel/core": "7.9.0",
     "@babel/node": "7.8.7",
@@ -182,6 +185,10 @@
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/preset-env": "7.9.0",
     "@babel/preset-typescript": "7.9.0",
+    "@jest/console": "25.1.0",
+    "@jest/reporters": "25.1.0",
+    "@jest/test-result": "25.1.0",
+    "@octokit/rest": "16.43.1",
     "@semantic-release/exec": "5.0.0",
     "@types/bunyan": "1.8.6",
     "@types/cacache": "12.0.1",
