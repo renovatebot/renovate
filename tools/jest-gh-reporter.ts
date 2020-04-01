@@ -4,6 +4,7 @@ import { error, info } from '@actions/core';
 import { GitHub } from '@actions/github';
 import { Octokit } from '@octokit/rest';
 import { relative } from 'path';
+import stripAnsi from 'strip-ansi';
 import { getEnv } from './utils';
 
 const name = 'jest-results';
@@ -29,6 +30,29 @@ function getPath(suite: TestResult): string {
 
 const ignoreStates = new Set(['passed']);
 const MAX_ANNOTATIONS = 50;
+const lineRe = /\.spec\.ts:(?<line>\d+):(?<col>\d+)\)/;
+
+function getPos(
+  msg: string
+): Pick<
+  Octokit.ChecksCreateParamsOutputAnnotations,
+  'end_column' | 'end_line' | 'start_column' | 'start_line'
+> {
+  const pos = lineRe.exec(msg);
+  if (!pos || !pos.groups) {
+    return { start_line: 0, end_line: 0 };
+  }
+
+  const line = parseInt(pos.groups.line, 10);
+  const col = parseInt(pos.groups.col, 10);
+
+  return {
+    start_line: line,
+    end_line: line,
+    start_column: col,
+    end_column: col,
+  };
+}
 
 class GitHubReporter extends BaseReporter {
   private readonly _api: GitHub | null;
@@ -64,14 +88,16 @@ class GitHubReporter extends BaseReporter {
             annotations.length = 0;
             break;
           }
+          const message =
+            stripAnsi(test.failureMessages?.join('\n ')) ?? test.status;
+          const pos = getPos(message);
+
           annotations.push({
             title: test.fullName.substr(0, 255),
-            message: test.failureMessages?.join('\n ') ?? test.status,
+            message,
             path,
             annotation_level: getLevel(test),
-            start_line: test.location?.line ?? 0,
-            start_column: test.location?.column ?? 0,
-            end_line: test.location?.line ?? 0,
+            ...pos,
           });
         }
       }
