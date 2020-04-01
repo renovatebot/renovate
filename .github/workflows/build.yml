@@ -31,6 +31,8 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           dry-run: ${{github.ref == 'refs/heads/master'}}
 
+      - run: env | grep GITHUB_
+
   test:
     needs: [cleanup]
     runs-on: ${{ matrix.os }}
@@ -139,6 +141,8 @@ jobs:
 
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Upload coverage
         uses: actions/upload-artifact@v1
