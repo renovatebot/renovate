@@ -1,9 +1,10 @@
-import { ReleaseResult, GetReleasesConfig } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as semver from '../../versioning/semver';
 import * as gitRefs from '../git-refs';
 
 export const id = 'git-tags';
-
+const lnReplacePattern1 = /\.git$/;
+const lnReplacePattern2 = /\/$/;
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -17,15 +18,15 @@ export async function getPkgReleases({
     .map(ref => ref.value)
     .filter(tag => semver.isVersion(tag));
 
-  const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
+  const sourceUrl = lookupName
+    .replace(lnReplacePattern1, '')
+    .replace(lnReplacePattern2, '');
 
-  const result: ReleaseResult = {
+  return {
     sourceUrl,
     releases: tags.map(tag => ({
       version: tag,
       gitRef: tag,
     })),
   };
-
-  return result;
 }
