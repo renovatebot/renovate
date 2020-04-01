@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is/dist';
 import URL from 'url';
 import got from '../got';
 
@@ -8,8 +9,16 @@ export interface HttpOptions {
   };
 }
 
+interface InternalHttpOptions extends HttpOptions {
+  json?: boolean;
+}
+
 export interface HttpResponse<T = unknown> {
   body: string;
+}
+
+export interface HttpJsonResponse extends HttpResponse {
+  body: any;
 }
 
 export class Http {
@@ -22,9 +31,9 @@ export class Http {
     this.options = options;
   }
 
-  async get<T = unknown>(
+  private async request<T = unknown>(
     url: string | URL,
-    options: HttpOptions = {}
+    options: InternalHttpOptions = {}
   ): Promise<HttpResponse<T> | null> {
     const resolvedUrl = URL.resolve(options.baseUrl || '', url.toString());
     const combinedOptions = {
@@ -33,9 +42,22 @@ export class Http {
       ...options,
     };
     const res = await got(resolvedUrl, combinedOptions);
-    if (!res) {
-      return null;
-    }
     return { body: res.body };
+  }
+
+  get<T = unknown>(
+    url: string | URL,
+    options: HttpOptions = {}
+  ): Promise<HttpResponse<T> | null> {
+    return this.request(url, options);
+  }
+
+  async getJson<T = unknown>(
+    url: string | URL,
+    options: HttpOptions = {}
+  ): Promise<HttpJsonResponse> {
+    const res = await this.request(url, options);
+    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
+    return { body };
   }
 }
