@@ -118,12 +118,18 @@ class GitHubReporter extends BaseReporter {
     if (!this._api) {
       return;
     }
-    const ref = getEnv('GITHUB_SHA');
+    const run_id = parseInt(getEnv('GITHUB_RUN_ID'), 10);
     const [owner, repo] = getEnv('GITHUB_REPOSITORY').split('/');
     const checkArgs = {
       owner,
       repo,
     };
+    const { data: wf } = await this._api.actions.getWorkflowRun({
+      owner,
+      repo,
+      run_id,
+    });
+    const ref = wf.head_sha;
 
     info(`repo: ${owner} / ${repo}`);
     info(`sha: ${ref}`);

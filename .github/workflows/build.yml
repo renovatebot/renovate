@@ -31,8 +31,6 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           dry-run: ${{github.ref == 'refs/heads/master'}}
 
-      - run: env
-
   test:
     needs: [cleanup]
     runs-on: ${{ matrix.os }}
