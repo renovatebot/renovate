@@ -66,7 +66,7 @@ class GitHubReporter extends BaseReporter {
           }
           annotations.push({
             title: test.fullName.substr(0, 255),
-            message: test.failureMessages?.join('\n '),
+            message: test.failureMessages?.join('\n ') ?? '',
             path,
             annotation_level: getLevel(test),
             start_line: test.location?.line ?? 0,
