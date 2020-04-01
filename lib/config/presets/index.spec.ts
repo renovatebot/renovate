@@ -262,6 +262,9 @@ describe('config/presets', () => {
     it('parses local', () => {
       expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
     });
+    it('parses no prefix as local', () => {
+      expect(presets.parsePreset('some/repo')).toMatchSnapshot();
+    });
     it('returns default package name with params', () => {
       expect(
         presets.parsePreset(':group(packages/eslint, eslint)')

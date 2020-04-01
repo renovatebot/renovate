@@ -66,6 +66,12 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
+  } else if (
+    !str.startsWith('@') &&
+    !str.startsWith(':') &&
+    str.includes('/')
+  ) {
+    presetSource = 'local';
   }
   str = str.replace(/^npm>/, '');
   presetSource = presetSource || 'npm';
