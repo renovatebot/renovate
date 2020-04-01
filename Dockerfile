@@ -205,7 +205,12 @@ RUN poetry config virtualenvs.in-project false
 
 # renovate: datasource=npm depName=pnpm
 ENV PNPM_VERSION=4.12.0
-RUN curl -sSL https://raw.githubusercontent.com/pnpm/self-installer/master/install.js | node
+ENV PNPM_DEST="${HOME}/.pnpm"
+ENV PNPM_BIN_DEST="${HOME}/.pnpm/.bin"
+ENV PATH="${HOME}/.pnpm/bin:$PATH"
+RUN set -ex ;\
+  curl -sSL https://unpkg.com/@pnpm/self-installer | node; \
+  echo "pnpm: $(pnpm --version)"
 
 # Renovate
 #=========
