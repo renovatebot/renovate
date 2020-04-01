@@ -49,8 +49,9 @@ export async function getRawRefs({
       .replace(/^.+?refs\//gm, '')
       .split('\n');
 
+    const refMatch = /(?<type>\w+)\/(?<value>.*)/;
     const result = refs.map(ref => {
-      const match = /(?<type>\w+)\/(?<value>.*)/.exec(ref);
+      const match = refMatch.exec(ref);
       return {
         type: match.groups.type,
         value: match.groups.value,
