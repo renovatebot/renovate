@@ -84,7 +84,10 @@ class GitHubReporter extends BaseReporter {
           t => !ignoreStates.has(t.status)
         )) {
           if (annotations.length === MAX_ANNOTATIONS) {
-            await this._createOrUpdate(testResult.success, annotations);
+            await this._createOrUpdate(
+              testResult.numFailedTests !== 0,
+              annotations
+            );
             annotations.length = 0;
             break;
           }
@@ -104,7 +107,10 @@ class GitHubReporter extends BaseReporter {
       }
 
       if (annotations.length) {
-        await this._createOrUpdate(testResult.success, annotations);
+        await this._createOrUpdate(
+          testResult.numFailedTests !== 0,
+          annotations
+        );
       }
     } catch (e) {
       error(`Unexpected error: ${e}`);
@@ -112,7 +118,7 @@ class GitHubReporter extends BaseReporter {
   }
 
   private async _createOrUpdate(
-    status: boolean,
+    success: boolean,
     annotations: Octokit.ChecksCreateParamsOutputAnnotations[]
   ): Promise<void> {
     if (!this._api) {
@@ -154,7 +160,7 @@ class GitHubReporter extends BaseReporter {
         ...checkArgs,
         check_run_id: check.id,
         completed_at: new Date().toISOString(),
-        conclusion: status ? 'success' : 'failure',
+        conclusion: success ? 'success' : 'failure',
         status: 'completed',
         output,
       });
@@ -168,7 +174,7 @@ class GitHubReporter extends BaseReporter {
       name,
       head_sha: ref,
       completed_at: new Date().toISOString(),
-      conclusion: status ? 'success' : 'failure',
+      conclusion: success ? 'success' : 'failure',
       status: 'completed',
       output: { ...output, title: 'Jest' },
     });
