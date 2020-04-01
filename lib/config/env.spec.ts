@@ -63,7 +63,6 @@ describe('config/env', () => {
     });
     it('supports GitHub custom endpoint and gitlab.com', () => {
       const envParam: NodeJS.ProcessEnv = {
-        GITLAB_COM_TOKEN: 'a gitlab.com token',
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };

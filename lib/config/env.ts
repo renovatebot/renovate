@@ -4,10 +4,7 @@ import { getOptions, RenovateOptions } from './definitions';
 import { RenovateConfig } from './common';
 import { logger } from '../logger';
 import * as datasourceDocker from '../datasource/docker';
-import {
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../constants/platforms';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
