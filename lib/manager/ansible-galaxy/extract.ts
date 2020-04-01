@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGalaxy from '../../datasource/galaxy';
+import { SkipReason } from '../../types';
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
@@ -40,13 +41,13 @@ function interpretLine(
 function finalize(dependency: PackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = SkipReason.NoVersion;
     return false;
   }
 
   const source: string = dep.managerData.src;
   const sourceMatch: RegExpMatchArray = new RegExp(
-    /^(git|http|git\+http)s?(:\/\/|@).*(\/|:)(.+\/[^.]+)\/?(\.git)?$/
+    /^(git|http|git\+http|ssh)s?(:\/\/|@).*(\/|:)(.+\/[^.]+)\/?(\.git)?$/
   ).exec(source);
   if (sourceMatch) {
     dep.datasource = datasourceGitTags.id;
@@ -58,7 +59,7 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = dep.managerData.src;
     dep.lookupName = dep.managerData.src;
   } else {
-    dep.skipReason = 'no-source-match';
+    dep.skipReason = SkipReason.NoSourceMatch;
     return false;
   }
   if (dep.managerData.name !== null) {
@@ -95,9 +96,13 @@ export default function extractPackageFile(
           }
           const line = lines[lineNumber + 1];
 
-          if (!line) break;
+          if (!line) {
+            break;
+          }
           lineMatch = blockLineRegEx.exec(line);
-          if (lineMatch) lineNumber += 1;
+          if (lineMatch) {
+            lineNumber += 1;
+          }
         } while (lineMatch);
         if (finalize(dep)) {
           delete dep.managerData;

@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { CargoConfig, CargoSection } from './types';
 import * as datasourceCrate from '../../datasource/crate';
+import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedContent: CargoSection,
@@ -15,7 +16,7 @@ function extractFromSection(
     return [];
   }
   Object.keys(sectionContent).forEach(depName => {
-    let skipReason: string;
+    let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     if (typeof currentValue !== 'string') {
@@ -26,20 +27,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = 'path-dependency';
+          skipReason = SkipReason.PathDependency;
         }
         if (git) {
-          skipReason = 'git-dependency';
+          skipReason = SkipReason.GitDependency;
         }
       } else if (path) {
         currentValue = '';
-        skipReason = 'path-dependency';
+        skipReason = SkipReason.PathDependency;
       } else if (git) {
         currentValue = '';
-        skipReason = 'git-dependency';
+        skipReason = SkipReason.GitDependency;
       } else {
         currentValue = '';
-        skipReason = 'invalid-dependency-specification';
+        skipReason = SkipReason.InvalidDependencySpecification;
       }
     }
     const dep: PackageDependency = {

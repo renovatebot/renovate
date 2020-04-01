@@ -32,7 +32,11 @@ export function updateDependency({
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);
   const updatedContent = updateAtPosition(restContent, upgrade, '</');
-  if (!updatedContent) return null;
-  if (updatedContent === restContent) return fileContent;
+  if (!updatedContent) {
+    return null;
+  }
+  if (updatedContent === restContent) {
+    return fileContent;
+  }
   return `${spaces}${updatedContent}`;
 }

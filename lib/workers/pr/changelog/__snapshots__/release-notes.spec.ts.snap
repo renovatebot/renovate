@@ -33,6 +33,51 @@ Object {
 }
 `;
 
+exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
+Object {
+  "body": "##### ⚠ BREAKING CHANGES
+
+-   **deps:** yargs-parser@17.0.0 no longer implicitly creates arrays out of boolean
+    arguments when duplicates are provided
+
+##### Features
+
+-   **completion:** takes negated flags into account when boolean-negation is set ([#1509](https://www.github.com/yargs/yargs/issues/1509)) ([7293ad5](https://www.github.com/yargs/yargs/commit/7293ad50d20ea0fb7dd1ac9b925e90e1bd95dea8))
+-   **deps:** pull in yargs-parser@17.0.0 ([#1553](https://www.github.com/yargs/yargs/issues/1553)) ([b9409da](https://www.github.com/yargs/yargs/commit/b9409da199ebca515a848489c206b807fab2e65d))
+-   deprecateOption ([#1559](https://www.github.com/yargs/yargs/issues/1559)) ([8aae333](https://www.github.com/yargs/yargs/commit/8aae3332251d09fa136db17ef4a40d83fa052bc4))
+-   display appropriate $0 for electron apps ([#1536](https://www.github.com/yargs/yargs/issues/1536)) ([d0e4379](https://www.github.com/yargs/yargs/commit/d0e437912917d6a66bb5128992fa2f566a5f830b))
+-   introduces strictCommands() subset of strict mode ([#1540](https://www.github.com/yargs/yargs/issues/1540)) ([1d4cca3](https://www.github.com/yargs/yargs/commit/1d4cca395a98b395e6318f0505fc73bef8b01350))
+-   **deps:** yargs-parser with 'greedy-array' configuration ([#1569](https://www.github.com/yargs/yargs/issues/1569)) ([a03a320](https://www.github.com/yargs/yargs/commit/a03a320dbf5c0ce33d829a857fc04a651c0bb53e))
+
+##### Bug Fixes
+
+-   help always displayed for the first command parsed having an async handler ([#1535](https://www.github.com/yargs/yargs/issues/1535)) ([d585b30](https://www.github.com/yargs/yargs/commit/d585b303a43746201b05c9c9fda94a444634df33))
+-   **deps:** fix enumeration for normalized path arguments ([#1567](https://www.github.com/yargs/yargs/issues/1567)) ([0b5b1b0](https://www.github.com/yargs/yargs/commit/0b5b1b0e5f4f9baf393c48e9cc2bc85c1b67a47a))
+-   **locales:** only translate default option group name ([acc16de](https://www.github.com/yargs/yargs/commit/acc16de6b846ea7332db753646a9cec76b589162))
+-   **locales:** remove extra space in French for 'default' ([#1564](https://www.github.com/yargs/yargs/issues/1564)) ([ecfc2c4](https://www.github.com/yargs/yargs/commit/ecfc2c474575c6cdbc6d273c94c13181bd1dbaa6))
+-   **translations:** add French translation for unknown command ([#1563](https://www.github.com/yargs/yargs/issues/1563)) ([18b0b75](https://www.github.com/yargs/yargs/commit/18b0b752424bf560271e670ff95a0f90c8386787))
+-   **translations:** fix pluralization in error messages. ([#1557](https://www.github.com/yargs/yargs/issues/1557)) ([94fa38c](https://www.github.com/yargs/yargs/commit/94fa38cbab8d86943e87bf41d368ed56dffa6835))
+-   **yargs:** correct support of bundled electron apps ([#1554](https://www.github.com/yargs/yargs/issues/1554)) ([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))
+",
+  "url": "https://github.com/yargs/yargs/blob/master/CHANGELOG.md#1520-httpswwwgithubcomyargsyargscomparev1510v1520-2020-03-01",
+}
+`;
+
+exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
+Object {
+  "body": "##### Features
+
+-   **yargs-parser:** introduce single-digit boolean aliases ([#1576](https://www.github.com/yargs/yargs/issues/1576)) ([3af7f04](https://www.github.com/yargs/yargs/commit/3af7f04cdbfcbd4b3f432aca5144d43f21958c39))
+-   add usage for single-digit boolean aliases ([#1580](https://www.github.com/yargs/yargs/issues/1580)) ([6014e39](https://www.github.com/yargs/yargs/commit/6014e39bca3a1e8445aa0fb2a435f6181e344c45))
+
+##### Bug Fixes
+
+-   address ambiguity between nargs of 1 and requiresArg ([#1572](https://www.github.com/yargs/yargs/issues/1572)) ([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))
+",
+  "url": "https://github.com/yargs/yargs/blob/master/CHANGELOG.md#1530-httpswwwgithubcomyargsyargscomparev1520v1530-2020-03-08",
+}
+`;
+
 exports[`workers/pr/release-notes getReleaseNotesMd() parses angular.js 1`] = `
 Object {
   "body": "#### Bug Fixes

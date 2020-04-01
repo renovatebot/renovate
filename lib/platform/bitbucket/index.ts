@@ -1,3 +1,4 @@
+import URL from 'url';
 import parseDiff from 'parse-diff';
 import addrs from 'email-addresses';
 import { api } from './bb-got-wrapper';
@@ -20,7 +21,6 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
-  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -30,12 +30,10 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
+
+const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
 
@@ -49,14 +47,14 @@ export function initPlatform({
       'Init: You must configure a Bitbucket username and password'
     );
   }
-  if (endpoint && endpoint !== 'https://api.bitbucket.org/') {
-    throw new Error(
-      'Init: Bitbucket Cloud endpoint can only be https://api.bitbucket.org/'
+  if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
+    logger.warn(
+      `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformConfig = {
-    endpoint: 'https://api.bitbucket.org/',
+    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
 }
@@ -81,12 +79,14 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
+  endpoint = BITBUCKET_PROD_ENDPOINT,
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: 'https://api.bitbucket.org/',
+    url: endpoint,
   });
+  api.setBaseUrl(endpoint);
   config = {
     repository,
     username: opts.username,
@@ -135,10 +135,17 @@ export async function initRepo({
     throw err;
   }
 
+  const { hostname } = URL.parse(endpoint);
+
+  // Converts API hostnames to their respective HTTP git hosts:
+  // `api.bitbucket.org`  to `bitbucket.org`
+  // `api-staging.<host>` to `staging.<host>`
+  const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
+
   const url = GitStorage.getUrl({
     protocol: 'https',
     auth: `${opts.username}:${opts.password}`,
-    hostname: 'bitbucket.org',
+    hostname: hostnameWithoutApiPrefix,
     repository,
   });
 
@@ -415,46 +422,48 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
   const noOfFailures = statuses.filter(
-    (status: { state: string }) => status.state === 'FAILED'
+    (status: { state: string }) =>
+      status.state === 'FAILED' || status.state === 'STOPPED'
   ).length;
   if (noOfFailures) {
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return BRANCH_STATUS_PENDING;
+    return BranchStatus.yellow;
   }
-  return BRANCH_STATUS_SUCCESS;
+  return BranchStatus.green;
 }
+
+const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
+  SUCCESSFUL: BranchStatus.green,
+  INPROGRESS: BranchStatus.yellow,
+  FAILED: BranchStatus.red,
+};
 
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = (statuses.find(status => status.key === context) || {}).state;
-
-  return (
-    Object.keys(utils.buildStates).find(
-      stateKey => utils.buildStates[stateKey] === bbState
-    ) || null
-  );
+  return bbToRenovateStatusMapping[bbState] || null;
 }
 
 export async function setBranchStatus({

@@ -12,3 +12,7 @@ package.json
 **/__fixtures__/
 **/__mocks__/
 bin/yarn*
+
+# generated typescript code
+**/*.generated.ts
+tools/dist

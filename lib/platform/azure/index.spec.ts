@@ -2,11 +2,7 @@ import is from '@sindresorhus/is';
 import * as _hostRules from '../../util/host-rules';
 import { RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -86,11 +82,29 @@ describe('platform/azure', () => {
       expect.assertions(1);
       expect(() => azure.initPlatform({})).toThrow();
     });
-    it('should throw if no token', () => {
+    it('should throw if no token nor a username and password', () => {
       expect.assertions(1);
       expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
+        })
+      ).toThrow();
+    });
+    it('should throw if a username but no password', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          username: 'user',
+        })
+      ).toThrow();
+    });
+    it('should throw if a password but no username', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          password: 'pass',
         })
       ).toThrow();
     });
@@ -416,12 +430,12 @@ describe('platform/azure', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
       await initRepo('some-repo');
       const res = await azure.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BRANCH_STATUS_FAILED);
+      expect(res).toEqual(BranchStatus.red);
     });
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -432,7 +446,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_SUCCESS);
+      expect(res).toEqual(BranchStatus.green);
     });
     it('should pass through failed', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -443,7 +457,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
-      expect(res).toEqual(BRANCH_STATUS_PENDING);
+      expect(res).toEqual(BranchStatus.yellow);
     });
   });
 
@@ -806,12 +820,25 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
+            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
             createThread: jest.fn(() => [{ id: 123 }]),
             getThreads: jest.fn(() => []),
           } as any)
       );
-      await azure.addAssignees(123, ['test@bonjour.fr']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      azureApi.coreApi.mockImplementation(
+        () =>
+          ({
+            getTeams: jest.fn(() => [
+              { id: 3, name: 'abc' },
+              { id: 4, name: 'def' },
+            ]),
+            getTeamMembersWithExtendedProperties: jest.fn(() => [
+              { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
+            ]),
+          } as any)
+      );
+      await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -838,7 +865,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -850,13 +877,63 @@ describe('platform/azure', () => {
     });
   });
 
+  describe('getPrFiles', () => {
+    it('single change', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestIterations: jest.fn(() => [{ id: 1 }]),
+            getPullRequestIterationChanges: jest.fn(() => ({
+              changeEntries: [{ item: { path: '/index.js' } }],
+            })),
+          } as any)
+      );
+      const res = await azure.getPrFiles(46);
+      expect(res).toHaveLength(1);
+      expect(res).toEqual(['index.js']);
+    });
+    it('multiple changes', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
+            getPullRequestIterationChanges: jest
+              .fn()
+              .mockResolvedValueOnce({
+                changeEntries: [{ item: { path: '/index.js' } }],
+              })
+              .mockResolvedValueOnce({
+                changeEntries: [{ item: { path: '/package.json' } }],
+              }),
+          } as any)
+      );
+      const res = await azure.getPrFiles(46);
+      expect(res).toHaveLength(2);
+      expect(res).toEqual(['index.js', 'package.json']);
+    });
+    it('deduplicate changes', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
+            getPullRequestIterationChanges: jest.fn().mockResolvedValue({
+              changeEntries: [{ item: { path: '/index.js' } }],
+            }),
+          } as any)
+      );
+      const res = await azure.getPrFiles(46);
+      expect(res).toHaveLength(1);
+      expect(res).toEqual(['index.js']);
+    });
+  });
+
   describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', async () => {
       const res = await azure.setBranchStatus({
         branchName: 'test',
         context: 'test',
         description: 'test',
-        state: 'test',
+        state: BranchStatus.yellow,
         url: 'test',
       });
       expect(res).toBeUndefined();
@@ -865,12 +942,6 @@ describe('platform/azure', () => {
     it('mergePr', async () => {
       const res = await azure.mergePr(0, undefined);
       expect(res).toBe(false);
-    });
-
-    // to become async?
-    it('getPrFiles', async () => {
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(0);
     });
   });
 

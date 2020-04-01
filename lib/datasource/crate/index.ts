@@ -12,10 +12,6 @@ export const id = 'crate';
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  if (!lookupName) {
-    return null;
-  }
-
   const cacheNamespace = 'datasource-crate';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(

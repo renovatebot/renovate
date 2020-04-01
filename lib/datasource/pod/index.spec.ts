@@ -2,7 +2,6 @@ import { api as _api } from '../../platform/github/gh-got-wrapper';
 import { getPkgReleases } from '.';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
-import { GetReleasesConfig } from '../common';
 
 const api = mocked(_api);
 
@@ -18,14 +17,6 @@ describe('datasource/cocoapods', () => {
     beforeEach(() => global.renovateCache.rmAll());
     it('returns null for invalid inputs', async () => {
       api.get.mockResolvedValueOnce(null);
-      expect(
-        await getPkgReleases({ registryUrls: [] } as GetReleasesConfig)
-      ).toBeNull();
-      expect(
-        await getPkgReleases({
-          lookupName: null,
-        })
-      ).toBeNull();
       expect(
         await getPkgReleases({
           lookupName: 'foobar',

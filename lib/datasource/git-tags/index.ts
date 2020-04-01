@@ -1,40 +1,24 @@
-import simpleGit from 'simple-git/promise';
+import { ReleaseResult, GetReleasesConfig } from '../common';
 import * as semver from '../../versioning/semver';
 import { logger } from '../../logger';
-import { ReleaseResult, GetReleasesConfig } from '../common';
+import * as gitRefs from '../git-refs';
 
 export const id = 'git-tags';
-
-const cacheNamespace = 'git-tags';
-const cacheMinutes = 10;
-
-// git will prompt for known hosts or passwords, unless we activate BatchMode
-process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
 export async function getPkgReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const git = simpleGit();
   try {
-    const cachedResult = await renovateCache.get<ReleaseResult>(
-      cacheNamespace,
-      lookupName
-    );
-    /* istanbul ignore next line */
-    if (cachedResult) return cachedResult;
-
     // fetch remote tags
-    const lsRemote = await git.listRemote([
-      '--sort=-v:refname',
-      '--tags',
-      lookupName,
-    ]);
-    // extract valid tags from git ls-remote which looks like 'commithash\trefs/tags/1.2.3
-    const tags = lsRemote
-      .replace(/^.+?refs\/tags\//gm, '')
-      .split('\n')
+    const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
+
+    const tags = rawRefs
+      .filter(ref => ref.type === 'tags')
+      .map(ref => ref.value)
       .filter(tag => semver.isVersion(tag));
+
     const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
+
     const result: ReleaseResult = {
       sourceUrl,
       releases: tags.map(tag => ({
@@ -43,10 +27,9 @@ export async function getPkgReleases({
       })),
     };
 
-    await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
     return result;
-  } catch (e) {
-    logger.debug(`Error looking up tags in ${lookupName}`);
+  } catch (err) {
+    logger.debug({ err }, `Git-Tags lookup error in ${lookupName}`);
   }
   return null;
 }

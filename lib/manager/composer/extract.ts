@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageFile, PackageDependency } from '../common';
 import { platform } from '../../platform';
-
+import { SkipReason } from '../../types';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
 
@@ -154,10 +154,10 @@ export async function extractPackageFile(
             dep.lookupName = lookupName;
           }
           if (!depName.includes('/')) {
-            dep.skipReason = 'unsupported';
+            dep.skipReason = SkipReason.Unsupported;
           }
           if (currentValue === '*') {
-            dep.skipReason = 'any-version';
+            dep.skipReason = SkipReason.AnyVersion;
           }
           if (lockParsed) {
             const lockedDep = lockParsed.packages.find(

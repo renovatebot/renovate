@@ -2,7 +2,7 @@ ARG IMAGE=latest
 
 # Base image
 #============
-FROM renovate/yarn:1.22.0@sha256:a7737a9182c1456ac089022a44bea22eb9d5069b3f8388cda06b473717a8dd41 AS base
+FROM renovate/yarn:1.22.4@sha256:6f559c0e98e931b0650e35418d385f13726244ec20b4dac6de3dfa808ad49319 AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -48,7 +48,8 @@ FROM base as final-base
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-ENV DOCKER_VERSION=19.03.5
+# renovate: datasource=docker depName=docker versioning=docker
+ENV DOCKER_VERSION=19.03.8
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
     && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
@@ -71,7 +72,9 @@ RUN apt-get update && \
 
 
 ## Gradle (needs java-jre, installed above)
-ENV GRADLE_VERSION 6.2
+
+# renovate: datasource=gradle-version depName=gradle versioning=maven
+ENV GRADLE_VERSION=6.3
 
 RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
     unzip -q -d /opt/ gradle-$GRADLE_VERSION-bin.zip && \
@@ -95,7 +98,7 @@ RUN apt-get update && \
 
 # Elixir
 
-ENV ELIXIR_VERSION 1.8.2
+ENV ELIXIR_VERSION=1.8.2
 
 RUN curl -L https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip -o Precompiled.zip && \
     mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
@@ -106,10 +109,14 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 # PHP Composer
 
-RUN apt-get update && apt-get install -y php-cli php-mbstring && \
+RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu bionic main" > /etc/apt/sources.list.d/ondrej-php.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C && \
+    apt-get update && \
+    apt-get -y install php7.4-cli php7.4-mbstring php7.4-curl && \
     rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_VERSION=1.9.3
+# renovate: datasource=github-releases depName=composer/composer
+ENV COMPOSER_VERSION=1.10.1
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
@@ -120,7 +127,7 @@ RUN chmod +x /usr/local/bin/composer
 RUN apt-get update && apt-get install -y bzr mercurial && \
     rm -rf /var/lib/apt/lists/*
 
-ENV GOLANG_VERSION 1.13.4
+ENV GOLANG_VERSION=1.13.4
 
 # Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
 # private repositories.
@@ -153,6 +160,8 @@ RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
 # CocoaPods
 RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt/lists/*
 RUN ruby --version
+
+# renovate: datasource=rubygems depName=cocoapods versioning=ruby
 ENV COCOAPODS_VERSION 1.9.0
 RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
@@ -184,7 +193,8 @@ RUN pip install --user pipenv
 
 # Poetry
 
-ENV POETRY_VERSION=1.0.0
+# renovate: datasource=github-releases depName=python-poetry/poetry
+ENV POETRY_VERSION=1.0.5
 
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${POETRY_VERSION}
 

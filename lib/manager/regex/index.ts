@@ -5,7 +5,9 @@ import { logger } from '../../logger';
 
 export const autoReplace = true;
 
-export const defaultConfig = {};
+export const defaultConfig = {
+  pinDigests: false,
+};
 
 export function extractPackageFile(
   content: string,
@@ -25,6 +27,7 @@ export function extractPackageFile(
         'depName',
         'lookupName',
         'currentValue',
+        'currentDigest',
         'datasource',
         'versioning',
       ];
@@ -40,7 +43,7 @@ export function extractPackageFile(
             );
             return null;
           }
-        } else {
+        } else if (groups[field]) {
           dep[field] = groups[field];
         }
       }
@@ -52,6 +55,8 @@ export function extractPackageFile(
     }
     depIndex += 1;
   } while (matchResult);
-  if (deps.length) return { deps, matchStrings: config.matchStrings };
+  if (deps.length) {
+    return { deps, matchStrings: config.matchStrings };
+  }
   return null;
 }

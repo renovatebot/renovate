@@ -42,9 +42,10 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   constructor(new_config: string) {
     super();
-    if (!new_config)
+    if (!new_config) {
       // eslint-disable-next-line no-param-reassign
       new_config = '^(?<major>\\d+)?$';
+    }
 
     // without at least one of {major, minor, patch} specified in the regex,
     // this versioner will not work properly

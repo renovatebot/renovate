@@ -6,7 +6,6 @@ import {
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 
-// istanbul ignore next
 export default create({
   options: {},
   handler: (options, next) => {

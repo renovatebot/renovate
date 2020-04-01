@@ -43,19 +43,15 @@ export async function getDigest(
   const assets: CdnjsAsset[] = res.body && res.body.assets;
   const asset = assets && assets.find(({ version }) => version === newValue);
   const hash = asset && asset.sri && asset.sri[assetName];
-  if (hash) result = hash;
+  if (hash) {
+    result = hash;
+  }
   return result;
 }
 
 export async function getPkgReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('CDNJS lookup failure: empty lookupName');
-    return null;
-  }
-
   const [library, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 
@@ -65,7 +61,9 @@ export async function getPkgReleases({
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) return cachedResult;
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   const url = depUrl(library);
 
@@ -87,8 +85,12 @@ export async function getPkgReleases({
 
     const result: ReleaseResult = { releases };
 
-    if (homepage) result.homepage = homepage;
-    if (repository && repository.url) result.sourceUrl = repository.url;
+    if (homepage) {
+      result.homepage = homepage;
+    }
+    if (repository && repository.url) {
+      result.sourceUrl = repository.url;
+    }
 
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
 

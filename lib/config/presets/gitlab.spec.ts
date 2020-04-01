@@ -1,10 +1,11 @@
 import * as gitlab from './gitlab';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
+import { GotResponse } from '../../platform';
 
 jest.mock('../../platform/gitlab/gl-got-wrapper');
 jest.mock('../../util/got');
 
-const glGot: any = api.get;
+const glGot: jest.Mock<Promise<Partial<GotResponse>>> = api.get as never;
 
 describe('config/presets/gitlab', () => {
   beforeEach(() => {
@@ -18,22 +19,25 @@ describe('config/presets/gitlab', () => {
       ).rejects.toThrow();
     });
     it('throws if no content', async () => {
-      glGot.mockImplementationOnce(() => ({
+      glGot.mockResolvedValueOnce({
         body: {},
-      }));
+      });
       await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if fails to parse', async () => {
-      glGot.mockImplementationOnce(() => ({
+      glGot.mockResolvedValueOnce({
         body: {
           content: Buffer.from('not json').toString('base64'),
         },
-      }));
+      });
       await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
     });
     it('should return the preset', async () => {
       glGot.mockResolvedValueOnce({
         body: [
+          {
+            name: 'devel',
+          },
           {
             name: 'master',
             default: true,

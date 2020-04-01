@@ -13,6 +13,13 @@ function getCacheKey(depHost: string, repo: string): string {
   return `${depHost}:${repo}:${type}`;
 }
 
+type GitlabTag = {
+  name: string;
+  commit?: {
+    created_at?: string;
+  };
+};
+
 export async function getPkgReleases({
   registryUrls,
   lookupName: repo,
@@ -21,7 +28,7 @@ export async function getPkgReleases({
   const depHost = is.nonEmptyArray(registryUrls)
     ? registryUrls[0].replace(/\/$/, '')
     : 'https://gitlab.com';
-  let versions: string[];
+  let gitlabTags: GitlabTag[];
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(depHost, repo)
@@ -36,22 +43,19 @@ export async function getPkgReleases({
   try {
     // tag
     const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
-    type GlTag = {
-      name: string;
-    }[];
 
-    versions = (
-      await glGot<GlTag>(url, {
+    gitlabTags = (
+      await glGot<GitlabTag[]>(url, {
         paginate: true,
       })
-    ).body.map(o => o.name);
+    ).body;
   } catch (err) {
     // istanbul ignore next
     logger.debug({ repo, err }, 'Error retrieving from Gitlab');
   }
 
   // istanbul ignore if
-  if (!versions) {
+  if (!gitlabTags) {
     return null;
   }
 
@@ -59,9 +63,10 @@ export async function getPkgReleases({
     sourceUrl: `${depHost}/${repo}`,
     releases: null,
   };
-  dependency.releases = versions.map(version => ({
-    version,
-    gitRef: version,
+  dependency.releases = gitlabTags.map(({ name, commit }) => ({
+    version: name,
+    gitRef: name,
+    releaseTimestamp: commit?.created_at,
   }));
 
   const cacheMinutes = 10;

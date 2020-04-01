@@ -39,6 +39,7 @@ interface StorageConfig {
   baseBranch?: string;
   url: string;
   gitPrivateKey?: string;
+  extraCloneOpts?: Git.Options;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -183,7 +184,13 @@ export class Storage {
       const cloneStart = process.hrtime();
       try {
         // clone only the default branch
-        await this._git.clone(config.url, '.', ['--depth=2']);
+        let opts = ['--depth=2'];
+        if (config.extraCloneOpts) {
+          opts = opts.concat(
+            Object.entries(config.extraCloneOpts).map(e => `${e[0]}=${e[1]}`)
+          );
+        }
+        await this._git.clone(config.url, '.', opts);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
         throw new Error(PLATFORM_FAILURE);
@@ -518,7 +525,9 @@ export class Storage {
       if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
         fileNames.unshift('-f');
       }
-      if (fileNames.length) await this._git.add(fileNames);
+      if (fileNames.length) {
+        await this._git.add(fileNames);
+      }
       if (deleted.length) {
         for (const f of deleted) {
           try {

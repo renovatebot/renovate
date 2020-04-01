@@ -20,7 +20,6 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
-  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,11 +30,7 @@ import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
 
 interface Config {
@@ -54,6 +49,11 @@ interface Config {
   repository: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 let config: Config = {} as any;
 
 const defaults: any = {
@@ -63,12 +63,16 @@ const defaults: any = {
 export function initPlatform({
   endpoint,
   token,
+  username,
+  password,
 }: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
-  if (!token) {
-    throw new Error('Init: You must configure an Azure DevOps token');
+  if (!token && !(username && password)) {
+    throw new Error(
+      'Init: You must configure an Azure DevOps token, or a username and password'
+    );
   }
   // TODO: Add a connection check that endpoint/token combination are valid
   const res = {
@@ -154,12 +158,13 @@ export async function initRepo({
     url: defaults.endpoint,
   });
   const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+    defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
   await config.storage.initRepo({
     ...config,
     localDir,
     url,
+    extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
@@ -393,7 +398,7 @@ export /* istanbul ignore next */ function getCommitMessages(): Promise<
 
 export async function getBranchStatusCheck(
   branchName: string,
-  context?: string
+  context: string
 ): Promise<BranchStatus> {
   logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
   const azureApiGit = await azureApi.gitApi();
@@ -402,9 +407,9 @@ export async function getBranchStatusCheck(
     azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   if (branch.aheadCount === 0) {
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
-  return BRANCH_STATUS_PENDING;
+  return BranchStatus.yellow;
 }
 
 export async function getBranchStatus(
@@ -414,14 +419,14 @@ export async function getBranchStatus(
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
   if (requiredStatusChecks.length) {
     // This is Unsupported
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
-  const branchStatusCheck = await getBranchStatusCheck(branchName);
+  const branchStatusCheck = await getBranchStatusCheck(branchName, null);
   return branchStatusCheck;
 }
 
@@ -643,33 +648,7 @@ export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
 
-/**
- *
- * @param {number} issueNo
- * @param {string[]} assignees
- */
-export async function addAssignees(
-  issueNo: number,
-  assignees: string[]
-): Promise<void> {
-  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
-  await ensureComment({
-    number: issueNo,
-    topic: 'Add Assignees',
-    content: assignees.map(a => `@<${a}>`).join(', '),
-  });
-}
-
-/**
- *
- * @param {number} prNo
- * @param {string[]} reviewers
- */
-export async function addReviewers(
-  prNo: number,
-  reviewers: string[]
-): Promise<void> {
-  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
+async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
@@ -689,7 +668,7 @@ export async function addReviewers(
   const ids: { id: string; name: string }[] = [];
   members.forEach(listMembers => {
     listMembers.forEach(m => {
-      reviewers.forEach(r => {
+      users.forEach(r => {
         if (
           r.toLowerCase() === m.identity.displayName.toLowerCase() ||
           r.toLowerCase() === m.identity.uniqueName.toLowerCase()
@@ -703,7 +682,7 @@ export async function addReviewers(
   });
 
   teams.forEach(t => {
-    reviewers.forEach(r => {
+    users.forEach(r => {
       if (r.toLowerCase() === t.name.toLowerCase()) {
         if (ids.filter(c => c.id === t.id).length === 0) {
           ids.push({ id: t.id, name: r });
@@ -711,6 +690,41 @@ export async function addReviewers(
       }
     });
   });
+
+  return ids;
+}
+
+/**
+ *
+ * @param {number} issueNo
+ * @param {string[]} assignees
+ */
+export async function addAssignees(
+  issueNo: number,
+  assignees: string[]
+): Promise<void> {
+  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
+  const ids = await getUserIds(assignees);
+  await ensureComment({
+    number: issueNo,
+    topic: 'Add Assignees',
+    content: ids.map(a => `@<${a.id}>`).join(', '),
+  });
+}
+
+/**
+ *
+ * @param {number} prNo
+ * @param {string[]} reviewers
+ */
+export async function addReviewers(
+  prNo: number,
+  reviewers: string[]
+): Promise<void> {
+  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
+  const azureApiGit = await azureApi.gitApi();
+
+  const ids = await getUserIds(reviewers);
 
   await Promise.all(
     ids.map(async obj => {
@@ -734,12 +748,32 @@ export /* istanbul ignore next */ async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-// to become async?
-export function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug(
-    `getPrFiles(prNo)(${prNo}) - Not supported by Azure DevOps (yet!)`
+export async function getPrFiles(prId: number): Promise<string[]> {
+  const azureApiGit = await azureApi.gitApi();
+  const prIterations = await azureApiGit.getPullRequestIterations(
+    config.repoId,
+    prId
   );
-  return Promise.resolve([]);
+  return [
+    ...new Set(
+      (
+        await Promise.all(
+          prIterations.map(
+            async iteration =>
+              (
+                await azureApiGit.getPullRequestIterationChanges(
+                  config.repoId,
+                  prId,
+                  iteration.id
+                )
+              ).changeEntries
+          )
+        )
+      )
+        .reduce((acc, val) => acc.concat(val), [])
+        .map(change => change.item.path.slice(1))
+    ),
+  ];
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

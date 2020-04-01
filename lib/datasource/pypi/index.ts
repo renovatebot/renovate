@@ -35,18 +35,20 @@ async function getDependency(
   hostUrl: string,
   compatibility: Record<string, string>
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   try {
+    const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
     const dependency: ReleaseResult = { releases: null };
+    logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await got(url.parse(lookupUrl), {
       json: true,
       hostType: id,
     });
     const dep = rep && rep.body;
     if (!dep) {
-      logger.debug({ dependency: packageName }, 'pip package not found');
+      logger.trace({ dependency: packageName }, 'pip package not found');
       return null;
     }
+    logger.trace({ lookupUrl }, 'Got pypi api result');
     if (
       !(dep.info && normalizeName(dep.info.name) === normalizeName(packageName))
     ) {
@@ -126,7 +128,7 @@ async function getSimpleDependency(
     });
     const dep = response && response.body;
     if (!dep) {
-      logger.debug({ dependency: packageName }, 'pip package not found');
+      logger.trace({ dependency: packageName }, 'pip package not found');
       return null;
     }
     const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
@@ -169,17 +171,27 @@ export async function getPkgReleases({
   if (process.env.PIP_INDEX_URL) {
     hostUrls = [process.env.PIP_INDEX_URL];
   }
-  for (let hostUrl of hostUrls) {
+  let dep: ReleaseResult;
+  for (let index = 0; index < hostUrls.length && !dep; index += 1) {
+    let hostUrl = hostUrls[index];
     hostUrl += hostUrl.endsWith('/') ? '' : '/';
-    let dep: ReleaseResult;
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+      logger.trace(
+        { lookupName, hostUrl },
+        'Looking up pypi simple dependency'
+      );
       dep = await getSimpleDependency(lookupName, hostUrl);
     } else {
+      logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
       dep = await getDependency(lookupName, hostUrl, compatibility);
     }
     if (dep !== null) {
-      return dep;
+      logger.trace({ lookupName, hostUrl }, 'Found pypi result');
     }
   }
+  if (dep) {
+    return dep;
+  }
+  logger.debug({ lookupName, registryUrls }, 'No pypi result - returning null');
   return null;
 }
