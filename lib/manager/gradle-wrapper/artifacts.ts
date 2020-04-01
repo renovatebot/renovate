@@ -1,14 +1,13 @@
 import Git from 'simple-git/promise';
 import { resolve } from 'path';
+import * as fs from 'fs-extra';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { exec } from '../../util/exec';
+import { exec, ExecOptions } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
 import { VERSION_REGEX } from './search';
-
-const gradlewFilename =
-  process.platform === 'win32' ? 'gradlew.bat' : 'gradlew';
+import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(
   status: Git.StatusResult,
@@ -35,14 +34,28 @@ export async function updateArtifacts({
   try {
     const projectDir = resolve(packageFileName, './../../../');
     logger.debug(updatedDeps, 'gradle-wrapper.updateArtifacts()');
-    const gradlewPath = resolve(projectDir, `./${gradlewFilename}`);
+    const gradlewPath = resolve(
+      projectDir,
+      `./${gradleWrapperFileName(config)}`
+    );
     const version = VERSION_REGEX.exec(newPackageFileContent).groups.version;
-    const execStr = `${gradlewPath} wrapper --gradle-version ${version} --project-dir ${projectDir}`;
-    logger.debug(`Updating gradle wrapper: "${execStr}"`);
+    prepareGradleCommand(
+      gradleWrapperFileName(config),
+      projectDir,
+      await fs.stat(gradlewPath).catch(() => null),
+      null
+    );
+    const cmd = `${gradlewPath} wrapper --gradle-version ${version} --project-dir ${projectDir}`;
+    logger.debug(`Updating gradle wrapper: "${cmd}"`);
+    const execOptions: ExecOptions = {
+      docker: {
+        image: 'renovate/gradle',
+      },
+    };
     try {
-      await exec(execStr);
-    } catch (err) {
-      logger.debug(
+      await exec(cmd, execOptions);
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'
       );
