@@ -1,4 +1,3 @@
-import { getInstalledPath } from 'get-installed-path';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
 import * as _yarnHelper from '../../../manager/npm/post-update/yarn';
@@ -10,9 +9,6 @@ import { BinarySource } from '../../../util/exec/common';
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
-jest.mock('get-installed-path');
-
-getInstalledPath.mockImplementation(() => null);
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
@@ -34,7 +30,6 @@ describe('generateLockFile', () => {
   });
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
-    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const config = {
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
@@ -47,8 +42,6 @@ describe('generateLockFile', () => {
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
-
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     process.env.YARN_MUTEX_FILE = '/tmp/yarn.mutext';
     const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
@@ -60,7 +53,6 @@ describe('generateLockFile', () => {
   it('detects yarnIntegrity', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const config = {
       upgrades: [{ yarnIntegrity: true }],
@@ -72,7 +64,6 @@ describe('generateLockFile', () => {
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     const execSnapshots = mockExecAll(exec, {
       stdout: '',
       stderr: 'some-error',
@@ -86,55 +77,29 @@ describe('generateLockFile', () => {
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
-  it('finds yarn embedded in renovate', async () => {
-    const execSnapshots = mockExecAll(exec);
-    getInstalledPath.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
-    getInstalledPath.mockImplementationOnce(() => '/node_modules/renovate');
-    getInstalledPath.mockImplementationOnce(
-      () => '/node_modules/renovate/node_modules/yarn'
-    );
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const res = await yarnHelper.generateLockFile('some-dir');
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-  });
   it('finds yarn globally', async () => {
     const execSnapshots = mockExecAll(exec);
-    getInstalledPath.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
-    getInstalledPath.mockImplementationOnce(() => '/node_modules/renovate');
-    getInstalledPath.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
-    getInstalledPath.mockImplementationOnce(() => '/node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await yarnHelper.generateLockFile('some-dir');
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
-  it('uses fallback yarn', async () => {
+  it('uses docker yarn', async () => {
     const execSnapshots = mockExecAll(exec);
-    getInstalledPath.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
-    getInstalledPath.mockImplementationOnce(() => '/node_modules/renovate');
-    getInstalledPath.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
-    getInstalledPath.mockImplementationOnce(() => {
-      throw new Error('not found');
-    });
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const res = await yarnHelper.generateLockFile('some-dir', undefined, {
-      binarySource: BinarySource.Global,
-    });
+
+    const res = await yarnHelper.generateLockFile(
+      'some-dir',
+      {},
+      {
+        binarySource: BinarySource.Docker,
+        cacheDir: 'some-cache-dir',
+        dockerMapDotfiles: true,
+      }
+    );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });
