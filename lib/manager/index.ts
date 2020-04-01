@@ -21,29 +21,9 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
-import { loadModules } from '../util/modules';
-import { logger } from '../logger';
+import managers from './api.generated';
 
-// istanbul ignore next
-function validateManager(manager): boolean {
-  if (!manager.defaultConfig) {
-    logger.fatal(`manager is missing defaultConfig`);
-    return false;
-  }
-  if (!manager.updateDependency && !manager.autoReplace) {
-    logger.fatal(`manager is missing updateDependency`);
-    return false;
-  }
-  if (!manager.extractPackageFile && !manager.extractAllPackageFiles) {
-    logger.fatal(
-      `manager must support extractPackageFile or extractAllPackageFiles`
-    );
-  }
-  return true;
-}
-
-const managers = loadModules<ManagerApi>(__dirname, validateManager);
-const managerList = Object.keys(managers);
+const managerList = Array.from(managers.keys());
 
 const languageList = [
   LANGUAGE_DART,
@@ -59,21 +39,27 @@ const languageList = [
   LANGUAGE_RUST,
 ];
 
-export const get = <T extends keyof ManagerApi>(
+export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
-): ManagerApi[T] => managers[manager][name];
+): ManagerApi[T] | null {
+  return managers.get(manager)?.[name];
+}
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
-export const getManagers = (): Record<string, ManagerApi> => managers;
+export const getManagers = (): Map<string, ManagerApi> => managers;
 
 export function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
   files: string[]
 ): Result<PackageFile[] | null> {
-  return managers[manager] && managers[manager].extractAllPackageFiles
-    ? managers[manager].extractAllPackageFiles(config, files)
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  return m.extractAllPackageFiles
+    ? m.extractAllPackageFiles(config, files)
     : null;
 }
 
@@ -81,9 +67,11 @@ export function getPackageUpdates(
   manager: string,
   config: PackageUpdateConfig
 ): Result<PackageUpdateResult[]> | null {
-  return managers[manager] && managers[manager].getPackageUpdates
-    ? managers[manager].getPackageUpdates(config)
-    : null;
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  return m.getPackageUpdates ? m.getPackageUpdates(config) : null;
 }
 
 export function extractPackageFile(
@@ -92,16 +80,24 @@ export function extractPackageFile(
   fileName?: string,
   config?: ExtractConfig
 ): Result<PackageFile | null> {
-  return managers[manager] && managers[manager].extractPackageFile
-    ? managers[manager].extractPackageFile(content, fileName, config)
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  return m.extractPackageFile
+    ? m.extractPackageFile(content, fileName, config)
     : null;
 }
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const { manager, rangeStrategy } = config;
-  if (managers[manager].getRangeStrategy) {
+  if (!managers.has(manager)) {
+    return null;
+  }
+  const m = managers.get(manager);
+  if (m.getRangeStrategy) {
     // Use manager's own function if it exists
-    return managers[manager].getRangeStrategy(config);
+    return m.getRangeStrategy(config);
   }
   if (rangeStrategy === 'auto') {
     // default to 'replace' for auto
