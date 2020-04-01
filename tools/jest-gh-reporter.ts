@@ -40,7 +40,7 @@ function getPos(
 > {
   const pos = lineRe.exec(msg);
   if (!pos || !pos.groups) {
-    return { start_line: 1, end_line: 1 };
+    return { start_line: 0, end_line: 0 };
   }
 
   const line = parseInt(pos.groups.line, 10);
