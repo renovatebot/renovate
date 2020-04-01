@@ -35,7 +35,10 @@ export class Http {
     url: string | URL,
     options: InternalHttpOptions = {}
   ): Promise<HttpResponse<T> | null> {
-    const resolvedUrl = URL.resolve(options.baseUrl || '', url.toString());
+    let resolvedUrl = url.toString();
+    if (options.baseUrl) {
+      resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
+    }
     const combinedOptions = {
       ...this.options,
       hostType: this.hostType,
