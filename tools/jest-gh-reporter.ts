@@ -78,6 +78,8 @@ class GitHubReporter extends BaseReporter {
 
       const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = [];
 
+      info(`Failed tests: ${testResult.numFailedTests}`);
+
       for (const suite of testResult.testResults) {
         const path = getPath(suite);
         for (const test of suite.testResults.filter(
@@ -139,6 +141,8 @@ class GitHubReporter extends BaseReporter {
 
     info(`repo: ${owner} / ${repo}`);
     info(`sha: ${ref}`);
+    info(`success: ${success}`);
+
     const output: Octokit.ChecksUpdateParamsOutput = {
       summary: 'Jest test results',
     };
@@ -160,8 +164,8 @@ class GitHubReporter extends BaseReporter {
         ...checkArgs,
         check_run_id: check.id,
         completed_at: new Date().toISOString(),
-        conclusion: success ? 'success' : 'failure',
-        status: 'completed',
+        conclusion:
+          success && check.conclusion === 'success' ? 'success' : 'failure',
         output,
       });
 
@@ -175,7 +179,6 @@ class GitHubReporter extends BaseReporter {
       head_sha: ref,
       completed_at: new Date().toISOString(),
       conclusion: success ? 'success' : 'failure',
-      status: 'completed',
       output: { ...output, title: 'Jest' },
     });
   }
