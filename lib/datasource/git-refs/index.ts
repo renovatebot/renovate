@@ -10,11 +10,6 @@ const cacheMinutes = 10;
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
-const refMatchPattern = /(?<type>\w+)\/(?<value>.*)/;
-const lsRemoteReplace = /^.+?refs\//gm;
-const lnReplacePattern1 = /\.git$/;
-const lnReplacePattern2 = /\/$/;
-
 export interface RawRefs {
   type: string;
   value: string;
@@ -51,11 +46,11 @@ export async function getRawRefs({
 
     const refs = lsRemote
       .trim()
-      .replace(lsRemoteReplace, '')
+      .replace(/^.+?refs\//gm, '')
       .split('\n');
 
     const result = refs.map(ref => {
-      const match = refMatchPattern.exec(ref);
+      const match = /(?<type>\w+)\/(?<value>.*)/.exec(ref);
       return {
         type: match.groups.type,
         value: match.groups.value,
@@ -83,9 +78,7 @@ export async function getPkgReleases({
 
     const uniqueRefs = [...new Set(refs)];
 
-    const sourceUrl = lookupName
-      .replace(lnReplacePattern1, '')
-      .replace(lnReplacePattern2, '');
+    const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
 
     const result: ReleaseResult = {
       sourceUrl,
