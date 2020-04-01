@@ -12,6 +12,9 @@ export async function getPkgReleases({
     // fetch remote tags
     const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
 
+    if (rawRefs === null) {
+      return null;
+    }
     const tags = rawRefs
       .filter(ref => ref.type === 'tags')
       .map(ref => ref.value)
