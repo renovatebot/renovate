@@ -20,7 +20,7 @@ module.exports = {
       statements: 100,
     },
   },
-  reporter: ci ? ['default', 'tools/dist/jest-gh-reporter.js'] : ['default'],
+  reporters: ci ? ['default', 'tools/dist/jest-gh-reporter.js'] : ['default'],
   setupFilesAfterEnv: ['<rootDir>/test/globals.ts'],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   transform: {
