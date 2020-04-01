@@ -7,6 +7,9 @@ import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
 import { VERSION_REGEX } from './search';
 
+const gradlewFilename =
+  process.platform === 'win32' ? 'gradlew.bat' : 'gradlew';
+
 async function addIfUpdated(
   status: Git.StatusResult,
   filePath: string
@@ -32,18 +35,25 @@ export async function updateArtifacts({
   try {
     const projectDir = resolve(packageFileName, './../../../');
     logger.debug(updatedDeps, 'gradle-wrapper.updateArtifacts()');
-    const gradlew = resolve(projectDir, './gradlew');
+    const gradlewPath = resolve(projectDir, `./${gradlewFilename}`);
     const version = VERSION_REGEX.exec(newPackageFileContent).groups.version;
-    const execStr = `${gradlew} wrapper --gradle-version ${version} --project-dir ${projectDir}`;
+    const execStr = `${gradlewPath} wrapper --gradle-version ${version} --project-dir ${projectDir}`;
     logger.debug(`Updating gradle wrapper: "${execStr}"`);
-    await exec(execStr);
+    try {
+      await exec(execStr);
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Error executing gradle wrapper update command. It can be not a critical one though.'
+      );
+    }
     const status = await platform.getRepoStatus();
     const updateArtifactsResult = (
       await Promise.all(
         [
           resolve(projectDir, './gradle/wrapper/gradle-wrapper.properties'),
           resolve(projectDir, './gradle/wrapper/gradle-wrapper.jar'),
-          gradlew,
+          resolve(projectDir, './gradlew'),
           resolve(projectDir, './gradlew.bat'),
         ].map(async filePath => addIfUpdated(status, filePath))
       )

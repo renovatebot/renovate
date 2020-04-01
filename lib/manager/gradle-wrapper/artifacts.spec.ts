@@ -139,7 +139,7 @@ describe('manager/gradle-wrapper/update', () => {
 
         // 5.6.4 => 5.6.4 (updates execs)
         // 6.3 => (5.6.4) (downgrades execs)
-        // look like a bug in Gradle
+        // looks like a bug in Gradle
         ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
           expect(
             readFileSync(
@@ -158,14 +158,14 @@ describe('manager/gradle-wrapper/update', () => {
       }
     });
   });
-  describe('updateArtifacts - error handling', () => {
+  describe('updateArtifacts - error handling - getRepoStatus', () => {
     beforeEach(() => {
       jest.resetModules();
       jest.resetAllMocks();
       jest.clearAllMocks();
     });
 
-    ifSystemSupportsGradle(6).it('error handling', async () => {
+    ifSystemSupportsGradle(6).it('error handling - getRepoStatus', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
         platform.getRepoStatus.mockImplementation(() => {
@@ -208,5 +208,54 @@ describe('manager/gradle-wrapper/update', () => {
         await resetTestFiles();
       }
     });
+  });
+
+  describe('updateArtifacts - error handling - command execution', () => {
+    beforeEach(() => {
+      jest.resetModules();
+      jest.resetAllMocks();
+      jest.clearAllMocks();
+    });
+
+    ifSystemSupportsGradle(6).it(
+      'error handling - command execution',
+      async () => {
+        try {
+          jest.setTimeout(5 * 60 * 1000);
+
+          const res = await dcUpdate.updateArtifacts({
+            packageFileName: resolve(__dirname, 'some/wrong/file/path'),
+            updatedDeps: [],
+            newPackageFileContent: readFileSync(
+              resolve(
+                __dirname,
+                `./__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties`
+              ),
+              'utf8'
+            ),
+            config: null,
+          });
+
+          expect(res).toEqual(null);
+
+          // 5.6.4 => 5.6.4 (updates execs) -  unexpected behavior (looks like a bug in Gradle)
+          ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+            expect(
+              readFileSync(
+                resolve(__dirname, `./__fixtures__/testFiles/${file}`),
+                'utf8'
+              )
+            ).toEqual(
+              readFileSync(
+                resolve(__dirname, `./__fixtures__/testFiles-copy/${file}`),
+                'utf8'
+              )
+            );
+          });
+        } finally {
+          await resetTestFiles();
+        }
+      }
+    );
   });
 });
