@@ -120,7 +120,6 @@ class GitHubReporter extends BaseReporter {
     const ref = getEnv('GITHUB_SHA');
     const [owner, repo] = getEnv('GITHUB_REPOSITORY').split('/');
     const checkArgs = {
-      name,
       owner,
       repo,
     };
@@ -134,6 +133,7 @@ class GitHubReporter extends BaseReporter {
 
     const { data } = await this._api.checks.listForRef({
       ...checkArgs,
+      check_name: name,
       ref,
       filter: 'latest',
     });
@@ -156,6 +156,7 @@ class GitHubReporter extends BaseReporter {
     info(`Create check run`);
     await this._api.checks.create({
       ...checkArgs,
+      name,
       head_sha: ref,
       completed_at: new Date().toISOString(),
       conclusion: status ? 'success' : 'failure',
