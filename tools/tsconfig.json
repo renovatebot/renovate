@@ -1,12 +1,15 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "../tmp/tools",
-    "allowJs": false,
-    "checkJs": false,
-    "isolatedModules": false,
-    "sourceMap": false,
+    "strict": true,
+    "target": "es2018",
+    "module": "commonjs",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": false,
+    "lib": ["es2018"],
+    "types": ["node"],
     "incremental": true
   }
 }
