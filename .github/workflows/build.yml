@@ -35,8 +35,8 @@ jobs:
     needs: [cleanup]
     runs-on: ${{ matrix.os }}
 
-    # tests shouldn't need more than 15 min
-    timeout-minutes: 15
+    # tests shouldn't need more time
+    timeout-minutes: 30
 
     strategy:
       matrix:
@@ -163,7 +163,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # lint shouldn't need more than 10 min
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
@@ -260,7 +260,7 @@ jobs:
     needs: [lint, test, test-docker]
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
