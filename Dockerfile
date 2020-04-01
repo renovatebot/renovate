@@ -201,6 +201,12 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-
 ENV PATH="${HOME}/.poetry/bin:$PATH"
 RUN poetry config virtualenvs.in-project false
 
+# pnpm
+
+# renovate: datasource=npm depName=pnpm
+ENV PNPM_VERSION=4.12.0
+RUN curl -sSL https://raw.githubusercontent.com/pnpm/self-installer/master/install.js | node
+
 # Renovate
 #=========
 FROM $IMAGE as final
