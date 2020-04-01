@@ -77,8 +77,7 @@ class GitHubReporter extends BaseReporter {
       }
 
       const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = [];
-
-      info(`Failed tests: ${testResult.numFailedTests}`);
+      const success = testResult.numFailedTests === 0;
 
       for (const suite of testResult.testResults) {
         const path = getPath(suite);
@@ -86,10 +85,7 @@ class GitHubReporter extends BaseReporter {
           t => !ignoreStates.has(t.status)
         )) {
           if (annotations.length === MAX_ANNOTATIONS) {
-            await this._createOrUpdate(
-              testResult.numFailedTests !== 0,
-              annotations
-            );
+            await this._createOrUpdate(success, annotations);
             annotations.length = 0;
             break;
           }
@@ -109,10 +105,7 @@ class GitHubReporter extends BaseReporter {
       }
 
       if (annotations.length) {
-        await this._createOrUpdate(
-          testResult.numFailedTests !== 0,
-          annotations
-        );
+        await this._createOrUpdate(success, annotations);
       }
     } catch (e) {
       error(`Unexpected error: ${e}`);
@@ -141,7 +134,6 @@ class GitHubReporter extends BaseReporter {
 
     info(`repo: ${owner} / ${repo}`);
     info(`sha: ${ref}`);
-    info(`success: ${success}`);
 
     const output: Octokit.ChecksUpdateParamsOutput = {
       summary: 'Jest test results',
