@@ -95,7 +95,6 @@ describe('generateLockFile', () => {
       {
         binarySource: BinarySource.Docker,
         cacheDir: 'some-cache-dir',
-        dockerMapDotfiles: true,
       }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
