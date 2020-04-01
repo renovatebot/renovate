@@ -89,7 +89,8 @@ class GitHubReporter extends BaseReporter {
             break;
           }
           const message =
-            stripAnsi(test.failureMessages?.join('\n ')) ?? test.status;
+            stripAnsi(test.failureMessages?.join('\n ')) ||
+            `test status: ${test.status}`;
           const pos = getPos(message);
 
           annotations.push({
@@ -162,7 +163,7 @@ class GitHubReporter extends BaseReporter {
       completed_at: new Date().toISOString(),
       conclusion: status ? 'success' : 'failure',
       status: 'completed',
-      output: { ...output, title: 'Jest test results' },
+      output: { ...output, title: 'Jest' },
     });
   }
 }
