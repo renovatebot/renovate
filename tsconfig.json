@@ -24,6 +24,6 @@
     "bin",
     "coverage",
     "config.js",
-    "tools/dist"
+    "tmp"
   ]
 }
