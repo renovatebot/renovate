@@ -1,18 +1,16 @@
-import got from 'got';
-import gotUtil from '../got';
+import URL from 'url';
+import got from '../got';
 
-interface GotOptions extends got.GotOptions<string | null> {
-  json?: boolean;
-  useCache?: boolean;
-  hostType: string;
-}
-
-export interface HttpOptions extends got.GotOptions<string | null> {
-  useCache?: boolean;
+export interface HttpOptions {
+  baseUrl?: string;
+  body?: any;
+  headers?: {
+    'accept-encoding'?: string;
+  };
 }
 
 export interface HttpResponse<T = unknown> {
-  body: T;
+  body: string;
 }
 
 export class Http {
@@ -25,19 +23,20 @@ export class Http {
     this.options = options;
   }
 
-  private combineOptions(options: HttpOptions): GotOptions {
-    return {
-      ...this.options,
-      ...options,
-      hostType: this.hostType,
-    };
-  }
-
   async get<T = unknown>(
     url: string | URL,
-    options?: HttpOptions
-  ): Promise<HttpResponse<T>> {
-    const res = await gotUtil(url, this.combineOptions(options));
-    return res;
+    options: HttpOptions = {}
+  ): Promise<HttpResponse<T> | null> {
+    const resolvedUrl = URL.resolve(options.baseUrl || '', url.toString());
+    const combinedOptions = {
+      ...this.options,
+      hostType: this.hostType,
+      ...options,
+    };
+    const res = await got(resolvedUrl, combinedOptions);
+    if (!res) {
+      return null;
+    }
+    return { body: res.body };
   }
 }

@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
@@ -8,6 +8,8 @@ import {
 } from '../common';
 
 export const id = 'crate';
+
+const http = new Http(id);
 
 export async function getPkgReleases({
   lookupName,
@@ -41,9 +43,7 @@ export async function getPkgReleases({
     'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
   const crateUrl = baseUrl + path;
   try {
-    let res: any = await got(crateUrl, {
-      hostType: id,
-    });
+    let res: any = await http.get(crateUrl);
     if (!res || !res.body) {
       logger.warn(
         { dependency: lookupName },
