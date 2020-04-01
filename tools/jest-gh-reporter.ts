@@ -56,8 +56,8 @@ class GitHubReporter extends BaseReporter {
 
       for (const suite of testResult.testResults) {
         const path = getPath(suite);
-        for (const test of suite.testResults.filter(t =>
-          ignoreStates.has(t.status)
+        for (const test of suite.testResults.filter(
+          t => !ignoreStates.has(t.status)
         )) {
           if (annotations.length === MAX_ANNOTATIONS) {
             await this._createOrUpdate(testResult.success, annotations);
@@ -66,7 +66,7 @@ class GitHubReporter extends BaseReporter {
           }
           annotations.push({
             title: test.fullName.substr(0, 255),
-            message: test.failureMessages?.join('\n ') ?? '',
+            message: test.failureMessages?.join('\n ') ?? test.status,
             path,
             annotation_level: getLevel(test),
             start_line: test.location?.line ?? 0,
@@ -74,6 +74,10 @@ class GitHubReporter extends BaseReporter {
             end_line: test.location?.line ?? 0,
           });
         }
+      }
+
+      if (annotations.length) {
+        await this._createOrUpdate(testResult.success, annotations);
       }
     } catch (e) {
       error(`Unexpected error: ${e}`);
@@ -102,22 +106,18 @@ class GitHubReporter extends BaseReporter {
       output.annotations = annotations;
     }
 
-    console.log('\nannotations:');
-    console.dir(annotations);
-
-    const checks = await this._api.checks.listForRef({
+    const { data } = await this._api.checks.listForRef({
       ...checkArgs,
       ref,
       filter: 'latest',
     });
-    if (checks.data.check_runs.length) {
-      const [run] = checks.data.check_runs;
-      info(`Update check run: ${run.id}`);
-      console.dir(run);
+    const check = data.check_runs.find(c => c.name === name);
+    if (check) {
+      info(`Update check run: ${check.name} (${check.id}) ${check.html_url}`);
 
       await this._api.checks.update({
         ...checkArgs,
-        check_run_id: run.id,
+        check_run_id: check.id,
         completed_at: new Date().toISOString(),
         conclusion: status ? 'success' : 'failure',
         status: 'completed',
