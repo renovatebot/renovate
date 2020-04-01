@@ -3,7 +3,6 @@ import got from '../got';
 
 export interface HttpOptions {
   baseUrl?: string;
-  body?: any;
   headers?: {
     'accept-encoding'?: string;
   };
