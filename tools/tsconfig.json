@@ -2,10 +2,11 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "./dist",
+    "outDir": "../tmp/tools",
     "allowJs": false,
     "checkJs": false,
     "isolatedModules": false,
-    "sourceMap": false
+    "sourceMap": false,
+    "incremental": true
   }
 }

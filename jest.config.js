@@ -10,7 +10,7 @@ module.exports = {
     '!lib/**/{__fixtures__,__mocks__,__testutil__}/**/*.{js,ts}',
   ],
   coverageReporters: ci
-    ? ['html', 'json', 'text-summary', 'tools/dist/jest-gh-reporter.js']
+    ? ['html', 'json', 'text-summary']
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
@@ -20,7 +20,7 @@ module.exports = {
       statements: 100,
     },
   },
-  reporters: ci ? ['default', 'tools/dist/jest-gh-reporter.js'] : ['default'],
+  reporters: ['default', './tmp/tools/jest-gh-reporter.js'],
   setupFilesAfterEnv: ['<rootDir>/test/globals.ts'],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   transform: {
