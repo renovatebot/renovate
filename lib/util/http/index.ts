@@ -15,7 +15,7 @@ export interface HttpOptions {
 }
 
 export interface HttpPostOptions extends HttpOptions {
-  body: any;
+  body: unknown;
 }
 
 interface InternalHttpOptions extends HttpOptions {
