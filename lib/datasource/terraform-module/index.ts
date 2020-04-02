@@ -74,7 +74,7 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformRelease = (await http.getJson(pkgUrl)).body;
+    const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
     if (returnedName !== repository) {
       logger.warn({ pkgUrl }, 'Terraform registry result mismatch');

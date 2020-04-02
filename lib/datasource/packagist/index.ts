@@ -107,7 +107,7 @@ async function getPackagistFile(
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
   if (opts.auth || (opts.headers && opts.headers.authorization)) {
-    return (await http.getJson(regUrl + '/' + fileName, opts)).body;
+    return (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts)).body;
   }
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
@@ -117,7 +117,7 @@ async function getPackagistFile(
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
   }
-  const res = (await http.getJson(regUrl + '/' + fileName, opts)).body;
+  const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts)).body;
   const cacheMinutes = 1440; // 1 day
   await renovateCache.set(
     cacheNamespace,
@@ -223,7 +223,8 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  const res = (await http.getJson(pkgUrl)).body.packages[name];
+  // TODO: fix types
+  const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
     dep.name = name;
@@ -271,7 +272,8 @@ async function packageLookup(
         .replace('%hash%', providerPackages[name])
     );
     const opts = getHostOpts(regUrl);
-    const versions = (await http.getJson(pkgUrl, opts)).body.packages[name];
+    // TODO: fix types
+    const versions = (await http.getJson<any>(pkgUrl, opts)).body.packages[name];
     const dep = extractDepReleases(versions);
     dep.name = name;
     logger.trace({ dep }, 'dep');

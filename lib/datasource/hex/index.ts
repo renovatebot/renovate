@@ -26,7 +26,7 @@ export async function getPkgReleases({
   const hexPackageName = lookupName.split(':')[0];
   const hexUrl = `https://hex.pm/api/packages/${hexPackageName}`;
   try {
-    const response = await http.getJson(hexUrl);
+    const response = await http.getJson<HexRelease>(hexUrl);
 
     const hexRelease: HexRelease = response.body;
 

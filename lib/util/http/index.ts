@@ -23,7 +23,7 @@ interface InternalHttpOptions extends HttpOptions {
   method?: 'get' | 'post';
 }
 
-export interface HttpResponse<T = unknown> {
+export interface HttpResponse {
   body: string;
   headers: any;
 }
@@ -42,10 +42,10 @@ export class Http {
     this.options = options;
   }
 
-  private async request<T = unknown>(
+  private async request(
     url: string | URL,
     options?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
+  ): Promise<HttpResponse | null> {
     let resolvedUrl = url.toString();
     if (options?.baseUrl) {
       resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
@@ -81,10 +81,10 @@ export class Http {
     return { body: res.body, headers: res.headers };
   }
 
-  get<T = unknown>(
+  get(
     url: string,
     options: HttpOptions = {}
-  ): Promise<HttpResponse<T> | null> {
+  ): Promise<HttpResponse | null> {
     return this.request(url, options);
   }
 

@@ -37,7 +37,7 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformProvider = (await http.getJson(pkgUrl)).body;
+    const res = (await http.getJson<TerraformProvider>(pkgUrl)).body;
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       name: repository,

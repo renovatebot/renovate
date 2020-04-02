@@ -1,4 +1,4 @@
-import { Http } from '../../util/http';
+import { Http, HttpJsonResponse } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
@@ -24,7 +24,7 @@ export async function getPkgReleases({
     body: DartResult;
   } = null;
   try {
-    raw = await http.getJson(pkgUrl);
+    raw = await http.getJson<DartResult>(pkgUrl);
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.debug({ lookupName }, `Dependency lookup failure: not found`);
