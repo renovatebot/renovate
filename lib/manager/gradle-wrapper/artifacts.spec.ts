@@ -7,19 +7,19 @@ import { mocked } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 
 const platform = mocked(_platform);
+const config = {
+  localDir: resolve(__dirname, './__fixtures__/testFiles'),
+};
 
 jest.mock('../../util/got');
 jest.mock('../../platform');
 
 async function resetTestFiles() {
   await dcUpdate.updateArtifacts({
-    packageFileName: resolve(
-      __dirname,
-      './__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties'
-    ),
+    packageFileName: 'gradle-wrapper.properties',
     updatedDeps: [],
     newPackageFileContent: `https://services.gradle.org/distributions/gradle-5.6.4-bin.zip`,
-    config: null,
+    config,
   });
 }
 
@@ -46,10 +46,7 @@ describe('manager/gradle-wrapper/update', () => {
         } as Git.StatusResult);
 
         const res = await dcUpdate.updateArtifacts({
-          packageFileName: resolve(
-            __dirname,
-            './__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties'
-          ),
+          packageFileName: 'gradle-wrapper.properties',
           updatedDeps: [],
           newPackageFileContent: readFileSync(
             resolve(
@@ -58,7 +55,7 @@ describe('manager/gradle-wrapper/update', () => {
             ),
             'utf8'
           ),
-          config: null,
+          config,
         });
 
         expect(res).toEqual(
@@ -120,10 +117,7 @@ describe('manager/gradle-wrapper/update', () => {
         } as Git.StatusResult);
 
         const res = await dcUpdate.updateArtifacts({
-          packageFileName: resolve(
-            __dirname,
-            './__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties'
-          ),
+          packageFileName: 'gradle-wrapper.properties',
           updatedDeps: [],
           newPackageFileContent: readFileSync(
             resolve(
@@ -132,7 +126,7 @@ describe('manager/gradle-wrapper/update', () => {
             ),
             'utf8'
           ),
-          config: null,
+          config,
         });
 
         expect(res).toEqual([]);
@@ -185,7 +179,7 @@ describe('manager/gradle-wrapper/update', () => {
             ),
             'utf8'
           ),
-          config: null,
+          config,
         });
 
         expect(res).toEqual(null);
@@ -224,7 +218,7 @@ describe('manager/gradle-wrapper/update', () => {
           jest.setTimeout(5 * 60 * 1000);
 
           const res = await dcUpdate.updateArtifacts({
-            packageFileName: resolve(__dirname, 'some/wrong/file/path'),
+            packageFileName: 'gradle-wrapper.properties',
             updatedDeps: [],
             newPackageFileContent: readFileSync(
               resolve(
@@ -233,7 +227,9 @@ describe('manager/gradle-wrapper/update', () => {
               ),
               'utf8'
             ),
-            config: null,
+            config: {
+              localDir: 'some/incorrect/path',
+            },
           });
 
           expect(res).toEqual(null);

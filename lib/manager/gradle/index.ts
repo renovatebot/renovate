@@ -34,8 +34,7 @@ const TIMEOUT_CODE = 143;
 export function gradleWrapperFileName(config: ExtractConfig): string {
   if (
     os.platform() === 'win32' &&
-    config != null &&
-    config.binarySource !== BinarySource.Docker
+    config?.binarySource !== BinarySource.Docker
   ) {
     return 'gradlew.bat';
   }

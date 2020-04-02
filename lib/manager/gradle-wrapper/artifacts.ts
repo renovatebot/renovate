@@ -32,14 +32,14 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const projectDir = resolve(packageFileName, './../../../');
+    const projectDir = config.localDir;
     logger.debug(updatedDeps, 'gradle-wrapper.updateArtifacts()');
     const gradlewPath = resolve(
       projectDir,
       `./${gradleWrapperFileName(config)}`
     );
     const version = VERSION_REGEX.exec(newPackageFileContent).groups.version;
-    prepareGradleCommand(
+    await prepareGradleCommand(
       gradleWrapperFileName(config),
       projectDir,
       await fs.stat(gradlewPath).catch(() => null),
