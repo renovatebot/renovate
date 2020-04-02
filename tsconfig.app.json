@@ -16,6 +16,7 @@
     "**/__fixtures__/**",
     "**/__testutil__/**",
     "**/*.spec.ts",
-    "./test"
+    "./test",
+    "./tools"
   ]
 }

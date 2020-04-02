@@ -25,6 +25,7 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3 /usr/bin/python
 COPY package.json .
 COPY yarn.lock .
 COPY tools tools
+COPY patches patches
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
@@ -162,7 +163,7 @@ RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt
 RUN ruby --version
 
 # renovate: datasource=rubygems depName=cocoapods versioning=ruby
-ENV COCOAPODS_VERSION 1.9.0
+ENV COCOAPODS_VERSION 1.9.1
 RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
 USER ubuntu
