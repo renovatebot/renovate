@@ -44,10 +44,10 @@ export class Http {
 
   private async request<T = unknown>(
     url: string | URL,
-    options: InternalHttpOptions = {}
+    options?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
     let resolvedUrl = url.toString();
-    if (options.baseUrl) {
+    if (options?.baseUrl) {
       resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
     }
     // TODO: deep merge in order to merge headers
