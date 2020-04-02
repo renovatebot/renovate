@@ -48,6 +48,7 @@ export async function updateArtifacts({
     const cmd = `${gradlewPath} wrapper --gradle-version ${version} --project-dir ${projectDir}`;
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
+      cwd: config.localDir,
       docker: {
         image: 'renovate/gradle',
       },
