@@ -139,7 +139,12 @@ async function getAuthHeaders(
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
-    const authResponse = (await http.getJson<{ token?: string, access_token?: string }>(authUrl, opts)).body;
+    const authResponse = (
+      await http.getJson<{ token?: string; access_token?: string }>(
+        authUrl,
+        opts
+      )
+    ).body;
 
     const token = authResponse.token || authResponse.access_token;
     // istanbul ignore if

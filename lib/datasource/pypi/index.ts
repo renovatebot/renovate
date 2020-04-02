@@ -41,7 +41,7 @@ async function getDependency(
     const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
     const dependency: ReleaseResult = { releases: null };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
-   // TODO: fix type
+    // TODO: fix type
     const rep = await http.getJson<any>(lookupUrl);
     const dep = rep && rep.body;
     if (!dep) {
