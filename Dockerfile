@@ -25,6 +25,7 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3 /usr/bin/python
 COPY package.json .
 COPY yarn.lock .
 COPY tools tools
+COPY patches patches
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
