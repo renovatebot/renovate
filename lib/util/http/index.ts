@@ -100,7 +100,7 @@ export class Http {
   async postJson<T = unknown>(
     url: string,
     options: HttpPostOptions
-  ): Promise<HttpJsonResponse> {
+  ): Promise<HttpJsonResponse<T>> {
     const res = await this.request(url, { ...options, method: 'post' });
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { ...res, body };
