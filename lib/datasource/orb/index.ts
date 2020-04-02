@@ -40,7 +40,7 @@ export async function getPkgReleases({
   };
   try {
     const res: OrbRelease = (
-      await http.postJson(url, {
+      await http.postJson<{ data: { orb: OrbRelease } }>(url, {
         body,
       })
     ).body.data.orb;
