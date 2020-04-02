@@ -82,14 +82,14 @@ export class Http {
   }
 
   get<T = unknown>(
-    url: string | URL,
+    url: string,
     options: HttpOptions = {}
   ): Promise<HttpResponse<T> | null> {
     return this.request(url, options);
   }
 
   async getJson<T = unknown>(
-    url: string | URL,
+    url: string,
     options: HttpOptions = {}
   ): Promise<HttpJsonResponse> {
     const res = await this.request(url, options);
@@ -98,7 +98,7 @@ export class Http {
   }
 
   async postJson<T = unknown>(
-    url: string | URL,
+    url: string,
     options: HttpPostOptions
   ): Promise<HttpJsonResponse> {
     const res = await this.request(url, { ...options, method: 'post' });
@@ -106,7 +106,7 @@ export class Http {
     return { ...res, body };
   }
 
-  stream(url: string | URL, options?: HttpOptions): NodeJS.ReadableStream {
+  stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
     const combinedOptions: any = {
       method: 'get',
       ...this.options,

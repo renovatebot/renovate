@@ -48,7 +48,7 @@ export async function downloadHttpProtocol(
 ): Promise<string | null> {
   let raw: { body: string };
   try {
-    raw = await http.get(pkgUrl);
+    raw = await http.get(pkgUrl.toString());
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
