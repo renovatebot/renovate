@@ -91,7 +91,7 @@ export class Http {
   async getJson<T = unknown>(
     url: string,
     options: HttpOptions = {}
-  ): Promise<HttpJsonResponse> {
+  ): Promise<HttpJsonResponse<T>> {
     const res = await this.request(url, options);
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { ...res, body };
