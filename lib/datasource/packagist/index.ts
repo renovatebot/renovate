@@ -12,6 +12,7 @@ export const id = 'packagist';
 
 const http = new Http(id);
 
+// We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
 function getHostOpts(url: string): HttpOptions {
   const opts: HttpOptions = {};
   const { username, password } = hostRules.find({
