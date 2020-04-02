@@ -23,6 +23,7 @@
     "**/__mocks__/*",
     "bin",
     "coverage",
-    "config.js"
+    "config.js",
+    "tmp"
   ]
 }
