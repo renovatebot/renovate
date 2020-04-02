@@ -1,9 +1,11 @@
 import url from 'url';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError } from '../common';
 
 import { id, MAVEN_REPO, MAVEN_REPO_DEPRECATED } from './common';
+
+const http = new Http(id);
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -46,23 +48,7 @@ export async function downloadHttpProtocol(
 ): Promise<string | null> {
   let raw: { body: string };
   try {
-    raw = await got(pkgUrl, {
-      hostType,
-      hooks: {
-        beforeRedirect: [
-          (options: any): void => {
-            if (
-              options.search &&
-              options.search.indexOf('X-Amz-Algorithm') !== -1
-            ) {
-              // maven repository is hosted on amazon, redirect url includes authentication.
-              // eslint-disable-next-line no-param-reassign
-              delete options.auth;
-            }
-          },
-        ],
-      },
-    });
+    raw = await http.get(pkgUrl);
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
