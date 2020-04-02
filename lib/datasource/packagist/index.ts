@@ -47,7 +47,7 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
   try {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
-    const res: PackageMeta = (await http.getJson(url, opts)).body;
+    const res = (await http.getJson<PackageMeta>(url, opts)).body;
     const meta: RegistryMeta = {};
     meta.packages = res.packages;
     if (res.includes) {

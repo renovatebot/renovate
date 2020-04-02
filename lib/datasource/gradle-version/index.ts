@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
-import { Http } from '../../util/http';
+import { Http, HttpJsonResponse } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
@@ -52,7 +52,7 @@ export async function getPkgReleases({
   const allReleases: Release[][] = await Promise.all(
     versionsUrls.map(async url => {
       try {
-        const response: GradleRelease = await http.getJson(url);
+        const response = await http.getJson<GradleRelease[]>(url);
         const releases = response.body
           .filter(release => !release.snapshot && !release.nightly)
           .filter(
