@@ -70,7 +70,8 @@ export async function getPkgReleases(
     releases: [],
   };
   try {
-    const pkgUrlListRaw = await http.getJson(queryUrl);
+    // TODO: fix types
+    const pkgUrlListRaw = await http.getJson<any>(queryUrl);
     const match = pkgUrlListRaw.body.data.find(
       item => item.id.toLowerCase() === pkgName.toLowerCase()
     );
