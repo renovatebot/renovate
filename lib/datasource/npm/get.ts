@@ -133,7 +133,8 @@ export async function getDependency(
       headers,
       useCache,
     };
-    const raw = await http.getJson(pkgUrl, opts);
+    // TODO: fix type
+    const raw = await http.getJson<any>(pkgUrl, opts);
     if (retries < 3) {
       logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
