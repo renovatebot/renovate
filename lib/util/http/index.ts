@@ -105,4 +105,14 @@ export class Http {
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { ...res, body };
   }
+
+  stream(url: string | URL, options?: HttpOptions): NodeJS.ReadableStream {
+    const combinedOptions: any = {
+      method: 'get',
+      ...this.options,
+      hostType: this.hostType,
+      ...options,
+    };
+    return got.stream(url, combinedOptions);
+  }
 }
