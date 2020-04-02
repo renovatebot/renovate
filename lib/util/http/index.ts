@@ -23,14 +23,12 @@ interface InternalHttpOptions extends HttpOptions {
   method?: 'get' | 'post';
 }
 
-export interface HttpResponse {
-  body: string;
+export interface HttpResponse<T = string> {
+  body: T;
   headers: any;
 }
 
-export interface HttpJsonResponse<T = unknown> extends HttpResponse {
-  body: T;
-}
+export type HttpJsonResponse<T = unknown> = HttpResponse<T>;
 
 export class Http {
   readonly hostType: string;
@@ -81,10 +79,7 @@ export class Http {
     return { body: res.body, headers: res.headers };
   }
 
-  get(
-    url: string,
-    options: HttpOptions = {}
-  ): Promise<HttpResponse | null> {
+  get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, options);
   }
 
