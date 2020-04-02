@@ -20,9 +20,7 @@ export async function getPkgReleases({
     };
   }
 
-  let raw: {
-    body: DartResult;
-  } = null;
+  let raw: HttpJsonResponse<DartResult> = null;
   try {
     raw = await http.getJson<DartResult>(pkgUrl);
   } catch (err) {
