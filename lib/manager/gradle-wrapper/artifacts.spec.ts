@@ -167,10 +167,7 @@ describe('manager/gradle-wrapper/update', () => {
         });
 
         const res = await dcUpdate.updateArtifacts({
-          packageFileName: resolve(
-            __dirname,
-            './__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties'
-          ),
+          packageFileName: 'gradle-wrapper.properties',
           updatedDeps: [],
           newPackageFileContent: readFileSync(
             resolve(
@@ -182,9 +179,13 @@ describe('manager/gradle-wrapper/update', () => {
           config,
         });
 
-        expect(res).toEqual(null);
+        expect(res[0].artifactError.lockFile).toEqual(
+          'gradle-wrapper.properties'
+        );
+        expect(res[0].artifactError.stderr).not.toBeNull();
+        expect(res[0].artifactError.stderr).not.toEqual('');
 
-        // 5.6.4 => 5.6.4 (updates execs) -  unexpected behavior (looks like a bug in Gradle)
+        // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
         ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
           expect(
             readFileSync(
@@ -232,9 +233,13 @@ describe('manager/gradle-wrapper/update', () => {
             },
           });
 
-          expect(res).toEqual(null);
+          expect(res[0].artifactError.lockFile).toEqual(
+            'gradle-wrapper.properties'
+          );
+          expect(res[0].artifactError.stderr).not.toBeNull();
+          expect(res[0].artifactError.stderr).not.toEqual('');
 
-          // 5.6.4 => 5.6.4 (updates execs) -  unexpected behavior (looks like a bug in Gradle)
+          // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
           ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
             expect(
               readFileSync(
