@@ -13,6 +13,7 @@ import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as _manager from '.';
 import { ExtractConfig } from '../common';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
+import { replacingSerializer } from '../../../test/util';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 const standardUpdatesReport = () =>
@@ -32,17 +33,6 @@ const gradleOutput = {
   stdout: 'gradle output',
   stderr: '',
 };
-
-const replacingSerializer = (
-  search: string,
-  replacement: string
-): jest.SnapshotSerializerPlugin => ({
-  test: value => typeof value === 'string' && value.includes(search),
-  serialize: (val, config, indent, depth, refs, printer) => {
-    const replaced = (val as string).replace(search, replacement);
-    return printer(replaced, config, indent, depth, refs);
-  },
-});
 
 function resetMocks() {
   jest.resetAllMocks();
