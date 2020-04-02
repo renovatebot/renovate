@@ -28,8 +28,8 @@ export interface HttpResponse<T = unknown> {
   headers: any;
 }
 
-export interface HttpJsonResponse extends HttpResponse {
-  body: any;
+export interface HttpJsonResponse<T = unknown> extends HttpResponse {
+  body: T;
 }
 
 export class Http {
