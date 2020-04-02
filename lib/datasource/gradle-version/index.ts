@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
-import { Http, HttpJsonResponse } from '../../util/http';
+import { Http } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
@@ -17,15 +17,13 @@ const http = new Http(id);
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
 interface GradleRelease {
-  body: {
-    snapshot?: boolean;
-    nightly?: boolean;
-    rcFor?: string;
-    version: string;
-    downloadUrl?: string;
-    checksumUrl?: string;
-    buildTime?: string;
-  }[];
+  snapshot?: boolean;
+  nightly?: boolean;
+  rcFor?: string;
+  version: string;
+  downloadUrl?: string;
+  checksumUrl?: string;
+  buildTime?: string;
 }
 
 const buildTimeRegex = regEx(
