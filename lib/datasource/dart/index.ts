@@ -1,4 +1,4 @@
-import { Http, HttpJsonResponse } from '../../util/http';
+import { Http, HttpResponse } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
@@ -20,7 +20,7 @@ export async function getPkgReleases({
     };
   }
 
-  let raw: HttpJsonResponse<DartResult> = null;
+  let raw: HttpResponse<DartResult> = null;
   try {
     raw = await http.getJson<DartResult>(pkgUrl);
   } catch (err) {

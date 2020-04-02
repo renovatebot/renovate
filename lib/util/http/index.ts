@@ -28,8 +28,6 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
-export type HttpJsonResponse<T = unknown> = HttpResponse<T>;
-
 export class Http {
   readonly hostType: string;
 
@@ -86,7 +84,7 @@ export class Http {
   async getJson<T = unknown>(
     url: string,
     options: HttpOptions = {}
-  ): Promise<HttpJsonResponse<T>> {
+  ): Promise<HttpResponse<T>> {
     const res = await this.request(url, options);
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { ...res, body };
@@ -95,7 +93,7 @@ export class Http {
   async postJson<T = unknown>(
     url: string,
     options: HttpPostOptions
-  ): Promise<HttpJsonResponse<T>> {
+  ): Promise<HttpResponse<T>> {
     const res = await this.request(url, { ...options, method: 'post' });
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { ...res, body };
