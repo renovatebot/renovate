@@ -62,6 +62,9 @@ export async function getUpdatedPackageFiles(
         if (res) {
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
+            if (upgrade.rangeStrategy === 'update-lockfile') {
+              updatedFileContents[packageFile] = res;
+            }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
@@ -114,7 +117,8 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === existingContent &&
-        upgrade.datasource === datasourceGitSubmodules.id
+        (upgrade.datasource === datasourceGitSubmodules.id ||
+          upgrade.rangeStrategy === 'update-lockfile')
       ) {
         updatedFileContents[packageFile] = newContent;
       }
