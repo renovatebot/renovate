@@ -29,14 +29,8 @@ export interface HttpResponse<T = string> {
 }
 
 export class Http {
-  readonly hostType: string;
 
-  readonly options: HttpOptions;
-
-  constructor(hostType: string, options?: HttpOptions) {
-    this.hostType = hostType;
-    this.options = options;
-  }
+  constructor(private hostType: string, private options?: HttpOptions) { }
 
   private async request(
     url: string | URL,
