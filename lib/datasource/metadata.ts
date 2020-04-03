@@ -11,6 +11,8 @@ const manualChangelogUrls = {
       'https://github.com/facebook/create-react-app/releases',
     firebase: 'https://firebase.google.com/support/release-notes/js',
     'flow-bin': 'https://github.com/facebook/flow/blob/master/Changelog.md',
+    gatsby:
+      'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
   },

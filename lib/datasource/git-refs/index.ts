@@ -33,7 +33,6 @@ export async function getRawRefs({
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
-      '--sort=-v:refname',
       '--tags',
       '--heads',
       '--refs',
