@@ -137,6 +137,7 @@ class GitHubReporter extends BaseReporter {
 
     const output: Octokit.ChecksUpdateParamsOutput = {
       summary: 'Jest test results',
+      title: 'Jest',
     };
     if (annotations.length) {
       output.annotations = annotations;
@@ -171,7 +172,7 @@ class GitHubReporter extends BaseReporter {
       head_sha: ref,
       completed_at: new Date().toISOString(),
       conclusion: success ? 'success' : 'failure',
-      output: { ...output, title: 'Jest' },
+      output: { ...output },
     });
   }
 }
