@@ -1,10 +1,12 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import * as github from '../github-tags';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import { regEx } from '../../util/regex';
 
 export const id = 'go';
+
+const http = new Http(id);
 
 interface DataSource {
   datasource: string;
@@ -32,14 +34,10 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   }
   const pkgUrl = `https://${goModule}?go-get=1`;
   try {
-    const res = (
-      await got(pkgUrl, {
-        hostType: id,
-      })
-    ).body;
-    const sourceMatch = res.match(
-      regEx(`<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`)
-    );
+    const res = (await http.get(pkgUrl)).body;
+    const sourceMatch = regEx(
+      `<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`
+    ).exec(res);
     if (sourceMatch) {
       const [, goSourceUrl] = sourceMatch;
       logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');

@@ -2,6 +2,7 @@ import got from 'got';
 import { Url } from 'url';
 
 export interface Options {
+  hooks?: any;
   hostType?: string;
   search?: string;
   token?: string;

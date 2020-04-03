@@ -1,7 +1,10 @@
 import { hrtime } from 'process';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError, ReleaseResult } from '../common';
+import { id } from './common';
+
+const http = new Http(id);
 
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
@@ -22,7 +25,7 @@ async function updateRubyGemsVersions(): Promise<void> {
   try {
     logger.debug('Rubygems: Fetching rubygems.org versions');
     const startTime = hrtime();
-    newLines = (await got(url, options)).body;
+    newLines = (await http.get(url, options)).body;
     const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     logger.debug({ seconds }, 'Rubygems: Fetched rubygems.org versions');
