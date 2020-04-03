@@ -11,6 +11,7 @@ coverage
 **/*.d.ts
 /config.js
 
-# generated typescript code
+# generated code
 **/*.generated.ts
-
+/tools/dist
+/patches
