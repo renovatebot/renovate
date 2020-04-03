@@ -16,13 +16,13 @@ async function getUrl(
   submoduleName: string
 ): Promise<string> {
   const path = (
-    await Git().raw([
+    (await Git().raw([
       'config',
       '--file',
       gitModulesPath,
       '--get',
       `submodule.${submoduleName}.url`,
-    ])
+    ])) || ''
   ).trim();
   if (!path.startsWith('../')) {
     return path;
@@ -76,7 +76,7 @@ async function getModules(
 }
 
 export default async function extractPackageFile(
-  content: string,
+  _content: string,
   fileName: string,
   config: ManagerConfig
 ): Promise<PackageFile | null> {
