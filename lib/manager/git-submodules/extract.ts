@@ -59,7 +59,7 @@ async function getModules(
       gitModulesPath,
       '--get-regexp',
       'path',
-    ])) || ''
+    ])) || /* istanbul ignore next: should never happen */ ''
   )
     .trim()
     .split(/\n/)
