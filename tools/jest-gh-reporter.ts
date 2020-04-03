@@ -135,7 +135,7 @@ class GitHubReporter extends BaseReporter {
     info(`repo: ${owner} / ${repo}`);
     info(`sha: ${ref}`);
 
-    const output: Octokit.ChecksUpdateParamsOutput = {
+    const output: Octokit.ChecksCreateParamsOutput = {
       summary: 'Jest test results',
       title: 'Jest',
     };
