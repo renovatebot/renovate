@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
@@ -8,6 +8,8 @@ import {
 } from '../common';
 
 export const id = 'galaxy';
+
+const http = new Http(id);
 
 export async function getPkgReleases({
   lookupName,
@@ -36,9 +38,7 @@ export async function getPkgReleases({
     projectName;
   const galaxyProjectUrl = baseUrl + userName + '/' + projectName;
   try {
-    let res: any = await got(galaxyAPIUrl, {
-      hostType: id,
-    });
+    let res: any = await http.get(galaxyAPIUrl);
     if (!res || !res.body) {
       logger.warn(
         { dependency: lookupName },

@@ -1,4 +1,4 @@
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
 import {
@@ -7,14 +7,16 @@ import {
   VERSION_REGEX,
 } from './search';
 
+const http = new Http('gradle-wrapper');
+
 function replaceType(url: string): string {
   return url.replace('bin', 'all');
 }
 
 async function getChecksum(url: string): Promise<string> {
   try {
-    const response = await got(url);
-    return response.body as string;
+    const response = await http.get(url);
+    return response.body;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
       logger.debug('Gradle checksum lookup failure: not found');

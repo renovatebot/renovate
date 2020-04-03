@@ -1,8 +1,10 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-provider';
+
+const http = new Http(id);
 
 interface TerraformProvider {
   namespace: string;
@@ -35,12 +37,7 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformProvider = (
-      await got(pkgUrl, {
-        json: true,
-        hostType: id,
-      })
-    ).body;
+    const res = (await http.getJson<TerraformProvider>(pkgUrl)).body;
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       name: repository,

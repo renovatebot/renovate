@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
+
+const http = new Http(id);
 
 interface RegistryRepository {
   registry: string;
@@ -72,12 +74,7 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformRelease = (
-      await got(pkgUrl, {
-        json: true,
-        hostType: id,
-      })
-    ).body;
+    const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
     if (returnedName !== repository) {
       logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
