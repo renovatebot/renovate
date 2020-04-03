@@ -11,7 +11,7 @@ const consulData: any = fs.readFileSync(
 );
 
 describe('datasource/terraform-module', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       global.repoCache = {};
@@ -20,7 +20,7 @@ describe('datasource/terraform-module', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await terraform.getPkgReleases({
+        await terraform.getReleases({
           lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
@@ -32,7 +32,7 @@ describe('datasource/terraform-module', () => {
         })
       );
       expect(
-        await terraform.getPkgReleases({
+        await terraform.getReleases({
           lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
@@ -42,7 +42,7 @@ describe('datasource/terraform-module', () => {
         throw new Error();
       });
       expect(
-        await terraform.getPkgReleases({
+        await terraform.getReleases({
           lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
@@ -51,7 +51,7 @@ describe('datasource/terraform-module', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await terraform.getPkgReleases({
+      const res = await terraform.getReleases({
         lookupName: 'hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
@@ -61,7 +61,7 @@ describe('datasource/terraform-module', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await terraform.getPkgReleases({
+      const res = await terraform.getReleases({
         lookupName: 'registry.terraform.io/hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
@@ -71,7 +71,7 @@ describe('datasource/terraform-module', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await terraform.getPkgReleases({
+      const res = await terraform.getReleases({
         lookupName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });

@@ -121,7 +121,7 @@ describe('bundler.updateArtifacts()', () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
       platform.getFile.mockResolvedValueOnce('1.2.0');
-      datasource.getPkgReleases.mockResolvedValueOnce({
+      datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
           { version: '1.2.0' },
@@ -149,7 +149,7 @@ describe('bundler.updateArtifacts()', () => {
     it('compatibility options', async () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
-      datasource.getPkgReleases.mockResolvedValueOnce({
+      datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
           { version: '1.2.0' },
@@ -182,7 +182,7 @@ describe('bundler.updateArtifacts()', () => {
     it('invalid compatibility options', async () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
-      datasource.getPkgReleases.mockResolvedValueOnce({
+      datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
           { version: '1.2.0' },
@@ -217,7 +217,7 @@ describe('bundler.updateArtifacts()', () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.outputFile.mockResolvedValueOnce(null as never);
       platform.getFile.mockResolvedValueOnce('1.2.0');
-      datasource.getPkgReleases.mockResolvedValueOnce({
+      datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
           { version: '1.2.0' },

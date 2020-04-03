@@ -1,5 +1,5 @@
 import { api as _api } from '../../platform/github/gh-got-wrapper';
-import { getPkgReleases } from '.';
+import { getReleases } from '.';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
 
@@ -13,12 +13,12 @@ const config = {
 };
 
 describe('datasource/cocoapods', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => global.renovateCache.rmAll());
     it('returns null for invalid inputs', async () => {
       api.get.mockResolvedValueOnce(null);
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'foobar',
           registryUrls: [],
         })
@@ -26,14 +26,14 @@ describe('datasource/cocoapods', () => {
     });
     it('returns null for empty result', async () => {
       api.get.mockResolvedValueOnce(null);
-      expect(await getPkgReleases(config)).toBeNull();
+      expect(await getReleases(config)).toBeNull();
     });
     it('returns null for missing fields', async () => {
       api.get.mockResolvedValueOnce({} as GotResponse);
-      expect(await getPkgReleases(config)).toBeNull();
+      expect(await getReleases(config)).toBeNull();
 
       api.get.mockResolvedValueOnce({ body: '' } as GotResponse);
-      expect(await getPkgReleases(config)).toBeNull();
+      expect(await getReleases(config)).toBeNull();
     });
     it('returns null for 404', async () => {
       api.get.mockImplementation(() =>
@@ -42,7 +42,7 @@ describe('datasource/cocoapods', () => {
         })
       );
       expect(
-        await getPkgReleases({
+        await getReleases({
           ...config,
           registryUrls: [
             ...config.registryUrls,
@@ -58,7 +58,7 @@ describe('datasource/cocoapods', () => {
           statusCode: 401,
         })
       );
-      expect(await getPkgReleases(config)).toBeNull();
+      expect(await getReleases(config)).toBeNull();
     });
     it('throws for 429', async () => {
       api.get.mockImplementationOnce(() =>
@@ -66,7 +66,7 @@ describe('datasource/cocoapods', () => {
           statusCode: 429,
         })
       );
-      await expect(getPkgReleases(config)).rejects.toThrowError(
+      await expect(getReleases(config)).rejects.toThrowError(
         'registry-failure'
       );
     });
@@ -76,7 +76,7 @@ describe('datasource/cocoapods', () => {
           statusCode: 502,
         })
       );
-      await expect(getPkgReleases(config)).rejects.toThrowError(
+      await expect(getReleases(config)).rejects.toThrowError(
         'registry-failure'
       );
     });
@@ -84,14 +84,14 @@ describe('datasource/cocoapods', () => {
       api.get.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases(config)).toBeNull();
+      expect(await getReleases(config)).toBeNull();
     });
     it('processes real data from CDN', async () => {
       api.get.mockResolvedValueOnce({
         body: 'foo/1.2.3',
       } as GotResponse);
       expect(
-        await getPkgReleases({
+        await getReleases({
           ...config,
           registryUrls: ['https://cdn.cocoapods.org'],
         })
@@ -108,7 +108,7 @@ describe('datasource/cocoapods', () => {
         body: [{ name: '1.2.3' }],
       } as GotResponse);
       expect(
-        await getPkgReleases({
+        await getReleases({
           ...config,
           registryUrls: ['https://github.com/Artsy/Specs'],
         })

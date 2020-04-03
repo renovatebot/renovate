@@ -27,7 +27,7 @@ const orbData = {
 };
 
 describe('datasource/orb', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       global.repoCache = {};
@@ -36,7 +36,7 @@ describe('datasource/orb', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -44,7 +44,7 @@ describe('datasource/orb', () => {
     it('returns null for missing orb', async () => {
       got.mockReturnValueOnce({ body: { data: {} } });
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
@@ -56,7 +56,7 @@ describe('datasource/orb', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -66,7 +66,7 @@ describe('datasource/orb', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -75,7 +75,7 @@ describe('datasource/orb', () => {
       got.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await datasource.getReleases({
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
@@ -86,7 +86,7 @@ describe('datasource/orb', () => {
       got.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await datasource.getReleases({
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();

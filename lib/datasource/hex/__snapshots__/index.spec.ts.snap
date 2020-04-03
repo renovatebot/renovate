@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/hex getPkgReleases process public repo without auth 1`] = `
+exports[`datasource/hex getReleases process public repo without auth 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
   "releases": Array [
@@ -88,7 +88,7 @@ Object {
 }
 `;
 
-exports[`datasource/hex getPkgReleases processes real data 1`] = `
+exports[`datasource/hex getReleases processes real data 1`] = `
 Object {
   "homepage": "https://hex.pm/packages/certifi",
   "releases": Array [

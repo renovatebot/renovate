@@ -15,14 +15,14 @@ interface OrbRelease {
 }
 
 /**
- * orb.getPkgReleases
+ * orb.getReleases
  *
  * This function will fetch an orb from CircleCI and return all semver versions.
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  logger.debug({ lookupName }, 'orb.getPkgReleases()');
+  logger.debug({ lookupName }, 'orb.getReleases()');
   const cacheNamespace = 'orb';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(

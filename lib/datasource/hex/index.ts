@@ -15,7 +15,7 @@ interface HexRelease {
   }[];
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
   // Get dependency name from lookupName.

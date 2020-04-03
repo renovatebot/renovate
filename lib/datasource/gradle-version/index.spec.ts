@@ -13,7 +13,7 @@ const allResponse: any = fs.readFileSync(
 let config: any = {};
 
 describe('datasource/gradle-version', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       config = {
         lookupName: 'abc',
@@ -27,7 +27,7 @@ describe('datasource/gradle-version', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(allResponse),
       });
-      const res = await gradleVersion.getPkgReleases(config);
+      const res = await gradleVersion.getReleases(config);
       expect(got).toHaveBeenCalledTimes(1);
       expect(got.mock.calls[0][0]).toEqual(
         'https://services.gradle.org/versions/all'
@@ -40,7 +40,7 @@ describe('datasource/gradle-version', () => {
       got.mockReturnValue({
         body: JSON.parse(allResponse),
       });
-      const res = await gradleVersion.getPkgReleases({
+      const res = await gradleVersion.getReleases({
         ...config,
         registryUrls: ['https://foo.bar', 'http://baz.qux'],
       });

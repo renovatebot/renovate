@@ -1,9 +1,9 @@
 import { getPackageUpdates } from './package';
-import { getPkgReleases as _getPkgReleases } from '../../datasource/github-tags';
+import { getReleases as _getReleases } from '../../datasource/github-tags';
 import { getConfig } from '../../config/defaults';
 
 const defaultConfig = getConfig();
-const getPkgReleases: any = _getPkgReleases;
+const getReleases: any = _getReleases;
 
 jest.mock('../../datasource/github-tags');
 
@@ -38,7 +38,7 @@ describe('lib/manager/travis/package', () => {
     it('detects pinning', async () => {
       config.currentValue = ['8.4.0', '10.0.0', '12.0.0'];
       config.supportPolicy = ['lts'];
-      getPkgReleases.mockReturnValueOnce({
+      getReleases.mockReturnValueOnce({
         releases: [
           {
             version: '4.4.4',

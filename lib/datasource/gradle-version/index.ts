@@ -40,7 +40,7 @@ function formatBuildTime(timeStr: string): string | null {
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult> {
   const versionsUrls = is.nonEmptyArray(registryUrls)

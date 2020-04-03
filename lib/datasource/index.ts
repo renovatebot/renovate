@@ -37,7 +37,7 @@ async function fetchReleases(
     logger.warn('Unknown datasource: ' + datasource);
     return null;
   }
-  const dep = await (await load(datasource)).getPkgReleases(config);
+  const dep = await (await load(datasource)).getReleases(config);
   addMetaData(dep, datasource, config.lookupName);
   return dep;
 }
@@ -64,7 +64,7 @@ export async function getPkgReleases(
   const { datasource } = config;
   const lookupName = config.lookupName || config.depName;
   if (!lookupName) {
-    logger.error({ config }, 'Datasource getPkgReleases without lookupName');
+    logger.error({ config }, 'Datasource getReleases without lookupName');
     return null;
   }
   let res: ReleaseResult;

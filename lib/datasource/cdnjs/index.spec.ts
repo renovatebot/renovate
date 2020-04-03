@@ -1,6 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import { getDigest, getPkgReleases } from '.';
+import { getDigest, getReleases } from '.';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const got: jest.Mock<any> = _got as any;
@@ -40,62 +40,62 @@ describe('datasource/cdnjs', () => {
       expect(res).toBe('sha256-F/Xda58SPdcUCr+xhSGz9MA2zQBPb0ASEYKohl8UCHc=');
     });
   });
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       return global.renovateCache.rmAll();
     });
     it('throws for empty result', async () => {
       got.mockResolvedValueOnce(null);
-      await expect(
-        getPkgReleases({ lookupName: 'foo/bar' })
-      ).rejects.toThrowError(DATASOURCE_FAILURE);
+      await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
+        DATASOURCE_FAILURE
+      );
     });
     it('returns null for missing fields', async () => {
       got.mockResolvedValueOnce({});
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
     });
     it('returns null for 404', async () => {
       got.mockRejectedValueOnce({ statusCode: 404 });
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
     });
     it('returns null for 401', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });
-      expect(await getPkgReleases({ lookupName: 'foo/bar' })).toBeNull();
+      expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
     });
     it('throws for 429', async () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
-      await expect(
-        getPkgReleases({ lookupName: 'foo/bar' })
-      ).rejects.toThrowError(DATASOURCE_FAILURE);
+      await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
+        DATASOURCE_FAILURE
+      );
     });
     it('throws for 5xx', async () => {
       got.mockRejectedValueOnce({ statusCode: 502 });
-      await expect(
-        getPkgReleases({ lookupName: 'foo/bar' })
-      ).rejects.toThrowError(DATASOURCE_FAILURE);
+      await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
+        DATASOURCE_FAILURE
+      );
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      await expect(
-        getPkgReleases({ lookupName: 'foo/bar' })
-      ).rejects.toThrowError(DATASOURCE_FAILURE);
+      await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
+        DATASOURCE_FAILURE
+      );
     });
     it('returns null with wrong auth token', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });
-      const res = await getPkgReleases({ lookupName: 'foo/bar' });
+      const res = await getReleases({ lookupName: 'foo/bar' });
       expect(res).toBeNull();
     });
     it('processes real data', async () => {
       got.mockResolvedValueOnce({ body: res1 });
-      const res = await getPkgReleases({ lookupName: 'd3-force/d3-force.js' });
+      const res = await getReleases({ lookupName: 'd3-force/d3-force.js' });
       expect(res).toMatchSnapshot();
     });
     it('filters releases by asset presence', async () => {
       got.mockResolvedValueOnce({ body: res2 });
-      const res = await getPkgReleases({
+      const res = await getReleases({
         lookupName: 'bulma/only/0.7.5/style.css',
       });
       expect(res).toMatchSnapshot();

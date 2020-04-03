@@ -70,23 +70,23 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
 }
 
 /**
- * go.getPkgReleases
+ * go.getReleases
  *
  * This datasource resolves a go module URL into its source repository
  *  and then fetch it if it is on GitHub.
  *
  * This function will:
  *  - Determine the source URL for the module
- *  - Call the respective getPkgReleases in github to retrieve the tags
+ *  - Call the respective getReleases in github to retrieve the tags
  *  - Filter module tags according to the module path
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  logger.trace(`go.getPkgReleases(${lookupName})`);
+  logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === github.id) {
-    const res = await github.getPkgReleases(source);
+    const res = await github.getReleases(source);
     // istanbul ignore if
     if (!res) {
       return res;
@@ -97,10 +97,10 @@ export async function getPkgReleases({
      * the old behaviour stays the same.
      */
     const nameParts = lookupName.split('/');
-    logger.trace({ nameParts, releases: res.releases }, 'go.getPkgReleases');
+    logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
     if (nameParts.length > 3) {
       const prefix = nameParts.slice(3, nameParts.length).join('/');
-      logger.trace(`go.getPkgReleases.prefix:${prefix}`);
+      logger.trace(`go.getReleases.prefix:${prefix}`);
       const submodReleases = res.releases
         .filter(
           release => release.version && release.version.startsWith(prefix)
@@ -110,7 +110,7 @@ export async function getPkgReleases({
           r2.version = r2.version.replace(`${prefix}/`, '');
           return r2;
         });
-      logger.trace({ submodReleases }, 'go.getPkgReleases');
+      logger.trace({ submodReleases }, 'go.getReleases');
       if (submodReleases.length > 0) {
         res.releases = submodReleases;
         return res;

@@ -11,7 +11,7 @@ export const id = 'crate';
 
 const http = new Http(id);
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-crate';
