@@ -4,7 +4,7 @@ import { Stats } from 'fs';
 import upath from 'upath';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import * as mavenVersioning from '../../versioning/maven';
+import * as gradleVersioning from '../../versioning/gradle';
 import {
   ExtractConfig,
   PackageFile,
@@ -49,17 +49,18 @@ async function prepareGradleCommandLine(
   const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
   const gradlewName = gradleWrapperFileName(config);
 
+  /* eslint-disable no-bitwise */
+  // istanbul ignore if
   if (gradlew?.isFile() === true) {
     // if the file is not executable by others
-    // eslint-disable-next-line no-bitwise
     if ((gradlew.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      // eslint-disable-next-line no-bitwise
       await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
     }
 
     return `${gradlewName} ${args}`;
   }
+  /* eslint-enable no-bitwise */
 
   return `gradle ${args}`;
 }
@@ -188,5 +189,5 @@ export const language = LANGUAGE_JAVA;
 export const defaultConfig = {
   fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
   timeout: 600,
-  versioning: mavenVersioning.id,
+  versioning: gradleVersioning.id,
 };

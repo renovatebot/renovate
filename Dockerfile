@@ -25,6 +25,7 @@ RUN rm -rf /usr/bin/python && ln /usr/bin/python3 /usr/bin/python
 COPY package.json .
 COPY yarn.lock .
 COPY tools tools
+COPY patches patches
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
@@ -74,7 +75,7 @@ RUN apt-get update && \
 ## Gradle (needs java-jre, installed above)
 
 # renovate: datasource=gradle-version depName=gradle versioning=maven
-ENV GRADLE_VERSION 6.2
+ENV GRADLE_VERSION=6.3
 
 RUN wget --no-verbose https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
     unzip -q -d /opt/ gradle-$GRADLE_VERSION-bin.zip && \
@@ -98,7 +99,7 @@ RUN apt-get update && \
 
 # Elixir
 
-ENV ELIXIR_VERSION 1.8.2
+ENV ELIXIR_VERSION=1.8.2
 
 RUN curl -L https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip -o Precompiled.zip && \
     mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
@@ -127,7 +128,7 @@ RUN chmod +x /usr/local/bin/composer
 RUN apt-get update && apt-get install -y bzr mercurial && \
     rm -rf /var/lib/apt/lists/*
 
-ENV GOLANG_VERSION 1.13.4
+ENV GOLANG_VERSION=1.13.4
 
 # Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
 # private repositories.
@@ -162,7 +163,7 @@ RUN apt-get update && apt-get install -y ruby ruby2.5-dev && rm -rf /var/lib/apt
 RUN ruby --version
 
 # renovate: datasource=rubygems depName=cocoapods versioning=ruby
-ENV COCOAPODS_VERSION 1.9.0
+ENV COCOAPODS_VERSION 1.9.1
 RUN gem install --no-rdoc --no-ri cocoapods -v ${COCOAPODS_VERSION}
 
 USER ubuntu
