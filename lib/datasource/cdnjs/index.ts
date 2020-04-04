@@ -12,9 +12,6 @@ export const id = 'cdnjs';
 
 const http = new Http(id);
 
-const cacheNamespace = `datasource-${id}`;
-const cacheMinutes = 60;
-
 export interface CdnjsResponse {
   homepage?: string;
   repository?: {
@@ -28,14 +25,19 @@ export function depUrl(library: string): string {
   return `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
 }
 
+function getParts(lookupName: string): any {
+  const library = lookupName.split('/')[0];
+  const assetName = lookupName.replace(`${library}/`, '');
+  return { library, assetName };
+}
+
 export async function getDigest(
   { lookupName }: GetReleasesConfig,
   newValue?: string
 ): Promise<string | null> {
   let result = null;
-  const library = lookupName.split('/')[0];
+  const { library, assetName } = getParts(lookupName);
   const url = depUrl(library);
-  const assetName = lookupName.replace(`${library}/`, '');
   let res = null;
   try {
     res = await http.getJson(url);
@@ -51,12 +53,9 @@ export async function getDigest(
   return result;
 }
 
-export async function getPkgReleases({
-  lookupName,
-}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  const [library, ...assetParts] = lookupName.split('/');
-  const assetName = assetParts.join('/');
-
+async function getLibrary(library: string): Promise<CdnjsResponse> {
+  const cacheNamespace = `datasource-${id}`;
+  const cacheMinutes = 60;
   const cacheKey = library;
   const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
@@ -66,15 +65,20 @@ export async function getPkgReleases({
   if (cachedResult) {
     return cachedResult;
   }
-
   const url = depUrl(library);
+  const res = (await http.getJson<CdnjsResponse>(url)).body;
+  await renovateCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+  return res;
+}
 
+export async function getPkgReleases({
+  lookupName,
+}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
+  const { library, assetName } = getParts(lookupName);
   try {
-    const res = await http.getJson(url);
+    const cdnjsResp = await getLibrary(library);
 
-    const cdnjsResp: CdnjsResponse = res.body;
-
-    if (!cdnjsResp || !cdnjsResp.assets) {
+    if (!cdnjsResp?.assets) {
       logger.warn({ library }, `Invalid CDNJS response`);
       return null;
     }
@@ -93,9 +97,6 @@ export async function getPkgReleases({
     if (repository && repository.url) {
       result.sourceUrl = repository.url;
     }
-
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
-
     return result;
   } catch (err) {
     const errorData = { library, err };
