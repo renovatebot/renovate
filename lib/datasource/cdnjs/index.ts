@@ -34,7 +34,7 @@ async function downloadLibrary(library: string): Promise<CdnjsResponse> {
 }
 
 async function getLibrary(library: string): Promise<CdnjsResponse> {
-  return cacheAble<CdnjsResponse>(id, library, downloadLibrary, 60);
+  return cacheAble({ id, lookup: library, cb: downloadLibrary, minutes: 60 });
 }
 
 export async function getReleases({
