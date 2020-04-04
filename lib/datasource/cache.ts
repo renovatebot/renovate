@@ -1,4 +1,4 @@
-import { logger } from '../../lib/logger';
+import { logger } from '../logger';
 
 export type CacheLoadCallback<TArg, TResult> = (
   lookup: TArg
