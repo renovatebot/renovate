@@ -40,9 +40,7 @@ describe('manager/gradle-wrapper/update', () => {
             'gradle/wrapper/gradle-wrapper.jar',
             'gradlew',
             'gradlew.bat',
-          ].map(filename =>
-            resolve(__dirname, `./__fixtures__/testFiles/${filename}`)
-          ),
+          ],
         } as Git.StatusResult);
 
         const res = await dcUpdate.updateArtifacts({
@@ -64,19 +62,21 @@ describe('manager/gradle-wrapper/update', () => {
             'gradle/wrapper/gradle-wrapper.jar',
             'gradlew',
             'gradlew.bat',
-          ]
-            .map(filename =>
-              resolve(__dirname, `./__fixtures__/testFiles/${filename}`)
-            )
-            .map(filePath => {
-              return {
-                artifactError: null,
-                file: {
-                  name: filePath,
-                  contents: readFileSync(filePath, 'utf8'),
-                },
-              };
-            })
+          ].map(fileProjectPath => {
+            return {
+              artifactError: null,
+              file: {
+                name: fileProjectPath,
+                contents: readFileSync(
+                  resolve(
+                    __dirname,
+                    `./__fixtures__/testFiles/${fileProjectPath}`
+                  ),
+                  'utf8'
+                ),
+              },
+            };
+          })
         );
 
         [
