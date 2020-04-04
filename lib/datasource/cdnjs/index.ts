@@ -28,29 +28,6 @@ export function depUrl(library: string): string {
   return `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
 }
 
-export async function getDigest(
-  { lookupName }: GetReleasesConfig,
-  newValue?: string
-): Promise<string | null> {
-  let result = null;
-  const library = lookupName.split('/')[0];
-  const url = depUrl(library);
-  const assetName = lookupName.replace(`${library}/`, '');
-  let res = null;
-  try {
-    res = await http.getJson(url);
-  } catch (e) /* istanbul ignore next */ {
-    return null;
-  }
-  const assets: CdnjsAsset[] = res.body && res.body.assets;
-  const asset = assets && assets.find(({ version }) => version === newValue);
-  const hash = asset && asset.sri && asset.sri[assetName];
-  if (hash) {
-    result = hash;
-  }
-  return result;
-}
-
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -83,7 +60,7 @@ export async function getReleases({
 
     const releases = assets
       .filter(({ files }) => files.includes(assetName))
-      .map(({ version }) => ({ version }));
+      .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
 
     const result: ReleaseResult = { releases };
 
