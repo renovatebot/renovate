@@ -56,7 +56,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   }
 }
 
-export async function getPkgReleases(
+export async function getReleases(
   registryUrl: string,
   feedUrl: string,
   pkgName: string

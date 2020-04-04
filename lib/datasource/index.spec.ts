@@ -21,7 +21,7 @@ describe('datasource/index', () => {
       module: datasource.Datasource,
       name: string
     ): boolean {
-      if (!module.getPkgReleases) {
+      if (!module.getReleases) {
         return false;
       }
       if (module.id !== name) {
@@ -47,6 +47,7 @@ describe('datasource/index', () => {
   it('returns null for no datasource', async () => {
     expect(
       await datasource.getPkgReleases({
+        datasource: null,
         depName: 'some/dep',
       })
     ).toBeNull();
@@ -55,6 +56,7 @@ describe('datasource/index', () => {
     expect(
       await datasource.getPkgReleases({
         datasource: 'npm',
+        depName: null,
       })
     ).toBeNull();
   });
@@ -75,7 +77,7 @@ describe('datasource/index', () => {
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'react-native',
@@ -85,7 +87,7 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'node',
@@ -94,7 +96,7 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('trims sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({
+    npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
       releases: [],
     });
@@ -105,7 +107,7 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toEqual('https://abc.com');
   });
   it('massages sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({
+    npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: 'scm:git@github.com:Jasig/cas.git',
       releases: [],
     });

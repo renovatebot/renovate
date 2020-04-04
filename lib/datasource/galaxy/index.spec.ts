@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import _got from '../../util/got';
-import { getPkgReleases } from './index';
+import { getReleases } from './index';
 
 const got: any = _got;
 
@@ -17,14 +17,14 @@ const empty = fs.readFileSync(
 jest.mock('../../util/got');
 
 describe('datasource/galaxy', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       global.repoCache = {};
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(
-        await getPkgReleases({ lookupName: 'non_existent_crate' })
+        await getReleases({ lookupName: 'non_existent_crate' })
       ).toBeNull();
     });
     it('returns null for missing fields', async () => {
@@ -32,7 +32,7 @@ describe('datasource/galaxy', () => {
         body: undefined,
       });
       expect(
-        await getPkgReleases({ lookupName: 'non_existent_crate' })
+        await getReleases({ lookupName: 'non_existent_crate' })
       ).toBeNull();
     });
     it('returns null for empty list', async () => {
@@ -40,7 +40,7 @@ describe('datasource/galaxy', () => {
         body: '\n',
       });
       expect(
-        await getPkgReleases({ lookupName: 'non_existent_crate' })
+        await getReleases({ lookupName: 'non_existent_crate' })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -49,19 +49,19 @@ describe('datasource/galaxy', () => {
           statusCode: 404,
         })
       );
-      expect(await getPkgReleases({ lookupName: 'some_crate' })).toBeNull();
+      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases({ lookupName: 'some_crate' })).toBeNull();
+      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      const res = await getPkgReleases({ lookupName: 'yatesr.timezone' });
+      const res = await getReleases({ lookupName: 'yatesr.timezone' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -70,7 +70,7 @@ describe('datasource/galaxy', () => {
       got.mockReturnValueOnce({
         body: empty,
       });
-      const res = await getPkgReleases({ lookupName: 'foo.bar' });
+      const res = await getReleases({ lookupName: 'foo.bar' });
       expect(res).toBeNull();
     });
     it('throws for 5xx', async () => {
@@ -81,7 +81,7 @@ describe('datasource/galaxy', () => {
       );
       let e;
       try {
-        await getPkgReleases({ lookupName: 'some_crate' });
+        await getReleases({ lookupName: 'some_crate' });
       } catch (err) {
         e = err;
       }
@@ -94,7 +94,7 @@ describe('datasource/galaxy', () => {
       got.mockImplementationOnce(() => {
         throw err;
       });
-      expect(await getPkgReleases({ lookupName: 'foo.bar' })).toBeNull();
+      expect(await getReleases({ lookupName: 'foo.bar' })).toBeNull();
     });
   });
 });

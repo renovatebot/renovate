@@ -123,7 +123,7 @@ function isDefaultRepo(url: string): boolean {
   return false;
 }
 
-export async function getPkgReleases(
+export async function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
   const { lookupName } = config;

@@ -4,7 +4,7 @@ import * as gitRefs from '../git-refs';
 
 export const id = 'git-tags';
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });

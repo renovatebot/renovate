@@ -15,11 +15,11 @@ interface TerraformProvider {
 }
 
 /**
- * terraform-provider.getPkgReleases
+ * terraform-provider.getReleases
  *
  * This function will fetch a provider from the public Terraform registry and return all semver versions.
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

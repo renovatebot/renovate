@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/pypi getPkgReleases process data from +simple endpoint 1`] = `
+exports[`datasource/pypi getReleases process data from +simple endpoint 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -40,7 +40,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getPkgReleases process data from simple endpoint 1`] = `
+exports[`datasource/pypi getReleases process data from simple endpoint 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -80,7 +80,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getPkgReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
+exports[`datasource/pypi getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -90,7 +90,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getPkgReleases processes real data 1`] = `
+exports[`datasource/pypi getReleases processes real data 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -186,7 +186,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getPkgReleases respects compatibility 1`] = `
+exports[`datasource/pypi getReleases respects compatibility 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -205,14 +205,14 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getPkgReleases returns non-github home_page 1`] = `
+exports[`datasource/pypi getReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
   "releases": Array [],
 }
 `;
 
-exports[`datasource/pypi getPkgReleases supports custom datasource url 1`] = `
+exports[`datasource/pypi getReleases supports custom datasource url 1`] = `
 Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
@@ -229,7 +229,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getPkgReleases supports custom datasource url from environmental variable 1`] = `
+exports[`datasource/pypi getReleases supports custom datasource url from environmental variable 1`] = `
 Array [
   Array [
     "https://my.pypi.python/pypi/azure-cli-monitor/json",
@@ -246,7 +246,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getPkgReleases supports multiple custom datasource urls 1`] = `
+exports[`datasource/pypi getReleases supports multiple custom datasource urls 1`] = `
 Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
