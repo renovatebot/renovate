@@ -22,9 +22,11 @@ export interface CdnjsResponse {
   assets?: CdnjsAsset[];
 }
 
-async function downloadLibrary(library: string): Promise<CdnjsResponse> {
+async function downloadLibrary(
+  library: string
+): Promise<{ data: CdnjsResponse }> {
   const url = `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
-  return (await http.getJson<CdnjsResponse>(url)).body;
+  return { data: (await http.getJson<CdnjsResponse>(url)).body };
 }
 
 export async function getReleases({

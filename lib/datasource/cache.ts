@@ -1,3 +1,5 @@
+import { logger } from '../../lib/logger';
+
 export type CacheLoadCallback<TArg, TResult> = (
   lookup: TArg
 ) => Promise<TResult>;
@@ -14,7 +16,7 @@ export type CacheConfig<TArg, TResult> = {
   /**
    * Callback to use on cache miss to load result
    */
-  cb: CacheLoadCallback<TArg, TResult>;
+  cb: CacheLoadCallback<TArg, { data: TResult; isPrivate?: boolean }>;
   /**
    * Time to cache result in minutes
    */
@@ -39,9 +41,15 @@ export async function cacheAble<TArg, TResult = unknown>({
   );
   // istanbul ignore if
   if (cachedResult) {
+    logger.trace({ id, lookup }, 'datasource cachedResult');
     return cachedResult;
   }
-  const res = await func(lookup);
-  await renovateCache.set(cacheNamespace, cacheKey, res, minutes);
-  return res;
+  const { data, isPrivate } = await func(lookup);
+  // istanbul ignore if
+  if (isPrivate) {
+    logger.trace({ id, lookup }, 'Skipping datasource cache for private data');
+  } else {
+    await renovateCache.set(cacheNamespace, cacheKey, data, minutes);
+  }
+  return data;
 }
