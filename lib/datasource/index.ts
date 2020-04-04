@@ -43,11 +43,7 @@ async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
-  if (!datasourceName) {
-    logger.warn('No datasource found');
-    return null;
-  }
-  if (!datasources.has(datasourceName)) {
+  if (!datasourceName || !datasources.has(datasourceName)) {
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
