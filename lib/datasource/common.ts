@@ -42,6 +42,7 @@ export interface Release {
 
   releaseTimestamp?: any;
   version: string;
+  newDigest?: string;
 }
 
 export interface ReleaseResult {

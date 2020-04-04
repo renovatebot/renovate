@@ -37,20 +37,6 @@ async function getLibrary(library: string): Promise<CdnjsResponse> {
   return cacheAble<CdnjsResponse>(id, library, downloadLibrary, 60);
 }
 
-export async function getDigest(
-  { lookupName }: GetReleasesConfig,
-  newValue?: string
-): Promise<string | null> {
-  try {
-    const { library, assetName } = getParts(lookupName);
-    const { assets } = await getLibrary(library);
-    const asset = assets.find(({ version }) => version === newValue);
-    return asset.sri[assetName] || null;
-  } catch (err) /* istanbul ignore next */ {
-    return null;
-  }
-}
-
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -60,7 +46,7 @@ export async function getReleases({
 
     const releases = assets
       .filter(({ files }) => files.includes(assetName))
-      .map(({ version }) => ({ version }));
+      .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
 
     const result: ReleaseResult = { releases };
 
