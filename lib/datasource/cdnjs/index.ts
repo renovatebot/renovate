@@ -1,19 +1,17 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+import { cacheAble, CachePromise } from '../cache';
+
+export const id = 'cdnjs';
+
+const http = new Http(id);
 
 export interface CdnjsAsset {
   version: string;
   files: string[];
   sri?: Record<string, string>;
 }
-
-export const id = 'cdnjs';
-
-const http = new Http(id);
-
-const cacheNamespace = `datasource-${id}`;
-const cacheMinutes = 60;
 
 export interface CdnjsResponse {
   homepage?: string;
@@ -24,40 +22,22 @@ export interface CdnjsResponse {
   assets?: CdnjsAsset[];
 }
 
-export function depUrl(library: string): string {
-  return `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
+async function downloadLibrary(library: string): CachePromise<CdnjsResponse> {
+  const url = `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
+  return { data: (await http.getJson<CdnjsResponse>(url)).body };
 }
 
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const [library, ...assetParts] = lookupName.split('/');
-  const assetName = assetParts.join('/');
-
-  const cacheKey = library;
-  const cachedResult = await renovateCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-
-  const url = depUrl(library);
-
+  const library = lookupName.split('/')[0];
   try {
-    const res = await http.getJson(url);
-
-    const cdnjsResp: CdnjsResponse = res.body;
-
-    if (!cdnjsResp || !cdnjsResp.assets) {
-      logger.warn({ library }, `Invalid CDNJS response`);
-      return null;
-    }
-
-    const { assets, homepage, repository } = cdnjsResp;
-
+    const { assets, homepage, repository } = await cacheAble({
+      id,
+      lookup: library,
+      cb: downloadLibrary,
+    });
+    const assetName = lookupName.replace(`${library}/`, '');
     const releases = assets
       .filter(({ files }) => files.includes(assetName))
       .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
@@ -67,31 +47,16 @@ export async function getReleases({
     if (homepage) {
       result.homepage = homepage;
     }
-    if (repository && repository.url) {
+    if (repository?.url) {
       result.sourceUrl = repository.url;
     }
-
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
-
     return result;
   } catch (err) {
-    const errorData = { library, err };
-
-    if (
-      err.statusCode === 429 ||
-      (err.statusCode >= 500 && err.statusCode < 600)
-    ) {
-      throw new DatasourceError(err);
+    if (err.statusCode === 404) {
+      logger.debug({ library, err }, 'Package lookup error');
+      return null;
     }
-    if (err.statusCode === 401) {
-      logger.debug(errorData, 'Authorization error');
-    } else if (err.statusCode === 404) {
-      logger.debug(errorData, 'Package lookup error');
-    } else {
-      logger.debug(errorData, 'CDNJS lookup failure: Unknown error');
-      throw new DatasourceError(err);
-    }
+    // Throw a DatasourceError for all other types of errors
+    throw new DatasourceError(err);
   }
-
-  return null;
 }
