@@ -1,5 +1,6 @@
 import { api as _api } from '../../platform/github/gh-got-wrapper';
 import * as pod from '.';
+import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
@@ -9,14 +10,14 @@ const api = mocked(_api);
 jest.mock('../../platform/github/gh-got-wrapper');
 
 const config = {
-  versioning: 'ruby',
-  datasource: 'pod',
-  lookupName: 'foo',
+  versioning: rubyVersioning.id,
+  datasource: pod.id,
+  depName: 'foo',
   registryUrls: [],
 };
 
 describe('datasource/cocoapods', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       global.repoCache = {};
@@ -27,7 +28,8 @@ describe('datasource/cocoapods', () => {
       api.get.mockResolvedValueOnce(null);
       expect(
         await getPkgReleases({
-          lookupName: 'foobar',
+          datasource: pod.id,
+          depName: 'foobar',
           registryUrls: [],
         })
       ).toBeNull();
@@ -75,7 +77,7 @@ describe('datasource/cocoapods', () => {
         })
       );
       await expect(
-        pod.getPkgReleases({
+        getPkgReleases({
           ...config,
           registryUrls: ['https://cdn.cocoapods.org'],
         })
@@ -88,7 +90,7 @@ describe('datasource/cocoapods', () => {
         })
       );
       await expect(
-        pod.getPkgReleases({
+        getPkgReleases({
           ...config,
           registryUrls: ['https://cdn.cocoapods.org'],
         })

@@ -1,8 +1,10 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-provider';
+
+const http = new Http(id);
 
 interface TerraformProvider {
   namespace: string;
@@ -13,11 +15,11 @@ interface TerraformProvider {
 }
 
 /**
- * terraform-provider.getPkgReleases
+ * terraform-provider.getReleases
  *
  * This function will fetch a provider from the public Terraform registry and return all semver versions.
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -35,12 +37,7 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformProvider = (
-      await got(pkgUrl, {
-        json: true,
-        hostType: id,
-      })
-    ).body;
+    const res = (await http.getJson<TerraformProvider>(pkgUrl)).body;
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       name: repository,

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/rubygems getPkgReleases returns a dep for rubygems.org package hit 1`] = `
+exports[`datasource/rubygems getReleases returns a dep for rubygems.org package hit 1`] = `
 Object {
   "name": "1pass",
   "releases": Array [
@@ -14,7 +14,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getPkgReleases uses multiple source urls 1`] = `
+exports[`datasource/rubygems getReleases uses multiple source urls 1`] = `
 Object {
   "homepage": "http://rubyonrails.org",
   "releases": Array [
@@ -2396,7 +2396,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getPkgReleases uses rubygems.org if no registry urls were provided 1`] = `
+exports[`datasource/rubygems getReleases uses rubygems.org if no registry urls were provided 1`] = `
 Object {
   "name": "1pass",
   "releases": Array [
@@ -2410,7 +2410,7 @@ Object {
 }
 `;
 
-exports[`datasource/rubygems getPkgReleases works with real data 1`] = `
+exports[`datasource/rubygems getReleases works with real data 1`] = `
 Object {
   "homepage": "http://rubyonrails.org",
   "releases": Array [

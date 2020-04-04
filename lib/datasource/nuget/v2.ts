@@ -1,15 +1,17 @@
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { ReleaseResult } from '../common';
 
 import { id } from './common';
+
+const http = new Http(id);
 
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
 }
 
-export async function getPkgReleases(
+export async function getReleases(
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {
@@ -20,17 +22,7 @@ export async function getPkgReleases(
   try {
     let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
     do {
-      const pkgVersionsListRaw = await got(pkgUrlList, {
-        hostType: id,
-      });
-      if (pkgVersionsListRaw.statusCode !== 200) {
-        logger.debug(
-          { dependency: pkgName, pkgVersionsListRaw },
-          `nuget registry failure: status code != 200`
-        );
-        return null;
-      }
-
+      const pkgVersionsListRaw = await http.get(pkgUrlList);
       const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
 
       const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');

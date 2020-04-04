@@ -1,6 +1,8 @@
 import _got from '../../util/got';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
+import * as rubyVersioning from '../../versioning/ruby';
+import * as rubygems from '.';
 import { getPkgReleases } from '..';
 
 const got: any = _got;
@@ -27,13 +29,13 @@ const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 jest.mock('../../util/got');
 
 describe('datasource/rubygems', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
     const params = {
-      versioning: 'ruby',
-      datasource: 'rubygems',
-      lookupName: 'rails',
+      versioning: rubyVersioning.id,
+      datasource: rubygems.id,
+      depName: 'rails',
       registryUrls: ['https://thirdparty.com', 'https://firstparty.com'],
     };
 

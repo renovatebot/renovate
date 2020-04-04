@@ -63,7 +63,7 @@ export async function resolvePackageReleases(
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

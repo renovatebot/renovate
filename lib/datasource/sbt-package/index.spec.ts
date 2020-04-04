@@ -103,7 +103,7 @@ describe('datasource/sbt', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: sbtPlugin.id,
-          lookupName: 'org.scalatest:scalatest',
+          depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toEqual(null);
@@ -113,7 +113,7 @@ describe('datasource/sbt', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: sbtPlugin.id,
-          lookupName: 'org.scalatest:scalatest',
+          depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven', MAVEN_REPO],
         })
       ).toEqual({
@@ -127,7 +127,7 @@ describe('datasource/sbt', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: sbtPlugin.id,
-          lookupName: 'org.scalatest:scalatest_2.12',
+          depName: 'org.scalatest:scalatest_2.12',
           registryUrls: [],
         })
       ).toEqual({

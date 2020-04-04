@@ -1,10 +1,12 @@
 import yaml from 'js-yaml';
 
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 
 export const id = 'helm';
+
+const http = new Http(id);
 
 export async function getRepositoryData(
   repository: string
@@ -17,7 +19,7 @@ export async function getRepositoryData(
   }
   let res: any;
   try {
-    res = await got('index.yaml', { hostType: id, baseUrl: repository });
+    res = await http.get('index.yaml', { baseUrl: repository });
     if (!res || !res.body) {
       logger.warn(`Received invalid response from ${repository}`);
       return null;
@@ -84,13 +86,13 @@ export async function getRepositoryData(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [helmRepository] = registryUrls;
   if (!helmRepository) {
-    logger.warn(`helmRepository was not provided to getPkgReleases`);
+    logger.warn(`helmRepository was not provided to getReleases`);
     return null;
   }
   const repositoryData = await getRepositoryData(helmRepository);
