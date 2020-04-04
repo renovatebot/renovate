@@ -6,7 +6,7 @@ export const id = 'cdnjs';
 
 const http = new Http(id);
 
-function getParts(lookupName: string): any {
+function getParts(lookupName: string): { library: string; assetName: string } {
   const library = lookupName.split('/')[0];
   const assetName = lookupName.replace(`${library}/`, '');
   return { library, assetName };
@@ -52,10 +52,9 @@ export async function getDigest(
   try {
     const { library, assetName } = getParts(lookupName);
     const { assets } = await getLibrary(library);
-    const asset = assets?.find(({ version }) => version === newValue);
-    const hash = asset?.sri && asset?.sri[assetName];
-    return hash || null;
-  } catch (e) /* istanbul ignore next */ {
+    const asset = assets.find(({ version }) => version === newValue);
+    return asset.sri[assetName] || null;
+  } catch (err) /* istanbul ignore next */ {
     return null;
   }
 }
@@ -85,6 +84,7 @@ export async function getPkgReleases({
       logger.debug({ library, err }, 'Package lookup error');
       return null;
     }
+    // Throw a DatasourceError for all other types of errors
     throw new DatasourceError(err);
   }
 }
