@@ -53,7 +53,7 @@ export async function getDigest(
 
 export async function getReleases({
   lookupName,
-}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [library, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 

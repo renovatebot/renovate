@@ -82,7 +82,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  */
 export async function getReleases({
   lookupName,
-}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === github.id) {

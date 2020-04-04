@@ -47,6 +47,7 @@ describe('datasource/index', () => {
   it('returns null for no datasource', async () => {
     expect(
       await datasource.getPkgReleases({
+        datasource: null,
         depName: 'some/dep',
       })
     ).toBeNull();
@@ -55,6 +56,7 @@ describe('datasource/index', () => {
     expect(
       await datasource.getPkgReleases({
         datasource: 'npm',
+        depName: null,
       })
     ).toBeNull();
   });
