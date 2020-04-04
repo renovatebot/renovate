@@ -27,7 +27,7 @@ const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 jest.mock('../../util/got');
 
 describe('datasource/rubygems', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
     const params = {
@@ -42,14 +42,14 @@ describe('datasource/rubygems', () => {
 
     it('returns null for missing pkg', async () => {
       got.mockReturnValueOnce({});
-      expect(await rubygems.getPkgReleases(params)).toBeNull();
+      expect(await rubygems.getReleases(params)).toBeNull();
     });
 
     it('returns null for rubygems.org package miss', async () => {
       const newparams = { ...params };
       newparams.registryUrls = ['https://rubygems.org'];
       got.mockReturnValueOnce({ body: rubygemsOrgVersions });
-      expect(await rubygems.getPkgReleases(newparams)).toBeNull();
+      expect(await rubygems.getReleases(newparams)).toBeNull();
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
@@ -58,7 +58,7 @@ describe('datasource/rubygems', () => {
         registryUrls: ['https://rubygems.org'],
       };
       got.mockReturnValueOnce({ body: rubygemsOrgVersions });
-      const res = await rubygems.getPkgReleases(newparams);
+      const res = await rubygems.getReleases(newparams);
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(
@@ -73,13 +73,13 @@ describe('datasource/rubygems', () => {
       got.mockReturnValue({ body: rubygemsOrgVersions });
 
       expect(
-        await rubygems.getPkgReleases({
+        await rubygems.getReleases({
           ...params,
           registryUrls: [],
         })
       ).toBeNull();
 
-      const res = await rubygems.getPkgReleases({
+      const res = await rubygems.getReleases({
         lookupName: '1pass',
         registryUrls: [],
       });
@@ -92,7 +92,7 @@ describe('datasource/rubygems', () => {
         .mockReturnValueOnce({ body: railsInfo })
         .mockReturnValueOnce({ body: railsVersions });
 
-      expect(await rubygems.getPkgReleases(params)).toMatchSnapshot();
+      expect(await rubygems.getReleases(params)).toMatchSnapshot();
     });
 
     it('uses multiple source urls', async () => {
@@ -105,12 +105,12 @@ describe('datasource/rubygems', () => {
         .mockImplementationOnce(() => ({ body: railsInfo }))
         .mockImplementationOnce(() => ({ body: railsVersions }));
 
-      expect(await rubygems.getPkgReleases(params)).toMatchSnapshot();
+      expect(await rubygems.getReleases(params)).toMatchSnapshot();
     });
 
     it('returns null if mismatched name', async () => {
       got.mockReturnValueOnce({ body: { ...railsInfo, name: 'oooops' } });
-      expect(await rubygems.getPkgReleases(params)).toBeNull();
+      expect(await rubygems.getReleases(params)).toBeNull();
     });
 
     afterEach(() => {

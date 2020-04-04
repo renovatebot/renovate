@@ -561,7 +561,7 @@ async function getLabels(
 }
 
 /**
- * docker.getPkgReleases
+ * docker.getReleases
  *
  * A docker image usually looks something like this: somehost.io/owner/repo:8.1.0-alpine
  * In the above:
@@ -571,7 +571,7 @@ async function getLabels(
  *
  * This function will filter only tags that contain a semver version
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

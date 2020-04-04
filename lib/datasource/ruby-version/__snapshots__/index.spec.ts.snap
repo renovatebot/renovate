@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gradle getPkgReleases parses real data 1`] = `
+exports[`datasource/gradle getReleases parses real data 1`] = `
 Object {
   "homepage": "https://www.ruby-lang.org",
   "releases": Array [

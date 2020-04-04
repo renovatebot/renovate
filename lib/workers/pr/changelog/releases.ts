@@ -1,4 +1,5 @@
 import { getPkgReleases, Release } from '../../../datasource';
+import { isGetPkgReleasesConfig } from '../../../datasource/common';
 import { logger } from '../../../logger';
 import { get, VersioningApi } from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
@@ -23,6 +24,10 @@ export async function getInRangeReleases(
   config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
   const { versioning, fromVersion, toVersion, depName, datasource } = config;
+  // istanbul ignore if
+  if (!isGetPkgReleasesConfig(config)) {
+    return null;
+  }
   try {
     const pkgReleases = (await getPkgReleases(config)).releases;
     const version = get(versioning);

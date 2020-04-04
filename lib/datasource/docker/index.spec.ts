@@ -269,7 +269,7 @@ describe('api/docker', () => {
       ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
   });
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       global.repoCache = {};
@@ -404,7 +404,7 @@ describe('api/docker', () => {
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await docker.getPkgReleases({
+      const res = await docker.getReleases({
         lookupName: 'my/node',
       });
       expect(res).toBeNull();

@@ -306,11 +306,11 @@ async function packageLookup(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult> {
-  logger.trace(`getPkgReleases(${lookupName})`);
+  logger.trace(`getReleases(${lookupName})`);
 
   let res: ReleaseResult;
   const registries = is.nonEmptyArray(registryUrls)

@@ -8,6 +8,7 @@ import {
   supportsDigests,
   getDigest,
   Release,
+  isGetPkgReleasesConfig,
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
@@ -141,6 +142,12 @@ export async function lookupUpdates(
   const isValid = currentValue && version.isValid(currentValue);
   if (!isValid) {
     res.skipReason = SkipReason.InvalidValue;
+  }
+
+  // istanbul ignore if
+  if (!isGetPkgReleasesConfig(config)) {
+    res.skipReason = SkipReason.Unknown;
+    return res;
   }
 
   if (isValid) {
