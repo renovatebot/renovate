@@ -8,20 +8,18 @@ import { exec, ExecOptions } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
 import { VERSION_REGEX } from './search';
-import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
+import { gradleWrapperFileName, prepareGradleCommand } from '../gradle';
 
 async function addIfUpdated(
   status: Git.StatusResult,
-  projectDir: string,
   fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
-    const filePath = resolve(projectDir, `./${fileProjectPath}`);
     return {
       artifactError: null,
       file: {
         name: fileProjectPath,
-        contents: await readLocalFile(filePath),
+        contents: await readLocalFile(fileProjectPath),
       },
     };
   }
@@ -72,9 +70,7 @@ export async function updateArtifacts({
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(async fileProjectPath =>
-          addIfUpdated(status, projectDir, fileProjectPath)
-        )
+        ].map(async fileProjectPath => addIfUpdated(status, fileProjectPath))
       )
     ).filter(e => e != null);
     logger.debug(

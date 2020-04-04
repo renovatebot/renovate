@@ -5,6 +5,7 @@ import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
 import { mocked } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import { setFsConfig } from '../../util/fs';
 
 const platform = mocked(_platform);
 const config = {
@@ -29,6 +30,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.resetModules();
       jest.resetAllMocks();
       jest.clearAllMocks();
+      setFsConfig(config);
     });
 
     ifSystemSupportsGradle(6).it('replaces existing value', async () => {
@@ -107,6 +109,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.resetModules();
       jest.resetAllMocks();
       jest.clearAllMocks();
+      setFsConfig(config);
     });
 
     ifSystemSupportsGradle(6).it('up to date', async () => {
@@ -157,6 +160,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.resetModules();
       jest.resetAllMocks();
       jest.clearAllMocks();
+      setFsConfig(config);
     });
 
     ifSystemSupportsGradle(6).it('error handling - getRepoStatus', async () => {
@@ -210,6 +214,7 @@ describe('manager/gradle-wrapper/update', () => {
       jest.resetModules();
       jest.resetAllMocks();
       jest.clearAllMocks();
+      setFsConfig(config);
     });
 
     ifSystemSupportsGradle(6).it(
