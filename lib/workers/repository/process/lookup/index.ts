@@ -334,6 +334,7 @@ export async function lookupUpdates(
         'canBeUnpublished',
         'downloadUrl',
         'checksumUrl',
+        'newDigest',
       ];
       releaseFields.forEach(field => {
         if (updateRelease[field] !== undefined) {
@@ -364,7 +365,7 @@ export async function lookupUpdates(
     }
   }
   // Add digests if necessary
-  if (await supportsDigests(config)) {
+  if (config.newDigest || (await supportsDigests(config))) {
     if (
       config.currentDigest &&
       config.datasource !== datasourceGitSubmodules.id
@@ -402,7 +403,8 @@ export async function lookupUpdates(
     // update digest for all
     for (const update of res.updates) {
       if (config.pinDigests || config.currentDigest) {
-        update.newDigest = await getDigest(config, update.newValue);
+        update.newDigest =
+          update.newDigest || (await getDigest(config, update.newValue));
         if (update.newDigest) {
           update.newDigestShort = update.newDigest
             .replace('sha256:', '')
