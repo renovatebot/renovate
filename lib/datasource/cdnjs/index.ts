@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+import { cacheAble } from '../cache';
 
 export const id = 'cdnjs';
 
@@ -27,22 +28,13 @@ export interface CdnjsResponse {
   assets?: CdnjsAsset[];
 }
 
-async function getLibrary(library: string): Promise<CdnjsResponse> {
-  const cacheNamespace = `datasource-${id}`;
-  const cacheMinutes = 60;
-  const cacheKey = library;
-  const cachedResult = await renovateCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
+async function downloadLibrary(library: string): Promise<CdnjsResponse> {
   const url = `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
-  const res = (await http.getJson<CdnjsResponse>(url)).body;
-  await renovateCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
-  return res;
+  return (await http.getJson<CdnjsResponse>(url)).body;
+}
+
+async function getLibrary(library: string): Promise<CdnjsResponse> {
+  return cacheAble<CdnjsResponse>(id, library, downloadLibrary, 60);
 }
 
 export async function getDigest(
