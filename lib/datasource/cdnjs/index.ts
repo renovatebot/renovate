@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
-import { cacheAble } from '../cache';
+import { cacheAble, CachePromise } from '../cache';
 
 export const id = 'cdnjs';
 
@@ -22,9 +22,7 @@ export interface CdnjsResponse {
   assets?: CdnjsAsset[];
 }
 
-async function downloadLibrary(
-  library: string
-): Promise<{ data: CdnjsResponse }> {
+async function downloadLibrary(library: string): CachePromise<CdnjsResponse> {
   const url = `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
   return { data: (await http.getJson<CdnjsResponse>(url)).body };
 }

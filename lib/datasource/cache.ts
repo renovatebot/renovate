@@ -1,8 +1,30 @@
 import { logger } from '../logger';
 
-export type CacheLoadCallback<TArg, TResult> = (
+/**
+ * Cache callback result which has to be returned by the `CacheCallback` function.
+ */
+export interface CacheResult<TResult = unknown> {
+  /**
+   * The data which should be added to the cache
+   */
+  data: TResult;
+  /**
+   * `data` can only be cached if this is not `true`
+   */
+  isPrivate?: boolean;
+}
+
+/**
+ * Simple helper type for defining the `CacheCallback` function return type
+ */
+export type CachePromise<TResult = unknown> = Promise<CacheResult<TResult>>;
+
+/**
+ * The callback function which is called on cache miss.
+ */
+export type CacheCallback<TArg, TResult = unknown> = (
   lookup: TArg
-) => Promise<TResult>;
+) => CachePromise<TResult>;
 
 export type CacheConfig<TArg, TResult> = {
   /**
@@ -16,7 +38,7 @@ export type CacheConfig<TArg, TResult> = {
   /**
    * Callback to use on cache miss to load result
    */
-  cb: CacheLoadCallback<TArg, { data: TResult; isPrivate?: boolean }>;
+  cb: CacheCallback<TArg, TResult>;
   /**
    * Time to cache result in minutes
    */
@@ -30,7 +52,7 @@ export type CacheConfig<TArg, TResult> = {
 export async function cacheAble<TArg, TResult = unknown>({
   id,
   lookup,
-  cb: func,
+  cb,
   minutes = 60,
 }: CacheConfig<TArg, TResult>): Promise<TResult> {
   const cacheNamespace = `datasource-${id}`;
@@ -44,7 +66,7 @@ export async function cacheAble<TArg, TResult = unknown>({
     logger.trace({ id, lookup }, 'datasource cachedResult');
     return cachedResult;
   }
-  const { data, isPrivate } = await func(lookup);
+  const { data, isPrivate } = await cb(lookup);
   // istanbul ignore if
   if (isPrivate) {
     logger.trace({ id, lookup }, 'Skipping datasource cache for private data');
