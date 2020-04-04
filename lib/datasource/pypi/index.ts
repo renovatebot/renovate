@@ -157,7 +157,7 @@ async function getSimpleDependency(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   compatibility,
   lookupName,
   registryUrls,

@@ -96,9 +96,9 @@ describe('datasource/maven', () => {
     return versions.map(v => ({ version: v }));
   }
 
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     it('should return empty if library is not found', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'unknown:unknown',
         registryUrls: [
@@ -110,7 +110,7 @@ describe('datasource/maven', () => {
     });
 
     it('should simply return all versions of a specific library', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'org.hamcrest:hamcrest-core',
         registryUrls: [
@@ -133,7 +133,7 @@ describe('datasource/maven', () => {
     });
 
     it('should return versions in all repositories for a specific library', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
@@ -147,7 +147,7 @@ describe('datasource/maven', () => {
     });
 
     it('should return all versions of a specific library for http repositories', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: ['https://repo.maven.apache.org/maven2/'],
@@ -156,7 +156,7 @@ describe('datasource/maven', () => {
     });
 
     it('should return all versions of a specific library if a repository fails', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
@@ -178,7 +178,7 @@ describe('datasource/maven', () => {
 
       expect.assertions(1);
       await expect(
-        maven.getPkgReleases({
+        maven.getReleases({
           ...config,
           lookupName: 'org:artifact',
           registryUrls: ['http://central.maven.org/maven2/'],
@@ -193,7 +193,7 @@ describe('datasource/maven', () => {
 
       expect.assertions(1);
       await expect(
-        maven.getPkgReleases({
+        maven.getReleases({
           ...config,
           lookupName: 'org:artifact',
           registryUrls: ['https://repo.maven.apache.org/maven2/'],
@@ -202,7 +202,7 @@ describe('datasource/maven', () => {
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
@@ -228,7 +228,7 @@ describe('datasource/maven', () => {
       nock('http://invalid_metadata_repo')
         .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
         .reply(200, invalidMavenMetadata);
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
@@ -246,7 +246,7 @@ describe('datasource/maven', () => {
       nock('http://invalid_metadata_repo')
         .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
         .reply(200, invalidMavenMetadata);
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
@@ -258,7 +258,7 @@ describe('datasource/maven', () => {
     });
 
     it('should return all versions of a specific library if a repository does not end with /', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: ['https://repo.maven.apache.org/maven2'],
@@ -267,14 +267,14 @@ describe('datasource/maven', () => {
     });
 
     it('should return null if no repositories defined', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
       });
       expect(releases).not.toBeNull();
     });
     it('should return null for invalid registryUrls', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         // eslint-disable-next-line no-template-curly-in-string
@@ -283,7 +283,7 @@ describe('datasource/maven', () => {
       expect(releases).toBeNull();
     });
     it('should support scm.url values prefixed with "scm:"', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'io.realm:realm-gradle-plugin',
         registryUrls: ['file://lib/datasource/maven/__fixtures__/jcenter/'],
@@ -292,7 +292,7 @@ describe('datasource/maven', () => {
     });
 
     it('should remove authentication header when redirected with authentication in query string', async () => {
-      const releases = await maven.getPkgReleases({
+      const releases = await maven.getReleases({
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: ['http://frontend_for_private_s3_repository/maven2'],

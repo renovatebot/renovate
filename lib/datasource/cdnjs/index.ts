@@ -51,9 +51,9 @@ export async function getDigest(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
-}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const { library, assetName } = getParts(lookupName);
   try {
     const { assets, homepage, repository } = await getLibrary(library);

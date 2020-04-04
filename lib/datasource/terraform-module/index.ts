@@ -45,13 +45,13 @@ interface TerraformRelease {
 }
 
 /**
- * terraform.getPkgReleases
+ * terraform.getReleases
  *
  * This function will fetch a package from the specified Terraform registry and return all semver versions.
  *  - `sourceUrl` is supported of "source" field is set
  *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

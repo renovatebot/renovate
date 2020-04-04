@@ -22,7 +22,6 @@ export interface BranchUpgradeConfig
   currentDigestShort?: string;
   currentValue?: string;
   currentVersion?: string;
-
   endpoint?: string;
   excludeCommitPaths?: string[];
   group?: GroupConfig;
