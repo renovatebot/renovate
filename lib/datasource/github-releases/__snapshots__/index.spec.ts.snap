@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/github-releases getPkgReleases returns releases 1`] = `
+exports[`datasource/github-releases getReleases returns releases 1`] = `
 Object {
   "releases": Array [
     Object {

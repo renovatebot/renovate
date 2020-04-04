@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gitlab-tags getPkgReleases returns tags 1`] = `
+exports[`datasource/gitlab-tags getReleases returns tags 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -23,7 +23,7 @@ Object {
 }
 `;
 
-exports[`datasource/gitlab-tags getPkgReleases returns tags with default registry 1`] = `
+exports[`datasource/gitlab-tags getReleases returns tags with default registry 1`] = `
 Object {
   "releases": Array [
     Object {

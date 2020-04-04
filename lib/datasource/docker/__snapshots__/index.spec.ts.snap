@@ -1,11 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
+exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -15,7 +22,14 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
         "json": true,
+        "method": "get",
       },
     ],
     Array [
@@ -24,12 +38,25 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "authorization": "Bearer some-token ",
         },
-        "json": true,
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -39,6 +66,13 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
   ],
@@ -88,12 +122,19 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
 }
 `;
 
-exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
+exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -103,7 +144,14 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
         "json": true,
+        "method": "get",
       },
     ],
     Array [
@@ -112,12 +160,25 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "authorization": "Bearer some-token ",
         },
-        "json": true,
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -127,6 +188,13 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
   ],
@@ -176,12 +244,19 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
 }
 `;
 
-exports[`api/docker getPkgReleases adds no library/ prefix for other registries 1`] = `
+exports[`api/docker getReleases adds no library/ prefix for other registries 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       "https://k8s.gcr.io/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -191,7 +266,14 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
         "json": true,
+        "method": "get",
       },
     ],
     Array [
@@ -200,12 +282,25 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "authorization": "Bearer some-token ",
         },
-        "json": true,
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
     Array [
       "https://k8s.gcr.io/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -215,6 +310,13 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
   ],
@@ -264,12 +366,19 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
 }
 `;
 
-exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
+exports[`api/docker getReleases uses custom registry in depName 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       "https://registry.company.com/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -277,12 +386,25 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
       "https://registry.company.com/v2/node/tags/list?n=10000",
       Object {
         "headers": Object {},
-        "json": true,
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
     Array [
       "https://registry.company.com/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -313,11 +435,18 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
 }
 `;
 
-exports[`api/docker getPkgReleases uses custom registry with registryUrls 1`] = `
+exports[`api/docker getReleases uses custom registry with registryUrls 1`] = `
 Array [
   Array [
     "https://registry.company.com/v2/",
     Object {
+      "hooks": Object {
+        "beforeRedirect": Array [
+          [Function],
+        ],
+      },
+      "hostType": "docker",
+      "method": "get",
       "throwHttpErrors": false,
     },
   ],
@@ -325,19 +454,38 @@ Array [
     "https://registry.company.com/v2/node/tags/list?n=10000",
     Object {
       "headers": Object {},
-      "json": true,
+      "hooks": Object {
+        "beforeRedirect": Array [
+          [Function],
+        ],
+      },
+      "hostType": "docker",
+      "method": "get",
     },
   ],
   Array [
     "https://api.github.com/user/9287/repos?page=3&per_page=100",
     Object {
       "headers": Object {},
-      "json": true,
+      "hooks": Object {
+        "beforeRedirect": Array [
+          [Function],
+        ],
+      },
+      "hostType": "docker",
+      "method": "get",
     },
   ],
   Array [
     "https://registry.company.com/v2/",
     Object {
+      "hooks": Object {
+        "beforeRedirect": Array [
+          [Function],
+        ],
+      },
+      "hostType": "docker",
+      "method": "get",
       "throwHttpErrors": false,
     },
   ],
@@ -347,17 +495,31 @@ Array [
       "headers": Object {
         "accept": "application/vnd.docker.distribution.manifest.v2+json",
       },
+      "hooks": Object {
+        "beforeRedirect": Array [
+          [Function],
+        ],
+      },
+      "hostType": "docker",
+      "method": "get",
     },
   ],
 ]
 `;
 
-exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
+exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],
@@ -365,12 +527,25 @@ exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/tags/list?n=1000",
       Object {
         "headers": Object {},
-        "json": true,
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
       },
     ],
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
       Object {
+        "hooks": Object {
+          "beforeRedirect": Array [
+            [Function],
+          ],
+        },
+        "hostType": "docker",
+        "method": "get",
         "throwHttpErrors": false,
       },
     ],

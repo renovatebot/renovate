@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
@@ -12,18 +12,18 @@ import {
 
 export const id = 'gradle-version';
 
+const http = new Http(id);
+
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
 interface GradleRelease {
-  body: {
-    snapshot?: boolean;
-    nightly?: boolean;
-    rcFor?: string;
-    version: string;
-    downloadUrl?: string;
-    checksumUrl?: string;
-    buildTime?: string;
-  }[];
+  snapshot?: boolean;
+  nightly?: boolean;
+  rcFor?: string;
+  version: string;
+  downloadUrl?: string;
+  checksumUrl?: string;
+  buildTime?: string;
 }
 
 const buildTimeRegex = regEx(
@@ -40,7 +40,7 @@ function formatBuildTime(timeStr: string): string | null {
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult> {
   const versionsUrls = is.nonEmptyArray(registryUrls)
@@ -50,10 +50,7 @@ export async function getPkgReleases({
   const allReleases: Release[][] = await Promise.all(
     versionsUrls.map(async url => {
       try {
-        const response: GradleRelease = await got(url, {
-          hostType: id,
-          json: true,
-        });
+        const response = await http.getJson<GradleRelease[]>(url);
         const releases = response.body
           .filter(release => !release.snapshot && !release.nightly)
           .filter(

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gradle-version getPkgReleases calls configured registryUrls 1`] = `
+exports[`datasource/gradle-version getReleases calls configured registryUrls 1`] = `
 Object {
   "homepage": "https://gradle.org",
   "releases": Array [
@@ -801,7 +801,7 @@ Object {
 }
 `;
 
-exports[`datasource/gradle-version getPkgReleases processes real data 1`] = `
+exports[`datasource/gradle-version getReleases processes real data 1`] = `
 Object {
   "homepage": "https://gradle.org",
   "releases": Array [
