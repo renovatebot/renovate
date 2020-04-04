@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
 export interface CdnjsAsset {
@@ -9,6 +9,8 @@ export interface CdnjsAsset {
 }
 
 export const id = 'cdnjs';
+
+const http = new Http(id);
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 60;
@@ -26,36 +28,9 @@ export function depUrl(library: string): string {
   return `https://api.cdnjs.com/libraries/${library}?fields=homepage,repository,assets`;
 }
 
-export async function getDigest(
-  { lookupName }: GetReleasesConfig,
-  newValue?: string
-): Promise<string | null> {
-  let result = null;
-  const library = lookupName.split('/')[0];
-  const url = depUrl(library);
-  const assetName = lookupName.replace(`${library}/`, '');
-  let res = null;
-  try {
-    res = await got(url, { hostType: id, json: true });
-  } catch (e) /* istanbul ignore next */ {
-    return null;
-  }
-  const assets: CdnjsAsset[] = res.body && res.body.assets;
-  const asset = assets && assets.find(({ version }) => version === newValue);
-  const hash = asset && asset.sri && asset.sri[assetName];
-  if (hash) result = hash;
-  return result;
-}
-
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
-}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('CDNJS lookup failure: empty lookupName');
-    return null;
-  }
-
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [library, ...assetParts] = lookupName.split('/');
   const assetName = assetParts.join('/');
 
@@ -65,12 +40,14 @@ export async function getPkgReleases({
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) return cachedResult;
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   const url = depUrl(library);
 
   try {
-    const res = await got(url, { hostType: id, json: true });
+    const res = await http.getJson(url);
 
     const cdnjsResp: CdnjsResponse = res.body;
 
@@ -83,12 +60,16 @@ export async function getPkgReleases({
 
     const releases = assets
       .filter(({ files }) => files.includes(assetName))
-      .map(({ version }) => ({ version }));
+      .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
 
     const result: ReleaseResult = { releases };
 
-    if (homepage) result.homepage = homepage;
-    if (repository && repository.url) result.sourceUrl = repository.url;
+    if (homepage) {
+      result.homepage = homepage;
+    }
+    if (repository && repository.url) {
+      result.sourceUrl = repository.url;
+    }
 
     await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
 

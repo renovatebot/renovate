@@ -10,3 +10,8 @@ coverage
 **/__mocks__/**
 **/*.d.ts
 /config.js
+
+# generated code
+**/*.generated.ts
+/tools/dist
+/patches

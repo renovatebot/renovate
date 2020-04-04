@@ -49,12 +49,14 @@ async function resolvePluginReleases(
         }
       }
     }
-    if (releases.length) return [...new Set(releases)].sort(compare);
+    if (releases.length) {
+      return [...new Set(releases)].sort(compare);
+    }
   }
   return resolvePackageReleases(rootUrl, artifact, scalaVersion);
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls: configRegistryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

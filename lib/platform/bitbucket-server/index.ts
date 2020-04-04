@@ -20,7 +20,6 @@ import {
   EnsureCommentConfig,
   EnsureIssueResult,
   EnsureIssueConfig,
-  BranchStatus,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,12 +30,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import {
-  BRANCH_STATUS_FAILED,
-  BRANCH_STATUS_FAILURE,
-  BRANCH_STATUS_PENDING,
-  BRANCH_STATUS_SUCCESS,
-} from '../../constants/branch-constants';
+import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -165,8 +159,11 @@ export async function initRepo({
       const { body } = await api.get<FileData>(
         `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
       );
-      if (!body.isLastPage) logger.warn('Renovate config to big: ' + body.size);
-      else renovateConfig = JSON.parse(body.lines.join());
+      if (!body.isLastPage) {
+        logger.warn('Renovate config to big: ' + body.size);
+      } else {
+        renovateConfig = JSON.parse(body.lines.join());
+      }
     } catch {
       // Do nothing
     }
@@ -237,13 +234,23 @@ export async function initRepo({
   }
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
+export async function getRepoForceRebase(): Promise<boolean> {
   logger.debug(`getRepoForceRebase()`);
-  // TODO if applicable
-  // This function should return true only if the user has enabled a setting on the repo that enforces PRs to be kept up to date with master
-  // In such cases we rebase Renovate branches every time they fall behind
-  // In GitHub this is part of "branch protection"
-  return Promise.resolve(false);
+
+  // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
+  const res = await api.get(
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`
+  );
+
+  // If the default merge strategy contains `ff-only` the PR can only be merged
+  // if it is up to date with the base branch.
+  // The current options for id are:
+  // no-ff, ff, ff-only, rebase-no-ff, rebase-ff-only, squash, squash-ff-only
+  return Boolean(
+    res.body.mergeConfig &&
+      res.body.mergeConfig.defaultStrategy &&
+      res.body.mergeConfig.defaultStrategy.id.indexOf('ff-only') >= 0
+  );
 }
 
 export async function setBaseBranch(
@@ -536,7 +543,7 @@ export async function getBranchStatus(
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
     logger.debug('Status checks disabled = returning "success"');
-    return BRANCH_STATUS_SUCCESS;
+    return BranchStatus.green;
   }
 
   if (!(await branchExists(branchName))) {
@@ -548,14 +555,18 @@ export async function getBranchStatus(
 
     logger.debug({ commitStatus }, 'branch status check result');
 
-    if (commitStatus.failed > 0) return BRANCH_STATUS_FAILED;
-    if (commitStatus.inProgress > 0) return BRANCH_STATUS_PENDING;
+    if (commitStatus.failed > 0) {
+      return BranchStatus.red;
+    }
+    if (commitStatus.inProgress > 0) {
+      return BranchStatus.yellow;
+    }
     return commitStatus.successful > 0
-      ? BRANCH_STATUS_SUCCESS
-      : BRANCH_STATUS_PENDING;
+      ? BranchStatus.green
+      : BranchStatus.yellow;
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return BRANCH_STATUS_FAILED;
+    return BranchStatus.red;
   }
 }
 
@@ -576,7 +587,7 @@ async function getStatusCheck(
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
   try {
@@ -586,12 +597,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return BRANCH_STATUS_SUCCESS;
+            return BranchStatus.green;
           case 'INPROGRESS':
-            return BRANCH_STATUS_PENDING;
+            return BranchStatus.yellow;
           case 'FAILED':
           default:
-            return BRANCH_STATUS_FAILURE;
+            return BranchStatus.red;
         }
       }
     }
@@ -626,13 +637,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case BRANCH_STATUS_SUCCESS:
+      case BranchStatus.green:
         body.state = 'SUCCESSFUL';
         break;
-      case BRANCH_STATUS_PENDING:
+      case BranchStatus.yellow:
         body.state = 'INPROGRESS';
         break;
-      case BRANCH_STATUS_FAILURE:
+      case BranchStatus.red:
       default:
         body.state = 'FAILED';
         break;

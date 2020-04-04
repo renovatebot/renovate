@@ -8,12 +8,14 @@ import {
   supportsDigests,
   getDigest,
   Release,
+  isGetPkgReleasesConfig,
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
 import { RenovateConfig, UpdateType } from '../../../../config';
 import { clone } from '../../../../util/clone';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { SkipReason } from '../../../../types';
 
 export interface LookupWarning {
   updateType: 'warning';
@@ -28,7 +30,7 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string;
-  skipReason?: string;
+  skipReason: SkipReason;
   releases: Release[];
 
   updates: LookupUpdate[];
@@ -138,7 +140,15 @@ export async function lookupUpdates(
   const res: UpdateResult = { updates: [], warnings: [] } as any;
 
   const isValid = currentValue && version.isValid(currentValue);
-  if (!isValid) res.skipReason = 'invalid-value';
+  if (!isValid) {
+    res.skipReason = SkipReason.InvalidValue;
+  }
+
+  // istanbul ignore if
+  if (!isGetPkgReleasesConfig(config)) {
+    res.skipReason = SkipReason.Unknown;
+    return res;
+  }
 
   if (isValid) {
     const dependency = clone(await getPkgReleases(config));
@@ -324,6 +334,7 @@ export async function lookupUpdates(
         'canBeUnpublished',
         'downloadUrl',
         'checksumUrl',
+        'newDigest',
       ];
       releaseFields.forEach(field => {
         if (updateRelease[field] !== undefined) {
@@ -344,17 +355,17 @@ export async function lookupUpdates(
     }
     res.updates = res.updates.concat(Object.values(buckets));
   } else if (!currentValue) {
-    res.skipReason = 'unsupported-value';
+    res.skipReason = SkipReason.UnsupportedValue;
   } else {
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
-      res.skipReason = 'unsupported-value';
+      res.skipReason = SkipReason.UnsupportedValue;
     } else {
       delete res.skipReason;
     }
   }
   // Add digests if necessary
-  if (supportsDigests(config)) {
+  if (config.newDigest || (await supportsDigests(config))) {
     if (
       config.currentDigest &&
       config.datasource !== datasourceGitSubmodules.id
@@ -392,7 +403,8 @@ export async function lookupUpdates(
     // update digest for all
     for (const update of res.updates) {
       if (config.pinDigests || config.currentDigest) {
-        update.newDigest = await getDigest(config, update.newValue);
+        update.newDigest =
+          update.newDigest || (await getDigest(config, update.newValue));
         if (update.newDigest) {
           update.newDigestShort = update.newDigest
             .replace('sha256:', '')

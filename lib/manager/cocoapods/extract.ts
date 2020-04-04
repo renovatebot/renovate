@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourcePod from '../../datasource/pod';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { SkipReason } from '../../types';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
@@ -26,6 +27,9 @@ export interface ParsedLine {
 
 export function parseLine(line: string): ParsedLine {
   const result: ParsedLine = {};
+  if (!line) {
+    return result;
+  }
   for (const regex of Object.values(regexMappings)) {
     const match = regex.exec(line.replace(/#.*$/, ''));
     if (match && match.groups) {
@@ -38,8 +42,12 @@ export function parseLine(line: string): ParsedLine {
       ? `${result.spec}/${result.subspec}`
       : result.spec;
     const groupName = result.spec;
-    if (depName) result.depName = depName;
-    if (groupName) result.groupName = groupName;
+    if (depName) {
+      result.depName = depName;
+    }
+    if (groupName) {
+      result.groupName = groupName;
+    }
     delete result.spec;
     delete result.subspec;
   }
@@ -96,7 +104,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: 'unknown-version',
+        skipReason: SkipReason.UnknownVersion,
       };
 
       if (currentValue) {
@@ -115,14 +123,14 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep = {
             depName,
             groupName,
-            skipReason: 'git-dependency',
+            skipReason: SkipReason.GitDependency,
           };
         }
       } else if (path) {
         dep = {
           depName,
           groupName,
-          skipReason: 'path-dependency',
+          skipReason: SkipReason.PathDependency,
         };
       }
 

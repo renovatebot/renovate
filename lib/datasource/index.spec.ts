@@ -4,6 +4,7 @@ import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceNpm from './npm';
 import { mocked } from '../../test/util';
+import { loadModules } from '../util/modules';
 
 jest.mock('./docker');
 jest.mock('./npm');
@@ -15,15 +16,47 @@ describe('datasource/index', () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
   });
-  it('returns if digests are supported', () => {
+  it('validates dataource', async () => {
+    function validateDatasource(
+      module: datasource.Datasource,
+      name: string
+    ): boolean {
+      if (!module.getReleases) {
+        return false;
+      }
+      if (module.id !== name) {
+        return false;
+      }
+      return true;
+    }
+    const dss = datasource.getDatasources();
+
+    const loadedDs = loadModules(__dirname, validateDatasource);
+    expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
+
+    for (const dsName of dss.keys()) {
+      const ds = await dss.get(dsName);
+      expect(validateDatasource(ds, dsName)).toBe(true);
+    }
+  });
+  it('returns if digests are supported', async () => {
     expect(
-      datasource.supportsDigests({ datasource: datasourceGithubTags.id })
+      await datasource.supportsDigests({ datasource: datasourceGithubTags.id })
     ).toBe(true);
   });
   it('returns null for no datasource', async () => {
     expect(
       await datasource.getPkgReleases({
+        datasource: null,
         depName: 'some/dep',
+      })
+    ).toBeNull();
+  });
+  it('returns null for no lookupName', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'npm',
+        depName: null,
       })
     ).toBeNull();
   });
@@ -44,7 +77,7 @@ describe('datasource/index', () => {
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'react-native',
@@ -54,7 +87,7 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'node',
@@ -63,7 +96,7 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('trims sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({
+    npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
       releases: [],
     });
@@ -74,7 +107,7 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toEqual('https://abc.com');
   });
   it('massages sourceUrl', async () => {
-    npmDatasource.getPkgReleases.mockResolvedValue({
+    npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: 'scm:git@github.com:Jasig/cas.git',
       releases: [],
     });

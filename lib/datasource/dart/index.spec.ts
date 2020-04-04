@@ -1,6 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import { getPkgReleases } from '.';
+import { getReleases } from '.';
 
 const got: any = _got;
 
@@ -14,13 +14,13 @@ const body: any = JSON.parse(
 jest.mock('../../util/got');
 
 describe('datasource/dart', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       global.repoCache = {};
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
-      expect(await getPkgReleases({ lookupName: 'non_sense' })).toBeNull();
+      expect(await getReleases({ lookupName: 'non_sense' })).toBeNull();
     });
     it('returns null for empty fields', async () => {
       const withoutVersions = {
@@ -29,7 +29,7 @@ describe('datasource/dart', () => {
       };
       got.mockReturnValueOnce({ body: withoutVersions });
       expect(
-        await getPkgReleases({ lookupName: 'shared_preferences' })
+        await getReleases({ lookupName: 'shared_preferences' })
       ).toBeNull();
 
       const withoutLatest = {
@@ -38,7 +38,7 @@ describe('datasource/dart', () => {
       };
       got.mockReturnValueOnce({ body: withoutLatest });
       expect(
-        await getPkgReleases({ lookupName: 'shared_preferences' })
+        await getReleases({ lookupName: 'shared_preferences' })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -48,7 +48,7 @@ describe('datasource/dart', () => {
         })
       );
       expect(
-        await getPkgReleases({ lookupName: 'shared_preferences' })
+        await getReleases({ lookupName: 'shared_preferences' })
       ).toBeNull();
     });
     it('throws for 5xx', async () => {
@@ -59,7 +59,7 @@ describe('datasource/dart', () => {
       );
       let e;
       try {
-        await getPkgReleases({ lookupName: 'shared_preferences' });
+        await getReleases({ lookupName: 'shared_preferences' });
       } catch (err) {
         e = err;
       }
@@ -71,12 +71,12 @@ describe('datasource/dart', () => {
         throw new Error();
       });
       expect(
-        await getPkgReleases({ lookupName: 'shared_preferences' })
+        await getReleases({ lookupName: 'shared_preferences' })
       ).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({ body });
-      const res = await getPkgReleases({
+      const res = await getReleases({
         lookupName: 'shared_preferences',
       });
       expect(res).toMatchSnapshot();

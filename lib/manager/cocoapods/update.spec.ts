@@ -9,6 +9,16 @@ const fileContent = fs.readFileSync(
 
 describe('lib/manager/cocoapods/update', () => {
   describe('updateDependency', () => {
+    it('handles undefined lines', () => {
+      const upgrade = {
+        depName: 'b',
+        managerData: { lineNumber: 999999999 },
+        currentValue: '1.2.3',
+        newValue: '2.0.0',
+      };
+      const res = updateDependency({ fileContent, upgrade });
+      expect(res).toBeNull();
+    });
     it('replaces existing value', () => {
       const upgrade = {
         depName: 'b',

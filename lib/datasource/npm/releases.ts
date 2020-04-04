@@ -2,7 +2,7 @@ import { getDependency } from './get';
 import { setNpmrc } from './npmrc';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   npmrc,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

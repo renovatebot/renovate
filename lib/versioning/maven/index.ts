@@ -27,12 +27,20 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 function matches(a: string, b: string): boolean {
-  if (!b) return false;
-  if (isVersion(b)) return equals(a, b);
+  if (!b) {
+    return false;
+  }
+  if (isVersion(b)) {
+    return equals(a, b);
+  }
   const ranges = parseRange(b);
-  if (!ranges) return false;
+  if (!ranges) {
+    return false;
+  }
   return ranges.reduce((result, range): any => {
-    if (result) return result;
+    if (result) {
+      return result;
+    }
 
     const { leftType, leftValue, rightType, rightValue } = range;
 
@@ -117,8 +125,12 @@ const maxSatisfyingVersion = (versions: string[], range: string): string => {
   // istanbul ignore next
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
-      if (!result) return version;
-      if (isGreaterThan(version, result)) return version;
+      if (!result) {
+        return version;
+      }
+      if (isGreaterThan(version, result)) {
+        return version;
+      }
     }
     return result;
   }, null);

@@ -1098,7 +1098,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = datasourceDocker.id;
       config.pinDigests = true;
-      docker.getPkgReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1119,7 +1119,7 @@ describe('workers/repository/process/lookup', () => {
         config.depName = 'node';
         config.versioning = dockerVersioning.id;
         config.datasource = datasourceDocker.id;
-        docker.getPkgReleases.mockResolvedValueOnce({
+        docker.getReleases.mockResolvedValueOnce({
           releases: [
             { version: '8.1.0' },
             { version: '8.1.5' },
@@ -1141,7 +1141,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = datasourceDocker.id;
       config.pinDigests = true;
-      docker.getPkgReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1160,7 +1160,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = datasourceDocker.id;
       config.pinDigests = true;
-      docker.getPkgReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1182,7 +1182,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'node';
       config.datasource = datasourceDocker.id;
       config.pinDigests = true;
-      docker.getPkgReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1205,7 +1205,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = datasourceDocker.id;
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getPkgReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1226,7 +1226,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = datasourceDocker.id;
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getPkgReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: 'alpine',
@@ -1244,9 +1244,10 @@ describe('workers/repository/process/lookup', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles git submodule update', async () => {
+      config.depName = 'some-path';
       config.versioning = gitVersioning.id;
       config.datasource = datasourceGitSubmodules.id;
-      gitSubmodules.getPkgReleases.mockResolvedValueOnce({
+      gitSubmodules.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',

@@ -2,14 +2,19 @@ import { safeLoad } from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import * as datasourceDart from '../../datasource/dart';
+import { SkipReason } from '../../types';
 
 function getDeps(
   depsObj: { [x: string]: any },
   preset: { depType: string }
 ): PackageDependency[] {
-  if (!depsObj) return [];
+  if (!depsObj) {
+    return [];
+  }
   return Object.keys(depsObj).reduce((acc, depName) => {
-    if (depName === 'meta') return acc;
+    if (depName === 'meta') {
+      return acc;
+    }
 
     const section = depsObj[depName];
 
@@ -17,13 +22,17 @@ function getDeps(
     if (section && section.version) {
       currentValue = section.version.toString();
     } else if (section) {
-      if (typeof section === 'string') currentValue = section;
-      if (typeof section === 'number') currentValue = section.toString();
+      if (typeof section === 'string') {
+        currentValue = section;
+      }
+      if (typeof section === 'number') {
+        currentValue = section.toString();
+      }
     }
 
     const dep: PackageDependency = { ...preset, depName, currentValue };
     if (!currentValue) {
-      dep.skipReason = 'not-a-version';
+      dep.skipReason = SkipReason.NotAVersion;
     }
 
     return [...acc, dep];

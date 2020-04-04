@@ -30,7 +30,7 @@ export async function confirmIfDepUpdated(
   if (
     newUpgrade &&
     newUpgrade.currentValue === newValue &&
-    newUpgrade.currentDigest === newDigest
+    (!newUpgrade.currentDigest || newUpgrade.currentDigest === newDigest)
   ) {
     return true;
   }
@@ -87,9 +87,9 @@ export async function doAutoReplace(
     newValue,
     currentDigest,
     newDigest,
-    autoReplaceData = {},
+    autoReplaceData,
   } = upgrade;
-  const replaceString = autoReplaceData.replaceString || currentValue;
+  const replaceString = autoReplaceData?.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {

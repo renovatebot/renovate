@@ -1,62 +1,86 @@
-import { access, constants, exists } from 'fs-extra';
+import * as os from 'os';
+import * as fs from 'fs-extra';
+import { Stats } from 'fs';
 import upath from 'upath';
-
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import * as mavenVersioning from '../../versioning/maven';
-
+import * as gradleVersioning from '../../versioning/gradle';
 import {
-  init,
-  collectVersionVariables,
-  updateGradleVersion,
-  GradleDependency,
-} from './build-gradle';
-import {
-  createRenovateGradlePlugin,
-  extractDependenciesFromUpdatesReport,
-} from './gradle-updates-report';
-import {
-  PackageFile,
   ExtractConfig,
-  Upgrade,
+  PackageFile,
   UpdateDependencyConfig,
+  Upgrade,
 } from '../common';
 import { platform } from '../../platform';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
+import { BinarySource } from '../../util/exec/common';
+import {
+  collectVersionVariables,
+  GradleDependency,
+  init,
+  updateGradleVersion,
+} from './build-gradle';
+import {
+  createRenovateGradlePlugin,
+  extractDependenciesFromUpdatesReport,
+} from './gradle-updates-report';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
-async function canExecute(path: string): Promise<boolean> {
-  try {
-    await access(path, constants.X_OK);
-    return true;
-  } catch {
-    return false;
+export function gradleWrapperFileName(config: ExtractConfig): string {
+  if (
+    os.platform() === 'win32' &&
+    config?.binarySource !== BinarySource.Docker
+  ) {
+    return 'gradlew.bat';
   }
+  return './gradlew';
 }
 
-async function getGradleCommandLine(
-  config: ExtractConfig,
-  cwd: string
+export async function prepareGradleCommand(
+  gradlewName: string,
+  cwd: string,
+  gradlew: Stats | null,
+  args: string | null
 ): Promise<string> {
-  const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
-
-  const gradlewPath = upath.join(cwd, 'gradlew');
-  const gradlewExists = await exists(gradlewPath);
-  const gradlewExecutable = gradlewExists && (await canExecute(gradlewPath));
-  if (gradlewExecutable) return `./gradlew ${args}`;
-  if (gradlewExists) return `sh gradlew ${args}`;
-
-  return `gradle ${args}`;
+  /* eslint-disable no-bitwise */
+  // istanbul ignore if
+  if (gradlew?.isFile() === true) {
+    // if the file is not executable by others
+    if ((gradlew.mode & 0o1) === 0) {
+      // add the execution permission to the owner, group and others
+      await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
+    }
+    if (args === null) {
+      return gradlewName;
+    }
+    return `${gradlewName} ${args}`;
+  }
+  /* eslint-enable no-bitwise */
+  return null;
 }
 
-async function executeGradle(
+async function prepareGradleCommandFallback(
+  gradlewName: string,
+  cwd: string,
+  gradlew: Stats | null,
+  args: string
+): Promise<string> {
+  const cmd = await prepareGradleCommand(gradlewName, cwd, gradlew, args);
+  if (cmd === null) {
+    return `gradle ${args}`;
+  }
+  return cmd;
+}
+
+export async function executeGradle(
   config: ExtractConfig,
-  cwd: string
+  cwd: string,
+  gradlew: Stats | null
 ): Promise<void> {
   let stdout: string;
   let stderr: string;
@@ -64,7 +88,12 @@ async function executeGradle(
     config.gradle && config.gradle.timeout
       ? config.gradle.timeout * 1000
       : undefined;
-  const cmd = await getGradleCommandLine(config, cwd);
+  const cmd = await prepareGradleCommandFallback(
+    gradleWrapperFileName(config),
+    cwd,
+    gradlew,
+    GRADLE_DEPENDENCY_REPORT_OPTIONS
+  );
   const execOptions: ExecOptions = {
     timeout,
     cwd,
@@ -93,19 +122,21 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
+  let gradlew: Stats | null;
   for (const packageFile of packageFiles) {
+    const dirname = upath.dirname(packageFile);
+    const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
+    gradlew = await fs
+      .stat(upath.join(config.localDir, gradlewPath))
+      .catch(() => null);
+
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;
       break;
     }
 
     // If there is gradlew in the same directory, the directory should be a Gradle project root
-    const dirname = upath.dirname(packageFile);
-    const gradlewPath = upath.join(dirname, 'gradlew');
-    const gradlewExists = await exists(
-      upath.join(config.localDir, gradlewPath)
-    );
-    if (gradlewExists) {
+    if (gradlew?.isFile() === true) {
       rootBuildGradle = packageFile;
       break;
     }
@@ -119,7 +150,7 @@ export async function extractAllPackageFiles(
   const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
 
   await createRenovateGradlePlugin(cwd);
-  await executeGradle(config, cwd);
+  await executeGradle(config, cwd, gradlew);
 
   init();
 
@@ -175,5 +206,5 @@ export const language = LANGUAGE_JAVA;
 export const defaultConfig = {
   fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$'],
   timeout: 600,
-  versioning: mavenVersioning.id,
+  versioning: gradleVersioning.id,
 };

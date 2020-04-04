@@ -4,6 +4,7 @@ import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
 import * as datasourceRubygems from '../../datasource/rubygems';
+import { SkipReason } from '../../types';
 
 export async function extractPackageFile(
   content: string,
@@ -57,7 +58,7 @@ export async function extractPackageFile(
           .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
       } else {
-        dep.skipReason = 'no-version';
+        dep.skipReason = SkipReason.NoVersion;
       }
       if (!dep.skipReason) {
         dep.datasource = datasourceRubygems.id;

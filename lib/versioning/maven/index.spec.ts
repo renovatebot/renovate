@@ -129,7 +129,7 @@ describe('versioning/maven/compare', () => {
     '[,1.0]',
   ];
   it('filters out incorrect ranges', () => {
-    Object.keys(invalidRanges).forEach(rangeStr => {
+    invalidRanges.forEach(rangeStr => {
       const range = parseRange(rangeStr);
       expect(range).toBeNull();
       expect(rangeToStr(range)).toBeNull();

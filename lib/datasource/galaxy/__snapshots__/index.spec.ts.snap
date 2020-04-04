@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/galaxy getPkgReleases processes real data 1`] = `
+exports[`datasource/galaxy getReleases processes real data 1`] = `
 Object {
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
   "releases": Array [
@@ -20,3 +20,5 @@ Object {
   "sourceUrl": "https://github.com/yatesr/ansible-timezone",
 }
 `;
+
+exports[`datasource/galaxy getReleases throws for 5xx 1`] = `[Error: registry-failure]`;

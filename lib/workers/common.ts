@@ -22,7 +22,6 @@ export interface BranchUpgradeConfig
   currentDigestShort?: string;
   currentValue?: string;
   currentVersion?: string;
-
   endpoint?: string;
   excludeCommitPaths?: string[];
   group?: GroupConfig;
@@ -43,6 +42,18 @@ export interface BranchUpgradeConfig
   sourceDirectory?: string;
   updatedPackageFiles?: FileData[];
   updatedArtifacts?: FileData[];
+}
+
+export enum PrResult {
+  AwaitingApproval = 'AwaitingApproval',
+  AwaitingGreenBranch = 'AwaitingGreenBranch',
+  AwaitingNotPending = 'AwaitingNotPending',
+  BlockeddByBranchAutomerge = 'BlockeddByBranchAutomerge',
+  Created = 'Created',
+  Error = 'Error',
+  ErrorAlreadyExists = 'ErrorAlreadyExists',
+  NotUpdated = 'NotUpdated',
+  Updated = 'Updated',
 }
 
 export type ProcessBranchResult =

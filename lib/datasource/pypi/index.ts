@@ -3,10 +3,12 @@ import url from 'url';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { matches } from '../../versioning/pep440';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pypi';
+
+const http = new Http(id);
 
 function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
@@ -35,18 +37,18 @@ async function getDependency(
   hostUrl: string,
   compatibility: Record<string, string>
 ): Promise<ReleaseResult | null> {
-  const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   try {
+    const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
     const dependency: ReleaseResult = { releases: null };
-    const rep = await got(url.parse(lookupUrl), {
-      json: true,
-      hostType: id,
-    });
+    logger.trace({ lookupUrl }, 'Pypi api got lookup');
+    // TODO: fix type
+    const rep = await http.getJson<any>(lookupUrl);
     const dep = rep && rep.body;
     if (!dep) {
-      logger.debug({ dependency: packageName }, 'pip package not found');
+      logger.trace({ dependency: packageName }, 'pip package not found');
       return null;
     }
+    logger.trace({ lookupUrl }, 'Got pypi api result');
     if (
       !(dep.info && normalizeName(dep.info.name) === normalizeName(packageName))
     ) {
@@ -121,12 +123,10 @@ async function getSimpleDependency(
   const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   try {
     const dependency: ReleaseResult = { releases: null };
-    const response = await got<string>(url.parse(lookupUrl), {
-      hostType: id,
-    });
+    const response = await http.get(lookupUrl);
     const dep = response && response.body;
     if (!dep) {
-      logger.debug({ dependency: packageName }, 'pip package not found');
+      logger.trace({ dependency: packageName }, 'pip package not found');
       return null;
     }
     const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
@@ -157,7 +157,7 @@ async function getSimpleDependency(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   compatibility,
   lookupName,
   registryUrls,
@@ -169,17 +169,27 @@ export async function getPkgReleases({
   if (process.env.PIP_INDEX_URL) {
     hostUrls = [process.env.PIP_INDEX_URL];
   }
-  for (let hostUrl of hostUrls) {
+  let dep: ReleaseResult;
+  for (let index = 0; index < hostUrls.length && !dep; index += 1) {
+    let hostUrl = hostUrls[index];
     hostUrl += hostUrl.endsWith('/') ? '' : '/';
-    let dep: ReleaseResult;
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+      logger.trace(
+        { lookupName, hostUrl },
+        'Looking up pypi simple dependency'
+      );
       dep = await getSimpleDependency(lookupName, hostUrl);
     } else {
+      logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
       dep = await getDependency(lookupName, hostUrl, compatibility);
     }
     if (dep !== null) {
-      return dep;
+      logger.trace({ lookupName, hostUrl }, 'Found pypi result');
     }
   }
+  if (dep) {
+    return dep;
+  }
+  logger.debug({ lookupName, registryUrls }, 'No pypi result - returning null');
   return null;
 }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/custom/extract extracts multiple dependencies 1`] = `
+exports[`manager/regex/index extracts multiple dependencies 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -12,7 +12,6 @@ Object {
       "currentValue": "6.2",
       "datasource": "gradle-version",
       "depName": "gradle",
-      "lookupName": undefined,
       "versioning": "maven",
     },
     Object {
@@ -24,7 +23,6 @@ Object {
       "currentValue": "10.19.0",
       "datasource": "github-tags",
       "depName": "nodejs/node",
-      "lookupName": undefined,
       "versioning": "node",
     },
     Object {
@@ -36,7 +34,6 @@ Object {
       "currentValue": "1.9.3",
       "datasource": "github-releases",
       "depName": "composer/composer",
-      "lookupName": undefined,
       "versioning": "semver",
     },
     Object {
@@ -48,7 +45,6 @@ Object {
       "currentValue": "1.9.0",
       "datasource": "rubygems",
       "depName": "cocoapods",
-      "lookupName": undefined,
       "versioning": "ruby",
     },
     Object {
@@ -60,7 +56,6 @@ Object {
       "currentValue": "19.03.1",
       "datasource": "github-releases",
       "depName": "docker/docker-ce",
-      "lookupName": undefined,
       "versioning": "docker",
     },
     Object {
@@ -72,7 +67,6 @@ Object {
       "currentValue": "1.0.0",
       "datasource": "github-releases",
       "depName": "python-poetry/poetry",
-      "lookupName": undefined,
       "versioning": "semver",
     },
     Object {
@@ -84,7 +78,6 @@ Object {
       "currentValue": "6.10.2",
       "datasource": "npm",
       "depName": "npm",
-      "lookupName": undefined,
       "versioning": "semver",
     },
     Object {
@@ -96,7 +89,6 @@ Object {
       "currentValue": "1.19.1",
       "datasource": "npm",
       "depName": "yarn",
-      "lookupName": undefined,
       "versioning": "semver",
     },
   ],

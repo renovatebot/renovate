@@ -19,6 +19,8 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 
+Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`. Renovate does not read/override the config from within each base branch if present.
+
 Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
@@ -45,7 +47,7 @@ Alias values must be properly formatted URIs.
 
 ## assignAutomerge
 
-By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renvoate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks. By configuring this setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 
 ## assignees
 
@@ -160,7 +162,7 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 
 ## bumpVersion
 
-Currently this setting supports `npm` only, so raise a feature request if you have a use for it with other package managers. It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates depencies within. Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
+Currently this setting supports `npm` only, so raise a feature request if you have a use for it with other package managers. It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within. Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
 Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
@@ -330,7 +332,7 @@ Sometimes file matches are really simple - for example with Go Modules Renovate 
 
 At other times, the possible files is too vague for Renovate to have any default. For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them contain a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile` or `Dockerfile.base`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
+Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
 ```json
 {
@@ -1183,7 +1185,7 @@ Users can define custom managers for cases such as:
 
 The custom manager concept is based on using Regular Expression named capture groups. For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`). It's not recommended to do both, due to the potential for confusion. It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
 
-For more details and examples, see the documentation page the for the regex manager [here](/modules/managers/regex/).
+For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
 
 ### matchStrings
 
