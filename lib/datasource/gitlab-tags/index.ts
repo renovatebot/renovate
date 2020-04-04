@@ -20,7 +20,7 @@ type GitlabTag = {
   };
 };
 
-export async function getPkgReleases({
+export async function getReleases({
   registryUrls,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

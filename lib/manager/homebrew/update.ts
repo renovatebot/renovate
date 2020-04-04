@@ -2,9 +2,11 @@ import { fromStream } from 'hasha';
 import { coerce } from 'semver';
 import { parseUrlPath } from './extract';
 import { skip, isSpace, removeComments } from './util';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
+
+const http = new Http('homebrew');
 
 function replaceUrl(
   idx: number,
@@ -160,7 +162,7 @@ export async function updateDependency({
     }/releases/download/${upgrade.newValue}/${
       upgrade.managerData.repoName
     }-${coerce(upgrade.newValue)}.tar.gz`;
-    newSha256 = await fromStream(got.stream(newUrl), {
+    newSha256 = await fromStream(http.stream(newUrl), {
       algorithm: 'sha256',
     });
   } catch (errOuter) {
@@ -169,7 +171,7 @@ export async function updateDependency({
     );
     try {
       newUrl = `https://github.com/${upgrade.managerData.ownerName}/${upgrade.managerData.repoName}/archive/${upgrade.newValue}.tar.gz`;
-      newSha256 = await fromStream(got.stream(newUrl), {
+      newSha256 = await fromStream(http.stream(newUrl), {
         algorithm: 'sha256',
       });
     } catch (errInner) {

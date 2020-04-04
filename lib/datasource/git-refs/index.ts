@@ -32,28 +32,40 @@ export async function getRawRefs({
     }
 
     // fetch remote tags
-    const lsRemote = await git.listRemote([lookupName, '--sort=-v:refname']);
+    const lsRemote = await git.listRemote([
+      '--tags',
+      '--heads',
+      '--refs',
+      lookupName,
+    ]);
 
     if (!lsRemote) {
       return null;
     }
 
-    const refs = lsRemote.replace(/^.+?refs\//gm, '').split('\n');
+    const refs = lsRemote
+      .trim()
+      .replace(/^.+?refs\//gm, '')
+      .split('\n');
 
-    const result = refs.map(ref => ({
-      type: /(.*?)\//.exec(ref)[1],
-      value: /\/(.*)/.exec(ref)[1],
-    }));
+    const refMatch = /(?<type>\w+)\/(?<value>.*)/;
+    const result = refs.map(ref => {
+      const match = refMatch.exec(ref);
+      return {
+        type: match.groups.type,
+        value: match.groups.value,
+      };
+    });
 
     await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
     return result;
   } catch (err) {
-    logger.debug({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);
+    logger.error({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);
   }
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   try {
@@ -78,7 +90,7 @@ export async function getPkgReleases({
 
     return result;
   } catch (err) {
-    logger.debug({ err }, `Git-Refs lookup error in ${lookupName}`);
+    logger.error({ err }, `Git-Refs lookup error in ${lookupName}`);
   }
   return null;
 }

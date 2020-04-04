@@ -162,7 +162,7 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 
 ## bumpVersion
 
-Currently this setting supports `npm` only, so raise a feature request if you have a use for it with other package managers. It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates depencies within. Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
+Currently this setting supports `npm` only, so raise a feature request if you have a use for it with other package managers. It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within. Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
 Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 

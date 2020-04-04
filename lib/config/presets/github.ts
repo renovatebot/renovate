@@ -1,8 +1,11 @@
 import { logger } from '../../logger';
 import { Preset } from './common';
-import got, { GotJSONOptions } from '../../util/got';
+import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { ensureTrailingSlash } from '../../util/url';
+
+const id = 'github';
+const http = new Http(id);
 
 async function fetchJSONFile(
   repo: string,
@@ -10,18 +13,16 @@ async function fetchJSONFile(
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
-  const opts: GotJSONOptions = {
+  const opts: HttpOptions = {
     headers: {
       accept: global.appMode
         ? 'application/vnd.github.machine-man-preview+json'
         : 'application/vnd.github.v3+json',
     },
-    json: true,
-    hostType: 'github',
   };
   let res: { body: { content: string } };
   try {
-    res = await got(url, opts);
+    res = await http.getJson(url, opts);
   } catch (err) {
     if (err.message === PLATFORM_FAILURE) {
       throw err;

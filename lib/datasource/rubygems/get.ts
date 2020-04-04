@@ -1,11 +1,12 @@
 import { OutgoingHttpHeaders } from 'http';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import retriable from './retriable';
 import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
 import { ReleaseResult } from '../common';
 import { id } from './common';
+
+const http = new Http(id);
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
@@ -35,16 +36,13 @@ const getHeaders = (): OutgoingHttpHeaders => {
 };
 
 const fetch = async ({ dependency, registry, path }): Promise<any> => {
-  const json = true;
-
-  const retry = { retries: retriable() };
   const headers = getHeaders();
 
   const name = `${path}/${dependency}.json`;
   const baseUrl = registry;
 
   logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
-  const response = (await got(name, { retry, json, baseUrl, headers })) || {
+  const response = (await http.getJson(name, { baseUrl, headers })) || {
     body: undefined,
   };
 

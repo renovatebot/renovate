@@ -20,7 +20,7 @@ const mixedHyphensResponse = fs.readFileSync(
 );
 
 describe('datasource/pypi', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     const OLD_ENV = process.env;
 
     beforeEach(() => {
@@ -40,7 +40,7 @@ describe('datasource/pypi', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           lookupName: 'something',
         })
       ).toBeNull();
@@ -50,7 +50,7 @@ describe('datasource/pypi', () => {
         throw new Error();
       });
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           lookupName: 'something',
         })
       ).toBeNull();
@@ -60,7 +60,7 @@ describe('datasource/pypi', () => {
         body: JSON.parse(res1),
       });
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           lookupName: 'azure-cli-monitor',
         })
       ).toMatchSnapshot();
@@ -72,7 +72,7 @@ describe('datasource/pypi', () => {
       const config = {
         registryUrls: ['https://custom.pypi.net/foo'],
       };
-      await pypi.getPkgReleases({
+      await pypi.getReleases({
         ...config,
         lookupName: 'azure-cli-monitor',
       });
@@ -84,7 +84,7 @@ describe('datasource/pypi', () => {
       });
       const pipIndexUrl = process.env.PIP_INDEX_URL;
       process.env.PIP_INDEX_URL = 'https://my.pypi.python/pypi/';
-      await pypi.getPkgReleases({
+      await pypi.getReleases({
         lookupName: 'azure-cli-monitor',
       });
       expect(got.mock.calls).toMatchSnapshot();
@@ -103,7 +103,7 @@ describe('datasource/pypi', () => {
           'https://third-index/foo',
         ],
       };
-      await pypi.getPkgReleases({
+      await pypi.getReleases({
         ...config,
         lookupName: 'azure-cli-monitor',
       });
@@ -119,7 +119,7 @@ describe('datasource/pypi', () => {
         },
       });
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           lookupName: 'something',
         })
       ).toMatchSnapshot();
@@ -134,7 +134,7 @@ describe('datasource/pypi', () => {
         },
       });
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           lookupName: 'something',
         })
       ).toBeNull();
@@ -158,7 +158,7 @@ describe('datasource/pypi', () => {
         },
       });
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           compatibility: { python: '2.7' },
           lookupName: 'doit',
         })
@@ -172,7 +172,7 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           ...config,
           compatibility: { python: '2.7' },
           lookupName: 'dj-database-url',
@@ -187,7 +187,7 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://some.registry.org/+simple/'],
       };
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           ...config,
           compatibility: { python: '2.7' },
           lookupName: 'dj-database-url',
@@ -202,7 +202,7 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           ...config,
           compatibility: { python: '2.7' },
           lookupName: 'image-collector',
@@ -215,7 +215,7 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           ...config,
           compatibility: { python: '2.7' },
           lookupName: 'dj-database-url',
@@ -230,7 +230,7 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           ...config,
           compatibility: { python: '2.7' },
           lookupName: 'dj-database-url',
@@ -245,7 +245,7 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await pypi.getPkgReleases({
+        await pypi.getReleases({
           ...config,
           compatibility: { python: '2.7' },
           lookupName: 'dj-database-url',

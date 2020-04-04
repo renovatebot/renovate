@@ -1,0 +1,10 @@
+diff --git a/node_modules/@jest/types/node_modules/chalk/index.d.ts b/node_modules/@jest/types/node_modules/chalk/index.d.ts
+index 7e22c45..23dd077 100644
+--- a/node_modules/@jest/types/node_modules/chalk/index.d.ts
++++ b/node_modules/@jest/types/node_modules/chalk/index.d.ts
+@@ -1,4 +1,4 @@
+-declare const enum LevelEnum {
++declare enum LevelEnum {
+ 	/**
+ 	All colors disabled.
+ 	*/

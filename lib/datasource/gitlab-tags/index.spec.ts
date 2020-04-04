@@ -11,7 +11,7 @@ describe('datasource/gitlab-tags', () => {
     global.repoCache = {};
     return global.renovateCache.rmAll();
   });
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeAll(() => global.renovateCache.rmAll());
     it('returns tags', async () => {
       const body = [
@@ -30,7 +30,7 @@ describe('datasource/gitlab-tags', () => {
         },
       ];
       glGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await gitlab.getPkgReleases({
+      const res = await gitlab.getReleases({
         registryUrls: ['https://gitlab.company.com/api/v4/'],
         lookupName: 'some/dep2',
       });
@@ -41,7 +41,7 @@ describe('datasource/gitlab-tags', () => {
     it('returns tags with default registry', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       glGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await gitlab.getPkgReleases({
+      const res = await gitlab.getReleases({
         lookupName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
