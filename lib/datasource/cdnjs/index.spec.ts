@@ -18,12 +18,6 @@ let res2 = fs.readFileSync(
 );
 res2 = JSON.parse(res2);
 
-let res3 = fs.readFileSync(
-  'lib/datasource/cdnjs/__fixtures__/KaTeX.json',
-  'utf8'
-);
-res3 = JSON.parse(res3);
-
 describe('datasource/cdnjs', () => {
   describe('getReleases', () => {
     beforeEach(() => {
