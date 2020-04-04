@@ -18,7 +18,7 @@ export type CacheConfig<TArg, TResult> = {
   /**
    * Time to cache result in minutes
    */
-  minutes: number;
+  minutes?: number;
 };
 
 /**
@@ -29,7 +29,7 @@ export async function cacheAble<TArg, TResult = unknown>({
   id,
   lookup,
   cb: func,
-  minutes,
+  minutes = 60,
 }: CacheConfig<TArg, TResult>): Promise<TResult> {
   const cacheNamespace = `datasource-${id}`;
   const cacheKey = JSON.stringify(lookup);

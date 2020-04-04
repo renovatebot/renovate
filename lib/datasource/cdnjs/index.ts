@@ -7,12 +7,6 @@ export const id = 'cdnjs';
 
 const http = new Http(id);
 
-function getParts(lookupName: string): { library: string; assetName: string } {
-  const library = lookupName.split('/')[0];
-  const assetName = lookupName.replace(`${library}/`, '');
-  return { library, assetName };
-}
-
 export interface CdnjsAsset {
   version: string;
   files: string[];
@@ -33,17 +27,17 @@ async function downloadLibrary(library: string): Promise<CdnjsResponse> {
   return (await http.getJson<CdnjsResponse>(url)).body;
 }
 
-async function getLibrary(library: string): Promise<CdnjsResponse> {
-  return cacheAble({ id, lookup: library, cb: downloadLibrary, minutes: 60 });
-}
-
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const { library, assetName } = getParts(lookupName);
+  const library = lookupName.split('/')[0];
   try {
-    const { assets, homepage, repository } = await getLibrary(library);
-
+    const { assets, homepage, repository } = await cacheAble({
+      id,
+      lookup: library,
+      cb: downloadLibrary,
+    });
+    const assetName = lookupName.replace(`${library}/`, '');
     const releases = assets
       .filter(({ files }) => files.includes(assetName))
       .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
