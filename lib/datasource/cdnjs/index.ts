@@ -47,7 +47,7 @@ export async function getReleases({
     if (homepage) {
       result.homepage = homepage;
     }
-    if (repository && repository.url) {
+    if (repository?.url) {
       result.sourceUrl = repository.url;
     }
     return result;
