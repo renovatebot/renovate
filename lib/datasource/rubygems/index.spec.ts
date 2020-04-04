@@ -49,6 +49,11 @@ describe('datasource/rubygems', () => {
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 
+    it('returns null for missing pkg', async () => {
+      got.mockReturnValueOnce({});
+      expect(await getPkgReleases(params)).toBeNull();
+    });
+
     it('returns null for rubygems.org package miss', async () => {
       const newparams = { ...params };
       newparams.registryUrls = [];
