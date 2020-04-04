@@ -2,24 +2,39 @@
 import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
+import { readFile } from 'fs-extra';
+import { join } from 'upath';
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../common';
 import { exec, ExecOptions } from '../../util/exec';
-import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
 import { VERSION_REGEX } from './search';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle';
 
 async function addIfUpdated(
+  config: UpdateArtifactsConfig,
   status: Git.StatusResult,
   fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
+    const rawFileContents = await readFile(
+      join(config.localDir, fileProjectPath)
+    );
+    let fileContents;
+    if (fileProjectPath.endsWith('.jar')) {
+      fileContents = rawFileContents;
+    } else {
+      fileContents = rawFileContents.toString('utf8');
+    }
     return {
       artifactError: null,
       file: {
         name: fileProjectPath,
-        contents: await readLocalFile(fileProjectPath),
+        contents: fileContents,
       },
     };
   }
@@ -70,7 +85,9 @@ export async function updateArtifacts({
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(async fileProjectPath => addIfUpdated(status, fileProjectPath))
+        ].map(async fileProjectPath =>
+          addIfUpdated(config, status, fileProjectPath)
+        )
       )
     ).filter(e => e != null);
     logger.debug(

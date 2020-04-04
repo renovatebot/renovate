@@ -74,7 +74,7 @@ describe('manager/gradle-wrapper/update', () => {
                     __dirname,
                     `./__fixtures__/testFiles/${fileProjectPath}`
                   ),
-                  'utf8'
+                  fileProjectPath.endsWith('.jar') ? null : 'utf8'
                 ),
               },
             };
@@ -90,12 +90,12 @@ describe('manager/gradle-wrapper/update', () => {
           expect(
             readFileSync(
               resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-              'utf8'
+              file.endsWith('.jar') ? null : 'utf8'
             )
           ).toEqual(
             readFileSync(
               resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
-              'utf8'
+              file.endsWith('.jar') ? null : 'utf8'
             )
           );
         });
