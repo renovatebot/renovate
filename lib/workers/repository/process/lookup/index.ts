@@ -144,6 +144,7 @@ export async function lookupUpdates(
     res.skipReason = SkipReason.InvalidValue;
   }
 
+  // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     res.skipReason = SkipReason.Unknown;
     return res;
