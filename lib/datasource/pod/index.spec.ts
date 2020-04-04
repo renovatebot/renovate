@@ -1,5 +1,6 @@
 import { api as _api } from '../../platform/github/gh-got-wrapper';
-import { getPkgReleases } from '.';
+import * as pod from '.';
+import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
 
@@ -8,13 +9,20 @@ const api = mocked(_api);
 jest.mock('../../platform/github/gh-got-wrapper');
 
 const config = {
+  versioning: 'ruby',
+  datasource: 'pod',
   lookupName: 'foo',
-  registryUrls: ['https://github.com/CocoaPods/Specs'],
+  registryUrls: [],
 };
 
 describe('datasource/cocoapods', () => {
   describe('getPkgReleases', () => {
-    beforeEach(() => global.renovateCache.rmAll());
+    beforeEach(() => {
+      jest.resetAllMocks();
+      global.repoCache = {};
+      return global.renovateCache.rmAll();
+    });
+
     it('returns null for invalid inputs', async () => {
       api.get.mockResolvedValueOnce(null);
       expect(
@@ -66,9 +74,12 @@ describe('datasource/cocoapods', () => {
           statusCode: 429,
         })
       );
-      await expect(getPkgReleases(config)).rejects.toThrowError(
-        'registry-failure'
-      );
+      await expect(
+        pod.getPkgReleases({
+          ...config,
+          registryUrls: ['https://cdn.cocoapods.org'],
+        })
+      ).rejects.toThrowError('registry-failure');
     });
     it('throws for 5xx', async () => {
       api.get.mockImplementationOnce(() =>
@@ -76,9 +87,12 @@ describe('datasource/cocoapods', () => {
           statusCode: 502,
         })
       );
-      await expect(getPkgReleases(config)).rejects.toThrowError(
-        'registry-failure'
-      );
+      await expect(
+        pod.getPkgReleases({
+          ...config,
+          registryUrls: ['https://cdn.cocoapods.org'],
+        })
+      ).rejects.toThrowError('registry-failure');
     });
     it('returns null for unknown error', async () => {
       api.get.mockImplementationOnce(() => {
@@ -93,7 +107,7 @@ describe('datasource/cocoapods', () => {
       expect(
         await getPkgReleases({
           ...config,
-          registryUrls: ['https://cdn.cocoapods.org'],
+          registryUrls: ['https://github.com/CocoaPods/Specs'],
         })
       ).toEqual({
         releases: [

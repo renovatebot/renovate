@@ -7,6 +7,8 @@ import { resolvePackageReleases } from '../sbt-package';
 
 export const id = 'sbt-plugin';
 
+export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
+
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
 async function resolvePluginReleases(
@@ -58,10 +60,8 @@ async function resolvePluginReleases(
 
 export async function getPkgReleases({
   lookupName,
-  registryUrls: configRegistryUrls,
+  registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const registryUrls = [SBT_PLUGINS_REPO, ...configRegistryUrls];
-
   const [groupId, artifactId] = lookupName.split(':');
   const groupIdSplit = groupId.split('.');
   const artifactIdSplit = artifactId.split('_');

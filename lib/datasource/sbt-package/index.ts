@@ -3,8 +3,11 @@ import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir } from '../sbt-plugin/util';
 import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { MAVEN_REPO } from '../maven/common';
 
 export const id = 'sbt-package';
+
+export const defaultRegistryUrls = [MAVEN_REPO];
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 

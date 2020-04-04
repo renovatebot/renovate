@@ -1,7 +1,7 @@
 import _got from '../../util/got';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
-import * as rubygems from '.';
+import { getPkgReleases } from '..';
 
 const got: any = _got;
 
@@ -31,6 +31,8 @@ describe('datasource/rubygems', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
     const params = {
+      versioning: 'ruby',
+      datasource: 'rubygems',
       lookupName: 'rails',
       registryUrls: ['https://thirdparty.com', 'https://firstparty.com'],
     };
@@ -40,26 +42,28 @@ describe('datasource/rubygems', () => {
       jest.resetAllMocks();
     });
 
-    it('returns null for missing pkg', async () => {
-      got.mockReturnValueOnce({});
-      expect(await rubygems.getPkgReleases(params)).toBeNull();
+    afterEach(() => {
+      global.repoCache = {};
+      process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 
     it('returns null for rubygems.org package miss', async () => {
       const newparams = { ...params };
-      newparams.registryUrls = ['https://rubygems.org'];
+      newparams.registryUrls = [];
       got.mockReturnValueOnce({ body: rubygemsOrgVersions });
-      expect(await rubygems.getPkgReleases(newparams)).toBeNull();
+      expect(await getPkgReleases(newparams)).toBeNull();
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
       const newparams = {
+        ...params,
         lookupName: '1pass',
-        registryUrls: ['https://rubygems.org'],
+        registryUrls: [],
       };
       got.mockReturnValueOnce({ body: rubygemsOrgVersions });
-      const res = await rubygems.getPkgReleases(newparams);
+      const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
+      expect(res.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
       expect(
         res.releases.find(release => release.version === '0.1.1')
@@ -73,17 +77,19 @@ describe('datasource/rubygems', () => {
       got.mockReturnValue({ body: rubygemsOrgVersions });
 
       expect(
-        await rubygems.getPkgReleases({
+        await getPkgReleases({
           ...params,
           registryUrls: [],
         })
       ).toBeNull();
 
-      const res = await rubygems.getPkgReleases({
+      const res = await getPkgReleases({
+        ...params,
         lookupName: '1pass',
         registryUrls: [],
       });
       expect(res).not.toBeNull();
+      expect(res.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
     });
 
@@ -92,7 +98,9 @@ describe('datasource/rubygems', () => {
         .mockReturnValueOnce({ body: railsInfo })
         .mockReturnValueOnce({ body: railsVersions });
 
-      expect(await rubygems.getPkgReleases(params)).toMatchSnapshot();
+      const res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(339);
+      expect(res).toMatchSnapshot();
     });
 
     it('uses multiple source urls', async () => {
@@ -105,17 +113,14 @@ describe('datasource/rubygems', () => {
         .mockImplementationOnce(() => ({ body: railsInfo }))
         .mockImplementationOnce(() => ({ body: railsVersions }));
 
-      expect(await rubygems.getPkgReleases(params)).toMatchSnapshot();
+      const res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(339);
+      expect(res).toMatchSnapshot();
     });
 
     it('returns null if mismatched name', async () => {
       got.mockReturnValueOnce({ body: { ...railsInfo, name: 'oooops' } });
-      expect(await rubygems.getPkgReleases(params)).toBeNull();
-    });
-
-    afterEach(() => {
-      global.repoCache = {};
-      process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
+      expect(await getPkgReleases(params)).toBeNull();
     });
   });
 });
