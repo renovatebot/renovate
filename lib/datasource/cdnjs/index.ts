@@ -31,6 +31,24 @@ function getParts(lookupName: string): any {
   return { library, assetName };
 }
 
+async function getLibrary(library: string): Promise<CdnjsResponse> {
+  const cacheNamespace = `datasource-${id}`;
+  const cacheMinutes = 60;
+  const cacheKey = library;
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    cacheKey
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+  const url = depUrl(library);
+  const res = (await http.getJson<CdnjsResponse>(url)).body;
+  await renovateCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+  return res;
+}
+
 export async function getDigest(
   { lookupName }: GetReleasesConfig,
   newValue?: string
@@ -51,24 +69,6 @@ export async function getDigest(
     result = hash;
   }
   return result;
-}
-
-async function getLibrary(library: string): Promise<CdnjsResponse> {
-  const cacheNamespace = `datasource-${id}`;
-  const cacheMinutes = 60;
-  const cacheKey = library;
-  const cachedResult = await renovateCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-  const url = depUrl(library);
-  const res = (await http.getJson<CdnjsResponse>(url)).body;
-  await renovateCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
-  return res;
 }
 
 export async function getPkgReleases({
