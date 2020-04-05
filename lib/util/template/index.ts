@@ -5,9 +5,15 @@ import { logger } from '../../logger';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
+handlebars.registerHelper('replace', (find, replace, context) => {
+  return context.replace(new RegExp(find, 'g'), replace);
+});
+
 export const exposedConfigOptions = [
+  'branchName',
   'branchPrefix',
   'branchTopic',
+  'commitMessage',
   'commitMessageAction',
   'commitMessageExtra',
   'commitMessagePrefix',
@@ -20,12 +26,16 @@ export const exposedConfigOptions = [
   'prBodyColumns',
   'prBodyDefinitions',
   'prBodyNotes',
+  'prTitle',
 ];
 
 export const allowedFields = {
+  baseDir: 'The full directory with path that the dependency has been found in',
   currentValue: 'The extracted current value of the dependency being updated',
+  currentVersion: 'The current version that is being updated',
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
+  depNameEscaped: 'The dependency name with forward slashes replace with %2f',
   depNameLinked:
     'The dependency name already linked to its home page using markdown',
   depNameSanitized:
@@ -34,14 +44,18 @@ export const allowedFields = {
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
   displayTo: 'The to value, formatted for display',
+  fromVersion:
+    'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
+  isRange: 'true if the new value is a range',
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
   lookupName: 'The full name that was used to look up the dependency.',
+  newDigest: 'The new digest value',
   newDigestShort:
-    'A shorted version of the new digest, for use when the full digest is too long to be conveniently displayed',
+    'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
   newMajor:
     'The major version of the new version. e.g. "3" if the new version if "3.1.0"',
   newMinor:
@@ -50,8 +64,12 @@ export const allowedFields = {
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade.',
   packageFile: 'The filename that the dependency was found in',
+  parentDir:
+    'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
+  recreateClosed: 'If true, this PR will be recreated if closed',
   references: 'A list of references for the upgrade',
+  releases: 'An array of releases for an upgrade',
   repository: 'The current repository',
   toVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   updateType: 'One of digest, pin, rollback, patch, minor, major',
