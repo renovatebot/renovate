@@ -259,7 +259,7 @@ export function generateBranchConfig(
           : '';
       upgrade.prTitle += upgrade.updateType === 'patch' ? ' (patch)' : '';
     }
-    // Compile again to allow for nested handlebars templates
+    // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
     config.upgrades.push(upgrade);

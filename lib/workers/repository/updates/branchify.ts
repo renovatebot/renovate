@@ -50,7 +50,6 @@ export function branchifyUpgrades(
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;
-    // massage for handlebars
     const upper = (str: string): string =>
       str.charAt(0).toUpperCase() + str.substr(1);
     if (update.updateType) {
@@ -83,7 +82,7 @@ export function branchifyUpgrades(
     } else {
       update.branchName = template.compile(update.branchName, update);
     }
-    // Compile extra times in case of nested handlebars templates
+    // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);
     update.branchName = cleanBranchName(
       template.compile(update.branchName, update)
