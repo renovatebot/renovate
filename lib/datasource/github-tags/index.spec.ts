@@ -7,7 +7,7 @@ jest.mock('../../platform/github/gh-http-wrapper');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
-const ghGot: any = api.get;
+const ghGot: any = api.getJson;
 const hostRules: any = _hostRules;
 
 describe('datasource/github-tags', () => {

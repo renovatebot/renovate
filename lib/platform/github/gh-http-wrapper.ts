@@ -6,16 +6,17 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { dispatchError } from './gh-got-wrapper';
 
 const hostType = PLATFORM_TYPE_GITHUB;
+export const getHostType = (): string => hostType;
 
 let baseUrl = 'https://api.github.com/';
-
+export const getBaseUrl = (): string => baseUrl;
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function req<T = unknown>(
+async function request<T = unknown>(
   path: string,
   options?: any,
   okToRetry = true
@@ -61,7 +62,14 @@ async function req<T = unknown>(
       result = await http.getJson<T>(path, opts);
     } else if (method === 'post') {
       result = await http.postJson<T>(path, opts);
+    } else if (method === 'patch') {
+      result = await http.patchJson<T>(path, opts);
+    } else if (method === 'put') {
+      result = await http.putJson<T>(path, opts);
+    } else if (method === 'delete') {
+      result = await http.deleteJson<T>(path, opts);
     }
+
     if (result !== null) {
       if (opts.paginate) {
         // Check if result is paginated
@@ -80,7 +88,7 @@ async function req<T = unknown>(
             const nextUrl = URL.parse(linkHeader.next.url, true);
             delete nextUrl.search;
             nextUrl.query.page = page.toString();
-            return req(
+            return request(
               URL.format(nextUrl),
               { ...opts, paginate: false },
               okToRetry
@@ -100,16 +108,37 @@ async function req<T = unknown>(
   return result;
 }
 
-export function get<T = unknown>(
+export function getJson<T = unknown>(
   url: string,
   opts?: any
 ): Promise<HttpResponse<T>> {
-  return req<T>(url, { ...opts, method: 'get' });
+  return request<T>(url, { ...opts, method: 'get' });
 }
 
-export function post<T = unknown>(
+export function postJson<T = unknown>(
   url: string,
   opts?: any
 ): Promise<HttpResponse<T>> {
-  return req<T>(url, { ...opts, method: 'post' });
+  return request<T>(url, { ...opts, method: 'post' });
+}
+
+export function patchJson<T = unknown>(
+  url: string,
+  opts?: any
+): Promise<HttpResponse<T>> {
+  return request<T>(url, { ...opts, method: 'patch' });
+}
+
+export function putJson<T = unknown>(
+  url: string,
+  opts?: any
+): Promise<HttpResponse<T>> {
+  return request<T>(url, { ...opts, method: 'put' });
+}
+
+export function deleteJson<T = unknown>(
+  url: string,
+  opts?: any
+): Promise<HttpResponse<T>> {
+  return request<T>(url, { ...opts, method: 'delete' });
 }

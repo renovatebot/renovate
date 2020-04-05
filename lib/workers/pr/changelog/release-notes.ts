@@ -22,7 +22,7 @@ export async function getReleaseList(
   try {
     let url = githubApiBaseURL.replace(/\/?$/, '/');
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await api.get<
+    const res = await api.getJson<
       {
         html_url: string;
         id: number;
@@ -158,7 +158,7 @@ export async function getReleaseNotesMd(
     let apiPrefix = githubApiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
-    const filesRes = await api.get<{ name: string }[]>(apiPrefix);
+    const filesRes = await api.getJson<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
       .map(f => f.name)
       .filter(f => changelogFilenameRegex.test(f));
@@ -173,7 +173,7 @@ export async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
-    const fileRes = await api.get<{ content: string }>(
+    const fileRes = await api.getJson<{ content: string }>(
       `${apiPrefix}/${changelogFile}`
     );
     changelogMd =

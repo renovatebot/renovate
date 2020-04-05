@@ -25,7 +25,7 @@ describe('datasource/cocoapods', () => {
     });
 
     it('returns null for invalid inputs', async () => {
-      api.get.mockResolvedValueOnce(null);
+      api.getJson.mockResolvedValueOnce(null);
       expect(
         await getPkgReleases({
           datasource: pod.id,
@@ -35,18 +35,18 @@ describe('datasource/cocoapods', () => {
       ).toBeNull();
     });
     it('returns null for empty result', async () => {
-      api.get.mockResolvedValueOnce(null);
+      api.getJson.mockResolvedValueOnce(null);
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('returns null for missing fields', async () => {
-      api.get.mockResolvedValueOnce({} as GotResponse);
+      api.getJson.mockResolvedValueOnce({} as GotResponse);
       expect(await getPkgReleases(config)).toBeNull();
 
-      api.get.mockResolvedValueOnce({ body: '' } as GotResponse);
+      api.getJson.mockResolvedValueOnce({ body: '' } as GotResponse);
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('returns null for 404', async () => {
-      api.get.mockImplementation(() =>
+      api.getJson.mockImplementation(() =>
         Promise.reject({
           statusCode: 404,
         })
@@ -63,7 +63,7 @@ describe('datasource/cocoapods', () => {
       ).toBeNull();
     });
     it('returns null for 401', async () => {
-      api.get.mockImplementationOnce(() =>
+      api.getJson.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 401,
         })
@@ -71,7 +71,7 @@ describe('datasource/cocoapods', () => {
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('throws for 429', async () => {
-      api.get.mockImplementationOnce(() =>
+      api.getJson.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 429,
         })
@@ -84,7 +84,7 @@ describe('datasource/cocoapods', () => {
       ).rejects.toThrowError('registry-failure');
     });
     it('throws for 5xx', async () => {
-      api.get.mockImplementationOnce(() =>
+      api.getJson.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 502,
         })
@@ -97,13 +97,13 @@ describe('datasource/cocoapods', () => {
       ).rejects.toThrowError('registry-failure');
     });
     it('returns null for unknown error', async () => {
-      api.get.mockImplementationOnce(() => {
+      api.getJson.mockImplementationOnce(() => {
         throw new Error();
       });
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('processes real data from CDN', async () => {
-      api.get.mockResolvedValueOnce({
+      api.getJson.mockResolvedValueOnce({
         body: 'foo/1.2.3',
       } as GotResponse);
       expect(
@@ -120,7 +120,7 @@ describe('datasource/cocoapods', () => {
       });
     });
     it('processes real data from Github', async () => {
-      api.get.mockResolvedValueOnce({
+      api.getJson.mockResolvedValueOnce({
         body: [{ name: '1.2.3' }],
       } as GotResponse);
       expect(

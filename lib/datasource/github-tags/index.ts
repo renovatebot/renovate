@@ -32,11 +32,11 @@ async function getTagCommit(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/git/refs/tags/${tag}`;
-    const res = (await api.get<GithubTagsResp>(url)).body.object;
+    const res = (await api.getJson<GithubTagsResp>(url)).body.object;
     if (res.type === 'commit') {
       digest = res.sha;
     } else if (res.type === 'tag') {
-      digest = (await api.get<GithubTagsResp>(res.url)).body.object.sha;
+      digest = (await api.getJson<GithubTagsResp>(res.url)).body.object.sha;
     } else {
       logger.warn({ res }, 'Unknown git tag refs type');
     }
@@ -84,7 +84,7 @@ export async function getDigest(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
-    digest = (await api.get(url)).body[0].sha;
+    digest = (await api.getJson(url)).body[0].sha;
   } catch (err) {
     logger.debug(
       { githubRepo, err },
@@ -134,7 +134,7 @@ export async function getReleases({
     }[];
 
     versions = (
-      await api.get<GitHubTag>(url, {
+      await api.getJson<GitHubTag>(url, {
         paginate: true,
       })
     ).body.map(o => o.name);

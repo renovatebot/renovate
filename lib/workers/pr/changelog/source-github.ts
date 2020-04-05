@@ -19,7 +19,7 @@ async function getTags(
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
   url += `repos/${repository}/tags?per_page=100`;
   try {
-    const res = await api.get<{ name: string }[]>(url, {
+    const res = await api.getJson<{ name: string }[]>(url, {
       paginate: true,
     });
 

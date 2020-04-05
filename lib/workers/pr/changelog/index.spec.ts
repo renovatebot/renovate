@@ -9,7 +9,7 @@ import { BranchConfig } from '../../common';
 jest.mock('../../../platform/github/gh-http-wrapper');
 jest.mock('../../../datasource/npm');
 
-const ghGot = mocked(api).get;
+const ghGot = mocked(api).getJson;
 
 const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',

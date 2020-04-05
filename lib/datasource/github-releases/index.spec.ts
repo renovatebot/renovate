@@ -4,7 +4,7 @@ import * as github from '.';
 
 jest.mock('../../platform/github/gh-http-wrapper');
 
-const ghGot: any = api.get;
+const ghGot: any = api.getJson;
 
 describe('datasource/github-releases', () => {
   beforeEach(() => global.renovateCache.rmAll());

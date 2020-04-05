@@ -13,7 +13,7 @@ const got: any = _got;
 
 async function getError(): Promise<Error> {
   try {
-    await api.get('some-url', {});
+    await api.getJson('some-url', {});
   } catch (err) {
     return err;
   }
@@ -29,7 +29,7 @@ describe('platform/gh-http-wrapper', () => {
   it('supports app mode', async () => {
     got.mockImplementationOnce(() => ({}));
     global.appMode = true;
-    await api.get('some-url', { headers: { accept: 'some-accept' } });
+    await api.getJson('some-url', { headers: { accept: 'some-accept' } });
     expect(got.mock.calls[0][1].headers.accept).toBe(
       'application/vnd.github.machine-man-preview+json, some-accept'
     );
@@ -40,7 +40,7 @@ describe('platform/gh-http-wrapper', () => {
       body: {},
     }));
     api.setBaseUrl('https://ghe.mycompany.com/api/v3/');
-    await api.post('graphql', {
+    await api.postJson('graphql', {
       body: 'abc',
     });
     expect(got.mock.calls[0][0].includes('/v3')).toBe(false);
@@ -65,7 +65,7 @@ describe('platform/gh-http-wrapper', () => {
       headers: {},
       body: ['d'],
     });
-    const res = await api.get('some-url', { paginate: true });
+    const res = await api.getJson('some-url', { paginate: true });
     expect(res.body).toEqual(['a', 'b', 'c', 'd']);
     expect(got).toHaveBeenCalledTimes(3);
   });
@@ -82,7 +82,7 @@ describe('platform/gh-http-wrapper', () => {
       headers: {},
       body: ['b'],
     });
-    const res = await api.get('some-url', { paginate: true });
+    const res = await api.getJson('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
     expect(got).toHaveBeenCalledTimes(1);
   });
@@ -95,7 +95,7 @@ describe('platform/gh-http-wrapper', () => {
           'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
       })
     );
-    await expect(api.get('some-url')).rejects.toThrow();
+    await expect(api.getJson('some-url')).rejects.toThrow();
   });
 
   it('should throw Bad credentials', async () => {

@@ -3,7 +3,7 @@ import delay from 'delay';
 import URL from 'url';
 
 import { logger } from '../../logger';
-import { api } from './gh-got-wrapper';
+import * as api from './gh-http-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
 import {
@@ -130,9 +130,12 @@ export async function initPlatform({
   let renovateUsername: string;
   try {
     const userData = (
-      await api.get(defaults.endpoint + 'user', {
-        token,
-      })
+      await api.getJson<{ login: string; name: string }>(
+        defaults.endpoint + 'user',
+        {
+          token,
+        }
+      )
     ).body;
     renovateUsername = userData.login;
     gitAuthor = userData.name;
@@ -142,9 +145,12 @@ export async function initPlatform({
   }
   try {
     const userEmail = (
-      await api.get(defaults.endpoint + 'user/emails', {
-        token,
-      })
+      await api.getJson<{ email: string }[]>(
+        defaults.endpoint + 'user/emails',
+        {
+          token,
+        }
+      )
     ).body;
     if (userEmail.length && userEmail[0].email) {
       gitAuthor += ` <${userEmail[0].email}>`;
@@ -171,8 +177,11 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await api.get('user/repos?per_page=100', { paginate: true });
-    return res.body.map((repo: { full_name: string }) => repo.full_name);
+    const res = await api.getJson<{ full_name: string }[]>(
+      'user/repos?per_page=100',
+      { paginate: true }
+    );
+    return res.body.map(repo => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -196,7 +205,7 @@ async function getBranchProtection(
   if (config.parentRepo) {
     return {};
   }
-  const res = await api.get(
+  const res = await api.getJson(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`
   );
   return res.body;
@@ -205,7 +214,7 @@ async function getBranchProtection(
 // Return the commit SHA for a branch
 async function getBranchCommit(branchName: string): Promise<string> {
   try {
-    const res = await api.get(
+    const res = await api.getJson<{ object: { sha: string } }>(
       `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
     );
     return res.body.object.sha;
@@ -262,7 +271,7 @@ export async function initRepo({
   config.gitPrivateKey = gitPrivateKey;
   let res;
   try {
-    res = await api.get(`repos/${repository}`);
+    res = await api.getJson(`repos/${repository}`);
     logger.trace({ repositoryDetails: res.body }, 'Repository details');
     config.enterpriseVersion =
       res.headers && (res.headers['x-github-enterprise-version'] as string);
@@ -272,7 +281,7 @@ export async function initRepo({
         const renovateConfig = JSON.parse(
           Buffer.from(
             (
-              await api.get(
+              await api.getJson<{ content: string }>(
                 `repos/${config.repository}/contents/${defaultConfigFile}`
               )
             ).body.content,
@@ -305,7 +314,7 @@ export async function initRepo({
         renovateConfig = JSON.parse(
           Buffer.from(
             (
-              await api.get(
+              await api.getJson<{ content: string }>(
                 `repos/${config.repository}/contents/${defaultConfigFile}`
               )
             ).body.content,
@@ -384,14 +393,14 @@ export async function initRepo({
     config.repository = null;
     // Get list of existing repos
     const existingRepos = (
-      await api.get<{ full_name: string }[]>('user/repos?per_page=100', {
+      await api.getJson<{ full_name: string }[]>('user/repos?per_page=100', {
         token: forkToken || opts.token,
         paginate: true,
       })
     ).body.map(r => r.full_name);
     try {
       config.repository = (
-        await api.post(`repos/${repository}/forks`, {
+        await api.postJson<{ full_name: string }>(`repos/${repository}/forks`, {
           token: forkToken || opts.token,
         })
       ).body.full_name;
@@ -412,7 +421,7 @@ export async function initRepo({
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
-        await api.patch(
+        await api.patchJson(
           `repos/${config.repository}/git/refs/heads/${config.baseBranch}`,
           {
             body: {
@@ -641,9 +650,8 @@ async function getClosedPrs(): Promise<PrList> {
       `;
       const options = {
         body: JSON.stringify({ query }),
-        json: false,
       };
-      const res = JSON.parse((await api.post(url, options)).body);
+      const res = JSON.parse((await api.postJson<any>(url, options)).body);
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!res.data) {
@@ -748,7 +756,7 @@ async function getOpenPrs(): Promise<PrList> {
         body: JSON.stringify({ query }),
         json: false,
       };
-      const res = JSON.parse((await api.post(url, options)).body);
+      const res = JSON.parse((await api.postJson<any>(url, options)).body);
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!res.data) {
@@ -872,7 +880,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     'PR not found in open or closed PRs list - trying to fetch it directly'
   );
   const pr = (
-    await api.get(
+    await api.getJson<any>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
     )
   ).body;
@@ -899,7 +907,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       if (global.gitAuthor) {
         // Check against gitAuthor
         const commitAuthorEmail = (
-          await api.get(
+          await api.getJson(
             `repos/${config.parentRepo ||
               config.repository}/pulls/${prNo}/commits`
           )
@@ -932,7 +940,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       // Check if only one author of all commits
       logger.debug({ prNo }, 'Checking all commits');
       const prCommits = (
-        await api.get(
+        await api.getJson<any[]>(
           `repos/${config.parentRepo ||
             config.repository}/pulls/${prNo}/commits`
         )
@@ -989,7 +997,7 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug('Retrieving PR list');
     let res;
     try {
-      res = await api.get(
+      res = await api.getJson(
         `repos/${config.parentRepo ||
           config.repository}/pulls?per_page=100&state=all`,
         { paginate: true }
@@ -1077,7 +1085,9 @@ async function getStatus(
     branchName
   )}/status`;
 
-  return (await api.get(commitStatusUrl, { useCache })).body;
+  return (
+    await api.getJson<CombinedBranchStatus>(commitStatusUrl, { useCache })
+  ).body;
 }
 
 // Returns the combined status for a branch.
@@ -1124,7 +1134,7 @@ export async function getBranchStatus(
           Accept: 'application/vnd.github.antiope-preview+json',
         },
       };
-      const checkRunsRaw = (await api.get(checkRunsUrl, opts)).body;
+      const checkRunsRaw = (await api.getJson<any>(checkRunsUrl, opts)).body;
       if (checkRunsRaw.check_runs && checkRunsRaw.check_runs.length) {
         checkRuns = checkRunsRaw.check_runs.map(
           (run: { name: string; status: string; conclusion: string }) => ({
@@ -1184,7 +1194,7 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (await api.get(url, { useCache })).body;
+  return (await api.getJson<GhBranchStatus[]>(url, { useCache })).body;
 }
 
 const githubToRenovateStatusMapping = {
@@ -1249,7 +1259,7 @@ export async function setBranchStatus({
     if (targetUrl) {
       options.target_url = targetUrl;
     }
-    await api.post(url, { body: options });
+    await api.postJson(url, { body: options });
 
     // update status cache
     await getStatus(branchName, false);
@@ -1311,7 +1321,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
   }
   logger.debug('Found issue ' + issue.number);
   const issueBody = (
-    await api.get(
+    await api.getJson<any>(
       `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
     )
   ).body.body;
@@ -1323,7 +1333,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
-  await api.patch(
+  await api.patchJson(
     `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
     {
       body: { state: 'closed' },
@@ -1361,7 +1371,7 @@ export async function ensureIssue({
         }
       }
       const issueBody = (
-        await api.get(
+        await api.getJson<any>(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`
@@ -1373,7 +1383,7 @@ export async function ensureIssue({
       }
       if (shouldReOpen) {
         logger.debug('Patching issue');
-        await api.patch(
+        await api.patchJson(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`,
@@ -1385,12 +1395,15 @@ export async function ensureIssue({
         return 'updated';
       }
     }
-    await api.post(`repos/${config.parentRepo || config.repository}/issues`, {
-      body: {
-        title,
-        body,
-      },
-    });
+    await api.postJson(
+      `repos/${config.parentRepo || config.repository}/issues`,
+      {
+        body: {
+          title,
+          body,
+        },
+      }
+    );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     delete config.issueList;
@@ -1428,7 +1441,7 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees ${assignees} to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
-  await api.post(`repos/${repository}/issues/${issueNo}/assignees`, {
+  await api.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
     body: {
       assignees,
     },
@@ -1446,7 +1459,7 @@ export async function addReviewers(
     .filter(e => e.startsWith('team:'))
     .map(e => e.replace(/^team:/, ''));
   try {
-    await api.post(
+    await api.postJson(
       `repos/${config.parentRepo ||
         config.repository}/pulls/${prNo}/requested_reviewers`,
       {
@@ -1468,7 +1481,7 @@ async function addLabels(
   logger.debug(`Adding labels ${labels} to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   if (is.array(labels) && labels.length) {
-    await api.post(`repos/${repository}/issues/${issueNo}/labels`, {
+    await api.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
       body: labels,
     });
   }
@@ -1481,7 +1494,9 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   try {
-    await api.delete(`repos/${repository}/issues/${issueNo}/labels/${label}`);
+    await api.deleteJson(
+      `repos/${repository}/issues/${issueNo}/labels/${label}`
+    );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
@@ -1489,7 +1504,7 @@ export async function deleteLabel(
 
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
-  await api.post(
+  await api.postJson(
     `repos/${config.parentRepo ||
       config.repository}/issues/${issueNo}/comments`,
     {
@@ -1500,7 +1515,7 @@ async function addComment(issueNo: number, body: string): Promise<void> {
 
 async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
-  await api.patch(
+  await api.patchJson(
     `repos/${config.parentRepo ||
       config.repository}/issues/comments/${commentId}`,
     {
@@ -1511,7 +1526,7 @@ async function editComment(commentId: number, body: string): Promise<void> {
 
 async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
-  await api.delete(
+  await api.deleteJson(
     `repos/${config.parentRepo ||
       config.repository}/issues/comments/${commentId}`
   );
@@ -1529,7 +1544,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     config.repository}/issues/${issueNo}/comments?per_page=100`;
   try {
     const comments = (
-      await api.get<Comment[]>(url, {
+      await api.getJson<Comment[]>(url, {
         paginate: true,
       })
     ).body;
@@ -1591,6 +1606,7 @@ export async function ensureComment({
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
+    debugger;
     if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
@@ -1656,7 +1672,7 @@ export async function createPr({
   }
   logger.debug({ title, head, base }, 'Creating PR');
   const pr = (
-    await api.post<Pr>(
+    await api.postJson<Pr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
@@ -1690,11 +1706,11 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
     return [];
   }
   const files = (
-    await api.get(
+    await api.getJson<{ filename: string }[]>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}/files`
     )
   ).body;
-  return files.map((f: { filename: string }) => f.filename);
+  return files.map(f => f.filename);
 }
 
 export async function updatePr(
@@ -1716,7 +1732,7 @@ export async function updatePr(
     options.token = config.forkToken;
   }
   try {
-    await api.patch(
+    await api.patchJson(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
@@ -1749,10 +1765,10 @@ export async function mergePr(
       'Branch protection: Attempting to merge PR when PR reviews are enabled'
     );
     const repository = config.parentRepo || config.repository;
-    const reviews = await api.get(`repos/${repository}/pulls/${prNo}/reviews`);
-    const isApproved = reviews.body.some(
-      (review: { state: string }) => review.state === 'APPROVED'
+    const reviews = await api.getJson<{ state: string }[]>(
+      `repos/${repository}/pulls/${prNo}/reviews`
     );
+    const isApproved = reviews.body.some(review => review.state === 'APPROVED');
     if (!isApproved) {
       logger.debug(
         { branch: branchName, prNo },
@@ -1773,7 +1789,7 @@ export async function mergePr(
     options.body.merge_method = config.mergeMethod;
     try {
       logger.debug({ options, url }, `mergePr`);
-      await api.put(url, options);
+      await api.putJson(url, options);
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
@@ -1793,7 +1809,7 @@ export async function mergePr(
     options.body.merge_method = 'rebase';
     try {
       logger.debug({ options, url }, `mergePr`);
-      await api.put(url, options);
+      await api.putJson(url, options);
     } catch (err1) {
       logger.debug(
         { err: err1 },
@@ -1802,7 +1818,7 @@ export async function mergePr(
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
-        await api.put(url, options);
+        await api.putJson(url, options);
       } catch (err2) {
         logger.debug(
           { err: err2 },
@@ -1811,7 +1827,7 @@ export async function mergePr(
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
-          await api.put(url, options);
+          await api.putJson(url, options);
         } catch (err3) {
           logger.debug(
             { err: err3 },
@@ -1882,7 +1898,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   };
   let alerts = [];
   try {
-    const res = JSON.parse((await api.post(url, options)).body);
+    const res = JSON.parse((await api.postJson<any>(url, options)).body);
     if (res.data.repository.vulnerabilityAlerts) {
       alerts = res.data.repository.vulnerabilityAlerts.edges.map(
         (edge: { node: any }) => edge.node

@@ -1,4 +1,4 @@
-import { get } from '../../platform/github/gh-http-wrapper';
+import * as api from '../../platform/github/gh-http-wrapper';
 import { ReleaseResult, GetReleasesConfig } from '../common';
 import { logger } from '../../logger';
 
@@ -35,7 +35,7 @@ export async function getReleases({
   }
   try {
     const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-    const res = await get<GithubRelease[]>(url, {
+    const res = await api.getJson<GithubRelease[]>(url, {
       paginate: true,
     });
     githubReleases = res.body;
