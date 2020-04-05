@@ -79,7 +79,7 @@ class GitHubReporter extends BaseReporter {
       const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = [];
       const success = testResult.numFailedTests === 0;
 
-      for (const suite of testResult.testResults) {
+      for (const suite of testResult.testResults.filter(s => !s.skipped)) {
         const path = getPath(suite);
         for (const test of suite.testResults.filter(
           t => !ignoreStates.has(t.status)
