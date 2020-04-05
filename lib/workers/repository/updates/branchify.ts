@@ -1,9 +1,8 @@
 import slugify from 'slugify';
-import handlebars from 'handlebars';
 import { clean as cleanGitRef } from 'clean-git-ref';
 import { Merge } from 'type-fest';
 import { logger, addMeta, removeMeta } from '../../../logger';
-
+import * as template from '../../../util/template';
 import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
@@ -77,16 +76,17 @@ export function branchifyUpgrades(
         update.groupSlug = `patch-${update.groupSlug}`;
       }
       update.branchTopic = update.group.branchTopic || update.branchTopic;
-      update.branchName = handlebars.compile(
-        update.group.branchName || update.branchName
-      )(update);
+      update.branchName = template.compile(
+        update.group.branchName || update.branchName,
+        update
+      );
     } else {
-      update.branchName = handlebars.compile(update.branchName)(update);
+      update.branchName = template.compile(update.branchName, update);
     }
     // Compile extra times in case of nested handlebars templates
-    update.branchName = handlebars.compile(update.branchName)(update);
+    update.branchName = template.compile(update.branchName, update);
     update.branchName = cleanBranchName(
-      handlebars.compile(update.branchName)(update)
+      template.compile(update.branchName, update)
     );
 
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];

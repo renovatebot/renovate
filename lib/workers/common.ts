@@ -17,7 +17,9 @@ export interface BranchUpgradeConfig
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
   branchName: string;
+  commitBody?: string;
   commitMessage?: string;
+  commitMessageExtra?: string;
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
@@ -34,6 +36,7 @@ export interface BranchUpgradeConfig
 
   parentBranch?: string;
   prBodyNotes?: string[];
+  prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
   releases?: Release[];

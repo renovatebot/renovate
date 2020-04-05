@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import handlebars from 'handlebars';
+import * as template from '../../../util/template';
 import { logger } from '../../../logger';
 import { emojify } from '../../../util/emoji';
 import { BranchConfig } from '../../common';
@@ -10,9 +10,7 @@ export function getPrNotes(config: BranchConfig): string {
     if (is.nonEmptyArray(upgrade.prBodyNotes)) {
       for (const note of upgrade.prBodyNotes) {
         try {
-          const res = handlebars
-            .compile(note)(upgrade)
-            .trim();
+          const res = template.compile(note, upgrade).trim();
           if (res && res.length) {
             notes.push(res);
           }
