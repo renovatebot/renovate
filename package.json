@@ -128,6 +128,7 @@
     "delay": "4.3.0",
     "detect-indent": "6.0.0",
     "email-addresses": "3.1.0",
+    "fast-safe-stringify": "2.0.7",
     "fs-extra": "8.1.0",
     "get-installed-path": "4.0.8",
     "github-url-from-git": "1.5.0",

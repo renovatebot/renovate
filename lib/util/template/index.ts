@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import safeStringify from 'fast-safe-stringify';
 import * as handlebars from 'handlebars';
 import { logger } from '../../logger';
 
@@ -57,7 +58,8 @@ export const allowedFields = {
   upgrades: 'An array of upgrade objects in the branch',
 };
 
-function getFilteredObject(obj: any): any {
+function getFilteredObject(input: any): any {
+  const obj = JSON.parse(safeStringify(input));
   const res = {};
   const allAllowed = [
     ...Object.keys(allowedFields),
@@ -66,7 +68,7 @@ function getFilteredObject(obj: any): any {
   for (const field of allAllowed) {
     const value = obj[field];
     if (is.array(value)) {
-      res[field] = obj[field].map(element => getFilteredObject(element));
+      res[field] = value.map(element => getFilteredObject(element));
     } else if (is.object(value)) {
       res[field] = getFilteredObject(value);
     } else if (!is.undefined(value)) {
@@ -82,7 +84,6 @@ export function compile(
   filterFields = true
 ): string {
   const filteredInput = filterFields ? getFilteredObject(input) : input;
-  logger.debug({ template, filteredInput }, 'Compiling template');
-  const res = handlebars.compile(template)(input);
-  return res;
+  logger.trace({ template, filteredInput }, 'Compiling template');
+  return handlebars.compile(template)(input);
 }
