@@ -28,7 +28,7 @@ function getPath(suite: TestResult): string {
   return relative(ROOT, suite.testFilePath).replace(/\\/g, '/');
 }
 
-const ignoreStates = new Set(['passed']);
+const ignoreStates = new Set(['passed', 'pending']);
 const MAX_ANNOTATIONS = 50;
 const lineRe = /\.spec\.ts:(?<line>\d+):(?<col>\d+)\)/;
 
@@ -40,7 +40,7 @@ function getPos(
 > {
   const pos = lineRe.exec(msg);
   if (!pos || !pos.groups) {
-    return { start_line: 1, end_line: 1 };
+    return { start_line: 0, end_line: 0 };
   }
 
   const line = parseInt(pos.groups.line, 10);
