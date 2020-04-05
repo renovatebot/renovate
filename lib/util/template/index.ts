@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-const allowedFields = {
+export const allowedFields = {
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
   depNameSanitized:
