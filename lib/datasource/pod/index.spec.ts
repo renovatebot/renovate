@@ -1,4 +1,4 @@
-import { api as _api } from '../../platform/github/gh-got-wrapper';
+import * as _api from '../../platform/github/gh-http-wrapper';
 import * as pod from '.';
 import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
@@ -7,7 +7,7 @@ import { GotResponse } from '../../platform';
 
 const api = mocked(_api);
 
-jest.mock('../../platform/github/gh-got-wrapper');
+jest.mock('../../platform/github/gh-http-wrapper');
 
 const config = {
   versioning: rubyVersioning.id,

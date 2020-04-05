@@ -1,4 +1,4 @@
-import { api } from '../../../platform/github/gh-got-wrapper';
+import * as api from '../../../platform/github/gh-http-wrapper';
 import * as hostRules from '../../../util/host-rules';
 import { getChangeLogJSON, ChangeLogError } from '.';
 import { mocked, partial } from '../../../../test/util';
@@ -6,7 +6,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
 
-jest.mock('../../../platform/github/gh-got-wrapper');
+jest.mock('../../../platform/github/gh-http-wrapper');
 jest.mock('../../../datasource/npm');
 
 const ghGot = mocked(api).get;

@@ -1,9 +1,9 @@
-import { api } from '../../platform/github/gh-got-wrapper';
+import * as api from '../../platform/github/gh-http-wrapper';
 
 import * as github from '.';
 import * as _hostRules from '../../util/host-rules';
 
-jest.mock('../../platform/github/gh-got-wrapper');
+jest.mock('../../platform/github/gh-http-wrapper');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 

@@ -1,10 +1,16 @@
-import { api } from '../../platform/github/gh-got-wrapper';
+import * as api from '../../platform/github/gh-http-wrapper';
 import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
 
-const { get: ghGot } = api;
-
 export const id = 'github-tags';
+
+interface GithubTagsResp {
+  object: {
+    type?: string;
+    sha?: string;
+    url?: string;
+  };
+}
 
 const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(repo: string, type: string): string {
@@ -26,11 +32,11 @@ async function getTagCommit(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/git/refs/tags/${tag}`;
-    const res = (await ghGot(url)).body.object;
+    const res = (await api.get<GithubTagsResp>(url)).body.object;
     if (res.type === 'commit') {
       digest = res.sha;
     } else if (res.type === 'tag') {
-      digest = (await ghGot(res.url)).body.object.sha;
+      digest = (await api.get<GithubTagsResp>(res.url)).body.object.sha;
     } else {
       logger.warn({ res }, 'Unknown git tag refs type');
     }
@@ -78,7 +84,7 @@ export async function getDigest(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
-    digest = (await ghGot(url)).body[0].sha;
+    digest = (await api.get(url)).body[0].sha;
   } catch (err) {
     logger.debug(
       { githubRepo, err },
@@ -128,7 +134,7 @@ export async function getReleases({
     }[];
 
     versions = (
-      await ghGot<GitHubTag>(url, {
+      await api.get<GitHubTag>(url, {
         paginate: true,
       })
     ).body.map(o => o.name);

@@ -1,10 +1,8 @@
-import { api } from '../../platform/github/gh-got-wrapper';
+import * as api from '../../platform/github/gh-http-wrapper';
 
 import * as github from '.';
 
-jest.mock('../../platform/github/gh-got-wrapper');
-jest.mock('../../util/got');
-jest.mock('../../util/host-rules');
+jest.mock('../../platform/github/gh-http-wrapper');
 
 const ghGot: any = api.get;
 
