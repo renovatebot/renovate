@@ -20,7 +20,7 @@ export interface HttpPostOptions extends HttpOptions {
 
 interface InternalHttpOptions extends HttpOptions {
   json?: boolean;
-  method?: 'get' | 'post';
+  method?: 'get' | 'post' | 'patch' | 'put' | 'delete';
 }
 
 export interface HttpResponse<T = string> {
@@ -88,6 +88,33 @@ export class Http {
     options: HttpPostOptions
   ): Promise<HttpResponse<T>> {
     const res = await this.request(url, { ...options, method: 'post' });
+    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
+    return { ...res, body };
+  }
+
+  async patchJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    const res = await this.request(url, { ...options, method: 'patch' });
+    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
+    return { ...res, body };
+  }
+
+  async putJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    const res = await this.request(url, { ...options, method: 'put' });
+    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
+    return { ...res, body };
+  }
+
+  async deleteJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    const res = await this.request(url, { ...options, method: 'delete' });
     const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
     return { ...res, body };
   }
