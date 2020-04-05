@@ -1,4 +1,4 @@
-import handlebars from 'handlebars';
+import * as template from '../../../util/template';
 import releaseNotesHbs from '../changelog/hbs-template';
 import { BranchConfig } from '../../common';
 
@@ -9,7 +9,7 @@ export function getChangelogs(config: BranchConfig): string {
     return releaseNotes;
   }
   releaseNotes +=
-    '\n\n---\n\n' + handlebars.compile(releaseNotesHbs)(config) + '\n\n';
+    '\n\n---\n\n' + template.compile(releaseNotesHbs, config) + '\n\n';
   releaseNotes = releaseNotes.replace(/### \[`vv/g, '### [`v');
   // Generic replacements/link-breakers
 

@@ -1,4 +1,4 @@
-import handlebars from 'handlebars';
+import * as template from '../../../util/template';
 import { logger } from '../../../logger';
 import { BranchConfig } from '../../common';
 
@@ -43,9 +43,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
       try {
         // istanbul ignore else
         if (value) {
-          res[header] = handlebars
-            .compile(value)(upgrade)
-            .replace(/^``$/, '');
+          res[header] = template.compile(value, upgrade).replace(/^``$/, '');
         } else {
           res[header] = '';
         }
