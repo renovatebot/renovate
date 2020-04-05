@@ -1,9 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 import nock from 'nock';
-import { getReleases } from '.';
-import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
+import { getPkgReleases } from '..';
+import { parseIndexDir } from './util';
+import * as sbtPlugin from '.';
+import * as mavenVersioning from '../../versioning/maven';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./__fixtures__/maven-index.html`),
@@ -23,7 +24,7 @@ describe('datasource/sbt', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
 
-  describe('getReleases', () => {
+  describe('getPkgReleases', () => {
     beforeEach(() => {
       nock.disableNetConnect();
       nock('https://failed_repo')
@@ -98,23 +99,29 @@ describe('datasource/sbt', () => {
 
     it('returns null in case of errors', async () => {
       expect(
-        await getReleases({
-          lookupName: 'org.scalatest:scalatest',
+        await getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toEqual(null);
       expect(
-        await getReleases({
-          lookupName: 'org.scalatest:scalaz',
-          registryUrls: [SBT_PLUGINS_REPO],
+        await getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.scalatest:scalaz',
+          registryUrls: [],
         })
       ).toEqual(null);
     });
     it('fetches sbt plugins', async () => {
       expect(
-        await getReleases({
-          lookupName: 'org.foundweekends:sbt-bintray',
-          registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
+        await getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.foundweekends:sbt-bintray',
+          registryUrls: [],
         })
       ).toEqual({
         dependencyUrl:
@@ -125,9 +132,11 @@ describe('datasource/sbt', () => {
         releases: [{ version: '0.5.5' }],
       });
       expect(
-        await getReleases({
-          lookupName: 'org.foundweekends:sbt-bintray_2.12',
-          registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
+        await getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.foundweekends:sbt-bintray_2.12',
+          registryUrls: [],
         })
       ).toEqual({
         dependencyUrl:
