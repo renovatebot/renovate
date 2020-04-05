@@ -12,5 +12,5 @@ export function getPrBanner(config: BranchConfig): string {
   if (!config.prBanner) {
     return '';
   }
-  return template.compile(config.prBanner.toString(), config) + '\n\n';
+  return template.compile(config.prBanner, config) + '\n\n';
 }

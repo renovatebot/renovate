@@ -35,6 +35,7 @@ export interface BranchUpgradeConfig
   packageFile?: string;
 
   parentBranch?: string;
+  prBanner?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;
   prPriority?: number;
