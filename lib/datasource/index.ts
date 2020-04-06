@@ -12,7 +12,6 @@ import {
   GetReleasesConfig,
   GetPkgReleasesConfig,
 } from './common';
-import * as semverVersioning from '../versioning/semver';
 import datasources from './api.generated';
 
 export * from './common';
@@ -101,10 +100,8 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
-  const versioning =
-    config && config.versioning ? config.versioning : semverVersioning.id;
   // Filter by versioning
-  const version = allVersioning.get(versioning);
+  const version = allVersioning.get(config.versioning);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);

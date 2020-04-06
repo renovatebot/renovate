@@ -11,7 +11,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
     });
-    it('catches invalid handlebars templates', async () => {
+    it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
       };

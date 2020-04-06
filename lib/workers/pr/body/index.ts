@@ -1,4 +1,4 @@
-import handlebars from 'handlebars';
+import * as template from '../../../util/template';
 import { platform } from '../../../platform';
 import { get } from '../../../versioning';
 import { getPrConfigDescription } from './config-description';
@@ -9,8 +9,6 @@ import { getPrNotes, getPrExtraNotes } from './notes';
 import { getChangelogs } from './changelogs';
 import { getControls } from './controls';
 import { BranchConfig } from '../../common';
-
-handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach(upgrade => {
@@ -80,7 +78,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
   const defaultPrBodyTemplate =
     '{{{banner}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
   const prBodyTemplate = config.prBodyTemplate || defaultPrBodyTemplate;
-  let prBody = handlebars.compile(prBodyTemplate)(content);
+  let prBody = template.compile(prBodyTemplate, content);
   prBody = prBody.trim();
   prBody = prBody.replace(/\n\n\n+/g, '\n\n');
   prBody = platform.getPrBody(prBody);

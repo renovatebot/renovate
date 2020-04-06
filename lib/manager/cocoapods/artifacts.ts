@@ -76,7 +76,7 @@ export async function updateArtifacts({
   if (!status.modified.includes(lockFileName)) {
     return null;
   }
-  logger.debug('Returning updated Gemfile.lock');
+  logger.debug(`Returning updated lockfile: ${lockFileName}`);
   const lockFileContent = await readLocalFile(lockFileName);
   return [
     {
