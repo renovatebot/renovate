@@ -5,7 +5,6 @@ import { logger } from '../../logger';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-// istanbul ignore next
 handlebars.registerHelper('replace', (find, replace, context) => {
   return context.replace(new RegExp(find, 'g'), replace);
 });
