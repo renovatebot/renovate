@@ -2,8 +2,6 @@
 import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
-import { readFile } from 'fs-extra';
-import { join } from 'upath';
 import { logger } from '../../logger';
 import {
   UpdateArtifact,
@@ -14,6 +12,7 @@ import { exec, ExecOptions } from '../../util/exec';
 import { platform } from '../../platform';
 import { VERSION_REGEX } from './search';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle';
+import { readLocalFile } from '../../util/fs';
 
 async function addIfUpdated(
   config: UpdateArtifactsConfig,
@@ -21,9 +20,7 @@ async function addIfUpdated(
   fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
-    const rawFileContents = await readFile(
-      join(config.localDir, fileProjectPath)
-    );
+    const rawFileContents = await readLocalFile(fileProjectPath);
     let fileContents;
     if (fileProjectPath.endsWith('.jar')) {
       fileContents = rawFileContents;
