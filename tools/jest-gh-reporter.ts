@@ -60,7 +60,11 @@ class GitHubReporter extends BaseReporter {
   constructor() {
     super();
     try {
-      this._api = new GitHub(getEnv('GITHUB_TOKEN'));
+      const token = getEnv('GITHUB_TOKEN');
+      if (!token) {
+        return;
+      }
+      this._api = new GitHub(token);
     } catch (e) {
       error(`Unexpected error: ${e}`);
       this._api = null;
