@@ -1,6 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
+exports[`api/docker getRegistryRepository handles local registries 1`] = `
+Object {
+  "registry": "https://registry:5000",
+  "repository": "org/package",
+}
+`;
+
+exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -44,6 +51,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -122,7 +130,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
 }
 `;
 
-exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
+exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -166,6 +174,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -244,7 +253,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
 }
 `;
 
-exports[`api/docker getPkgReleases adds no library/ prefix for other registries 1`] = `
+exports[`api/docker getReleases adds no library/ prefix for other registries 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -288,6 +297,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -366,7 +376,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
 }
 `;
 
-exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
+exports[`api/docker getReleases uses custom registry in depName 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -392,6 +402,7 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -435,7 +446,7 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
 }
 `;
 
-exports[`api/docker getPkgReleases uses custom registry with registryUrls 1`] = `
+exports[`api/docker getReleases uses custom registry with registryUrls 1`] = `
 Array [
   Array [
     "https://registry.company.com/v2/",
@@ -460,6 +471,7 @@ Array [
         ],
       },
       "hostType": "docker",
+      "json": true,
       "method": "get",
     },
   ],
@@ -473,6 +485,7 @@ Array [
         ],
       },
       "hostType": "docker",
+      "json": true,
       "method": "get",
     },
   ],
@@ -507,7 +520,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
+exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -533,6 +546,7 @@ exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -569,12 +583,5 @@ exports[`api/docker getPkgReleases uses lower tag limit for ECR deps 1`] = `
       "value": undefined,
     },
   ],
-}
-`;
-
-exports[`api/docker getRegistryRepository handles local registries 1`] = `
-Object {
-  "registry": "https://registry:5000",
-  "repository": "org/package",
 }
 `;

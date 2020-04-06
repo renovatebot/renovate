@@ -22,29 +22,21 @@ describe('lib/manager/gitsubmodules/extract', () => {
     });
   });
   describe('extractPackageFile()', () => {
-    it('handles empty gitmodules file', async () => {
+    it('extracts submodules', async () => {
+      let res;
       expect(
         await extractPackageFile('', '.gitmodules.1', { localDir })
       ).toBeNull();
-    });
-    it('default to master branch', async () => {
-      const res = await extractPackageFile('', '.gitmodules.2', { localDir });
+      res = await extractPackageFile('', '.gitmodules.2', { localDir });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
-    });
-    it('extract branch', async () => {
-      const res = await extractPackageFile('', '.gitmodules.3', { localDir });
+      res = await extractPackageFile('', '.gitmodules.3', { localDir });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
-    });
-    it('extract relative URL', async () => {
-      const res = await extractPackageFile('', '.gitmodules.4', { localDir });
+      res = await extractPackageFile('', '.gitmodules.4', { localDir });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
-    });
-
-    it('extract name path mismatch', async () => {
-      const res = await extractPackageFile('', '.gitmodules.5', { localDir });
+      res = await extractPackageFile('', '.gitmodules.5', { localDir });
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });

@@ -33,7 +33,7 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     setExecConfig(config);
 
-    datasource.getPkgReleases.mockResolvedValue({
+    datasource.getReleases.mockResolvedValue({
       releases: [
         { version: '1.2.0' },
         { version: '1.2.1' },
@@ -196,7 +196,7 @@ describe('.updateArtifacts()', () => {
     });
 
     platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
-    datasource.getPkgReleases.mockResolvedValueOnce({
+    datasource.getReleases.mockResolvedValueOnce({
       releases: [],
     });
 

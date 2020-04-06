@@ -59,12 +59,12 @@ describe('datasource/github-tags', () => {
       expect(res).toBeNull();
     });
   });
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeAll(() => global.renovateCache.rmAll());
     it('returns tags', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await github.getPkgReleases({
+      const res = await github.getReleases({
         lookupName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();

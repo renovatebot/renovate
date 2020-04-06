@@ -11,7 +11,7 @@ const consulData: any = fs.readFileSync(
 );
 
 describe('datasource/terraform', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       global.repoCache = {};
@@ -20,7 +20,7 @@ describe('datasource/terraform', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await terraformProvider.getPkgReleases({
+        await terraformProvider.getReleases({
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -32,7 +32,7 @@ describe('datasource/terraform', () => {
         })
       );
       expect(
-        await terraformProvider.getPkgReleases({
+        await terraformProvider.getReleases({
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -42,7 +42,7 @@ describe('datasource/terraform', () => {
         throw new Error();
       });
       expect(
-        await terraformProvider.getPkgReleases({
+        await terraformProvider.getReleases({
           lookupName: 'azurerm',
         })
       ).toBeNull();
@@ -51,7 +51,7 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await terraformProvider.getPkgReleases({
+      const res = await terraformProvider.getReleases({
         lookupName: 'azurerm',
       });
       expect(res).toMatchSnapshot();

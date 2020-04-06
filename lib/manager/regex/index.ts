@@ -1,4 +1,4 @@
-import * as handlebars from 'handlebars';
+import * as template from '../../util/template';
 import { CustomExtractConfig, PackageFile, Result } from '../common';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
@@ -35,11 +35,11 @@ export function extractPackageFile(
         const fieldTemplate = `${field}Template`;
         if (config[fieldTemplate]) {
           try {
-            dep[field] = handlebars.compile(config[fieldTemplate])(groups);
+            dep[field] = template.compile(config[fieldTemplate], groups);
           } catch (err) {
             logger.warn(
               { template: config[fieldTemplate] },
-              'Error compiling handlebars template for custom manager'
+              'Error compiling template for custom manager'
             );
             return null;
           }

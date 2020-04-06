@@ -10,7 +10,7 @@ const http = new Http(id);
 
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 
-export async function getPkgReleases(
+export async function getReleases(
   _config?: GetReleasesConfig
 ): Promise<ReleaseResult> {
   // First check the persistent cache

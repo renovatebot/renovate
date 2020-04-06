@@ -86,13 +86,13 @@ export async function getRepositoryData(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [helmRepository] = registryUrls;
   if (!helmRepository) {
-    logger.warn(`helmRepository was not provided to getPkgReleases`);
+    logger.warn(`helmRepository was not provided to getReleases`);
     return null;
   }
   const repositoryData = await getRepositoryData(helmRepository);

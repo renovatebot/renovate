@@ -1,5 +1,5 @@
 import _simpleGit from 'simple-git/promise';
-import { getPkgReleases } from '.';
+import { getReleases } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
@@ -8,14 +8,14 @@ const lookupName = 'https://github.com/example/example.git';
 
 describe('datasource/git-refs', () => {
   beforeEach(() => global.renovateCache.rmAll());
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
           return Promise.resolve(null);
         },
       });
-      const versions = await getPkgReleases({ lookupName });
+      const versions = await getReleases({ lookupName });
       expect(versions).toEqual(null);
     });
     it('returns nil if remote call throws exception', async () => {
@@ -24,7 +24,7 @@ describe('datasource/git-refs', () => {
           throw new Error();
         },
       });
-      const versions = await getPkgReleases({ lookupName });
+      const versions = await getReleases({ lookupName });
       expect(versions).toEqual(null);
     });
     it('returns versions filtered from tags', async () => {
@@ -36,7 +36,7 @@ describe('datasource/git-refs', () => {
         },
       });
 
-      const versions = await getPkgReleases({
+      const versions = await getReleases({
         lookupName,
       });
 

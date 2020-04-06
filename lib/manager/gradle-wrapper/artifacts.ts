@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
@@ -11,13 +12,15 @@ import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(
   status: Git.StatusResult,
-  filePath: string
+  projectDir: string,
+  fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
-  if (status.modified.includes(filePath)) {
+  if (status.modified.includes(fileProjectPath)) {
+    const filePath = resolve(projectDir, `./${fileProjectPath}`);
     return {
       artifactError: null,
       file: {
-        name: filePath,
+        name: fileProjectPath,
         contents: await readLocalFile(filePath),
       },
     };
@@ -65,11 +68,13 @@ export async function updateArtifacts({
     const updateArtifactsResult = (
       await Promise.all(
         [
-          resolve(projectDir, './gradle/wrapper/gradle-wrapper.properties'),
-          resolve(projectDir, './gradle/wrapper/gradle-wrapper.jar'),
-          resolve(projectDir, './gradlew'),
-          resolve(projectDir, './gradlew.bat'),
-        ].map(async filePath => addIfUpdated(status, filePath))
+          'gradle/wrapper/gradle-wrapper.properties',
+          'gradle/wrapper/gradle-wrapper.jar',
+          'gradlew',
+          'gradlew.bat',
+        ].map(async fileProjectPath =>
+          addIfUpdated(status, projectDir, fileProjectPath)
+        )
       )
     ).filter(e => e != null);
     logger.debug(

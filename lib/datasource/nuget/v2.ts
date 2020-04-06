@@ -11,7 +11,7 @@ function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
 }
 
-export async function getPkgReleases(
+export async function getReleases(
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {

@@ -8,7 +8,7 @@ import {
 } from '../common';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
-import { getPkgReleases } from '../../../datasource/docker';
+import { getReleases } from '../../../datasource/docker';
 
 const prefetchedImages = new Set<string>();
 
@@ -82,7 +82,7 @@ async function getDockerTag(
     { constraint },
     `Found ${scheme} version constraint - checking for a compatible ${lookupName} image to use`
   );
-  const imageReleases = await getPkgReleases({ lookupName });
+  const imageReleases = await getReleases({ lookupName });
   if (imageReleases && imageReleases.releases) {
     let versions = imageReleases.releases.map(release => release.version);
     versions = versions.filter(
