@@ -17,7 +17,7 @@ import {
   Opt,
   DockerOptions,
 } from './common';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 
 const execConfig: ExecConfig = {
   binarySource: null,
