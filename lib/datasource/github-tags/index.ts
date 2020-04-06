@@ -84,7 +84,7 @@ export async function getDigest(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
-    digest = (await api.getJson(url)).body[0].sha;
+    digest = (await api.getJson<{ sha: string }[]>(url)).body[0].sha;
   } catch (err) {
     logger.debug(
       { githubRepo, err },
