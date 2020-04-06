@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`api/docker getRegistryRepository handles local registries 1`] = `
+Object {
+  "registry": "https://registry:5000",
+  "repository": "org/package",
+}
+`;
+
 exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
 [MockFunction] {
   "calls": Array [
@@ -44,6 +51,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -166,6 +174,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -288,6 +297,7 @@ exports[`api/docker getReleases adds no library/ prefix for other registries 1`]
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -392,6 +402,7 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -460,6 +471,7 @@ Array [
         ],
       },
       "hostType": "docker",
+      "json": true,
       "method": "get",
     },
   ],
@@ -473,6 +485,7 @@ Array [
         ],
       },
       "hostType": "docker",
+      "json": true,
       "method": "get",
     },
   ],
@@ -533,6 +546,7 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
           ],
         },
         "hostType": "docker",
+        "json": true,
         "method": "get",
       },
     ],
@@ -569,12 +583,5 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
       "value": undefined,
     },
   ],
-}
-`;
-
-exports[`api/docker getRegistryRepository handles local registries 1`] = `
-Object {
-  "registry": "https://registry:5000",
-  "repository": "org/package",
 }
 `;
