@@ -1,4 +1,4 @@
-import * as _fs from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as branchWorker from '.';
 import * as _schedule from './schedule';
 import * as _checkExisting from './check-existing';
@@ -12,6 +12,7 @@ import * as _getUpdated from './get-updated';
 import * as _exec from '../../util/exec';
 import { defaultConfig, platform, mocked } from '../../../test/util';
 import { BranchConfig, PrResult } from '../common';
+import * as upath from 'upath';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -33,7 +34,6 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../../util/exec');
-jest.mock('fs-extra');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
@@ -45,7 +45,6 @@ const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
-const fs = mocked(_fs);
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
@@ -635,10 +634,10 @@ describe('workers/branch', () => {
       } as StatusResult);
       global.trustLevel = 'high';
 
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
-
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const modifiedFile = upath.join(__dirname, 'modified_file');
+      await fs.writeFile(modifiedFile, 'content');
 
       const result = await branchWorker.processBranch({
         ...config,
@@ -646,12 +645,13 @@ describe('workers/branch', () => {
           commands: ['echo 1', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
-        localDir: '/localDir',
+        localDir: __dirname,
         allowedPostUpgradeCommands: ['^echo 1$'],
       });
 
       expect(result).toEqual('done');
-      expect(exec.exec).toHaveBeenCalledWith('echo 1', { cwd: '/localDir' });
+      expect(exec.exec).toHaveBeenCalledWith('echo 1', { cwd: __dirname });
+      fs.unlink(modifiedFile);
     });
   });
 });

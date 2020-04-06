@@ -1,4 +1,4 @@
-import _fs from 'fs-extra';
+import fs from 'fs-extra';
 import {
   logger,
   setContext,
@@ -14,10 +14,16 @@ import { add } from '../util/host-rules';
 
 jest.unmock('.');
 
-jest.mock('fs-extra');
-const fs: any = _fs;
+const logFile = 'file.log';
 
 describe('logger', () => {
+  beforeEach(async () => {
+    try {
+      await fs.unlink(logFile);
+    } catch {
+      // File doesn't exist
+    }
+  });
   it('inits', () => {
     expect(logger).toBeDefined();
   });
@@ -72,45 +78,30 @@ describe('logger', () => {
     expect(() =>
       addStream({
         name: 'logfile',
-        path: 'file.log',
+        path: logFile,
         level: 'error',
         type: 'rotating-file',
       })
     ).toThrow("Rotating files aren't supported");
   });
 
-  it('supports file-based logging', () => {
-    let chunk = null;
-    fs.createWriteStream.mockReturnValueOnce({
-      writable: true,
-      write(x) {
-        chunk = x;
-      },
-    });
-
+  it('supports file-based logging', async () => {
     addStream({
       name: 'logfile',
-      path: 'file.log',
+      path: logFile,
       level: 'error',
     });
 
     logger.error('foo');
 
-    expect(JSON.parse(chunk).msg).toEqual('foo');
+    const content = await fs.readFile(logFile, 'utf-8');
+    expect(JSON.parse(content).msg).toEqual('foo');
   });
 
-  it('handles cycles', () => {
-    let logged = null;
-    fs.createWriteStream.mockReturnValueOnce({
-      writable: true,
-      write(x) {
-        logged = JSON.parse(x);
-      },
-    });
-
+  it('handles cycles', async () => {
     addStream({
       name: 'logfile',
-      path: 'file.log',
+      path: logFile,
       level: 'error',
     });
 
@@ -118,24 +109,18 @@ describe('logger', () => {
     meta.foo = meta;
     meta.bar.push(meta);
     logger.error(meta, 'foo');
+
+    const logged = JSON.parse(await fs.readFile(logFile, 'utf-8'));
     expect(logged.msg).toEqual('foo');
     expect(logged.foo.foo).toEqual('[Circular]');
     expect(logged.foo.bar).toEqual(['[Circular]']);
     expect(logged.bar).toEqual('[Circular]');
   });
 
-  it('sanitizes secrets', () => {
-    let logged = null;
-    fs.createWriteStream.mockReturnValueOnce({
-      writable: true,
-      write(x) {
-        logged = JSON.parse(x);
-      },
-    });
-
+  it('sanitizes secrets', async () => {
     addStream({
       name: 'logfile',
-      path: 'file.log',
+      path: logFile,
       level: 'error',
     });
     add({ password: 'secret"password' });
@@ -144,6 +129,8 @@ describe('logger', () => {
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
     });
+
+    const logged = JSON.parse(await fs.readFile(logFile, 'utf-8'));
 
     expect(logged.foo).not.toEqual('secret"password');
     expect(logged.bar[0]).toEqual('somethingelse');
