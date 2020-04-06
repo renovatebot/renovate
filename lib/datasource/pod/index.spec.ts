@@ -1,13 +1,13 @@
-import * as _api from '../../platform/github/gh-http-wrapper';
+import * as github from '../../util/http/github';
 import * as pod from '.';
 import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
 
-const api = mocked(_api);
+const api = mocked(github);
 
-jest.mock('../../platform/github/gh-http-wrapper');
+jest.mock('../../util/http/github');
 
 const config = {
   versioning: rubyVersioning.id,

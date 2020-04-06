@@ -1,5 +1,5 @@
-import _got from '../../util/got';
-import * as api from './gh-http-wrapper';
+import _got from '../got';
+import * as api from './github';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_FAILURE,

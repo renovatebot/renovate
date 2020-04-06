@@ -10,7 +10,7 @@ import { mocked } from '../../../test/util';
 
 describe('platform/github', () => {
   let github: Platform;
-  let api: jest.Mocked<typeof import('./gh-http-wrapper')>;
+  let api: jest.Mocked<typeof import('../../util/http/github')>;
   let got: jest.Mock<Promise<Partial<GotResponse>>>;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let GitStorage: jest.Mock<typeof import('../git/storage')>;
@@ -19,10 +19,10 @@ describe('platform/github', () => {
     jest.resetModules();
     jest.unmock('.');
     jest.mock('delay');
-    jest.mock('./gh-http-wrapper');
+    jest.mock('../../util/http/github');
     jest.mock('../../util/host-rules');
     jest.mock('../../util/got');
-    api = mocked(await import('./gh-http-wrapper'));
+    api = mocked(await import('../../util/http/github'));
     got = (await import('../../util/got')).default as any;
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));

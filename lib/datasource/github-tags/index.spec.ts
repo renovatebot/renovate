@@ -1,13 +1,13 @@
-import * as api from '../../platform/github/gh-http-wrapper';
+import { getJson } from '../../util/http/github';
 
 import * as github from '.';
 import * as _hostRules from '../../util/host-rules';
 
-jest.mock('../../platform/github/gh-http-wrapper');
+jest.mock('../../util/http/github');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
-const ghGot: any = api.getJson;
+const ghGot: any = getJson;
 const hostRules: any = _hostRules;
 
 describe('datasource/github-tags', () => {

@@ -1,4 +1,4 @@
-import * as api from '../../../platform/github/gh-http-wrapper';
+import * as github from '../../../util/http/github';
 import * as hostRules from '../../../util/host-rules';
 import { getChangeLogJSON, ChangeLogError } from '.';
 import { mocked, partial } from '../../../../test/util';
@@ -6,10 +6,10 @@ import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
 
-jest.mock('../../../platform/github/gh-http-wrapper');
+jest.mock('../../../util/http/github');
 jest.mock('../../../datasource/npm');
 
-const ghGot = mocked(api).getJson;
+const ghGot = mocked(github).getJson;
 
 const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',

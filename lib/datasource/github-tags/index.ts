@@ -1,4 +1,4 @@
-import * as api from '../../platform/github/gh-http-wrapper';
+import * as api from '../../util/http/github';
 import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
 

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import * as api from '../../platform/github/gh-http-wrapper';
+import * as github from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
 
@@ -34,7 +34,7 @@ async function makeRequest<T = unknown>(
   json = true
 ): Promise<T | null> {
   try {
-    const resp = await api.getJson<T>(url, { json });
+    const resp = await github.getJson<T>(url, { json });
     if (resp && resp.body) {
       return resp.body;
     }

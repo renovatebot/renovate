@@ -1,9 +1,9 @@
 import URL from 'url';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
-import { Http, HttpResponse } from '../../util/http';
+import { Http, HttpResponse } from './index';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { dispatchError } from './gh-got-wrapper';
+import { dispatchError } from '../../platform/github/gh-got-wrapper';
 
 const hostType = PLATFORM_TYPE_GITHUB;
 export const getHostType = (): string => hostType;

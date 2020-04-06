@@ -1,10 +1,10 @@
-import * as api from '../../platform/github/gh-http-wrapper';
+import { getJson } from '../../util/http/github';
 
 import * as github from '.';
 
-jest.mock('../../platform/github/gh-http-wrapper');
+jest.mock('../../util/http/github');
 
-const ghGot: any = api.getJson;
+const ghGot: any = getJson;
 
 describe('datasource/github-releases', () => {
   beforeEach(() => global.renovateCache.rmAll());

@@ -1,5 +1,5 @@
 import URL from 'url';
-import * as api from '../../../platform/github/gh-http-wrapper';
+import * as github from '../../../util/http/github';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
@@ -19,7 +19,7 @@ async function getTags(
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
   url += `repos/${repository}/tags?per_page=100`;
   try {
-    const res = await api.getJson<{ name: string }[]>(url, {
+    const res = await github.getJson<{ name: string }[]>(url, {
       paginate: true,
     });
 
