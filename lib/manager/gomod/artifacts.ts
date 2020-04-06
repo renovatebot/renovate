@@ -129,10 +129,9 @@ export async function updateArtifacts({
         });
       }
     }
-    const finalGoModContent = (await readLocalFile(goModFileName)).replace(
-      /\/\/ renovate-replace /g,
-      ''
-    );
+    const finalGoModContent = (
+      await readLocalFile(goModFileName, 'utf8')
+    ).replace(/\/\/ renovate-replace /g, '');
     if (finalGoModContent !== newGoModContent) {
       logger.debug('Found updated go.mod after go.sum update');
       res.push({

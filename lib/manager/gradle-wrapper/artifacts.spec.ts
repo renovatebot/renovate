@@ -71,8 +71,7 @@ describe('manager/gradle-wrapper/update', () => {
                   resolve(
                     __dirname,
                     `./__fixtures__/testFiles/${fileProjectPath}`
-                  ),
-                  'utf8'
+                  )
                 ),
               },
             };
@@ -86,14 +85,10 @@ describe('manager/gradle-wrapper/update', () => {
           'gradlew.bat',
         ].forEach(file => {
           expect(
-            readFileSync(
-              resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-              'utf8'
-            )
+            readFileSync(resolve(__dirname, `./__fixtures__/testFiles/${file}`))
           ).toEqual(
             readFileSync(
-              resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
-              'utf8'
+              resolve(__dirname, `./__fixtures__/expectedFiles/${file}`)
             )
           );
         });
