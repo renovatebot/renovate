@@ -7,6 +7,7 @@ interface OutgoingHttpHeaders {
 }
 
 export interface HttpOptions {
+  body?: any;
   auth?: string;
   baseUrl?: string;
   headers?: OutgoingHttpHeaders;
@@ -74,22 +75,27 @@ export class Http {
     return this.request(url, options);
   }
 
+  async requestJson<T = unknown>(
+    url: string,
+    options: InternalHttpOptions = {}
+  ): Promise<HttpResponse<T>> {
+    const res = await this.request(url, { ...options, json: true });
+    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
+    return { ...res, body };
+  }
+
   async getJson<T = unknown>(
     url: string,
     options: HttpOptions = {}
   ): Promise<HttpResponse<T>> {
-    const res = await this.request(url, options);
-    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
-    return { ...res, body };
+    return this.requestJson(url, options);
   }
 
   async postJson<T = unknown>(
     url: string,
     options: HttpPostOptions
   ): Promise<HttpResponse<T>> {
-    const res = await this.request(url, { ...options, method: 'post' });
-    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
-    return { ...res, body };
+    return this.requestJson(url, { ...options, method: 'post' });
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
