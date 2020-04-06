@@ -55,7 +55,7 @@ function getPos(
 }
 
 class GitHubReporter extends BaseReporter {
-  private readonly _api: GitHub | null;
+  private readonly _api: GitHub | null = null;
 
   constructor() {
     super();
@@ -67,7 +67,6 @@ class GitHubReporter extends BaseReporter {
       this._api = new GitHub(token);
     } catch (e) {
       error(`Unexpected error: ${e}`);
-      this._api = null;
     }
   }
 
