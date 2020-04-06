@@ -34,10 +34,7 @@ async function makeRequest<T = unknown>(
   json = true
 ): Promise<T | null> {
   try {
-    const resp = await api.getJson<T>(url, { json });
-    if (resp && resp.body) {
-      return resp.body;
-    }
+    return await api.getJson<T>(url, { json }).body;
   } catch (err) {
     const errorData = { lookupName, err };
 
