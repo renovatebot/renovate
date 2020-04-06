@@ -1609,7 +1609,6 @@ export async function ensureComment({
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
-    debugger;
     if (err.message === PLATFORM_FAILURE) {
       throw err;
     }

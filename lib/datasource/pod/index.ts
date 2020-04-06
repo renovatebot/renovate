@@ -34,10 +34,7 @@ async function makeRequest<T = unknown>(
   json = true
 ): Promise<T | null> {
   try {
-    const resp = await github.getJson<T>(url, { json });
-    if (resp && resp.body) {
-      return resp.body;
-    }
+    return (await github.getJson<T>(url, { json })).body;
   } catch (err) {
     const errorData = { lookupName, err };
 
