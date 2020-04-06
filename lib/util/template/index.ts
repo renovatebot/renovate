@@ -1,10 +1,11 @@
 import is from '@sindresorhus/is';
-import safeStringify from 'fast-safe-stringify';
 import * as handlebars from 'handlebars';
 import { logger } from '../../logger';
+import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
+// istanbul ignore next
 handlebars.registerHelper('replace', (find, replace, context) => {
   return context.replace(new RegExp(find, 'g'), replace);
 });
@@ -77,7 +78,7 @@ export const allowedFields = {
 };
 
 function getFilteredObject(input: any): any {
-  const obj = JSON.parse(safeStringify(input));
+  const obj = clone(input);
   const res = {};
   const allAllowed = [
     ...Object.keys(allowedFields),
