@@ -20,7 +20,7 @@ export interface HttpPostOptions extends HttpOptions {
 
 interface InternalHttpOptions extends HttpOptions {
   json?: boolean;
-  method?: 'get' | 'post';
+  method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
 export interface HttpResponse<T = string> {
@@ -95,6 +95,34 @@ export class Http {
     options: HttpPostOptions
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options, method: 'post' });
+  }
+
+  async putJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'put' });
+  }
+
+  async patchJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'patch' });
+  }
+
+  async deleteJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'delete' });
+  }
+
+  async headJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'head' });
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
