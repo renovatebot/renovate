@@ -25,8 +25,33 @@ async function updateFile(file: string, code: string): Promise<void> {
   }
   newFiles.add(file);
 }
+
+async function generate(
+  path: string,
+  types: string[],
+  map = ''
+): Promise<void> {
+  shell.echo(`> ${path}`);
+  let imports = '';
+  let maps = '';
+  for (const ds of findModules(`lib/${path}`)) {
+    const name = _.camelCase(ds);
+    imports += `import * as ${name} from './${ds}';\n`;
+    maps += `api.set('${ds}', ${name}${map});\n`;
+  }
+
+  const code = `import { ${types.join(', ')} } from './common';
+    ${imports}\n
+    const api = new Map<string, ${types.join(' | ')}>();
+    export default api;
+    ${maps}`;
+
+  await updateFile(`lib/${path}/api.generated.ts`, code.replace(/^\s+/gm, ''));
+}
+
 (async () => {
   try {
+    // datasources
     shell.echo('> datasources');
     let code = `
 import { Datasource } from './common';
@@ -38,22 +63,15 @@ export default api;
     }
     await updateFile('lib/datasource/api.generated.ts', code);
 
-    shell.echo('> managers');
-    let imports = '';
-    let maps = '';
-    for (const ds of findModules('lib/manager')) {
-      const name = _.camelCase(ds);
-      imports += `import * as ${name} from './${ds}';\n`;
-      maps += `api.set('${ds}', ${name});\n`;
-    }
+    // managers
+    await generate('manager', ['ManagerApi']);
 
-    code = `import { ManagerApi } from './common';
-${imports}
-const api = new Map<string, ManagerApi>();
-export default api;
-${maps}`;
-
-    await updateFile('lib/manager/api.generated.ts', code);
+    // versioning
+    await generate(
+      'versioning',
+      ['VersioningApi', 'VersioningApiConstructor'],
+      '.api'
+    );
 
     await Promise.all(
       shell
