@@ -6,6 +6,8 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export { id } from './common';
 
+export { getDefaultFeed } from './v3';
+
 function parseRegistryUrl(
   registryUrl: string
 ): { feedUrl: string; protocolVersion: number } {
