@@ -5,8 +5,6 @@ import { logger } from '../../logger';
 
 export const id = 'pod';
 
-export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
-
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
@@ -112,6 +110,8 @@ async function getReleasesFromCDN(
   return null;
 }
 
+const defaultCDN = 'https://cdn.cocoapods.org';
+
 function isDefaultRepo(url: string): boolean {
   const match = githubRegex.exec(url);
   if (match) {
@@ -123,10 +123,14 @@ function isDefaultRepo(url: string): boolean {
   return false;
 }
 
-export async function getReleases({
-  lookupName,
-  registryUrls,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
+  let { registryUrls } = config;
+  registryUrls =
+    registryUrls && registryUrls.length ? registryUrls : [defaultCDN];
+
   const podName = lookupName.replace(/\/.*$/, '');
 
   const cachedResult = await renovateCache.get<ReleaseResult>(
@@ -145,7 +149,7 @@ export async function getReleases({
 
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(registryUrl)) {
-      [registryUrl] = defaultRegistryUrls;
+      registryUrl = defaultCDN;
     }
 
     if (githubRegex.exec(registryUrl)) {

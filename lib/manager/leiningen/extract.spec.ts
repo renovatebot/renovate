@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { trimAtKey, extractFromVectors, extractPackageFile } from './extract';
-import * as datasourceClojure from '../../datasource/clojure';
+import * as datasourceMaven from '../../datasource/maven';
 
 const leinProjectClj = readFileSync(
   resolve(__dirname, `./__fixtures__/project.clj`),
@@ -23,7 +23,7 @@ describe('manager/clojure/extract', () => {
     expect(extractFromVectors('[[]]')).toEqual([]);
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
-        datasource: datasourceClojure.id,
+        datasource: datasourceMaven.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
         fileReplacePosition: 11,
@@ -33,13 +33,13 @@ describe('manager/clojure/extract', () => {
       extractFromVectors('[\t[foo/bar "1.2.3"]\n["foo/baz"  "4.5.6"] ]')
     ).toEqual([
       {
-        datasource: datasourceClojure.id,
+        datasource: datasourceMaven.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
         fileReplacePosition: 12,
       },
       {
-        datasource: datasourceClojure.id,
+        datasource: datasourceMaven.id,
         depName: 'foo:baz',
         currentValue: '4.5.6',
         fileReplacePosition: 33,

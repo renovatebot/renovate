@@ -1,6 +1,7 @@
+import { CLOJARS_REPO, MAVEN_REPO } from '../../datasource/maven/common';
 import { expandDepName } from '../leiningen/extract';
 import { PackageFile, PackageDependency } from '../common';
-import * as datasourceClojure from '../../datasource/clojure';
+import * as datasourceMaven from '../../datasource/maven';
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];
@@ -19,11 +20,11 @@ export function extractPackageFile(content: string): PackageFile {
     match = regex.exec(rest);
 
     deps.push({
-      datasource: datasourceClojure.id,
+      datasource: datasourceMaven.id,
       depName: expandDepName(depName),
       currentValue,
       fileReplacePosition,
-      registryUrls: [],
+      registryUrls: [CLOJARS_REPO, MAVEN_REPO],
     });
   }
 

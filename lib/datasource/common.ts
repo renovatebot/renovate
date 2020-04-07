@@ -68,8 +68,6 @@ export interface Datasource {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  defaultRegistryUrls?: string[];
-  appendRegistryUrls?: string[];
 }
 
 export class DatasourceError extends Error {
