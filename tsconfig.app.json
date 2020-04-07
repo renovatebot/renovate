@@ -9,14 +9,6 @@
     "checkJs": false,
     "types": ["node"]
   },
-  "exclude": [
-    "./.cache",
-    "./dist",
-    "**/__mocks__/**",
-    "**/__fixtures__/**",
-    "**/__testutil__/**",
-    "**/*.spec.ts",
-    "./test",
-    "./tools"
-  ]
+  "files": ["lib/renovate.ts"],
+  "include": ["lib/**/*.d.ts"]
 }

@@ -29,16 +29,12 @@ COPY patches patches
 RUN yarn install --frozen-lockfile
 
 COPY lib lib
+COPY app app
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.app.json tsconfig.app.json
 
 
 RUN yarn build:docker
-
-# Prune node_modules to production-only so they can be copied into the final image
-
-RUN yarn install --production --frozen-lockfile
-
 
 # Final-base image
 #============
@@ -210,13 +206,15 @@ FROM $IMAGE as final
 COPY package.json .
 
 COPY --from=tsbuild /usr/src/app/dist dist
-COPY --from=tsbuild /usr/src/app/node_modules node_modules
+# COPY --from=tsbuild /usr/src/app/node_modules node_modules
 COPY bin bin
 COPY data data
 
+# compabillity file
+RUN echo "require('./index.js');" > dist/renovate.js
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
 USER 1000
 
-ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
+ENTRYPOINT ["node", "/usr/src/app/dist/index.js"]
 CMD []

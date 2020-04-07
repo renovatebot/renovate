@@ -8,8 +8,8 @@
   },
   "scripts": {
     "build": "run-s clean generate:* compile:* copy-static-files",
-    "build:docker": "run-s generate:* compile:ts copy-static-files",
-    "build:bundle": "ncc build lib/renovate.ts",
+    "build:docker": "run-s generate:* build:bundle copy-static-files",
+    "build:bundle": "cd app && ncc build index.ts -o ../dist -s",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
