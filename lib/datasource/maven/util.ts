@@ -3,17 +3,15 @@ import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError } from '../common';
 
-import { id, MAVEN_REPO, MAVEN_REPO_DEPRECATED } from './common';
+import { id, MAVEN_REPO } from './common';
 
 const http = new Http(id);
 
 const getHost = (x: string): string => new url.URL(x).host;
 
-const defaultHosts = [MAVEN_REPO, MAVEN_REPO_DEPRECATED].map(getHost);
-
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
-  return defaultHosts.includes(host);
+  return getHost(MAVEN_REPO) === host;
 }
 
 function isTemporalError(err: { code: string; statusCode: number }): boolean {
