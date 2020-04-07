@@ -64,7 +64,7 @@ async function determineRegistryUrls(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig = {}
+  config: ExtractConfig
 ): Promise<PackageFile> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const { isVersion } = get(config.versioning || semverVersioning.id);
