@@ -1738,7 +1738,7 @@ export function getOptions(): RenovateOptions[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, config] of Object.entries(getManagers())) {
+  for (const [name, config] of getManagers().entries()) {
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,
