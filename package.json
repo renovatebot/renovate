@@ -14,7 +14,7 @@
     "compile:ts": "tsc -p tsconfig.app.json",
     "compile:dts": "tsc -p tsconfig.dts.json",
     "generate": "run-s generate:*",
-    "generate:imports": "node --experimental-modules tools/generate-imports.mjs",
+    "generate:imports": "node tmp/tools/generate-imports.js",
     "copy-static-files": "copyfiles -u 1 -e **/__fixtures__/**  -e **/__mocks__/** lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
