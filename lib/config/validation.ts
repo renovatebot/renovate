@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import * as handlebars from 'handlebars';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import * as managerValidator from './validation-helpers/managers';
 import { RenovateConfig, ValidationMessage } from './common';
 import { regEx } from '../util/regex';
+import * as template from '../util/template';
 
 const options = getOptions();
 
@@ -77,13 +77,13 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = handlebars.compile(val)(config);
-          res = handlebars.compile(res)(config);
-          handlebars.compile(res)(config);
+          let res = template.compile(val.toString(), config);
+          res = template.compile(res, config);
+          template.compile(res, config);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
-            message: `Invalid handlebars template in config path: ${currentPath}`,
+            message: `Invalid template in config path: ${currentPath}`,
           });
         }
       }

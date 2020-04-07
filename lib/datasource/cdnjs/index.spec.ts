@@ -30,17 +30,21 @@ describe('datasource/cdnjs', () => {
         DATASOURCE_FAILURE
       );
     });
-    it('returns null for missing fields', async () => {
+    it('throws for missing fields', async () => {
       got.mockResolvedValueOnce({});
-      expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
+      await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
+        DATASOURCE_FAILURE
+      );
     });
     it('returns null for 404', async () => {
       got.mockRejectedValueOnce({ statusCode: 404 });
       expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
     });
-    it('returns null for 401', async () => {
+    it('throws for 401', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });
-      expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
+      await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
+        DATASOURCE_FAILURE
+      );
     });
     it('throws for 429', async () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
@@ -61,11 +65,6 @@ describe('datasource/cdnjs', () => {
       await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(
         DATASOURCE_FAILURE
       );
-    });
-    it('returns null with wrong auth token', async () => {
-      got.mockRejectedValueOnce({ statusCode: 401 });
-      const res = await getReleases({ lookupName: 'foo/bar' });
-      expect(res).toBeNull();
     });
     it('processes real data', async () => {
       got.mockResolvedValueOnce({ body: res1 });
