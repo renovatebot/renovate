@@ -3,6 +3,7 @@ import * as platform from '../../platform';
 import * as _hostRules from '../../util/host-rules';
 import * as _ghApi from '../../platform/github';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { RenovateConfig } from '../../config';
 
 jest.mock('../../platform/github');
 jest.unmock('../../platform');
@@ -12,7 +13,7 @@ const hostRules = _hostRules;
 const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
 describe('lib/workers/global/autodiscover', () => {
-  let config;
+  let config: RenovateConfig;
   beforeEach(async () => {
     jest.resetAllMocks();
     config = {};

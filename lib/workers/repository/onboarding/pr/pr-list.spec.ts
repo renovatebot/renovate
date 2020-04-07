@@ -1,5 +1,6 @@
 import { getConfig, RenovateConfig } from '../../../../../test/util';
 import { getPrList } from './pr-list';
+import { BranchConfig } from '../../../common';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
@@ -9,7 +10,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       config = getConfig();
     });
     it('handles emptyu', () => {
-      const branches = [];
+      const branches: BranchConfig[] = [];
       const res = getPrList(config, branches);
       expect(res).toMatchSnapshot();
     });

@@ -38,7 +38,7 @@ export function getMatchingFiles(
   manager: string,
   fileMatchList: string[]
 ): string[] {
-  let matchedFiles = [];
+  let matchedFiles: string[] = [];
   for (const fileMatch of fileMatchList) {
     logger.debug(`Using file match: ${fileMatch} for manager ${manager}`);
     const re = new RegExp(fileMatch);

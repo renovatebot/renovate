@@ -50,7 +50,7 @@ If you need any further assistance then you can also [request help here](${confi
   );
   let prBody = prTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
-    let files = [];
+    let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
         managerFiles.map(file => ` * \`${file.packageFile}\` (${manager})`)
@@ -115,7 +115,7 @@ If you need any further assistance then you can also [request help here](${confi
     return;
   }
   logger.debug('Creating onboarding PR');
-  const labels = [];
+  const labels: string[] = [];
   const useDefaultBranch = true;
   try {
     // istanbul ignore if

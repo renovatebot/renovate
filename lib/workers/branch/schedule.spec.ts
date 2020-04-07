@@ -1,5 +1,6 @@
 import mockDate from 'mockdate';
 import * as schedule from './schedule';
+import { RenovateConfig } from '../../config';
 
 describe('workers/branch/schedule', () => {
   describe('hasValidTimezone(schedule)', () => {
@@ -98,7 +99,7 @@ describe('workers/branch/schedule', () => {
     });
   });
   describe('isScheduledNow(config)', () => {
-    let config;
+    let config: RenovateConfig;
     beforeEach(() => {
       mockDate.set('2017-06-30T10:50:00.000'); // Locally 2017-06-30 10:50am
       jest.resetAllMocks();
@@ -109,7 +110,7 @@ describe('workers/branch/schedule', () => {
       expect(res).toBe(true);
     });
     it('returns true if at any time', () => {
-      config.schedule = 'at any time';
+      config.schedule = 'at any time' as never;
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
@@ -140,7 +141,7 @@ describe('workers/branch/schedule', () => {
       expect(res).toBe(false);
     });
     it('massages string', () => {
-      config.schedule = 'before 4:00am';
+      config.schedule = 'before 4:00am' as never;
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });

@@ -7,7 +7,7 @@ import webpackJson from '../../../../config/npm/__fixtures__/webpack.json';
 import nextJson from '../../../../config/npm/__fixtures__/next.json';
 import vueJson from '../../../../config/npm/__fixtures__/vue.json';
 import typescriptJson from '../../../../config/npm/__fixtures__/typescript.json';
-import { mocked, getConfig } from '../../../../../test/util';
+import { mocked, getConfig, partial } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';
@@ -19,6 +19,7 @@ import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourceDocker from '../../../../datasource/docker';
 import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { LookupUpdateConfig } from '.';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
@@ -28,11 +29,12 @@ qJson.latestVersion = '1.4.1';
 const docker = mocked(datasourceDocker);
 const gitSubmodules = mocked(datasourceGitSubmodules);
 
-let config;
+let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
-    config = getConfig();
+    // TODO: fix types
+    config = partial<LookupUpdateConfig>(getConfig());
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';

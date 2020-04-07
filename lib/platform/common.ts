@@ -2,7 +2,7 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
-import { BranchStatus } from '../types';
+import { BranchStatus, VulnerabilityAlert } from '../types';
 
 export interface FileData {
   name: string;
@@ -133,10 +133,6 @@ export interface EnsureCommentConfig {
   topic: string;
   content: string;
 }
-/**
- * TODO: Proper typing
- */
-export type VulnerabilityAlert = any;
 
 export type EnsureIssueResult = 'updated' | 'created';
 

@@ -5,6 +5,7 @@ import {
   getReleaseNotes,
   getReleaseNotesMd,
 } from './release-notes';
+import { ChangeLogNotes } from './common';
 
 const ghGot: jest.Mock<Promise<{ body: unknown }>> = got as never;
 
@@ -186,8 +187,8 @@ describe('workers/pr/release-notes', () => {
       expect(res).toMatchSnapshot();
     });
     describe('ReleaseNotes Correctness', () => {
-      let versionOneNotes;
-      let versionTwoNotes;
+      let versionOneNotes: ChangeLogNotes;
+      let versionTwoNotes: ChangeLogNotes;
       it('parses yargs 15.3.0', async () => {
         ghGot
           .mockResolvedValueOnce({ body: contentsResponse })

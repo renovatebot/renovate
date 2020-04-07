@@ -122,7 +122,7 @@ export async function fetchUpdates(
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const stats = {
-    managers: {},
+    managers: {} as Record<string, { fileCount: number; depCount: number }>,
     fileCount: 0,
     depCount: 0,
   };

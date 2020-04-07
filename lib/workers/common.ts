@@ -16,6 +16,7 @@ export interface BranchUpgradeConfig
     Partial<LookupUpdate>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
+  baseDeps?: PackageDependency[];
   branchName: string;
   commitBody?: string;
   commitMessage?: string;
@@ -26,6 +27,7 @@ export interface BranchUpgradeConfig
   currentVersion?: string;
   endpoint?: string;
   excludeCommitPaths?: string[];
+  githubName?: string;
   group?: GroupConfig;
 
   groupName?: string;
@@ -41,7 +43,6 @@ export interface BranchUpgradeConfig
   prPriority?: number;
   prTitle?: string;
   releases?: Release[];
-  releaseTimestamp?: string;
 
   sourceDirectory?: string;
   updatedPackageFiles?: FileData[];
@@ -79,11 +80,13 @@ export interface BranchConfig
   extends BranchUpgradeConfig,
     RenovateAdminConfig,
     PlatformPrOptions {
+  automergeComment?: string;
   automergeType?: string;
   baseBranch?: string;
   canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
+  masterIssueChecks?: Record<string, string>;
   releaseTimestamp?: string;
 
   res?: ProcessBranchResult;

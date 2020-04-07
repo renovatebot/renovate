@@ -35,7 +35,7 @@ export function mockExecAll(
   execFn: jest.Mock<typeof _exec>,
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
-  const snapshots = [];
+  const snapshots: ExecSnapshots = [];
   execFn.mockImplementation((cmd, options, callback) => {
     snapshots.push(execSnapshot(cmd, options));
     if (execResult instanceof Error) {
@@ -51,7 +51,7 @@ export function mockExecSequence(
   execFn: jest.Mock<typeof _exec>,
   execResults: ExecResult[]
 ): ExecSnapshots {
-  const snapshots = [];
+  const snapshots: ExecSnapshots = [];
   execResults.forEach(execResult => {
     execFn.mockImplementationOnce((cmd, options, callback) => {
       snapshots.push(execSnapshot(cmd, options));

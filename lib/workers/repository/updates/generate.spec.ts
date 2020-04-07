@@ -439,7 +439,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.prTitle).toMatchSnapshot();
     });
     it('handles @types specially', () => {
-      const branch = [
+      const branch: BranchUpgradeConfig[] = [
         {
           commitBodyTable: true,
           datasource: datasourceNpm.id,
@@ -470,7 +470,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeUndefined();
     });
     it('handles @types specially (reversed)', () => {
-      const branch = [
+      const branch: BranchUpgradeConfig[] = [
         {
           depName: 'some-dep',
           groupName: null,
@@ -493,7 +493,7 @@ describe('workers/repository/updates/generate', () => {
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles upgrades', () => {
-      const branch = [
+      const branch: BranchUpgradeConfig[] = [
         {
           depName: 'some-dep',
           branchName: 'some-branch',

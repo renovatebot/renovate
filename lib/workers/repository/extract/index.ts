@@ -22,7 +22,7 @@ export async function extractAllDependencies(
       continue; // eslint-disable-line
     }
     const managerConfig = getManagerConfig(config, manager);
-    let packageFiles = [];
+    let packageFiles: PackageFile[] = [];
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers) {
         const regexManagerConfig = mergeChildConfig(

@@ -3,9 +3,11 @@ import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
 import { regEx } from '../../util/regex';
+import { BranchUpgradeConfig } from '../common';
+import { PackageDependency } from '../../manager/common';
 
 export async function confirmIfDepUpdated(
-  upgrade,
+  upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
   const {
@@ -37,13 +39,13 @@ export async function confirmIfDepUpdated(
   return false;
 }
 
-function getDepsSignature(deps): string {
+function getDepsSignature(deps: PackageDependency[]): string {
   return deps.map(dep => `${dep.depName}${dep.lookupName}`).join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(
-  upgrade,
-  branchContent
+  upgrade: BranchUpgradeConfig,
+  branchContent: string
 ): Promise<boolean> {
   const { baseDeps, manager, packageFile } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
@@ -65,7 +67,7 @@ function escapeRegExp(input: string): string {
 }
 
 export async function doAutoReplace(
-  upgrade,
+  upgrade: BranchUpgradeConfig,
   existingContent: string,
   parentBranch: string | null
 ): Promise<string | null> {

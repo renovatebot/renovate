@@ -2,8 +2,8 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { doAutoReplace } from './auto-replace';
 import { defaultConfig } from '../../../test/util';
-import { RenovateConfig } from '../../config';
 import { extractPackageFile } from '../../manager/html';
+import { BranchUpgradeConfig } from '../common';
 
 const sampleHtml = readFileSync(
   resolve(__dirname, `../../manager/html/__fixtures__/sample.html`),
@@ -12,8 +12,8 @@ const sampleHtml = readFileSync(
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
-    let parentBranch;
-    let upgrade: RenovateConfig;
+    let parentBranch: string;
+    let upgrade: BranchUpgradeConfig;
     beforeEach(() => {
       upgrade = {
         ...JSON.parse(JSON.stringify(defaultConfig)),
@@ -49,6 +49,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.autoReplaceData = {
         depIndex: 0,
+        replaceString: undefined,
       };
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();

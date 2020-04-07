@@ -1,7 +1,7 @@
 import { RenovateConfig, defaultConfig } from '../../../../../test/util';
 import { BranchConfig } from '../../../common';
-
-const { ensureOnboardingPr } = require('.');
+import { PackageFile } from '../../../../manager/common';
+import { ensureOnboardingPr } from '.';
 
 /** @type any */
 const { platform } = require('../../../../platform');
@@ -9,7 +9,7 @@ const { platform } = require('../../../../platform');
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
-    let packageFiles;
+    let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
     beforeEach(() => {
       jest.resetAllMocks();
@@ -19,7 +19,7 @@ describe('workers/repository/onboarding/pr', () => {
         warnings: [],
         description: [],
       };
-      packageFiles = { npm: [{ packageFile: 'package.json' }] };
+      packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.getPrBody = jest.fn(input => input);
       platform.createPr.mockReturnValue({});

@@ -70,9 +70,9 @@ export function generateBranchConfig(
   const hasGroupName = branchUpgrades[0].groupName !== null;
   logger.debug(`hasGroupName: ${hasGroupName}`);
   // Use group settings only if multiple upgrades or lazy grouping is disabled
-  const depNames = [];
-  const newValue = [];
-  const toVersions = [];
+  const depNames: string[] = [];
+  const newValue: string[] = [];
+  const toVersions: string[] = [];
   branchUpgrades.forEach(upg => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);

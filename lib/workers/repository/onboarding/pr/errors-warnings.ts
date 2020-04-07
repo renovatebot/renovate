@@ -35,8 +35,8 @@ export function getDepWarnings(
 ): string {
   let warningText = '';
   try {
-    const warnings = [];
-    const warningFiles = [];
+    const warnings: string[] = [];
+    const warningFiles: string[] = [];
     for (const files of Object.values(packageFiles || {})) {
       for (const file of files || []) {
         if (file.deps) {

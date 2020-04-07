@@ -3,9 +3,13 @@ import { UpdateType } from '../../../../config';
 export interface LookupUpdate {
   blockedByPin?: boolean;
   branchName?: string;
+  canBeUnpublished?: boolean;
+  checksumUrl?: string;
   commitMessageAction?: string;
   displayFrom?: string;
   displayTo?: string;
+  downloadUrl?: string;
+  isBump?: boolean;
   isLockfileUpdate?: boolean;
   isPin?: boolean;
   isRange?: boolean;
@@ -18,6 +22,7 @@ export interface LookupUpdate {
   newMinor?: number;
   newValue: string;
   newVersion?: string;
+  releaseTimestamp?: string;
   semanticCommitType?: string;
   toVersion?: string;
   updateType: UpdateType;

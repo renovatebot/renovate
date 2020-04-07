@@ -8,6 +8,7 @@ import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _hostRules from '../../../util/host-rules';
 import { platform as _platform } from '../../../platform';
 import { mocked } from '../../../../test/util';
+import { PostUpdateConfig } from '../../../manager/common';
 
 const defaultConfig = getConfig();
 
@@ -256,7 +257,7 @@ describe('manager/npm/post-update', () => {
   });
   */
   describe('writeUpdatedPackageFiles', () => {
-    let config;
+    let config: PostUpdateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -298,7 +299,7 @@ describe('manager/npm/post-update', () => {
     });
   });
   describe('getAdditionalFiles', () => {
-    let config;
+    let config: PostUpdateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,

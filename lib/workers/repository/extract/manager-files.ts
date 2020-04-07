@@ -13,7 +13,10 @@ import {
 } from './file-match';
 import { PackageFile } from '../../../manager/common';
 
-export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
+// TODO: fix types
+export async function getManagerPackageFiles(
+  config: any
+): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {

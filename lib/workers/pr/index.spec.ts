@@ -2,10 +2,10 @@ import * as prWorker from '.';
 import * as _changelogHelper from './changelog';
 import { getConfig } from '../../config/defaults';
 import { platform as _platform, Pr } from '../../platform';
-import { mocked } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import { PrResult } from '../common';
+import { PrResult, BranchConfig, BranchUpgradeConfig } from '../common';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
@@ -52,18 +52,18 @@ function setupChangelogMock() {
 
 describe('workers/pr', () => {
   describe('checkAutoMerge(pr, config)', () => {
-    let config;
-    let pr;
+    let config: BranchConfig;
+    let pr: Pr;
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         ...defaultConfig,
-      };
-      pr = {
+      });
+      pr = partial<Pr>({
         head: {
           ref: 'somebranch',
         },
         canMerge: true,
-      };
+      });
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -116,7 +116,7 @@ describe('workers/pr', () => {
     });
   });
   describe('ensurePr', () => {
-    let config;
+    let config: BranchConfig;
     // TODO fix type
     const existingPr: Pr = {
       displayNumber: 'Existing PR',
@@ -127,9 +127,9 @@ describe('workers/pr', () => {
     } as never;
     beforeEach(() => {
       setupChangelogMock();
-      config = {
+      config = partial<BranchConfig>({
         ...defaultConfig,
-      };
+      });
       config.branchName = 'renovate/dummy-1.x';
       config.prTitle = 'Update dependency dummy to v1.1.0';
       config.depType = 'devDependencies';
@@ -182,7 +182,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -213,7 +213,7 @@ describe('workers/pr', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
         },
-      ]);
+      ] as never);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
@@ -227,7 +227,7 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.isPin = true;
       config.updateType = 'pin';
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       config.timezone = 'some timezone';
       config.rebaseWhen = 'behind-base-branch';
       const { prResult, pr } = await prWorker.ensurePr(config);
@@ -368,7 +368,7 @@ describe('workers/pr', () => {
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       config.semanticCommitScope = null;
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
@@ -384,7 +384,7 @@ describe('workers/pr', () => {
       platform.getBranchPr.mockResolvedValueOnce(modifiedPr);
       config.semanticCommitScope = null;
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -393,7 +393,7 @@ describe('workers/pr', () => {
     it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);

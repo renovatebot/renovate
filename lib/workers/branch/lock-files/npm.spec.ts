@@ -1,4 +1,4 @@
-import { getInstalledPath } from 'get-installed-path';
+import { getInstalledPath as _getInstalledPath } from 'get-installed-path';
 import path from 'path';
 import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
@@ -13,6 +13,7 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('get-installed-path');
 
+const getInstalledPath: jest.Mock<string> = _getInstalledPath as never;
 getInstalledPath.mockImplementation(() => null);
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);

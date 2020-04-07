@@ -1,13 +1,13 @@
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
+import { RenovateConfig, ValidationMessage } from '../../../config';
 
 export async function checkBaseBranch(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   logger.debug('checkBaseBranch()');
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
-  let error = [];
+  let error: ValidationMessage[] = [];
   if (config.baseBranch) {
     // Read content and target PRs here
     if (await platform.branchExists(config.baseBranch)) {
