@@ -1,5 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/nuget/extract extractPackageFile() considers NuGet.config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "managerData": Object {
+        "lineNumber": 8,
+      },
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json#protocolVersion=3",
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() extracts all dependencies 1`] = `
 Array [
   Object {
@@ -139,6 +159,38 @@ Array [
     },
   },
 ]
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() handles NuGet.config without package sources 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "managerData": Object {
+        "lineNumber": 8,
+      },
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() handles malformed NuGet.config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "managerData": Object {
+        "lineNumber": 8,
+      },
+    },
+  ],
+}
 `;
 
 exports[`lib/manager/nuget/extract extractPackageFile() returns empty for invalid csproj 1`] = `
