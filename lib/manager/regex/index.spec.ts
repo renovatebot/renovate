@@ -1,12 +1,18 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile } from '.';
+import { extractPackageFile, defaultConfig } from '.';
+import { getName } from '../../../test/util';
 
 const dockerfileContent = readFileSync(
   resolve(__dirname, `./__fixtures__/Dockerfile`),
   'utf8'
 );
-describe('manager/custom/extract', () => {
+describe(getName(__filename), () => {
+  it('has default config', () => {
+    expect(defaultConfig).toEqual({
+      pinDigests: false,
+    });
+  });
   it('extracts multiple dependencies', async () => {
     const config = {
       matchStrings: [
@@ -40,7 +46,7 @@ describe('manager/custom/extract', () => {
     const res = await extractPackageFile('', 'Dockerfile', config);
     expect(res).toBeNull();
   });
-  it('returns null if invalid handlebars template', async () => {
+  it('returns null if invalid template', async () => {
     const config = {
       matchStrings: [
         'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',

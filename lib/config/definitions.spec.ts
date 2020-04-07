@@ -2,7 +2,7 @@ import { getOptions } from './definitions';
 import { getName } from '../../test/util';
 
 jest.mock('../manager', () => ({
-  getManagers: jest.fn(() => ({ testManager: {} })),
+  getManagers: jest.fn(() => new Map().set('testManager', {})),
 }));
 
 describe(getName(__filename), () => {

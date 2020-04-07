@@ -1,6 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
+import * as URL from 'url';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
@@ -130,6 +131,17 @@ function sectionize(text: string, level: number): string[] {
   return result;
 }
 
+function isUrl(url: string): boolean {
+  try {
+    return !!URL.parse(url).hostname;
+  } catch (err) {
+    // istanbul ignore next
+    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
+  }
+  // istanbul ignore next
+  return false;
+}
+
 export async function getReleaseNotesMd(
   repository: string,
   version: string,
@@ -179,14 +191,16 @@ export async function getReleaseNotesMd(
     if (changelogParsed.length >= 2) {
       for (const section of changelogParsed) {
         try {
-          const [heading] = section.split('\n');
+          // replace brackets and parenthesis with space
+          const deParenthesizedSection = section.replace(/[[\]()]/g, ' ');
+          const [heading] = deParenthesizedSection.split('\n');
           const title = heading
             .replace(/^\s*#*\s*/, '')
             .split(' ')
             .filter(Boolean);
           let body = section.replace(/.*?\n(-{3,}\n)?/, '').trim();
           for (const word of title) {
-            if (word.includes(version)) {
+            if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               let url = `${githubBaseURL}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');

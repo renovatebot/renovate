@@ -14,7 +14,9 @@
     "./dist",
     "**/__mocks__/**",
     "**/__fixtures__/**",
+    "**/__testutil__/**",
     "**/*.spec.ts",
-    "./test"
+    "./test",
+    "./tools"
   ]
 }

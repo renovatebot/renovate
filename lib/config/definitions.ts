@@ -448,7 +448,6 @@ const options: RenovateOptions[] = [
     name: 'ignoreScripts',
     description:
       'Configure this to true if trustLevel is high but you wish to skip running scripts when updating lock files',
-    stage: 'package',
     type: 'boolean',
     default: false,
   },
@@ -1739,7 +1738,7 @@ export function getOptions(): RenovateOptions[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, config] of Object.entries(getManagers())) {
+  for (const [name, config] of getManagers().entries()) {
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

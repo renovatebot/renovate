@@ -22,6 +22,11 @@ const jsYamlChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const yargsChangelogMd = fs.readFileSync(
+  'lib/workers/pr/__fixtures__/yargs.md',
+  'utf8'
+);
+
 const contentsResponse = [
   { name: 'lib' },
   { name: 'CHANGELOG.md' },
@@ -179,6 +184,52 @@ describe('workers/pr/release-notes', () => {
       );
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+    });
+    describe('ReleaseNotes Correctness', () => {
+      let versionOneNotes;
+      let versionTwoNotes;
+      it('parses yargs 15.3.0', async () => {
+        ghGot
+          .mockResolvedValueOnce({ body: contentsResponse })
+          .mockResolvedValueOnce({
+            body: {
+              content: Buffer.from(yargsChangelogMd).toString('base64'),
+            },
+          });
+        const res = await getReleaseNotesMd(
+          'yargs/yargs',
+          '15.3.0',
+          'https://github.com/',
+          'https://api.github.com/'
+        );
+        versionOneNotes = res;
+        expect(res).not.toBeNull();
+        expect(res).toMatchSnapshot();
+      });
+      it('parses yargs 15.2.0', async () => {
+        ghGot
+          .mockResolvedValueOnce({ body: contentsResponse })
+          .mockResolvedValueOnce({
+            body: {
+              content: Buffer.from(yargsChangelogMd).toString('base64'),
+            },
+          });
+        const res = await getReleaseNotesMd(
+          'yargs/yargs',
+          '15.2.0',
+          'https://github.com/',
+          'https://api.github.com/'
+        );
+        versionTwoNotes = res;
+        expect(res).not.toBeNull();
+        expect(res).toMatchSnapshot();
+      });
+      it('isUrl', () => {
+        expect(versionOneNotes).not.toMatchObject(versionTwoNotes);
+      });
+      it('15.3.0 is not equal to 15.2.0', () => {
+        expect(versionOneNotes).not.toMatchObject(versionTwoNotes);
+      });
     });
   });
 });

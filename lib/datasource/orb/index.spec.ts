@@ -27,24 +27,24 @@ const orbData = {
 };
 
 describe('datasource/orb', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
-      got.post.mockReturnValueOnce({ body: {} });
+      got.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
     });
     it('returns null for missing orb', async () => {
-      got.post.mockReturnValueOnce({ body: { data: {} } });
+      got.mockReturnValueOnce({ body: { data: {} } });
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
@@ -56,7 +56,7 @@ describe('datasource/orb', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
@@ -66,16 +66,16 @@ describe('datasource/orb', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({
+        await datasource.getReleases({
           lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
     });
     it('processes real data', async () => {
-      got.post.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await datasource.getReleases({
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
@@ -83,10 +83,10 @@ describe('datasource/orb', () => {
     });
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
-      got.post.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases({
+      const res = await datasource.getReleases({
         lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import nock from 'nock';
-import { getPkgReleases } from '.';
+import { getReleases } from '.';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir, SBT_PLUGINS_REPO } from '../sbt-plugin/util';
 
@@ -23,7 +23,7 @@ describe('datasource/sbt', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
 
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       nock.disableNetConnect();
       nock('https://failed_repo')
@@ -98,7 +98,7 @@ describe('datasource/sbt', () => {
 
     it('returns null in case of errors', async () => {
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
@@ -106,7 +106,7 @@ describe('datasource/sbt', () => {
     });
     it('fetches releases from Maven', async () => {
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'org.scalatest:scalatest',
           registryUrls: [
             'https://failed_repo/maven',
@@ -122,7 +122,7 @@ describe('datasource/sbt', () => {
         releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'org.scalatest:scalatest_2.12',
           registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
         })

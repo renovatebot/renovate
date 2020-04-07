@@ -24,6 +24,14 @@ export function updateDependency({
   const lines = fileContent.split('\n');
   const lineToChange = lines[managerData.lineNumber];
 
+  if (!lineToChange) {
+    logger.warn(
+      { fileContent, depName, currentValue, newValue },
+      'Undefined cocoapods lineToChange'
+    );
+    return null;
+  }
+
   if (!lineContainsDep(lineToChange, depName)) {
     return null;
   }

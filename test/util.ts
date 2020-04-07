@@ -31,3 +31,21 @@ export function getName(file: string): string {
   const [, name] = /lib\/(.*?)\.spec\.ts$/.exec(file.replace(/\\/g, '/'));
   return name;
 }
+
+/**
+ * Can be used to search and replace strings in jest snapshots.
+ * @example
+ * expect.addSnapshotSerializer(
+ *     replacingSerializer(upath.toUnix(gradleDir.path), 'localDir')
+ * );
+ */
+export const replacingSerializer = (
+  search: string,
+  replacement: string
+): jest.SnapshotSerializerPlugin => ({
+  test: value => typeof value === 'string' && value.includes(search),
+  serialize: (val, config, indent, depth, refs, printer) => {
+    const replaced = (val as string).replace(search, replacement);
+    return printer(replaced, config, indent, depth, refs);
+  },
+});

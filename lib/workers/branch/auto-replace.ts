@@ -30,7 +30,7 @@ export async function confirmIfDepUpdated(
   if (
     newUpgrade &&
     newUpgrade.currentValue === newValue &&
-    newUpgrade.currentDigest === newDigest
+    (!newUpgrade.currentDigest || newUpgrade.currentDigest === newDigest)
   ) {
     return true;
   }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/orb getPkgReleases processes homeUrl 1`] = `
+exports[`datasource/orb getReleases processes homeUrl 1`] = `
 Object {
   "homepage": "https://google.com",
   "name": "hyper-expanse/library-release-workflows",
@@ -50,7 +50,7 @@ Object {
 }
 `;
 
-exports[`datasource/orb getPkgReleases processes real data 1`] = `
+exports[`datasource/orb getReleases processes real data 1`] = `
 Object {
   "homepage": "https://circleci.com/orbs/registry/orb/hyper-expanse/library-release-workflows",
   "name": "hyper-expanse/library-release-workflows",
