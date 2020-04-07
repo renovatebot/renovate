@@ -11,7 +11,6 @@ import {
   RepoParams,
   RepoConfig,
   Issue,
-  VulnerabilityAlert,
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
@@ -39,7 +38,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { BranchStatus } from '../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../types';
 import {
   PR_STATE_ALL,
   PR_STATE_CLOSED,
@@ -1057,11 +1056,12 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+// https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
 type BranchState = 'failure' | 'pending' | 'success';
 
 interface GhBranchStatus {
   context: string;
-  state: BranchState;
+  state: BranchState | 'error';
 }
 
 interface CombinedBranchStatus {
@@ -1096,7 +1096,7 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return BranchStatus.red;
   }
-  let commitStatus;
+  let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
@@ -1156,14 +1156,14 @@ export async function getBranchStatus(
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
     }
-    if (commitStatus.state === 'failed') {
+    if (commitStatus.state === 'failure') {
       return BranchStatus.red;
     }
     return BranchStatus.yellow;
   }
   if (
-    commitStatus.state === 'failed' ||
-    checkRuns.some(run => run.conclusion === 'failed')
+    commitStatus.state === 'failure' ||
+    checkRuns.some(run => run.conclusion === 'failure')
   ) {
     return BranchStatus.red;
   }
@@ -1189,7 +1189,8 @@ async function getStatusCheck(
 
 const githubToRenovateStatusMapping = {
   success: BranchStatus.green,
-  failed: BranchStatus.red,
+  failure: BranchStatus.red,
+  error: BranchStatus.red,
   pending: BranchStatus.yellow,
 };
 

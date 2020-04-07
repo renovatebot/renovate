@@ -14,7 +14,6 @@ import {
   RepoConfig,
   Pr,
   Issue,
-  VulnerabilityAlert,
   CreatePRConfig,
   EnsureIssueConfig,
   BranchStatusConfig,
@@ -30,7 +29,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import { BranchStatus } from '../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../types';
 import { RenovateConfig } from '../../config';
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
@@ -727,7 +726,7 @@ export async function createPr({
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
-  let reviewers = [];
+  let reviewers: { uuid: { raw: string } }[] = [];
 
   if (config.bbUseDefaultReviewers) {
     const reviewersResponse = (

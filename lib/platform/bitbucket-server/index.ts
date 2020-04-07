@@ -12,7 +12,6 @@ import {
   RepoConfig,
   Pr,
   Issue,
-  VulnerabilityAlert,
   GotResponse,
   CreatePRConfig,
   BranchStatusConfig,
@@ -30,7 +29,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../types';
 import { RenovateConfig } from '../../config';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)

@@ -632,7 +632,7 @@ describe('platform/github', () => {
       const res = await github.getBranchStatus('somebranch', []);
       expect(res).toEqual(BranchStatus.green);
     });
-    it('should pass through failed', async () => {
+    it('should pass through failure', async () => {
       await initRepo({
         repository: 'some/repo',
       });
@@ -640,7 +640,7 @@ describe('platform/github', () => {
         () =>
           ({
             body: {
-              state: 'failed',
+              state: 'failure',
             },
           } as any)
       );

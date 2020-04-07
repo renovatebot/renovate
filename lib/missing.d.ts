@@ -30,3 +30,29 @@ declare module 'linkify-markdown' {
 declare module 'get-installed-path' {
   export function getInstalledPath(arg: string): Promise<string>;
 }
+
+declare module '@snyk/ruby-semver/lib/ruby/gem-version' {
+  export function create(version: string): any;
+  export function parse(version: string): any;
+}
+
+declare module '@snyk/ruby-semver/lib/ruby/gem-requirement' {
+  export function parse(version: string): any;
+}
+
+declare module '@snyk/ruby-semver' {
+  export function diff(a: any, b: any): string;
+  export function eq(a: any, b: any): boolean;
+  export function gt(a: any, b: any): boolean;
+  export function gte(a: any, b: any): boolean;
+  export function lte(a: any, b: any): boolean;
+  export function major(version: any): number;
+  export function maxSatisfying(version: any[], range: string): string;
+  export function minSatisfying(version: any[], range: string): string;
+  export function minor(version: any): number;
+  export function patch(version: any): number;
+
+  export function prerelease(version: any): string[];
+  export function satisfies(version: any, range: string): boolean;
+  export function valid(version: any): boolean;
+}

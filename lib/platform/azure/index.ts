@@ -14,7 +14,6 @@ import {
   RepoConfig,
   Pr,
   Issue,
-  VulnerabilityAlert,
   CreatePRConfig,
   BranchStatusConfig,
   FindPRConfig,
@@ -30,7 +29,7 @@ import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../types';
 import { RenovateConfig } from '../../config';
 
 interface Config {

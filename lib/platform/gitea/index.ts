@@ -13,7 +13,6 @@ import {
   Pr,
   RepoConfig,
   RepoParams,
-  VulnerabilityAlert,
 } from '../common';
 import { api } from './gitea-got-wrapper';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
@@ -31,7 +30,7 @@ import { RenovateConfig } from '../../config';
 import { configFileNames } from '../../config/app-strings';
 import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
-import { BranchStatus } from '../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../types';
 import * as helper from './gitea-helper';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 
