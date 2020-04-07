@@ -1,10 +1,11 @@
 import { parse, join } from 'upath';
 import { outputFile, readFile } from 'fs-extra';
 import { logger } from '../logger';
+import { RenovateConfig } from '../config/common';
 
 let localDir = '';
 
-export function setFsConfig(config: any): void {
+export function setFsConfig(config: Partial<RenovateConfig>): void {
   localDir = config.localDir;
 }
 
@@ -20,12 +21,20 @@ export function getSiblingFileName(
   return join(subDirectory, otherFileName);
 }
 
-export async function readLocalFile(fileName: string): Promise<string> {
+export async function readLocalFile(fileName: string): Promise<Buffer>;
+export async function readLocalFile(
+  fileName: string,
+  encoding: 'utf8'
+): Promise<string>;
+export async function readLocalFile(
+  fileName: string,
+  encoding?: string
+): Promise<string | Buffer> {
   const localFileName = join(localDir, fileName);
   try {
-    const fileContent = await readFile(localFileName, 'utf8');
+    const fileContent = await readFile(localFileName, encoding);
     return fileContent;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.trace({ err }, 'Error reading local file');
     return null;
   }
