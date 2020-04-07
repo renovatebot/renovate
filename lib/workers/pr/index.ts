@@ -1,7 +1,7 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
-import { ChangeLogError, getChangeLogJSON } from './changelog';
+import { ChangeLogError } from './changelog';
 import { getPrBody } from './body';
 import { platform, Pr, PlatformPrOptions } from '../../platform';
 import { BranchConfig, PrResult } from '../common';
