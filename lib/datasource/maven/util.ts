@@ -55,6 +55,7 @@ export async function downloadHttpProtocol(
   try {
     const httpClient = httpByHostType(hostType);
     raw = await httpClient.get(pkgUrl.toString());
+    return raw.body;
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
@@ -80,5 +81,23 @@ export async function downloadHttpProtocol(
     }
     return null;
   }
-  return raw.body;
+}
+
+export async function isHttpResourceExists(
+  pkgUrl: url.URL | string,
+  hostType = id
+): Promise<boolean | null> {
+  try {
+    const httpClient = httpByHostType(hostType);
+    await httpClient.head(pkgUrl.toString());
+    return true;
+  } catch (err) {
+    if (isNotFoundError(err)) {
+      return false;
+    }
+
+    const failedUrl = pkgUrl.toString();
+    logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
+    return null;
+  }
 }
