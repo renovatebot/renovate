@@ -10,6 +10,7 @@ import {
 import { LookupUpdate } from './repository/process/lookup/common';
 import { FileData, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
+import { ChangeLogResult } from './pr/changelog/common';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -43,6 +44,8 @@ export interface BranchUpgradeConfig
   sourceDirectory?: string;
   updatedPackageFiles?: FileData[];
   updatedArtifacts?: FileData[];
+
+  logJSON?: ChangeLogResult;
 }
 
 export enum PrResult {

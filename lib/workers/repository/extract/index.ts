@@ -7,6 +7,8 @@ import {
 } from '../../../config';
 import { getManagerPackageFiles } from './manager-files';
 import { PackageFile } from '../../../manager/common';
+import { BranchConfig } from '../../common';
+import { getChangeLogJSON } from '../../pr/changelog';
 
 export async function extractAllDependencies(
   config: RenovateConfig
@@ -48,4 +50,14 @@ export async function extractAllDependencies(
   }
   logger.debug(`Found ${fileCount} package file(s)`);
   return extractions;
+}
+
+export async function extractChangeLogJSON(
+  branches: BranchConfig[]
+): Promise<void> {
+  for (const branch of branches) {
+    for (const upgrade of branch.upgrades) {
+      upgrade.logJSON = await getChangeLogJSON(upgrade);
+    }
+  }
 }

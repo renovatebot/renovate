@@ -10,6 +10,7 @@ import { processRepo, updateRepo } from './process';
 import { finaliseRepo } from './finalise';
 import { ensureMasterIssue } from './master-issue';
 import { RenovateConfig } from '../../config';
+import { extractChangeLogJSON } from './extract';
 
 let renovateVersion = 'unknown';
 try {
@@ -32,6 +33,7 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
     const { branches, branchList, packageFiles } = await processRepo(config);
+    await extractChangeLogJSON(branches);
     await ensureOnboardingPr(config, packageFiles, branches);
     const { res } = await updateRepo(
       config,

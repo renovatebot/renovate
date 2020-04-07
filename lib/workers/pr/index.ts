@@ -194,7 +194,7 @@ export async function ensurePr(
     processedUpgrades.push(upgradeKey);
     upgrade.hasUrls = !!(upgrade.sourceUrl || upgrade.homepage);
 
-    const logJSON = await getChangeLogJSON(upgrade);
+    const logJSON = upgrade.logJSON;
 
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
