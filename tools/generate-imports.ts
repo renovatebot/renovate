@@ -26,15 +26,23 @@ async function updateFile(file: string, code: string): Promise<void> {
   newFiles.add(file);
 }
 
-async function generate(
-  path: string,
-  types: string[],
-  map = ''
-): Promise<void> {
+async function generate({
+  path,
+  types,
+  map = '',
+  excludes = [],
+}: {
+  path: string;
+  types: string[];
+  map?: string;
+  excludes?: string[];
+}): Promise<void> {
   shell.echo(`> ${path}`);
   let imports = '';
   let maps = '';
-  for (const ds of findModules(`lib/${path}`)) {
+  for (const ds of findModules(`lib/${path}`).filter(
+    n => !excludes?.includes(n)
+  )) {
     const name = _.camelCase(ds);
     imports += `import * as ${name} from './${ds}';\n`;
     maps += `api.set('${ds}', ${name}${map});\n`;
@@ -64,14 +72,14 @@ export default api;
     await updateFile('lib/datasource/api.generated.ts', code);
 
     // managers
-    await generate('manager', ['ManagerApi']);
+    await generate({ path: 'manager', types: ['ManagerApi'] });
 
     // versioning
-    await generate(
-      'versioning',
-      ['VersioningApi', 'VersioningApiConstructor'],
-      '.api'
-    );
+    await generate({
+      path: 'versioning',
+      types: ['VersioningApi', 'VersioningApiConstructor'],
+      map: '.api',
+    });
 
     await Promise.all(
       shell
