@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/helm getPkgReleases returns list of versions for normal response if index.yaml is cached 1`] = `
+exports[`datasource/helm getReleases returns list of versions for normal response if index.yaml is cached 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",
   "name": "ambassador",
@@ -118,7 +118,7 @@ Object {
 }
 `;
 
-exports[`datasource/helm getPkgReleases returns list of versions for normal response if index.yaml is not cached 1`] = `
+exports[`datasource/helm getReleases returns list of versions for normal response if index.yaml is not cached 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",
   "name": "ambassador",
@@ -236,4 +236,4 @@ Object {
 }
 `;
 
-exports[`datasource/helm getPkgReleases throws for 5xx 1`] = `[Error: registry-failure]`;
+exports[`datasource/helm getReleases throws for 5xx 1`] = `[Error: registry-failure]`;

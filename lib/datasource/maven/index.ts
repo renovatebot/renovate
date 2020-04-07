@@ -142,7 +142,7 @@ function extractVersions(metadata: XmlDocument): string[] {
   return elements.map(el => el.val);
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

@@ -28,7 +28,7 @@ function getPath(suite: TestResult): string {
   return relative(ROOT, suite.testFilePath).replace(/\\/g, '/');
 }
 
-const ignoreStates = new Set(['passed']);
+const ignoreStates = new Set(['passed', 'pending']);
 const MAX_ANNOTATIONS = 50;
 const lineRe = /\.spec\.ts:(?<line>\d+):(?<col>\d+)\)/;
 
@@ -40,7 +40,7 @@ function getPos(
 > {
   const pos = lineRe.exec(msg);
   if (!pos || !pos.groups) {
-    return { start_line: 1, end_line: 1 };
+    return { start_line: 0, end_line: 0 };
   }
 
   const line = parseInt(pos.groups.line, 10);
@@ -55,15 +55,18 @@ function getPos(
 }
 
 class GitHubReporter extends BaseReporter {
-  private readonly _api: GitHub | null;
+  private readonly _api: GitHub | null = null;
 
   constructor() {
     super();
     try {
-      this._api = new GitHub(getEnv('GITHUB_TOKEN'));
+      const token = getEnv('GITHUB_TOKEN');
+      if (!token) {
+        return;
+      }
+      this._api = new GitHub(token);
     } catch (e) {
       error(`Unexpected error: ${e}`);
-      this._api = null;
     }
   }
 
@@ -79,7 +82,7 @@ class GitHubReporter extends BaseReporter {
       const annotations: Octokit.ChecksCreateParamsOutputAnnotations[] = [];
       const success = testResult.numFailedTests === 0;
 
-      for (const suite of testResult.testResults) {
+      for (const suite of testResult.testResults.filter(s => !s.skipped)) {
         const path = getPath(suite);
         for (const test of suite.testResults.filter(
           t => !ignoreStates.has(t.status)
@@ -135,8 +138,9 @@ class GitHubReporter extends BaseReporter {
     info(`repo: ${owner} / ${repo}`);
     info(`sha: ${ref}`);
 
-    const output: Octokit.ChecksUpdateParamsOutput = {
+    const output: Octokit.ChecksCreateParamsOutput = {
       summary: 'Jest test results',
+      title: 'Jest',
     };
     if (annotations.length) {
       output.annotations = annotations;
@@ -171,7 +175,7 @@ class GitHubReporter extends BaseReporter {
       head_sha: ref,
       completed_at: new Date().toISOString(),
       conclusion: success ? 'success' : 'failure',
-      output: { ...output, title: 'Jest' },
+      output: { ...output },
     });
   }
 }

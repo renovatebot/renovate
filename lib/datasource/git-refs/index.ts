@@ -65,7 +65,7 @@ export async function getRawRefs({
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   try {

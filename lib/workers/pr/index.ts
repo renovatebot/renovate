@@ -192,7 +192,6 @@ export async function ensurePr(
       continue; // eslint-disable-line no-continue
     }
     processedUpgrades.push(upgradeKey);
-    upgrade.hasUrls = !!(upgrade.sourceUrl || upgrade.homepage);
 
     const logJSON = await getChangeLogJSON(upgrade);
 

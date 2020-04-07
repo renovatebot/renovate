@@ -5,12 +5,12 @@ import * as allVersioning from '../versioning';
 import {
   Datasource,
   DatasourceError,
-  PkgReleaseConfig,
   Release,
   ReleaseResult,
   DigestConfig,
+  GetReleasesConfig,
+  GetPkgReleasesConfig,
 } from './common';
-import * as semverVersioning from '../versioning/semver';
 import datasources from './api.generated';
 
 export * from './common';
@@ -25,25 +25,23 @@ function load(datasource: string): Promise<Datasource> {
   return datasources.get(datasource);
 }
 
+type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
+
 async function fetchReleases(
-  config: PkgReleaseConfig
+  config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource } = config;
-  if (!datasource) {
-    logger.warn('No datasource found');
-    return null;
-  }
   if (!datasources.has(datasource)) {
     logger.warn('Unknown datasource: ' + datasource);
     return null;
   }
-  const dep = await (await load(datasource)).getPkgReleases(config);
+  const dep = await (await load(datasource)).getReleases(config);
   addMetaData(dep, datasource, config.lookupName);
   return dep;
 }
 
 function getRawReleases(
-  config: PkgReleaseConfig
+  config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const cacheKey =
     cacheNamespace +
@@ -59,12 +57,15 @@ function getRawReleases(
 }
 
 export async function getPkgReleases(
-  config: PkgReleaseConfig
+  config: GetPkgReleasesConfig
 ): Promise<ReleaseResult | null> {
-  const { datasource } = config;
+  if (!config.datasource) {
+    logger.warn('No datasource found');
+    return null;
+  }
   const lookupName = config.lookupName || config.depName;
   if (!lookupName) {
-    logger.error({ config }, 'Datasource getPkgReleases without lookupName');
+    logger.error({ config }, 'Datasource getReleases without lookupName');
     return null;
   }
   let res: ReleaseResult;
@@ -75,7 +76,7 @@ export async function getPkgReleases(
     });
   } catch (e) /* istanbul ignore next */ {
     if (e instanceof DatasourceError) {
-      e.datasource = datasource;
+      e.datasource = config.datasource;
       e.lookupName = lookupName;
     }
     throw e;
@@ -83,10 +84,8 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
-  const versioning =
-    config && config.versioning ? config.versioning : semverVersioning.id;
   // Filter by versioning
-  const version = allVersioning.get(versioning);
+  const version = allVersioning.get(config.versioning);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);

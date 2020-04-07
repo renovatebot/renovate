@@ -21,7 +21,7 @@ const mailchimpJson: any = fs.readFileSync(
 );
 
 describe('datasource/packagist', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     let config: any;
     beforeEach(() => {
       jest.resetAllMocks();
@@ -41,7 +41,7 @@ describe('datasource/packagist', () => {
       config = {
         registryUrls: ['https://composer.renovatebot.com'],
       };
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'something/one',
       });
@@ -61,7 +61,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: packagesOnly,
       });
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'vendor/package-name',
       });
@@ -73,7 +73,7 @@ describe('datasource/packagist', () => {
           code: 'ETIMEDOUT',
         })
       );
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'vendor/package-name2',
       });
@@ -85,7 +85,7 @@ describe('datasource/packagist', () => {
           statusCode: 403,
         })
       );
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'vendor/package-name',
       });
@@ -98,7 +98,7 @@ describe('datasource/packagist', () => {
           url: 'https://some.registry/packages.json',
         })
       );
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'drewm/mailchip-api',
       });
@@ -123,7 +123,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(includesJson),
       });
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'guzzlehttp/guzzle',
       });
@@ -162,7 +162,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'wpackagist-plugin/1beyt',
       });
@@ -201,7 +201,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await packagist.getPkgReleases({
+      const res = await packagist.getReleases({
         ...config,
         lookupName: 'some/other',
       });
@@ -213,7 +213,7 @@ describe('datasource/packagist', () => {
       });
       config.registryUrls = ['https://packagist.org'];
       expect(
-        await packagist.getPkgReleases({
+        await packagist.getReleases({
           ...config,
           lookupName: 'drewm/mailchimp-api',
         })
@@ -225,7 +225,7 @@ describe('datasource/packagist', () => {
       });
       config.registryUrls = [];
       expect(
-        await packagist.getPkgReleases({
+        await packagist.getReleases({
           ...config,
           lookupName: 'drewm/mailchimp-api',
         })

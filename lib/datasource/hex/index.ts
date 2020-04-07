@@ -1,8 +1,10 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
 
 export const id = 'hex';
+
+const http = new Http(id);
 
 interface HexRelease {
   html_url: string;
@@ -13,9 +15,9 @@ interface HexRelease {
   }[];
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
-}: Partial<GetReleasesConfig>): Promise<ReleaseResult | null> {
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
   // Get dependency name from lookupName.
   // If the dependency is private lookupName contains organization name as following:
   // hexPackageName:organizationName
@@ -24,10 +26,7 @@ export async function getPkgReleases({
   const hexPackageName = lookupName.split(':')[0];
   const hexUrl = `https://hex.pm/api/packages/${hexPackageName}`;
   try {
-    const response = await got(hexUrl, {
-      json: true,
-      hostType: id,
-    });
+    const response = await http.getJson<HexRelease>(hexUrl);
 
     const hexRelease: HexRelease = response.body;
 
