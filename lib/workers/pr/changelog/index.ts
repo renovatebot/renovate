@@ -25,7 +25,7 @@ export async function getChangeLogJSON(
   try {
     let res: ChangeLogResult | null = null;
 
-    if (args.sourceUrl?.search(/gitlab/) !== -1) {
+    if (args.sourceUrl?.includes('gitlab')) {
       res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
     } else {
       res = await sourceGithub.getChangeLogJSON({ ...args, releases });
