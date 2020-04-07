@@ -1156,13 +1156,13 @@ export async function getBranchStatus(
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
     }
-    if (commitStatus.state === 'failed') {
+    if (commitStatus.state === 'failure') {
       return BranchStatus.red;
     }
     return BranchStatus.yellow;
   }
   if (
-    commitStatus.state === 'failed' ||
+    commitStatus.state === 'failure' ||
     checkRuns.some(run => run.conclusion === 'failed')
   ) {
     return BranchStatus.red;
@@ -1189,7 +1189,7 @@ async function getStatusCheck(
 
 const githubToRenovateStatusMapping = {
   success: BranchStatus.green,
-  failed: BranchStatus.red,
+  failure: BranchStatus.red,
   pending: BranchStatus.yellow,
 };
 
