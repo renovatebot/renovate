@@ -36,7 +36,6 @@ export const allowedFields = {
   currentVersion: 'The current version that is being updated',
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
-  depNameEscaped: 'The dependency name with forward slashes replace with %2f',
   depNameLinked:
     'The dependency name already linked to its home page using markdown',
   depNameSanitized:

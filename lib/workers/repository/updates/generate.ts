@@ -142,12 +142,6 @@ export function generateBranchConfig(
     ) {
       logger.debug({ config: upgrade }, 'empty displayFrom/displayTo');
     }
-    if (upgrade.depName) {
-      upgrade.depNameEscaped = (upgrade.lookupName || upgrade.depName).replace(
-        /\//g,
-        '%2f'
-      );
-    }
     upgrade.prettyDepType =
       upgrade.prettyDepType || upgrade.depType || 'dependency';
     if (useGroupSettings) {
