@@ -1057,11 +1057,13 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+// https://developer.github.com/v3/repos/statuses
+// https://developer.github.com/v3/checks/runs/
 type BranchState = 'failure' | 'pending' | 'success';
 
 interface GhBranchStatus {
   context: string;
-  state: BranchState;
+  state: BranchState | 'error';
 }
 
 interface CombinedBranchStatus {
@@ -1163,7 +1165,7 @@ export async function getBranchStatus(
   }
   if (
     commitStatus.state === 'failure' ||
-    checkRuns.some(run => run.conclusion === 'failed')
+    checkRuns.some(run => run.conclusion === 'failure')
   ) {
     return BranchStatus.red;
   }
@@ -1189,6 +1191,7 @@ async function getStatusCheck(
 
 const githubToRenovateStatusMapping = {
   success: BranchStatus.green,
+  error: BranchStatus.red,
   failure: BranchStatus.red,
   pending: BranchStatus.yellow,
 };
