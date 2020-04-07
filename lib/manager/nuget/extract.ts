@@ -42,7 +42,7 @@ async function determineRegistryUrls(
     return undefined;
   }
 
-  const registryUrls = [datasourceNuget.getDefaultFeed()];
+  const registryUrls = datasourceNuget.defaultRegistryUrls;
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
