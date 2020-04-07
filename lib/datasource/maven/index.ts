@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import url from 'url';
 import fs from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
@@ -10,6 +9,8 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 import { MAVEN_REPO } from './common';
 
 export { id } from './common';
+
+export const defaultRegistryUrls = [MAVEN_REPO];
 
 function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
@@ -146,10 +147,7 @@ export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const registries = is.nonEmptyArray(registryUrls)
-    ? registryUrls
-    : [MAVEN_REPO];
-  const repositories = registries.map(repository =>
+  const repositories = registryUrls.map(repository =>
     repository.replace(/\/?$/, '/')
   );
   const dependency = getDependencyParts(lookupName);
