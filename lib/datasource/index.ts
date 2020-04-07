@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as allVersioning from '../versioning';
@@ -27,16 +28,31 @@ function load(datasource: string): Promise<Datasource> {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
+function resolveRegistryUrls(
+  datasource: Datasource,
+  extractedUrls: string[]
+): string[] {
+  const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
+  return is.nonEmptyArray(extractedUrls)
+    ? [...extractedUrls, ...appendRegistryUrls]
+    : [...defaultRegistryUrls, ...appendRegistryUrls];
+}
+
 async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
-  const { datasource } = config;
-  if (!datasources.has(datasource)) {
-    logger.warn('Unknown datasource: ' + datasource);
+  const { datasource: datasourceName } = config;
+  if (!datasourceName || !datasources.has(datasourceName)) {
+    logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
-  const dep = await (await load(datasource)).getReleases(config);
-  addMetaData(dep, datasource, config.lookupName);
+  const datasource = await load(datasourceName);
+  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
+  const dep = await datasource.getReleases({
+    ...config,
+    registryUrls,
+  });
+  addMetaData(dep, datasourceName, config.lookupName);
   return dep;
 }
 

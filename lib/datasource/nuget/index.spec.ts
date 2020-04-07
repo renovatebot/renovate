@@ -58,10 +58,6 @@ const nugetIndexV3 = fs.readFileSync(
   'utf8'
 );
 
-const configNoRegistryUrls = {
-  lookupName: 'nunit',
-};
-
 const configV3V2 = {
   lookupName: 'nunit',
   registryUrls: [
@@ -116,15 +112,6 @@ describe('datasource/nuget', () => {
         ...config,
       });
       expect(got.mock.calls[0][0]).toEqual('https://my-registry/');
-    });
-
-    it('queries the default nuget feed if no registries are supplied', async () => {
-      await nuget.getReleases({
-        ...configNoRegistryUrls,
-      });
-      expect(got.mock.calls[0][0]).toEqual(
-        'https://api.nuget.org/v3/index.json'
-      );
     });
 
     it(`can't get packages list (v3)`, async () => {
