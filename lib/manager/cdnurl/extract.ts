@@ -12,10 +12,6 @@ export function extractPackageFile(content: string): PackageFile {
   while (match) {
     const [wholeSubstr] = match;
     const { depName, currentValue, asset } = match.groups;
-
-    const fileReplacePosition =
-      offset + match.index + wholeSubstr.indexOf(currentValue);
-
     offset += match.index + wholeSubstr.length;
     rest = content.slice(offset);
     match = cloudflareUrlRegex.exec(rest);
@@ -25,9 +21,6 @@ export function extractPackageFile(content: string): PackageFile {
       depName,
       lookupName: `${depName}/${asset}`,
       currentValue,
-      managerData: {
-        fileReplacePosition,
-      },
     });
   }
 
