@@ -3,11 +3,7 @@ import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
 import { logger } from '../../logger';
-import {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { exec, ExecOptions } from '../../util/exec';
 import { platform } from '../../platform';
 import { VERSION_REGEX } from './search';
@@ -15,7 +11,6 @@ import { gradleWrapperFileName, prepareGradleCommand } from '../gradle';
 import { readLocalFile } from '../../util/fs';
 
 async function addIfUpdated(
-  config: UpdateArtifactsConfig,
   status: Git.StatusResult,
   fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
@@ -82,9 +77,7 @@ export async function updateArtifacts({
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(async fileProjectPath =>
-          addIfUpdated(config, status, fileProjectPath)
-        )
+        ].map(async fileProjectPath => addIfUpdated(status, fileProjectPath))
       )
     ).filter(e => e != null);
     logger.debug(
