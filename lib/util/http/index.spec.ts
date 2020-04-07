@@ -33,6 +33,42 @@ describe(getName(__filename), () => {
     ).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });
+  it('putJson', async () => {
+    nock(baseUrl)
+      .put('/')
+      .reply(200, {});
+    expect(
+      await http.putJson('http://renovate.com', { body: {}, baseUrl })
+    ).toMatchSnapshot();
+    expect(nock.isDone()).toBe(true);
+  });
+  it('patchJson', async () => {
+    nock(baseUrl)
+      .patch('/')
+      .reply(200, {});
+    expect(
+      await http.patchJson('http://renovate.com', { body: {}, baseUrl })
+    ).toMatchSnapshot();
+    expect(nock.isDone()).toBe(true);
+  });
+  it('deleteJson', async () => {
+    nock(baseUrl)
+      .delete('/')
+      .reply(200, {});
+    expect(
+      await http.deleteJson('http://renovate.com', { body: {}, baseUrl })
+    ).toMatchSnapshot();
+    expect(nock.isDone()).toBe(true);
+  });
+  it('headJson', async () => {
+    nock(baseUrl)
+      .head('/')
+      .reply(200, {});
+    expect(
+      await http.headJson('http://renovate.com', { body: {}, baseUrl })
+    ).toMatchSnapshot();
+    expect(nock.isDone()).toBe(true);
+  });
 
   it('stream', async () => {
     nock(baseUrl)

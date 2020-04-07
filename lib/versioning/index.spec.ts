@@ -2,6 +2,12 @@ import * as allVersioning from '.';
 import { getOptions } from '../config/definitions';
 import { GenericVersioningApi, GenericVersion } from './loose/generic';
 import * as semverVersioning from './semver';
+import { loadModules } from '../util/modules';
+import {
+  VersioningApi,
+  VersioningApiConstructor,
+  isVersioningApiConstructor,
+} from './common';
 
 const supportedSchemes = getOptions().find(
   option => option.name === 'versioning'
@@ -10,6 +16,31 @@ const supportedSchemes = getOptions().find(
 describe('allVersioning.get(versioning)', () => {
   it('has api', () => {
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
+  });
+  it('validates', () => {
+    function validate(
+      module: VersioningApi | VersioningApiConstructor,
+      name: string
+    ): boolean {
+      // eslint-disable-next-line new-cap
+      const mod = isVersioningApiConstructor(module) ? new module() : module;
+
+      // TODO: test required api
+      if (!mod.isValid || !mod.isVersion) {
+        fail(`Missing api on ${name}`);
+      }
+
+      return true;
+    }
+    const vers = allVersioning.getVersionings();
+
+    const loadedVers = loadModules(__dirname);
+    expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
+
+    for (const name of vers.keys()) {
+      const ver = vers.get(name);
+      expect(validate(ver, name)).toBe(true);
+    }
   });
 
   it('should fallback to semver', () => {
