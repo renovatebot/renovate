@@ -48,8 +48,8 @@ export function extractPackageFile(content: string): PackageFile | null {
           terraformDependency[1]
         );
         const dep: PackageDependency = {
-          moduleName: terraformDependency[2],
           managerData: {
+            moduleName: terraformDependency[2],
             terraformDependencyType: tfDepType,
           },
         };
@@ -66,10 +66,10 @@ export function extractPackageFile(content: string): PackageFile | null {
               const [, key, value] = kvMatch;
               if (key === 'version') {
                 dep.currentValue = value;
-                dep.versionLine = lineNumber;
+                dep.managerData.versionLine = lineNumber;
               } else if (key === 'source') {
-                dep.source = value;
-                dep.sourceLine = lineNumber;
+                dep.managerData.source = value;
+                dep.managerData.sourceLine = lineNumber;
               }
             }
           } while (line.trim() !== '}');
@@ -86,11 +86,11 @@ export function extractPackageFile(content: string): PackageFile | null {
       TerraformDependencyTypes.module
     ) {
       const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.exec(
-        dep.source
+        dep.managerData.source
       );
       // Regex would need to be updated to support ssh://
       const gitTagsRefMatch = /git::(http|https:\/\/(.*.*\/(.*\/.*)))(?:|\/\/.*)\?ref=(.*)$/.exec(
-        dep.source
+        dep.managerData.source
       );
       /* eslint-disable no-param-reassign */
       if (githubRefMatch) {
@@ -100,7 +100,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.currentValue = githubRefMatch[3];
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = githubRefMatch[2];
-        dep.managerData.lineNumber = dep.sourceLine;
+        dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
@@ -111,19 +111,19 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.currentValue = gitTagsRefMatch[4];
         dep.datasource = datasourceGitTags.id;
         dep.lookupName = gitTagsRefMatch[1];
-        dep.managerData.lineNumber = dep.sourceLine;
+        dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
-      } else if (dep.source) {
-        const moduleParts = dep.source.split('//')[0].split('/');
+      } else if (dep.managerData.source) {
+        const moduleParts = dep.managerData.source.split('//')[0].split('/');
         if (moduleParts[0] === '..') {
           dep.skipReason = SkipReason.Local;
         } else if (moduleParts.length >= 3) {
           dep.depType = 'terraform';
           dep.depName = moduleParts.join('/');
           dep.depNameShort = dep.depName;
-          dep.managerData.lineNumber = dep.versionLine;
+          dep.managerData.lineNumber = dep.managerData.versionLine;
           dep.datasource = datasourceTerraformModule.id;
         }
       } else {
@@ -135,9 +135,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       TerraformDependencyTypes.provider
     ) {
       dep.depType = 'terraform';
-      dep.depName = dep.moduleName;
-      dep.depNameShort = dep.moduleName;
-      dep.managerData.lineNumber = dep.versionLine;
+      dep.depName = dep.managerData.moduleName;
+      dep.depNameShort = dep.managerData.moduleName;
+      dep.managerData.lineNumber = dep.managerData.versionLine;
       dep.datasource = datasourceTerraformProvider.id;
       if (dep.managerData.lineNumber) {
         if (!isValid(dep.currentValue)) {
@@ -147,8 +147,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.skipReason = SkipReason.NoVersion;
       }
     }
-    delete dep.sourceLine;
-    delete dep.versionLine;
+    delete dep.managerData;
     /* eslint-enable no-param-reassign */
   });
   if (deps.some(dep => dep.skipReason !== 'local')) {
