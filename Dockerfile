@@ -36,6 +36,11 @@ COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build:docker
 
+# workaround for bundle path
+RUN set -ex ;\
+  mv dist/manager/pip_setup/extract.py dist/;\
+  rm -rf dist/manager
+
 # Final-base image
 #============
 FROM base as final-base
@@ -206,7 +211,6 @@ FROM $IMAGE as final
 COPY package.json .
 
 COPY --from=tsbuild /usr/src/app/dist dist
-# COPY --from=tsbuild /usr/src/app/node_modules node_modules
 COPY bin bin
 COPY data data
 
