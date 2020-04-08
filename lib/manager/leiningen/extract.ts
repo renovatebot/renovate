@@ -1,6 +1,5 @@
-import { CLOJARS_REPO, MAVEN_REPO } from '../../datasource/maven/common';
 import { PackageDependency, PackageFile } from '../common';
-import * as datasourceMaven from '../../datasource/maven';
+import * as datasourceClojure from '../../datasource/clojure';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
@@ -50,10 +49,9 @@ export function extractFromVectors(
     if (artifactId && version && fileReplacePosition) {
       result.push({
         ...ctx,
-        datasource: datasourceMaven.id,
+        datasource: datasourceClojure.id,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
-        fileReplacePosition,
       });
     }
     artifactId = '';
@@ -96,7 +94,7 @@ export function extractFromVectors(
 }
 
 function extractLeinRepos(content: string): string[] {
-  const result = [CLOJARS_REPO, MAVEN_REPO];
+  const result = [];
 
   const repoContent = trimAtKey(
     content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments

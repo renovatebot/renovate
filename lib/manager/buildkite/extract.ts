@@ -56,7 +56,6 @@ export function extractPackageFile(content: string): PackageFile | null {
             }
           }
           const dep: PackageDependency = {
-            managerData: { lineNumber },
             depName,
             currentValue,
             skipReason,

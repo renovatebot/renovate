@@ -84,10 +84,10 @@ export async function executeGradle(
 ): Promise<void> {
   let stdout: string;
   let stderr: string;
-  const timeout =
-    config.gradle && config.gradle.timeout
-      ? config.gradle.timeout * 1000
-      : undefined;
+  let timeout;
+  if (config.gradle?.timeout) {
+    timeout = config.gradle.timeout * 1000;
+  }
   const cmd = await prepareGradleCommandFallback(
     gradleWrapperFileName(config),
     cwd,
