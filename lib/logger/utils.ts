@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import bunyan from 'bunyan';
 import { Stream } from 'stream';
-import { sanitize } from '../util/sanitize';
+import { sanitize, redactedFields } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {
   level: number;
@@ -75,7 +75,9 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
       let curValue = val;
-      if (contentFields.includes(key)) {
+      if (redactedFields.includes(key)) {
+        curValue = '***********';
+      } else if (contentFields.includes(key)) {
         curValue = '[content]';
       } else if (templateFields.includes(key)) {
         curValue = '[Template]';
