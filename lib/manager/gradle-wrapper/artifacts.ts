@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
@@ -48,7 +47,7 @@ export async function updateArtifacts({
     };
     try {
       await exec(cmd, execOptions);
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.warn(
         { err },
         'Error executing gradle wrapper update command. It can be not a critical one though.'
