@@ -37,6 +37,14 @@ export class ErrorStream extends Stream {
     return this._errors;
   }
 }
+const templateFields = ['prBody'];
+const contentFields = [
+  'content',
+  'contents',
+  'packageLockParsed',
+  'yarnLockParsed',
+];
+// const arrayFields = ['packageFiles', 'upgrades'];
 
 function sanitizeValue(value: any, seen = new WeakMap()): any {
   if (Array.isArray(value)) {
@@ -52,6 +60,10 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     return arrayResult;
   }
 
+  if (value instanceof Buffer) {
+    return '[content]';
+  }
+
   const valueType = typeof value;
 
   if (value != null && valueType !== 'function' && valueType === 'object') {
@@ -62,9 +74,18 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
-      objectResult[key] = seen.has(val)
-        ? seen.get(val)
-        : sanitizeValue(val, seen);
+      let curValue = val;
+      if (contentFields.includes(key)) {
+        curValue = '[content]';
+      } else if (templateFields.includes(key)) {
+        curValue = '[Template]';
+        // } else if (arrayFields.includes(key)) {
+        //   curValue = '[Array]';
+      } else {
+        curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
+      }
+
+      objectResult[key] = curValue;
     }
     return objectResult;
   }

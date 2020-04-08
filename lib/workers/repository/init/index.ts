@@ -8,6 +8,7 @@ import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import { redactedFields, add } from '../../../util/sanitize';
 
 export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   global.repoCache = {};
@@ -22,6 +23,11 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   config.semanticCommits = await detectSemanticCommits(config);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
+
+  for (const key of redactedFields) {
+    add(config[key] as string);
+  }
+
   checkIfConfigured(config);
   config = await checkBaseBranch(config);
   await platform.setBranchPrefix(config.branchPrefix);
