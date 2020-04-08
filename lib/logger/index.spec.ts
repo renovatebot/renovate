@@ -143,11 +143,13 @@ describe('logger', () => {
     logger.error({
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
+      npmToken: 'token',
     });
 
     expect(logged.foo).not.toEqual('secret"password');
     expect(logged.bar[0]).toEqual('somethingelse');
     expect(logged.foo).toContain('redacted');
     expect(logged.bar[1]).toContain('redacted');
+    expect(logged.npmToken).not.toEqual('token');
   });
 });
