@@ -75,7 +75,6 @@ export async function extractPackageFile(
     config.localDir
   );
 
-  let lineNumber = 0;
   for (const line of content.split('\n')) {
     /**
      * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -99,7 +98,6 @@ export async function extractPackageFile(
         depType: 'nuget',
         depName,
         currentValue,
-        managerData: { lineNumber },
         datasource: datasourceNuget.id,
       };
       if (registryUrls) {
@@ -110,7 +108,6 @@ export async function extractPackageFile(
       }
       deps.push(dep);
     }
-    lineNumber += 1;
   }
   return { deps };
 }
