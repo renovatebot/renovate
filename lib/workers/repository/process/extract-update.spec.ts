@@ -23,7 +23,9 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
       };
       const res = await extract(config);
-      await update(config, res.branches);
+      expect(res).toMatchSnapshot();
+      const writeUpdateResult = await update(config, res.branches);
+      expect(writeUpdateResult).toMatchSnapshot();
     });
   });
 });

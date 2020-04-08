@@ -22,7 +22,8 @@ describe('config/index', () => {
     });
     it('supports token in env', async () => {
       const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
-      await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toMatchSnapshot();
     });
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat([
@@ -31,12 +32,14 @@ describe('config/index', () => {
         '--log-context=abc123',
       ]);
       const env: NodeJS.ProcessEnv = {};
-      await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toMatchSnapshot();
     });
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=false']);
       const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
-      await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toMatchSnapshot();
     });
     it('supports Bitbucket username/passwod', async () => {
       defaultArgv = defaultArgv.concat([
@@ -45,7 +48,8 @@ describe('config/index', () => {
         '--password=pass',
       ]);
       const env: NodeJS.ProcessEnv = {};
-      await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toMatchSnapshot();
     });
     it('massages trailing slash into endpoint', async () => {
       defaultArgv = defaultArgv.concat([

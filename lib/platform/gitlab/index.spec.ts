@@ -1,3 +1,5 @@
+// TODO fix mocks
+/* eslint-disable jest/expect-expect */
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/httpMock';

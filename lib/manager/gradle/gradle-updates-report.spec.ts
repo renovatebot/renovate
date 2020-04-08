@@ -1,3 +1,5 @@
+// Doesn't work with ifSystemSupportsGradle
+/* eslint jest/no-standalone-expect: 0 */
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';

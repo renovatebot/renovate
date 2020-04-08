@@ -10,7 +10,7 @@ beforeEach(() => {
 describe('workers/repository/configured', () => {
   describe('checkIfConfigured()', () => {
     it('returns', () => {
-      checkIfConfigured(config);
+      expect(() => checkIfConfigured(config)).not.toThrow();
     });
     it('throws if disabled', () => {
       config.enabled = false;

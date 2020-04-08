@@ -1,4 +1,7 @@
+// TODO fix mocks
+/* eslint-disable jest/expect-expect */
 import URL from 'url';
+import 'jest-extended';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
@@ -156,7 +159,8 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getFileList();
+        const fileList = await bitbucket.getFileList();
+        expect(fileList).not.toBeNull();
       });
     });
   });
@@ -166,7 +170,8 @@ describe('platform/bitbucket', () => {
       it('sends to gitFs', async () => {
         await initRepo();
         await mocked(async () => {
-          await bitbucket.branchExists('test');
+          const branchExists = await bitbucket.branchExists('test');
+          expect(branchExists).toEqual(true);
         });
       });
     });
@@ -522,15 +527,6 @@ describe('platform/bitbucket', () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getAllRenovateBranches('test');
-      });
-    });
-  });
-
-  describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await mocked(async () => {
-        await bitbucket.getBranchLastCommitTime('test');
       });
     });
   });

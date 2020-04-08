@@ -38,7 +38,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 1`] = `
+exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
 Array [
   Object {
     "internalPackages": Array [
@@ -80,7 +80,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 2`] = `
+exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
 Array [
   Object {
     "internalPackages": Array [

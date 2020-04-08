@@ -117,6 +117,7 @@ describe('workers/branch', () => {
         isModified: false,
       } as never);
       await branchWorker.processBranch(config);
+      expect(parent.getParentBranch).toHaveBeenCalled();
     });
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -472,7 +473,8 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      await branchWorker.processBranch(config);
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).not.toBeNull();
     });
     it('throws and swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -482,7 +484,8 @@ describe('workers/branch', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
-      await branchWorker.processBranch(config);
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).not.toBeNull();
     });
     it('swallows pr errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -497,7 +500,8 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      await branchWorker.processBranch(config);
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).not.toBeNull();
     });
 
     it('closed pr (dry run)', async () => {

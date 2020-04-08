@@ -62,6 +62,8 @@ describe('platform/gitlab/gl-got-wrapper', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('sets baseUrl', () => {
-    api.setBaseUrl('https://gitlab.renovatebot.com/api/v4/');
+    expect(() =>
+      api.setBaseUrl('https://gitlab.renovatebot.com/api/v4/')
+    ).not.toThrow();
   });
 });
