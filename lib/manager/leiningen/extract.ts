@@ -52,7 +52,6 @@ export function extractFromVectors(
         datasource: datasourceClojure.id,
         depName: expandDepName(cleanStrLiteral(artifactId)),
         currentValue: cleanStrLiteral(version),
-        fileReplacePosition,
       });
     }
     artifactId = '';
