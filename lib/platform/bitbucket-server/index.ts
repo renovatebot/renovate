@@ -732,7 +732,6 @@ export async function addReviewers(
       {
         body: {
           title: pr.title,
-          description: pr.description,
           version: pr.version,
           reviewers: Array.from(reviewersSet).map(name => ({ user: { name } })),
         },
