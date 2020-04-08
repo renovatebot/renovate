@@ -41,6 +41,8 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   cacheDir?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
+
+  toVersion?: string;
 }
 
 export interface PackageUpdateConfig {

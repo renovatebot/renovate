@@ -5,11 +5,12 @@ import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
 import { mocked, getName } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
-import { setFsConfig } from '../../util/fs';
+import { setUtilConfig } from '../../util';
 
 const platform = mocked(_platform);
 const config = {
   localDir: resolve(__dirname, './__fixtures__/testFiles'),
+  toVersion: '5.6.4',
 };
 
 jest.mock('../../util/got');
@@ -26,7 +27,7 @@ async function resetTestFiles() {
 
 describe(getName(__filename), () => {
   beforeAll(() => {
-    setFsConfig(config);
+    setUtilConfig(config);
   });
   beforeEach(() => {
     jest.resetAllMocks();
@@ -54,7 +55,7 @@ describe(getName(__filename), () => {
             ),
             'utf8'
           ),
-          config,
+          config: { ...config, toVersion: '6.3' },
         });
 
         expect(res).toEqual(

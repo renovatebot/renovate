@@ -7,7 +7,6 @@ import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { exec, ExecOptions } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
-import { VERSION_REGEX } from './search';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(
@@ -28,25 +27,21 @@ async function addIfUpdated(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
-  newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     const projectDir = config.localDir;
-    logger.debug(updatedDeps, 'gradle-wrapper.updateArtifacts()');
+    logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);
-    const version = VERSION_REGEX.exec(newPackageFileContent).groups.version;
-    await prepareGradleCommand(
+    const cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
       await fs.stat(gradlewPath).catch(() => null),
-      null
+      `wrapper --gradle-version ${config.toVersion}`
     );
-    const cmd = `${gradlewPath} wrapper --gradle-version ${version} --project-dir ${projectDir}`;
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
-      cwd: config.localDir,
       docker: {
         image: 'renovate/gradle',
       },
@@ -71,7 +66,8 @@ export async function updateArtifacts({
       )
     ).filter(e => e != null);
     logger.debug(
-      `Returning updated gradle-wrapper files: ${updateArtifactsResult}`
+      { files: updateArtifactsResult.map(r => r.file.name) },
+      `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;
   } catch (err) {
