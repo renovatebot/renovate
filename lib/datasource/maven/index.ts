@@ -196,7 +196,6 @@ async function getArtifactInfo(
   const proto = artifactUrl.protocol;
   if (proto === 'http:' || proto === 'https:') {
     const result = await isHttpResourceExists(artifactUrl);
-    debugger;
     return [version, result];
   }
   return [version, true];
