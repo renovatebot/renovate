@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
-import { regEx } from '../../util/regex';
+import { regEx, escapeRegExp } from '../../util/regex';
 
 export async function confirmIfDepUpdated(
   upgrade,
@@ -58,10 +58,6 @@ export async function checkBranchDepsMatchBaseDeps(
     logger.warn('Failed to parse branchContent');
     return false;
   }
-}
-
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 export async function doAutoReplace(
