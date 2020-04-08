@@ -1,7 +1,8 @@
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 
 export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+
+export const autoReplace = true;
 
 export const defaultConfig = {
   commitMessageTopic:
