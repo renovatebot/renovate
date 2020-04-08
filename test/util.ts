@@ -11,16 +11,24 @@ export function mocked<T>(module: T): jest.Mocked<T> {
   return module as never;
 }
 
-export function mockPartial(
-  moduleName: string,
-  overrides?: unknown
-): typeof jest {
+/**
+ * Partially mock a module, providing an object with explicit mocks
+ * @param moduleName The module to mock
+ * @param overrides An object containing the mocks
+ * @example
+ * jest.mock('../../util/exec/docker/index', () =>
+ *   require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+ *     removeDanglingContainers: jest.fn(),
+ *   })
+ * );
+ */
+export function mockPartial(moduleName: string, overrides?: object): unknown {
   const absolutePath = upath.join(module.parent.filename, '../', moduleName);
   const originalModule = jest.requireActual(absolutePath);
   return {
     __esModule: true,
     ...originalModule,
-    ...(overrides as object),
+    ...overrides,
   };
 }
 
