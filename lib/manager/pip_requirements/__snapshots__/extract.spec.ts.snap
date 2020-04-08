@@ -8,27 +8,18 @@ Object {
       "datasource": "pypi",
       "depName": "some-package",
       "fromVersion": "0.3.1",
-      "managerData": Object {
-        "lineNumber": 2,
-      },
     },
     Object {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
       "fromVersion": "1.0.0",
-      "managerData": Object {
-        "lineNumber": 3,
-      },
     },
     Object {
       "currentValue": "==1.9",
       "datasource": "pypi",
       "depName": "not_semver",
       "fromVersion": "1.9",
-      "managerData": Object {
-        "lineNumber": 4,
-      },
     },
   ],
   "registryUrls": Array [
@@ -44,45 +35,30 @@ Array [
     "datasource": "pypi",
     "depName": "Django",
     "fromVersion": "1",
-    "managerData": Object {
-      "lineNumber": 0,
-    },
   },
   Object {
     "currentValue": "==0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
     "fromVersion": "0.6.27",
-    "managerData": Object {
-      "lineNumber": 1,
-    },
   },
   Object {
     "currentValue": "==0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
     "fromVersion": "0.2",
-    "managerData": Object {
-      "lineNumber": 2,
-    },
   },
   Object {
     "currentValue": "==2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
     "fromVersion": "2.4.5",
-    "managerData": Object {
-      "lineNumber": 3,
-    },
   },
   Object {
     "currentValue": "==0.1.2",
     "datasource": "pypi",
     "depName": "wsgiref",
     "fromVersion": "0.1.2",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
   },
 ]
 `;
@@ -94,18 +70,12 @@ Array [
     "datasource": "pypi",
     "depName": "Django",
     "fromVersion": "1.11.23",
-    "managerData": Object {
-      "lineNumber": 0,
-    },
   },
   Object {
     "currentValue": "==0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
     "fromVersion": "0.6.27",
-    "managerData": Object {
-      "lineNumber": 1,
-    },
     "skipReason": "ignored",
   },
   Object {
@@ -113,27 +83,18 @@ Array [
     "datasource": "pypi",
     "depName": "dj-database-url",
     "fromVersion": "0.2",
-    "managerData": Object {
-      "lineNumber": 2,
-    },
   },
   Object {
     "currentValue": "==2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
     "fromVersion": "2.4.5",
-    "managerData": Object {
-      "lineNumber": 3,
-    },
   },
   Object {
     "currentValue": "==0.1.2",
     "datasource": "pypi",
     "depName": "wsgiref",
     "fromVersion": "0.1.2",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
   },
 ]
 `;
@@ -146,53 +107,35 @@ Object {
       "datasource": "pypi",
       "depName": "Django",
       "fromVersion": "2.0.12",
-      "managerData": Object {
-        "lineNumber": 4,
-      },
     },
     Object {
       "currentValue": "==4.1.1",
       "datasource": "pypi",
       "depName": "celery",
       "fromVersion": "4.1.1",
-      "managerData": Object {
-        "lineNumber": 5,
-      },
     },
     Object {
       "currentValue": " == 3.2.1",
       "datasource": "pypi",
       "depName": "foo",
-      "managerData": Object {
-        "lineNumber": 6,
-      },
     },
     Object {
       "currentValue": "==0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
       "fromVersion": "0.3.1",
-      "managerData": Object {
-        "lineNumber": 7,
-      },
     },
     Object {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
       "fromVersion": "1.0.0",
-      "managerData": Object {
-        "lineNumber": 8,
-      },
     },
     Object {
       "currentValue": "==1.9",
       "datasource": "pypi",
       "depName": "not_semver",
       "fromVersion": "1.9",
-      "managerData": Object {
-        "lineNumber": 9,
-      },
     },
   ],
   "registryUrls": Array [
@@ -210,53 +153,35 @@ Object {
       "datasource": "pypi",
       "depName": "Django",
       "fromVersion": "2.0.12",
-      "managerData": Object {
-        "lineNumber": 3,
-      },
     },
     Object {
       "currentValue": "==4.1.1",
       "datasource": "pypi",
       "depName": "celery",
       "fromVersion": "4.1.1",
-      "managerData": Object {
-        "lineNumber": 4,
-      },
     },
     Object {
       "currentValue": " == 3.2.1",
       "datasource": "pypi",
       "depName": "foo",
-      "managerData": Object {
-        "lineNumber": 5,
-      },
     },
     Object {
       "currentValue": "==0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
       "fromVersion": "0.3.1",
-      "managerData": Object {
-        "lineNumber": 6,
-      },
     },
     Object {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
       "fromVersion": "1.0.0",
-      "managerData": Object {
-        "lineNumber": 7,
-      },
     },
     Object {
       "currentValue": "==1.9",
       "datasource": "pypi",
       "depName": "not_semver",
       "fromVersion": "1.9",
-      "managerData": Object {
-        "lineNumber": 8,
-      },
     },
   ],
   "registryUrls": Array [
@@ -274,53 +199,35 @@ Object {
       "datasource": "pypi",
       "depName": "Django",
       "fromVersion": "2.0.12",
-      "managerData": Object {
-        "lineNumber": 3,
-      },
     },
     Object {
       "currentValue": "==4.1.1",
       "datasource": "pypi",
       "depName": "celery",
       "fromVersion": "4.1.1",
-      "managerData": Object {
-        "lineNumber": 4,
-      },
     },
     Object {
       "currentValue": " == 3.2.1",
       "datasource": "pypi",
       "depName": "foo",
-      "managerData": Object {
-        "lineNumber": 5,
-      },
     },
     Object {
       "currentValue": "==0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
       "fromVersion": "0.3.1",
-      "managerData": Object {
-        "lineNumber": 6,
-      },
     },
     Object {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
       "fromVersion": "1.0.0",
-      "managerData": Object {
-        "lineNumber": 7,
-      },
     },
     Object {
       "currentValue": "==1.9",
       "datasource": "pypi",
       "depName": "not_semver",
       "fromVersion": "1.9",
-      "managerData": Object {
-        "lineNumber": 8,
-      },
     },
   ],
   "registryUrls": Array [
@@ -338,26 +245,17 @@ Object {
       "datasource": "pypi",
       "depName": "Django",
       "fromVersion": "2.0.12",
-      "managerData": Object {
-        "lineNumber": 1,
-      },
     },
     Object {
       "currentValue": "==4.1.1",
       "datasource": "pypi",
       "depName": "celery",
       "fromVersion": "4.1.1",
-      "managerData": Object {
-        "lineNumber": 2,
-      },
     },
     Object {
       "currentValue": " == 3.2.1",
       "datasource": "pypi",
       "depName": "foo",
-      "managerData": Object {
-        "lineNumber": 3,
-      },
     },
   ],
   "registryUrls": Array [
