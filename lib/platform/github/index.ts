@@ -17,6 +17,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  Pr,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -44,59 +45,17 @@ import {
   PR_STATE_CLOSED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import {
+  CombinedBranchStatus,
+  GhBranchStatus,
+  LocalRepoConfig,
+  BranchProtection,
+  PrList,
+  Comment,
+  GhPr,
+} from './types';
 
 const defaultConfigFile = configFileNames[0];
-
-interface Comment {
-  id: number;
-  body: string;
-}
-
-interface Pr {
-  displayNumber: string;
-  state: string;
-  title: string;
-  branchName: string;
-  number: number;
-  comments: Comment[];
-
-  createdAt: string;
-
-  sha: string;
-
-  sourceRepo: string;
-  isModified: boolean;
-}
-
-interface LocalRepoConfig {
-  repositoryName: string;
-  pushProtection: boolean;
-  prReviewsRequired: boolean;
-  repoForceRebase?: boolean;
-  storage: GitStorage;
-  parentRepo: string;
-  baseCommitSHA: string | null;
-  forkMode?: boolean;
-  forkToken?: string;
-  closedPrList: PrList | null;
-  openPrList: PrList | null;
-  prList: Pr[] | null;
-  issueList: any[] | null;
-  mergeMethod: string;
-  baseBranch: string;
-  defaultBranch: string;
-  enterpriseVersion: string;
-  gitPrivateKey?: string;
-  repositoryOwner: string;
-  repository: string | null;
-  localDir: string;
-  isGhe: boolean;
-  renovateUsername: string;
-  productLinks: any;
-}
-
-type BranchProtection = any;
-type PrList = Record<number, Pr>;
 
 let config: LocalRepoConfig = {} as any;
 
@@ -1056,19 +1015,6 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-// https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
-type BranchState = 'failure' | 'pending' | 'success';
-
-interface GhBranchStatus {
-  context: string;
-  state: BranchState | 'error';
-}
-
-interface CombinedBranchStatus {
-  state: BranchState;
-  statuses: GhBranchStatus[];
-}
-
 async function getStatus(
   branchName: string,
   useCache = true
@@ -1657,7 +1603,7 @@ export async function createPr({
   }
   logger.debug({ title, head, base }, 'Creating PR');
   const pr = (
-    await api.post<Pr>(
+    await api.post<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )

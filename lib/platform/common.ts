@@ -2,7 +2,12 @@ import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import { CommitFilesConfig } from './git/storage';
-import { BranchStatus, VulnerabilityAlert } from '../types';
+import {
+  BranchStatus,
+  VulnerabilityAlert as _VulnerabilityAlert,
+} from '../types';
+
+export type VulnerabilityAlert = _VulnerabilityAlert;
 
 export interface FileData {
   name: string;
@@ -77,15 +82,27 @@ export interface RepoParams {
 }
 
 /**
- * TODO: Proper typing
+ *
  */
-export type Pr = {
+export interface Pr {
+  body?: string;
   branchName: string;
-  title: string;
-  state: string;
+  canMerge?: boolean;
+  canMergeReason?: string;
+  createdAt?: string;
+  displayNumber?: string;
   isConflicted?: boolean;
   isModified?: boolean;
-} & Record<string, any>;
+  isStale?: boolean;
+  labels?: string[];
+  number?: number;
+  reviewers?: string[];
+  sha?: string;
+  sourceRepo?: string;
+  state: string;
+  targetBranch?: string;
+  title: string;
+}
 
 /**
  * TODO: Proper typing

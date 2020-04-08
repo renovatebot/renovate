@@ -5,7 +5,7 @@ import { platform as _platform, Pr } from '../../platform';
 import { mocked, partial } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import { PrResult, BranchConfig, BranchUpgradeConfig } from '../common';
+import { PrResult, BranchConfig } from '../common';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
@@ -59,9 +59,6 @@ describe('workers/pr', () => {
         ...defaultConfig,
       });
       pr = partial<Pr>({
-        head: {
-          ref: 'somebranch',
-        },
         canMerge: true,
       });
     });

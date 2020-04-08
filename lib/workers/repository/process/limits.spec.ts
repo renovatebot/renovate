@@ -15,7 +15,7 @@ describe('workers/repository/process/limits', () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockResolvedValueOnce([
         {
-          created_at: moment().format(),
+          createdAt: moment().toISOString(),
           branchName: null,
           title: null,
           state: null,

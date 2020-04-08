@@ -571,7 +571,7 @@ describe('platform/bitbucket-server', () => {
         it('posts PR', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr({
+          const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
             prTitle: 'title',
             prBody: 'body',
@@ -584,7 +584,7 @@ describe('platform/bitbucket-server', () => {
         it('posts PR default branch', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr({
+          const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
             prTitle: 'title',
             prBody: 'body',
