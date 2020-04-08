@@ -12,16 +12,13 @@ import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(
   status: Git.StatusResult,
-  projectDir: string,
   fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
-    const filePath = resolve(projectDir, `./${fileProjectPath}`);
     return {
-      artifactError: null,
       file: {
         name: fileProjectPath,
-        contents: await readLocalFile(filePath),
+        contents: await readLocalFile(fileProjectPath),
       },
     };
   }
@@ -37,13 +34,11 @@ export async function updateArtifacts({
   try {
     const projectDir = config.localDir;
     logger.debug(updatedDeps, 'gradle-wrapper.updateArtifacts()');
-    const gradlewPath = resolve(
-      projectDir,
-      `./${gradleWrapperFileName(config)}`
-    );
+    const gradlew = gradleWrapperFileName(config);
+    const gradlewPath = resolve(projectDir, `./${gradlew}`);
     const version = VERSION_REGEX.exec(newPackageFileContent).groups.version;
     await prepareGradleCommand(
-      gradleWrapperFileName(config),
+      gradlew,
       projectDir,
       await fs.stat(gradlewPath).catch(() => null),
       null
@@ -72,9 +67,7 @@ export async function updateArtifacts({
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(async fileProjectPath =>
-          addIfUpdated(status, projectDir, fileProjectPath)
-        )
+        ].map(async fileProjectPath => addIfUpdated(status, fileProjectPath))
       )
     ).filter(e => e != null);
     logger.debug(

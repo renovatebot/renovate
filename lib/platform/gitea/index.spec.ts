@@ -15,11 +15,12 @@ import {
   RepoConfig,
   RepoParams,
   Platform,
+  CommitFilesConfig,
+  File,
 } from '..';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { GiteaGotApi } from './gitea-got-wrapper';
-import { CommitFilesConfig, File } from '../git/storage';
 
 describe('platform/gitea', () => {
   let gitea: Platform;

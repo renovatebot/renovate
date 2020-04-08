@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy, SkipReason } from '../types';
 import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
-import { FileData } from '../platform/common';
+import { File } from '../platform/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -190,7 +190,7 @@ export interface ArtifactError {
 
 export interface UpdateArtifactsResult {
   artifactError?: ArtifactError;
-  file?: FileData;
+  file?: File;
 }
 
 export interface UpdateArtifact {

@@ -5,7 +5,7 @@ import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import { logger } from '../../logger';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import {
@@ -21,6 +21,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
