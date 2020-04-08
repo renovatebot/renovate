@@ -5,25 +5,16 @@ Array [
   Object {
     "currentValue": "v1.3.2.5",
     "depName": "namespace/docker-compose",
-    "managerData": Object {
-      "lineNumber": 5,
-    },
     "skipReason": "invalid-version",
   },
   Object {
     "currentValue": "v1.3.2",
     "depName": "https://github.com/buildkite/plugin-docker-compose",
-    "managerData": Object {
-      "lineNumber": 16,
-    },
     "skipReason": "git-plugin",
   },
   Object {
     "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
-    "managerData": Object {
-      "lineNumber": 23,
-    },
     "skipReason": "unknown",
   },
 ]
@@ -36,9 +27,6 @@ Array [
     "datasource": "github-tags",
     "depName": "docker-login",
     "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 3,
-    },
     "skipReason": undefined,
   },
   Object {
@@ -46,9 +34,6 @@ Array [
     "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 5,
-    },
     "skipReason": undefined,
   },
   Object {
@@ -56,9 +41,6 @@ Array [
     "datasource": "github-tags",
     "depName": "docker-login",
     "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 11,
-    },
     "skipReason": undefined,
   },
   Object {
@@ -66,9 +48,6 @@ Array [
     "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 13,
-    },
     "skipReason": undefined,
   },
 ]
@@ -81,9 +60,6 @@ Array [
     "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 5,
-    },
     "skipReason": undefined,
   },
   Object {
@@ -91,9 +67,6 @@ Array [
     "datasource": "github-tags",
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 16,
-    },
     "skipReason": undefined,
   },
 ]
@@ -106,9 +79,6 @@ Array [
     "datasource": "github-tags",
     "depName": "abc/detect-clowns",
     "lookupName": "abc/detect-clowns-buildkite-plugin",
-    "managerData": Object {
-      "lineNumber": 3,
-    },
     "skipReason": undefined,
   },
 ]

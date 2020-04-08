@@ -4,7 +4,7 @@ import * as pep440Versioning from '../versioning/pep440';
 import * as semverVersioning from '../versioning/semver';
 import { getVersioningList } from '../versioning';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { platformList } from '../platform';
+import { getPlatformList } from '../platform';
 
 import { getManagers } from '../manager';
 
@@ -455,7 +455,7 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
-    allowedValues: platformList,
+    allowedValues: getPlatformList(),
     default: PLATFORM_TYPE_GITHUB,
     admin: true,
   },

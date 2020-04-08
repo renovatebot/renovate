@@ -146,12 +146,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
-  source?: string;
   sourceLine?: number;
   toVersion?: string;
   updates?: PackageUpdateResult[];
