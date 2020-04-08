@@ -74,6 +74,13 @@ export default api;
     // managers
     await generate({ path: 'manager', types: ['ManagerApi'] });
 
+    // platform
+    await generate({
+      path: 'platform',
+      types: ['Platform'],
+      excludes: ['utils', 'git'],
+    });
+
     // versioning
     await generate({
       path: 'versioning',

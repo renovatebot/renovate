@@ -1,4 +1,3 @@
-import fs from 'fs';
 import URL from 'url';
 import addrs from 'email-addresses';
 import * as hostRules from '../util/host-rules';
@@ -6,15 +5,12 @@ import { logger } from '../logger';
 import { Platform } from './common';
 import { RenovateConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
+import platforms from './api.generated';
 
 export * from './common';
 
-export const platformList = fs
-  .readdirSync(__dirname, { withFileTypes: true })
-  .filter(dirent => dirent.isDirectory())
-  .map(dirent => dirent.name)
-  .filter(name => name !== 'git' && name !== 'utils') // TODO: should be cleaner
-  .sort();
+export const getPlatformList = (): string[] => Array.from(platforms.keys());
+export const getPlatforms = (): Map<string, Platform> => platforms;
 
 let _platform: Platform;
 
@@ -23,30 +19,27 @@ const handler: ProxyHandler<Platform> = {
     if (!_platform) {
       throw new Error(PLATFORM_NOT_FOUND);
     }
-
-    // TODO: add more validation
-
     return _platform[prop];
   },
 };
 
 export const platform = new Proxy<Platform>({} as any, handler);
 
-export async function setPlatformApi(name: string): Promise<void> {
-  if (!platformList.includes(name)) {
+export function setPlatformApi(name: string): void {
+  if (!platforms.has(name)) {
     throw new Error(
-      `Init: Platform "${name}" not found. Must be one of: ${platformList.join(
+      `Init: Platform "${name}" not found. Must be one of: ${getPlatformList().join(
         ', '
       )}`
     );
   }
-  _platform = await import('./' + name);
+  _platform = platforms.get(name);
 }
 
 export async function initPlatform(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
-  await setPlatformApi(config.platform);
+  setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };

@@ -31,7 +31,7 @@ import {
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
