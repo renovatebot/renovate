@@ -78,7 +78,6 @@ export async function getChangeLogJSON({
       );
       return { error: ChangeLogError.MissingGithubToken };
     }
-    // This should change now that gitlab is another option for retrieval
     logger.debug(
       { manager, depName, sourceUrl },
       'Repository URL does not match any known github hosts - skipping changelog retrieval'
