@@ -7,7 +7,6 @@ Object {
       "currentValue": "0.7.1",
       "datasource": "sbt-package",
       "depName": "com.example:foo_2.13.0-RC5",
-      "fileReplacePosition": 168,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
@@ -16,7 +15,6 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "fileReplacePosition": 120,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
@@ -32,7 +30,6 @@ Object {
       "currentValue": "0.0.1",
       "datasource": "sbt-package",
       "depName": "org.example:foo",
-      "fileReplacePosition": 132,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -46,7 +43,6 @@ Object {
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar_2.9.10",
-      "fileReplacePosition": 188,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -60,7 +56,6 @@ Object {
       "currentValue": "0.0.3",
       "datasource": "sbt-package",
       "depName": "org.example:baz_2.9.10",
-      "fileReplacePosition": 252,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -74,7 +69,6 @@ Object {
       "currentValue": "0.0.4",
       "datasource": "sbt-package",
       "depName": "org.example:qux",
-      "fileReplacePosition": 287,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -88,7 +82,6 @@ Object {
       "currentValue": "0.0.5",
       "datasource": "sbt-package",
       "depName": "org.example:quux",
-      "fileReplacePosition": 346,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -103,7 +96,6 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:quuz_2.9.10",
       "depType": "test",
-      "fileReplacePosition": 526,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -118,7 +110,6 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:corge",
       "depType": "Provided",
-      "fileReplacePosition": 584,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -133,7 +124,6 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "fileReplacePosition": 479,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -148,7 +138,6 @@ Object {
       "datasource": "sbt-plugin",
       "depName": "org.example:waldo",
       "depType": "plugin",
-      "fileReplacePosition": 986,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -169,7 +158,6 @@ Object {
       "currentValue": "0.0.1",
       "datasource": "sbt-package",
       "depName": "org.example:foo",
-      "fileReplacePosition": 195,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -183,7 +171,6 @@ Object {
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar_2.12",
-      "fileReplacePosition": 251,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -197,7 +184,6 @@ Object {
       "currentValue": "0.0.3",
       "datasource": "sbt-package",
       "depName": "org.example:baz_2.12",
-      "fileReplacePosition": 315,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -211,7 +197,6 @@ Object {
       "currentValue": "0.0.4",
       "datasource": "sbt-package",
       "depName": "org.example:qux",
-      "fileReplacePosition": 350,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -225,7 +210,6 @@ Object {
       "currentValue": "0.0.5",
       "datasource": "sbt-package",
       "depName": "org.example:quux",
-      "fileReplacePosition": 409,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -240,7 +224,6 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:quuz_2.12",
       "depType": "test",
-      "fileReplacePosition": 553,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -255,7 +238,6 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:corge",
       "depType": "Provided",
-      "fileReplacePosition": 611,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -270,7 +252,6 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "fileReplacePosition": 51,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -285,7 +266,6 @@ Object {
       "datasource": "sbt-plugin",
       "depName": "org.example:waldo",
       "depType": "plugin",
-      "fileReplacePosition": 1013,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
@@ -306,7 +286,6 @@ Object {
       "currentValue": "3.0.0",
       "datasource": "sbt-package",
       "depName": "org.scalatest:scalatest",
-      "fileReplacePosition": 65,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
@@ -316,7 +295,6 @@ Object {
       "datasource": "sbt-plugin",
       "depName": "com.github.gseitz:sbt-release",
       "depType": "plugin",
-      "fileReplacePosition": 100,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],

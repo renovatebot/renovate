@@ -1,8 +1,9 @@
 import * as mavenVersioning from '../../versioning/maven';
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile };
+
+export const autoReplace = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)deps\\.edn$'],

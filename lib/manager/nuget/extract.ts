@@ -42,7 +42,7 @@ async function determineRegistryUrls(
     return undefined;
   }
 
-  const registryUrls = [datasourceNuget.getDefaultFeed()];
+  const registryUrls = datasourceNuget.defaultRegistryUrls;
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
@@ -64,7 +64,7 @@ async function determineRegistryUrls(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig = {}
+  config: ExtractConfig
 ): Promise<PackageFile> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const { isVersion } = get(config.versioning || semverVersioning.id);
@@ -75,7 +75,6 @@ export async function extractPackageFile(
     config.localDir
   );
 
-  let lineNumber = 0;
   for (const line of content.split('\n')) {
     /**
      * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -99,7 +98,6 @@ export async function extractPackageFile(
         depType: 'nuget',
         depName,
         currentValue,
-        managerData: { lineNumber },
         datasource: datasourceNuget.id,
       };
       if (registryUrls) {
@@ -110,7 +108,6 @@ export async function extractPackageFile(
       }
       deps.push(dep);
     }
-    lineNumber += 1;
   }
   return { deps };
 }
