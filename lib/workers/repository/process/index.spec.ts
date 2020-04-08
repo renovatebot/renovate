@@ -1,4 +1,4 @@
-import { processRepo } from './index';
+import { processRepo, updateRepo } from './index';
 import * as _extractUpdate from './extract-update';
 import { getConfig, mocked, RenovateConfig } from '../../../../test/util';
 
@@ -22,6 +22,7 @@ describe('workers/repository/process/index', () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
       const res = await processRepo(config);
+      await updateRepo(config, res.branches, res.branchList, res.packageFiles);
       expect(res).toMatchSnapshot();
     });
   });

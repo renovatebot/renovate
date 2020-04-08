@@ -1,4 +1,4 @@
-import { extract } from './extract-update';
+import { extract, update } from './extract-update';
 import * as _branchify from '../updates/branchify';
 import { mocked } from '../../../../test/util';
 
@@ -22,7 +22,8 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      await extract(config);
+      const res = await extract(config);
+      await update(config, res.branches, res.branchList, res.packageFiles);
     });
   });
 });
