@@ -144,6 +144,9 @@ describe('logger', () => {
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
       npmToken: 'token',
+      buffer: Buffer.from('test'),
+      content: 'test',
+      prBody: 'test',
     });
 
     expect(logged.foo).not.toEqual('secret"password');
@@ -151,5 +154,8 @@ describe('logger', () => {
     expect(logged.foo).toContain('redacted');
     expect(logged.bar[1]).toContain('redacted');
     expect(logged.npmToken).not.toEqual('token');
+    expect(logged.buffer).toEqual('[content]');
+    expect(logged.content).toEqual('[content]');
+    expect(logged.prBody).toEqual('[Template]');
   });
 });
