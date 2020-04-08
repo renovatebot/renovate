@@ -1,3 +1,4 @@
+import * as upath from 'upath';
 import { platform as _platform } from '../lib/platform';
 import { getConfig } from '../lib/config/defaults';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
@@ -8,6 +9,19 @@ import { RenovateConfig as _RenovateConfig } from '../lib/config';
  */
 export function mocked<T>(module: T): jest.Mocked<T> {
   return module as never;
+}
+
+export function mockPartial(
+  moduleName: string,
+  overrides?: unknown
+): typeof jest {
+  const absolutePath = upath.join(module.parent.filename, '../', moduleName);
+  const originalModule = jest.requireActual(absolutePath);
+  return {
+    __esModule: true,
+    ...originalModule,
+    ...(overrides as object),
+  };
 }
 
 /**

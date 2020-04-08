@@ -21,7 +21,7 @@ shell.echo(`Publishing version: ${version}`);
 //   err = true;
 // }
 
-// eslint-disable-next-line promise/valid-params
+// eslint-disable-next-line promise/valid-params,@typescript-eslint/no-floating-promises
 import('./dispatch-release.mjs').catch();
 
 // if (err) {

@@ -48,8 +48,8 @@ describe('platform/azure', () => {
     });
   });
 
-  afterEach(() => {
-    azure.cleanRepo();
+  afterEach(async () => {
+    await azure.cleanRepo();
   });
 
   // do we need the args?
