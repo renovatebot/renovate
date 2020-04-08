@@ -74,7 +74,7 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
-      let curValue = val;
+      let curValue: any;
       if (redactedFields.includes(key)) {
         curValue = '***********';
       } else if (contentFields.includes(key)) {
