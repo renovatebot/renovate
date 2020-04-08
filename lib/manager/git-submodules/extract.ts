@@ -16,15 +16,15 @@ async function getUrl(
   submoduleName: string
 ): Promise<string> {
   const path = (
-    (await Git().raw([
+    await Git().raw([
       'config',
       '--file',
       gitModulesPath,
       '--get',
       `submodule.${submoduleName}.url`,
-    ])) || ''
-  ).trim();
-  if (!path.startsWith('../')) {
+    ])
+  )?.trim();
+  if (!path?.startsWith('../')) {
     return path;
   }
   const remoteUrl = (
@@ -59,7 +59,7 @@ async function getModules(
       gitModulesPath,
       '--get-regexp',
       'path',
-    ])) || /* istanbul ignore next: should never happen */ ''
+    ])) ?? /* istanbul ignore next: should never happen */ ''
   )
     .trim()
     .split(/\n/)
