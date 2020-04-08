@@ -33,7 +33,7 @@ export async function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
   try {
-    logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
+    logger.trace({ config: upgrade }, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');
     let { downloadUrl, checksumUrl } = upgrade;
 
