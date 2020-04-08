@@ -6,7 +6,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export { id } from './common';
 
-export { getDefaultFeed } from './v3';
+export const defaultRegistryUrls = [v3.getDefaultFeed()];
 
 function parseRegistryUrl(
   registryUrl: string
@@ -35,7 +35,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`nuget.getReleases(${lookupName})`);
   let dep: ReleaseResult = null;
-  for (const feed of registryUrls || [v3.getDefaultFeed()]) {
+  for (const feed of registryUrls) {
     const { feedUrl, protocolVersion } = parseRegistryUrl(feed);
     if (protocolVersion === 2) {
       dep = await v2.getReleases(feedUrl, lookupName);

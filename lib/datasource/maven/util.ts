@@ -5,7 +5,14 @@ import { DatasourceError } from '../common';
 
 import { id, MAVEN_REPO } from './common';
 
-const http = new Http(id);
+const http: Record<string, Http> = {};
+
+function httpByHostType(hostType: string): Http {
+  if (!http[hostType]) {
+    http[hostType] = new Http(hostType);
+  }
+  return http[hostType];
+}
 
 const getHost = (x: string): string => new url.URL(x).host;
 
@@ -46,7 +53,8 @@ export async function downloadHttpProtocol(
 ): Promise<string | null> {
   let raw: { body: string };
   try {
-    raw = await http.get(pkgUrl.toString());
+    const httpClient = httpByHostType(hostType);
+    raw = await httpClient.get(pkgUrl.toString());
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
