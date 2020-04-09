@@ -28,10 +28,10 @@ const config = {
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setExecConfig(config);
+    await setExecConfig(config);
 
     datasource.getReleases.mockResolvedValue({
       releases: [
@@ -114,7 +114,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile', async () => {
     const execSnapshots = mockExecAll(exec);
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Old Podfile');
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
@@ -132,7 +132,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Old Podfile');
     platform.getFile.mockResolvedValueOnce('Old Manifest.lock');
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -185,7 +185,7 @@ describe('.updateArtifacts()', () => {
   it('dynamically selects Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    setExecConfig({
+    await setExecConfig({
       ...config,
       binarySource: 'docker',
       dockerUser: 'ubuntu',
@@ -210,7 +210,7 @@ describe('.updateArtifacts()', () => {
   it('falls back to the `latest` Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    setExecConfig({
+    await setExecConfig({
       ...config,
       binarySource: 'docker',
       dockerUser: 'ubuntu',

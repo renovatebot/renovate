@@ -54,8 +54,8 @@ describe('platform/gitlab', () => {
     });
   });
 
-  afterEach(() => {
-    gitlab.cleanRepo();
+  afterEach(async () => {
+    await gitlab.cleanRepo();
   });
 
   describe('initPlatform()', () => {
@@ -164,8 +164,8 @@ describe('platform/gitlab', () => {
     });
   });
   describe('cleanRepo()', () => {
-    it('exists', () => {
-      gitlab.cleanRepo();
+    it('exists', async () => {
+      await gitlab.cleanRepo();
     });
   });
 
