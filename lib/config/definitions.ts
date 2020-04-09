@@ -275,7 +275,7 @@ const options: RenovateOptions[] = [
     description:
       'Enable / disable use of --ignore-platform-reqs in the composer package manager.',
     type: 'boolean',
-    default: false,
+    default: true,
     admin: true,
   },
   // Log options
