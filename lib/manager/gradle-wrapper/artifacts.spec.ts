@@ -55,7 +55,7 @@ describe(getName(__filename), () => {
             ),
             'utf8'
           ),
-          config: { ...config, toVersion: '6.3' },
+          config: { ...config, toVersion: '6.3.0' },
         });
 
         expect(res).toEqual(
