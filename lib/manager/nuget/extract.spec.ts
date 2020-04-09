@@ -24,8 +24,33 @@ describe('lib/manager/nuget/extract', () => {
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res.deps).toMatchSnapshot();
     });
+
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
+      const contents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
+    it('considers lower-case nuget.config', async () => {
+      const packageFile =
+        'with-lower-case-config-file/with-lower-case-config-file.csproj';
+      const contents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
+    it('considers pascal-case NuGet.Config', async () => {
+      const packageFile =
+        'with-pascal-case-config-file/with-pascal-case-config-file.csproj';
       const contents = readFileSync(
         path.join(config.localDir, packageFile),
         'utf8'
