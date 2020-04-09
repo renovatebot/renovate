@@ -26,8 +26,8 @@ async function resetTestFiles() {
 }
 
 describe(getName(__filename), () => {
-  beforeAll(() => {
-    setUtilConfig(config);
+  beforeAll(async () => {
+    await setUtilConfig(config);
   });
   beforeEach(() => {
     jest.resetAllMocks();

@@ -132,7 +132,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Old Podfile');
     platform.getFile.mockResolvedValueOnce('Old Manifest.lock');
     platform.getRepoStatus.mockResolvedValueOnce({
