@@ -283,7 +283,8 @@ jobs:
 
       # full checkout for semantic-release
       - uses: actions/checkout@v2
-        fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Cache Yarn packages
         uses: actions/cache@v1
