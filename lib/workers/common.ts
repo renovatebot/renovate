@@ -8,7 +8,7 @@ import {
   ValidationMessage,
 } from '../config';
 import { LookupUpdate } from './repository/process/lookup/common';
-import { FileData, PlatformPrOptions } from '../platform';
+import { File, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
 
 export interface BranchUpgradeConfig
@@ -44,8 +44,8 @@ export interface BranchUpgradeConfig
   releaseTimestamp?: string;
 
   sourceDirectory?: string;
-  updatedPackageFiles?: FileData[];
-  updatedArtifacts?: FileData[];
+  updatedPackageFiles?: File[];
+  updatedArtifacts?: File[];
 }
 
 export enum PrResult {
