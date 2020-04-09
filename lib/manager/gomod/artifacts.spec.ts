@@ -22,6 +22,11 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const platform = mocked(_platform);
+jest.mock('../../util/exec/docker/index', () =>
+  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+    removeDanglingContainers: jest.fn(),
+  })
+);
 
 const gomod1 = `module github.com/renovate-tests/gomod1
 
@@ -49,13 +54,13 @@ const goEnv = {
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    setUtilConfig(config);
+    await setUtilConfig(config);
     resetPrefetchedImages();
   });
   it('returns if no go.sum found', async () => {
@@ -104,7 +109,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -145,7 +150,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -169,7 +174,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials and appMode enabled', async () => {
-    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });

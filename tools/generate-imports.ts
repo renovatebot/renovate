@@ -57,6 +57,7 @@ async function generate({
   await updateFile(`lib/${path}/api.generated.ts`, code.replace(/^\s+/gm, ''));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
     // datasources
