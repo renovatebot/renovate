@@ -213,7 +213,9 @@ jobs:
         run: yarn install --frozen-lockfile --link-duplicates
 
       - name: Lint
-        run: yarn lint
+        run: |
+          yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
+          yarn prettier
 
       - name: Test schema
         run: yarn test-schema
