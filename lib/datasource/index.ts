@@ -11,7 +11,6 @@ import {
   DigestConfig,
   GetReleasesConfig,
   GetPkgReleasesConfig,
-  DefaultConfig,
 } from './common';
 import datasources from './api.generated';
 
