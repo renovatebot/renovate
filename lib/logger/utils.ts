@@ -44,7 +44,6 @@ const contentFields = [
   'packageLockParsed',
   'yarnLockParsed',
 ];
-// const arrayFields = ['packageFiles', 'upgrades'];
 
 function sanitizeValue(value: any, seen = new WeakMap()): any {
   if (Array.isArray(value)) {
@@ -81,8 +80,6 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
         curValue = '[content]';
       } else if (templateFields.includes(key)) {
         curValue = '[Template]';
-        // } else if (arrayFields.includes(key)) {
-        //   curValue = '[Array]';
       } else {
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
       }
