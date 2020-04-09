@@ -25,7 +25,10 @@ export async function extractAndUpdate(
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
   await raiseDeprecationWarnings(config, packageFiles);
-  const { branches, branchList } = branchifyUpgrades(config, packageFiles);
+  const { branches, branchList } = await branchifyUpgrades(
+    config,
+    packageFiles
+  );
   sortBranches(branches);
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
