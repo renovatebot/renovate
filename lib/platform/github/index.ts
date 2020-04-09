@@ -5,7 +5,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -18,6 +18,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -242,7 +243,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  cleanRepo();
+  await cleanRepo();
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove

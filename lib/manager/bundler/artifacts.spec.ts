@@ -27,11 +27,16 @@ jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
+jest.mock('../../util/exec/docker/index', () =>
+  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+    removeDanglingContainers: jest.fn(),
+  })
+);
 
 let config;
 
 describe('bundler.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
 
@@ -44,7 +49,7 @@ describe('bundler.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     resetPrefetchedImages();
-    setUtilConfig(config);
+    await setUtilConfig(config);
   });
   it('returns null by default', async () => {
     expect(
@@ -114,8 +119,8 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   describe('Docker', () => {
-    beforeEach(() => {
-      setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    beforeEach(async () => {
+      await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
       platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');

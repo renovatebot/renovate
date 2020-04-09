@@ -50,7 +50,7 @@ export function extractPackageFile(
   const regex = new RegExp(`^${dependencyPattern}$`, 'g');
   const deps = content
     .split('\n')
-    .map((rawline, lineNumber) => {
+    .map(rawline => {
       let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
@@ -66,7 +66,6 @@ export function extractPackageFile(
         ...dep,
         depName,
         currentValue,
-        managerData: { lineNumber },
         datasource: datasourcePypi.id,
       };
       if (currentValue && currentValue.startsWith('==')) {

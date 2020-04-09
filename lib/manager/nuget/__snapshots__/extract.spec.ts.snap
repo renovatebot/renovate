@@ -8,9 +8,40 @@ Object {
       "datasource": "nuget",
       "depName": "Autofac",
       "depType": "nuget",
-      "managerData": Object {
-        "lineNumber": 8,
-      },
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json#protocolVersion=3",
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() considers lower-case nuget.config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json#protocolVersion=3",
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() considers pascal-case NuGet.Config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
       "registryUrls": Array [
         "https://api.nuget.org/v3/index.json#protocolVersion=3",
         "https://contoso.com/packages/",
@@ -27,108 +58,72 @@ Array [
     "datasource": "nuget",
     "depName": "Autofac",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 12,
-    },
   },
   Object {
     "currentValue": "4.1.0",
     "datasource": "nuget",
     "depName": "Autofac.Extensions.DependencyInjection",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 13,
-    },
   },
   Object {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Hosting",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 14,
-    },
   },
   Object {
     "currentValue": "1.1.3",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Mvc.Core",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 15,
-    },
   },
   Object {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Server.Kestrel",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 16,
-    },
   },
   Object {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.Extensions.Configuration.Json",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 17,
-    },
   },
   Object {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.Extensions.Logging.Debug",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 18,
-    },
   },
   Object {
     "currentValue": "10.0.2",
     "datasource": "nuget",
     "depName": "Newtonsoft.Json",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 19,
-    },
   },
   Object {
     "currentValue": "2.4.0",
     "datasource": "nuget",
     "depName": "Serilog",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 20,
-    },
   },
   Object {
     "currentValue": "1.4.0",
     "datasource": "nuget",
     "depName": "Serilog.Extensions.Logging",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 21,
-    },
   },
   Object {
     "currentValue": "2.1.0",
     "datasource": "nuget",
     "depName": "Serilog.Sinks.Literate",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 22,
-    },
   },
   Object {
     "currentValue": "3.1.0.5",
     "datasource": "nuget",
     "depName": "Stateless",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 23,
-    },
     "skipReason": "not-a-version",
   },
   Object {
@@ -136,27 +131,18 @@ Array [
     "datasource": "nuget",
     "depName": "Range1",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 24,
-    },
   },
   Object {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range2",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 25,
-    },
   },
   Object {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range3",
     "depType": "nuget",
-    "managerData": Object {
-      "lineNumber": 26,
-    },
   },
 ]
 `;
@@ -169,9 +155,6 @@ Object {
       "datasource": "nuget",
       "depName": "Autofac",
       "depType": "nuget",
-      "managerData": Object {
-        "lineNumber": 8,
-      },
     },
   ],
 }
@@ -185,9 +168,6 @@ Object {
       "datasource": "nuget",
       "depName": "Autofac",
       "depType": "nuget",
-      "managerData": Object {
-        "lineNumber": 8,
-      },
     },
   ],
 }

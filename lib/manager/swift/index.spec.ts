@@ -1,7 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
 const pkgContent = readFileSync(
   resolve(__dirname, `./__fixtures__/SamplePackage.swift`),
@@ -135,77 +134,6 @@ describe('lib/manager/swift', () => {
     });
     it('parses multiple packages', () => {
       expect(extractPackageFile(pkgContent)).toMatchSnapshot();
-    });
-  });
-  describe('updateDependency()', () => {
-    it('updates successfully', () => {
-      [
-        [
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]',
-          '1.2.4',
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.4")]',
-        ],
-        [
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", from: "1.2.3")]',
-          '1.2.4',
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", from: "1.2.4")]',
-        ],
-        [
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..."1.2.4")]',
-          '"1.2.3"..."1.2.5"',
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..."1.2.5")]',
-        ],
-        [
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..<"1.2.4")]',
-          '"1.2.3"..<"1.2.5"',
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..<"1.2.5")]',
-        ],
-        [
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..."1.2.4")]',
-          '..."1.2.5"',
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..."1.2.5")]',
-        ],
-        [
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..<"1.2.4")]',
-          '..<"1.2.5"',
-          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..<"1.2.5")]',
-        ],
-      ].forEach(([content, newValue, result]) => {
-        const { deps } = extractPackageFile(content);
-        const [dep] = deps;
-        const upgrade = { ...dep, newValue };
-        const updated = updateDependency({
-          fileContent: content,
-          upgrade,
-        });
-        expect(updated).toEqual(result);
-      });
-    });
-    it('returns content if already updated', () => {
-      const content =
-        'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]';
-      const currentValue = '1.2.3';
-      const newValue = '1.2.4';
-      const { deps } = extractPackageFile(content);
-      const [dep] = deps;
-      const upgrade = { ...dep, newValue };
-      const replaced = content.replace(currentValue, newValue);
-      const updated = updateDependency({
-        fileContent: replaced,
-        upgrade,
-      });
-      expect(updated).toBe(replaced);
-    });
-    it('returns null if content is different', () => {
-      const content =
-        'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]';
-      const currentValue = '1.2.3';
-      const newValue = '1.2.4';
-      const { deps } = extractPackageFile(content);
-      const [dep] = deps;
-      const upgrade = { ...dep, newValue };
-      const replaced = content.replace(currentValue, '1.2.5');
-      expect(updateDependency({ fileContent: replaced, upgrade })).toBe(null);
     });
   });
 });
