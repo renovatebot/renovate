@@ -1,5 +1,5 @@
 import { LogLevel } from 'bunyan';
-import Range from 'semver/classes/Range';
+import Range from 'semver/classes/range';
 import { HostRule } from '../types';
 
 export type RenovateConfigStage =
