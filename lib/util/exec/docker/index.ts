@@ -142,19 +142,21 @@ export async function removeDockerContainer(image): Promise<void> {
 // istanbul ignore next
 export async function removeDanglingContainers(): Promise<void> {
   try {
-    const res = await rawExec(
-      `docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f`,
-      { encoding: 'utf-8' }
-    );
+    const res = await rawExec(`docker ps --filter label=renovate_child -aq`, {
+      encoding: 'utf-8',
+    });
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
         .split('\n')
         .map(container => container.trim())
         .filter(Boolean);
-      logger.debug({ containerIds }, 'Removed dangling child containers');
+      logger.debug({ containerIds }, 'Removing dangling child containers');
+      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
+        encoding: 'utf-8',
+      });
     } else {
-      logger.trace('No dangling containers to remove');
+      logger.debug('No dangling containers to remove');
     }
   } catch (err) {
     logger.warn({ err }, 'Error removing dangling containers');
