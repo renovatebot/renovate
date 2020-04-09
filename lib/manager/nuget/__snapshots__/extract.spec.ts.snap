@@ -17,6 +17,40 @@ Object {
 }
 `;
 
+exports[`lib/manager/nuget/extract extractPackageFile() considers lower-case nuget.config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json#protocolVersion=3",
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() considers pascal-case NuGet.Config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json#protocolVersion=3",
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() extracts all dependencies 1`] = `
 Array [
   Object {
