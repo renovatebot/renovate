@@ -50,6 +50,7 @@ module.exports = {
     // TODO: fix lint
     '@typescript-eslint/camelcase': 0, // disabled until ??
     '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/no-floating-promises': 2,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,

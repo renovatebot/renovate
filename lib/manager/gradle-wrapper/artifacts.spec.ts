@@ -26,8 +26,8 @@ async function resetTestFiles() {
 }
 
 describe(getName(__filename), () => {
-  beforeAll(() => {
-    setUtilConfig(config);
+  beforeAll(async () => {
+    await setUtilConfig(config);
   });
   beforeEach(() => {
     jest.resetAllMocks();
@@ -55,7 +55,7 @@ describe(getName(__filename), () => {
             ),
             'utf8'
           ),
-          config: { ...config, toVersion: '6.3' },
+          config: { ...config, toVersion: '6.3.0' },
         });
 
         expect(res).toEqual(

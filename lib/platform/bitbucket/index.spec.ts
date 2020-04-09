@@ -48,8 +48,8 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  afterEach(() => {
-    bitbucket.cleanRepo();
+  afterEach(async () => {
+    await bitbucket.cleanRepo();
   });
 
   async function mockedGet(path: string) {
