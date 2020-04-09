@@ -135,9 +135,5 @@ describe('config/cli', () => {
         Error("Invalid JSON value: 'Hello_World'")
       );
     });
-
-    it('fails', () => {
-      Promise.resolve();
-    });
   });
 });
