@@ -15,6 +15,7 @@ Array [
     "managerData": Object {
       "lineNumber": 12,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -29,6 +30,7 @@ Array [
     "managerData": Object {
       "lineNumber": 57,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -43,6 +45,7 @@ Array [
     "managerData": Object {
       "lineNumber": 61,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -57,6 +60,7 @@ Array [
     "managerData": Object {
       "lineNumber": 65,
     },
+    "versioning": "docker",
   },
 ]
 `;
@@ -114,6 +118,7 @@ Array [
     "managerData": Object {
       "lineNumber": 20,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -127,6 +132,7 @@ Array [
     "managerData": Object {
       "lineNumber": 27,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -140,6 +146,7 @@ Array [
     "managerData": Object {
       "lineNumber": 34,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -153,6 +160,7 @@ Array [
     "managerData": Object {
       "lineNumber": 41,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -166,6 +174,7 @@ Array [
     "managerData": Object {
       "lineNumber": 50,
     },
+    "versioning": "docker",
   },
   Object {
     "autoReplaceData": Object {
@@ -179,6 +188,7 @@ Array [
     "managerData": Object {
       "lineNumber": 57,
     },
+    "versioning": "docker",
   },
 ]
 `;

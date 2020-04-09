@@ -6,7 +6,7 @@ import {
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -20,6 +20,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';

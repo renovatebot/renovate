@@ -1,5 +1,5 @@
 import URL from 'url';
-import GitStorage, { CommitFilesConfig, StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import * as hostRules from '../../util/host-rules';
 import {
   BranchStatusConfig,
@@ -14,6 +14,7 @@ import {
   RepoConfig,
   RepoParams,
   VulnerabilityAlert,
+  CommitFilesConfig,
 } from '../common';
 import { api } from './gitea-got-wrapper';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';

@@ -30,12 +30,12 @@ export type BranchifiedConfig = Merge<
     branchList: string[];
   }
 >;
-export function branchifyUpgrades(
+export async function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-): BranchifiedConfig {
+): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
-  const updates = flattenUpdates(config, packageFiles);
+  const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map(u => u.depName)
