@@ -70,6 +70,7 @@ export interface Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[];
   appendRegistryUrls?: string[];
+  defaultConfig?: object;
 }
 
 export class DatasourceError extends Error {

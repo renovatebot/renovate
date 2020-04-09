@@ -75,7 +75,6 @@ async function fetchDepUpdates(
       currentValue,
       updates: dep.updates,
     });
-    logger.debug({ packageFile, depName }, 'fetchDepUpdates finished');
   }
   /* eslint-enable no-param-reassign */
 }
