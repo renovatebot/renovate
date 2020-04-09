@@ -3,6 +3,7 @@ import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
 import { regEx, escapeRegExp } from '../../util/regex';
+import { compile } from '../../util/template';
 
 export async function confirmIfDepUpdated(
   upgrade,
@@ -84,6 +85,7 @@ export async function doAutoReplace(
     currentDigest,
     newDigest,
     autoReplaceData,
+    autoReplaceNewString,
   } = upgrade;
   const replaceString = autoReplaceData?.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
@@ -96,15 +98,23 @@ export async function doAutoReplace(
     throw new Error(WORKER_FILE_UPDATE_FAILED);
   }
   try {
-    let newString = replaceString.replace(
-      regEx(escapeRegExp(currentValue), 'g'),
-      newValue
-    );
-    if (currentDigest && newDigest) {
-      newString = newString.replace(
-        regEx(escapeRegExp(currentDigest), 'g'),
-        newDigest
-      );
+    let newString: string;
+    if (autoReplaceNewString) {
+      newString = compile(autoReplaceNewString, upgrade, false);
+    } else {
+      newString = replaceString;
+      if (currentValue) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentValue), 'g'),
+          newValue
+        );
+      }
+      if (currentDigest && newDigest) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentDigest), 'g'),
+          newDigest
+        );
+      }
     }
     logger.debug(`Starting search at index ${searchIndex}`);
     // Iterate through the rest of the file

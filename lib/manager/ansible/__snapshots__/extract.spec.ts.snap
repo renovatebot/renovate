@@ -3,6 +3,9 @@
 exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
 Array [
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "busybox",
+    },
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -13,6 +16,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "redis",
+    },
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -23,6 +29,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "someuser/appimage",
+    },
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -33,6 +42,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "ubuntu:14.04",
+    },
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
@@ -43,6 +55,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "someuser/anotherappimage",
+    },
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -53,6 +68,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "busybox",
+    },
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -63,6 +81,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "postgres:latest",
+    },
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
@@ -73,6 +94,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "ubuntu:14.04",
+    },
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
@@ -83,6 +107,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "ubuntu:14.04",
+    },
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
@@ -98,6 +125,9 @@ Array [
 exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
 Array [
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "sameersbn/gitlab:11.5.1",
+    },
     "currentDigest": undefined,
     "currentValue": "11.5.1",
     "datasource": "docker",
@@ -108,6 +138,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "sameersbn/postgresql:10",
+    },
     "currentDigest": undefined,
     "currentValue": "10",
     "datasource": "docker",
@@ -118,6 +151,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "sameersbn/redis:4.0.9-1",
+    },
     "currentDigest": undefined,
     "currentValue": "4.0.9-1",
     "datasource": "docker",
@@ -128,6 +164,9 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "registry:2.6.2",
+    },
     "currentDigest": undefined,
     "currentValue": "2.6.2",
     "datasource": "docker",

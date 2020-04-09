@@ -3,6 +3,9 @@
 exports[`lib/manager/kubernetes/extract extractPackageFile() extracts image line in a YAML array 1`] = `
 Array [
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
+    },
     "currentDigest": undefined,
     "currentValue": "v2.1.0",
     "datasource": "docker",
@@ -17,6 +20,9 @@ Array [
 exports[`lib/manager/kubernetes/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "nginx:1.7.9",
+    },
     "currentDigest": undefined,
     "currentValue": "1.7.9",
     "datasource": "docker",
@@ -26,6 +32,9 @@ Array [
     },
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "k8s.gcr.io/kube-proxy-amd64:v1.11.1",
+    },
     "currentDigest": undefined,
     "currentValue": "v1.11.1",
     "datasource": "docker",

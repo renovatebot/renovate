@@ -32,6 +32,9 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(currentFrom: string): PackageDependency {
   const dep = splitImageParts(currentFrom);
+  dep.autoReplaceData = {
+    replaceString: currentFrom,
+  };
   dep.datasource = datasourceDocker.id;
   if (
     dep.depName &&

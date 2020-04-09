@@ -16,6 +16,7 @@ import {
   PackageUpdateResult,
 } from '../../../manager/common';
 import { SkipReason } from '../../../types';
+import { getDefaultConfig } from '../../../datasource';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
@@ -30,6 +31,8 @@ async function fetchDepUpdates(
   const { depName, currentValue } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
+  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
+  Object.assign(dep, datasourceDefaultConfig);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
@@ -75,7 +78,6 @@ async function fetchDepUpdates(
       currentValue,
       updates: dep.updates,
     });
-    logger.debug({ packageFile, depName }, 'fetchDepUpdates finished');
   }
   /* eslint-enable no-param-reassign */
 }

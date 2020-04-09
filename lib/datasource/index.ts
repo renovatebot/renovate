@@ -11,6 +11,7 @@ import {
   DigestConfig,
   GetReleasesConfig,
   GetPkgReleasesConfig,
+  DefaultConfig,
 } from './common';
 import datasources from './api.generated';
 
@@ -128,4 +129,11 @@ export async function getDigest(
     { lookupName, registryUrls },
     value
   );
+}
+
+export async function getDefaultConfig(
+  datasource: string
+): Promise<DefaultConfig> {
+  const loadedDatasource = await load(datasource);
+  return loadedDatasource?.defaultConfig || {};
 }

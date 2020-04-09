@@ -107,5 +107,26 @@ describe('workers/branch/auto-replace', () => {
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();
     });
+    it('updates with autoReplaceNewString', async () => {
+      const dockerfile =
+        'FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'node';
+      upgrade.lookupName = 'node';
+      upgrade.currentValue = '8.11.3-alpine';
+      upgrade.newValue = '8.11.4-alpine';
+      upgrade.currentDigest =
+        'sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d';
+      upgrade.newDigest = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      upgrade.autoReplaceData = {
+        depIndex: 0,
+        replaceString:
+          'node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d',
+      };
+      upgrade.autoReplaceNewString =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+      const res = await doAutoReplace(upgrade, dockerfile, parentBranch);
+      expect(res).toMatchSnapshot();
+    });
   });
 });

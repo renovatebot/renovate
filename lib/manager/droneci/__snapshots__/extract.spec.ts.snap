@@ -3,6 +3,9 @@
 exports[`lib/manager/droneci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "elixir:1.8.1-alpine",
+    },
     "currentDigest": undefined,
     "currentValue": "1.8.1-alpine",
     "datasource": "docker",
@@ -13,6 +16,9 @@ Array [
     },
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
+    },
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
@@ -24,6 +30,9 @@ Array [
     },
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "mysql:5.7.24",
+    },
     "currentDigest": undefined,
     "currentValue": "5.7.24",
     "datasource": "docker",
@@ -34,6 +43,9 @@ Array [
     },
   },
   Object {
+    "autoReplaceData": Object {
+      "replaceString": "redis:alpine",
+    },
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
