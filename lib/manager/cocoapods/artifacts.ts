@@ -1,3 +1,4 @@
+import { join, dirname } from 'upath';
 import { platform } from '../../platform';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
@@ -78,7 +79,7 @@ export async function updateArtifacts({
   }
   logger.debug(`Returning updated lockfile: ${lockFileName}`);
   const lockFileContent = await readLocalFile(lockFileName);
-  return [
+  const res: UpdateArtifactsResult[] = [
     {
       file: {
         name: lockFileName,
@@ -86,4 +87,29 @@ export async function updateArtifacts({
       },
     },
   ];
+
+  const podsDir = join(dirname(packageFileName), 'Pods');
+  const podsManifestFileName = join(podsDir, 'Manifest.lock');
+  if (await platform.getFile(podsManifestFileName)) {
+    for (const f of status.modified.concat(status.not_added)) {
+      if (f.startsWith(podsDir)) {
+        res.push({
+          file: {
+            name: f,
+            contents: await readLocalFile(f),
+          },
+        });
+      }
+    }
+    for (const f of status.deleted || []) {
+      res.push({
+        file: {
+          name: '|delete|',
+          contents: f,
+        },
+      });
+    }
+  }
+
+  return res;
 }

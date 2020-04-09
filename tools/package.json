@@ -12,6 +12,6 @@
     "got": "9.6.0",
     "lodash": "4.17.15",
     "shelljs": "0.8.3",
-    "strip-ansi": "5.2.0"
+    "strip-ansi": "6.0.0"
   }
 }

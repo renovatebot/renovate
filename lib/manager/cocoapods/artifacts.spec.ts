@@ -130,6 +130,27 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('returns updated Podfile and Pods files', async () => {
+    const execSnapshots = mockExecAll(exec);
+    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    platform.getFile.mockResolvedValueOnce('Old Podfile');
+    platform.getFile.mockResolvedValueOnce('Old Manifest.lock');
+    platform.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['Pods/New'],
+      modified: ['Podfile.lock', 'Pods/Manifest.lock'],
+      deleted: ['Pods/Deleted'],
+    } as Git.StatusResult);
+    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Podfile',
+        updatedDeps: ['foo'],
+        newPackageFileContent: '',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('catches write error', async () => {
     const execSnapshots = mockExecAll(exec);
     platform.getFile.mockResolvedValueOnce('Current Podfile');
