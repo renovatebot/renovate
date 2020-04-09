@@ -65,6 +65,7 @@ export interface RenovateAdminConfig {
   baseDir?: string;
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
+  composerIgnorePlatformReqs?: boolean;
   dryRun?: boolean;
 
   global?: GlobalConfig;
