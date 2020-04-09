@@ -36,6 +36,9 @@ COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build:docker
 
+# compabillity file
+RUN echo "require('./index.js');" > dist/renovate.js
+
 # Final-base image
 #============
 FROM base as final-base
@@ -209,8 +212,6 @@ COPY --from=tsbuild /usr/src/app/dist dist
 COPY bin bin
 COPY data data
 
-# compabillity file
-RUN echo "require('./index.js');" > dist/renovate.js
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
 USER 1000
