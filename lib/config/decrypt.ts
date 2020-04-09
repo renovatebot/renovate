@@ -73,7 +73,10 @@ export function decryptConfig(
               }
             } else {
               decryptedConfig[eKey] = decryptedStr;
-              add(decryptedStr);
+              // npmrc will be handled by setNpmrc
+              if (eKey !== 'npmrc') {
+                add(decryptedStr);
+              }
             }
           } catch (err) {
             const error = new Error('config-validation');
