@@ -37,7 +37,9 @@ export async function updateArtifacts({
       gradlew,
       projectDir,
       await fs.stat(gradlewPath).catch(() => null),
-      `wrapper --gradle-version ${config.toVersion}`
+      `wrapper --gradle-version ${config.toVersion.substring(
+        config.toVersion.lastIndexOf('.0')
+      )}`
     );
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
