@@ -357,6 +357,7 @@ export async function lookupUpdates(
   } else if (!currentValue) {
     res.skipReason = SkipReason.UnsupportedValue;
   } else {
+    debugger;
     logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
     if (!config.pinDigests && !config.currentDigest) {
       res.skipReason = SkipReason.UnsupportedValue;

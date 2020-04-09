@@ -129,3 +129,8 @@ export async function getDigest(
     value
   );
 }
+
+export async function getDefaultConfig(datasource: string): Promise<object> {
+  const loadedDatasource = await load(datasource);
+  return loadedDatasource?.defaultConfig || {};
+}

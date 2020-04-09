@@ -13,7 +13,7 @@ beforeEach(() => {
 
 describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
-    it('flattens', () => {
+    it('flattens', async () => {
       config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
@@ -72,7 +72,7 @@ describe('workers/repository/updates/flatten', () => {
           },
         ],
       };
-      const res = flattenUpdates(config, packageFiles);
+      const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(9);
       expect(
         res.filter(r => r.updateType === 'lockFileMaintenance')
