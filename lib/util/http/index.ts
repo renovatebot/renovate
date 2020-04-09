@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is/dist';
 import URL from 'url';
 import got from '../got';
 
@@ -7,6 +6,7 @@ interface OutgoingHttpHeaders {
 }
 
 export interface HttpOptions {
+  body?: any;
   auth?: string;
   baseUrl?: string;
   headers?: OutgoingHttpHeaders;
@@ -20,7 +20,7 @@ export interface HttpPostOptions extends HttpOptions {
 
 interface InternalHttpOptions extends HttpOptions {
   json?: boolean;
-  method?: 'get' | 'post';
+  method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
 export interface HttpResponse<T = string> {
@@ -31,10 +31,10 @@ export interface HttpResponse<T = string> {
 export class Http {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
-  private async request(
+  private async request<T>(
     url: string | URL,
     options?: InternalHttpOptions
-  ): Promise<HttpResponse | null> {
+  ): Promise<HttpResponse<T> | null> {
     let resolvedUrl = url.toString();
     if (options?.baseUrl) {
       resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
@@ -71,25 +71,58 @@ export class Http {
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
-    return this.request(url, options);
+    return this.request<string>(url, options);
+  }
+
+  private async requestJson<T = unknown>(
+    url: string,
+    options: InternalHttpOptions
+  ): Promise<HttpResponse<T>> {
+    const res = await this.request<T>(url, { ...options, json: true });
+    const body = res.body;
+    return { ...res, body };
   }
 
   async getJson<T = unknown>(
     url: string,
     options: HttpOptions = {}
   ): Promise<HttpResponse<T>> {
-    const res = await this.request(url, options);
-    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
-    return { ...res, body };
+    return this.requestJson<T>(url, options);
   }
 
   async postJson<T = unknown>(
     url: string,
     options: HttpPostOptions
   ): Promise<HttpResponse<T>> {
-    const res = await this.request(url, { ...options, method: 'post' });
-    const body = is.string(res.body) ? JSON.parse(res.body) : res.body;
-    return { ...res, body };
+    return this.requestJson<T>(url, { ...options, method: 'post' });
+  }
+
+  async putJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'put' });
+  }
+
+  async patchJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'patch' });
+  }
+
+  async deleteJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'delete' });
+  }
+
+  async headJson<T = unknown>(
+    url: string,
+    options: HttpPostOptions
+  ): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, { ...options, method: 'head' });
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {

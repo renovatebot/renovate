@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   exec as _cpExec,
   ExecOptions as ChildProcessExecOptions,

@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`util/http/index deleteJson 1`] = `
+Object {
+  "body": Object {},
+  "headers": Object {
+    "content-type": "application/json",
+  },
+}
+`;
+
+exports[`util/http/index get 1`] = `
+Object {
+  "body": "",
+  "headers": Object {},
+}
+`;
+
+exports[`util/http/index getJson 1`] = `
+Object {
+  "body": Object {
+    "test": true,
+  },
+  "headers": Object {},
+}
+`;
+
+exports[`util/http/index headJson 1`] = `
+Object {
+  "body": Object {},
+  "headers": Object {
+    "content-type": "application/json",
+  },
+}
+`;
+
+exports[`util/http/index patchJson 1`] = `
+Object {
+  "body": Object {},
+  "headers": Object {
+    "content-type": "application/json",
+  },
+}
+`;
+
+exports[`util/http/index postJson 1`] = `
+Object {
+  "body": Object {},
+  "headers": Object {
+    "content-type": "application/json",
+  },
+}
+`;
+
+exports[`util/http/index putJson 1`] = `
+Object {
+  "body": Object {},
+  "headers": Object {
+    "content-type": "application/json",
+  },
+}
+`;

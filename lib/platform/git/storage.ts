@@ -12,27 +12,13 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
 } from '../../constants/error-messages';
+import { CommitFilesConfig } from '../common';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
 }
 
 export type StatusResult = Git.StatusResult;
-
-/**
- * File to commit to branch
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-}
 
 interface StorageConfig {
   localDir: string;
@@ -48,13 +34,6 @@ interface LocalConfig extends StorageConfig {
   branchExists: Record<string, boolean>;
   branchPrefix: string;
 }
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  parentBranch?: string;
-};
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {

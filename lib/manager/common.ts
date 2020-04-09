@@ -1,6 +1,7 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy, SkipReason } from '../types';
 import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
+import { File } from '../platform/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -40,6 +41,8 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   cacheDir?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
+
+  toVersion?: string;
 }
 
 export interface PackageUpdateConfig {
@@ -145,12 +148,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
-  source?: string;
   sourceLine?: number;
   toVersion?: string;
   updates?: PackageUpdateResult[];
@@ -189,7 +190,7 @@ export interface ArtifactError {
 
 export interface UpdateArtifactsResult {
   artifactError?: ArtifactError;
-  file?: { name: string; contents: string };
+  file?: File;
 }
 
 export interface UpdateArtifact {

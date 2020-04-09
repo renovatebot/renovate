@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import fs from 'fs-extra';
 import * as upath from 'upath';
 import { exec as _exec } from 'child_process';

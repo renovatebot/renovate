@@ -3,12 +3,14 @@ import { resolve } from 'path';
 import Git from 'simple-git/promise';
 import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
-import { mocked } from '../../../test/util';
+import { mocked, getName } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import { setUtilConfig } from '../../util';
 
 const platform = mocked(_platform);
 const config = {
   localDir: resolve(__dirname, './__fixtures__/testFiles'),
+  toVersion: '5.6.4',
 };
 
 jest.mock('../../util/got');
@@ -23,14 +25,14 @@ async function resetTestFiles() {
   });
 }
 
-describe('manager/gradle-wrapper/update', () => {
+describe(getName(__filename), () => {
+  beforeAll(async () => {
+    await setUtilConfig(config);
+  });
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   describe('updateArtifacts - replaces existing value', () => {
-    beforeEach(() => {
-      jest.resetModules();
-      jest.resetAllMocks();
-      jest.clearAllMocks();
-    });
-
     ifSystemSupportsGradle(6).it('replaces existing value', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
@@ -40,9 +42,7 @@ describe('manager/gradle-wrapper/update', () => {
             'gradle/wrapper/gradle-wrapper.jar',
             'gradlew',
             'gradlew.bat',
-          ].map(filename =>
-            resolve(__dirname, `./__fixtures__/testFiles/${filename}`)
-          ),
+          ],
         } as Git.StatusResult);
 
         const res = await dcUpdate.updateArtifacts({
@@ -55,7 +55,7 @@ describe('manager/gradle-wrapper/update', () => {
             ),
             'utf8'
           ),
-          config,
+          config: { ...config, toVersion: '6.3.0' },
         });
 
         expect(res).toEqual(
@@ -64,19 +64,19 @@ describe('manager/gradle-wrapper/update', () => {
             'gradle/wrapper/gradle-wrapper.jar',
             'gradlew',
             'gradlew.bat',
-          ]
-            .map(filename =>
-              resolve(__dirname, `./__fixtures__/testFiles/${filename}`)
-            )
-            .map(filePath => {
-              return {
-                artifactError: null,
-                file: {
-                  name: filePath,
-                  contents: readFileSync(filePath, 'utf8'),
-                },
-              };
-            })
+          ].map(fileProjectPath => {
+            return {
+              file: {
+                name: fileProjectPath,
+                contents: readFileSync(
+                  resolve(
+                    __dirname,
+                    `./__fixtures__/testFiles/${fileProjectPath}`
+                  )
+                ),
+              },
+            };
+          })
         );
 
         [
@@ -86,14 +86,10 @@ describe('manager/gradle-wrapper/update', () => {
           'gradlew.bat',
         ].forEach(file => {
           expect(
-            readFileSync(
-              resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-              'utf8'
-            )
+            readFileSync(resolve(__dirname, `./__fixtures__/testFiles/${file}`))
           ).toEqual(
             readFileSync(
-              resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
-              'utf8'
+              resolve(__dirname, `./__fixtures__/expectedFiles/${file}`)
             )
           );
         });
@@ -103,12 +99,6 @@ describe('manager/gradle-wrapper/update', () => {
     });
   });
   describe('updateArtifacts - up to date', () => {
-    beforeEach(() => {
-      jest.resetModules();
-      jest.resetAllMocks();
-      jest.clearAllMocks();
-    });
-
     ifSystemSupportsGradle(6).it('up to date', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
@@ -153,12 +143,6 @@ describe('manager/gradle-wrapper/update', () => {
     });
   });
   describe('updateArtifacts - error handling - getRepoStatus', () => {
-    beforeEach(() => {
-      jest.resetModules();
-      jest.resetAllMocks();
-      jest.clearAllMocks();
-    });
-
     ifSystemSupportsGradle(6).it('error handling - getRepoStatus', async () => {
       try {
         jest.setTimeout(5 * 60 * 1000);
@@ -206,12 +190,6 @@ describe('manager/gradle-wrapper/update', () => {
   });
 
   describe('updateArtifacts - error handling - command execution', () => {
-    beforeEach(() => {
-      jest.resetModules();
-      jest.resetAllMocks();
-      jest.clearAllMocks();
-    });
-
     ifSystemSupportsGradle(6).it(
       'error handling - command execution',
       async () => {

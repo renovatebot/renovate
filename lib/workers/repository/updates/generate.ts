@@ -1,10 +1,10 @@
-import * as handlebars from 'handlebars';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import mdTable from 'markdown-table';
 import { logger } from '../../../logger';
 import { mergeChildConfig } from '../../../config';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import * as template from '../../../util/template';
 
 function ifTypesGroup(
   depNames: string[],
@@ -81,7 +81,7 @@ export function generateBranchConfig(
       toVersions.push(upg.toVersion);
     }
     if (upg.commitMessageExtra) {
-      const extra = handlebars.compile(upg.commitMessageExtra)(upg);
+      const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
         newValue.push(extra);
       }
@@ -142,12 +142,6 @@ export function generateBranchConfig(
     ) {
       logger.debug({ config: upgrade }, 'empty displayFrom/displayTo');
     }
-    if (upgrade.depName) {
-      upgrade.depNameEscaped = (upgrade.lookupName || upgrade.depName).replace(
-        /\//g,
-        '%2f'
-      );
-    }
     upgrade.prettyDepType =
       upgrade.prettyDepType || upgrade.depType || 'dependency';
     if (useGroupSettings) {
@@ -191,12 +185,13 @@ export function generateBranchConfig(
     }
     // Use templates to generate strings
     logger.trace('Compiling branchName: ' + upgrade.branchName);
-    upgrade.branchName = handlebars.compile(upgrade.branchName)(upgrade);
+    upgrade.branchName = template.compile(upgrade.branchName, upgrade);
     if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
-        semanticPrefix += `(${handlebars.compile(upgrade.semanticCommitScope)(
+        semanticPrefix += `(${template.compile(
+          upgrade.semanticCommitScope,
           upgrade
         )})`;
       }
@@ -208,11 +203,12 @@ export function generateBranchConfig(
         !upgrade.semanticCommitType.startsWith(':');
     }
     // Compile a few times in case there are nested templates
-    upgrade.commitMessage = handlebars.compile(upgrade.commitMessage || '')(
+    upgrade.commitMessage = template.compile(
+      upgrade.commitMessage || '',
       upgrade
     );
-    upgrade.commitMessage = handlebars.compile(upgrade.commitMessage)(upgrade);
-    upgrade.commitMessage = handlebars.compile(upgrade.commitMessage)(upgrade);
+    upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+    upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
     upgrade.commitMessage = upgrade.commitMessage.replace(/\s+/g, ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
@@ -226,16 +222,17 @@ export function generateBranchConfig(
       upgrade.commitMessage = splitMessage.join('\n');
     }
     if (upgrade.commitBody) {
-      upgrade.commitMessage = `${upgrade.commitMessage}\n\n${handlebars.compile(
-        upgrade.commitBody
-      )(upgrade)}`;
+      upgrade.commitMessage = `${upgrade.commitMessage}\n\n${template.compile(
+        upgrade.commitBody,
+        upgrade
+      )}`;
     }
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
     if (upgrade.prTitle) {
-      upgrade.prTitle = handlebars.compile(upgrade.prTitle)(upgrade);
-      upgrade.prTitle = handlebars.compile(upgrade.prTitle)(upgrade);
-      upgrade.prTitle = handlebars
-        .compile(upgrade.prTitle)(upgrade)
+      upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+      upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+      upgrade.prTitle = template
+        .compile(upgrade.prTitle, upgrade)
         .trim()
         .replace(/\s+/g, ' ');
       if (upgrade.toLowerCase) {
@@ -256,8 +253,8 @@ export function generateBranchConfig(
           : '';
       upgrade.prTitle += upgrade.updateType === 'patch' ? ' (patch)' : '';
     }
-    // Compile again to allow for nested handlebars templates
-    upgrade.prTitle = handlebars.compile(upgrade.prTitle)(upgrade);
+    // Compile again to allow for nested templates
+    upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
     config.upgrades.push(upgrade);
     if (upgrade.releaseTimestamp) {

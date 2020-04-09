@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { addMetaData } from './metadata';
 import * as allVersioning from '../versioning';
@@ -11,7 +12,6 @@ import {
   GetReleasesConfig,
   GetPkgReleasesConfig,
 } from './common';
-import * as semverVersioning from '../versioning/semver';
 import datasources from './api.generated';
 
 export * from './common';
@@ -28,16 +28,31 @@ function load(datasource: string): Promise<Datasource> {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
+function resolveRegistryUrls(
+  datasource: Datasource,
+  extractedUrls: string[]
+): string[] {
+  const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
+  return is.nonEmptyArray(extractedUrls)
+    ? [...extractedUrls, ...appendRegistryUrls]
+    : [...defaultRegistryUrls, ...appendRegistryUrls];
+}
+
 async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
-  const { datasource } = config;
-  if (!datasources.has(datasource)) {
-    logger.warn('Unknown datasource: ' + datasource);
+  const { datasource: datasourceName } = config;
+  if (!datasourceName || !datasources.has(datasourceName)) {
+    logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
-  const dep = await (await load(datasource)).getReleases(config);
-  addMetaData(dep, datasource, config.lookupName);
+  const datasource = await load(datasourceName);
+  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
+  const dep = await datasource.getReleases({
+    ...config,
+    registryUrls,
+  });
+  addMetaData(dep, datasourceName, config.lookupName);
   return dep;
 }
 
@@ -85,10 +100,8 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
-  const versioning =
-    config && config.versioning ? config.versioning : semverVersioning.id;
   // Filter by versioning
-  const version = allVersioning.get(versioning);
+  const version = allVersioning.get(config.versioning);
   // Return a sorted list of valid Versions
   function sortReleases(release1: Release, release2: Release): number {
     return version.sortVersions(release1.version, release2.version);

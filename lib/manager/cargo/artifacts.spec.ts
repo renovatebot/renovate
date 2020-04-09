@@ -18,6 +18,11 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const platform = mocked(_platform);
+jest.mock('../../util/exec/docker/index', () =>
+  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+    removeDanglingContainers: jest.fn(),
+  })
+);
 
 const config = {
   // `join` fixes Windows CI
@@ -26,12 +31,12 @@ const config = {
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setExecConfig(config);
+    await setExecConfig(config);
     resetPrefetchedImages();
   });
   it('returns null if no Cargo.lock found', async () => {
@@ -86,7 +91,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Cargo.lock with docker', async () => {
-    setExecConfig({ ...config, binarySource: BinarySource.Docker });
+    await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);

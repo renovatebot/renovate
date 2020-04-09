@@ -206,3 +206,66 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() returns updated Podfile and Pods files 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New Podfile",
+      "name": "Podfile.lock",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": undefined,
+      "name": "Pods/Manifest.lock",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": undefined,
+      "name": "Pods/New",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "Pods/Deleted",
+      "name": "|delete|",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() returns updated Podfile and Pods files 2`] = `
+Array [
+  Object {
+    "cmd": "docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;

@@ -1,42 +1,26 @@
-import fs from 'fs';
 import { logger } from '../logger';
 import {
   VersioningApi,
-  VersioningApiConstructor,
   isVersioningApiConstructor,
+  VersioningApiConstructor,
 } from './common';
+import versionings from './api.generated';
 
 export * from './common';
 
-const allVersioning: Record<
+export const getVersioningList = (): string[] => Array.from(versionings.keys());
+/**
+ * Get versioning map. Can be used to dynamically add new versionig type
+ */
+export const getVersionings = (): Map<
   string,
   VersioningApi | VersioningApiConstructor
-> = {};
-
-const versioningList: string[] = [];
-
-export const getVersioningList = (): string[] => versioningList;
-
-const versionings = fs
-  .readdirSync(__dirname, { withFileTypes: true })
-  .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
-  .map(dirent => dirent.name)
-  .sort();
-
-for (const versioning of versionings) {
-  try {
-    allVersioning[versioning] = require('./' + versioning).api; // eslint-disable-line
-    versioningList.push(versioning);
-  } catch (err) /* istanbul ignore next */ {
-    logger.fatal({ err }, `Can not load versioning "${versioning}".`);
-    process.exit(1);
-  }
-}
+> => versionings;
 
 export function get(versioning: string): VersioningApi {
   if (!versioning) {
     logger.debug('Missing versioning');
-    return allVersioning.semver as VersioningApi;
+    return versionings.get('semver') as VersioningApi;
   }
   let versioningName: string;
   let versioningConfig: string;
@@ -48,12 +32,11 @@ export function get(versioning: string): VersioningApi {
   } else {
     versioningName = versioning;
   }
-  const theVersioning = allVersioning[versioningName];
+  const theVersioning = versionings.get(versioningName);
   if (!theVersioning) {
     logger.warn({ versioning }, 'Unknown versioning');
-    return allVersioning.semver as VersioningApi;
+    return versionings.get('semver') as VersioningApi;
   }
-  // istanbul ignore if: needs an implementation
   if (isVersioningApiConstructor(theVersioning)) {
     // eslint-disable-next-line new-cap
     return new theVersioning(versioningConfig);
