@@ -211,8 +211,6 @@ export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
-  autoReplaceValue?(upgrade: any): string;
-
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[]
