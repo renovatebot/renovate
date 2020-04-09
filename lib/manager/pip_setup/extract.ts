@@ -1,4 +1,3 @@
-import { join } from 'upath';
 import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
@@ -7,6 +6,7 @@ import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
 import { BinarySource } from '../../util/exec/common';
 import { SkipReason } from '../../types';
+import { resolveFile } from '../../util';
 
 export const pythonVersions = ['python', 'python3', 'python3.8'];
 let pythonAlias: string | null = null;
@@ -51,7 +51,8 @@ export async function extractSetupFile(
 ): Promise<PythonSetup> {
   const cwd = config.localDir;
   let cmd: string;
-  const args = [`"${join(__dirname, 'extract.py')}"`, `"${packageFile}"`];
+  const file = await resolveFile('data/extract.py');
+  const args = [`"${file}"`, `"${packageFile}"`];
   if (config.binarySource === BinarySource.Docker) {
     logger.debug('Running python via docker');
     await exec(`docker pull renovate/pip`);
