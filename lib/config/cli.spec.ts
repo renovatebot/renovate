@@ -137,7 +137,7 @@ describe('config/cli', () => {
     });
 
     it('fails', () => {
-      fail('test');
+      Promise.resolve();
     });
   });
 });
