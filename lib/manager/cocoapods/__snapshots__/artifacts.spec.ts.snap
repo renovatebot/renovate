@@ -28,7 +28,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -68,7 +68,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -182,7 +182,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -245,7 +245,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_cocoapods -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_cocoapods -aq",
     "options": Object {
       "encoding": "utf-8",
     },

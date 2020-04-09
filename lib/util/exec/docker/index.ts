@@ -114,23 +114,28 @@ function getContainerName(image: string): string {
 
 export async function removeDockerContainer(image): Promise<void> {
   const containerName = getContainerName(image);
+  let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(
-      `docker ps --filter name=${containerName} -aq | xargs --no-run-if-empty docker rm -f`,
-      { encoding: 'utf-8' }
-    );
-    if (res?.stdout?.trim().length) {
-      const containerId = res.stdout.trim();
-      logger.info(
-        { image, containerName, containerId },
-        'Finished Docker container removal'
-      );
+    const res = await rawExec(cmd, {
+      encoding: 'utf-8',
+    });
+    const containerId = res?.stdout?.trim() || '';
+    // istanbul ignore if
+    if (containerId.length) {
+      logger.debug({ containerId }, 'Removing container');
+      cmd = `docker rm -f ${containerId}`;
+      await rawExec(cmd, {
+        encoding: 'utf-8',
+      });
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
   } catch (err) /* istanbul ignore next */ {
     logger.trace({ err }, 'removeDockerContainer err');
-    logger.info({ image, containerName }, 'Could not remove Docker container');
+    logger.info(
+      { image, containerName, cmd },
+      'Could not remove Docker container'
+    );
   }
 }
 
