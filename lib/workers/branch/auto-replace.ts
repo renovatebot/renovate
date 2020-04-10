@@ -85,7 +85,7 @@ export async function doAutoReplace(
     currentDigest,
     newDigest,
     autoReplaceData,
-    autoReplaceNewString,
+    autoReplaceStringTemplate,
   } = upgrade;
   const replaceString = autoReplaceData?.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
@@ -99,8 +99,8 @@ export async function doAutoReplace(
   }
   try {
     let newString: string;
-    if (autoReplaceNewString) {
-      newString = compile(autoReplaceNewString, upgrade, false);
+    if (autoReplaceStringTemplate) {
+      newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString;
       if (currentValue) {
