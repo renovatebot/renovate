@@ -2,7 +2,7 @@ import { join } from 'upath';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { BinarySource } from '../../../util/exec/common';
+import { VolumeOption } from '../../../util/exec/common';
 import { PostUpdateConfig } from '../../common';
 
 export interface GenerateLockFileResult {
@@ -22,9 +22,11 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  let cmd = '';
+  const cmd: string[] = [];
+  const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
   try {
     let lernaVersion: string;
+    const volumes: VolumeOption[] = [];
     try {
       const pJson = JSON.parse(await platform.getFile('package.json'));
       lernaVersion =
@@ -46,34 +48,24 @@ export async function generateLockFiles(
       params =
         '--ignore-scripts --ignore-engines --ignore-platform --mutex network:31879';
     }
-    if (config.binarySource === BinarySource.Docker) {
-      logger.debug('Running yarn via docker');
-      cmd = `docker run --rm `;
-      // istanbul ignore if
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      // istanbul ignore if
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map(e => `-e ${e} `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/${lernaClient} `;
+
+    // istanbul ignore if
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      volumes.push([homeNpmrc, `/home/ubuntu/.npmrc`]);
     }
-    cmd += `${lernaClient} install ${params} && npx lerna@${lernaVersion} bootstrap --no-ci -- ${params}`;
+    cmd.push(`${lernaClient} install ${params}`);
+    cmd.push(`npx lerna@${lernaVersion} bootstrap --no-ci -- ${params}`);
     await exec(cmd, {
       cwd,
       env,
+      docker: {
+        image: `renovate/${lernaClient}`,
+        volumes,
+        envVars,
+      },
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
