@@ -236,7 +236,7 @@
     "eslint-plugin-import": "2.20.2",
     "eslint-plugin-promise": "4.2.1",
     "glob": "7.1.6",
-    "husky": "3.1.0",
+    "husky": "4.2.5",
     "jest": "25.2.7",
     "jest-junit": "10.0.0",
     "jest-mock-extended": "1.0.8",
