@@ -12,6 +12,7 @@ Array [
     "managerData": Object {
       "lineNumber": 12,
     },
+    "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -23,6 +24,7 @@ Array [
     "managerData": Object {
       "lineNumber": 57,
     },
+    "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -34,6 +36,7 @@ Array [
     "managerData": Object {
       "lineNumber": 61,
     },
+    "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -45,6 +48,7 @@ Array [
     "managerData": Object {
       "lineNumber": 65,
     },
+    "versioning": "docker",
   },
 ]
 `;
@@ -99,6 +103,7 @@ Array [
     "managerData": Object {
       "lineNumber": 20,
     },
+    "versioning": "docker",
   },
   Object {
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
@@ -109,6 +114,7 @@ Array [
     "managerData": Object {
       "lineNumber": 27,
     },
+    "versioning": "docker",
   },
   Object {
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
@@ -119,6 +125,7 @@ Array [
     "managerData": Object {
       "lineNumber": 34,
     },
+    "versioning": "docker",
   },
   Object {
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
@@ -129,6 +136,7 @@ Array [
     "managerData": Object {
       "lineNumber": 41,
     },
+    "versioning": "docker",
   },
   Object {
     "currentDigest": "sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
@@ -139,6 +147,7 @@ Array [
     "managerData": Object {
       "lineNumber": 50,
     },
+    "versioning": "docker",
   },
   Object {
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
@@ -149,6 +158,7 @@ Array [
     "managerData": Object {
       "lineNumber": 57,
     },
+    "versioning": "docker",
   },
 ]
 `;

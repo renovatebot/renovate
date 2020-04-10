@@ -20,7 +20,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -65,7 +65,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -110,7 +110,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -156,7 +156,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_ruby -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
       "encoding": "utf-8",
     },
