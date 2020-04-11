@@ -33,6 +33,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   dockerUser: 'foobar',
+  composerIgnorePlatformReqs: true,
 };
 
 describe('.updateArtifacts()', () => {
@@ -207,5 +208,25 @@ describe('.updateArtifacts()', () => {
         config,
       })
     ).rejects.toThrow();
+  });
+  it('disables ignorePlatformReqs', async () => {
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New composer.lock' as any);
+    platform.getRepoStatus.mockResolvedValue({
+      modified: ['composer.lock'],
+    } as StatusResult);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          composerIgnorePlatformReqs: false,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });
