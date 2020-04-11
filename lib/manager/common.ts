@@ -39,6 +39,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   compatibility?: Record<string, string>;
   cacheDir?: string;
+  composerIgnorePlatformReqs?: boolean;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
 
