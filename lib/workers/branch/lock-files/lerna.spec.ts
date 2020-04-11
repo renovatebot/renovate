@@ -4,7 +4,6 @@ import { platform as _platform } from '../../../platform';
 import { mocked } from '../../../../test/util';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import * as _env from '../../../util/exec/env';
-import { BinarySource } from '../../../util/exec/common';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
