@@ -19,7 +19,7 @@ function notEmpty(s: string): boolean {
 function poetry2npm(input: string): string {
   const versions = input
     .split(',')
-    .map(str => str.trim())
+    .map((str) => str.trim())
     .filter(notEmpty);
   return versions.join(' ');
 }
@@ -31,7 +31,7 @@ function npm2poetry(input: string): string {
   // Note: this doesn't remove the ^
   const res = input
     .split(' ')
-    .map(str => str.trim())
+    .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
@@ -61,12 +61,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 
 const isSingleVersion = (constraint: string): string | boolean =>
   (constraint.trim().startsWith('=') &&
-    isVersion(
-      constraint
-        .trim()
-        .substring(1)
-        .trim()
-    )) ||
+    isVersion(constraint.trim().substring(1).trim())) ||
   isVersion(constraint.trim());
 
 function handleShort(

@@ -3,11 +3,11 @@ import * as fs from 'fs-extra';
 describe('manager metadata', () => {
   const managerList: string[] = fs
     .readdirSync(__dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => !name.startsWith('__'))
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter((name) => !name.startsWith('__'))
     .sort();
-  test.each(managerList)('%s has readme with no h1 or h2', async manager => {
+  test.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
     let readme: string;
     try {
       readme = await fs.readFile(`${__dirname}/${manager}/readme.md`, 'utf8');
@@ -28,7 +28,7 @@ describe('manager metadata', () => {
     }
 
     expect(
-      res.some(line => line.startsWith('# ') || line.startsWith('## '))
+      res.some((line) => line.startsWith('# ') || line.startsWith('## '))
     ).toBe(false);
   });
 });

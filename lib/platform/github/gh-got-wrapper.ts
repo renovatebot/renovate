@@ -164,7 +164,7 @@ async function get(
           new Array(lastPage),
           (x, i) => i + 1
         ).slice(1);
-        const queue = pageNumbers.map(page => (): Promise<GotResponse> => {
+        const queue = pageNumbers.map((page) => (): Promise<GotResponse> => {
           const nextUrl = URL.parse(linkHeader.next.url, true);
           delete nextUrl.search;
           nextUrl.query.page = page.toString();
@@ -176,7 +176,7 @@ async function get(
         });
         const pages = await pAll<{ body: any[] }>(queue, { concurrency: 5 });
         result.body = result.body.concat(
-          ...pages.filter(Boolean).map(page => page.body)
+          ...pages.filter(Boolean).map((page) => page.body)
         );
       }
     }

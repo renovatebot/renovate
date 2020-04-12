@@ -16,7 +16,7 @@ export async function getPrHourlyRemaining(
     logger.debug('currentHourStart=' + currentHourStart);
     try {
       const soFarThisHour = prList.filter(
-        pr =>
+        (pr) =>
           pr.branchName !== config.onboardingBranch &&
           moment(pr.createdAt).isAfter(currentHourStart)
       );

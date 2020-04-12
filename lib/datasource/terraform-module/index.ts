@@ -89,7 +89,7 @@ export async function getReleases({
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    dep.releases = res.versions.map(version => ({
+    dep.releases = res.versions.map((version) => ({
       version,
     }));
     if (pkgUrl.startsWith('https://registry.terraform.io/')) {

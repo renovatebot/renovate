@@ -131,7 +131,7 @@ export async function getReleases({
       await ghGot<GitHubTag>(url, {
         paginate: true,
       })
-    ).body.map(o => o.name);
+    ).body.map((o) => o.name);
   } catch (err) {
     logger.debug({ repo, err }, 'Error retrieving from github');
   }
@@ -142,7 +142,7 @@ export async function getReleases({
     sourceUrl: 'https://github.com/' + repo,
     releases: null,
   };
-  dependency.releases = versions.map(version => ({
+  dependency.releases = versions.map((version) => ({
     version,
     gitRef: version,
   }));

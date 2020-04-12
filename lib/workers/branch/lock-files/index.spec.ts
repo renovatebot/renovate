@@ -20,7 +20,7 @@ const lerna = mocked(_lerna);
 const hostRules = mocked(_hostRules);
 const platform = mocked(_platform);
 
-hostRules.find = jest.fn(_ => ({
+hostRules.find = jest.fn((_) => ({
   token: 'abc',
 }));
 

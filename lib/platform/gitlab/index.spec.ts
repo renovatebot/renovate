@@ -565,7 +565,7 @@ describe('platform/gitlab', () => {
   describe('setBranchStatus', () => {
     it.each([BranchStatus.green, BranchStatus.yellow, BranchStatus.red])(
       'sets branch status yellow',
-      async state => {
+      async (state) => {
         await initRepo();
         await gitlab.setBranchStatus({
           branchName: 'some-branch',

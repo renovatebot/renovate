@@ -63,7 +63,7 @@ async function getModules(
   )
     .trim()
     .split(/\n/)
-    .filter(s => !!s);
+    .filter((s) => !!s);
 
   const res: GitModule[] = [];
 

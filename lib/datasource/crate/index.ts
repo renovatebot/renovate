@@ -53,7 +53,7 @@ export async function getReleases({
     }
     res = res.body;
     res = res.split('\n');
-    res = res.map(line => line.trim()).filter(line => line.length !== 0);
+    res = res.map((line) => line.trim()).filter((line) => line.length !== 0);
     if (res.length === 0) {
       logger.warn(
         { dependency: lookupName },

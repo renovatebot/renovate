@@ -61,7 +61,7 @@ describe(getName(__filename), () => {
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(fileProjectPath => {
+        ].map((fileProjectPath) => {
           return {
             file: {
               name: fileProjectPath,
@@ -81,7 +81,7 @@ describe(getName(__filename), () => {
         'gradle/wrapper/gradle-wrapper.jar',
         'gradlew',
         'gradlew.bat',
-      ].forEach(file => {
+      ].forEach((file) => {
         expect(
           readFileSync(resolve(__dirname, `./__fixtures__/testFiles/${file}`))
         ).toEqual(
@@ -116,7 +116,7 @@ describe(getName(__filename), () => {
       // 5.6.4 => 5.6.4 (updates execs)
       // 6.3 => (5.6.4) (downgrades execs)
       // looks like a bug in Gradle
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
         expect(
           readFileSync(
             resolve(__dirname, `./__fixtures__/testFiles/${file}`),
@@ -157,7 +157,7 @@ describe(getName(__filename), () => {
       expect(res[0].artifactError.stderr).not.toEqual('');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
         expect(
           readFileSync(
             resolve(__dirname, `./__fixtures__/testFiles/${file}`),
@@ -198,7 +198,7 @@ describe(getName(__filename), () => {
         expect(res[0].artifactError.stderr).not.toEqual('');
 
         // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-        ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+        ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
           expect(
             readFileSync(
               resolve(__dirname, `./__fixtures__/testFiles/${file}`),

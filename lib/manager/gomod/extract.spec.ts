@@ -13,14 +13,14 @@ describe('lib/manager/gomod/extract', () => {
       const res = extractPackageFile(gomod1).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(8);
-      expect(res.filter(e => e.skipReason)).toHaveLength(1);
-      expect(res.filter(e => e.depType === 'replace')).toHaveLength(1);
+      expect(res.filter((e) => e.skipReason)).toHaveLength(1);
+      expect(res.filter((e) => e.depType === 'replace')).toHaveLength(1);
     });
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(58);
-      expect(res.filter(e => e.skipReason)).toHaveLength(0);
+      expect(res.filter((e) => e.skipReason)).toHaveLength(0);
     });
   });
 });

@@ -91,10 +91,10 @@ export async function pruneStaleBranches(
   logger.debug({ branchList, renovateBranches }, 'Branch lists');
   const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
-    branch => branch !== lockFileBranch
+    (branch) => branch !== lockFileBranch
   );
   const remainingBranches = renovateBranches.filter(
-    branch => !branchList.includes(branch)
+    (branch) => !branchList.includes(branch)
   );
   logger.debug(`remainingBranches=${remainingBranches}`);
   if (remainingBranches.length === 0) {

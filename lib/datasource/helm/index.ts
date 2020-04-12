@@ -100,7 +100,7 @@ export async function getReleases({
     logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
     return null;
   }
-  const releases = repositoryData.find(chart => chart.name === lookupName);
+  const releases = repositoryData.find((chart) => chart.name === lookupName);
   if (!releases) {
     logger.warn(
       { dependency: lookupName },

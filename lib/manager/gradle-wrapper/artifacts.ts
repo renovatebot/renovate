@@ -65,11 +65,11 @@ export async function updateArtifacts({
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(async fileProjectPath => addIfUpdated(status, fileProjectPath))
+        ].map(async (fileProjectPath) => addIfUpdated(status, fileProjectPath))
       )
-    ).filter(e => e != null);
+    ).filter((e) => e != null);
     logger.debug(
-      { files: updateArtifactsResult.map(r => r.file.name) },
+      { files: updateArtifactsResult.map((r) => r.file.name) },
       `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;

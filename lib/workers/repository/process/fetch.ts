@@ -64,7 +64,7 @@ async function fetchDepUpdates(
       logger.trace(
         { dependency: depName },
         `${dep.updates.length} result(s): ${dep.updates.map(
-          upgrade => upgrade.newValue
+          (upgrade) => upgrade.newValue
         )}`
       );
     }
@@ -87,7 +87,7 @@ async function fetchManagerPackagerFileUpdates(
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
-  const queue = pFile.deps.map(dep => (): Promise<void> =>
+  const queue = pFile.deps.map((dep) => (): Promise<void> =>
     fetchDepUpdates(packageFileConfig, dep)
   );
   logger.trace(
@@ -104,7 +104,7 @@ async function fetchManagerUpdates(
   manager: string
 ): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
-  const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
+  const queue = packageFiles[manager].map((pFile) => (): Promise<void> =>
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
   );
   logger.trace(
@@ -139,7 +139,7 @@ export async function fetchUpdates(
     stats.depCount += depCount;
   }
   logger.info({ stats }, `Extraction statistics`);
-  const allManagerJobs = managers.map(manager =>
+  const allManagerJobs = managers.map((manager) =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
