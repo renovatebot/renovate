@@ -12,8 +12,8 @@ const hostRules: any = _hostRules;
 
 describe('config/presets/github', () => {
   beforeEach(() => {
-    global.renovateCache.rmAll();
     got.mockReset();
+    return global.renovateCache.rmAll();
   });
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
