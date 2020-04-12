@@ -4,6 +4,7 @@ import { RangeStrategy } from '..';
 const {
   getNewValue,
   isValid,
+  isVersion,
   minSatisfyingVersion,
   maxSatisfyingVersion,
   isLessThanRange,
@@ -11,6 +12,10 @@ const {
 } = swift;
 
 describe('isValid(input)', () => {
+  it('supports isVersion', () => {
+    expect(isVersion('from: "1.2.3"')).toBe(false);
+    expect(isVersion('1.2.3')).toBe(true);
+  });
   it('understands Swift version ranges', () => {
     expect(isValid('from: "1.2.3"')).toBe(true);
     expect(isValid('from : "1.2.3"')).toBe(true);

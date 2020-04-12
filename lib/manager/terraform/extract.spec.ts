@@ -21,20 +21,6 @@ describe('lib/manager/terraform/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(22);
       expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(6);
-      expect(
-        res.deps.filter(
-          dep =>
-            dep.managerData.terraformDependencyType ===
-            TerraformDependencyTypes.module
-        )
-      ).toHaveLength(17);
-      expect(
-        res.deps.filter(
-          dep =>
-            dep.managerData.terraformDependencyType ===
-            TerraformDependencyTypes.provider
-        )
-      ).toHaveLength(5);
     });
     it('returns null if only local deps', () => {
       expect(extractPackageFile(tf2)).toBeNull();

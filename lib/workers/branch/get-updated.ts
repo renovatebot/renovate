@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { FileData, platform } from '../../platform';
+import { File, platform } from '../../platform';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { ArtifactError } from '../../manager/common';
@@ -11,8 +11,8 @@ import { BranchConfig } from '../common';
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
   parentBranch?: string;
-  updatedPackageFiles: FileData[];
-  updatedArtifacts: FileData[];
+  updatedPackageFiles: File[];
+  updatedArtifacts: File[];
 }
 
 export async function getUpdatedPackageFiles(
@@ -108,7 +108,7 @@ export async function getUpdatedPackageFiles(
     name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts: FileData[] = [];
+  const updatedArtifacts: File[] = [];
   const artifactErrors: ArtifactError[] = [];
   for (const packageFile of updatedPackageFiles) {
     const manager = packageFileManagers[packageFile.name];

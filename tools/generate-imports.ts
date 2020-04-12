@@ -57,6 +57,7 @@ async function generate({
   await updateFile(`lib/${path}/api.generated.ts`, code.replace(/^\s+/gm, ''));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
     // datasources
@@ -73,6 +74,13 @@ export default api;
 
     // managers
     await generate({ path: 'manager', types: ['ManagerApi'] });
+
+    // platform
+    await generate({
+      path: 'platform',
+      types: ['Platform'],
+      excludes: ['utils', 'git'],
+    });
 
     // versioning
     await generate({

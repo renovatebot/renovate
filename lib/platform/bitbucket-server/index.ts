@@ -4,7 +4,7 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -20,6 +20,7 @@ import {
   EnsureCommentConfig,
   EnsureIssueResult,
   EnsureIssueConfig,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,7 +32,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 import { ensureTrailingSlash } from '../../util/url';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -733,7 +734,6 @@ export async function addReviewers(
       {
         body: {
           title: pr.title,
-          description: pr.description,
           version: pr.version,
           reviewers: Array.from(reviewersSet).map(name => ({ user: { name } })),
         },

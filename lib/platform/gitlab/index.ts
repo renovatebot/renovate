@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -17,12 +17,13 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  CommitFilesConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,

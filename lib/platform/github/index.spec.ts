@@ -640,7 +640,7 @@ describe('platform/github', () => {
         () =>
           ({
             body: {
-              state: 'failed',
+              state: 'failure',
             },
           } as any)
       );
@@ -690,7 +690,7 @@ describe('platform/github', () => {
                 {
                   id: 23950195,
                   status: 'completed',
-                  conclusion: 'failed',
+                  conclusion: 'failure',
                   name: 'Travis CI - Branch',
                 },
               ],
@@ -796,7 +796,7 @@ describe('platform/github', () => {
               },
               {
                 context: 'context-3',
-                state: 'failed',
+                state: 'failure',
               },
             ],
           } as any)
@@ -825,7 +825,7 @@ describe('platform/github', () => {
               },
               {
                 context: 'context-3',
-                state: 'failed',
+                state: 'error',
               },
             ],
           } as any)

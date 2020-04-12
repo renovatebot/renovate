@@ -53,7 +53,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -111,7 +110,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -173,7 +171,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -229,7 +226,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -1620,7 +1616,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -1678,7 +1673,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -1740,7 +1734,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {
@@ -1796,7 +1789,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
-        "description": undefined,
         "reviewers": Array [
           Object {
             "user": Object {

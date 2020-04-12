@@ -29,6 +29,7 @@ Object {
   "commitMessageSuffix": null,
   "commitMessageTopic": "dependency {{depName}}",
   "compatibility": Object {},
+  "composerIgnorePlatformReqs": true,
   "configWarningReuseIssue": true,
   "dockerMapDotfiles": false,
   "dockerUser": null,
@@ -161,6 +162,7 @@ Object {
   "commitMessageSuffix": null,
   "commitMessageTopic": "dependency {{depName}}",
   "compatibility": Object {},
+  "composerIgnorePlatformReqs": true,
   "configWarningReuseIssue": true,
   "description": Array [],
   "digest": Object {
@@ -389,6 +391,7 @@ Object {
   "commitMessageSuffix": null,
   "commitMessageTopic": "dependency {{depName}}",
   "compatibility": Object {},
+  "composerIgnorePlatformReqs": true,
   "configWarningReuseIssue": true,
   "description": Array [],
   "digest": Object {

@@ -11,9 +11,6 @@ export function extractPackageFile(content: string): PackageFile {
   let offset = 0;
   while (match) {
     const [wholeSubstr, depName, currentValue] = match;
-    const fileReplacePosition =
-      offset + match.index + wholeSubstr.indexOf(currentValue);
-
     offset += match.index + wholeSubstr.length;
     rest = content.slice(offset);
     match = regex.exec(rest);
@@ -22,7 +19,6 @@ export function extractPackageFile(content: string): PackageFile {
       datasource: datasourceClojure.id,
       depName: expandDepName(depName),
       currentValue,
-      fileReplacePosition,
       registryUrls: [],
     });
   }

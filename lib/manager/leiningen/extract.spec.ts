@@ -26,7 +26,6 @@ describe('manager/clojure/extract', () => {
         datasource: datasourceClojure.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
-        fileReplacePosition: 11,
       },
     ]);
     expect(
@@ -36,13 +35,11 @@ describe('manager/clojure/extract', () => {
         datasource: datasourceClojure.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
-        fileReplacePosition: 12,
       },
       {
         datasource: datasourceClojure.id,
         depName: 'foo:baz',
         currentValue: '4.5.6',
-        fileReplacePosition: 33,
       },
     ]);
   });

@@ -23,8 +23,8 @@ async function getUrl(
       '--get',
       `submodule.${submoduleName}.url`,
     ])
-  ).trim();
-  if (!path.startsWith('../')) {
+  )?.trim();
+  if (!path?.startsWith('../')) {
     return path;
   }
   const remoteUrl = (
@@ -59,7 +59,7 @@ async function getModules(
       gitModulesPath,
       '--get-regexp',
       'path',
-    ])) || ''
+    ])) ?? /* istanbul ignore next: should never happen */ ''
   )
     .trim()
     .split(/\n/)
@@ -76,7 +76,7 @@ async function getModules(
 }
 
 export default async function extractPackageFile(
-  content: string,
+  _content: string,
   fileName: string,
   config: ManagerConfig
 ): Promise<PackageFile | null> {
