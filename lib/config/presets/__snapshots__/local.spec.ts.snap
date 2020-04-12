@@ -5,7 +5,10 @@ Array [
   Array [
     "some/repo",
     "",
-    "https://api.github.example.com",
+    Object {
+      "endpoint": "https://api.github.example.com",
+      "platform": "GitHub",
+    },
   ],
 ]
 `;
@@ -21,7 +24,10 @@ Array [
   Array [
     "some/repo",
     "",
-    "https://gitlab.example.com/api/v4",
+    Object {
+      "endpoint": "https://gitlab.example.com/api/v4",
+      "platform": "gitlab",
+    },
   ],
 ]
 `;
@@ -37,7 +43,9 @@ Array [
   Array [
     "some/repo",
     "",
-    undefined,
+    Object {
+      "platform": "github",
+    },
   ],
 ]
 `;
@@ -53,7 +61,9 @@ Array [
   Array [
     "some/repo",
     "",
-    undefined,
+    Object {
+      "platform": "GitLab",
+    },
   ],
 ]
 `;

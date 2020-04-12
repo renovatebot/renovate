@@ -9,10 +9,10 @@ export async function getPreset(
   baseConfig: RenovateConfig
 ): Promise<Preset> {
   if (baseConfig.platform?.toLowerCase() === 'gitlab') {
-    return gitlab.getPreset(pkgName, presetName, baseConfig.endpoint);
+    return gitlab.getPreset(pkgName, presetName, baseConfig);
   }
   if (baseConfig.platform?.toLowerCase() === 'github') {
-    return github.getPreset(pkgName, presetName, baseConfig.endpoint);
+    return github.getPreset(pkgName, presetName, baseConfig);
   }
   throw new Error(
     `Unsupported platform '${baseConfig.platform}' for local preset.`

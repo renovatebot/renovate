@@ -3,6 +3,7 @@ import { Preset } from './common';
 import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { ensureTrailingSlash } from '../../util/url';
+import { RenovateConfig } from '../common';
 
 const id = 'github';
 const http = new Http(id);
@@ -45,10 +46,11 @@ async function fetchJSONFile(
 export async function getPreset(
   pkgName: string,
   presetName = 'default',
-  endpoint = 'https://api.github.com/'
+  baseConfig?: RenovateConfig
 ): Promise<Preset> {
-  // eslint-disable-next-line no-param-reassign
-  endpoint = ensureTrailingSlash(endpoint);
+  const endpoint = ensureTrailingSlash(
+    baseConfig?.endpoint ?? 'https://api.github.com/'
+  );
   if (presetName === 'default') {
     try {
       const defaultJson = await fetchJSONFile(

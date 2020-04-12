@@ -78,7 +78,9 @@ describe('config/presets/github', () => {
     });
     it('uses custom endpoint', async () => {
       await github
-        .getPreset('some/repo', 'default', 'https://api.github.example.org')
+        .getPreset('some/repo', 'default', {
+          endpoint: 'https://api.github.example.org',
+        })
         .catch(_ => {});
       expect(got.mock.calls[0][0]).toEqual(
         'https://api.github.example.org/repos/some/repo/contents/default.json'

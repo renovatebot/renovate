@@ -61,7 +61,9 @@ describe('config/presets/gitlab', () => {
     });
     it('uses custom endpoint', async () => {
       await gitlab
-        .getPreset('some/repo', 'default', 'https://gitlab.example.org/api/v4')
+        .getPreset('some/repo', 'default', {
+          endpoint: 'https://gitlab.example.org/api/v4',
+        })
         .catch(_ => {});
       expect(glGot.mock.calls[0][0]).toEqual(
         'https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/branches'

@@ -2,6 +2,7 @@ import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
 import { Preset } from './common';
 import { ensureTrailingSlash } from '../../util/url';
+import { RenovateConfig } from '../common';
 
 const { get: glGot } = api;
 
@@ -31,10 +32,11 @@ async function getDefaultBranchName(
 export async function getPreset(
   pkgName: string,
   presetName = 'default',
-  endpoint = 'https://gitlab.com/api/v4/'
+  baseConfig?: RenovateConfig
 ): Promise<Preset> {
-  // eslint-disable-next-line no-param-reassign
-  endpoint = ensureTrailingSlash(endpoint);
+  const endpoint = ensureTrailingSlash(
+    baseConfig?.endpoint ?? 'https://gitlab.com/api/v4/'
+  );
   if (presetName !== 'default') {
     // TODO: proper error contructor
     throw new Error(
