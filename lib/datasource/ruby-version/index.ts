@@ -34,7 +34,7 @@ export async function getReleases(
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     for (const row of rows) {
       const columns: string[] = Array.from(
-        row.querySelectorAll('td').map(td => td.innerHTML)
+        row.querySelectorAll('td').map((td) => td.innerHTML)
       );
       if (columns.length) {
         const version = columns[0].replace('Ruby ', '');

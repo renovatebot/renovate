@@ -9,7 +9,7 @@ export function getWarnings(config: RenovateConfig): string {
   }
   let warningText = `\n# Warnings (${config.warnings.length})\n\n`;
   warningText += `Please correct - or verify that you can safely ignore - these warnings before you merge this PR.\n\n`;
-  config.warnings.forEach(w => {
+  config.warnings.forEach((w) => {
     warningText += `-   \`${w.depName}\`: ${w.message}\n`;
   });
   warningText += '\n---\n';
@@ -23,7 +23,7 @@ export function getErrors(config: RenovateConfig): string {
   }
   errorText = `\n# Errors (${config.errors.length})\n\n`;
   errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
-  config.errors.forEach(e => {
+  config.errors.forEach((e) => {
     errorText += `-   \`${e.depName}\`: ${e.message}\n`;
   });
   errorText += '\n---\n';
@@ -65,12 +65,12 @@ export function getDepWarnings(
       `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
     );
     warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
-    warnings.forEach(w => {
+    warnings.forEach((w) => {
       warningText += `-   \`${w}\`\n`;
     });
     warningText +=
       '\nFiles affected: ' +
-      warningFiles.map(f => '`' + f + '`').join(', ') +
+      warningFiles.map((f) => '`' + f + '`').join(', ') +
       '\n\n';
   } catch (err) {
     // istanbul ignore next

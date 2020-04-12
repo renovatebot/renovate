@@ -39,7 +39,7 @@ describe('datasource/git-submoduless', () => {
         lookupName,
         registryUrls,
       });
-      const result = versions.releases.map(x => x.version).sort();
+      const result = versions.releases.map((x) => x.version).sort();
       expect(result).toEqual(['commithash1']);
     });
   });

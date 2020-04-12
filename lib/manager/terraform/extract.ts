@@ -80,7 +80,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting buildkite plugins');
   }
-  deps.forEach(dep => {
+  deps.forEach((dep) => {
     if (
       dep.managerData.terraformDependencyType ===
       TerraformDependencyTypes.module
@@ -150,7 +150,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     delete dep.managerData;
     /* eslint-enable no-param-reassign */
   });
-  if (deps.some(dep => dep.skipReason !== 'local')) {
+  if (deps.some((dep) => dep.skipReason !== 'local')) {
     return { deps };
   }
   return null;

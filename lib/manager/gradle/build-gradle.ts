@@ -62,7 +62,7 @@ function allMapFormatOrders(
     `${version}${comma}${group}${comma}${name}`,
     `${name}${comma}${version}${comma}${group}`,
     `${version}${comma}${name}${comma}${group}`,
-  ].map(regex => new RegExp(`${prefix}${regex}${postfix}`));
+  ].map((regex) => new RegExp(`${prefix}${regex}${postfix}`));
 }
 
 function moduleMapVersionFormatMatch(dependency: GradleDependency): RegExp[] {
@@ -243,10 +243,7 @@ function updateGlobalMapVariables(
       }
 
       // Remove first path segment of variable and try again
-      variable = variable
-        .split('.')
-        .splice(1)
-        .join('.');
+      variable = variable.split('.').splice(1).join('.');
     }
   }
   return null;

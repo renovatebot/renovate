@@ -33,7 +33,7 @@ describe(getName(__filename), () => {
       `@myco:registry=https://test.org\n//test.org/:_authToken=XXX`,
     ];
 
-    it.each(configs)('%p', async npmrc => {
+    it.each(configs)('%p', async (npmrc) => {
       expect.assertions(1);
       setNpmrc(npmrc);
       await getDependency('@myco/test', 0);
@@ -55,7 +55,7 @@ describe(getName(__filename), () => {
       `@myco:registry=https://test.org\n_auth=dGVzdDp0ZXN0`,
     ];
 
-    it.each(configs)('%p', async npmrc => {
+    it.each(configs)('%p', async (npmrc) => {
       expect.assertions(1);
       setNpmrc(npmrc);
       await getDependency('@myco/test', 0);
@@ -75,7 +75,7 @@ describe(getName(__filename), () => {
       `registry=https://test.org`,
     ];
 
-    it.each(configs)('%p', async npmrc => {
+    it.each(configs)('%p', async (npmrc) => {
       expect.assertions(1);
       setNpmrc(npmrc);
       await getDependency('@myco/test', 0);

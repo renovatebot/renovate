@@ -12,10 +12,10 @@ export function extractPackageFile(content: string): PackageFile | null {
     deps = npmDepends[1]
       .replace(/(\s|\\n|\\t|'|")/g, '')
       .split(',')
-      .map(dep => dep.trim())
-      .filter(dep => dep.length)
-      .map(dep => dep.split(/:(.*)/))
-      .map(arr => {
+      .map((dep) => dep.trim())
+      .filter((dep) => dep.length)
+      .map((dep) => dep.split(/:(.*)/))
+      .map((arr) => {
         const [depName, currentValue] = arr;
         // istanbul ignore if
         if (!(depName && currentValue)) {
@@ -27,7 +27,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           datasource: datasourceNpm.id,
         };
       })
-      .filter(dep => dep.depName && dep.currentValue);
+      .filter((dep) => dep.depName && dep.currentValue);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ content }, 'Failed to parse meteor package.js');
   }

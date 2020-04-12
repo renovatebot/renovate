@@ -25,7 +25,7 @@ describe('datasource/packagist', () => {
     let config: any;
     beforeEach(() => {
       jest.resetAllMocks();
-      hostRules.find = jest.fn(input => input);
+      hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
       global.repoCache = {};
       config = {

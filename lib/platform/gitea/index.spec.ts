@@ -796,7 +796,7 @@ describe('platform/gitea', () => {
         branchName: mockNewPR.head.ref,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        labels: mockLabels.map(l => l.name),
+        labels: mockLabels.map((l) => l.name),
       });
 
       expect(helper.createPR).toHaveBeenCalledTimes(1);
@@ -805,7 +805,7 @@ describe('platform/gitea', () => {
         head: mockNewPR.head.ref,
         title: mockNewPR.title,
         body: mockNewPR.body,
-        labels: mockLabels.map(l => l.id),
+        labels: mockLabels.map((l) => l.id),
       });
     });
 
@@ -964,7 +964,7 @@ index 0000000..2173594
 
   describe('findIssue', () => {
     it('should return existing open issue', async () => {
-      const mockIssue = mockIssues.find(i => i.title === 'open-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       await initFakeRepo();
 
@@ -975,7 +975,7 @@ index 0000000..2173594
     });
 
     it('should not return existing closed issue', async () => {
-      const mockIssue = mockIssues.find(i => i.title === 'closed-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       await initFakeRepo();
 
@@ -1016,7 +1016,7 @@ index 0000000..2173594
     });
 
     it('should not reopen closed issue by default', async () => {
-      const closedIssue = mockIssues.find(i => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
 
       await initFakeRepo();
@@ -1040,7 +1040,7 @@ index 0000000..2173594
     });
 
     it('should reopen closed issue if desired', async () => {
-      const closedIssue = mockIssues.find(i => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
 
       await initFakeRepo();
@@ -1064,7 +1064,7 @@ index 0000000..2173594
     });
 
     it('should not update existing closed issue if desired', async () => {
-      const closedIssue = mockIssues.find(i => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
 
       await initFakeRepo();
@@ -1080,7 +1080,9 @@ index 0000000..2173594
     });
 
     it('should close all open duplicate issues except first one when updating', async () => {
-      const duplicates = mockIssues.filter(i => i.title === 'duplicate-issue');
+      const duplicates = mockIssues.filter(
+        (i) => i.title === 'duplicate-issue'
+      );
       const firstDuplicate = duplicates[0];
       helper.searchIssues.mockResolvedValueOnce(duplicates);
 

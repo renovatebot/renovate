@@ -10,9 +10,9 @@ export async function commitFilesToBranch(
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
-    updatedFiles = updatedFiles.filter(f => {
+    updatedFiles = updatedFiles.filter((f) => {
       const filename = f.name === '|delete|' ? f.contents.toString() : f.name;
-      const matchesExcludePaths = config.excludeCommitPaths.some(path =>
+      const matchesExcludePaths = config.excludeCommitPaths.some((path) =>
         minimatch(filename, path, { dot: true })
       );
       if (matchesExcludePaths) {

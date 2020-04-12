@@ -52,4 +52,4 @@ export async function getReleases({
 export const getDigest = (
   config: DigestConfig,
   newValue?: string
-): Promise<string> => new Promise(resolve => resolve(newValue));
+): Promise<string> => new Promise((resolve) => resolve(newValue));

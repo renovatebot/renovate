@@ -12,58 +12,44 @@ describe(getName(__filename), () => {
     nock.cleanAll();
   });
   it('get', async () => {
-    nock(baseUrl)
-      .get('/test')
-      .reply(200);
+    nock(baseUrl).get('/test').reply(200);
     expect(await http.get('http://renovate.com/test')).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });
   it('getJson', async () => {
-    nock(baseUrl)
-      .get('/')
-      .reply(200, '{ "test": true }');
+    nock(baseUrl).get('/').reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toMatchSnapshot();
   });
   it('postJson', async () => {
-    nock(baseUrl)
-      .post('/')
-      .reply(200, {});
+    nock(baseUrl).post('/').reply(200, {});
     expect(
       await http.postJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });
   it('putJson', async () => {
-    nock(baseUrl)
-      .put('/')
-      .reply(200, {});
+    nock(baseUrl).put('/').reply(200, {});
     expect(
       await http.putJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });
   it('patchJson', async () => {
-    nock(baseUrl)
-      .patch('/')
-      .reply(200, {});
+    nock(baseUrl).patch('/').reply(200, {});
     expect(
       await http.patchJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });
   it('deleteJson', async () => {
-    nock(baseUrl)
-      .delete('/')
-      .reply(200, {});
+    nock(baseUrl).delete('/').reply(200, {});
     expect(
       await http.deleteJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });
   it('headJson', async () => {
-    nock(baseUrl)
-      .head('/')
-      .reply(200, {});
+    nock(baseUrl).head('/').reply(200, {});
     expect(
       await http.headJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
@@ -71,9 +57,7 @@ describe(getName(__filename), () => {
   });
 
   it('stream', async () => {
-    nock(baseUrl)
-      .get('/some')
-      .reply(200, {});
+    nock(baseUrl).get('/some').reply(200, {});
 
     const stream = http.stream('/some', {
       baseUrl,
@@ -82,7 +66,7 @@ describe(getName(__filename), () => {
 
     let data = '';
 
-    stream.on('data', c => {
+    stream.on('data', (c) => {
       data += c;
     });
 

@@ -34,12 +34,12 @@ describe('lib/manager/pipenv/extract', () => {
       const res = extractPackageFile(pipfile1);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
-      expect(res.deps.filter(dep => !dep.skipReason)).toHaveLength(4);
+      expect(res.deps.filter((dep) => !dep.skipReason)).toHaveLength(4);
     });
     it('marks packages with "extras" as skipReason === any-version', () => {
       const res = extractPackageFile(pipfile3);
-      expect(res.deps.filter(r => !r.skipReason)).toHaveLength(0);
-      expect(res.deps.filter(r => r.skipReason)).toHaveLength(6);
+      expect(res.deps.filter((r) => !r.skipReason)).toHaveLength(0);
+      expect(res.deps.filter((r) => r.skipReason)).toHaveLength(6);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pipfile2);
@@ -50,24 +50,24 @@ describe('lib/manager/pipenv/extract', () => {
       const content =
         '[packages]\r\nflask = {git = "https://github.com/pallets/flask.git"}\r\nwerkzeug = ">=0.14"';
       const res = extractPackageFile(content);
-      expect(res.deps.filter(r => !r.skipReason)).toHaveLength(1);
+      expect(res.deps.filter((r) => !r.skipReason)).toHaveLength(1);
     });
     it('ignores invalid package names', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid = "==1.0.0"';
       const res = extractPackageFile(content);
       expect(res.deps).toHaveLength(2);
-      expect(res.deps.filter(dep => !dep.skipReason)).toHaveLength(1);
+      expect(res.deps.filter((dep) => !dep.skipReason)).toHaveLength(1);
     });
     it('ignores relative path dependencies', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\ntest = {path = "."}';
       const res = extractPackageFile(content);
-      expect(res.deps.filter(r => !r.skipReason)).toHaveLength(1);
+      expect(res.deps.filter((r) => !r.skipReason)).toHaveLength(1);
     });
     it('ignores invalid versions', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\nsome-package = "==0 0"';
       const res = extractPackageFile(content);
       expect(res.deps).toHaveLength(2);
-      expect(res.deps.filter(dep => !dep.skipReason)).toHaveLength(1);
+      expect(res.deps.filter((dep) => !dep.skipReason)).toHaveLength(1);
     });
     it('extracts all sources', () => {
       const content =

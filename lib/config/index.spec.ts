@@ -83,7 +83,7 @@ describe('config/index', () => {
       };
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
-      expect(config.packageRules.map(rule => rule.a)).toMatchObject([
+      expect(config.packageRules.map((rule) => rule.a)).toMatchObject([
         1,
         2,
         3,

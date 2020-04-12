@@ -65,7 +65,7 @@ describe('workers/repository/error', () => {
       PLATFORM_AUTHENTICATION_ERROR,
       REPOSITORY_TEMPORARY_ERROR,
     ];
-    errors.forEach(err => {
+    errors.forEach((err) => {
       it(`errors ${err}`, async () => {
         const res = await handleError(config, new Error(err));
         expect(res).toEqual(err);
