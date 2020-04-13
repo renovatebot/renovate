@@ -80,7 +80,6 @@ async function fetchDepUpdates(
   return dep;
 }
 
-/* eslint-disable no-param-reassign */
 async function fetchManagerPackagerFileUpdates(
   config: RenovateConfig,
   managerConfig: ManagerConfig,
@@ -96,6 +95,7 @@ async function fetchManagerPackagerFileUpdates(
     { manager, packageFile, queueLength: queue.length },
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
+  // eslint-disable-next-line no-param-reassign
   pFile.deps = await pAll(queue, { concurrency: 5 });
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
