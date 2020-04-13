@@ -84,7 +84,7 @@ export function decryptConfig(
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
       decryptedConfig[key] = [];
-      val.forEach(item => {
+      val.forEach((item) => {
         if (is.object(item) && !is.array(item)) {
           (decryptedConfig[key] as RenovateConfig[]).push(
             decryptConfig(item as RenovateConfig, privateKey)

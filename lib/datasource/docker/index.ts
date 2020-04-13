@@ -97,7 +97,7 @@ function getECRAuthToken(
     config.secretAccessKey = opts.password;
   }
   const ecr = new AWS.ECR(config);
-  return new Promise<string>(resolve => {
+  return new Promise<string>((resolve) => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
         logger.trace({ err }, 'err');
@@ -612,7 +612,7 @@ export async function getReleases({
   if (!tags) {
     return null;
   }
-  const releases = tags.map(version => ({ version }));
+  const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
     dockerRegistry: registry,
     dockerRepository: repository,

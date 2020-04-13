@@ -48,17 +48,17 @@ export async function getReleases({
     : [GradleVersionsServiceUrl];
 
   const allReleases: Release[][] = await Promise.all(
-    versionsUrls.map(async url => {
+    versionsUrls.map(async (url) => {
       try {
         const response = await http.getJson<GradleRelease[]>(url);
         const releases = response.body
-          .filter(release => !release.snapshot && !release.nightly)
+          .filter((release) => !release.snapshot && !release.nightly)
           .filter(
-            release =>
+            (release) =>
               // some milestone have wrong metadata and need to be filtered by version name content
               release.rcFor === '' && !release.version.includes('milestone')
           )
-          .map(release => ({
+          .map((release) => ({
             version: coerce(release.version).toString(),
             downloadUrl: release.downloadUrl,
             checksumUrl: release.checksumUrl,

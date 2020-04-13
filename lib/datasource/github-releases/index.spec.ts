@@ -26,7 +26,7 @@ describe('datasource/github-releases', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(4);
       expect(
-        res.releases.find(release => release.version === 'v1.1.0')
+        res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();
     });
   });

@@ -2,7 +2,7 @@ import loose from '.';
 
 describe('loose.', () => {
   describe('isVersion', () => {
-    ['1.1', '1.3.RC2', '2.1-rc2'].forEach(version => {
+    ['1.1', '1.3.RC2', '2.1-rc2'].forEach((version) => {
       it(version, () => {
         expect(loose.isVersion(version)).toMatchSnapshot();
       });
@@ -22,10 +22,10 @@ describe('loose.', () => {
         '0.8a',
         '3.1.0.GA',
         '3.0.0-beta.3',
-      ].forEach(version => {
+      ].forEach((version) => {
         expect(loose.isValid(version)).toBe(version);
       });
-      ['foo', '1.2.3.4.5.6.7'].forEach(version => {
+      ['foo', '1.2.3.4.5.6.7'].forEach((version) => {
         expect(loose.isValid(version)).toBeNull();
       });
     });

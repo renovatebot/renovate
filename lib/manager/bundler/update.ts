@@ -22,7 +22,7 @@ export function updateDependency({
     }
     const newValue = upgrade.newValue
       .split(',')
-      .map(part => `, ${delimiter}${part.trim()}${delimiter}`)
+      .map((part) => `, ${delimiter}${part.trim()}${delimiter}`)
       .join('');
     const newLine = lineToChange.replace(
       new RegExp(

@@ -39,7 +39,7 @@ describe('datasource/git-tags', () => {
       const versions = await getReleases({
         lookupName,
       });
-      const result = versions.releases.map(x => x.version).sort();
+      const result = versions.releases.map((x) => x.version).sort();
       expect(result).toEqual(['0.0.1', 'v0.0.2']);
     });
   });

@@ -12,12 +12,12 @@ describe('getChildProcess environment when trustlevel set to low', () => {
     'DOCKER_HOST',
   ];
   beforeEach(() => {
-    envVars.forEach(env => {
+    envVars.forEach((env) => {
       process.env[env] = env;
     });
   });
   afterEach(() => {
-    envVars.forEach(env => delete process.env[env]);
+    envVars.forEach((env) => delete process.env[env]);
   });
   it('returns default environment variables', () => {
     expect(getChildProcessEnv()).toMatchInlineSnapshot(`

@@ -15,7 +15,7 @@ function extractFromSection(
   if (!sectionContent) {
     return [];
   }
-  Object.keys(sectionContent).forEach(depName => {
+  Object.keys(sectionContent).forEach((depName) => {
     let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
@@ -85,7 +85,7 @@ export function extractPackageFile(
   let targetDeps: PackageDependency[] = [];
   if (targetSection) {
     const targets = Object.keys(targetSection);
-    targets.forEach(target => {
+    targets.forEach((target) => {
       const targetContent = parsedContent.target[target];
       // Dependencies for `${target}`
       const deps = [

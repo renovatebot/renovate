@@ -54,7 +54,7 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
     hostConfigVariablePrefix +
     getDomain(hostRule)
       .split('.')
-      .map(term => term.toUpperCase())
+      .map((term) => term.toUpperCase())
       .join('__');
 
   return {
@@ -181,7 +181,7 @@ export async function updateArtifacts(
           resolveMatches.push(resolveMatch[1].split(' ').shift());
         }
       } while (resolveMatch);
-      if (resolveMatches.some(match => !updatedDeps.includes(match))) {
+      if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
         logger.debug(
           { resolveMatches, updatedDeps },
           'Found new resolve matches - reattempting recursively'

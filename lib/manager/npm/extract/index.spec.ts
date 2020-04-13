@@ -84,7 +84,7 @@ describe('manager/npm/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('finds a lock file', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === 'yarn.lock') {
           return '# yarn.lock';
         }
@@ -98,7 +98,7 @@ describe('manager/npm/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('finds and filters .npmrc', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           return 'save-exact = true\npackage-lock = false\n';
         }
@@ -112,7 +112,7 @@ describe('manager/npm/extract', () => {
       expect(res.npmrc).toBeDefined();
     });
     it('finds and discards .npmrc', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           // eslint-disable-next-line
           return '//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
@@ -127,7 +127,7 @@ describe('manager/npm/extract', () => {
       expect(res.npmrc).toBeUndefined();
     });
     it('finds lerna', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
           return '{}';
         }
@@ -141,7 +141,7 @@ describe('manager/npm/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('finds "npmClient":"npm" in lerna.json', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
           return '{ "npmClient": "npm" }';
         }
@@ -155,7 +155,7 @@ describe('manager/npm/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('finds "npmClient":"yarn" in lerna.json', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
           return '{ "npmClient": "yarn" }';
         }
@@ -169,7 +169,7 @@ describe('manager/npm/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('finds simple yarn workspaces', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
           return '{}';
         }
@@ -183,7 +183,7 @@ describe('manager/npm/extract', () => {
       expect(res).toMatchSnapshot();
     });
     it('finds complex yarn workspaces', async () => {
-      platform.getFile = jest.fn(fileName => {
+      platform.getFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
           return '{}';
         }
