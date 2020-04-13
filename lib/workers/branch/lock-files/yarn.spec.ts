@@ -34,7 +34,7 @@ describe(getName(__filename), () => {
   });
   it.each([['1.0.0'], ['2.0.0']])(
     'generates lock files using yarn v%s',
-    async yarnVersion => {
+    async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -52,7 +52,7 @@ describe(getName(__filename), () => {
   );
   it.each([['1.0.0'], ['2.0.0']])(
     'performs lock file updates using yarn v%s',
-    async yarnVersion => {
+    async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -71,7 +71,7 @@ describe(getName(__filename), () => {
   );
   it.each([['1.0.0'], ['2.0.0']])(
     'detects yarnIntegrity using yarn v%s',
-    async yarnVersion => {
+    async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -124,7 +124,7 @@ describe(getName(__filename), () => {
   });
   it.each([['1.0.0'], ['2.0.0']])(
     'finds yarn v%s globally',
-    async yarnVersion => {
+    async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
