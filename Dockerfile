@@ -36,7 +36,7 @@ COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build:docker
 
-# compabillity file
+# compatability file
 RUN echo "require('./index.js');" > dist/renovate.js
 
 # Final-base image
