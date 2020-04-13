@@ -1175,7 +1175,9 @@ export async function getBranchStatus(
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
-    checkRuns.every((run) => ['skipped', 'neutral', 'success'].includes(run.conclusion))
+    checkRuns.every((run) =>
+      ['skipped', 'neutral', 'success'].includes(run.conclusion)
+    )
   ) {
     return BranchStatus.green;
   }
