@@ -12,15 +12,14 @@ import {
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
-import { RenovateConfig, UpdateType } from '../../../../config';
+import {
+  RenovateConfig,
+  UpdateType,
+  ValidationMessage,
+} from '../../../../config';
 import { clone } from '../../../../util/clone';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { SkipReason } from '../../../../types';
-
-export interface LookupWarning {
-  updateType: 'warning';
-  message: string;
-}
 
 export interface UpdateResult {
   sourceDirectory?: string;
@@ -34,7 +33,7 @@ export interface UpdateResult {
   releases: Release[];
 
   updates: LookupUpdate[];
-  warnings: LookupWarning[];
+  warnings: ValidationMessage[];
 }
 
 export interface LookupUpdateConfig
@@ -154,16 +153,16 @@ export async function lookupUpdates(
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
-      const result: LookupWarning = {
-        updateType: 'warning',
-        message: `Failed to look up dependency ${depName}`,
+      const warning: ValidationMessage = {
+        depName,
+        message: `Failed to lofok up dependency ${depName}`,
       };
       logger.debug(
         { dependency: depName, packageFile: config.packageFile },
-        result.message
+        warning.message
       );
       // TODO: return warnings in own field
-      res.warnings.push(result);
+      res.warnings.push(warning);
       return res;
     }
     if (dependency.deprecationMessage) {
@@ -202,7 +201,7 @@ export async function lookupUpdates(
       const taggedVersion = dependency.tags[config.followTag];
       if (!taggedVersion) {
         res.warnings.push({
-          updateType: 'warning',
+          depName,
           message: `Can't find version with tag ${config.followTag} for ${depName}`,
         });
         return res;
@@ -223,7 +222,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (!rollback) {
         res.warnings.push({
-          updateType: 'warning',
+          depName,
           message: `Can't find version matching ${currentValue} for ${depName}`,
         });
         return res;
