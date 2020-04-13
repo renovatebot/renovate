@@ -686,9 +686,9 @@ export async function getAdditionalFiles(
     const res = await lerna.generateLockFiles(
       lernaPackageFile.lernaClient,
       fullLearnaFileDir,
+      config,
       env,
-      skipInstalls,
-      config.binarySource
+      skipInstalls
     );
     // istanbul ignore else
     if (res.stderr) {
