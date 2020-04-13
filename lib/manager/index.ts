@@ -5,7 +5,7 @@ import {
   PackageUpdateConfig,
   RangeConfig,
   Result,
-  PackageUpdateResult,
+  LookupUpdate,
 } from './common';
 import { RangeStrategy } from '../types';
 import {
@@ -66,7 +66,7 @@ export function extractAllPackageFiles(
 export function getPackageUpdates(
   manager: string,
   config: PackageUpdateConfig
-): Result<PackageUpdateResult[]> | null {
+): Result<LookupUpdate[]> | null {
   if (!managers.has(manager)) {
     return null;
   }

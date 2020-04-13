@@ -52,13 +52,6 @@ export interface PackageUpdateConfig {
   supportPolicy?: string[];
 }
 
-export interface PackageUpdateResult {
-  newValue: string;
-  newMajor: number;
-  isRange: boolean;
-  sourceUrl: string;
-}
-
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   composerJsonType?: 'composer-plugin' | 'library' | 'metapackage' | 'project';
   currentValue?: string;
@@ -158,7 +151,8 @@ export interface LookupUpdate {
   newVersion?: string;
   semanticCommitType?: string;
   toVersion?: string;
-  updateType: UpdateType;
+  updateType?: UpdateType;
+  sourceUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -178,7 +172,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   skipReason?: SkipReason;
   sourceLine?: number;
   toVersion?: string;
-  updates?: PackageUpdateResult[];
+  updates?: LookupUpdate[];
   versionLine?: number;
   autoReplaceData?: AutoReplaceData;
 }
@@ -246,9 +240,7 @@ export interface ManagerApi {
     config?: ExtractConfig
   ): Result<PackageFile | null>;
 
-  getPackageUpdates?(
-    config: PackageUpdateConfig
-  ): Result<PackageUpdateResult[]>;
+  getPackageUpdates?(config: PackageUpdateConfig): Result<LookupUpdate[]>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

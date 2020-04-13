@@ -3,7 +3,7 @@ import { isEqual } from 'lodash';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
-import { PackageUpdateConfig, PackageUpdateResult } from '../common';
+import { PackageUpdateConfig, LookupUpdate } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { resolveFile } from '../../util';
 
@@ -86,7 +86,7 @@ async function checkPolicies(): Promise<void> {
 
 export async function getPackageUpdates(
   config: PackageUpdateConfig
-): Promise<PackageUpdateResult[]> {
+): Promise<LookupUpdate[]> {
   logger.trace('travis.getPackageUpdates()');
   const { supportPolicy } = config;
   if (!(supportPolicy && supportPolicy.length)) {
