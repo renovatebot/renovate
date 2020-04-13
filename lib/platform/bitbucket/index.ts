@@ -67,7 +67,7 @@ export async function getRepos(): Promise<string[]> {
     const repos = await utils.accumulateValues<{ full_name: string }>(
       `/2.0/repositories/?role=contributor`
     );
-    return repos.map(repo => repo.full_name);
+    return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
@@ -233,7 +233,7 @@ export async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
     logger.debug('Retrieving PR list');
     let url = `/2.0/repositories/${config.repository}/pullrequests?`;
-    url += utils.prStates.all.map(state => 'state=' + state).join('&');
+    url += utils.prStates.all.map((state) => 'state=' + state).join('&');
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
@@ -249,7 +249,7 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
-    p =>
+    (p) =>
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
@@ -463,7 +463,8 @@ export async function getBranchStatusCheck(
   context: string
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
-  const bbState = (statuses.find(status => status.key === context) || {}).state;
+  const bbState = (statuses.find((status) => status.key === context) || {})
+    .state;
   return bbToRenovateStatusMapping[bbState] || null;
 }
 
@@ -798,7 +799,7 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
       { json: false } as any
     )
   ).body;
-  const files = parseDiff(diff).map(file => file.to);
+  const files = parseDiff(diff).map((file) => file.to);
   return files;
 }
 

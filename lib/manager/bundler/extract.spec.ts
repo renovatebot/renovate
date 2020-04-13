@@ -78,10 +78,10 @@ describe('lib/manager/bundler/extract', () => {
       // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
       expect(
         res.deps
-          .filter(dep => {
+          .filter((dep) => {
             return Object.prototype.hasOwnProperty.call(dep, 'lockedVersion');
           })
-          .every(dep => {
+          .every((dep) => {
             return (
               Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
               isValid(dep.lockedVersion)
@@ -100,7 +100,7 @@ describe('lib/manager/bundler/extract', () => {
       const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps.every(dep => {
+        res.deps.every((dep) => {
           return (
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
             isValid(dep.lockedVersion)
@@ -115,10 +115,10 @@ describe('lib/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       expect(
         res.deps
-          .filter(dep => {
+          .filter((dep) => {
             return Object.prototype.hasOwnProperty.call(dep, 'lockedVersion');
           })
-          .every(dep => {
+          .every((dep) => {
             return (
               Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
               isValid(dep.lockedVersion)
@@ -132,7 +132,7 @@ describe('lib/manager/bundler/extract', () => {
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps.every(dep => {
+        res.deps.every((dep) => {
           return (
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
             isValid(dep.lockedVersion)
@@ -147,7 +147,7 @@ describe('lib/manager/bundler/extract', () => {
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
     expect(res).toMatchSnapshot();
     expect(
-      res.deps.every(dep => {
+      res.deps.every((dep) => {
         return (
           Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
           isValid(dep.lockedVersion)

@@ -65,7 +65,7 @@ export const replacingSerializer = (
   search: string,
   replacement: string
 ): jest.SnapshotSerializerPlugin => ({
-  test: value => typeof value === 'string' && value.includes(search),
+  test: (value) => typeof value === 'string' && value.includes(search),
   serialize: (val, config, indent, depth, refs, printer) => {
     const replaced = (val as string).replace(search, replacement);
     return printer(replaced, config, indent, depth, refs);

@@ -140,14 +140,14 @@ function extractVersions(metadata: XmlDocument): string[] {
   if (!elements) {
     return [];
   }
-  return elements.map(el => el.val);
+  return elements.map((el) => el.val);
 }
 
 export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repositories = registryUrls.map(repository =>
+  const repositories = registryUrls.map((repository) =>
     repository.replace(/\/?$/, '/')
   );
   const dependency = getDependencyParts(lookupName);
@@ -162,7 +162,7 @@ export async function getReleases({
     const mavenMetadata = await downloadMavenXml(metadataUrl);
     if (mavenMetadata) {
       const newVersions = extractVersions(mavenMetadata).filter(
-        version => !versions.includes(version)
+        (version) => !versions.includes(version)
       );
       const latestVersion = getLatestStableVersion(newVersions);
       if (latestVersion) {
@@ -193,6 +193,6 @@ export async function getReleases({
   return {
     ...dependency,
     ...dependencyInfo,
-    releases: versions.map(v => ({ version: v })),
+    releases: versions.map((v) => ({ version: v })),
   };
 }

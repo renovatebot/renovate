@@ -23,7 +23,7 @@ function getPath(path: string): string {
   return relative(ROOT, path).replace(/\\/g, '/');
 }
 
-const formatter: CLIEngine.Formatter = results => {
+const formatter: CLIEngine.Formatter = (results) => {
   try {
     for (const { filePath, messages } of results) {
       const file = getPath(filePath);

@@ -89,7 +89,7 @@ function dockerEnvVars(
 ): string[] {
   const extraEnvKeys = Object.keys(extraEnv || {});
   return extraEnvKeys.filter(
-    key => typeof childEnv[key] === 'string' && childEnv[key].length > 0
+    (key) => typeof childEnv[key] === 'string' && childEnv[key].length > 0
   );
 }
 
@@ -159,7 +159,7 @@ export async function exec(
       logger.trace({ err }, 'rawExec err');
       clearTimeout(timer);
       if (useDocker) {
-        await removeDockerContainer(docker.image).catch(removeErr => {
+        await removeDockerContainer(docker.image).catch((removeErr) => {
           throw new Error(
             `Error: "${removeErr.message}" - Original Error: "${err.message}"`
           );

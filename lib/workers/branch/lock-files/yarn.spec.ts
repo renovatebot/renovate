@@ -21,7 +21,7 @@ const yarnHelper = mocked(_yarnHelper);
 
 // TODO: figure out snapshot similarity for each CI platform
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
-  snapshots.map(snapshot => ({
+  snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));

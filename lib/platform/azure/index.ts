@@ -91,7 +91,7 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  return repos.map(repo => `${repo.project.name}/${repo.name}`);
+  return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
 async function getBranchCommit(fullBranchName: string): Promise<string> {
@@ -115,7 +115,7 @@ export async function initRepo({
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
   const repo = repos.filter(
-    c =>
+    (c) =>
       c.name.toLowerCase() === names.repo.toLowerCase() &&
       c.project.name.toLowerCase() === names.project.toLowerCase()
   )[0];
@@ -275,7 +275,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
   const azurePr = (await getPrList()).find(
-    item => item.pullRequestId === pullRequestId
+    (item) => item.pullRequestId === pullRequestId
   );
 
   if (!azurePr) {
@@ -289,8 +289,8 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   );
 
   azurePr.labels = labels
-    .filter(label => label.active)
-    .map(label => label.name);
+    .filter((label) => label.active)
+    .map((label) => label.name);
 
   const commits = await azureApiGit.getPullRequestCommits(
     config.repoId,
@@ -312,11 +312,11 @@ export async function findPr({
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
+      (item) => item.sourceRefName === azureHelper.getNewBranchName(branchName)
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter(item => item.title === prTitle);
+      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
     }
 
     switch (state) {
@@ -324,10 +324,12 @@ export async function findPr({
         // no more filter needed, we can go further...
         break;
       case PR_STATE_NOT_OPEN:
-        prsFiltered = prsFiltered.filter(item => item.state !== PR_STATE_OPEN);
+        prsFiltered = prsFiltered.filter(
+          (item) => item.state !== PR_STATE_OPEN
+        );
         break;
       default:
-        prsFiltered = prsFiltered.filter(item => item.state === state);
+        prsFiltered = prsFiltered.filter((item) => item.state === state);
         break;
     }
   } catch (error) {
@@ -476,7 +478,7 @@ export async function createPr({
     );
   }
   await Promise.all(
-    labels.map(label =>
+    labels.map((label) =>
       azureApiGit.createPullRequestLabel(
         {
           name: label,
@@ -519,7 +521,7 @@ export async function ensureComment({
   let threadIdFound = null;
   let commentIdFound = null;
   let commentNeedsUpdating = false;
-  threads.forEach(thread => {
+  threads.forEach((thread) => {
     const firstCommentContent = thread.comments[0].content;
     if (
       (topic && firstCommentContent?.startsWith(header)) ||
@@ -578,7 +580,7 @@ export async function ensureCommentRemoval(
     const threads = await azureApiGit.getThreads(config.repoId, issueNo);
     let threadIdFound = null;
 
-    threads.forEach(thread => {
+    threads.forEach((thread) => {
       if (thread.comments[0].content.startsWith(`### ${topic}\n\n`)) {
         threadIdFound = thread.id;
       }
@@ -653,11 +655,11 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
-  const repo = repos.filter(c => c.id === config.repoId)[0];
+  const repo = repos.filter((c) => c.id === config.repoId)[0];
   const teams = await azureApiCore.getTeams(repo.project.id);
   const members = await Promise.all(
     teams.map(
-      async t =>
+      async (t) =>
         /* eslint-disable no-return-await */
         await azureApiCore.getTeamMembersWithExtendedProperties(
           repo.project.id,
@@ -667,14 +669,14 @@ async function getUserIds(users: string[]): Promise<User[]> {
   );
 
   const ids: { id: string; name: string }[] = [];
-  members.forEach(listMembers => {
-    listMembers.forEach(m => {
-      users.forEach(r => {
+  members.forEach((listMembers) => {
+    listMembers.forEach((m) => {
+      users.forEach((r) => {
         if (
           r.toLowerCase() === m.identity.displayName.toLowerCase() ||
           r.toLowerCase() === m.identity.uniqueName.toLowerCase()
         ) {
-          if (ids.filter(c => c.id === m.identity.id).length === 0) {
+          if (ids.filter((c) => c.id === m.identity.id).length === 0) {
             ids.push({ id: m.identity.id, name: r });
           }
         }
@@ -682,10 +684,10 @@ async function getUserIds(users: string[]): Promise<User[]> {
     });
   });
 
-  teams.forEach(t => {
-    users.forEach(r => {
+  teams.forEach((t) => {
+    users.forEach((r) => {
       if (r.toLowerCase() === t.name.toLowerCase()) {
-        if (ids.filter(c => c.id === t.id).length === 0) {
+        if (ids.filter((c) => c.id === t.id).length === 0) {
           ids.push({ id: t.id, name: r });
         }
       }
@@ -709,7 +711,7 @@ export async function addAssignees(
   await ensureComment({
     number: issueNo,
     topic: 'Add Assignees',
-    content: ids.map(a => `@<${a.id}>`).join(', '),
+    content: ids.map((a) => `@<${a.id}>`).join(', '),
   });
 }
 
@@ -728,7 +730,7 @@ export async function addReviewers(
   const ids = await getUserIds(reviewers);
 
   await Promise.all(
-    ids.map(async obj => {
+    ids.map(async (obj) => {
       await azureApiGit.createPullRequestReviewer(
         {},
         config.repoId,
@@ -760,7 +762,7 @@ export async function getPrFiles(prId: number): Promise<string[]> {
       (
         await Promise.all(
           prIterations.map(
-            async iteration =>
+            async (iteration) =>
               (
                 await azureApiGit.getPullRequestIterationChanges(
                   config.repoId,
@@ -772,7 +774,7 @@ export async function getPrFiles(prId: number): Promise<string[]> {
         )
       )
         .reduce((acc, val) => acc.concat(val), [])
-        .map(change => change.item.path.slice(1))
+        .map((change) => change.item.path.slice(1))
     ),
   ];
 }

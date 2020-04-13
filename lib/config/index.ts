@@ -112,7 +112,7 @@ export async function parseConfigs(
   // Move global variables that we need to use later
   const importGlobals = ['prBanner', 'prFooter'];
   config.global = {};
-  importGlobals.forEach(key => {
+  importGlobals.forEach((key) => {
     config.global[key] = config[key];
     delete config[key];
   });

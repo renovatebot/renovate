@@ -39,7 +39,7 @@ export async function generateLockFile(
       cmd = `node ${installedPath}`;
       const yarnIntegrity =
         config.upgrades &&
-        config.upgrades.some(upgrade => upgrade.yarnIntegrity);
+        config.upgrades.some((upgrade) => upgrade.yarnIntegrity);
       if (!yarnIntegrity) {
         logger.warn('Using yarn@1.9.4 for install is deprecated');
         try {
@@ -113,14 +113,14 @@ export async function generateLockFile(
       env: cmdEnv,
     });
     const lockUpdates = upgrades
-      .filter(upgrade => upgrade.isLockfileUpdate)
-      .map(upgrade => upgrade.depName);
+      .filter((upgrade) => upgrade.isLockfileUpdate)
+      .map((upgrade) => upgrade.depName);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       const updateCmd =
         cmd +
         ' upgrade' +
-        lockUpdates.map(depName => ` ${depName}`).join('') +
+        lockUpdates.map((depName) => ` ${depName}`).join('') +
         cmdExtras;
       const updateRes = await exec(updateCmd, {
         cwd,

@@ -734,7 +734,9 @@ export async function addReviewers(
         body: {
           title: pr.title,
           version: pr.version,
-          reviewers: Array.from(reviewersSet).map(name => ({ user: { name } })),
+          reviewers: Array.from(reviewersSet).map((name) => ({
+            user: { name },
+          })),
         },
       }
     );
@@ -841,7 +843,7 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${number}`);
       body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.text !== body;
@@ -850,7 +852,7 @@ export async function ensureComment({
     } else {
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.text === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -887,7 +889,7 @@ export async function ensureCommentRemoval(
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(prNo);
     let commentId: number;
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
       if (comment.text.startsWith(`### ${topic}\n\n`)) {
         commentId = comment.id;
       }
@@ -1003,7 +1005,7 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
   const values = await utils.accumulateValues<{ path: { toString: string } }>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/changes?withComments=false`
   );
-  return values.map(f => f.path.toString);
+  return values.map((f) => f.path.toString);
 }
 
 export async function updatePr(

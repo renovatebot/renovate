@@ -12,7 +12,7 @@ describe('nuget.', () => {
       '17.04',
       '3.0.0.beta',
       '5.1.2-+',
-    ].forEach(version => {
+    ].forEach((version) => {
       it(version, () => {
         expect(nuget.isVersion(version)).toMatchSnapshot();
         expect(nuget.isValid(version)).toMatchSnapshot();
@@ -27,7 +27,7 @@ describe('nuget.', () => {
       '2.0.2-pre20191018090318',
       '1.0.0+c30d7625',
       '2.3.4-beta+1990ef74',
-    ].forEach(version => {
+    ].forEach((version) => {
       it(version, () => {
         expect(nuget.isStable(version)).toMatchSnapshot();
       });

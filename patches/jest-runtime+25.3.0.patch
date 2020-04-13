@@ -1,0 +1,35 @@
+diff --git a/node_modules/jest-runtime/build/index.js b/node_modules/jest-runtime/build/index.js
+index 15407cf..14c2178 100644
+--- a/node_modules/jest-runtime/build/index.js
++++ b/node_modules/jest-runtime/build/index.js
+@@ -1103,7 +1103,29 @@ class Runtime {
+       return this._getMockedNativeModule();
+     }
+ 
+-    return require(moduleName);
++    if (!this._coreModulesProxyCache) {
++      this._coreModulesProxyCache = Object.create(null);
++    }
++
++    if (this._coreModulesProxyCache[moduleName]) {
++      return this._coreModulesProxyCache[moduleName];
++    }
++
++    const mod = require(moduleName);
++    const forbidden = ['http', 'https'];
++
++    const set = (
++      target,
++      property,
++      value,
++      receiver,
++    ) => {
++      if (target !== mod || typeof value !== 'function' || value._isMockFunction || forbidden.some(s => s === moduleName))
++        return Reflect.set(target, property, value, receiver);
++      return true;
++    };
++
++    return this._coreModulesProxyCache[moduleName] = new Proxy(mod, {set});
+   }
+ 
+   _getMockedNativeModule() {

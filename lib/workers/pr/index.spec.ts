@@ -147,7 +147,7 @@ describe('workers/pr', () => {
         displayNumber: 'New Pull Request',
       } as never);
       config.upgrades = [config];
-      platform.getPrBody = jest.fn(input => input);
+      platform.getPrBody = jest.fn((input) => input);
       platform.getBranchPr = jest.fn();
       platform.getBranchStatus = jest.fn();
     });
@@ -377,9 +377,7 @@ describe('workers/pr', () => {
     });
     it('should return unmodified existing PR if only whitespace changes', async () => {
       const modifiedPr = JSON.parse(
-        JSON.stringify(existingPr)
-          .replace(' ', '  ')
-          .replace('\n', '\r\n')
+        JSON.stringify(existingPr).replace(' ', '  ').replace('\n', '\r\n')
       );
       platform.getBranchPr.mockResolvedValueOnce(modifiedPr);
       config.semanticCommitScope = null;

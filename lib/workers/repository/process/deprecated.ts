@@ -53,7 +53,7 @@ export async function raiseDeprecationWarnings(
       issueTitleList.push(issueTitle);
       let issueBody = deprecationMessage;
       issueBody += `\n\nAffected package file(s): ${depPackageFiles
-        .map(f => '`' + f + '`')
+        .map((f) => '`' + f + '`')
         .join(', ')}`;
       issueBody += `\n\nIf you don't care about this, you can close this issue and not be warned about \`${depName}\`'s deprecation again. If you would like to completely disable all future deprecation warnings then add the following to your config:\n\n\`\`\`\n"suppressNotifications": ["deprecationWarningIssues"]\n\`\`\`\n\n`;
       // istanbul ignore if
@@ -74,7 +74,7 @@ export async function raiseDeprecationWarnings(
     const issueList = await platform.getIssueList();
     if (issueList && issueList.length) {
       const deprecatedIssues = issueList.filter(
-        i => i.title.startsWith(issueTitlePrefix) && i.state === 'open'
+        (i) => i.title.startsWith(issueTitlePrefix) && i.state === 'open'
       );
       for (const i of deprecatedIssues) {
         if (!issueTitleList.includes(i.title)) {

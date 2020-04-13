@@ -69,9 +69,7 @@ describe(getName(__filename), () => {
     expect(res).toBeNull();
   });
   it('should fetch package info from npm', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
@@ -96,9 +94,7 @@ describe(getName(__filename), () => {
         '0.0.1': '2018-05-06T07:21:53+02:00',
       },
     };
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, pkg);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
@@ -119,9 +115,7 @@ describe(getName(__filename), () => {
         '0.0.1': '2018-05-06T07:21:53+02:00',
       },
     };
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, pkg);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
@@ -158,9 +152,7 @@ describe(getName(__filename), () => {
     expect(res.deprecationMessage).toMatchSnapshot();
   });
   it('should handle foobar', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
   });
@@ -173,74 +165,52 @@ describe(getName(__filename), () => {
   });
   it('should handle no time', async () => {
     delete npmResponse.time['0.0.2'];
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
   });
   it('should return canBeUnpublished=true', async () => {
-    npmResponse.time['0.0.2'] = moment()
-      .subtract(6, 'hours')
-      .format();
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    npmResponse.time['0.0.2'] = moment().subtract(6, 'hours').format();
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(true);
   });
   it('should return null if lookup fails 401', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(401);
+    nock('https://registry.npmjs.org').get('/foobar').reply(401);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toBeNull();
   });
   it('should return null if lookup fails', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(404);
+    nock('https://registry.npmjs.org').get('/foobar').reply(404);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toBeNull();
   });
   it('should throw error for unparseable', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, 'oops');
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, 'oops');
     await expect(npm.getReleases({ lookupName: 'foobar' })).rejects.toThrow();
   });
   it('should throw error for 429', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(429);
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(429);
+    nock('https://registry.npmjs.org').get('/foobar').reply(429);
+    nock('https://registry.npmjs.org').get('/foobar').reply(429);
     await expect(npm.getReleases({ lookupName: 'foobar' })).rejects.toThrow();
   });
   it('should throw error for 5xx', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(503);
+    nock('https://registry.npmjs.org').get('/foobar').reply(503);
     await expect(npm.getReleases({ lookupName: 'foobar' })).rejects.toThrow(
       Error(DATASOURCE_FAILURE)
     );
   });
   it('should throw error for 408', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(408);
+    nock('https://registry.npmjs.org').get('/foobar').reply(408);
     await expect(npm.getReleases({ lookupName: 'foobar' })).rejects.toThrow(
       Error(DATASOURCE_FAILURE)
     );
   });
   it('should throw error for others', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(451);
+    nock('https://registry.npmjs.org').get('/foobar').reply(451);
     await expect(npm.getReleases({ lookupName: 'foobar' })).rejects.toThrow();
   });
   it('should send an authorization header if provided', async () => {
@@ -248,16 +218,12 @@ describe(getName(__filename), () => {
       type: 'Basic',
       token: '1234',
     }));
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await npm.getReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
   });
   it('should use NPM_TOKEN if provided', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const oldToken = process.env.NPM_TOKEN;
     process.env.NPM_TOKEN = 'some-token';
     const res = await npm.getReleases({ lookupName: 'foobar' });
@@ -300,17 +266,13 @@ describe(getName(__filename), () => {
     npm.setNpmrc();
   });
   it('should use default registry if missing from npmrc', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const npmrc = 'foo=bar';
     const res = await npm.getReleases({ lookupName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
     const res1 = await npm.getReleases({ lookupName: 'foobar', npmrc });
     const res2 = await npm.getReleases({ lookupName: 'foobar', npmrc });
