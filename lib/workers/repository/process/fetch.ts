@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
@@ -9,12 +8,8 @@ import {
   ManagerConfig,
 } from '../../../config';
 import { applyPackageRules } from '../../../util/package-rules';
-import { lookupUpdates, LookupUpdateConfig, UpdateResult } from './lookup';
-import {
-  PackageFile,
-  PackageDependency,
-  PackageUpdateResult,
-} from '../../../manager/common';
+import { lookupUpdates, LookupUpdateConfig } from './lookup';
+import { PackageFile, PackageDependency } from '../../../manager/common';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
 
@@ -48,17 +43,10 @@ async function fetchDepUpdates(
     logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
     dep.skipReason = SkipReason.Disabled;
   } else {
-    let lookupResults: UpdateResult | PackageUpdateResult[];
     if (depConfig.datasource) {
-      lookupResults = await lookupUpdates(depConfig as LookupUpdateConfig);
+      Object.assign(dep, await lookupUpdates(depConfig as LookupUpdateConfig));
     } else {
-      lookupResults = await getPackageUpdates(manager, depConfig);
-    }
-    // istanbul ignore else
-    if (is.array(lookupResults)) {
-      dep.updates = lookupResults;
-    } else {
-      Object.assign(dep, lookupResults);
+      dep.updates = await getPackageUpdates(manager, depConfig);
     }
     // istanbul ignore if
     if (dep.updates.length) {
