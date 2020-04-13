@@ -10,8 +10,7 @@ import {
   Release,
   isGetPkgReleasesConfig,
 } from '../../../../datasource';
-import { LookupUpdate } from './common';
-import { RangeConfig } from '../../../../manager/common';
+import { RangeConfig, LookupUpdate } from '../../../../manager/common';
 import {
   RenovateConfig,
   UpdateType,
