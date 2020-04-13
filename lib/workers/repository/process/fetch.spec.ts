@@ -84,7 +84,7 @@ describe('workers/repository/process/fetch', () => {
       };
       // TODO: fix types
       npm.getPackageUpdates = jest.fn((_) => ['a', 'b'] as never);
-      lookupUpdates.mockResolvedValue(['a', 'b'] as never);
+      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
