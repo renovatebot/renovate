@@ -8,9 +8,9 @@ export function getIncludedFiles(
   if (!(includePaths && includePaths.length)) {
     return fileList;
   }
-  return fileList.filter(file =>
+  return fileList.filter((file) =>
     includePaths.some(
-      includePath =>
+      (includePath) =>
         file === includePath || minimatch(file, includePath, { dot: true })
     )
   );
@@ -24,9 +24,9 @@ export function filterIgnoredFiles(
     return fileList;
   }
   return fileList.filter(
-    file =>
+    (file) =>
       !ignorePaths.some(
-        ignorePath =>
+        (ignorePath) =>
           file.includes(ignorePath) ||
           minimatch(file, ignorePath, { dot: true })
       )
@@ -42,7 +42,9 @@ export function getMatchingFiles(
   for (const fileMatch of fileMatchList) {
     logger.debug(`Using file match: ${fileMatch} for manager ${manager}`);
     const re = new RegExp(fileMatch);
-    matchedFiles = matchedFiles.concat(fileList.filter(file => re.test(file)));
+    matchedFiles = matchedFiles.concat(
+      fileList.filter((file) => re.test(file))
+    );
   }
   // filter out duplicates
   return [...new Set(matchedFiles)];

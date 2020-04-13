@@ -73,10 +73,10 @@ describe('datasource/rubygems', () => {
       expect(res.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
       expect(
-        res.releases.find(release => release.version === '0.1.1')
+        res.releases.find((release) => release.version === '0.1.1')
       ).toBeDefined();
       expect(
-        res.releases.find(release => release.version === '0.1.2')
+        res.releases.find((release) => release.version === '0.1.2')
       ).toBeUndefined();
     });
 

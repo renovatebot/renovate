@@ -87,7 +87,7 @@ function getFilteredObject(input: any): any {
   for (const field of allAllowed) {
     const value = obj[field];
     if (is.array(value)) {
-      res[field] = value.map(element => getFilteredObject(element));
+      res[field] = value.map((element) => getFilteredObject(element));
     } else if (is.object(value)) {
       res[field] = getFilteredObject(value);
     } else if (!is.undefined(value)) {

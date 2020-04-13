@@ -270,6 +270,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'string',
   },
+  {
+    name: 'composerIgnorePlatformReqs',
+    description:
+      'Enable / disable use of --ignore-platform-reqs in the composer package manager.',
+    type: 'boolean',
+    default: true,
+    admin: true,
+  },
   // Log options
   {
     name: 'logLevel',

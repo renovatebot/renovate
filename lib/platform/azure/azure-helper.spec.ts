@@ -130,7 +130,7 @@ describe('platform/azure/helpers', () => {
         objectMode: true,
         /* eslint-disable func-names */
         /* eslint-disable object-shorthand */
-        read: function() {
+        read: function () {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"typeKey": "GitItemNotFoundException"}');
@@ -160,7 +160,7 @@ describe('platform/azure/helpers', () => {
         objectMode: true,
         /* eslint-disable func-names */
         /* eslint-disable object-shorthand */
-        read: function() {
+        read: function () {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"typeKey": "GitUnresolvableToCommitException"}');
@@ -190,7 +190,7 @@ describe('platform/azure/helpers', () => {
         objectMode: true,
         /* eslint-disable func-names */
         /* eslint-disable object-shorthand */
-        read: function() {
+        read: function () {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"hello"= "test"}');

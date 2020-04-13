@@ -39,7 +39,7 @@ function extractUrls(content: string): string[] | null {
     .replace(/urls?=\[/, '')
     .replace(/,?\]$/, '')
     .split(',')
-    .map(url => url.replace(/"/g, ''));
+    .map((url) => url.replace(/"/g, ''));
   return urls;
 }
 
@@ -67,7 +67,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (
-    await Promise.all(urls.map(url => getHashFromUrl(url)))
+    await Promise.all(urls.map((url) => getHashFromUrl(url)))
   ).filter(Boolean);
   const distinctHashes = [...new Set(hashes)];
   if (!distinctHashes.length) {
@@ -151,7 +151,7 @@ export async function updateDependency({
       );
       const match =
         upgrade.managerData.def.match(/(?<=archive\/).*(?=\.tar\.gz)/g) || [];
-      match.forEach(matchedHash => {
+      match.forEach((matchedHash) => {
         newDef = newDef.replace(matchedHash, upgrade.newDigest);
       });
     }

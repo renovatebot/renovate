@@ -23,7 +23,7 @@ describe('lib/manager/gitlabci-include/extract', () => {
         'http://gitlab.test/api/v4',
         'http://gitlab.test/api/v4/',
       ];
-      endpoints.forEach(endpoint => {
+      endpoints.forEach((endpoint) => {
         const res = extractPackageFile(yamlFile, '.gitlab-ci.yml', {
           endpoint,
         });

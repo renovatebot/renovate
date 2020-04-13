@@ -24,7 +24,7 @@ const origContent = readFileSync(
 );
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
-  return deps.find(dep => dep.depName === name);
+  return deps.find((dep) => dep.depName === name);
 }
 
 describe('manager/maven', () => {

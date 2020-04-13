@@ -39,6 +39,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   compatibility?: Record<string, string>;
   cacheDir?: string;
+  composerIgnorePlatformReqs?: boolean;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
 
@@ -52,8 +53,8 @@ export interface PackageUpdateConfig {
 }
 
 export interface PackageUpdateResult {
-  newValue: string[];
-  newMajor: string;
+  newValue: string;
+  newMajor: number;
   isRange: boolean;
   sourceUrl: string;
 }

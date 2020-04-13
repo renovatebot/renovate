@@ -32,7 +32,7 @@ shell.echo(`Dispatching version: ${version}`);
       },
     },
   });
-})().catch(e => {
+})().catch((e) => {
   // Ignore for now
   shell.echo(e.toString());
 });

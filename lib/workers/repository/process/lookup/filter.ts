@@ -35,15 +35,17 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredVersions = versions.filter(v =>
+  let filteredVersions = versions.filter((v) =>
     version.isGreaterThan(v, fromVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
-  const fromRelease = releases.find(release => release.version === fromVersion);
+  const fromRelease = releases.find(
+    (release) => release.version === fromVersion
+  );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
-    filteredVersions = filteredVersions.filter(v => {
-      const versionRelease = releases.find(release => release.version === v);
+    filteredVersions = filteredVersions.filter((v) => {
+      const versionRelease = releases.find((release) => release.version === v);
       if (versionRelease.isDeprecated) {
         logger.debug(
           `Skipping ${config.depName}@${v} because it is deprecated`
@@ -56,7 +58,7 @@ export function filterVersions(
 
   if (allowedVersions) {
     if (version.isValid(allowedVersions)) {
-      filteredVersions = filteredVersions.filter(v =>
+      filteredVersions = filteredVersions.filter((v) =>
         version.matches(v, allowedVersions)
       );
     } else if (
@@ -67,7 +69,7 @@ export function filterVersions(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions'
       );
-      filteredVersions = filteredVersions.filter(v =>
+      filteredVersions = filteredVersions.filter((v) =>
         semver.satisfies(semver.coerce(v), allowedVersions)
       );
     } else {
@@ -90,7 +92,7 @@ export function filterVersions(
   if (!version.isStable(fromVersion)) {
     // Allow unstable only in current major
     return filteredVersions.filter(
-      v =>
+      (v) =>
         version.isStable(v) ||
         (version.getMajor(v) === version.getMajor(fromVersion) &&
           version.getMinor(v) === version.getMinor(fromVersion) &&
@@ -99,7 +101,7 @@ export function filterVersions(
   }
 
   // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter(v => version.isStable(v));
+  filteredVersions = filteredVersions.filter((v) => version.isStable(v));
 
   // Filter the latest
 
@@ -116,5 +118,7 @@ export function filterVersions(
   if (version.isGreaterThan(fromVersion, latestVersion)) {
     return filteredVersions;
   }
-  return filteredVersions.filter(v => !version.isGreaterThan(v, latestVersion));
+  return filteredVersions.filter(
+    (v) => !version.isGreaterThan(v, latestVersion)
+  );
 }

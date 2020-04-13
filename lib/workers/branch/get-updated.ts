@@ -104,7 +104,7 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
-  const updatedPackageFiles = Object.keys(updatedFileContents).map(name => ({
+  const updatedPackageFiles = Object.keys(updatedFileContents).map((name) => ({
     name,
     contents: updatedFileContents[name],
   }));

@@ -52,7 +52,7 @@ export function mockExecSequence(
   execResults: ExecResult[]
 ): ExecSnapshots {
   const snapshots = [];
-  execResults.forEach(execResult => {
+  execResults.forEach((execResult) => {
     execFn.mockImplementationOnce((cmd, options, callback) => {
       snapshots.push(execSnapshot(cmd, options));
       if (execResult instanceof Error) {

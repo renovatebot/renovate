@@ -108,7 +108,7 @@ export async function getPkgReleases(
   }
   if (res.releases) {
     res.releases = res.releases
-      .filter(release => version.isVersion(release.version))
+      .filter((release) => version.isVersion(release.version))
       .sort(sortReleases);
   }
   return res;

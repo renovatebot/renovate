@@ -17,9 +17,7 @@ describe('config/presets/npm', () => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
   });
   it('should throw if no package', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/nopackage')
-      .reply(404);
+    nock('https://registry.npmjs.org').get('/nopackage').reply(404);
     await expect(npm.getPreset('nopackage', 'default')).rejects.toThrow(
       /dep not found/
     );
