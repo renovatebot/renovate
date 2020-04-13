@@ -1587,7 +1587,7 @@ const options: RenovateOptions[] = [
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
-      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}` {{{releaseTimestamp}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
     },

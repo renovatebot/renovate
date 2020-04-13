@@ -1,3 +1,4 @@
+import fs from 'fs';
 import * as template from '../../../util/template';
 import { logger } from '../../../logger';
 import { BranchConfig } from '../../common';
@@ -13,6 +14,7 @@ function getTableDefinition(config: BranchConfig): TableDefinition[] {
     const value = config.prBodyDefinitions[header];
     res.push({ header, value });
   }
+
   return res;
 }
 
@@ -35,6 +37,8 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
+  const str = JSON.stringify(config, null, 4);
+  fs.writeFileSync('yarn.txt', str);
   const tableDefinitions = getTableDefinition(config);
   const tableValues = config.upgrades.map(upgrade => {
     const res: Record<string, string> = {};

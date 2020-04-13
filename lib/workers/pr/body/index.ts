@@ -14,6 +14,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach(upgrade => {
     /* eslint-disable no-param-reassign */
     const { homepage, sourceUrl, sourceDirectory, changelogUrl } = upgrade;
+    console.log('releaseTimeStamp', upgrade.releaseTimestamp);
     let depNameLinked = upgrade.depName;
     const primaryLink = homepage || sourceUrl;
     if (primaryLink) {

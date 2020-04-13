@@ -44,6 +44,7 @@ export const allowedFields = {
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
   displayTo: 'The to value, formatted for display',
+  releaseTimestamp: 'The release timeStamp of the newer version',
   fromVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
   isLockfileUpdate: 'true if the branch is a lock file update',
