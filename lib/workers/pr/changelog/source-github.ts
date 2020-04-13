@@ -1,5 +1,5 @@
 import URL from 'url';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import { GithubHttp } from '../../../util/http/github';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
@@ -9,7 +9,7 @@ import { Release } from '../../../datasource';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { BranchUpgradeConfig } from '../../common';
 
-const { get: ghGot } = api;
+const http = new GithubHttp();
 
 async function getTags(
   endpoint: string,
@@ -21,7 +21,7 @@ async function getTags(
     : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
   url += `repos/${repository}/tags?per_page=100`;
   try {
-    const res = await ghGot<{ name: string }[]>(url, {
+    const res = await http.getJson<{ name: string }[]>(url, {
       paginate: true,
     });
 

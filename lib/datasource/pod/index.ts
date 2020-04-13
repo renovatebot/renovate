@@ -1,11 +1,14 @@
 import crypto from 'crypto';
-import { api } from '../../platform/github/gh-got-wrapper';
+import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
+import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
 export const id = 'pod';
 
 export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+
+const http = new GithubHttp(id);
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
@@ -36,16 +39,15 @@ async function makeRequest<T = unknown>(
   json = true
 ): Promise<T | null> {
   try {
-    const resp = await api.get(url, { json });
-    if (resp && resp.body) {
-      return resp.body;
-    }
+    const res = json ? await http.getJson<T>(url) : await http.get(url);
+    return res.body as T;
   } catch (err) {
     const errorData = { lookupName, err };
 
     if (
       err.statusCode === 429 ||
-      (err.statusCode >= 500 && err.statusCode < 600)
+      (err.statusCode >= 500 && err.statusCode < 600) ||
+      err.message === PLATFORM_FAILURE
     ) {
       logger.warn({ lookupName, err }, `CocoaPods registry failure`);
       throw new Error('registry-failure');

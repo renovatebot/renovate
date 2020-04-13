@@ -1,15 +1,15 @@
-import { api } from '../../../platform/github/gh-got-wrapper';
+import _got from '../../../util/got';
 import * as hostRules from '../../../util/host-rules';
 import { getChangeLogJSON, ChangeLogError } from '.';
-import { mocked, partial } from '../../../../test/util';
+import { partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
 
-jest.mock('../../../platform/github/gh-got-wrapper');
+jest.mock('../../../util/got');
 jest.mock('../../../datasource/npm');
 
-const ghGot = mocked(api).get;
+const got: any = _got;
 
 const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
@@ -35,7 +35,8 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
-      ghGot.mockClear();
+      jest.resetAllMocks();
+      jest.resetModules();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
@@ -51,7 +52,7 @@ describe('workers/pr/changelog', () => {
           fromVersion: null,
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
+      expect(got).toHaveBeenCalledTimes(0);
     });
     it('returns null if no fromVersion', async () => {
       expect(
@@ -60,7 +61,7 @@ describe('workers/pr/changelog', () => {
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
+      expect(got).toHaveBeenCalledTimes(0);
     });
     it('returns null if fromVersion equals toVersion', async () => {
       expect(
@@ -70,7 +71,7 @@ describe('workers/pr/changelog', () => {
           toVersion: '1.0.0',
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
+      expect(got).toHaveBeenCalledTimes(0);
     });
     it('skips invalid repos', async () => {
       expect(
@@ -88,7 +89,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
-      ghGot.mockResolvedValueOnce({
+      got.mockResolvedValueOnce({
         body: [
           { name: '0.9.0' },
           { name: '1.0.0' },
@@ -105,7 +106,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('filters unnecessary warns', async () => {
-      ghGot.mockImplementation(() => {
+      got.mockImplementation(() => {
         throw new Error('Unknown Github Repo');
       });
       expect(

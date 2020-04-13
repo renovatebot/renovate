@@ -3,11 +3,11 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 import * as URL from 'url';
 
-import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
 import { ChangeLogResult, ChangeLogNotes } from './common';
+import { GithubHttp } from '../../../util/http/github';
 
-const { get: ghGot } = api;
+const http = new GithubHttp();
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -24,7 +24,7 @@ export async function getReleaseList(
   try {
     let url = githubApiBaseURL.replace(/\/?$/, '/');
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await ghGot<
+    const res = await http.getJson<
       {
         html_url: string;
         id: number;
@@ -160,7 +160,7 @@ export async function getReleaseNotesMd(
     let apiPrefix = githubApiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
-    const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
+    const filesRes = await http.getJson<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
       .map((f) => f.name)
       .filter((f) => changelogFilenameRegex.test(f));
@@ -175,7 +175,7 @@ export async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
-    const fileRes = await ghGot<{ content: string }>(
+    const fileRes = await http.getJson<{ content: string }>(
       `${apiPrefix}/${changelogFile}`
     );
     changelogMd =

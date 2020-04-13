@@ -1,12 +1,11 @@
-import { api } from '../../platform/github/gh-got-wrapper';
+import _got from '../../util/got';
 
 import * as github from '.';
 
-jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
-const ghGot: any = api.get;
+const got: any = _got;
 
 describe('datasource/github-releases', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -19,7 +18,7 @@ describe('datasource/github-releases', () => {
         { tag_name: '1.0.0', published_at: '2020-03-09T11:00:00Z' },
         { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
       ];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
+      got.mockReturnValueOnce({ headers: {}, body });
       const res = await github.getReleases({
         lookupName: 'some/dep',
       });

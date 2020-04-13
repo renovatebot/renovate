@@ -1,8 +1,6 @@
-import { api } from '../../platform/github/gh-got-wrapper';
+import { GithubHttp } from '../../util/http/github';
 import { ReleaseResult, GetReleasesConfig } from '../common';
 import { logger } from '../../logger';
-
-const { get: ghGot } = api;
 
 export const id = 'github-releases';
 
@@ -12,6 +10,8 @@ type GithubRelease = {
   tag_name: string;
   published_at: string;
 };
+
+const http = new GithubHttp(id);
 
 /**
  * github.getReleases
@@ -37,7 +37,7 @@ export async function getReleases({
   }
   try {
     const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-    const res = await ghGot<GithubRelease[]>(url, {
+    const res = await http.getJson<GithubRelease[]>(url, {
       paginate: true,
     });
     githubReleases = res.body;
