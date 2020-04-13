@@ -100,12 +100,11 @@ export async function getPackageUpdates(
     }
   }
   logger.debug({ supportPolicy }, `supportPolicy`);
-  // TODO: `newValue` is a (string | number)[] !
   let newValue: any[] = (supportPolicy as (keyof NodeJsPolicies)[])
     .map((policy) => policies[policy])
     .reduce((result, policy) => result.concat(policy), [])
     .sort((a, b) => a - b);
-  const newMajor = newValue[newValue.length - 1];
+  const newMajor: number = newValue[newValue.length - 1];
   if (config.rangeStrategy === 'pin' || isVersion(config.currentValue[0])) {
     const versions = (
       await getPkgReleases({
@@ -130,7 +129,7 @@ export async function getPackageUpdates(
   }
   return [
     {
-      newValue,
+      newValue: newValue.join(','),
       newMajor,
       isRange: true,
       sourceUrl: 'https://github.com/nodejs/node',

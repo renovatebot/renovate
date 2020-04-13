@@ -53,8 +53,8 @@ export interface PackageUpdateConfig {
 }
 
 export interface PackageUpdateResult {
-  newValue: string[];
-  newMajor: string;
+  newValue: string;
+  newMajor: number;
   isRange: boolean;
   sourceUrl: string;
 }
