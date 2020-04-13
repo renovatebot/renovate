@@ -8,6 +8,7 @@ import {
   supportsDigests,
   getDigest,
   Release,
+  isGetPkgReleasesConfig,
 } from '../../../../datasource';
 import { LookupUpdate } from './common';
 import { RangeConfig } from '../../../../manager/common';
@@ -92,10 +93,10 @@ function getFromVersion(
     return currentValue.replace(/=/g, '').trim();
   }
   logger.trace(`currentValue ${currentValue} is range`);
-  let useVersions = allVersions.filter(v => version.matches(v, currentValue));
+  let useVersions = allVersions.filter((v) => version.matches(v, currentValue));
   if (latestVersion && version.matches(latestVersion, currentValue)) {
     useVersions = useVersions.filter(
-      v => !version.isGreaterThan(v, latestVersion)
+      (v) => !version.isGreaterThan(v, latestVersion)
     );
   }
   if (rangeStrategy === 'pin') {
@@ -143,6 +144,12 @@ export async function lookupUpdates(
     res.skipReason = SkipReason.InvalidValue;
   }
 
+  // istanbul ignore if
+  if (!isGetPkgReleasesConfig(config)) {
+    res.skipReason = SkipReason.Unknown;
+    return res;
+  }
+
   if (isValid) {
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
@@ -181,8 +188,8 @@ export async function lookupUpdates(
     const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = releases
-      .map(release => release.version)
-      .filter(v => version.isVersion(v));
+      .map((release) => release.version)
+      .filter((v) => version.isVersion(v));
     // istanbul ignore if
     if (allVersions.length === 0) {
       const message = `Found no results from datasource that look like a version`;
@@ -201,14 +208,14 @@ export async function lookupUpdates(
         return res;
       }
       allVersions = allVersions.filter(
-        v =>
+        (v) =>
           v === taggedVersion ||
           (v === currentValue &&
             version.isGreaterThan(taggedVersion, currentValue))
       );
     }
     // Check that existing constraint can be satisfied
-    const allSatisfyingVersions = allVersions.filter(v =>
+    const allSatisfyingVersions = allVersions.filter((v) =>
       version.matches(v, currentValue)
     );
     if (config.rollbackPrs && !allSatisfyingVersions.length) {
@@ -229,8 +236,8 @@ export async function lookupUpdates(
       rangeStrategy = 'bump';
     }
     const nonDeprecatedVersions = releases
-      .filter(release => !release.isDeprecated)
-      .map(release => release.version);
+      .filter((release) => !release.isDeprecated)
+      .map((release) => release.version);
     const fromVersion =
       getFromVersion(
         config,
@@ -267,7 +274,7 @@ export async function lookupUpdates(
       dependency.latestVersion,
       allVersions,
       releases
-    ).filter(v =>
+    ).filter((v) =>
       // Leave only compatible versions
       version.isCompatible(v, currentValue)
     );
@@ -318,7 +325,7 @@ export async function lookupUpdates(
       if (!version.isVersion(update.newValue)) {
         update.isRange = true;
       }
-      const updateRelease = releases.find(release =>
+      const updateRelease = releases.find((release) =>
         version.equals(release.version, toVersion)
       );
       // TODO: think more about whether to just Object.assign this
@@ -327,8 +334,9 @@ export async function lookupUpdates(
         'canBeUnpublished',
         'downloadUrl',
         'checksumUrl',
+        'newDigest',
       ];
-      releaseFields.forEach(field => {
+      releaseFields.forEach((field) => {
         if (updateRelease[field] !== undefined) {
           update[field] = updateRelease[field];
         }
@@ -357,7 +365,7 @@ export async function lookupUpdates(
     }
   }
   // Add digests if necessary
-  if (supportsDigests(config)) {
+  if (config.newDigest || (await supportsDigests(config))) {
     if (
       config.currentDigest &&
       config.datasource !== datasourceGitSubmodules.id
@@ -371,7 +379,7 @@ export async function lookupUpdates(
       }
     } else if (config.pinDigests) {
       // Create a pin only if one doesn't already exists
-      if (!res.updates.some(update => update.updateType === 'pin')) {
+      if (!res.updates.some((update) => update.updateType === 'pin')) {
         // pin digest
         res.updates.push({
           updateType: 'pin',
@@ -395,7 +403,8 @@ export async function lookupUpdates(
     // update digest for all
     for (const update of res.updates) {
       if (config.pinDigests || config.currentDigest) {
-        update.newDigest = await getDigest(config, update.newValue);
+        update.newDigest =
+          update.newDigest || (await getDigest(config, update.newValue));
         if (update.newDigest) {
           update.newDigestShort = update.newDigest
             .replace('sha256:', '')
@@ -424,14 +433,14 @@ export async function lookupUpdates(
   }
   // Strip out any non-changed ones
   res.updates = res.updates
-    .filter(update => update.newDigest !== null)
+    .filter((update) => update.newDigest !== null)
     .filter(
-      update =>
+      (update) =>
         update.newValue !== config.currentValue ||
         update.isLockfileUpdate ||
         (update.newDigest && !update.newDigest.startsWith(config.currentDigest))
     );
-  if (res.updates.some(update => update.updateType === 'pin')) {
+  if (res.updates.some((update) => update.updateType === 'pin')) {
     for (const update of res.updates) {
       if (update.updateType !== 'pin' && update.updateType !== 'rollback') {
         update.blockedByPin = true;

@@ -1,12 +1,11 @@
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import semver from 'semver';
 import URL from 'url';
 
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -19,6 +18,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -243,7 +243,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  cleanRepo();
+  await cleanRepo();
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -389,7 +389,7 @@ export async function initRepo({
         token: forkToken || opts.token,
         paginate: true,
       })
-    ).body.map(r => r.full_name);
+    ).body.map((r) => r.full_name);
     try {
       config.repository = (
         await api.post(`repos/${repository}/forks`, {
@@ -901,8 +901,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
         // Check against gitAuthor
         const commitAuthorEmail = (
           await api.get(
-            `repos/${config.parentRepo ||
-              config.repository}/pulls/${prNo}/commits`
+            `repos/${
+              config.parentRepo || config.repository
+            }/pulls/${prNo}/commits`
           )
         ).body[0].commit.author.email;
         if (commitAuthorEmail === global.gitAuthor.email) {
@@ -934,8 +935,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       logger.debug({ prNo }, 'Checking all commits');
       const prCommits = (
         await api.get(
-          `repos/${config.parentRepo ||
-            config.repository}/pulls/${prNo}/commits`
+          `repos/${
+            config.parentRepo || config.repository
+          }/pulls/${prNo}/commits`
         )
       ).body;
       // Filter out "Update branch" presses
@@ -991,8 +993,9 @@ export async function getPrList(): Promise<Pr[]> {
     let res;
     try {
       res = await api.get(
-        `repos/${config.parentRepo ||
-          config.repository}/pulls?per_page=100&state=all`,
+        `repos/${
+          config.parentRepo || config.repository
+        }/pulls?per_page=100&state=all`,
         { paginate: true }
       );
     } catch (err) /* istanbul ignore next */ {
@@ -1036,7 +1039,7 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
-    p =>
+    (p) =>
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state) &&
@@ -1058,11 +1061,13 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+// https://developer.github.com/v3/repos/statuses
+// https://developer.github.com/v3/checks/runs/
 type BranchState = 'failure' | 'pending' | 'success';
 
 interface GhBranchStatus {
   context: string;
-  state: BranchState;
+  state: BranchState | 'error';
 }
 
 interface CombinedBranchStatus {
@@ -1157,20 +1162,20 @@ export async function getBranchStatus(
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
     }
-    if (commitStatus.state === 'failed') {
+    if (commitStatus.state === 'failure') {
       return BranchStatus.red;
     }
     return BranchStatus.yellow;
   }
   if (
-    commitStatus.state === 'failed' ||
-    checkRuns.some(run => run.conclusion === 'failed')
+    commitStatus.state === 'failure' ||
+    checkRuns.some((run) => run.conclusion === 'failure')
   ) {
     return BranchStatus.red;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
-    checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
+    checkRuns.every((run) => ['neutral', 'success'].includes(run.conclusion))
   ) {
     return BranchStatus.green;
   }
@@ -1190,7 +1195,8 @@ async function getStatusCheck(
 
 const githubToRenovateStatusMapping = {
   success: BranchStatus.green,
-  failed: BranchStatus.red,
+  error: BranchStatus.red,
+  failure: BranchStatus.red,
   pending: BranchStatus.yellow,
 };
 
@@ -1264,7 +1270,7 @@ export async function setBranchStatus({
 // Issue
 
 /* istanbul ignore next */
-async function getGraphqlIssues(): Promise<Issue[]> {
+async function getIssues(): Promise<Issue[]> {
   // prettier-ignore
   const query = `
     query {
@@ -1288,50 +1294,16 @@ async function getGraphqlIssues(): Promise<Issue[]> {
   const result = await getGraphqlNodes<Issue>(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map(issue => ({
+  return result.map((issue) => ({
     ...issue,
     state: issue.state.toLowerCase(),
   }));
 }
 
-// istanbul ignore next
-async function getRestIssues(): Promise<Issue[]> {
-  logger.debug('Retrieving issueList');
-  const res = await api.get<
-    {
-      pull_request: boolean;
-      number: number;
-      state: string;
-      title: string;
-    }[]
-  >(
-    `repos/${config.repository}/issues?creator=${config.renovateUsername}&state=all&per_page=100&sort=created&direction=asc`,
-    { paginate: 'all', useCache: false }
-  );
-  // istanbul ignore if
-  if (!is.array(res.body)) {
-    logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
-    return [];
-  }
-  return res.body
-    .filter(issue => !issue.pull_request)
-    .map(i => ({
-      number: i.number,
-      state: i.state,
-      title: i.title,
-    }));
-}
-
 export async function getIssueList(): Promise<Issue[]> {
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
-    const filterBySupportMinimumGheVersion = '2.17.0';
-    // istanbul ignore next
-    config.issueList =
-      config.enterpriseVersion &&
-      semver.lt(config.enterpriseVersion, filterBySupportMinimumGheVersion)
-        ? await getRestIssues()
-        : await getGraphqlIssues();
+    config.issueList = await getIssues();
   }
   return config.issueList;
 }
@@ -1339,7 +1311,7 @@ export async function getIssueList(): Promise<Issue[]> {
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
-    i => i.state === 'open' && i.title === title
+    (i) => i.state === 'open' && i.title === title
   );
   if (!issue) {
     return null;
@@ -1376,9 +1348,9 @@ export async function ensureIssue({
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
-    const issues = issueList.filter(i => i.title === title);
+    const issues = issueList.filter((i) => i.title === title);
     if (issues.length) {
-      let issue = issues.find(i => i.state === 'open');
+      let issue = issues.find((i) => i.state === 'open');
       if (!issue) {
         if (once) {
           logger.debug('Issue already closed - skipping recreation');
@@ -1476,14 +1448,15 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
 
-  const userReviewers = reviewers.filter(e => !e.startsWith('team:'));
+  const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
-    .filter(e => e.startsWith('team:'))
-    .map(e => e.replace(/^team:/, ''));
+    .filter((e) => e.startsWith('team:'))
+    .map((e) => e.replace(/^team:/, ''));
   try {
     await api.post(
-      `repos/${config.parentRepo ||
-        config.repository}/pulls/${prNo}/requested_reviewers`,
+      `repos/${
+        config.parentRepo || config.repository
+      }/pulls/${prNo}/requested_reviewers`,
       {
         body: {
           reviewers: userReviewers,
@@ -1525,8 +1498,9 @@ export async function deleteLabel(
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
   await api.post(
-    `repos/${config.parentRepo ||
-      config.repository}/issues/${issueNo}/comments`,
+    `repos/${
+      config.parentRepo || config.repository
+    }/issues/${issueNo}/comments`,
     {
       body: { body },
     }
@@ -1536,8 +1510,9 @@ async function addComment(issueNo: number, body: string): Promise<void> {
 async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
   await api.patch(
-    `repos/${config.parentRepo ||
-      config.repository}/issues/comments/${commentId}`,
+    `repos/${
+      config.parentRepo || config.repository
+    }/issues/comments/${commentId}`,
     {
       body: { body },
     }
@@ -1547,8 +1522,9 @@ async function editComment(commentId: number, body: string): Promise<void> {
 async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
   await api.delete(
-    `repos/${config.parentRepo ||
-      config.repository}/issues/comments/${commentId}`
+    `repos/${
+      config.parentRepo || config.repository
+    }/issues/comments/${commentId}`
   );
 }
 
@@ -1560,8 +1536,9 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
-  const url = `repos/${config.parentRepo ||
-    config.repository}/issues/${issueNo}/comments?per_page=100`;
+  const url = `repos/${
+    config.parentRepo || config.repository
+  }/issues/${issueNo}/comments?per_page=100`;
   try {
     const comments = (
       await api.get<Comment[]>(url, {
@@ -1593,7 +1570,7 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${number}`);
       body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.body.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.body !== body;
@@ -1602,7 +1579,7 @@ export async function ensureComment({
     } else {
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.body === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -1647,7 +1624,7 @@ export async function ensureCommentRemoval(
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
   let commentId: number;
-  comments.forEach(comment => {
+  comments.forEach((comment) => {
     if (comment.body.startsWith(`### ${topic}\n\n`)) {
       commentId = comment.id;
     }
@@ -1797,8 +1774,9 @@ export async function mergePr(
     }
     logger.debug('Found approving reviews');
   }
-  const url = `repos/${config.parentRepo ||
-    config.repository}/pulls/${prNo}/merge`;
+  const url = `repos/${
+    config.parentRepo || config.repository
+  }/pulls/${prNo}/merge`;
   const options = {
     body: {} as any,
   };
@@ -1879,13 +1857,6 @@ export function getPrBody(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql vulnerabilityAlerts query on GHE'
-    );
-    return [];
-  }
   const headers = {
     accept: 'application/vnd.github.vixen-preview+json',
   };

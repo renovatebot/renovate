@@ -21,7 +21,7 @@ describe('lib/workers/global', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     configParser.parseConfigs = jest.fn();
-    platform.initPlatform.mockImplementation(input => Promise.resolve(input));
+    platform.initPlatform.mockImplementation((input) => Promise.resolve(input));
   });
   it('handles config warnings and errors', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({

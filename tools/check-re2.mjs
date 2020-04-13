@@ -1,5 +1,6 @@
 import shell from 'shelljs';
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   shell.echo('-n', 'Checking re2 ... ');
   try {

@@ -21,9 +21,9 @@ export function updateDependency({
     return fileContent;
   }
   const { depName, newValue } = upgrade;
-  const oldVersion = doc.dependencies.filter(dep => dep.name === depName)[0]
+  const oldVersion = doc.dependencies.filter((dep) => dep.name === depName)[0]
     .version;
-  doc.dependencies = doc.dependencies.map(dep =>
+  doc.dependencies = doc.dependencies.map((dep) =>
     dep.name === depName ? { ...dep, version: newValue } : dep
   );
   const searchString = `${oldVersion}`;

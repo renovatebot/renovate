@@ -26,7 +26,10 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
   await raiseDeprecationWarnings(config, packageFiles);
-  const { branches, branchList } = branchifyUpgrades(config, packageFiles);
+  const { branches, branchList } = await branchifyUpgrades(
+    config,
+    packageFiles
+  );
   sortBranches(branches);
   return { branches, branchList, packageFiles };
 }

@@ -4,7 +4,7 @@ import delay from 'delay';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -20,6 +20,7 @@ import {
   EnsureCommentConfig,
   EnsureIssueResult,
   EnsureIssueConfig,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,7 +32,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -234,13 +235,23 @@ export async function initRepo({
   }
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
+export async function getRepoForceRebase(): Promise<boolean> {
   logger.debug(`getRepoForceRebase()`);
-  // TODO if applicable
-  // This function should return true only if the user has enabled a setting on the repo that enforces PRs to be kept up to date with master
-  // In such cases we rebase Renovate branches every time they fall behind
-  // In GitHub this is part of "branch protection"
-  return Promise.resolve(false);
+
+  // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
+  const res = await api.get(
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`
+  );
+
+  // If the default merge strategy contains `ff-only` the PR can only be merged
+  // if it is up to date with the base branch.
+  // The current options for id are:
+  // no-ff, ff, ff-only, rebase-no-ff, rebase-ff-only, squash, squash-ff-only
+  return Boolean(
+    res.body.mergeConfig &&
+      res.body.mergeConfig.defaultStrategy &&
+      res.body.mergeConfig.defaultStrategy.id.indexOf('ff-only') >= 0
+  );
 }
 
 export async function setBaseBranch(
@@ -722,9 +733,10 @@ export async function addReviewers(
       {
         body: {
           title: pr.title,
-          description: pr.description,
           version: pr.version,
-          reviewers: Array.from(reviewersSet).map(name => ({ user: { name } })),
+          reviewers: Array.from(reviewersSet).map((name) => ({
+            user: { name },
+          })),
         },
       }
     );
@@ -831,7 +843,7 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${number}`);
       body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.text !== body;
@@ -840,7 +852,7 @@ export async function ensureComment({
     } else {
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.text === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -877,7 +889,7 @@ export async function ensureCommentRemoval(
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(prNo);
     let commentId: number;
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
       if (comment.text.startsWith(`### ${topic}\n\n`)) {
         commentId = comment.id;
       }
@@ -993,7 +1005,7 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
   const values = await utils.accumulateValues<{ path: { toString: string } }>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/changes?withComments=false`
   );
-  return values.map(f => f.path.toString);
+  return values.map((f) => f.path.toString);
 }
 
 export async function updatePr(

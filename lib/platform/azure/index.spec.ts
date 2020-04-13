@@ -18,7 +18,7 @@ describe('platform/azure', () => {
     jest.mock('../git/storage');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
-    require('../../util/sanitize').sanitize = jest.fn(input => input);
+    require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
@@ -48,8 +48,8 @@ describe('platform/azure', () => {
     });
   });
 
-  afterEach(() => {
-    azure.cleanRepo();
+  afterEach(async () => {
+    await azure.cleanRepo();
   });
 
   // do we need the args?
@@ -82,11 +82,29 @@ describe('platform/azure', () => {
       expect.assertions(1);
       expect(() => azure.initPlatform({})).toThrow();
     });
-    it('should throw if no token', () => {
+    it('should throw if no token nor a username and password', () => {
       expect.assertions(1);
       expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
+        })
+      ).toThrow();
+    });
+    it('should throw if a username but no password', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          username: 'user',
+        })
+      ).toThrow();
+    });
+    it('should throw if a password but no username', () => {
+      expect.assertions(1);
+      expect(() =>
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          password: 'pass',
         })
       ).toThrow();
     });
@@ -621,7 +639,7 @@ describe('platform/azure', () => {
             updatePullRequest: updateFn,
           } as any)
       );
-      azureHelper.getRenovatePRFormat.mockImplementation(x => x as any);
+      azureHelper.getRenovatePRFormat.mockImplementation((x) => x as any);
       const pr = await azure.createPr({
         branchName: 'some-branch',
         prTitle: 'The Title',
@@ -802,12 +820,25 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
+            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
             createThread: jest.fn(() => [{ id: 123 }]),
             getThreads: jest.fn(() => []),
           } as any)
       );
-      await azure.addAssignees(123, ['test@bonjour.fr']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      azureApi.coreApi.mockImplementation(
+        () =>
+          ({
+            getTeams: jest.fn(() => [
+              { id: 3, name: 'abc' },
+              { id: 4, name: 'def' },
+            ]),
+            getTeamMembersWithExtendedProperties: jest.fn(() => [
+              { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
+            ]),
+          } as any)
+      );
+      await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -834,7 +865,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
     });
   });
 

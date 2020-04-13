@@ -48,10 +48,13 @@ describe('platform/gitea/gitea-got-wrapper', () => {
       })
     );
 
-    const res = await api.get('pagination-example-1', { paginate: true });
+    const res = await api.get(`${baseURL}/pagination-example-1`, {
+      paginate: true,
+    });
 
     expect(res.body).toHaveLength(6);
     expect(res.body).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
+    expect(got.mock.calls).toMatchSnapshot();
     expect(got).toHaveBeenCalledTimes(3);
   });
 

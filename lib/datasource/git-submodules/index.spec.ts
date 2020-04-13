@@ -1,5 +1,5 @@
 import _simpleGit from 'simple-git/promise';
-import { getPkgReleases, getDigest } from '.';
+import { getReleases, getDigest } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
@@ -9,14 +9,14 @@ const registryUrls = [lookupName, 'master'];
 
 describe('datasource/git-submoduless', () => {
   beforeEach(() => global.renovateCache.rmAll());
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     it('returns null if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
           return Promise.resolve(null);
         },
       });
-      const versions = await getPkgReleases({ lookupName, registryUrls });
+      const versions = await getReleases({ lookupName, registryUrls });
       expect(versions).toEqual(null);
     });
     it('returns null if remote call throws exception', async () => {
@@ -25,7 +25,7 @@ describe('datasource/git-submoduless', () => {
           throw new Error();
         },
       });
-      const versions = await getPkgReleases({ lookupName, registryUrls });
+      const versions = await getReleases({ lookupName, registryUrls });
       expect(versions).toEqual(null);
     });
     it('returns versions filtered from tags', async () => {
@@ -35,11 +35,11 @@ describe('datasource/git-submoduless', () => {
         },
       });
 
-      const versions = await getPkgReleases({
+      const versions = await getReleases({
         lookupName,
         registryUrls,
       });
-      const result = versions.releases.map(x => x.version).sort();
+      const result = versions.releases.map((x) => x.version).sort();
       expect(result).toEqual(['commithash1']);
     });
   });

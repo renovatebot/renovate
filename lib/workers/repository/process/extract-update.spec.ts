@@ -10,7 +10,7 @@ jest.mock('../extract');
 
 const branchify = mocked(_branchify);
 
-branchify.branchifyUpgrades.mockReturnValueOnce({
+branchify.branchifyUpgrades.mockResolvedValueOnce({
   branches: [],
   branchList: [],
 });

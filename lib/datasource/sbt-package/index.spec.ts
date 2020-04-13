@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs';
 import nock from 'nock';
-import { getPkgReleases } from '.';
+import { getPkgReleases } from '..';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir, SBT_PLUGINS_REPO } from '../sbt-plugin/util';
+import { parseIndexDir } from '../sbt-plugin/util';
+import * as sbtPlugin from '.';
+import * as mavenVersioning from '../../versioning/maven';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./__fixtures__/maven-index.html`),
@@ -26,9 +28,7 @@ describe('datasource/sbt', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       nock.disableNetConnect();
-      nock('https://failed_repo')
-        .get('/maven/org/scalatest/')
-        .reply(404, null);
+      nock('https://failed_repo').get('/maven/org/scalatest/').reply(404, null);
       nock('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/')
         .reply(
@@ -99,7 +99,9 @@ describe('datasource/sbt', () => {
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
-          lookupName: 'org.scalatest:scalatest',
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toEqual(null);
@@ -107,12 +109,10 @@ describe('datasource/sbt', () => {
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
-          lookupName: 'org.scalatest:scalatest',
-          registryUrls: [
-            'https://failed_repo/maven',
-            MAVEN_REPO,
-            SBT_PLUGINS_REPO,
-          ],
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.scalatest:scalatest',
+          registryUrls: ['https://failed_repo/maven', MAVEN_REPO],
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',
@@ -123,8 +123,10 @@ describe('datasource/sbt', () => {
       });
       expect(
         await getPkgReleases({
-          lookupName: 'org.scalatest:scalatest_2.12',
-          registryUrls: [MAVEN_REPO, SBT_PLUGINS_REPO],
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'org.scalatest:scalatest_2.12',
+          registryUrls: [],
         })
       ).toEqual({
         dependencyUrl: 'https://repo.maven.apache.org/maven2/org/scalatest',

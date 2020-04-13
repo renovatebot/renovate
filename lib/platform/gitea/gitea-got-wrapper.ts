@@ -1,7 +1,7 @@
-import URL from 'url';
-import { GotApi, GotApiOptions, GotResponse } from '../common';
+import { URL } from 'url';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import got from '../../util/got';
+import { GotApi, GotApiOptions, GotResponse } from '../common';
 
 const hostType = PLATFORM_TYPE_GITEA;
 let baseUrl: string;
@@ -28,15 +28,15 @@ async function get(path: string, options?: any): Promise<GotResponse> {
   const res = await got(path, opts);
   const pc = getPaginationContainer(res.body);
   if (opts.paginate && pc) {
-    const url = URL.parse(res.url, true);
+    const url = new URL(res.url);
     const total = parseInt(res.headers['x-total-count'] as string, 10);
-    let nextPage = parseInt(url.query.page as string, 10) || 1 + 1;
+    let nextPage = parseInt(url.searchParams.get('page') || '1', 10);
 
     while (total && pc.length < total) {
       nextPage += 1;
-      url.query.page = nextPage.toString();
+      url.searchParams.set('page', nextPage.toString());
 
-      const nextRes = await got(URL.format(url), opts);
+      const nextRes = await got(url.toString(), opts);
       pc.push(...getPaginationContainer(nextRes.body));
     }
   }

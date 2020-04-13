@@ -69,8 +69,8 @@ export async function extractPackageFile(
     if (groupMatch) {
       const depTypes = groupMatch[1]
         .split(',')
-        .map(group => group.trim())
-        .map(group => group.replace(/^:/, ''));
+        .map((group) => group.trim())
+        .map((group) => group.replace(/^:/, ''));
       const groupLineNumber = lineNumber;
       let groupContent = '';
       let groupLine = '';
@@ -84,7 +84,7 @@ export async function extractPackageFile(
       const groupRes = await extractPackageFile(groupContent);
       if (groupRes) {
         res.deps = res.deps.concat(
-          groupRes.deps.map(dep => ({
+          groupRes.deps.map((dep) => ({
             ...dep,
             depTypes,
             managerData: {
@@ -118,7 +118,7 @@ export async function extractPackageFile(
         const sourceRes = await extractPackageFile(sourceContent);
         if (sourceRes) {
           res.deps = res.deps.concat(
-            sourceRes.deps.map(dep => ({
+            sourceRes.deps.map((dep) => ({
               ...dep,
               registryUrls: [repositoryUrl],
               managerData: {
@@ -145,7 +145,7 @@ export async function extractPackageFile(
       if (platformsRes) {
         res.deps = res.deps.concat(
           // eslint-disable-next-line no-loop-func
-          platformsRes.deps.map(dep => ({
+          platformsRes.deps.map((dep) => ({
             ...dep,
             managerData: {
               lineNumber: dep.managerData.lineNumber + platformsLineNumber + 1,
@@ -170,7 +170,7 @@ export async function extractPackageFile(
       if (ifRes) {
         res.deps = res.deps.concat(
           // eslint-disable-next-line no-loop-func
-          ifRes.deps.map(dep => ({
+          ifRes.deps.map((dep) => ({
             ...dep,
             managerData: {
               lineNumber: dep.managerData.lineNumber + ifLineNumber + 1,

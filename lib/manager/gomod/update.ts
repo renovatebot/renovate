@@ -8,10 +8,7 @@ export function updateDependency({
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
-    let depNameNoVersion = depName
-      .split('/')
-      .slice(0, 3)
-      .join('/');
+    let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
     if (depNameNoVersion.startsWith('gopkg.in')) {
       depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
     }

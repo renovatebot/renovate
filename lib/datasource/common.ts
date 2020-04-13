@@ -1,25 +1,39 @@
 import { DATASOURCE_FAILURE } from '../constants/error-messages';
 
-export interface GetReleasesConfig {
-  lookupName: string;
-  registryUrls?: string[];
-  compatibility?: Record<string, string>;
-  npmrc?: string;
-}
-
 export interface Config {
   datasource?: string;
   depName?: string;
   lookupName?: string;
   registryUrls?: string[];
 }
-export interface PkgReleaseConfig extends Config {
+
+export type DigestConfig = Config;
+
+interface ReleasesConfigBase {
   compatibility?: Record<string, string>;
   npmrc?: string;
+  registryUrls?: string[];
+}
+
+export interface GetReleasesConfig extends ReleasesConfigBase {
+  lookupName: string;
+}
+
+export interface GetPkgReleasesConfig extends ReleasesConfigBase {
+  datasource: string;
+  depName: string;
+  lookupName?: string;
   versioning?: string;
 }
 
-export type DigestConfig = Config;
+export function isGetPkgReleasesConfig(
+  input: any
+): input is GetPkgReleasesConfig {
+  return (
+    (input as GetPkgReleasesConfig).datasource !== undefined &&
+    (input as GetPkgReleasesConfig).depName !== undefined
+  );
+}
 
 export interface Release {
   changelogUrl?: string;
@@ -28,6 +42,7 @@ export interface Release {
 
   releaseTimestamp?: any;
   version: string;
+  newDigest?: string;
 }
 
 export interface ReleaseResult {
@@ -50,8 +65,12 @@ export interface ReleaseResult {
 }
 
 export interface Datasource {
+  id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
-  getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult | null>;
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
+  defaultRegistryUrls?: string[];
+  appendRegistryUrls?: string[];
+  defaultConfig?: object;
 }
 
 export class DatasourceError extends Error {

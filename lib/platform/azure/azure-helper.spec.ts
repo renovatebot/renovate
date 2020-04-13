@@ -13,6 +13,26 @@ describe('platform/azure/helpers', () => {
     azureApi = require('./azure-got-wrapper');
   });
 
+  describe('getStorageExtraCloneOpts', () => {
+    it('should configure basic auth', () => {
+      const res = azureHelper.getStorageExtraCloneOpts({
+        username: 'user',
+        password: 'pass',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure personal access token', () => {
+      const res = azureHelper.getStorageExtraCloneOpts({
+        token: '1234567890123456789012345678901234567890123456789012',
+      });
+      expect(res).toMatchSnapshot();
+    });
+    it('should configure bearer token', () => {
+      const res = azureHelper.getStorageExtraCloneOpts({ token: 'token' });
+      expect(res).toMatchSnapshot();
+    });
+  });
+
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
       const res = azureHelper.getNewBranchName('testBB');
@@ -110,7 +130,7 @@ describe('platform/azure/helpers', () => {
         objectMode: true,
         /* eslint-disable func-names */
         /* eslint-disable object-shorthand */
-        read: function() {
+        read: function () {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"typeKey": "GitItemNotFoundException"}');
@@ -140,7 +160,7 @@ describe('platform/azure/helpers', () => {
         objectMode: true,
         /* eslint-disable func-names */
         /* eslint-disable object-shorthand */
-        read: function() {
+        read: function () {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"typeKey": "GitUnresolvableToCommitException"}');
@@ -170,7 +190,7 @@ describe('platform/azure/helpers', () => {
         objectMode: true,
         /* eslint-disable func-names */
         /* eslint-disable object-shorthand */
-        read: function() {
+        read: function () {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"hello"= "test"}');

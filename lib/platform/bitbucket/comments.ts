@@ -77,7 +77,7 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
       body = `### ${topic}\n\n${content}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.content.raw !== body;
@@ -86,7 +86,7 @@ export async function ensureComment({
     } else {
       logger.debug(`Ensuring content-only comment in #${prNo}`);
       body = `${content}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.content.raw === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -121,7 +121,7 @@ export async function ensureCommentRemoval(
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(config, prNo);
     let commentId: number;
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
       if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
         commentId = comment.id;
       }

@@ -1,5 +1,5 @@
 import URL from 'url';
-import GitStorage, { CommitFilesConfig, StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import * as hostRules from '../../util/host-rules';
 import {
   BranchStatusConfig,
@@ -14,6 +14,7 @@ import {
   RepoConfig,
   RepoParams,
   VulnerabilityAlert,
+  CommitFilesConfig,
 } from '../common';
 import { api } from './gitea-got-wrapper';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
@@ -27,7 +28,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 import { configFileNames } from '../../config/app-strings';
 import { smartTruncate } from '../utils/pr-body';
 import { sanitize } from '../../util/sanitize';
@@ -122,7 +123,7 @@ function findCommentByTopic(
   comments: helper.Comment[],
   topic: string
 ): helper.Comment | null {
-  return comments.find(c => c.body.startsWith(`### ${topic}\n\n`));
+  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`));
 }
 
 async function isPRModified(
@@ -168,7 +169,7 @@ function getLabelList(): Promise<helper.Label[]> {
       .getRepoLabels(config.repository, {
         useCache: false,
       })
-      .then(labels => {
+      .then((labels) => {
         logger.debug(`Retrieved ${labels.length} Labels`);
         return labels;
       });
@@ -180,7 +181,7 @@ function getLabelList(): Promise<helper.Label[]> {
 async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
-  return labelList.find(l => l.name === name)?.id;
+  return labelList.find((l) => l.name === name)?.id;
 }
 
 const platform: Platform = {
@@ -329,7 +330,7 @@ const platform: Platform = {
     logger.debug('Auto-discovering Gitea repositories');
     try {
       const repos = await helper.searchRepos({ uid: botUserID });
-      return repos.map(r => r.full_name);
+      return repos.map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -413,7 +414,7 @@ const platform: Platform = {
       config.repository,
       branchName
     );
-    const cs = ccs.statuses.find(s => s.context === context);
+    const cs = ccs.statuses.find((s) => s.context === context);
     if (!cs) {
       return null;
     } // no status check exists
@@ -439,7 +440,7 @@ const platform: Platform = {
     if (config.prList === null) {
       config.prList = helper
         .searchPRs(config.repository, {}, { useCache: false })
-        .then(prs => {
+        .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(Boolean);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
           return prList;
@@ -452,7 +453,7 @@ const platform: Platform = {
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
-    let pr = prList.find(p => p.number === number);
+    let pr = prList.find((p) => p.number === number);
     if (pr) {
       logger.debug('Returning from cached PRs');
     } else {
@@ -490,7 +491,7 @@ const platform: Platform = {
     logger.debug(`findPr(${branchName}, ${title}, ${state})`);
     const prList = await platform.getPrList();
     const pr = prList.find(
-      p =>
+      (p) =>
         p.sourceRepo === config.repository &&
         p.branchName === branchName &&
         matchesState(p.state, state) &&
@@ -621,7 +622,7 @@ const platform: Platform = {
     if (config.issueList === null) {
       config.issueList = helper
         .searchIssues(config.repository, {}, { useCache: false })
-        .then(issues => {
+        .then((issues) => {
           const issueList = issues.map(toRenovateIssue);
           logger.debug(`Retrieved ${issueList.length} Issues`);
           return issueList;
@@ -633,7 +634,9 @@ const platform: Platform = {
 
   async findIssue(title: string): Promise<Issue> {
     const issueList = await platform.getIssueList();
-    const issue = issueList.find(i => i.state === 'open' && i.title === title);
+    const issue = issueList.find(
+      (i) => i.state === 'open' && i.title === title
+    );
 
     if (issue) {
       logger.debug(`Found Issue #${issue.number}`);
@@ -650,11 +653,11 @@ const platform: Platform = {
     logger.debug(`ensureIssue(${title})`);
     try {
       const issueList = await platform.getIssueList();
-      const issues = issueList.filter(i => i.title === title);
+      const issues = issueList.filter((i) => i.title === title);
 
       // Update any matching issues which currently exist
       if (issues.length) {
-        let activeIssue = issues.find(i => i.state === 'open');
+        let activeIssue = issues.find((i) => i.state === 'open');
 
         // If no active issue was found, decide if it shall be skipped, re-opened or updated without state change
         if (!activeIssue) {
@@ -763,7 +766,7 @@ const platform: Platform = {
         comment = findCommentByTopic(commentList, topic);
         body = `### ${topic}\n\n${body}`;
       } else {
-        comment = commentList.find(c => c.body === body);
+        comment = commentList.find((c) => c.body === body);
       }
 
       // Create a new comment if no match has been found, otherwise update if necessary

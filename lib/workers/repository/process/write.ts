@@ -19,11 +19,11 @@ export async function writeUpdates(
     `Processing ${branches.length} branch${
       branches.length !== 1 ? 'es' : ''
     }: ${branches
-      .map(b => b.branchName)
+      .map((b) => b.branchName)
       .sort()
       .join(', ')}`
   );
-  branches = branches.filter(branchConfig => {
+  branches = branches.filter((branchConfig) => {
     if (branchConfig.blockedByPin) {
       logger.debug(`Branch ${branchConfig.branchName} is blocked by a Pin PR`);
       return false;

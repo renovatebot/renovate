@@ -77,22 +77,16 @@ const getVarName = (str: string): string =>
 const isVarName = (str: string): boolean =>
   /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
 
-const getVarInfo = (
-  str: string,
-  ctx: ParseContext
-): { val: string; fileReplacePosition: number } => {
-  const { fileOffset } = ctx;
+const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
   const rightPart = str.replace(
     /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
     ''
   );
-  const fileReplacePosition = str.indexOf(rightPart) + fileOffset;
   const val = rightPart.replace(/"\s*$/, '');
-  return { val, fileReplacePosition };
+  return { val };
 };
 
 interface ParseContext {
-  fileOffset: number;
   scalaVersion: string;
   variables: any;
   depType?: string;
@@ -102,7 +96,7 @@ function parseDepExpr(
   expr: string,
   ctx: ParseContext
 ): PackageDependency | null {
-  const { scalaVersion, fileOffset, variables } = ctx;
+  const { scalaVersion, variables } = ctx;
   let { depType } = ctx;
 
   const isValidToken = (str: string): boolean =>
@@ -164,28 +158,9 @@ function parseDepExpr(
     depType = rawScope.replace(/^"/, '').replace(/"$/, '');
   }
 
-  let fileReplacePosition: number;
-  if (isStringLiteral(rawVersion)) {
-    // Calculate fileReplacePosition incrementally
-    // help us to avoid errors in updating phase.
-    fileReplacePosition = 0;
-    fileReplacePosition +=
-      expr.slice(fileReplacePosition).indexOf(rawGroupId) + rawGroupId.length;
-    fileReplacePosition +=
-      expr.slice(fileReplacePosition).indexOf(rawArtifactId) +
-      rawArtifactId.length;
-    fileReplacePosition += expr
-      .slice(fileReplacePosition)
-      .indexOf(currentValue);
-    fileReplacePosition += fileOffset;
-  } else {
-    fileReplacePosition = variables[rawVersion].fileReplacePosition;
-  }
-
   const result: PackageDependency = {
     depName,
     currentValue,
-    fileReplacePosition,
   };
 
   if (depType) {
@@ -195,7 +170,6 @@ function parseDepExpr(
   return result;
 }
 interface ParseOptions {
-  fileOffset?: number;
   isMultiDeps?: boolean;
   scalaVersion?: string;
   variables?: Record<string, any>;
@@ -207,13 +181,12 @@ function parseSbtLine(
   lineIndex: number,
   lines: string[]
 ): (PackageFile & ParseOptions) | null {
-  const { deps, registryUrls, fileOffset, variables } = acc;
+  const { deps, registryUrls, variables } = acc;
 
   let { isMultiDeps, scalaVersion } = acc;
 
   const ctx: ParseContext = {
     scalaVersion,
-    fileOffset,
     variables,
   };
 
@@ -238,38 +211,30 @@ function parseSbtLine(
         /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
         ''
       );
-      const expOffset = line.length - depExpr.length;
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        fileOffset: fileOffset + expOffset,
       });
     } else if (isSingleLineDep(line)) {
       isMultiDeps = false;
       const depExpr = line.replace(/^.*\+=\s*/, '');
-      const expOffset = line.length - depExpr.length;
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        fileOffset: fileOffset + expOffset,
       });
     } else if (isPluginDep(line)) {
       isMultiDeps = false;
       const rightPart = line.replace(/^\s*addSbtPlugin\s*\(/, '');
-      const expOffset = line.length - rightPart.length;
       const depExpr = rightPart.replace(/\)\s*$/, '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
         depType: 'plugin',
-        fileOffset: fileOffset + expOffset,
       });
     } else if (isDepsBegin(line)) {
       isMultiDeps = true;
     } else if (isMultiDeps) {
       const rightPart = line.replace(/^[\s,]*/, '');
-      const expOffset = line.length - rightPart.length;
       const depExpr = rightPart.replace(/[\s,]*$/, '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        fileOffset: fileOffset + expOffset,
       });
     }
   }
@@ -289,7 +254,6 @@ function parseSbtLine(
   if (lineIndex + 1 < lines.length) {
     return {
       ...acc,
-      fileOffset: fileOffset + line.length + 1, // inc. newline
       isMultiDeps,
       scalaVersion:
         scalaVersion ||
@@ -310,7 +274,6 @@ export function extractPackageFile(content: string): PackageFile {
   }
   const lines = content.split(/\n/);
   return lines.reduce(parseSbtLine, {
-    fileOffset: 0,
     registryUrls: [MAVEN_REPO],
     deps: [],
     isMultiDeps: false,

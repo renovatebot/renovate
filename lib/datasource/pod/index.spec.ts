@@ -1,5 +1,7 @@
 import { api as _api } from '../../platform/github/gh-got-wrapper';
-import { getPkgReleases } from '.';
+import * as pod from '.';
+import * as rubyVersioning from '../../versioning/ruby';
+import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
 
@@ -8,18 +10,26 @@ const api = mocked(_api);
 jest.mock('../../platform/github/gh-got-wrapper');
 
 const config = {
-  lookupName: 'foo',
-  registryUrls: ['https://github.com/CocoaPods/Specs'],
+  versioning: rubyVersioning.id,
+  datasource: pod.id,
+  depName: 'foo',
+  registryUrls: [],
 };
 
 describe('datasource/cocoapods', () => {
-  describe('getPkgReleases', () => {
-    beforeEach(() => global.renovateCache.rmAll());
+  describe('getReleases', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      global.repoCache = {};
+      return global.renovateCache.rmAll();
+    });
+
     it('returns null for invalid inputs', async () => {
       api.get.mockResolvedValueOnce(null);
       expect(
         await getPkgReleases({
-          lookupName: 'foobar',
+          datasource: pod.id,
+          depName: 'foobar',
           registryUrls: [],
         })
       ).toBeNull();
@@ -66,9 +76,12 @@ describe('datasource/cocoapods', () => {
           statusCode: 429,
         })
       );
-      await expect(getPkgReleases(config)).rejects.toThrowError(
-        'registry-failure'
-      );
+      await expect(
+        getPkgReleases({
+          ...config,
+          registryUrls: ['https://cdn.cocoapods.org'],
+        })
+      ).rejects.toThrowError('registry-failure');
     });
     it('throws for 5xx', async () => {
       api.get.mockImplementationOnce(() =>
@@ -76,9 +89,12 @@ describe('datasource/cocoapods', () => {
           statusCode: 502,
         })
       );
-      await expect(getPkgReleases(config)).rejects.toThrowError(
-        'registry-failure'
-      );
+      await expect(
+        getPkgReleases({
+          ...config,
+          registryUrls: ['https://cdn.cocoapods.org'],
+        })
+      ).rejects.toThrowError('registry-failure');
     });
     it('returns null for unknown error', async () => {
       api.get.mockImplementationOnce(() => {
@@ -93,7 +109,7 @@ describe('datasource/cocoapods', () => {
       expect(
         await getPkgReleases({
           ...config,
-          registryUrls: ['https://cdn.cocoapods.org'],
+          registryUrls: ['https://github.com/CocoaPods/Specs'],
         })
       ).toEqual({
         releases: [

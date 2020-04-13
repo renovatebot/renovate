@@ -1,17 +1,24 @@
 import url from 'url';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError } from '../common';
 
-import { id, MAVEN_REPO, MAVEN_REPO_DEPRECATED } from './common';
+import { id, MAVEN_REPO } from './common';
+
+const http: Record<string, Http> = {};
+
+function httpByHostType(hostType: string): Http {
+  if (!http[hostType]) {
+    http[hostType] = new Http(hostType);
+  }
+  return http[hostType];
+}
 
 const getHost = (x: string): string => new url.URL(x).host;
 
-const defaultHosts = [MAVEN_REPO, MAVEN_REPO_DEPRECATED].map(getHost);
-
 function isMavenCentral(pkgUrl: url.URL | string): boolean {
   const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
-  return defaultHosts.includes(host);
+  return getHost(MAVEN_REPO) === host;
 }
 
 function isTemporalError(err: { code: string; statusCode: number }): boolean {
@@ -46,23 +53,8 @@ export async function downloadHttpProtocol(
 ): Promise<string | null> {
   let raw: { body: string };
   try {
-    raw = await got(pkgUrl, {
-      hostType,
-      hooks: {
-        beforeRedirect: [
-          (options: any): void => {
-            if (
-              options.search &&
-              options.search.indexOf('X-Amz-Algorithm') !== -1
-            ) {
-              // maven repository is hosted on amazon, redirect url includes authentication.
-              // eslint-disable-next-line no-param-reassign
-              delete options.auth;
-            }
-          },
-        ],
-      },
-    });
+    const httpClient = httpByHostType(hostType);
+    raw = await httpClient.get(pkgUrl.toString());
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {

@@ -64,7 +64,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_rust -aq | xargs --no-run-if-empty docker rm -f",
+    "cmd": "docker ps --filter name=renovate_rust -aq",
     "options": Object {
       "encoding": "utf-8",
     },

@@ -6,7 +6,7 @@ import {
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -20,6 +20,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,7 +32,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 
 interface Config {
   storage: GitStorage;
@@ -49,6 +50,11 @@ interface Config {
   repository: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 let config: Config = {} as any;
 
 const defaults: any = {
@@ -58,12 +64,16 @@ const defaults: any = {
 export function initPlatform({
   endpoint,
   token,
+  username,
+  password,
 }: RenovateConfig): Promise<PlatformConfig> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
-  if (!token) {
-    throw new Error('Init: You must configure an Azure DevOps token');
+  if (!token && !(username && password)) {
+    throw new Error(
+      'Init: You must configure an Azure DevOps token, or a username and password'
+    );
   }
   // TODO: Add a connection check that endpoint/token combination are valid
   const res = {
@@ -81,7 +91,7 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  return repos.map(repo => `${repo.project.name}/${repo.name}`);
+  return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
 async function getBranchCommit(fullBranchName: string): Promise<string> {
@@ -105,7 +115,7 @@ export async function initRepo({
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
   const repo = repos.filter(
-    c =>
+    (c) =>
       c.name.toLowerCase() === names.repo.toLowerCase() &&
       c.project.name.toLowerCase() === names.project.toLowerCase()
   )[0];
@@ -149,12 +159,13 @@ export async function initRepo({
     url: defaults.endpoint,
   });
   const url =
-    defaults.endpoint.replace('https://', `https://token:${opts.token}@`) +
+    defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
   await config.storage.initRepo({
     ...config,
     localDir,
     url,
+    extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
@@ -264,7 +275,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
   const azurePr = (await getPrList()).find(
-    item => item.pullRequestId === pullRequestId
+    (item) => item.pullRequestId === pullRequestId
   );
 
   if (!azurePr) {
@@ -278,8 +289,8 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   );
 
   azurePr.labels = labels
-    .filter(label => label.active)
-    .map(label => label.name);
+    .filter((label) => label.active)
+    .map((label) => label.name);
 
   const commits = await azureApiGit.getPullRequestCommits(
     config.repoId,
@@ -301,11 +312,11 @@ export async function findPr({
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      item => item.sourceRefName === azureHelper.getNewBranchName(branchName)
+      (item) => item.sourceRefName === azureHelper.getNewBranchName(branchName)
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter(item => item.title === prTitle);
+      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
     }
 
     switch (state) {
@@ -313,10 +324,12 @@ export async function findPr({
         // no more filter needed, we can go further...
         break;
       case PR_STATE_NOT_OPEN:
-        prsFiltered = prsFiltered.filter(item => item.state !== PR_STATE_OPEN);
+        prsFiltered = prsFiltered.filter(
+          (item) => item.state !== PR_STATE_OPEN
+        );
         break;
       default:
-        prsFiltered = prsFiltered.filter(item => item.state === state);
+        prsFiltered = prsFiltered.filter((item) => item.state === state);
         break;
     }
   } catch (error) {
@@ -465,7 +478,7 @@ export async function createPr({
     );
   }
   await Promise.all(
-    labels.map(label =>
+    labels.map((label) =>
       azureApiGit.createPullRequestLabel(
         {
           name: label,
@@ -508,7 +521,7 @@ export async function ensureComment({
   let threadIdFound = null;
   let commentIdFound = null;
   let commentNeedsUpdating = false;
-  threads.forEach(thread => {
+  threads.forEach((thread) => {
     const firstCommentContent = thread.comments[0].content;
     if (
       (topic && firstCommentContent?.startsWith(header)) ||
@@ -567,7 +580,7 @@ export async function ensureCommentRemoval(
     const threads = await azureApiGit.getThreads(config.repoId, issueNo);
     let threadIdFound = null;
 
-    threads.forEach(thread => {
+    threads.forEach((thread) => {
       if (thread.comments[0].content.startsWith(`### ${topic}\n\n`)) {
         threadIdFound = thread.id;
       }
@@ -638,6 +651,52 @@ export /* istanbul ignore next */ function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
 
+async function getUserIds(users: string[]): Promise<User[]> {
+  const azureApiGit = await azureApi.gitApi();
+  const azureApiCore = await azureApi.coreApi();
+  const repos = await azureApiGit.getRepositories();
+  const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const teams = await azureApiCore.getTeams(repo.project.id);
+  const members = await Promise.all(
+    teams.map(
+      async (t) =>
+        /* eslint-disable no-return-await */
+        await azureApiCore.getTeamMembersWithExtendedProperties(
+          repo.project.id,
+          t.id
+        )
+    )
+  );
+
+  const ids: { id: string; name: string }[] = [];
+  members.forEach((listMembers) => {
+    listMembers.forEach((m) => {
+      users.forEach((r) => {
+        if (
+          r.toLowerCase() === m.identity.displayName.toLowerCase() ||
+          r.toLowerCase() === m.identity.uniqueName.toLowerCase()
+        ) {
+          if (ids.filter((c) => c.id === m.identity.id).length === 0) {
+            ids.push({ id: m.identity.id, name: r });
+          }
+        }
+      });
+    });
+  });
+
+  teams.forEach((t) => {
+    users.forEach((r) => {
+      if (r.toLowerCase() === t.name.toLowerCase()) {
+        if (ids.filter((c) => c.id === t.id).length === 0) {
+          ids.push({ id: t.id, name: r });
+        }
+      }
+    });
+  });
+
+  return ids;
+}
+
 /**
  *
  * @param {number} issueNo
@@ -648,10 +707,11 @@ export async function addAssignees(
   assignees: string[]
 ): Promise<void> {
   logger.trace(`addAssignees(${issueNo}, ${assignees})`);
+  const ids = await getUserIds(assignees);
   await ensureComment({
     number: issueNo,
     topic: 'Add Assignees',
-    content: assignees.map(a => `@<${a}>`).join(', '),
+    content: ids.map((a) => `@<${a.id}>`).join(', '),
   });
 }
 
@@ -666,49 +726,11 @@ export async function addReviewers(
 ): Promise<void> {
   logger.trace(`addReviewers(${prNo}, ${reviewers})`);
   const azureApiGit = await azureApi.gitApi();
-  const azureApiCore = await azureApi.coreApi();
-  const repos = await azureApiGit.getRepositories();
-  const repo = repos.filter(c => c.id === config.repoId)[0];
-  const teams = await azureApiCore.getTeams(repo.project.id);
-  const members = await Promise.all(
-    teams.map(
-      async t =>
-        /* eslint-disable no-return-await */
-        await azureApiCore.getTeamMembersWithExtendedProperties(
-          repo.project.id,
-          t.id
-        )
-    )
-  );
 
-  const ids: { id: string; name: string }[] = [];
-  members.forEach(listMembers => {
-    listMembers.forEach(m => {
-      reviewers.forEach(r => {
-        if (
-          r.toLowerCase() === m.identity.displayName.toLowerCase() ||
-          r.toLowerCase() === m.identity.uniqueName.toLowerCase()
-        ) {
-          if (ids.filter(c => c.id === m.identity.id).length === 0) {
-            ids.push({ id: m.identity.id, name: r });
-          }
-        }
-      });
-    });
-  });
-
-  teams.forEach(t => {
-    reviewers.forEach(r => {
-      if (r.toLowerCase() === t.name.toLowerCase()) {
-        if (ids.filter(c => c.id === t.id).length === 0) {
-          ids.push({ id: t.id, name: r });
-        }
-      }
-    });
-  });
+  const ids = await getUserIds(reviewers);
 
   await Promise.all(
-    ids.map(async obj => {
+    ids.map(async (obj) => {
       await azureApiGit.createPullRequestReviewer(
         {},
         config.repoId,
@@ -740,7 +762,7 @@ export async function getPrFiles(prId: number): Promise<string[]> {
       (
         await Promise.all(
           prIterations.map(
-            async iteration =>
+            async (iteration) =>
               (
                 await azureApiGit.getPullRequestIterationChanges(
                   config.repoId,
@@ -752,7 +774,7 @@ export async function getPrFiles(prId: number): Promise<string[]> {
         )
       )
         .reduce((acc, val) => acc.concat(val), [])
-        .map(change => change.item.path.slice(1))
+        .map((change) => change.item.path.slice(1))
     ),
   ];
 }

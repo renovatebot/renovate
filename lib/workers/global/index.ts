@@ -79,13 +79,13 @@ export async function start(): Promise<0 | 1> {
       await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
-        repoConfig.hostRules.forEach(rule => hostRules.add(rule));
+        repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
         repoConfig.hostRules = [];
       }
       await repositoryWorker.renovateRepository(repoConfig);
     }
     setMeta({});
-    logger.debug(`Renovate existing successfully`);
+    logger.debug(`Renovate exiting successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));

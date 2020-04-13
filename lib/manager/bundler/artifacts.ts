@@ -12,6 +12,14 @@ import {
   BUNDLER_INVALID_CREDENTIALS,
   BUNDLER_UNKNOWN_ERROR,
 } from '../../constants/error-messages';
+import { HostRule } from '../../types';
+import {
+  getAuthenticationHeaderValue,
+  findAllAuthenticatable,
+  getDomain,
+} from './host-rules';
+
+const hostConfigVariablePrefix = 'BUNDLE_';
 
 async function getRubyConstraint(
   updateArtifact: UpdateArtifact
@@ -39,6 +47,19 @@ async function getRubyConstraint(
     }
   }
   return rubyConstraint;
+}
+
+function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
+  const varName =
+    hostConfigVariablePrefix +
+    getDomain(hostRule)
+      .split('.')
+      .map((term) => term.toUpperCase())
+      .join('__');
+
+  return {
+    [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
+  };
 }
 
 export async function updateArtifacts(
@@ -85,8 +106,16 @@ export async function updateArtifacts(
       'ruby --version',
       `gem install bundler${bundlerVersion} --no-document`,
     ];
+
+    const bundlerHostRulesVariables = findAllAuthenticatable({
+      hostType: 'bundler',
+    }).reduce((variables, hostRule) => {
+      return { ...variables, ...buildBundleHostVariable(hostRule) };
+    }, {} as Record<string, string>);
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
+      extraEnv: bundlerHostRulesVariables,
       docker: {
         image: 'renovate/ruby',
         tagScheme: 'ruby',
@@ -152,7 +181,7 @@ export async function updateArtifacts(
           resolveMatches.push(resolveMatch[1].split(' ').shift());
         }
       } while (resolveMatch);
-      if (resolveMatches.some(match => !updatedDeps.includes(match))) {
+      if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
         logger.debug(
           { resolveMatches, updatedDeps },
           'Found new resolve matches - reattempting recursively'

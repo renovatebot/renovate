@@ -1,6 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
+import * as URL from 'url';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
@@ -32,7 +33,7 @@ export async function getReleaseList(
         body: string;
       }[]
     >(url);
-    return res.body.map(release => ({
+    return res.body.map((release) => ({
       url: release.html_url,
       id: release.id,
       tag: release.tag_name,
@@ -84,7 +85,7 @@ export async function getReleaseNotes(
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
   const releaseList = await getReleaseList(githubApiBaseURL, repository);
   let releaseNotes: ChangeLogNotes | null = null;
-  releaseList.forEach(release => {
+  releaseList.forEach((release) => {
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
@@ -110,7 +111,7 @@ function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split('\n');
   const tokens = markdown.parse(text, undefined);
-  tokens.forEach(token => {
+  tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substr(1);
       if (lev <= level) {
@@ -128,6 +129,17 @@ function sectionize(text: string, level: number): string[] {
     }
   }
   return result;
+}
+
+function isUrl(url: string): boolean {
+  try {
+    return !!URL.parse(url).hostname;
+  } catch (err) {
+    // istanbul ignore next
+    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
+  }
+  // istanbul ignore next
+  return false;
 }
 
 export async function getReleaseNotesMd(
@@ -150,8 +162,8 @@ export async function getReleaseNotesMd(
     apiPrefix += `repos/${repository}/contents/`;
     const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
-      .map(f => f.name)
-      .filter(f => changelogFilenameRegex.test(f));
+      .map((f) => f.name)
+      .filter((f) => changelogFilenameRegex.test(f));
     if (!files.length) {
       logger.trace('no changelog file found');
       return null;
@@ -179,14 +191,16 @@ export async function getReleaseNotesMd(
     if (changelogParsed.length >= 2) {
       for (const section of changelogParsed) {
         try {
-          const [heading] = section.split('\n');
+          // replace brackets and parenthesis with space
+          const deParenthesizedSection = section.replace(/[[\]()]/g, ' ');
+          const [heading] = deParenthesizedSection.split('\n');
           const title = heading
             .replace(/^\s*#*\s*/, '')
             .split(' ')
             .filter(Boolean);
           let body = section.replace(/.*?\n(-{3,}\n)?/, '').trim();
           for (const word of title) {
-            if (word.includes(version)) {
+            if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               let url = `${githubBaseURL}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');

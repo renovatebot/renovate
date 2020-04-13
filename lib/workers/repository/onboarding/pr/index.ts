@@ -53,7 +53,7 @@ If you need any further assistance then you can also [request help here](${confi
     let files = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
-        managerFiles.map(file => ` * \`${file.packageFile}\` (${manager})`)
+        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
       );
     }
     prBody =

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import { getPkgReleases, getRepositoryData } from '.';
+import { getReleases, getRepositoryData } from '.';
 
 const got: any = _got;
 
@@ -13,7 +13,7 @@ const indexYaml = fs.readFileSync(
 jest.mock('../../util/got');
 
 describe('datasource/helm', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       global.repoCache = {};
@@ -21,7 +21,7 @@ describe('datasource/helm', () => {
     });
     it('returns null if lookupName was not provided', async () => {
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: undefined,
           registryUrls: ['example-repository.com'],
         })
@@ -29,7 +29,7 @@ describe('datasource/helm', () => {
     });
     it('returns null if repository was not provided', async () => {
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'some_chart',
           registryUrls: [],
         })
@@ -38,7 +38,7 @@ describe('datasource/helm', () => {
     it('returns null for empty response', async () => {
       got.mockReturnValueOnce(null);
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'non_existent_chart',
           registryUrls: ['example-repository.com'],
         })
@@ -49,7 +49,7 @@ describe('datasource/helm', () => {
         body: undefined,
       });
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'non_existent_chart',
           registryUrls: ['example-repository.com'],
         })
@@ -62,7 +62,7 @@ describe('datasource/helm', () => {
         })
       );
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'some_chart',
           registryUrls: ['example-repository.com'],
         })
@@ -76,7 +76,7 @@ describe('datasource/helm', () => {
       );
       let e;
       try {
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'some_chart',
           registryUrls: ['example-repository.com'],
         });
@@ -91,7 +91,7 @@ describe('datasource/helm', () => {
         throw new Error();
       });
       expect(
-        await getPkgReleases({
+        await getReleases({
           lookupName: 'some_chart',
           registryUrls: ['example-repository.com'],
         })
@@ -100,7 +100,7 @@ describe('datasource/helm', () => {
     it('returns null if index.yaml in response is empty', async () => {
       const res = { body: '# A comment' };
       got.mockReturnValueOnce(res);
-      const releases = await getPkgReleases({
+      const releases = await getReleases({
         lookupName: 'non_existent_chart',
         registryUrls: ['example-repository.com'],
       });
@@ -114,7 +114,7 @@ describe('datasource/helm', () => {
                      yaml`,
       };
       got.mockReturnValueOnce(res);
-      const releases = await getPkgReleases({
+      const releases = await getReleases({
         lookupName: 'non_existent_chart',
         registryUrls: ['example-repository.com'],
       });
@@ -122,7 +122,7 @@ describe('datasource/helm', () => {
     });
     it('returns null if lookupName is not in index.yaml', async () => {
       got.mockReturnValueOnce({ body: indexYaml });
-      const releases = await getPkgReleases({
+      const releases = await getReleases({
         lookupName: 'non_existent_chart',
         registryUrls: ['example-repository.com'],
       });
@@ -130,7 +130,7 @@ describe('datasource/helm', () => {
     });
     it('returns list of versions for normal response if index.yaml is not cached', async () => {
       got.mockReturnValueOnce({ body: indexYaml });
-      const releases = await getPkgReleases({
+      const releases = await getReleases({
         lookupName: 'ambassador',
         registryUrls: ['example-repository.com'],
       });
@@ -150,7 +150,7 @@ describe('datasource/helm', () => {
         repositoryData,
         cacheMinutes
       );
-      const releases = await getPkgReleases({
+      const releases = await getReleases({
         lookupName: 'ambassador',
         registryUrls: [repository],
       });

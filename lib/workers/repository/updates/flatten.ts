@@ -9,16 +9,17 @@ import {
 import { applyPackageRules } from '../../../util/package-rules';
 import { get } from '../../../manager';
 import { LANGUAGE_DOCKER } from '../../../constants/languages';
+import { getDefaultConfig } from '../../../datasource';
 
 // Return only rules that contain an updateType
 function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
-  return packageRules.filter(rule => is.nonEmptyArray(rule.updateTypes));
+  return packageRules.filter((rule) => is.nonEmptyArray(rule.updateTypes));
 }
 
-export function flattenUpdates(
+export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-): RenovateConfig[] {
+): Promise<RenovateConfig[]> {
   const updates = [];
   const updateTypes = [
     'major',
@@ -39,6 +40,11 @@ export function flattenUpdates(
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
+            // apply config from datasource
+            const datasourceConfig = await getDefaultConfig(
+              depConfig.datasource
+            );
+            updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
             updateConfig = applyPackageRules(updateConfig);
             // Keep only rules that haven't been applied yet (with updateTypes)
             updateConfig.packageRules = getUpdateTypeRules(
@@ -106,6 +112,6 @@ export function flattenUpdates(
     }
   }
   return updates
-    .filter(update => update.enabled)
-    .map(update => filterConfig(update, 'branch'));
+    .filter((update) => update.enabled)
+    .map((update) => filterConfig(update, 'branch'));
 }

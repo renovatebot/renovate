@@ -17,25 +17,14 @@ const parse = (version: string): RubyVersion => ({
 });
 
 const adapt = (left: string, right: string): string =>
-  left
-    .split('.')
-    .slice(0, right.split('.').length)
-    .join('.');
+  left.split('.').slice(0, right.split('.').length).join('.');
 
 const floor = (version: string): string =>
-  [
-    ...create(version)
-      .release()
-      .getSegments()
-      .slice(0, -1),
-    0,
-  ].join('.');
+  [...create(version).release().getSegments().slice(0, -1), 0].join('.');
 
 // istanbul ignore next
 const incrementLastSegment = (version: string): string => {
-  const segments = create(version)
-    .release()
-    .getSegments();
+  const segments = create(version).release().getSegments();
   const nextLast = parseInt(last(segments), 10) + 1;
 
   return [...segments.slice(0, -1), nextLast].join('.');
@@ -84,9 +73,7 @@ const increment = (from: string, to: string): string => {
 
 // istanbul ignore next
 const decrement = (version: string): string => {
-  const segments = create(version)
-    .release()
-    .getSegments();
+  const segments = create(version).release().getSegments();
   const nextSegments = segments
     .reverse()
     .reduce((accumulator: number[], segment: number, index: number) => {

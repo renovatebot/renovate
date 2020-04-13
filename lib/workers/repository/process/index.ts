@@ -18,7 +18,7 @@ export async function processRepo(
     config.prCreation === 'approval' ||
     (config.packageRules &&
       config.packageRules.some(
-        rule => rule.masterIssueApproval || rule.prCreation === 'approval'
+        (rule) => rule.masterIssueApproval || rule.prCreation === 'approval'
       ))
   ) {
     config.masterIssueTitle =
@@ -29,7 +29,7 @@ export async function processRepo(
       const checked = issue.body.match(new RegExp(checkMatch, 'g'));
       if (checked && checked.length) {
         const re = new RegExp(checkMatch);
-        checked.forEach(check => {
+        checked.forEach((check) => {
           const [, type, branchName] = re.exec(check);
           config.masterIssueChecks[branchName] = type;
         });

@@ -3,15 +3,17 @@ import moment from 'moment';
 import url from 'url';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import isBase64 from 'validator/lib/isBase64';
 import { OutgoingHttpHeaders } from 'http';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got, { GotJSONOptions } from '../../util/got';
+import { find } from '../../util/host-rules';
+import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
 import { getNpmrc } from './npmrc';
 import { DatasourceError, Release, ReleaseResult } from '../common';
 import { id } from './common';
+
+const http = new Http(id);
 
 let memcache = {};
 
@@ -75,22 +77,42 @@ export async function getDependency(
   if (cachedResult) {
     return cachedResult;
   }
-  const authInfo = registryAuthToken(regUrl, { npmrc });
   const headers: OutgoingHttpHeaders = {};
+  let authInfo = registryAuthToken(regUrl, { npmrc, recursive: true });
+
+  if (
+    !authInfo &&
+    npmrc &&
+    npmrc._authToken &&
+    regUrl.replace(/\/?$/, '/') === npmrc.registry?.replace(/\/?$/, '/')
+  ) {
+    authInfo = { type: 'Bearer', token: npmrc._authToken };
+  }
 
   if (authInfo && authInfo.type && authInfo.token) {
-    // istanbul ignore if
-    if (npmrc && npmrc.massagedAuth && isBase64(authInfo.token)) {
-      logger.debug('Massaging authorization type to Basic');
-      authInfo.type = 'Basic';
-    }
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: packageName },
-      'Using auth for npm lookup'
+      'Using auth (via npmrc) for npm lookup'
     );
   } else if (process.env.NPM_TOKEN && process.env.NPM_TOKEN !== 'undefined') {
+    logger.trace(
+      { token: maskToken(process.env.NPM_TOKEN), npmName: packageName },
+      'Using auth (via process.env.NPM_TOKEN) for npm lookup'
+    );
     headers.authorization = `Bearer ${process.env.NPM_TOKEN}`;
+  } else {
+    const opts = find({
+      hostType: 'npm',
+      url: regUrl,
+    });
+    if (opts.token) {
+      logger.trace(
+        { token: maskToken(opts.token), npmName: packageName },
+        'Using auth (via hostRules) for npm lookup'
+      );
+      headers.authorization = `Bearer ${opts.token}`;
+    }
   }
 
   const uri = url.parse(pkgUrl);
@@ -107,15 +129,12 @@ export async function getDependency(
 
   try {
     const useCache = retries === 3; // Disable cache if we're retrying
-    const opts: GotJSONOptions = {
-      hostType: id,
-      json: true,
-      retry: 5,
+    const opts: HttpOptions = {
       headers,
       useCache,
     };
-    const raw = await got(pkgUrl, opts);
-    // istanbul ignore if
+    // TODO: fix type
+    const raw = await http.getJson<any>(pkgUrl, opts);
     if (retries < 3) {
       logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
@@ -167,7 +186,7 @@ export async function getDependency(
       dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
     }
-    dep.releases = Object.keys(res.versions).map(version => {
+    dep.releases = Object.keys(res.versions).map((version) => {
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
@@ -207,7 +226,6 @@ export async function getDependency(
       );
       return null;
     }
-    // istanbul ignore if
     if (err.statusCode === 402) {
       logger.debug(
         {
@@ -242,13 +260,11 @@ export async function getDependency(
         await delay(5000);
         return getDependency(packageName, retries - 1);
       }
-      // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }
       throw new DatasourceError(err);
     }
-    // istanbul ignore next
     return null;
   }
 }

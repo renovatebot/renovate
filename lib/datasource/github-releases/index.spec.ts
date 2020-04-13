@@ -10,7 +10,7 @@ const ghGot: any = api.get;
 
 describe('datasource/github-releases', () => {
   beforeEach(() => global.renovateCache.rmAll());
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeAll(() => global.renovateCache.rmAll());
     it('returns releases', async () => {
       const body = [
@@ -20,13 +20,13 @@ describe('datasource/github-releases', () => {
         { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await github.getPkgReleases({
+      const res = await github.getReleases({
         lookupName: 'some/dep',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(4);
       expect(
-        res.releases.find(release => release.version === 'v1.1.0')
+        res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();
     });
   });

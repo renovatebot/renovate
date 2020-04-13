@@ -11,7 +11,7 @@ shell.echo(`Dispatching version: ${version}`);
 
 (async () => {
   if (dry) {
-    shell.echo('dry-run done.');
+    shell.echo('DRY-RUN: done.');
     return;
   }
   await got(`repos/${process.env.GITHUB_REPOSITORY}/dispatches`, {
@@ -32,7 +32,7 @@ shell.echo(`Dispatching version: ${version}`);
       },
     },
   });
-})().catch(e => {
+})().catch((e) => {
   // Ignore for now
   shell.echo(e.toString());
 });

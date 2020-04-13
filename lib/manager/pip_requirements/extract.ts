@@ -23,7 +23,7 @@ export function extractPackageFile(
 
   let indexUrl: string;
   const extraUrls = [];
-  content.split('\n').forEach(line => {
+  content.split('\n').forEach((line) => {
     if (line.startsWith('--index-url ')) {
       indexUrl = line.substring('--index-url '.length).split(' ')[0];
     }
@@ -50,9 +50,9 @@ export function extractPackageFile(
   const regex = new RegExp(`^${dependencyPattern}$`, 'g');
   const deps = content
     .split('\n')
-    .map((rawline, lineNumber) => {
+    .map((rawline) => {
       let dep: PackageDependency = {};
-      const [line, comment] = rawline.split('#').map(part => part.trim());
+      const [line, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
         dep.skipReason = SkipReason.Ignored;
       }
@@ -66,7 +66,6 @@ export function extractPackageFile(
         ...dep,
         depName,
         currentValue,
-        managerData: { lineNumber },
         datasource: datasourcePypi.id,
       };
       if (currentValue && currentValue.startsWith('==')) {

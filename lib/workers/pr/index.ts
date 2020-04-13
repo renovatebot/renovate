@@ -192,7 +192,6 @@ export async function ensurePr(
       continue; // eslint-disable-line no-continue
     }
     processedUpgrades.push(upgradeKey);
-    upgrade.hasUrls = !!(upgrade.sourceUrl || upgrade.homepage);
 
     const logJSON = upgrade.logJSON;
 
@@ -210,7 +209,7 @@ export async function ensurePr(
         ) {
           commitRepos.push(upgrade.githubName);
           if (logJSON.versions) {
-            logJSON.versions.forEach(version => {
+            logJSON.versions.forEach((version) => {
               const release = { ...version };
               upgrade.releases.push(release);
             });
@@ -233,7 +232,7 @@ export async function ensurePr(
 
   // Update the config object
   Object.assign(config, upgrades[0]);
-  config.hasReleaseNotes = config.upgrades.some(upg => upg.hasReleaseNotes);
+  config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
   const releaseNoteRepos = [];
   for (const upgrade of config.upgrades) {
@@ -348,7 +347,7 @@ export async function ensurePr(
         if (err.body.errors && err.body.errors.length) {
           if (
             err.body.errors.some(
-              error =>
+              (error) =>
                 error.message &&
                 error.message.startsWith('A pull request already exists')
             )

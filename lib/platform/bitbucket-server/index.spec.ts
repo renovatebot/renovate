@@ -157,11 +157,65 @@ describe('platform/bitbucket-server', () => {
       });
 
       describe('repoForceRebase()', () => {
-        it('always return false, since bitbucket does not support force rebase', async () => {
+        it('returns false on missing mergeConfig', async () => {
           expect.assertions(1);
+          api.get.mockResolvedValueOnce({
+            body: {
+              mergeConfig: null,
+            },
+          } as any);
           const actual = await bitbucket.getRepoForceRebase();
           expect(actual).toBe(false);
         });
+
+        it('returns false on missing defaultStrategy', async () => {
+          expect.assertions(1);
+          api.get.mockResolvedValueOnce({
+            body: {
+              mergeConfig: {
+                defaultStrategy: null,
+              },
+            },
+          } as any);
+          const actual = await bitbucket.getRepoForceRebase();
+          expect(actual).toBe(false);
+        });
+
+        it.each(['ff-only', 'rebase-ff-only', 'squash-ff-only'])(
+          'return true if %s strategy is enabled',
+          async (id) => {
+            expect.assertions(1);
+            api.get.mockResolvedValueOnce({
+              body: {
+                mergeConfig: {
+                  defaultStrategy: {
+                    id,
+                  },
+                },
+              },
+            } as any);
+            const actual = await bitbucket.getRepoForceRebase();
+            expect(actual).toBe(true);
+          }
+        );
+
+        it.each(['no-ff', 'ff', 'rebase-no-ff', 'squash'])(
+          'return false if %s strategy is enabled',
+          async (id) => {
+            expect.assertions(1);
+            api.get.mockResolvedValueOnce({
+              body: {
+                mergeConfig: {
+                  defaultStrategy: {
+                    id,
+                  },
+                },
+              },
+            } as any);
+            const actual = await bitbucket.getRepoForceRebase();
+            expect(actual).toBe(false);
+          }
+        );
       });
 
       describe('setBaseBranch()', () => {

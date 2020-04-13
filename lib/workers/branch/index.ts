@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon';
-import { readFile } from 'fs-extra';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { join } from 'upath';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -40,6 +38,7 @@ import {
 import { BranchStatus } from '../../types';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
+import { readLocalFile } from '../../util/fs';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -59,8 +58,8 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
-    .map(upgrade => upgrade.depName)
-    .filter(v => v) // remove nulls (happens for lock file maintenance)
+    .map((upgrade) => upgrade.depName)
+    .filter((v) => v) // remove nulls (happens for lock file maintenance)
     .filter((value, i, list) => list.indexOf(value) === i); // remove duplicates
   logger.debug(
     { dependencies },
@@ -238,7 +237,7 @@ export async function processBranch(
 
     if (
       config.upgrades.some(
-        upgrade => upgrade.stabilityDays && upgrade.releaseTimestamp
+        (upgrade) => upgrade.stabilityDays && upgrade.releaseTimestamp
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
@@ -309,7 +308,7 @@ export async function processBranch(
     if (config.updatedArtifacts && config.updatedArtifacts.length) {
       logger.debug(
         {
-          updatedArtifacts: config.updatedArtifacts.map(f =>
+          updatedArtifacts: config.updatedArtifacts.map((f) =>
             f.name === '|delete|' ? `${f.contents} (delete)` : f.name
           ),
         },
@@ -336,7 +335,7 @@ export async function processBranch(
       if (is.nonEmptyArray(commands)) {
         for (const cmd of commands) {
           if (
-            !config.allowedPostUpgradeCommands.some(pattern =>
+            !config.allowedPostUpgradeCommands.some((pattern) =>
               regEx(pattern).test(cmd)
             )
           ) {
@@ -367,12 +366,10 @@ export async function processBranch(
                 { file: relativePath, pattern },
                 'Post-upgrade file saved'
               );
-              const existingContent = await readFile(
-                join(config.localDir, relativePath)
-              );
+              const existingContent = await readLocalFile(relativePath);
               config.updatedArtifacts.push({
                 name: relativePath,
-                contents: existingContent.toString(),
+                contents: existingContent,
               });
             }
           }
@@ -446,6 +443,7 @@ export async function processBranch(
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
+      !masterIssueCheck &&
       commitHash &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
@@ -580,7 +578,7 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
-        config.artifactErrors.forEach(error => {
+        config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile}\n\n`;
           content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
         });

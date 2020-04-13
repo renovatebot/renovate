@@ -1,9 +1,8 @@
 import slugify from 'slugify';
-import handlebars from 'handlebars';
 import { clean as cleanGitRef } from 'clean-git-ref';
 import { Merge } from 'type-fest';
 import { logger, addMeta, removeMeta } from '../../../logger';
-
+import * as template from '../../../util/template';
 import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
@@ -31,15 +30,15 @@ export type BranchifiedConfig = Merge<
     branchList: string[];
   }
 >;
-export function branchifyUpgrades(
+export async function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-): BranchifiedConfig {
+): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
-  const updates = flattenUpdates(config, packageFiles);
+  const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
-      .map(u => u.depName)
+      .map((u) => u.depName)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -51,7 +50,6 @@ export function branchifyUpgrades(
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;
-    // massage for handlebars
     const upper = (str: string): string =>
       str.charAt(0).toUpperCase() + str.substr(1);
     if (update.updateType) {
@@ -77,16 +75,17 @@ export function branchifyUpgrades(
         update.groupSlug = `patch-${update.groupSlug}`;
       }
       update.branchTopic = update.group.branchTopic || update.branchTopic;
-      update.branchName = handlebars.compile(
-        update.group.branchName || update.branchName
-      )(update);
+      update.branchName = template.compile(
+        update.group.branchName || update.branchName,
+        update
+      );
     } else {
-      update.branchName = handlebars.compile(update.branchName)(update);
+      update.branchName = template.compile(update.branchName, update);
     }
-    // Compile extra times in case of nested handlebars templates
-    update.branchName = handlebars.compile(update.branchName)(update);
+    // Compile extra times in case of nested templates
+    update.branchName = template.compile(update.branchName, update);
     update.branchName = cleanBranchName(
-      handlebars.compile(update.branchName)(update)
+      template.compile(update.branchName, update)
     );
 
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
@@ -107,7 +106,7 @@ export function branchifyUpgrades(
   removeMeta(['branch']);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
   const branchList = config.repoIsOnboarded
-    ? branches.map(upgrade => upgrade.branchName)
+    ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;
   // istanbul ignore next
   try {
