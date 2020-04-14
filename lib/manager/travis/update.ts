@@ -21,7 +21,7 @@ export function updateDependency({
     }
     let newString = `node_js:\n`;
     // TODO: `newValue` is a string!
-    (upgrade.newValue as any).forEach(version => {
+    upgrade.newValue.split(',').forEach(version => {
       newString += `${indent}- ${quote}${version}${quote}\n`;
     });
     return fileContent.replace(/node_js:(\n\s+-[^\n]+)+\n/, newString);

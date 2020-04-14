@@ -27,7 +27,6 @@ export async function getReleaseList(
   try {
     let url = apiBaseURL.replace(/\/?$/, '/');
     if (apiBaseURL.includes('github')) {
-      // github repo
       url += `repos/${repository}/releases?per_page=100`;
       const res = await ghGot<
         {
@@ -47,7 +46,6 @@ export async function getReleaseList(
       }));
     }
     if (apiBaseURL.includes('gitlab')) {
-      // not github, hopefully gitlab
       url += `projects/${repository.replace(
         /\//g,
         '%2f'

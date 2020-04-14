@@ -3,9 +3,9 @@ import { isEqual } from 'lodash';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
-import nodeJsSchedule from '../../../data/node-js-schedule.json';
-import { PackageUpdateConfig, PackageUpdateResult } from '../common';
+import { PackageUpdateConfig, LookupUpdate } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { resolveFile } from '../../util';
 
 interface NodeJsPolicies {
   all: number[];
@@ -26,7 +26,9 @@ type NodeJsData = Record<string, NodeJsSchedule>;
 let policies: NodeJsPolicies;
 let refreshDate: Date;
 
-function generatePolicies(): void {
+async function generatePolicies(): Promise<NodeJsData> {
+  const file = await resolveFile('data/node-js-schedule.json');
+  const nodeJsSchedule = (await import(file)) as NodeJsData;
   policies = {
     all: [],
     lts: [],
@@ -38,7 +40,7 @@ function generatePolicies(): void {
 
   const now = new Date();
 
-  for (const [vRelease, data] of Object.entries(nodeJsSchedule as NodeJsData)) {
+  for (const [vRelease, data] of Object.entries(nodeJsSchedule)) {
     const isAlive = new Date(data.start) < now && new Date(data.end) > now;
     if (isAlive) {
       const release = parseInt(vRelease.replace(/^v/, ''), 10);
@@ -59,16 +61,18 @@ function generatePolicies(): void {
   }
   policies.current.push(policies.active[policies.active.length - 1]);
   policies.lts_latest.push(policies.lts[policies.lts.length - 1]);
+
+  return nodeJsSchedule;
 }
 
-function checkPolicies(): void {
+async function checkPolicies(): Promise<void> {
   if (policies && refreshDate > new Date()) {
     return;
   }
-  generatePolicies();
+  const nodeJsSchedule = await generatePolicies();
   refreshDate = new Date('3000-01-01'); // y3k
   const now = new Date();
-  for (const data of Object.values(nodeJsSchedule as NodeJsData)) {
+  for (const data of Object.values(nodeJsSchedule)) {
     const fields = ['start', 'lts', 'maintenance', 'end'];
     for (const field of fields) {
       const fieldDate = new Date(data[field]);
@@ -82,13 +86,13 @@ function checkPolicies(): void {
 
 export async function getPackageUpdates(
   config: PackageUpdateConfig
-): Promise<PackageUpdateResult[]> {
+): Promise<LookupUpdate[]> {
   logger.trace('travis.getPackageUpdates()');
   const { supportPolicy } = config;
   if (!(supportPolicy && supportPolicy.length)) {
     return [];
   }
-  checkPolicies();
+  await checkPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
       logger.warn(`Unknown supportPolicy: ${policy}`);
@@ -96,12 +100,11 @@ export async function getPackageUpdates(
     }
   }
   logger.debug({ supportPolicy }, `supportPolicy`);
-  // TODO: `newValue` is a (string | number)[] !
   let newValue: any[] = (supportPolicy as (keyof NodeJsPolicies)[])
     .map(policy => policies[policy])
     .reduce((result, policy) => result.concat(policy), [])
     .sort((a, b) => a - b);
-  const newMajor = newValue[newValue.length - 1];
+  const newMajor: number = newValue[newValue.length - 1];
   if (config.rangeStrategy === 'pin' || isVersion(config.currentValue[0])) {
     const versions = (
       await getPkgReleases({
@@ -126,7 +129,7 @@ export async function getPackageUpdates(
   }
   return [
     {
-      newValue,
+      newValue: newValue.join(','),
       newMajor,
       isRange: true,
       sourceUrl: 'https://github.com/nodejs/node',

@@ -67,6 +67,8 @@ export interface RenovateAdminConfig {
   configWarningReuseIssue?: boolean;
   dryRun?: boolean;
 
+  endpoint?: string;
+
   global?: GlobalConfig;
 
   localDir?: string;
@@ -80,6 +82,7 @@ export interface RenovateAdminConfig {
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
 
+  platform?: string;
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
   repositories?: RenovateRepository[];
@@ -121,7 +124,6 @@ export interface RenovateConfig
   branchList?: string[];
   description?: string[];
 
-  endpoint?: string;
   errors?: ValidationMessage[];
   extends?: string[];
 

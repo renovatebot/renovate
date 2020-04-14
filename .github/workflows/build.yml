@@ -139,8 +139,6 @@ jobs:
 
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Upload coverage
         uses: actions/upload-artifact@v1
@@ -215,7 +213,9 @@ jobs:
         run: yarn install --frozen-lockfile --link-duplicates
 
       - name: Lint
-        run: yarn lint
+        run: |
+          yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
+          yarn prettier
 
       - name: Test schema
         run: yarn test-schema
@@ -281,7 +281,10 @@ jobs:
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
 
+      # full checkout for semantic-release
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Cache Yarn packages
         uses: actions/cache@v1

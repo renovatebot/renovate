@@ -6,7 +6,7 @@ import {
 import * as azureHelper from './azure-helper';
 import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -20,6 +20,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,7 +32,8 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
+import { ensureTrailingSlash } from '../../util/url';
 
 interface Config {
   storage: GitStorage;
@@ -76,7 +78,7 @@ export function initPlatform({
   }
   // TODO: Add a connection check that endpoint/token combination are valid
   const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+    endpoint: ensureTrailingSlash(endpoint),
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);

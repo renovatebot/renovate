@@ -16,6 +16,35 @@ import { HostRule } from '../../types';
 
 export const id = 'docker';
 
+export const defaultConfig = {
+  managerBranchPrefix: 'docker-',
+  commitMessageTopic: '{{{depName}}} Docker tag',
+  major: { enabled: false },
+  commitMessageExtra:
+    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+  digest: {
+    branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
+    commitMessageExtra: 'to {{newDigestShort}}',
+    commitMessageTopic:
+      '{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
+    group: {
+      commitMessageTopic: '{{{groupName}}}',
+      commitMessageExtra: '',
+    },
+  },
+  pin: {
+    commitMessageExtra: '',
+    groupName: 'Docker digests',
+    group: {
+      commitMessageTopic: '{{{groupName}}}',
+      branchTopic: 'digests-pin',
+    },
+  },
+  group: {
+    commitMessageTopic: '{{{groupName}}} Docker tags',
+  },
+};
+
 const http = new Http(id);
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;

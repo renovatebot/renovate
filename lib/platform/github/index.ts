@@ -5,7 +5,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -18,6 +18,7 @@ import {
   FindPRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
+  CommitFilesConfig,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';
@@ -45,6 +46,7 @@ import {
   PR_STATE_CLOSED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { ensureTrailingSlash } from '../../util/url';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -121,7 +123,7 @@ export async function initPlatform({
   }
 
   if (endpoint) {
-    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    defaults.endpoint = ensureTrailingSlash(endpoint);
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.debug('Using default github endpoint: ' + defaults.endpoint);
@@ -242,7 +244,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  cleanRepo();
+  await cleanRepo();
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -1057,11 +1059,13 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+// https://developer.github.com/v3/repos/statuses
+// https://developer.github.com/v3/checks/runs/
 type BranchState = 'failure' | 'pending' | 'success';
 
 interface GhBranchStatus {
   context: string;
-  state: BranchState;
+  state: BranchState | 'error';
 }
 
 interface CombinedBranchStatus {
@@ -1156,20 +1160,22 @@ export async function getBranchStatus(
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
     }
-    if (commitStatus.state === 'failed') {
+    if (commitStatus.state === 'failure') {
       return BranchStatus.red;
     }
     return BranchStatus.yellow;
   }
   if (
-    commitStatus.state === 'failed' ||
-    checkRuns.some(run => run.conclusion === 'failed')
+    commitStatus.state === 'failure' ||
+    checkRuns.some(run => run.conclusion === 'failure')
   ) {
     return BranchStatus.red;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
-    checkRuns.every(run => ['neutral', 'success'].includes(run.conclusion))
+    checkRuns.every(run =>
+      ['skipped', 'neutral', 'success'].includes(run.conclusion)
+    )
   ) {
     return BranchStatus.green;
   }
@@ -1189,7 +1195,8 @@ async function getStatusCheck(
 
 const githubToRenovateStatusMapping = {
   success: BranchStatus.green,
-  failed: BranchStatus.red,
+  error: BranchStatus.red,
+  failure: BranchStatus.red,
   pending: BranchStatus.yellow,
 };
 
