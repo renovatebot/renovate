@@ -11,6 +11,7 @@ import { applyPackageRules } from '../../../util/package-rules';
 import { lookupUpdates, LookupUpdateConfig } from './lookup';
 import { PackageFile, PackageDependency } from '../../../manager/common';
 import { SkipReason } from '../../../types';
+import { getDefaultConfig } from '../../../datasource';
 import { clone } from '../../../util/clone';
 
 async function fetchDepUpdates(
@@ -26,6 +27,8 @@ async function fetchDepUpdates(
   const { depName, currentValue } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
+  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
+  depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
