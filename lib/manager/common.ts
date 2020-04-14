@@ -126,11 +126,6 @@ export interface Package<T> extends ManagerData<T> {
   prettyDepType?: any;
 }
 
-export interface AutoReplaceData {
-  replaceString: string;
-  depIndex?: number;
-}
-
 export interface LookupUpdate {
   blockedByPin?: boolean;
   branchName?: string;
@@ -174,7 +169,8 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   toVersion?: string;
   updates?: LookupUpdate[];
   versionLine?: number;
-  autoReplaceData?: AutoReplaceData;
+  replaceString?: string;
+  depIndex?: number;
 }
 
 export interface Upgrade<T = Record<string, any>>
