@@ -1,13 +1,13 @@
 import { logger } from '../../../logger';
 import { mergeChildConfig, RenovateConfig } from '../../../config';
-import { extract, ExtractResult, update, UpdateResult } from './extract-update';
+import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
 import { platform } from '../../../platform';
+import { WriteUpdateResult } from './write';
 import { BranchConfig } from '../../common';
-import { PackageFile } from '../../../manager/common';
 
 export async function processRepo(
   config: RenovateConfig
-): Promise<ExtractResult> {
+): Promise<ExtractAndUpdateResult> {
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.masterIssueChecks = {};
@@ -45,6 +45,7 @@ export async function processRepo(
   }
   if (config.baseBranches && config.baseBranches.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
+    let res: WriteUpdateResult | undefined;
     let branches: BranchConfig[] = [];
     let branchList: string[] = [];
     for (const baseBranch of config.baseBranches) {
@@ -55,23 +56,13 @@ export async function processRepo(
         baseBranchConfig.hasBaseBranches = true;
       }
       await platform.setBaseBranch(baseBranch);
-      const baseBranchRes = await extract(baseBranchConfig);
+      const baseBranchRes = await extractAndUpdate(baseBranchConfig);
+      ({ res } = baseBranchRes);
       branches = branches.concat(baseBranchRes.branches);
       branchList = branchList.concat(baseBranchRes.branchList);
     }
-    return { branches, branchList };
+    return { res, branches, branchList };
   }
   logger.debug('No baseBranches');
-  return extract(config);
-}
-
-export async function updateRepo(
-  config: RenovateConfig,
-  branches: BranchConfig[],
-  branchList: string[],
-  packageFiles?: Record<string, PackageFile[]>
-): Promise<UpdateResult> {
-  logger.debug('processRepo()');
-
-  return update(config, branches, branchList, packageFiles);
+  return extractAndUpdate(config);
 }

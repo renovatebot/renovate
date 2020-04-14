@@ -6,11 +6,10 @@ import { logger, setMeta } from '../../logger';
 import { initRepo } from './init';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { processResult, ProcessResult } from './result';
-import { processRepo, updateRepo } from './process';
+import { processRepo } from './process';
 import { finaliseRepo } from './finalise';
 import { ensureMasterIssue } from './master-issue';
 import { RenovateConfig } from '../../config';
-import { extractChangeLogJSON } from './extract';
 
 let renovateVersion = 'unknown';
 try {
@@ -32,15 +31,10 @@ export async function renovateRepository(
     await fs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
-    const { branches, branchList, packageFiles } = await processRepo(config);
-    await extractChangeLogJSON(branches);
-    await ensureOnboardingPr(config, packageFiles, branches);
-    const { res } = await updateRepo(
-      config,
-      branches,
-      branchList,
-      packageFiles
+    const { res, branches, branchList, packageFiles } = await processRepo(
+      config
     );
+    await ensureOnboardingPr(config, packageFiles, branches);
     if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);
     }

@@ -1,4 +1,4 @@
-import { extract, update } from './extract-update';
+import { extractAndUpdate } from './extract-update';
 import * as _branchify from '../updates/branchify';
 import { mocked } from '../../../../test/util';
 
@@ -16,14 +16,13 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
 });
 
 describe('workers/repository/process/extract-update', () => {
-  describe('extract()', () => {
+  describe('extractAndUpdate()', () => {
     it('runs', async () => {
       const config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      const res = await extract(config);
-      await update(config, res.branches, res.branchList, res.packageFiles);
+      await extractAndUpdate(config);
     });
   });
 });
