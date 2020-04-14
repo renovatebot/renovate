@@ -4,7 +4,6 @@ import { LANGUAGE_DOCKER } from '../../constants/languages';
 const language = LANGUAGE_DOCKER;
 
 export { extractPackageFile, language };
-export const autoReplace = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/).drone.yml$'],

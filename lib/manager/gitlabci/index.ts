@@ -5,8 +5,6 @@ const language = LANGUAGE_DOCKER;
 
 export { extractPackageFile, language };
 
-export const autoReplace = true;
-
 export const defaultConfig = {
   fileMatch: ['^\\.gitlab-ci\\.yml$'],
 };
