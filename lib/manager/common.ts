@@ -75,7 +75,6 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
-  autoReplace?: boolean;
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
   compatibility?: Record<string, string>;
@@ -221,7 +220,6 @@ export interface UpdateDependencyConfig {
 
 export interface ManagerApi {
   defaultConfig: object;
-  autoReplace?: boolean;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
