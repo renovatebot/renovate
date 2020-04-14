@@ -47,6 +47,7 @@ export async function processRepo(
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     let branches: BranchConfig[] = [];
     let branchList: string[] = [];
+    let packageFiles: Record<string, PackageFile[]>;
     for (const baseBranch of config.baseBranches) {
       logger.debug(`baseBranch: ${baseBranch}`);
       const baseBranchConfig = mergeChildConfig(config, { baseBranch });
@@ -58,8 +59,9 @@ export async function processRepo(
       const baseBranchRes = await extract(baseBranchConfig);
       branches = branches.concat(baseBranchRes.branches);
       branchList = branchList.concat(baseBranchRes.branchList);
+      packageFiles = baseBranchRes.packageFiles;
     }
-    return { branches, branchList };
+    return { branches, branchList, packageFiles };
   }
   logger.debug('No baseBranches');
   return extract(config);
