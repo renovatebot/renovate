@@ -75,7 +75,6 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
-  autoReplace?: boolean;
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
   compatibility?: Record<string, string>;
@@ -126,11 +125,6 @@ export interface Package<T> extends ManagerData<T> {
   prettyDepType?: any;
 }
 
-export interface AutoReplaceData {
-  replaceString: string;
-  depIndex?: number;
-}
-
 export interface LookupUpdate {
   blockedByPin?: boolean;
   branchName?: string;
@@ -174,7 +168,8 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   toVersion?: string;
   updates?: LookupUpdate[];
   versionLine?: number;
-  autoReplaceData?: AutoReplaceData;
+  replaceString?: string;
+  depIndex?: number;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -225,7 +220,6 @@ export interface UpdateDependencyConfig {
 
 export interface ManagerApi {
   defaultConfig: object;
-  autoReplace?: boolean;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 

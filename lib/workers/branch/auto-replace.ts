@@ -9,13 +9,7 @@ export async function confirmIfDepUpdated(
   upgrade,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    autoReplaceData,
-  } = upgrade;
+  const { manager, packageFile, newValue, newDigest, depIndex } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade;
   try {
@@ -24,7 +18,7 @@ export async function confirmIfDepUpdated(
       packageFile,
       upgrade
     );
-    newUpgrade = newExtract.deps[autoReplaceData.depIndex];
+    newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
@@ -84,7 +78,6 @@ export async function doAutoReplace(
     newValue,
     currentDigest,
     newDigest,
-    autoReplaceData,
     autoReplaceStringTemplate,
   } = upgrade;
   const replaceString = autoReplaceData?.replaceString || currentValue;

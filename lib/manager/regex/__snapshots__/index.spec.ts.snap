@@ -4,91 +4,67 @@ exports[`manager/regex/index extracts multiple dependencies 1`] = `
 Object {
   "deps": Array [
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 0,
-        "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
-",
-      },
       "currentValue": "6.2",
       "datasource": "gradle-version",
       "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
       "versioning": "maven",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 1,
-        "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
-",
-      },
       "currentValue": "10.19.0",
       "datasource": "github-tags",
       "depName": "nodejs/node",
+      "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+",
       "versioning": "node",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 2,
-        "replaceString": "ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer
-",
-      },
       "currentValue": "1.9.3",
       "datasource": "github-releases",
       "depName": "composer/composer",
+      "replaceString": "ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer
+",
       "versioning": "semver",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 3,
-        "replaceString": "ENV COCOAPODS_VERSION=1.9.0 # rubygems/cocoapods&versioning=ruby
-",
-      },
       "currentValue": "1.9.0",
       "datasource": "rubygems",
       "depName": "cocoapods",
+      "replaceString": "ENV COCOAPODS_VERSION=1.9.0 # rubygems/cocoapods&versioning=ruby
+",
       "versioning": "ruby",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 4,
-        "replaceString": "ENV DOCKER_VERSION=19.03.1 # github-releases/docker/docker-ce&versioning=docker
-",
-      },
       "currentValue": "19.03.1",
       "datasource": "github-releases",
       "depName": "docker/docker-ce",
+      "replaceString": "ENV DOCKER_VERSION=19.03.1 # github-releases/docker/docker-ce&versioning=docker
+",
       "versioning": "docker",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 5,
-        "replaceString": "ENV POETRY_VERSION=1.0.0 # github-releases/python-poetry/poetry
-",
-      },
       "currentValue": "1.0.0",
       "datasource": "github-releases",
       "depName": "python-poetry/poetry",
+      "replaceString": "ENV POETRY_VERSION=1.0.0 # github-releases/python-poetry/poetry
+",
       "versioning": "semver",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 6,
-        "replaceString": "ENV NPM_VERSION=6.10.2 # npm/npm
-",
-      },
       "currentValue": "6.10.2",
       "datasource": "npm",
       "depName": "npm",
+      "replaceString": "ENV NPM_VERSION=6.10.2 # npm/npm
+",
       "versioning": "semver",
     },
     Object {
-      "autoReplaceData": Object {
-        "depIndex": 7,
-        "replaceString": "ENV YARN_VERSION=1.19.1 # npm/yarn
-",
-      },
       "currentValue": "1.19.1",
       "datasource": "npm",
       "depName": "yarn",
+      "replaceString": "ENV YARN_VERSION=1.19.1 # npm/yarn
+",
       "versioning": "semver",
     },
   ],
