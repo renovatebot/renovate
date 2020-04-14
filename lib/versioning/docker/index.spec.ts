@@ -79,7 +79,7 @@ describe('docker.', () => {
   describe('maxSatisfyingVersion(versions, range)', () => {
     it('should support all versions length', () => {
       [docker.minSatisfyingVersion, docker.maxSatisfyingVersion].forEach(
-        max => {
+        (max) => {
           const versions = [
             '0.9.8',
             '1.1.1',
@@ -109,7 +109,7 @@ describe('docker.', () => {
         ['1.2.3', '1.3.4'],
         ['2.0.1', '1.2.3'],
         ['1.2.3', '0.9.5'],
-      ].forEach(pair => {
+      ].forEach((pair) => {
         expect(docker.sortVersions(pair[0], pair[1])).toBe(
           semver.sortVersions(pair[0], pair[1])
         );

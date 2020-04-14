@@ -33,15 +33,15 @@ export async function getInRangeReleases(
     const version = get(versioning);
 
     const releases = pkgReleases
-      .filter(release => version.isCompatible(release.version, fromVersion))
+      .filter((release) => version.isCompatible(release.version, fromVersion))
       .filter(
-        release =>
+        (release) =>
           version.equals(release.version, fromVersion) ||
           version.isGreaterThan(release.version, fromVersion)
       )
-      .filter(release => !version.isGreaterThan(release.version, toVersion))
+      .filter((release) => !version.isGreaterThan(release.version, toVersion))
       .filter(
-        release =>
+        (release) =>
           version.isStable(release.version) ||
           matchesUnstable(version, fromVersion, release.version) ||
           matchesUnstable(version, toVersion, release.version)

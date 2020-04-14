@@ -27,9 +27,7 @@ describe('datasource/sbt', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       nock.disableNetConnect();
-      nock('https://failed_repo')
-        .get('/maven/org/scalatest/')
-        .reply(404, null);
+      nock('https://failed_repo').get('/maven/org/scalatest/').reply(404, null);
       nock('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/')
         .reply(

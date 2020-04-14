@@ -34,7 +34,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
     // TODO: fix types
     const servicesIndexRaw = await http.getJson<any>(url);
     const searchQueryService = servicesIndexRaw.body.resources.find(
-      resource =>
+      (resource) =>
         resource['@type'] && resource['@type'].startsWith(resourceType)
     );
     const searchQueryServiceId = searchQueryService['@id'];
@@ -74,23 +74,23 @@ export async function getReleases(
     // TODO: fix types
     const pkgUrlListRaw = await http.getJson<any>(queryUrl);
     const match = pkgUrlListRaw.body.data.find(
-      item => item.id.toLowerCase() === pkgName.toLowerCase()
+      (item) => item.id.toLowerCase() === pkgName.toLowerCase()
     );
     // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#search-result
     if (!match) {
       // There are no pkgName or releases in current feed
       return null;
     }
-    dep.releases = match.versions.map(item => ({
+    dep.releases = match.versions.map((item) => ({
       version: item.version,
     }));
 
     try {
       // For nuget.org we have a way to get nuspec file
       const sanitizedVersions = dep.releases
-        .map(release => semver.valid(release.version))
+        .map((release) => semver.valid(release.version))
         .filter(Boolean)
-        .filter(version => !semver.prerelease(version));
+        .filter((version) => !semver.prerelease(version));
       let lastVersion: string;
       // istanbul ignore else
       if (sanitizedVersions.length) {

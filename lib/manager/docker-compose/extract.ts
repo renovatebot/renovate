@@ -22,7 +22,7 @@ class LineMapper {
 
   constructor(content: string, filter: RegExp) {
     this.imageLines = [...content.split('\n').entries()]
-      .filter(entry => filter.test(entry[1]))
+      .filter((entry) => filter.test(entry[1]))
       .map(([lineNumber, line]) => ({ lineNumber, line, used: false }));
   }
 
@@ -66,8 +66,8 @@ export function extractPackageFile(
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(config.services || {})
-      .filter(service => service && service.image && !service.build)
-      .map(service => {
+      .filter((service) => service && service.image && !service.build)
+      .map((service) => {
         const dep = getDep(service.image);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
         // istanbul ignore if

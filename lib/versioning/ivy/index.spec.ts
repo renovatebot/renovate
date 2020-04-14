@@ -49,7 +49,7 @@ describe('versioning/ivy/match', () => {
       ']1.0,)',
       '(,2.0]',
       '(,2.0[',
-    ].forEach(value => {
+    ].forEach((value) => {
       expect(parseDynamicRevision(value)).toEqual({
         type: REV_TYPE_RANGE,
         value,

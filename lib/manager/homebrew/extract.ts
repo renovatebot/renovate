@@ -7,14 +7,14 @@ import { SkipReason } from '../../types';
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
   i += 'sha256'.length;
-  i = skip(i, content, c => {
+  i = skip(i, content, (c) => {
     return isSpace(c);
   });
   if (content[i] !== '"' && content[i] !== "'") {
     return null;
   }
   i += 1;
-  const j = skip(i, content, c => {
+  const j = skip(i, content, (c) => {
     return c !== '"' && c !== "'";
   });
   const sha256 = content.slice(i, j);
@@ -33,7 +33,7 @@ function extractSha256(content: string): string | null {
 function parseUrl(idx: number, content: string): string | null {
   let i = idx;
   i += 'url'.length;
-  i = skip(i, content, c => {
+  i = skip(i, content, (c) => {
     return isSpace(c);
   });
   const chr = content[i];
@@ -41,7 +41,7 @@ function parseUrl(idx: number, content: string): string | null {
     return null;
   }
   i += 1;
-  const j = skip(i, content, c => {
+  const j = skip(i, content, (c) => {
     return c !== '"' && c !== "'" && !isSpace(c);
   });
   const url = content.slice(i, j);
@@ -78,7 +78,7 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
       return null;
     }
     let s = url.pathname.split('/');
-    s = s.filter(val => val);
+    s = s.filter((val) => val);
     const ownerName = s[0];
     const repoName = s[1];
     let currentValue: string;
@@ -108,17 +108,17 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
 function parseClassHeader(idx: number, content: string): string | null {
   let i = idx;
   i += 'class'.length;
-  i = skip(i, content, c => {
+  i = skip(i, content, (c) => {
     return isSpace(c);
   });
   // Skip all non space and non '<' characters
-  let j = skip(i, content, c => {
+  let j = skip(i, content, (c) => {
     return !isSpace(c) && c !== '<';
   });
   const className = content.slice(i, j);
   i = j;
   // Skip spaces
-  i = skip(i, content, c => {
+  i = skip(i, content, (c) => {
     return isSpace(c);
   });
   if (content[i] === '<') {
@@ -126,11 +126,11 @@ function parseClassHeader(idx: number, content: string): string | null {
   } else {
     return null;
   } // Skip spaces
-  i = skip(i, content, c => {
+  i = skip(i, content, (c) => {
     return isSpace(c);
   });
   // Skip non-spaces
-  j = skip(i, content, c => {
+  j = skip(i, content, (c) => {
     return !isSpace(c);
   });
   if (content.slice(i, j) !== 'Formula') {

@@ -125,7 +125,7 @@ export async function mergeRenovateConfig(
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
-      .map(e => e.message)
+      .map((e) => e.message)
       .join(', ');
     throw error;
   }
@@ -146,7 +146,7 @@ export async function mergeRenovateConfig(
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   const resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig),
+    await presets.resolveConfigPresets(decryptedConfig, config),
     config.privateKey
   );
   delete resolvedConfig.privateKey;

@@ -31,7 +31,7 @@ describe('platform', () => {
     const loadedMgr = loadModules(
       __dirname,
       null,
-      m => !['utils', 'git'].includes(m)
+      (m) => !['utils', 'git'].includes(m)
     );
     expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));
 

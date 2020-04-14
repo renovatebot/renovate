@@ -98,7 +98,7 @@ interface Logger {
 
 export const logger: Logger = {} as any;
 
-loggerLevels.forEach(loggerLevel => {
+loggerLevels.forEach((loggerLevel) => {
   logger[loggerLevel] = logFactory(loggerLevel);
 });
 
@@ -122,7 +122,7 @@ export function addMeta(obj: any): void {
 
 // removeMeta removes the provided fields from meta
 export function removeMeta(fields: string[]): void {
-  Object.keys(meta).forEach(key => {
+  Object.keys(meta).forEach((key) => {
     if (fields.includes(key)) {
       delete meta[key];
     }

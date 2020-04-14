@@ -86,7 +86,7 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
-      config.upgrades.forEach(upgrade => {
+      config.upgrades.forEach((upgrade) => {
         upgrade.autoReplace = true; // eslint-disable-line no-param-reassign
       });
       const res = await getUpdatedPackageFiles(config);
@@ -140,7 +140,7 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
-      config.upgrades.forEach(upgrade => {
+      config.upgrades.forEach((upgrade) => {
         upgrade.autoReplace = true; // eslint-disable-line no-param-reassign
       });
       const res = await getUpdatedPackageFiles(config);

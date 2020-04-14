@@ -97,7 +97,7 @@ function mergeDependenciesWithRepositories(
   if (!project.dependencies) {
     return [];
   }
-  return project.dependencies.map(dep => ({
+  return project.dependencies.map((dep) => ({
     ...dep,
     repos: [...project.repositories],
   }));
@@ -116,13 +116,13 @@ function combineReposOnDuplicatedDependencies(
   currentValue: GradleDependencyWithRepos
 ): GradleDependencyWithRepos[] {
   const existingDependency = accumulator.find(
-    dep => dep.name === currentValue.name && dep.group === currentValue.group
+    (dep) => dep.name === currentValue.name && dep.group === currentValue.group
   );
   if (!existingDependency) {
     accumulator.push(currentValue);
   } else {
     const nonExistingRepos = currentValue.repos.filter(
-      repo => !existingDependency.repos.includes(repo)
+      (repo) => !existingDependency.repos.includes(repo)
     );
     existingDependency.repos.push(...nonExistingRepos);
   }
@@ -152,8 +152,8 @@ export async function extractDependenciesFromUpdatesReport(
     .reduce(combineReposOnDuplicatedDependencies, []);
 
   return dependencies
-    .map(gradleModule => buildDependency(gradleModule))
-    .map(dep => {
+    .map((gradleModule) => buildDependency(gradleModule))
+    .map((dep) => {
       /* https://github.com/renovatebot/renovate/issues/4627 */
       const { depName, currentValue } = dep;
       if (depName.endsWith('_%%')) {

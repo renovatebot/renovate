@@ -22,9 +22,9 @@ export function updateDependency({
   }
   const { depName, newValue } = upgrade;
   const oldVersion = doc.releases.filter(
-    dep => dep.chart.split('/')[1] === depName
+    (dep) => dep.chart.split('/')[1] === depName
   )[0].version;
-  doc.releases = doc.releases.map(dep =>
+  doc.releases = doc.releases.map((dep) =>
     dep.chart.split('/')[1] === depName ? { ...dep, version: newValue } : dep
   );
   const searchString = `${oldVersion}`;

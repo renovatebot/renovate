@@ -44,7 +44,7 @@ export async function extractPackageFile(
     logger.debug({ fileName }, 'requirements.yaml has no dependencies');
     return null;
   }
-  deps = doc.dependencies.map(dep => {
+  deps = doc.dependencies.map((dep) => {
     const res: PackageDependency = {
       depName: dep.name,
       currentValue: dep.version,

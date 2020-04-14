@@ -49,13 +49,13 @@ function uniq<T = unknown>(
   eql = (x: T, y: T): boolean => x === y
 ): T[] {
   return array.filter((x, idx, arr) => {
-    return arr.findIndex(y => eql(x, y)) === idx;
+    return arr.findIndex((y) => eql(x, y)) === idx;
   });
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
-  const filtered: VolumesPair[] = expanded.filter(vol => vol !== null);
+  const filtered: VolumesPair[] = expanded.filter((vol) => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => {
     return `-v "${from}":"${to}"`;
@@ -63,7 +63,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
 }
 
 function prepareCommands(commands: Opt<string>[]): string[] {
-  return commands.filter(command => command && typeof command === 'string');
+  return commands.filter((command) => command && typeof command === 'string');
 }
 
 async function getDockerTag(
@@ -84,9 +84,9 @@ async function getDockerTag(
   );
   const imageReleases = await getReleases({ lookupName });
   if (imageReleases && imageReleases.releases) {
-    let versions = imageReleases.releases.map(release => release.version);
+    let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
-      version => isVersion(version) && matches(version, constraint)
+      (version) => isVersion(version) && matches(version, constraint)
     );
     versions = versions.sort(sortVersions);
     if (versions.length) {
@@ -149,7 +149,7 @@ export async function removeDanglingContainers(): Promise<void> {
       const containerIds = res.stdout
         .trim()
         .split('\n')
-        .map(container => container.trim())
+        .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
       await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
@@ -187,8 +187,8 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter(x => typeof x === 'string')
-        .map(e => `-e ${e}`)
+        .filter((x) => typeof x === 'string')
+        .map((e) => `-e ${e}`)
     );
   }
 

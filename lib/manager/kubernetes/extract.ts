@@ -32,7 +32,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     lineNumber += 1;
   }
   deps = deps.filter(
-    dep => !(dep.currentValue && dep.currentValue.includes('${'))
+    (dep) => !(dep.currentValue && dep.currentValue.includes('${'))
   );
   if (!deps.length) {
     return null;

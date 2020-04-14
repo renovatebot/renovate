@@ -39,7 +39,7 @@ export async function confirmIfDepUpdated(
 }
 
 function getDepsSignature(deps): string {
-  return deps.map(dep => `${dep.depName}${dep.lookupName}`).join(',');
+  return deps.map((dep) => `${dep.depName}${dep.lookupName}`).join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(
@@ -91,11 +91,11 @@ export async function doAutoReplace(
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
-    logger.error(
+    logger.warn(
       { depName },
       'Cannot find replaceString in current file content'
     );
-    throw new Error(WORKER_FILE_UPDATE_FAILED);
+    return existingContent;
   }
   try {
     let newString: string;

@@ -17,7 +17,7 @@ export function check({
   if (Array.isArray(resolvedRule.managers)) {
     if (
       resolvedRule.managers.find(
-        confManager => !getManagerList().includes(confManager)
+        (confManager) => !getManagerList().includes(confManager)
       )
     ) {
       managersErrMessage = `${currentPath}:
