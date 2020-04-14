@@ -48,6 +48,7 @@ async function fetchDepUpdates(
     } else {
       dep.updates = await getPackageUpdates(manager, depConfig);
     }
+    dep.updates = dep.updates || [];
     // istanbul ignore if
     if (dep.updates.length) {
       logger.trace(
