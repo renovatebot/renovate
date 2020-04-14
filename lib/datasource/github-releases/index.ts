@@ -11,7 +11,7 @@ type GithubRelease = {
   published_at: string;
 };
 
-const http = new GithubHttp(id);
+const http = new GithubHttp();
 
 /**
  * github.getReleases
