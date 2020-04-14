@@ -126,12 +126,9 @@ export async function generateLockFile(
         cwd,
         env,
       });
-      stdout += updateRes.stdout
-        ? /* istanbul ignore next */ updateRes.stdout
-        : '';
-      stderr += updateRes.stderr
-        ? /* istanbul ignore next */ updateRes.stderr
-        : '';
+      // istanbul ignore next
+      stdout += updateRes.stdout || '';
+      stderr += updateRes.stderr || '';
     }
 
     if (yarnMajorVersion < 2) {
@@ -146,12 +143,9 @@ export async function generateLockFile(
           cwd,
           env,
         });
-        stdout += dedupeRes.stdout
-          ? /* istanbul ignore next */ dedupeRes.stdout
-          : '';
-        stderr += dedupeRes.stderr
-          ? /* istanbul ignore next */ dedupeRes.stderr
-          : '';
+        // istanbul ignore next
+        stdout += dedupeRes.stdout || '';
+        stderr += dedupeRes.stderr || '';
       }
       if (
         config.postUpdateOptions &&
@@ -164,17 +158,13 @@ export async function generateLockFile(
           cwd,
           env,
         });
-        stdout += dedupeRes.stdout
-          ? /* istanbul ignore next */ dedupeRes.stdout
-          : '';
-        stderr += dedupeRes.stderr
-          ? /* istanbul ignore next */ dedupeRes.stderr
-          : '';
+        // istanbul ignore next
+        stdout += dedupeRes.stdout || '';
+        stderr += dedupeRes.stderr || '';
       }
     } else if (
       config.postUpdateOptions &&
-      (config.postUpdateOptions.includes('yarnDedupeFewer') ||
-        config.postUpdateOptions.includes('yarnDedupeHighest'))
+      config.postUpdateOptions.some((option) => option.startsWith('yarnDedupe'))
     ) {
       logger.warn('yarn-deduplicate is not supported since yarn 2');
     }

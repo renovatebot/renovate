@@ -42,7 +42,7 @@ describe('config/presets/local', () => {
     });
 
     it('forwards to github', async () => {
-      const content = await local.getPreset('some/repo', '', {
+      const content = await local.getPreset('some/repo', undefined, {
         platform: 'github',
       });
       expect(githubGetPreset.mock.calls).toMatchSnapshot();
