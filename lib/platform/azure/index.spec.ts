@@ -505,7 +505,7 @@ describe('platform/azure', () => {
       azureHelper.getRenovatePRFormat.mockImplementation(
         () =>
           ({
-            pullRequestId: 1234,
+            number: 1234,
           } as any)
       );
       const pr = await azure.getPr(1234);
@@ -542,7 +542,7 @@ describe('platform/azure', () => {
       azureHelper.getRenovatePRFormat.mockImplementation(
         () =>
           ({
-            pullRequestId: 1234,
+            number: 1234,
             isModified: false,
           } as any)
       );

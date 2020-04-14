@@ -28,7 +28,15 @@ declare module 'linkify-markdown' {
 }
 
 declare module 'get-installed-path' {
-  export function getInstalledPath(arg: string): Promise<string>;
+  interface Options {
+    cwd?: string;
+    local?: boolean;
+    paths?: string[];
+  }
+  export function getInstalledPath(
+    arg: string,
+    opts?: Options
+  ): Promise<string>;
 }
 
 declare module '@snyk/ruby-semver/lib/ruby/gem-version' {
