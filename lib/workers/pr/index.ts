@@ -1,7 +1,7 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
-import { ChangeLogError } from './changelog';
+import { ChangeLogError, getChangeLogJSON } from './changelog';
 import { getPrBody } from './body';
 import { platform, Pr, PlatformPrOptions } from '../../platform';
 import { BranchConfig, PrResult } from '../common';
@@ -193,7 +193,7 @@ export async function ensurePr(
     }
     processedUpgrades.push(upgradeKey);
 
-    const logJSON = upgrade.logJSON;
+    const logJSON = await getChangeLogJSON(upgrade);
 
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
