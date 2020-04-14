@@ -46,6 +46,7 @@ import {
   PR_STATE_CLOSED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { ensureTrailingSlash } from '../../util/url';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -122,7 +123,7 @@ export async function initPlatform({
   }
 
   if (endpoint) {
-    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    defaults.endpoint = ensureTrailingSlash(endpoint);
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.debug('Using default github endpoint: ' + defaults.endpoint);

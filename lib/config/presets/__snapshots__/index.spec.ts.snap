@@ -98,6 +98,24 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses local 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+  "presetSource": "local",
+}
+`;
+
+exports[`config/presets parsePreset parses no prefix as local 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+  "presetSource": "local",
+}
+`;
+
 exports[`config/presets parsePreset returns default package name 1`] = `
 Object {
   "packageName": "renovate-config-default",

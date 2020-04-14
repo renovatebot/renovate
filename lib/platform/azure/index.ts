@@ -33,6 +33,7 @@ import {
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
 import { RenovateConfig } from '../../config/common';
+import { ensureTrailingSlash } from '../../util/url';
 
 interface Config {
   storage: GitStorage;
@@ -77,7 +78,7 @@ export function initPlatform({
   }
   // TODO: Add a connection check that endpoint/token combination are valid
   const res = {
-    endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
+    endpoint: ensureTrailingSlash(endpoint),
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
