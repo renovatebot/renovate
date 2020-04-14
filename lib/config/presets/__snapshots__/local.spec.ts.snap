@@ -42,7 +42,7 @@ exports[`config/presets/local getPreset() forwards to github 1`] = `
 Array [
   Array [
     "some/repo",
-    "",
+    "default",
     Object {
       "platform": "github",
     },
