@@ -49,7 +49,7 @@ export async function getRawRefs({
       .split('\n');
 
     const refMatch = /(?<type>\w+)\/(?<value>.*)/;
-    const result = refs.map(ref => {
+    const result = refs.map((ref) => {
       const match = refMatch.exec(ref);
       return {
         type: match.groups.type,
@@ -72,9 +72,9 @@ export async function getReleases({
     const rawRefs: RawRefs[] = await getRawRefs({ lookupName });
 
     const refs = rawRefs
-      .filter(ref => ref.type === 'tags' || ref.type === 'heads')
-      .map(ref => ref.value)
-      .filter(ref => semver.isVersion(ref));
+      .filter((ref) => ref.type === 'tags' || ref.type === 'heads')
+      .map((ref) => ref.value)
+      .filter((ref) => semver.isVersion(ref));
 
     const uniqueRefs = [...new Set(refs)];
 
@@ -82,7 +82,7 @@ export async function getReleases({
 
     const result: ReleaseResult = {
       sourceUrl,
-      releases: uniqueRefs.map(ref => ({
+      releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
       })),

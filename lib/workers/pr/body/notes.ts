@@ -26,7 +26,7 @@ export function getPrNotes(config: BranchConfig): string {
 
 export function getPrExtraNotes(config: BranchConfig): string {
   let res = '';
-  if (config.upgrades.some(upgrade => upgrade.gitRef)) {
+  if (config.upgrades.some((upgrade) => upgrade.gitRef)) {
     res += emojify(
       ':abcd: If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.\n\n'
     );

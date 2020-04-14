@@ -31,12 +31,12 @@ export const isValid = (input: string): boolean =>
 export const isVersion = (input: string): boolean => !!valid(input);
 const maxSatisfyingVersion = (versions: string[], range: string): string =>
   maxSatisfying(
-    versions.map(v => v.replace(/^v/, '')),
+    versions.map((v) => v.replace(/^v/, '')),
     toSemverRange(range)
   );
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(
-    versions.map(v => v.replace(/^v/, '')),
+    versions.map((v) => v.replace(/^v/, '')),
     toSemverRange(range)
   );
 const isLessThanRange = (version: string, range: string): boolean =>

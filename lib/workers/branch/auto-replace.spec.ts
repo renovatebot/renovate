@@ -72,7 +72,7 @@ describe('workers/branch/auto-replace', () => {
       const res = await doAutoReplace(upgrade, srcAlreadyUpdated, parentBranch);
       expect(res).toMatchSnapshot();
     });
-    it('throws if replaceString mismatch', async () => {
+    it('returns existing content if replaceString mismatch', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
@@ -85,9 +85,8 @@ describe('workers/branch/auto-replace', () => {
         depIndex: 0,
         replaceString: script,
       };
-      await expect(
-        doAutoReplace(upgrade, 'wrong source', parentBranch)
-      ).rejects.toThrow();
+      const res = await doAutoReplace(upgrade, 'wrong source', parentBranch);
+      expect(res).toEqual('wrong source');
     });
     it('updates version and integrity', async () => {
       const script =

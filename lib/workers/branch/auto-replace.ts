@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
-import { regEx } from '../../util/regex';
+import { regEx, escapeRegExp } from '../../util/regex';
 import { BranchUpgradeConfig } from '../common';
 import { PackageDependency } from '../../manager/common';
 
@@ -40,7 +40,7 @@ export async function confirmIfDepUpdated(
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {
-  return deps.map(dep => `${dep.depName}${dep.lookupName}`).join(',');
+  return deps.map((dep) => `${dep.depName}${dep.lookupName}`).join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(
@@ -60,10 +60,6 @@ export async function checkBranchDepsMatchBaseDeps(
     logger.warn('Failed to parse branchContent');
     return false;
   }
-}
-
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 export async function doAutoReplace(
@@ -95,11 +91,11 @@ export async function doAutoReplace(
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
-    logger.error(
+    logger.warn(
       { depName },
       'Cannot find replaceString in current file content'
     );
-    throw new Error(WORKER_FILE_UPDATE_FAILED);
+    return existingContent;
   }
   try {
     let newString = replaceString.replace(

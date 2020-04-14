@@ -19,8 +19,8 @@ function hex2npm(input: string): string {
 function npm2hex(input: string): string {
   const res = input
     .split(' ')
-    .map(str => str.trim())
-    .filter(str => str !== '');
+    .map((str) => str.trim())
+    .filter((str) => str !== '');
   let output = '';
   const operators = ['^', '=', '>', '<', '<=', '>=', '~'];
   for (let i = 0; i < res.length; i += 1) {

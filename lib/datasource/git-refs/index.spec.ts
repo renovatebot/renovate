@@ -40,7 +40,7 @@ describe('datasource/git-refs', () => {
         lookupName,
       });
 
-      const result = versions.releases.map(x => x.version).sort();
+      const result = versions.releases.map((x) => x.version).sort();
       expect(result).toEqual(['0.0.1', 'v0.0.2', 'v0.0.3']);
     });
   });

@@ -31,7 +31,7 @@ export default function errSerializer(err: any): any {
         'private-header',
         'Private-header',
       ];
-      redactedHeaders.forEach(header => {
+      redactedHeaders.forEach((header) => {
         if (response.gotOptions.headers[header]) {
           response.gotOptions.headers[header] = '** redacted **';
         }

@@ -75,10 +75,10 @@ export const comparer = (
 
   // we don't not have ranges, so versions has to be equal
   function maxSatisfyingVersion(versions: string[], range: string): string {
-    return versions.find(v => equals(v, range)) || null;
+    return versions.find((v) => equals(v, range)) || null;
   }
   function minSatisfyingVersion(versions: string[], range: string): string {
-    return versions.find(v => equals(v, range)) || null;
+    return versions.find((v) => equals(v, range)) || null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
     const { toVersion } = newValueConfig || {};
@@ -178,11 +178,11 @@ export abstract class GenericVersioningApi<
   }
 
   maxSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find(v => this.equals(v, range)) || null;
+    return versions.find((v) => this.equals(v, range)) || null;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find(v => this.equals(v, range)) || null;
+    return versions.find((v) => this.equals(v, range)) || null;
   }
 
   // eslint-disable-next-line class-methods-use-this

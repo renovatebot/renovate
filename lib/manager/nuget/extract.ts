@@ -22,7 +22,9 @@ async function determineRegistryUrls(
   packageFile: string,
   localDir: string
 ): Promise<string[]> {
-  const nuGetConfigPath = await findUp('NuGet.config', {
+  // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
+  const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
+  const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
     cwd: path.dirname(path.join(localDir, packageFile)),
     type: 'file',
   });
@@ -75,7 +77,6 @@ export async function extractPackageFile(
     config.localDir
   );
 
-  let lineNumber = 0;
   for (const line of content.split('\n')) {
     /**
      * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -99,7 +100,6 @@ export async function extractPackageFile(
         depType: 'nuget',
         depName,
         currentValue,
-        managerData: { lineNumber },
         datasource: datasourceNuget.id,
       };
       if (registryUrls) {
@@ -110,7 +110,6 @@ export async function extractPackageFile(
       }
       deps.push(dep);
     }
-    lineNumber += 1;
   }
   return { deps };
 }

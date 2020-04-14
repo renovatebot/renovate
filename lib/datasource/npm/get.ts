@@ -186,7 +186,7 @@ export async function getDependency(
       dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
     }
-    dep.releases = Object.keys(res.versions).map(version => {
+    dep.releases = Object.keys(res.versions).map((version) => {
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,

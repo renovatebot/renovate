@@ -40,6 +40,10 @@ Set this to `docker` instead to use docker-based binaries.
 
 Configure this directory if you want to change which directory Renovate uses for storing cache data. If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/cache/`. If you configure this to be different to the `baseDir`, it means you can have one location for repo data and another for cache data.
 
+## composerIgnorePlatformReqs
+
+Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer package manager.
+
 ## dockerMapDotfiles
 
 This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files. Currently applicable to `.npmrc` only.
@@ -118,6 +122,15 @@ Parameter to reduce CI load. CI jobs are usually triggered by these events: pull
 This option is useful for troubleshooting, particularly if using presets. e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
 
 ## privateKey
+
+This private key is used to decrypt config files.
+
+The corresponding public key can be used to create encrypted values for config files. If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
+
+To create the key pair with openssl use the following commands:
+
+- `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
+- `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
 
 ## productLinks
 

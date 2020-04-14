@@ -5,7 +5,7 @@ export function sanitize(input: string): string {
     return input;
   }
   let output: string = input;
-  secrets.forEach(secret => {
+  secrets.forEach((secret) => {
     while (output.includes(secret)) {
       output = output.replace(secret, '**redacted**');
     }

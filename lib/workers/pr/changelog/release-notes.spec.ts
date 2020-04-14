@@ -59,7 +59,7 @@ describe('workers/pr/release-notes', () => {
     });
     it.each([[''], ['v'], ['other-']])(
       'gets release notes with body',
-      async prefix => {
+      async (prefix) => {
         ghGot.mockResolvedValueOnce({
           body: [
             { tag_name: `${prefix}1.0.0` },

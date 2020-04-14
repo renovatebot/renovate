@@ -183,7 +183,7 @@ describe('platform/bitbucket-server', () => {
 
         it.each(['ff-only', 'rebase-ff-only', 'squash-ff-only'])(
           'return true if %s strategy is enabled',
-          async id => {
+          async (id) => {
             expect.assertions(1);
             api.get.mockResolvedValueOnce({
               body: {
@@ -201,7 +201,7 @@ describe('platform/bitbucket-server', () => {
 
         it.each(['no-ff', 'ff', 'rebase-no-ff', 'squash'])(
           'return false if %s strategy is enabled',
-          async id => {
+          async (id) => {
             expect.assertions(1);
             api.get.mockResolvedValueOnce({
               body: {

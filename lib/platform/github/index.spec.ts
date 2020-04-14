@@ -717,8 +717,14 @@ describe('platform/github', () => {
         () =>
           ({
             body: {
-              total_count: 2,
+              total_count: 3,
               check_runs: [
+                {
+                  id: 2390199,
+                  status: 'completed',
+                  conclusion: 'skipped',
+                  name: 'Conditional GitHub Action',
+                },
                 {
                   id: 23950198,
                   status: 'completed',

@@ -8,6 +8,6 @@ jest.mock('../manager', () => ({
 describe(getName(__filename), () => {
   it('test manager should have no defaultConfig', () => {
     const opts = getOptions();
-    expect(opts.filter(o => o.name === 'testManager')).toEqual([]);
+    expect(opts.filter((o) => o.name === 'testManager')).toEqual([]);
   });
 });

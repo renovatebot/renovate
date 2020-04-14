@@ -15,6 +15,11 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/host-rules');
+jest.mock('../../util/exec/docker/index', () =>
+  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+    removeDanglingContainers: jest.fn(),
+  })
+);
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -31,7 +36,7 @@ const config = {
 const dockerConfig = { ...config, binarySource: BinarySource.Docker };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -39,7 +44,7 @@ describe('.updateArtifacts()', () => {
       LC_ALL: 'en_US',
     });
 
-    setUtilConfig(config);
+    await setUtilConfig(config);
     resetPrefetchedImages();
   });
 
@@ -85,7 +90,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
-    setUtilConfig(dockerConfig);
+    await setUtilConfig(dockerConfig);
     platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValue({

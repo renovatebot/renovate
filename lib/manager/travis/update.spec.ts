@@ -13,7 +13,7 @@ describe('manager/travis/update', () => {
       // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: ['8', '6', '4'],
-        newValue: [6, 8],
+        newValue: '6,8',
       };
       const res = updateDependency({ fileContent: content, upgrade });
       expect(res).toMatchSnapshot();
@@ -22,7 +22,7 @@ describe('manager/travis/update', () => {
       // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: [8, 6, 4],
-        newValue: [6, 8],
+        newValue: '6,8',
       };
       const res = updateDependency({
         fileContent: 'hello: world',
@@ -34,7 +34,7 @@ describe('manager/travis/update', () => {
       // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: ['6'],
-        newValue: [6, 8],
+        newValue: '6,8',
       };
       const res = updateDependency({
         fileContent: 'node_js:\n  - "6"\n',
@@ -46,7 +46,7 @@ describe('manager/travis/update', () => {
       // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: [8, 6, 4],
-        newValue: '6',
+        newValue: 6,
       };
       const res = updateDependency({ fileContent: content, upgrade });
       expect(res).toBeNull();

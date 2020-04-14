@@ -13,9 +13,9 @@ if (!fs.existsSync('lib')) {
 function findModules(dirname: string): string[] {
   return fs
     .readdirSync(dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => !name.startsWith('__'))
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter((name) => !name.startsWith('__'))
     .sort();
 }
 async function updateFile(file: string, code: string): Promise<void> {
@@ -41,7 +41,7 @@ async function generate({
   let imports = '';
   let maps = '';
   for (const ds of findModules(`lib/${path}`).filter(
-    n => !excludes?.includes(n)
+    (n) => !excludes?.includes(n)
   )) {
     const name = _.camelCase(ds);
     imports += `import * as ${name} from './${ds}';\n`;
@@ -57,6 +57,7 @@ async function generate({
   await updateFile(`lib/${path}/api.generated.ts`, code.replace(/^\s+/gm, ''));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
   try {
     // datasources
@@ -74,6 +75,13 @@ export default api;
     // managers
     await generate({ path: 'manager', types: ['ManagerApi'] });
 
+    // platform
+    await generate({
+      path: 'platform',
+      types: ['Platform'],
+      excludes: ['utils', 'git'],
+    });
+
     // versioning
     await generate({
       path: 'versioning',
@@ -84,8 +92,8 @@ export default api;
     await Promise.all(
       shell
         .find('lib/**/*.generated.ts')
-        .filter(f => !newFiles.has(f))
-        .map(file => fs.remove(file))
+        .filter((f) => !newFiles.has(f))
+        .map((file) => fs.remove(file))
     );
   } catch (e) {
     shell.echo(e.toString());

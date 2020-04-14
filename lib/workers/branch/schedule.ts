@@ -34,7 +34,7 @@ export function hasValidSchedule(
     return [true];
   }
   // check if any of the schedules fail to parse
-  const hasFailedSchedules = schedule.some(scheduleText => {
+  const hasFailedSchedules = schedule.some((scheduleText) => {
     const massagedText = fixShortHours(
       scheduleMappings[scheduleText] || scheduleText
     );
@@ -44,13 +44,13 @@ export function hasValidSchedule(
       // It failed to parse
       return true;
     }
-    if (parsedSchedule.schedules.some(s => s.m)) {
+    if (parsedSchedule.schedules.some((s) => s.m)) {
       message = `Invalid schedule: "${scheduleText}" should not specify minutes`;
       return true;
     }
     if (
       !parsedSchedule.schedules.some(
-        s => s.M || s.d !== undefined || s.D || s.t_a !== undefined || s.t_b
+        (s) => s.M || s.d !== undefined || s.D || s.t_a !== undefined || s.t_b
       )
     ) {
       message = `Invalid schedule: "${scheduleText}" has no months, days of week or time of day`;
@@ -114,12 +114,12 @@ export function isScheduledNow(config: RenovateConfig): boolean {
   // Support a single string but massage to array for processing
   logger.debug(`Checking ${configSchedule.length} schedule(s)`);
   // We run if any schedule matches
-  const isWithinSchedule = configSchedule.some(scheduleText => {
+  const isWithinSchedule = configSchedule.some((scheduleText) => {
     const massagedText = scheduleMappings[scheduleText] || scheduleText;
     const parsedSchedule = later.parse.text(fixShortHours(massagedText));
     logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
     // Later library returns array of schedules
-    return parsedSchedule.schedules.some(schedule => {
+    return parsedSchedule.schedules.some((schedule) => {
       // Check if months are defined
       if (schedule.M) {
         const currentMonth = parseInt(now.format('M'), 10);
@@ -145,7 +145,7 @@ export function isScheduledNow(config: RenovateConfig): boolean {
           'Friday',
           'Saturday',
         ];
-        const scheduledDays = schedule.d.map(day => dowMap[day]);
+        const scheduledDays = schedule.d.map((day) => dowMap[day]);
         logger.trace({ scheduledDays }, `scheduledDays`);
         if (!scheduledDays.includes(currentDay)) {
           logger.debug(

@@ -10,13 +10,13 @@ import { BranchStatus } from '../../../types';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
-    .filter(pr => pr.state === PR_STATE_OPEN)
-    .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
-    .filter(pr => new RegExp('renovate', 'i').test(pr.title));
+    .filter((pr) => pr.state === PR_STATE_OPEN)
+    .filter((pr) => pr.branchName && !pr.branchName.startsWith(branchPrefix))
+    .filter((pr) => new RegExp('renovate', 'i').test(pr.title));
 }
 
 async function getRenovateFiles(prNo: number): Promise<string[]> {
-  return (await platform.getPrFiles(prNo)).filter(file =>
+  return (await platform.getPrFiles(prNo)).filter((file) =>
     configFileNames.includes(file)
   );
 }
@@ -78,7 +78,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
             const { errors } = await migrateAndValidate(config, toValidate);
             if (errors && errors.length) {
               validations = validations.concat(
-                errors.map(error => ({
+                errors.map((error) => ({
                   file,
                   message: error.message,
                 }))
@@ -93,7 +93,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       const topic = `Renovate Configuration Errors`;
       if (validations.length) {
         const content = validations
-          .map(v => `\`${v.file}\`: ${v.message}`)
+          .map((v) => `\`${v.file}\`: ${v.message}`)
           .join('\n\n');
         await platform.ensureComment({
           number: pr.number,

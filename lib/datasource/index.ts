@@ -108,7 +108,7 @@ export async function getPkgReleases(
   }
   if (res.releases) {
     res.releases = res.releases
-      .filter(release => version.isVersion(release.version))
+      .filter((release) => version.isVersion(release.version))
       .sort(sortReleases);
   }
   return res;
@@ -128,4 +128,9 @@ export async function getDigest(
     { lookupName, registryUrls },
     value
   );
+}
+
+export async function getDefaultConfig(datasource: string): Promise<object> {
+  const loadedDatasource = await load(datasource);
+  return loadedDatasource?.defaultConfig || {};
 }

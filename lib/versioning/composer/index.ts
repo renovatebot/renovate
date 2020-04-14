@@ -125,10 +125,7 @@ function getNewValue({
     }
   }
   if (currentValue.includes(' || ')) {
-    const lastValue = currentValue
-      .split('||')
-      .pop()
-      .trim();
+    const lastValue = currentValue.split('||').pop().trim();
     const replacementValue = getNewValue({
       currentValue: lastValue,
       rangeStrategy,

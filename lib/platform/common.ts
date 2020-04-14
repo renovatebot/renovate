@@ -1,7 +1,6 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
-import { CommitFilesConfig } from './git/storage';
 import {
   BranchStatus,
   VulnerabilityAlert as _VulnerabilityAlert,
@@ -9,10 +8,27 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
-export interface FileData {
+/**
+ * File to commit to branch
+ */
+export interface File {
+  /**
+   * Relative file path
+   */
   name: string;
+
+  /**
+   * file contents
+   */
   contents: string | Buffer;
 }
+
+export type CommitFilesConfig = {
+  branchName: string;
+  files: File[];
+  message: string;
+  parentBranch?: string;
+};
 
 export interface GotApiOptions {
   useCache?: boolean;

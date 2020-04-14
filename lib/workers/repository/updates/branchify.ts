@@ -30,15 +30,15 @@ export type BranchifiedConfig = Merge<
     branchList: string[];
   }
 >;
-export function branchifyUpgrades(
+export async function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-): BranchifiedConfig {
+): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
-  const updates = flattenUpdates(config, packageFiles);
+  const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
-      .map(u => u.depName)
+      .map((u) => u.depName)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -106,7 +106,7 @@ export function branchifyUpgrades(
   removeMeta(['branch']);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
   const branchList = config.repoIsOnboarded
-    ? branches.map(upgrade => upgrade.branchName)
+    ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;
   // istanbul ignore next
   try {

@@ -104,7 +104,7 @@ async function getReleasesFromCDN(
       const line = lines[idx];
       const [name, ...versions] = line.split('/');
       if (name === lookupName.replace(/\/.*$/, '')) {
-        const releases = versions.map(version => ({ version }));
+        const releases = versions.map((version) => ({ version }));
         return { releases };
       }
     }

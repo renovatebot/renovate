@@ -77,8 +77,9 @@ describe('workers/branch/get-updated', () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
-      } as never);
-      composer.updateDependency.mockReturnValue('some new content');
+        branchName: undefined,
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -87,6 +88,9 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
+      config.upgrades.forEach((upgrade) => {
+        upgrade.autoReplace = true; // eslint-disable-line no-param-reassign
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
@@ -128,8 +132,9 @@ describe('workers/branch/get-updated', () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
-      } as never);
-      composer.updateDependency.mockReturnValue('some new content');
+        branchName: undefined,
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
@@ -138,6 +143,9 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
+      config.upgrades.forEach((upgrade) => {
+        upgrade.autoReplace = true; // eslint-disable-line no-param-reassign
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });

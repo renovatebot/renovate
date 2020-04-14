@@ -35,7 +35,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every(dep => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason));
     });
     it('parses simple requirements.yaml correctly', async () => {
       platform.getFile.mockReturnValueOnce(`
@@ -100,7 +100,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every(dep => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason));
     });
     it("doesn't fail if Chart.yaml is invalid", async () => {
       platform.getFile.mockReturnValueOnce(`

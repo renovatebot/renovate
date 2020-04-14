@@ -1,11 +1,10 @@
 import url, { URLSearchParams } from 'url';
 import delay from 'delay';
-
 import { PartialDeep } from 'type-fest';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
   PlatformConfig,
@@ -20,6 +19,7 @@ import {
   EnsureCommentConfig,
   EnsureIssueResult,
   EnsureIssueConfig,
+  CommitFilesConfig,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
@@ -31,8 +31,9 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus, VulnerabilityAlert } from '../../types';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 import { BbsPr, BbbsRestPr, BbsRestUserRef, BbsConfig } from './types';
+import { ensureTrailingSlash } from '../../util/url';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -70,7 +71,7 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+  defaults.endpoint = ensureTrailingSlash(endpoint);
   api.setBaseUrl(defaults.endpoint);
   const platformConfig: PlatformConfig = {
     endpoint: defaults.endpoint,
@@ -716,7 +717,9 @@ export async function addReviewers(
         body: {
           title: pr.title,
           version: pr.version,
-          reviewers: Array.from(reviewersSet).map(name => ({ user: { name } })),
+          reviewers: Array.from(reviewersSet).map((name) => ({
+            user: { name },
+          })),
         },
       }
     );
@@ -823,7 +826,7 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${number}`);
       body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.text.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.text !== body;
@@ -832,7 +835,7 @@ export async function ensureComment({
     } else {
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.text === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -869,7 +872,7 @@ export async function ensureCommentRemoval(
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(prNo);
     let commentId: number;
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
       if (comment.text.startsWith(`### ${topic}\n\n`)) {
         commentId = comment.id;
       }
@@ -917,7 +920,7 @@ export async function createPr({
       )
     ).body;
 
-    reviewers = defReviewers.map(u => ({
+    reviewers = defReviewers.map((u) => ({
       user: { name: u.name },
     }));
   }
@@ -984,7 +987,7 @@ export async function getPrFiles(prNo: number): Promise<string[]> {
   const values = await utils.accumulateValues<{ path: { toString: string } }>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/changes?withComments=false`
   );
-  return values.map(f => f.path.toString);
+  return values.map((f) => f.path.toString);
 }
 
 export async function updatePr(

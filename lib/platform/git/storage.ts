@@ -12,27 +12,13 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
 } from '../../constants/error-messages';
+import { CommitFilesConfig } from '../common';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
 }
 
 export type StatusResult = Git.StatusResult;
-
-/**
- * File to commit to branch
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-}
 
 interface StorageConfig {
   localDir: string;
@@ -48,13 +34,6 @@ interface LocalConfig extends StorageConfig {
   branchExists: Record<string, boolean>;
   branchPrefix: string;
 }
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  parentBranch?: string;
-};
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
@@ -116,9 +95,9 @@ export class Storage {
   private async _cleanLocalBranches(): Promise<void> {
     const existingBranches = (await this._git.raw(['branch']))
       .split('\n')
-      .map(branch => branch.trim())
-      .filter(branch => branch.length)
-      .filter(branch => !branch.startsWith('* '));
+      .map((branch) => branch.trim())
+      .filter((branch) => branch.length)
+      .filter((branch) => !branch.startsWith('* '));
     logger.debug({ existingBranches });
     for (const branchName of existingBranches) {
       await this._deleteLocalBranch(branchName);
@@ -187,7 +166,7 @@ export class Storage {
         let opts = ['--depth=2'];
         if (config.extraCloneOpts) {
           opts = opts.concat(
-            Object.entries(config.extraCloneOpts).map(e => `${e[0]}=${e[1]}`)
+            Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
           );
         }
         await this._git.clone(config.url, '.', opts);
@@ -273,7 +252,7 @@ export class Storage {
       n: 10,
       format: { message: '%s' },
     });
-    return res.all.map(commit => commit.message);
+    return res.all.map((commit) => commit.message);
   }
 
   async setBaseBranch(branchName: string): Promise<void> {
@@ -398,7 +377,7 @@ export class Storage {
     const branches = await this._git.branch(['--remotes', '--verbose']);
     return branches.all
       .map(localName)
-      .filter(branchName => branchName.startsWith(branchPrefix));
+      .filter((branchName) => branchName.startsWith(branchPrefix));
   }
 
   async isBranchStale(branchName: string): Promise<boolean> {
