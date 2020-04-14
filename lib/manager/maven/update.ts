@@ -4,7 +4,7 @@ import { UpdateDependencyConfig, Upgrade } from '../common';
 export function updateAtPosition(
   fileContent: string,
   upgrade: Upgrade,
-  endingAnchor = '"'
+  endingAnchor: string
 ): string | null {
   const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
