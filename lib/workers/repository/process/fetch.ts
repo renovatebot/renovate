@@ -18,7 +18,7 @@ async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  const dep = clone(indep);
+  let dep = clone(indep);
   dep.updates = [];
   if (dep.skipReason) {
     return dep;
@@ -28,7 +28,7 @@ async function fetchDepUpdates(
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
-  Object.assign(dep, datasourceDefaultConfig);
+  dep = mergeChildConfig(dep, datasourceDefaultConfig);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
