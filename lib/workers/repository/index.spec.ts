@@ -3,7 +3,7 @@ import { mock } from 'jest-mock-extended';
 import { renovateRepository } from '.';
 import * as _process from './process';
 import { mocked, RenovateConfig, getConfig } from '../../../test/util';
-import { ExtractResult } from './process/extract-update';
+import { ExtractAndUpdateResult } from './process/extract-update';
 
 const process = mocked(_process);
 
@@ -19,7 +19,7 @@ describe('workers/repository', () => {
       config = getConfig();
     });
     it('runs', async () => {
-      process.processRepo.mockResolvedValue(mock<ExtractResult>());
+      process.processRepo.mockResolvedValue(mock<ExtractAndUpdateResult>());
       const res = await renovateRepository(config);
       expect(res).toMatchSnapshot();
     });
