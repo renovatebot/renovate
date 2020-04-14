@@ -1,5 +1,9 @@
 import { Merge } from 'type-fest';
-import { PackageDependency, ArtifactError } from '../manager/common';
+import {
+  PackageDependency,
+  ArtifactError,
+  LookupUpdate,
+} from '../manager/common';
 import {
   RenovateSharedConfig,
   RenovateConfig,
@@ -7,7 +11,6 @@ import {
   RenovateAdminConfig,
   ValidationMessage,
 } from '../config';
-import { LookupUpdate } from './repository/process/lookup/common';
 import { File, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
 
