@@ -154,6 +154,14 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+    it('enforces allowedVersions with negativee regex', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '!/^1/';
+      config.depName = 'q';
+      config.datasource = datasourceNpm.id;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
     it('falls back to semver syntax allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '<1';

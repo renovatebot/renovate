@@ -16,7 +16,7 @@ export interface FilterConfig {
   versioning: string;
 }
 
-const regexes = {};
+const regexes: Record<string, RegExp> = {};
 
 export function filterVersions(
   config: FilterConfig,
