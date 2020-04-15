@@ -34,7 +34,6 @@ export function extractPackageFile(content: string): PackageFile | null {
               logger.trace(`Matched image name on line ${lineNumber}`);
               const currentFrom = imageNameMatch[1];
               const dep = getDep(currentFrom);
-              dep.managerData = { lineNumber };
               dep.depType = 'image-name';
               deps.push(dep);
             }
@@ -44,7 +43,6 @@ export function extractPackageFile(content: string): PackageFile | null {
             logger.trace(`Matched image on line ${lineNumber}`);
             const currentFrom = imageMatch[1];
             const dep = getDep(currentFrom);
-            dep.managerData = { lineNumber };
             dep.depType = 'image';
             deps.push(dep);
           }
@@ -67,7 +65,6 @@ export function extractPackageFile(content: string): PackageFile | null {
             const currentFrom = serviceImageMatch[1];
             lineNumber = serviceImageLine.lineNumber;
             const dep = getDep(currentFrom);
-            dep.managerData = { lineNumber };
             dep.depType = 'service-image';
             deps.push(dep);
           }
