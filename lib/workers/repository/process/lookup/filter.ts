@@ -4,6 +4,9 @@ import * as allVersioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as npmVersioning from '../../../../versioning/npm';
+import * as pep440 from '../../../../versioning/pep440';
+import * as poetryVersioning from '../../../../versioning/poetry';
+import { regEx } from '../../../../util/regex';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -14,6 +17,8 @@ export interface FilterConfig {
   respectLatest?: boolean;
   versioning: string;
 }
+
+const regexes: Record<string, RegExp> = {};
 
 export function filterVersions(
   config: FilterConfig,
@@ -57,7 +62,27 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    if (version.isValid(allowedVersions)) {
+    if (
+      allowedVersions.length > 1 &&
+      allowedVersions.startsWith('/') &&
+      allowedVersions.endsWith('/')
+    ) {
+      regexes[allowedVersions] =
+        regexes[allowedVersions] || regEx(allowedVersions.slice(1, -1));
+      filteredVersions = filteredVersions.filter((v) =>
+        regexes[allowedVersions].test(v)
+      );
+    } else if (
+      allowedVersions.length > 2 &&
+      allowedVersions.startsWith('!/') &&
+      allowedVersions.endsWith('/')
+    ) {
+      regexes[allowedVersions] =
+        regexes[allowedVersions] || regEx(allowedVersions.slice(2, -1));
+      filteredVersions = filteredVersions.filter(
+        (v) => !regexes[allowedVersions].test(v)
+      );
+    } else if (version.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
         version.matches(v, allowedVersions)
       );
@@ -71,6 +96,17 @@ export function filterVersions(
       );
       filteredVersions = filteredVersions.filter((v) =>
         semver.satisfies(semver.coerce(v), allowedVersions)
+      );
+    } else if (
+      versioning === poetryVersioning.id &&
+      pep440.isValid(allowedVersions)
+    ) {
+      logger.debug(
+        { depName: config.depName },
+        'Falling back to pypi syntax for allowedVersions'
+      );
+      filteredVersions = filteredVersions.filter((v) =>
+        pep440.matches(v, allowedVersions)
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);

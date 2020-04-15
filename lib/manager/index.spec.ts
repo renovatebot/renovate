@@ -41,22 +41,24 @@ describe('manager', () => {
   });
 
   describe('extractAllPackageFiles()', () => {
-    it('returns null', () => {
+    it('returns null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
       });
       expect(
-        manager.extractAllPackageFiles('unknown', {} as any, [])
+        await manager.extractAllPackageFiles('unknown', {} as any, [])
       ).toBeNull();
-      expect(manager.extractAllPackageFiles('dummy', {} as any, [])).toBeNull();
+      expect(
+        await manager.extractAllPackageFiles('dummy', {} as any, [])
+      ).toBeNull();
     });
-    it('returns non-null', () => {
+    it('returns non-null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
-        manager.extractAllPackageFiles('dummy', {} as any, [])
+        await manager.extractAllPackageFiles('dummy', {} as any, [])
       ).not.toBeNull();
     });
     afterEach(() => {

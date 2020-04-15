@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency } from '../common';
-import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
 import * as datasourceRubygems from '../../datasource/rubygems';
 import { SkipReason } from '../../types';
+import { readLocalFile } from '../../util/fs';
 
 export async function extractPackageFile(
   content: string,
@@ -53,10 +53,18 @@ export async function extractPackageFile(
         managerData: { lineNumber },
       };
       if (gemMatch[3]) {
-        dep.currentValue = gemMatch[0]
+        let currentValue = gemMatch[0]
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
-          .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
+        // strip quotes unless it's a complex constraint
+        if (
+          currentValue.startsWith(gemDelimiter) &&
+          currentValue.endsWith(gemDelimiter) &&
+          currentValue.split(gemDelimiter).length === 3
+        ) {
+          currentValue = currentValue.slice(1, -1);
+        }
+        dep.currentValue = currentValue;
       } else {
         dep.skipReason = SkipReason.NoVersion;
       }
@@ -186,7 +194,7 @@ export async function extractPackageFile(
 
   if (fileName) {
     const gemfileLock = fileName + '.lock';
-    const lockContent = await platform.getFile(gemfileLock);
+    const lockContent = await readLocalFile(gemfileLock, 'utf8');
     if (lockContent) {
       logger.debug({ packageFile: fileName }, 'Found Gemfile.lock file');
       const lockedEntries = extractLockFileEntries(lockContent);

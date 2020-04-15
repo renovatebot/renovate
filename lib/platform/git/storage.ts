@@ -277,7 +277,8 @@ export class Storage {
         if (
           err.message.includes(
             'unknown revision or path not in the working tree'
-          )
+          ) ||
+          err.message.includes('did not match any file(s) known to git')
         ) {
           throwBaseBranchValidationError(branchName);
         }

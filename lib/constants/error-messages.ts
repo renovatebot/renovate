@@ -1,5 +1,6 @@
 // System error
 export const SYSTEM_INSUFFICIENT_DISK_SPACE = 'disk-space';
+export const SYSTEM_INSUFFICIENT_MEMORY = 'out-of-memory';
 
 // Platform Error
 export const PLATFORM_AUTHENTICATION_ERROR = 'authentication-error';
@@ -40,7 +41,6 @@ export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
 
 // Bundler Error
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
-export const BUNDLER_UNKNOWN_ERROR = 'bundler-unknown';
 
 // Unknown Error
 export const UNKNOWN_ERROR = 'unknown-error';

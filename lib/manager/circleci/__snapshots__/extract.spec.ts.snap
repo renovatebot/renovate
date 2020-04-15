@@ -3,6 +3,7 @@
 exports[`lib/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -13,6 +14,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "4",
@@ -23,6 +25,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6",
@@ -33,6 +36,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.9.0",
@@ -78,6 +82,7 @@ Array [
     "versioning": "npm",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -87,6 +92,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -96,6 +102,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -105,6 +112,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -114,6 +122,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
     "currentValue": "3-6",
     "datasource": "docker",
@@ -123,6 +132,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",

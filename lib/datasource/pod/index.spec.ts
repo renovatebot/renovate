@@ -3,6 +3,7 @@ import * as pod from '.';
 import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
 import { GotResponse } from '../../platform';
+import { clearRepoCache } from '../../util/cache';
 import { mocked } from '../../../test/util';
 
 jest.mock('../../util/got');
@@ -19,7 +20,7 @@ describe('datasource/cocoapods', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      global.repoCache = {};
+      clearRepoCache();
       return global.renovateCache.rmAll();
     });
 

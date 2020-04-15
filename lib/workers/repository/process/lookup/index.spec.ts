@@ -13,12 +13,14 @@ import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440Versioning from '../../../../versioning/pep440';
+import * as poetryVersioning from '../../../../versioning/poetry';
 import * as datasourceNpm from '../../../../datasource/npm';
 import * as datasourcePypi from '../../../../datasource/pypi';
 import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourceDocker from '../../../../datasource/docker';
 import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { clearRepoCache } from '../../../../util/cache';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
@@ -36,7 +38,7 @@ describe('workers/repository/process/lookup', () => {
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
-    global.repoCache = {};
+    clearRepoCache();
     jest.resetAllMocks();
   });
 
@@ -146,11 +148,36 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+    it('enforces allowedVersions with regex', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '/^0/';
+      config.depName = 'q';
+      config.datasource = datasourceNpm.id;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('enforces allowedVersions with negativee regex', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '!/^1/';
+      config.depName = 'q';
+      config.datasource = datasourceNpm.id;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
     it('falls back to semver syntax allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '<1';
       config.depName = 'q';
       config.versioning = dockerVersioning.id; // this doesn't make sense but works for this test
+      config.datasource = datasourceNpm.id; // this doesn't make sense but works for this test
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('falls back to pep440 syntax allowedVersions', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '==0.9.4';
+      config.depName = 'q';
+      config.versioning = poetryVersioning.id; // this doesn't make sense but works for this test
       config.datasource = datasourceNpm.id; // this doesn't make sense but works for this test
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);

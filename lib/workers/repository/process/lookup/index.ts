@@ -330,8 +330,6 @@ export async function lookupUpdates(
       const releaseFields = [
         'releaseTimestamp',
         'canBeUnpublished',
-        'downloadUrl',
-        'checksumUrl',
         'newDigest',
       ];
       releaseFields.forEach((field) => {

@@ -2,22 +2,21 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
+  deleteLocalFile,
 } from '../../util/fs';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
-import {
-  BUNDLER_INVALID_CREDENTIALS,
-  BUNDLER_UNKNOWN_ERROR,
-} from '../../constants/error-messages';
+import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { HostRule } from '../../types';
 import {
   getAuthenticationHeaderValue,
   findAllAuthenticatable,
   getDomain,
 } from './host-rules';
+import { getRepoCached, setRepoCached } from '../../util/cache';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -72,12 +71,12 @@ export async function updateArtifacts(
     config,
   } = updateArtifact;
   const { compatibility = {} } = config;
-
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
+  const existingError = getRepoCached<string>('bundlerArtifactsError');
   // istanbul ignore if
-  if (global.repoCache.bundlerArtifactsError) {
+  if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
-    throw new Error(global.repoCache.bundlerArtifactsError);
+    throw new Error(existingError);
   }
   const lockFileName = `${packageFileName}.lock`;
   const existingLockFileContent = await platform.getFile(lockFileName);
@@ -85,10 +84,21 @@ export async function updateArtifacts(
     logger.debug('No Gemfile.lock found');
     return null;
   }
+
+  if (config.isLockFileMaintenance) {
+    await deleteLocalFile(lockFileName);
+  }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+    let cmd;
+
+    if (config.isLockFileMaintenance) {
+      cmd = 'bundle lock';
+    } else {
+      cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+    }
 
     let bundlerVersion = '';
     const { bundler } = compatibility;
@@ -167,11 +177,11 @@ export async function updateArtifacts(
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
       // Do not generate these PRs because we don't yet support Bundler authentication
-      global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
+      setRepoCached('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
-    if (output.match(resolveMatchRe)) {
+    if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
       logger.debug({ err }, 'Bundler has a resolve error');
       const resolveMatches = [];
       let resolveMatch;
@@ -200,20 +210,19 @@ export async function updateArtifacts(
         { err },
         'Gemfile.lock update failed due to incompatible packages'
       );
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: err.stdout + '\n' + err.stderr,
-          },
-        },
-      ];
+    } else {
+      logger.info(
+        { err },
+        'Gemfile.lock update failed due to an unknown reason'
+      );
     }
-    logger.warn(
-      { err },
-      'Gemfile.lock update failed due to unknown reason - skipping branch'
-    );
-    global.repoCache.bundlerArtifactsError = BUNDLER_UNKNOWN_ERROR;
-    throw new Error(BUNDLER_UNKNOWN_ERROR);
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: err.stdout + '\n' + err.stderr,
+        },
+      },
+    ];
   }
 }

@@ -5,6 +5,7 @@ import * as npm from '.';
 import * as hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { getName } from '../../../test/util';
+import { clearRepoCache } from '../../util/cache';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
@@ -25,7 +26,7 @@ describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    global.repoCache = {};
+    clearRepoCache();
     global.trustLevel = 'low';
     npm.resetCache();
     npm.setNpmrc();
