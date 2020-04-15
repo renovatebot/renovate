@@ -52,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const fromMatch = /^FROM /i.test(fromLine);
     if (fromMatch) {
       logger.trace({ lineNumber, fromLine }, 'FROM line');
-      const [fromPrefix, currentFrom, ...fromRest] = fromLine.match(/\S+/g);
+      const [, currentFrom, ...fromRest] = fromLine.match(/\S+/g);
       if (fromRest.length === 2 && fromRest[0].toLowerCase() === 'as') {
         logger.debug('Found a multistage build stage name');
         stageNames.push(fromRest[1]);

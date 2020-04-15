@@ -5,7 +5,6 @@ import { PackageFile, PackageDependency } from '../common';
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('kubernetes.extractPackageFile()');
   let deps: PackageDependency[] = [];
-  let lineNumber = 0;
 
   const isKubernetesManifest =
     /\s*apiVersion\s*:/.test(content) && /\s*kind\s*:/.test(content);
@@ -28,7 +27,6 @@ export function extractPackageFile(content: string): PackageFile | null {
       );
       deps.push(dep);
     }
-    lineNumber += 1;
   }
   deps = deps.filter(
     (dep) => !(dep.currentValue && dep.currentValue.includes('${'))
