@@ -47,6 +47,9 @@ jobs:
         exclude:
           - os: windows-latest
             node-version: 10
+          # exclude java 8 on node 10
+          - java-version: 8
+            node-version: 10
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
