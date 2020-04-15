@@ -8,9 +8,7 @@ Array [
     "datasource": "docker",
     "depName": "hadolint/hadolint",
     "depType": "image",
-    "managerData": Object {
-      "lineNumber": 36,
-    },
+    "replaceString": "hadolint/hadolint:latest",
   },
   Object {
     "currentDigest": undefined,
@@ -18,9 +16,7 @@ Array [
     "datasource": "docker",
     "depName": "docker",
     "depType": "image",
-    "managerData": Object {
-      "lineNumber": 53,
-    },
+    "replaceString": "docker:latest",
   },
   Object {
     "currentDigest": undefined,
@@ -28,9 +24,7 @@ Array [
     "datasource": "docker",
     "depName": "docker",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 55,
-    },
+    "replaceString": "docker:dind",
   },
   Object {
     "currentDigest": undefined,
@@ -38,9 +32,7 @@ Array [
     "datasource": "docker",
     "depName": "docker",
     "depType": "image",
-    "managerData": Object {
-      "lineNumber": 75,
-    },
+    "replaceString": "docker:latest",
   },
   Object {
     "currentDigest": undefined,
@@ -48,9 +40,7 @@ Array [
     "datasource": "docker",
     "depName": "docker",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 77,
-    },
+    "replaceString": "docker:dind",
   },
   Object {
     "currentDigest": undefined,
@@ -58,9 +48,7 @@ Array [
     "datasource": "docker",
     "depName": "image-name-test",
     "depType": "image-name",
-    "managerData": Object {
-      "lineNumber": 102,
-    },
+    "replaceString": "image-name-test:1.15",
   },
 ]
 `;
@@ -73,9 +61,7 @@ Array [
     "datasource": "docker",
     "depName": "renovate/renovate",
     "depType": "image-name",
-    "managerData": Object {
-      "lineNumber": 2,
-    },
+    "replaceString": "renovate/renovate:19.70.8-slim",
   },
   Object {
     "currentDigest": undefined,
@@ -83,9 +69,7 @@ Array [
     "datasource": "docker",
     "depName": "mariadb",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 6,
-    },
+    "replaceString": "mariadb:10.4.11",
   },
   Object {
     "currentDigest": undefined,
@@ -93,9 +77,7 @@ Array [
     "datasource": "docker",
     "depName": "other/image",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 8,
-    },
+    "replaceString": "other/image:1.0.0",
   },
 ]
 `;
