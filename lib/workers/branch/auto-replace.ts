@@ -10,13 +10,7 @@ export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    autoReplaceData,
-  } = upgrade;
+  const { manager, packageFile, newValue, newDigest, depIndex } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade;
   try {
@@ -25,7 +19,7 @@ export async function confirmIfDepUpdated(
       packageFile,
       upgrade
     );
-    newUpgrade = newExtract.deps[autoReplaceData.depIndex];
+    newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
@@ -79,15 +73,8 @@ export async function doAutoReplace(
     logger.debug('Branch dep is already updated');
     return existingContent;
   }
-  const {
-    depName,
-    currentValue,
-    newValue,
-    currentDigest,
-    newDigest,
-    autoReplaceData,
-  } = upgrade;
-  const replaceString = autoReplaceData?.replaceString || currentValue;
+  const { depName, currentValue, newValue, currentDigest, newDigest } = upgrade;
+  const replaceString = upgrade.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {

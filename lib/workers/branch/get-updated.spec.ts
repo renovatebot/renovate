@@ -29,25 +29,25 @@ describe('workers/branch/get-updated', () => {
       platform.getFile.mockResolvedValueOnce('existing content');
     });
     it('handles autoreplace base updated', async () => {
-      config.upgrades.push({ manager: 'html', autoReplace: true } as never);
+      config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('handles autoreplace branch no update', async () => {
-      config.upgrades.push({ manager: 'html', autoReplace: true } as never);
+      config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('handles autoreplace failure', async () => {
-      config.upgrades.push({ manager: 'html', autoReplace: true } as never);
+      config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles autoreplace branch needs update', async () => {
       config.parentBranch = 'some branch';
-      config.upgrades.push({ manager: 'html', autoReplace: true } as never);
+      config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
@@ -88,9 +88,6 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
-      config.upgrades.forEach((upgrade) => {
-        upgrade.autoReplace = true; // eslint-disable-line no-param-reassign
-      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
@@ -143,9 +140,6 @@ describe('workers/branch/get-updated', () => {
           },
         },
       ]);
-      config.upgrades.forEach((upgrade) => {
-        upgrade.autoReplace = true; // eslint-disable-line no-param-reassign
-      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });

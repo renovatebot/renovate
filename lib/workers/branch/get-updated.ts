@@ -26,7 +26,7 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { autoReplace, manager, packageFile, depName } = upgrade;
+    const { manager, packageFile, depName } = upgrade;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -45,8 +45,8 @@ export async function getUpdatedPackageFiles(
           parentBranch: undefined,
         });
       }
-      if (autoReplace) {
-        logger.debug('autoReplace');
+      const updateDependency = get(manager, 'updateDependency');
+      if (!updateDependency) {
         const res = await doAutoReplace(upgrade, existingContent, parentBranch);
         if (res) {
           if (res === existingContent) {
@@ -65,7 +65,6 @@ export async function getUpdatedPackageFiles(
         logger.error('Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      const updateDependency = get(manager, 'updateDependency');
       const newContent = await updateDependency({
         fileContent: existingContent,
         upgrade,
