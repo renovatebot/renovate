@@ -6,6 +6,10 @@ Array [
     "depName": "Configuration Error",
     "message": "Invalid regExp for packageRules[1].allowedVersions: \`/***$}{]][/\`",
   },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].allowedVersions: \`!/***$}{]][/\`",
+  },
 ]
 `;
 

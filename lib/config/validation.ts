@@ -115,6 +115,21 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
+      } else if (
+        key === 'allowedVersions' &&
+        is.string(val) &&
+        val.length > 2 &&
+        val.startsWith('!/') &&
+        val.endsWith('/')
+      ) {
+        try {
+          regEx(val.slice(2, -1));
+        } catch (err) {
+          errors.push({
+            depName: 'Configuration Error',
+            message: `Invalid regExp for ${currentPath}: \`${val}\``,
+          });
+        }
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {

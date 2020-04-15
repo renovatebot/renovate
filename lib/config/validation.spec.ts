@@ -30,10 +30,18 @@ describe('config/validation', () => {
             packageNames: ['bar'],
             allowedVersions: '/***$}{]][/',
           },
+          {
+            packageNames: ['baz'],
+            allowedVersions: '!/^2/',
+          },
+          {
+            packageNames: ['quack'],
+            allowedVersions: '!/***$}{]][/',
+          },
         ],
       };
       const { errors } = await configValidation.validateConfig(config);
-      expect(errors).toHaveLength(1);
+      expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
     it('returns nested errors', async () => {

@@ -70,6 +70,16 @@ export function filterVersions(
       filteredVersions = filteredVersions.filter((v) =>
         regexes[allowedVersions].test(v)
       );
+    } else if (
+      allowedVersions.length > 2 &&
+      allowedVersions.startsWith('!/') &&
+      allowedVersions.endsWith('/')
+    ) {
+      regexes[allowedVersions] =
+        regexes[allowedVersions] || regEx(allowedVersions.slice(2, -1));
+      filteredVersions = filteredVersions.filter(
+        (v) => !regexes[allowedVersions].test(v)
+      );
     } else if (version.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
         version.matches(v, allowedVersions)
