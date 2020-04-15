@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { Preset } from './common';
 import { ensureTrailingSlash } from '../../util/url';
 import { RenovateConfig } from '../common';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 
 const { get: glGot } = api;
 
@@ -35,7 +36,9 @@ export async function getPreset(
   baseConfig?: RenovateConfig
 ): Promise<Preset> {
   const endpoint = ensureTrailingSlash(
-    baseConfig?.endpoint ?? 'https://gitlab.com/api/v4/'
+    (baseConfig?.platform === PLATFORM_TYPE_GITLAB
+      ? baseConfig?.endpoint
+      : null) ?? 'https://gitlab.com/api/v4/'
   );
   if (presetName !== 'default') {
     // TODO: proper error contructor
