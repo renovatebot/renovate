@@ -7,9 +7,7 @@ Array [
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "replicated/dockerfilelint",
-    "managerData": Object {
-      "lineNumber": 11,
-    },
+    "replaceString": "replicated/dockerfilelint",
     "versioning": "docker",
   },
   Object {
@@ -18,9 +16,7 @@ Array [
     "currentValue": "6",
     "datasource": "docker",
     "depName": "node",
-    "managerData": Object {
-      "lineNumber": 36,
-    },
+    "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "versioning": "docker",
   },
 ]
@@ -33,9 +29,7 @@ Array [
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "replicated/dockerfilelint",
-    "managerData": Object {
-      "lineNumber": 17,
-    },
+    "replaceString": "replicated/dockerfilelint",
     "versioning": "docker",
   },
   Object {
@@ -44,9 +38,7 @@ Array [
     "currentValue": "6",
     "datasource": "docker",
     "depName": "node",
-    "managerData": Object {
-      "lineNumber": 31,
-    },
+    "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "versioning": "docker",
   },
 ]

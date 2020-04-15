@@ -8,6 +8,7 @@ import { resolveConfigPresets } from './presets';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { RenovateConfig, RenovateConfigStage } from './common';
 import { mergeChildConfig } from './utils';
+import { ensureTrailingSlash } from '../util/url';
 
 export * from './common';
 export { mergeChildConfig };
@@ -102,7 +103,7 @@ export async function parseConfigs(
   // Massage endpoint to have a trailing slash
   if (config.endpoint) {
     logger.debug('Adding trailing slash to endpoint');
-    config.endpoint = config.endpoint.replace(/\/?$/, '/');
+    config.endpoint = ensureTrailingSlash(config.endpoint);
   }
 
   // Remove log file entries

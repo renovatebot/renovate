@@ -120,7 +120,7 @@
     "chalk": "4.0.0",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "4.1.1",
+    "commander": "5.0.0",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "3.0.0",
     "deepmerge": "4.2.2",
@@ -158,7 +158,7 @@
     "parse-link-header": "1.0.1",
     "pnpm": "3.8.1",
     "registry-auth-token": "4.1.1",
-    "semver": "7.2.1",
+    "semver": "7.3.0",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shortid": "2.2.15",
@@ -170,8 +170,7 @@
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.22.4",
-    "yawn-yaml": "1.5.0"
+    "yarn": "1.22.4"
   },
   "optionalDependencies": {
     "re2": "1.10.5"
@@ -221,7 +220,6 @@
     "@types/tmp": "0.1.0",
     "@types/traverse": "0.6.32",
     "@types/xmldoc": "1.1.4",
-    "@types/yawn-yaml": "1.4.0",
     "@typescript-eslint/eslint-plugin": "2.27.0",
     "@typescript-eslint/parser": "2.27.0",
     "aws-sdk-mock": "5.1.0",

@@ -21,7 +21,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           'DroneCI docker image'
         );
         dep.depType = 'docker';
-        dep.managerData = { lineNumber };
         deps.push(dep);
       }
     }

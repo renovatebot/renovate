@@ -1,17 +1,24 @@
+import { PartialDeep } from 'type-fest';
 import * as github from './github';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { mocked } from '../../../test/util';
+import { GotResponse } from '../../platform';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
-const got: any = _got;
-const hostRules: any = _hostRules;
+const got: jest.Mock<PartialDeep<GotResponse>> = _got as never;
+const hostRules = mocked(_hostRules);
 
 describe('config/presets/github', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(() => {
+    got.mockReset();
+    return global.renovateCache.rmAll();
+  });
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
@@ -65,6 +72,30 @@ describe('config/presets/github', () => {
       } finally {
         delete global.appMode;
       }
+    });
+
+    it('uses default endpoint', async () => {
+      await github.getPreset('some/repo', 'default').catch((_) => {});
+      await github
+        .getPreset('some/repo', 'default', {
+          endpoint: 'https://api.github.example.org',
+        })
+        .catch((_) => {});
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://api.github.com/repos/some/repo/contents/default.json'
+      );
+      expect(got.mock.calls).toMatchSnapshot();
+    });
+    it('uses custom endpoint', async () => {
+      await github
+        .getPreset('some/repo', 'default', {
+          platform: PLATFORM_TYPE_GITHUB,
+          endpoint: 'https://api.github.example.org',
+        })
+        .catch((_) => {});
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://api.github.example.org/repos/some/repo/contents/default.json'
+      );
     });
   });
 });
