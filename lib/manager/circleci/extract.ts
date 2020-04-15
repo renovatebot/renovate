@@ -53,7 +53,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
         dep.depType = 'docker';
         dep.versioning = 'docker';
-        dep.managerData = { lineNumber };
         deps.push(dep);
       }
     }
