@@ -29,7 +29,7 @@ async function fetchJSONFile(
       throw err;
     }
     logger.debug(
-      { statusCode: err.statusCodef },
+      { statusCode: err.statusCode },
       `Failed to retrieve ${fileName} from repo`
     );
     throw new Error('dep not found');
