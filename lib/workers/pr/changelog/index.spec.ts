@@ -1,7 +1,7 @@
 import _got from '../../../util/got';
 import * as hostRules from '../../../util/host-rules';
 import { getChangeLogJSON, ChangeLogError } from '.';
-import { partial } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
@@ -9,7 +9,7 @@ import { BranchConfig } from '../../common';
 jest.mock('../../../util/got');
 jest.mock('../../../datasource/npm');
 
-const got: any = _got;
+const got: any = mocked(_got);
 
 const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
@@ -98,6 +98,16 @@ describe('workers/pr/changelog', () => {
           { name: '2.2.2' },
           { name: 'v2.4.2' },
         ],
+      } as never);
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
+    });
+    it('handles empty GitHub tags', async () => {
+      got.mockResolvedValueOnce({
+        body: [],
       } as never);
       expect(
         await getChangeLogJSON({
