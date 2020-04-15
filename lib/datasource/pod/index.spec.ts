@@ -3,9 +3,10 @@ import * as pod from '.';
 import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
 import { GotResponse } from '../../platform';
+import { mocked } from '../../../test/util';
 
 jest.mock('../../util/got');
-const got: any = _got;
+const got: any = mocked(_got);
 
 const config = {
   versioning: rubyVersioning.id,

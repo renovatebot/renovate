@@ -284,6 +284,13 @@ describe('Github GraphQL', () => {
 
   it('supports app mode', async () => {
     global.appMode = true;
+    got.mockReturnValue({
+      body: {
+        data: {
+          someprop: 'someval',
+        },
+      },
+    });
     await http.getGraphqlNodes(query, 'testItem');
     expect(got.mock.calls[0][1].headers.accept).toEqual(
       'application/vnd.github.machine-man-preview+json, application/vnd.github.merge-info-preview+json'

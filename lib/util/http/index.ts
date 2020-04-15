@@ -33,8 +33,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
   protected async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions
+    httpOpts?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
+    const options = { ...httpOpts };
     let resolvedUrl = url.toString();
     if (options?.baseUrl) {
       resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
@@ -66,8 +67,16 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         },
       ],
     };
+    if (global.appMode) {
+      options.headers = {
+        'user-agent':
+          process.env.RENOVATE_USER_AGENT ||
+          'https://github.com/renovatebot/renovate',
+        ...options?.headers,
+      };
+    }
     const res = await got(resolvedUrl, combinedOptions);
-    return { body: res?.body, headers: res?.headers };
+    return { body: res.body, headers: res.headers };
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

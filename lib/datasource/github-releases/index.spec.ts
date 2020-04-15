@@ -1,11 +1,12 @@
 import _got from '../../util/got';
+import { mocked } from '../../../test/util';
 
 import * as github from '.';
 
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
-const got: any = _got;
+const got: any = mocked(_got);
 
 describe('datasource/github-releases', () => {
   beforeEach(() => global.renovateCache.rmAll());

@@ -8,7 +8,7 @@ export const id = 'pod';
 
 export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
 
-const http = new GithubHttp(id);
+const http = new GithubHttp();
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;

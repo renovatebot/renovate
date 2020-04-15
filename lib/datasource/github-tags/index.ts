@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 
 export const id = 'github-tags';
 
-const http = new GithubHttp(id);
+const http = new GithubHttp();
 
 interface GithubTagsResp {
   object: {

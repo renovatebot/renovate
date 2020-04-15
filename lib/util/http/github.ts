@@ -129,11 +129,8 @@ function handleGotError(
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
-  constructor(
-    hostType: string = PLATFORM_TYPE_GITHUB,
-    options?: GithubHttpOptions
-  ) {
-    super(hostType, options);
+  constructor(options?: GithubHttpOptions) {
+    super(PLATFORM_TYPE_GITHUB, options);
   }
 
   protected async request<T>(
@@ -157,17 +154,14 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     }
 
     if (global.appMode) {
-      const appAccept = 'application/vnd.github.machine-man-preview+json';
+      const accept = 'application/vnd.github.machine-man-preview+json';
       opts.headers = {
-        accept: appAccept,
-        'user-agent':
-          process.env.RENOVATE_USER_AGENT ||
-          'https://github.com/renovatebot/renovate',
+        accept,
         ...opts.headers,
       };
       const optsAccept = opts?.headers?.accept;
-      if (typeof optsAccept === 'string' && !optsAccept.includes(appAccept)) {
-        opts.headers.accept = `${appAccept}, ${opts.headers.accept}`;
+      if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
+        opts.headers.accept = `${accept}, ${opts.headers.accept}`;
       }
     }
 
@@ -230,10 +224,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     if (global.appMode) {
       opts.headers = {
         accept: 'application/vnd.github.merge-info-preview+json',
-        'user-agent':
-          process.env.RENOVATE_USER_AGENT ||
-          'https://github.com/renovatebot/renovate',
-        ...opts.headers,
       };
     }
 
@@ -241,7 +231,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     try {
       const res = await this.postJson('graphql', opts);
-      result = res && res.body;
+      result = res?.body;
     } catch (gotErr) {
       handleGotError(gotErr, path, opts);
     }
