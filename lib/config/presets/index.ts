@@ -14,8 +14,9 @@ import {
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import { PresetApi } from './common';
 
-const presetSources = {
+const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
