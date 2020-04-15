@@ -741,6 +741,19 @@ Use this - usually within a packageRule - to limit how far to upgrade a dependen
 }
 ```
 
+This field also supports Regular Expressions if they begin and end with `/`. For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["com.thoughtworks.xstream:xstream"],
+      "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$/"
+    }
+  ]
+}
+```
+
 ### depTypeList
 
 Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.

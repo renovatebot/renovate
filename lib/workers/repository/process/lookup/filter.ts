@@ -4,6 +4,7 @@ import * as allVersioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as npmVersioning from '../../../../versioning/npm';
+import { regEx } from '../../../../util/regex';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -14,6 +15,8 @@ export interface FilterConfig {
   respectLatest?: boolean;
   versioning: string;
 }
+
+const regexes = {};
 
 export function filterVersions(
   config: FilterConfig,
@@ -57,7 +60,17 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    if (version.isValid(allowedVersions)) {
+    if (
+      allowedVersions.length > 1 &&
+      allowedVersions.startsWith('/') &&
+      allowedVersions.endsWith('/')
+    ) {
+      regexes[allowedVersions] =
+        regexes[allowedVersions] || regEx(allowedVersions.slice(1, -1));
+      filteredVersions = filteredVersions.filter((v) =>
+        regexes[allowedVersions].test(v)
+      );
+    } else if (version.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
         version.matches(v, allowedVersions)
       );
