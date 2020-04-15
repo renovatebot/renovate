@@ -74,7 +74,6 @@ export function extractPackageFile(
         if (!lineNumber) {
           return null;
         }
-        dep.managerData = { lineNumber };
         return dep;
       })
       .filter(Boolean);

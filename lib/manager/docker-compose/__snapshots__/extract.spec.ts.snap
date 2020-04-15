@@ -7,9 +7,7 @@ Array [
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
+    "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -17,60 +15,46 @@ Array [
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "managerData": Object {
-      "lineNumber": 18,
-    },
+    "replaceString": "node:10.0.0",
   },
   Object {
     "currentDigest": undefined,
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
-    "managerData": Object {
-      "lineNumber": 21,
-    },
+    "replaceString": "postgres:9.4.0",
   },
   Object {
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
-    "managerData": Object {
-      "lineNumber": 31,
-    },
+    "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   Object {
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
-    "managerData": Object {
-      "lineNumber": 46,
-    },
+    "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   Object {
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
-    "managerData": Object {
-      "lineNumber": 62,
-    },
+    "replaceString": "dockersamples/examplevotingapp_worker",
   },
   Object {
     "currentDigest": undefined,
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
-    "managerData": Object {
-      "lineNumber": 79,
-    },
+    "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
     "datasource": "docker",
-    "managerData": Object {
-      "lineNumber": 90,
-    },
+    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",
   },
 ]
