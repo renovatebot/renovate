@@ -140,7 +140,7 @@ export interface RenovateConfig
   masterIssueChecks?: Record<string, string>;
   masterIssueRebaseAllOpen?: boolean;
   masterIssueTitle?: string;
-
+  packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
