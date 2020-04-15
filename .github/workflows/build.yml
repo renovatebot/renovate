@@ -43,15 +43,9 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [12, 10]
         python-version: [3.8]
-        java-version: [8, 11]
+        java-version: [8]
         exclude:
           - os: windows-latest
-            node-version: 10
-          # exclude java 8 on node 10
-          - java-version: 8
-            node-version: 10
-          # exclude java 11 on node 10
-          - java-version: 11
             node-version: 10
 
     env:
