@@ -29,6 +29,7 @@ describe('workers/repository/updates/branchify', () => {
           version: '1.1.0',
           prTitle: 'some-title',
           updateType: 'minor',
+          packageFile: 'foo/package.json',
         },
       ]);
       config.repoIsOnboarded = true;
@@ -48,6 +49,7 @@ describe('workers/repository/updates/branchify', () => {
           groupName: 'some packages',
           group: {},
           separateMajorMinor: true,
+          packageFile: 'package.json',
         },
         {
           depName: 'foo',

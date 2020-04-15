@@ -154,7 +154,7 @@ export async function lookupUpdates(
       // If dependency lookup fails then warn and return
       const warning: ValidationMessage = {
         depName,
-        message: `Failed to lofok up dependency ${depName}`,
+        message: `Failed to look up dependency ${depName}`,
       };
       logger.debug(
         { dependency: depName, packageFile: config.packageFile },
