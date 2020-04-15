@@ -12,7 +12,7 @@ import { BranchConfig } from '../../common';
 export type ExtractResult = {
   branches: BranchConfig[];
   branchList: string[];
-  packageFiles?: Record<string, PackageFile[]>;
+  packageFiles: Record<string, PackageFile[]>;
 };
 
 export type UpdateResult = {
@@ -38,7 +38,7 @@ export async function update(
   config: RenovateConfig,
   branches: BranchConfig[],
   branchList: string[],
-  packageFiles?: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>
 ): Promise<UpdateResult> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
