@@ -170,8 +170,7 @@
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.22.4",
-    "yawn-yaml": "1.5.0"
+    "yarn": "1.22.4"
   },
   "optionalDependencies": {
     "re2": "1.10.5"
@@ -222,7 +221,6 @@
     "@types/tmp": "0.1.0",
     "@types/traverse": "0.6.32",
     "@types/xmldoc": "1.1.4",
-    "@types/yawn-yaml": "1.4.0",
     "@typescript-eslint/eslint-plugin": "2.27.0",
     "@typescript-eslint/parser": "2.27.0",
     "aws-sdk-mock": "5.1.0",

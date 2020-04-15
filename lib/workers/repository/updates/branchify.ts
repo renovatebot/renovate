@@ -46,6 +46,20 @@ export async function branchifyUpgrades(
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
   const branches: BranchConfig[] = [];
   for (const u of updates) {
+    // extract parentDir and baseDir from packageFile
+    if (u.packageFile) {
+      const packagePath = u.packageFile.split('/');
+      if (packagePath.length > 0) {
+        packagePath.splice(-1, 1);
+      }
+      if (packagePath.length > 0) {
+        u.parentDir = packagePath[packagePath.length - 1];
+        u.baseDir = packagePath.join('/');
+      } else {
+        u.parentDir = '';
+        u.baseDir = '';
+      }
+    }
     const update: BranchUpgradeConfig = { ...u } as any;
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;

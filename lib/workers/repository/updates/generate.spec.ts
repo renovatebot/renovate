@@ -271,79 +271,8 @@ describe('workers/repository/updates/generate', () => {
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
-          packageFile: 'foo/package.json',
-          semanticCommits: true,
-          semanticCommitType: 'chore',
-          semanticCommitScope: '{{parentDir}}',
-          lazyGrouping: true,
-          newValue: '1.2.0',
-          isSingleVersion: true,
-          toVersion: '1.2.0',
-          foo: 1,
-          group: {
-            foo: 2,
-          },
-        }),
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
-        'chore(foo): update dependency some-dep to v1.2.0'
-      );
-    });
-    it('scopes monorepo commits', () => {
-      const branch = [
-        partial<BranchUpgradeConfig>({
-          ...defaultConfig,
-          depName: 'some-dep',
-          packageFile: 'foo/package.json',
-          semanticCommits: true,
-          semanticCommitType: 'chore',
-          semanticCommitScope: '{{baseDir}}',
-          lazyGrouping: true,
-          newValue: '1.2.0',
-          isSingleVersion: true,
-          toVersion: '1.2.0',
-          foo: 1,
-          group: {
-            foo: 2,
-          },
-        }),
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
-        'chore(foo): update dependency some-dep to v1.2.0'
-      );
-    });
-    it('scopes monorepo commits', () => {
-      const branch = [
-        partial<BranchUpgradeConfig>({
-          ...defaultConfig,
-          depName: 'some-dep',
           packageFile: 'package.json',
-          semanticCommits: true,
-          semanticCommitType: 'chore',
-          semanticCommitScope: '{{parentDir}}',
-          lazyGrouping: true,
-          newValue: '1.2.0',
-          isSingleVersion: true,
-          toVersion: '1.2.0',
-          foo: 1,
-          group: {
-            foo: 2,
-          },
-        }),
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
-        'chore(): update dependency some-dep to v1.2.0'
-      );
-    });
-    it('scopes monorepo commits', () => {
-      const branch = [
-        partial<BranchUpgradeConfig>({
-          ...defaultConfig,
-          depName: 'some-dep',
-          packageFile: 'package.json',
+          baseDir: '',
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',
@@ -369,6 +298,7 @@ describe('workers/repository/updates/generate', () => {
           commitBodyTable: false,
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
+          parentDir: 'bar',
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: '{{parentDir}}',
@@ -393,6 +323,7 @@ describe('workers/repository/updates/generate', () => {
           ...defaultConfig,
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
+          baseDir: 'foo/bar',
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',

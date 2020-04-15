@@ -169,20 +169,6 @@ export function generateBranchConfig(
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
-    // extract parentDir and baseDir from packageFile
-    if (upgrade.packageFile) {
-      const packagePath = upgrade.packageFile.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
-      if (packagePath.length > 0) {
-        upgrade.parentDir = packagePath[packagePath.length - 1];
-        upgrade.baseDir = packagePath.join('/');
-      } else {
-        upgrade.parentDir = '';
-        upgrade.baseDir = '';
-      }
-    }
     // Use templates to generate strings
     logger.trace('Compiling branchName: ' + upgrade.branchName);
     upgrade.branchName = template.compile(upgrade.branchName, upgrade);
