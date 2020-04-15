@@ -10,7 +10,6 @@ import { processRepo, updateRepo } from './process';
 import { finaliseRepo } from './finalise';
 import { ensureMasterIssue } from './master-issue';
 import { RenovateConfig } from '../../config';
-import { extractChangeLogJSON } from './extract';
 
 let renovateVersion = 'unknown';
 try {
