@@ -32,7 +32,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
 
   const config: RenovateCliConfig = {};
 
-  const coersions = {
+  const coersions: Record<string, (arg: string) => unknown> = {
     boolean: (val: string): boolean => {
       if (val === 'true' || val === '') {
         return true;

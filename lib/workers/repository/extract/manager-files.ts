@@ -49,15 +49,8 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
         config
       );
       if (res) {
-        if (get(manager, 'autoReplace')) {
-          res.autoReplace = true;
-          for (let index = 0; index < res.deps.length; index += 1) {
-            // auto-populate the depIndex value
-            res.deps[index].autoReplaceData = {
-              ...res.deps[index].autoReplaceData,
-              depIndex: index,
-            };
-          }
+        for (let index = 0; index < res.deps.length; index += 1) {
+          res.deps[index].depIndex = index;
         }
         packageFiles.push({
           packageFile,

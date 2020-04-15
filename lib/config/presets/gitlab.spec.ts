@@ -1,11 +1,13 @@
+import { PartialDeep } from 'type-fest';
 import * as gitlab from './gitlab';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { GotResponse } from '../../platform';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 
 jest.mock('../../platform/gitlab/gl-got-wrapper');
 jest.mock('../../util/got');
 
-const glGot: jest.Mock<Promise<Partial<GotResponse>>> = api.get as never;
+const glGot: jest.Mock<Promise<PartialDeep<GotResponse>>> = api.get as never;
 
 describe('config/presets/gitlab', () => {
   beforeEach(() => {
@@ -55,13 +57,20 @@ describe('config/presets/gitlab', () => {
     });
     it('uses default endpoint', async () => {
       await gitlab.getPreset('some/repo', 'default').catch((_) => {});
+      await gitlab
+        .getPreset('some/repo', 'default', {
+          endpoint: 'https://gitlab.example.org/api/v4',
+        })
+        .catch((_) => {});
       expect(glGot.mock.calls[0][0]).toEqual(
         'https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches'
       );
+      expect(glGot.mock.calls).toMatchSnapshot();
     });
     it('uses custom endpoint', async () => {
       await gitlab
         .getPreset('some/repo', 'default', {
+          platform: PLATFORM_TYPE_GITLAB,
           endpoint: 'https://gitlab.example.org/api/v4',
         })
         .catch((_) => {});

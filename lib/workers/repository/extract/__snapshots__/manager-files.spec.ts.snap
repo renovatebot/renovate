@@ -26,18 +26,13 @@ Array [
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractPackageFile 1`] = `
 Array [
   Object {
-    "autoReplace": true,
     "deps": Array [
       Object {
-        "autoReplaceData": Object {
-          "depIndex": 0,
-        },
+        "depIndex": 0,
       },
       Object {
-        "autoReplaceData": Object {
-          "depIndex": 1,
-          "replaceString": "abc",
-        },
+        "depIndex": 1,
+        "replaceString": "abc",
       },
     ],
     "manager": "html",
