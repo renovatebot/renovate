@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/validation validateConfig(config) catches invalid allowedVersions regex 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[1].allowedVersions: \`/***$}{]][/\`",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
 Array [
   Object {
