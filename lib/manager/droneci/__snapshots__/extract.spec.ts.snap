@@ -3,57 +3,37 @@
 exports[`lib/manager/droneci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "elixir:1.8.1-alpine",
-    },
     "currentDigest": undefined,
     "currentValue": "1.8.1-alpine",
     "datasource": "docker",
     "depName": "elixir",
     "depType": "docker",
-    "managerData": Object {
-      "lineNumber": 5,
-    },
+    "replaceString": "elixir:1.8.1-alpine",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
-    },
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "amd64/node",
     "depType": "docker",
-    "managerData": Object {
-      "lineNumber": 16,
-    },
+    "replaceString": "amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "mysql:5.7.24",
-    },
     "currentDigest": undefined,
     "currentValue": "5.7.24",
     "datasource": "docker",
     "depName": "mysql",
     "depType": "docker",
-    "managerData": Object {
-      "lineNumber": 23,
-    },
+    "replaceString": "mysql:5.7.24",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "redis:alpine",
-    },
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "redis",
     "depType": "docker",
-    "managerData": Object {
-      "lineNumber": 28,
-    },
+    "replaceString": "redis:alpine",
   },
 ]
 `;

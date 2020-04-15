@@ -3,16 +3,11 @@
 exports[`lib/manager/kubernetes/extract extractPackageFile() extracts image line in a YAML array 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
-    },
     "currentDigest": undefined,
     "currentValue": "v2.1.0",
     "datasource": "docker",
     "depName": "quay.io/external_storage/local-volume-provisioner",
-    "managerData": Object {
-      "lineNumber": 14,
-    },
+    "replaceString": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
   },
 ]
 `;
@@ -20,28 +15,18 @@ Array [
 exports[`lib/manager/kubernetes/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "nginx:1.7.9",
-    },
     "currentDigest": undefined,
     "currentValue": "1.7.9",
     "datasource": "docker",
     "depName": "nginx",
-    "managerData": Object {
-      "lineNumber": 18,
-    },
+    "replaceString": "nginx:1.7.9",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "k8s.gcr.io/kube-proxy-amd64:v1.11.1",
-    },
     "currentDigest": undefined,
     "currentValue": "v1.11.1",
     "datasource": "docker",
     "depName": "k8s.gcr.io/kube-proxy-amd64",
-    "managerData": Object {
-      "lineNumber": 46,
-    },
+    "replaceString": "k8s.gcr.io/kube-proxy-amd64:v1.11.1",
   },
 ]
 `;

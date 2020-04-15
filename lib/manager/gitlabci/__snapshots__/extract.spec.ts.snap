@@ -3,82 +3,52 @@
 exports[`lib/manager/gitlabci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "hadolint/hadolint:latest",
-    },
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "hadolint/hadolint",
     "depType": "image",
-    "managerData": Object {
-      "lineNumber": 36,
-    },
+    "replaceString": "hadolint/hadolint:latest",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "docker:latest",
-    },
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "docker",
     "depType": "image",
-    "managerData": Object {
-      "lineNumber": 53,
-    },
+    "replaceString": "docker:latest",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "docker:dind",
-    },
     "currentDigest": undefined,
     "currentValue": "dind",
     "datasource": "docker",
     "depName": "docker",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 55,
-    },
+    "replaceString": "docker:dind",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "docker:latest",
-    },
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "docker",
     "depType": "image",
-    "managerData": Object {
-      "lineNumber": 75,
-    },
+    "replaceString": "docker:latest",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "docker:dind",
-    },
     "currentDigest": undefined,
     "currentValue": "dind",
     "datasource": "docker",
     "depName": "docker",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 77,
-    },
+    "replaceString": "docker:dind",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "image-name-test:1.15",
-    },
     "currentDigest": undefined,
     "currentValue": "1.15",
     "datasource": "docker",
     "depName": "image-name-test",
     "depType": "image-name",
-    "managerData": Object {
-      "lineNumber": 102,
-    },
+    "replaceString": "image-name-test:1.15",
   },
 ]
 `;
@@ -86,43 +56,28 @@ Array [
 exports[`lib/manager/gitlabci/extract extractPackageFile() extracts multiple image lines with comments 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "renovate/renovate:19.70.8-slim",
-    },
     "currentDigest": undefined,
     "currentValue": "19.70.8-slim",
     "datasource": "docker",
     "depName": "renovate/renovate",
     "depType": "image-name",
-    "managerData": Object {
-      "lineNumber": 2,
-    },
+    "replaceString": "renovate/renovate:19.70.8-slim",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "mariadb:10.4.11",
-    },
     "currentDigest": undefined,
     "currentValue": "10.4.11",
     "datasource": "docker",
     "depName": "mariadb",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 6,
-    },
+    "replaceString": "mariadb:10.4.11",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "other/image:1.0.0",
-    },
     "currentDigest": undefined,
     "currentValue": "1.0.0",
     "datasource": "docker",
     "depName": "other/image",
     "depType": "service-image",
-    "managerData": Object {
-      "lineNumber": 8,
-    },
+    "replaceString": "other/image:1.0.0",
   },
 ]
 `;

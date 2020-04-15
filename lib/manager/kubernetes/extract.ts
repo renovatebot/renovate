@@ -26,7 +26,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         },
         'Kubernetes image'
       );
-      dep.managerData = { lineNumber };
       deps.push(dep);
     }
     lineNumber += 1;

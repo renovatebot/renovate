@@ -3,9 +3,6 @@
 exports[`lib/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "node",
-    },
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -15,12 +12,10 @@ Array [
     "managerData": Object {
       "lineNumber": 12,
     },
+    "replaceString": "node",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "node:4",
-    },
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "4",
@@ -30,12 +25,10 @@ Array [
     "managerData": Object {
       "lineNumber": 57,
     },
+    "replaceString": "node:4",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "node:6",
-    },
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6",
@@ -45,12 +38,10 @@ Array [
     "managerData": Object {
       "lineNumber": 61,
     },
+    "replaceString": "node:6",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "node:8.9.0",
-    },
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.9.0",
@@ -60,6 +51,7 @@ Array [
     "managerData": Object {
       "lineNumber": 65,
     },
+    "replaceString": "node:8.9.0",
     "versioning": "docker",
   },
 ]
@@ -74,9 +66,6 @@ Array [
     "depName": "release-workflows",
     "depType": "orb",
     "lookupName": "hutson/library-release-workflows",
-    "managerData": Object {
-      "lineNumber": 3,
-    },
     "rangeStrategy": "pin",
     "versioning": "npm",
   },
@@ -87,9 +76,6 @@ Array [
     "depName": "no-version",
     "depType": "orb",
     "lookupName": "abc/def",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
     "rangeStrategy": "pin",
     "versioning": "npm",
   },
@@ -100,16 +86,10 @@ Array [
     "depName": "volatile",
     "depType": "orb",
     "lookupName": "zzz/zzz",
-    "managerData": Object {
-      "lineNumber": 5,
-    },
     "rangeStrategy": "pin",
     "versioning": "npm",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
-    },
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -118,12 +98,10 @@ Array [
     "managerData": Object {
       "lineNumber": 20,
     },
+    "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
-    },
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -132,12 +110,10 @@ Array [
     "managerData": Object {
       "lineNumber": 27,
     },
+    "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
-    },
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -146,12 +122,10 @@ Array [
     "managerData": Object {
       "lineNumber": 34,
     },
+    "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
-    },
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -160,12 +134,10 @@ Array [
     "managerData": Object {
       "lineNumber": 41,
     },
+    "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "pypy:3-6@sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
-    },
     "currentDigest": "sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
     "currentValue": "3-6",
     "datasource": "docker",
@@ -174,12 +146,10 @@ Array [
     "managerData": Object {
       "lineNumber": 50,
     },
+    "replaceString": "pypy:3-6@sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
     "versioning": "docker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
-    },
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
     "datasource": "docker",
@@ -188,6 +158,7 @@ Array [
     "managerData": Object {
       "lineNumber": 57,
     },
+    "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
 ]

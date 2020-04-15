@@ -3,98 +3,58 @@
 exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "quay.io/something/redis:alpine",
-    },
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
+    "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "node:10.0.0",
-    },
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "managerData": Object {
-      "lineNumber": 18,
-    },
+    "replaceString": "node:10.0.0",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "postgres:9.4.0",
-    },
     "currentDigest": undefined,
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
-    "managerData": Object {
-      "lineNumber": 21,
-    },
+    "replaceString": "postgres:9.4.0",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "dockersamples/examplevotingapp_vote:before",
-    },
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
-    "managerData": Object {
-      "lineNumber": 31,
-    },
+    "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "dockersamples/examplevotingapp_result:before",
-    },
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
-    "managerData": Object {
-      "lineNumber": 46,
-    },
+    "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "dockersamples/examplevotingapp_worker",
-    },
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
-    "managerData": Object {
-      "lineNumber": 62,
-    },
+    "replaceString": "dockersamples/examplevotingapp_worker",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "dockersamples/visualizer:stable",
-    },
     "currentDigest": undefined,
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
-    "managerData": Object {
-      "lineNumber": 79,
-    },
+    "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
-    "autoReplaceData": Object {
-      "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
-    },
     "datasource": "docker",
-    "managerData": Object {
-      "lineNumber": 90,
-    },
+    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",
   },
 ]

@@ -29,7 +29,6 @@ export function extractPackageFile(content: string): PackageFile | null {
               depType: 'orb',
               depName,
               currentValue,
-              managerData: { lineNumber },
               datasource: datasourceOrb.id,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',

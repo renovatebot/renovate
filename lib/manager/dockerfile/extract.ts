@@ -32,9 +32,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 export function getDep(currentFrom: string): PackageDependency {
   const dep = splitImageParts(currentFrom);
-  dep.autoReplaceData = {
-    replaceString: currentFrom,
-  };
+  dep.replaceString = currentFrom;
   dep.datasource = datasourceDocker.id;
   if (
     dep.depName &&
@@ -59,7 +57,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug('Found a multistage build stage name');
         stageNames.push(fromRest[1]);
       }
-      const fromSuffix = fromRest.join(' ');
       if (currentFrom === 'scratch') {
         logger.debug('Skipping scratch');
       } else if (stageNames.includes(currentFrom)) {
@@ -74,18 +71,13 @@ export function extractPackageFile(content: string): PackageFile | null {
           },
           'Dockerfile FROM'
         );
-        dep.managerData = {
-          lineNumber,
-          fromPrefix,
-          fromSuffix,
-        };
         deps.push(dep);
       }
     }
 
     const copyFromMatch = /^(COPY --from=)([^\s]+)\s+(.*)$/i.exec(fromLine);
     if (copyFromMatch) {
-      const [, fromPrefix, currentFrom, fromSuffix] = copyFromMatch;
+      const [, , currentFrom] = copyFromMatch;
       logger.trace({ lineNumber, fromLine }, 'COPY --from line');
       if (stageNames.includes(currentFrom)) {
         logger.debug({ currentFrom }, 'Skipping alias COPY --from');
@@ -101,11 +93,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           },
           'Dockerfile COPY --from'
         );
-        dep.managerData = {
-          lineNumber,
-          fromPrefix,
-          fromSuffix,
-        };
         deps.push(dep);
       }
     }
