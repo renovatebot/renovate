@@ -146,7 +146,7 @@ export async function mergeRenovateConfig(
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   const resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig),
+    await presets.resolveConfigPresets(decryptedConfig, config),
     config.privateKey
   );
   delete resolvedConfig.privateKey;

@@ -3,8 +3,6 @@ import * as nodeVersioning from '../../versioning/node';
 
 export { extractPackageFile } from './extract';
 
-export const autoReplace = true;
-
 export const language = LANGUAGE_NODE;
 
 export const defaultConfig = {
