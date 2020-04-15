@@ -4,9 +4,9 @@ import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { ensureTrailingSlash } from '../../util/url';
 import { RenovateConfig } from '../common';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
-const id = 'github';
-const http = new Http(id);
+const http = new Http(PLATFORM_TYPE_GITHUB);
 
 async function fetchJSONFile(
   repo: string,
@@ -49,7 +49,9 @@ export async function getPreset(
   baseConfig?: RenovateConfig
 ): Promise<Preset> {
   const endpoint = ensureTrailingSlash(
-    baseConfig?.endpoint ?? 'https://api.github.com/'
+    (baseConfig?.platform === PLATFORM_TYPE_GITHUB
+      ? baseConfig?.endpoint
+      : null) ?? 'https://api.github.com/'
   );
   if (presetName === 'default') {
     try {
