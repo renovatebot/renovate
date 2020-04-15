@@ -19,6 +19,7 @@ export interface BranchUpgradeConfig
     Partial<LookupUpdate>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
+  autoReplaceStringTemplate?: string;
   baseDeps?: PackageDependency[];
   branchName: string;
   commitBody?: string;
