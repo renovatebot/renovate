@@ -23,7 +23,7 @@ export function getRollbackUpdate(
     );
     return null;
   }
-  const lessThanVersions = versions.filter(v =>
+  const lessThanVersions = versions.filter((v) =>
     version.isLessThanRange(v, currentValue)
   );
   // istanbul ignore if

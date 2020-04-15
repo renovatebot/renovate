@@ -103,9 +103,9 @@ export async function getReleases({
       logger.trace(`go.getReleases.prefix:${prefix}`);
       const submodReleases = res.releases
         .filter(
-          release => release.version && release.version.startsWith(prefix)
+          (release) => release.version && release.version.startsWith(prefix)
         )
-        .map(release => {
+        .map((release) => {
           const r2 = release;
           r2.version = r2.version.replace(`${prefix}/`, '');
           return r2;
@@ -118,7 +118,7 @@ export async function getReleases({
     }
     if (res && res.releases) {
       res.releases = res.releases.filter(
-        release => release.version && release.version.startsWith('v')
+        (release) => release.version && release.version.startsWith('v')
       );
     }
     return res;

@@ -35,7 +35,7 @@ export function extractPackageFile(
   }
   logger.debug({ aliases }, 'repositories discovered.');
 
-  deps = doc.releases.map(dep => {
+  deps = doc.releases.map((dep) => {
     let depName = dep.chart;
     let repoName = null;
 

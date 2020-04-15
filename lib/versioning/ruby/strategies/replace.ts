@@ -7,7 +7,7 @@ function countInstancesOf(str: string, char: string): number {
 }
 
 function isMajorRange(range: string): boolean {
-  const splitRange = range.split(',').map(part => part.trim());
+  const splitRange = range.split(',').map((part) => part.trim());
   return (
     splitRange.length === 1 &&
     splitRange[0].startsWith('~>') &&
@@ -16,7 +16,7 @@ function isMajorRange(range: string): boolean {
 }
 
 function isCommonRubyMajorRange(range: string): boolean {
-  const splitRange = range.split(',').map(part => part.trim());
+  const splitRange = range.split(',').map((part) => part.trim());
   return (
     splitRange.length === 2 &&
     splitRange[0].startsWith('~>') &&
@@ -26,7 +26,7 @@ function isCommonRubyMajorRange(range: string): boolean {
 }
 
 function isCommonRubyMinorRange(range: string): boolean {
-  const splitRange = range.split(',').map(part => part.trim());
+  const splitRange = range.split(',').map((part) => part.trim());
   return (
     splitRange.length === 2 &&
     splitRange[0].startsWith('~>') &&
@@ -62,16 +62,13 @@ export default ({ to, range }: { range: string; to: string }): string => {
   } else {
     const lastPart = range
       .split(',')
-      .map(part => part.trim())
+      .map((part) => part.trim())
       .pop();
     const lastPartPrecision = lastPart.split('.').length;
     const toPrecision = to.split('.').length;
     let massagedTo: string = to;
     if (!lastPart.startsWith('<') && toPrecision > lastPartPrecision) {
-      massagedTo = to
-        .split('.')
-        .slice(0, lastPartPrecision)
-        .join('.');
+      massagedTo = to.split('.').slice(0, lastPartPrecision).join('.');
     }
     const newLastPart = bump({ to: massagedTo, range: lastPart });
     newRange = range.replace(lastPart, newLastPart);

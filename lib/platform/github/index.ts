@@ -390,7 +390,7 @@ export async function initRepo({
         token: forkToken || opts.token,
         paginate: true,
       })
-    ).body.map(r => r.full_name);
+    ).body.map((r) => r.full_name);
     try {
       config.repository = (
         await api.post(`repos/${repository}/forks`, {
@@ -902,8 +902,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
         // Check against gitAuthor
         const commitAuthorEmail = (
           await api.get(
-            `repos/${config.parentRepo ||
-              config.repository}/pulls/${prNo}/commits`
+            `repos/${
+              config.parentRepo || config.repository
+            }/pulls/${prNo}/commits`
           )
         ).body[0].commit.author.email;
         if (commitAuthorEmail === global.gitAuthor.email) {
@@ -935,8 +936,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       logger.debug({ prNo }, 'Checking all commits');
       const prCommits = (
         await api.get(
-          `repos/${config.parentRepo ||
-            config.repository}/pulls/${prNo}/commits`
+          `repos/${
+            config.parentRepo || config.repository
+          }/pulls/${prNo}/commits`
         )
       ).body;
       // Filter out "Update branch" presses
@@ -992,8 +994,9 @@ export async function getPrList(): Promise<Pr[]> {
     let res;
     try {
       res = await api.get(
-        `repos/${config.parentRepo ||
-          config.repository}/pulls?per_page=100&state=all`,
+        `repos/${
+          config.parentRepo || config.repository
+        }/pulls?per_page=100&state=all`,
         { paginate: true }
       );
     } catch (err) /* istanbul ignore next */ {
@@ -1037,7 +1040,7 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
-    p =>
+    (p) =>
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state) &&
@@ -1167,13 +1170,13 @@ export async function getBranchStatus(
   }
   if (
     commitStatus.state === 'failure' ||
-    checkRuns.some(run => run.conclusion === 'failure')
+    checkRuns.some((run) => run.conclusion === 'failure')
   ) {
     return BranchStatus.red;
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
-    checkRuns.every(run =>
+    checkRuns.every((run) =>
       ['skipped', 'neutral', 'success'].includes(run.conclusion)
     )
   ) {
@@ -1294,7 +1297,7 @@ async function getIssues(): Promise<Issue[]> {
   const result = await getGraphqlNodes<Issue>(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map(issue => ({
+  return result.map((issue) => ({
     ...issue,
     state: issue.state.toLowerCase(),
   }));
@@ -1311,7 +1314,7 @@ export async function getIssueList(): Promise<Issue[]> {
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
-    i => i.state === 'open' && i.title === title
+    (i) => i.state === 'open' && i.title === title
   );
   if (!issue) {
     return null;
@@ -1348,9 +1351,9 @@ export async function ensureIssue({
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
-    const issues = issueList.filter(i => i.title === title);
+    const issues = issueList.filter((i) => i.title === title);
     if (issues.length) {
-      let issue = issues.find(i => i.state === 'open');
+      let issue = issues.find((i) => i.state === 'open');
       if (!issue) {
         if (once) {
           logger.debug('Issue already closed - skipping recreation');
@@ -1448,14 +1451,15 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
 
-  const userReviewers = reviewers.filter(e => !e.startsWith('team:'));
+  const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
-    .filter(e => e.startsWith('team:'))
-    .map(e => e.replace(/^team:/, ''));
+    .filter((e) => e.startsWith('team:'))
+    .map((e) => e.replace(/^team:/, ''));
   try {
     await api.post(
-      `repos/${config.parentRepo ||
-        config.repository}/pulls/${prNo}/requested_reviewers`,
+      `repos/${
+        config.parentRepo || config.repository
+      }/pulls/${prNo}/requested_reviewers`,
       {
         body: {
           reviewers: userReviewers,
@@ -1497,8 +1501,9 @@ export async function deleteLabel(
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
   await api.post(
-    `repos/${config.parentRepo ||
-      config.repository}/issues/${issueNo}/comments`,
+    `repos/${
+      config.parentRepo || config.repository
+    }/issues/${issueNo}/comments`,
     {
       body: { body },
     }
@@ -1508,8 +1513,9 @@ async function addComment(issueNo: number, body: string): Promise<void> {
 async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
   await api.patch(
-    `repos/${config.parentRepo ||
-      config.repository}/issues/comments/${commentId}`,
+    `repos/${
+      config.parentRepo || config.repository
+    }/issues/comments/${commentId}`,
     {
       body: { body },
     }
@@ -1519,8 +1525,9 @@ async function editComment(commentId: number, body: string): Promise<void> {
 async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
   await api.delete(
-    `repos/${config.parentRepo ||
-      config.repository}/issues/comments/${commentId}`
+    `repos/${
+      config.parentRepo || config.repository
+    }/issues/comments/${commentId}`
   );
 }
 
@@ -1532,8 +1539,9 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
-  const url = `repos/${config.parentRepo ||
-    config.repository}/issues/${issueNo}/comments?per_page=100`;
+  const url = `repos/${
+    config.parentRepo || config.repository
+  }/issues/${issueNo}/comments?per_page=100`;
   try {
     const comments = (
       await api.get<Comment[]>(url, {
@@ -1565,7 +1573,7 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${number}`);
       body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.body.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.body !== body;
@@ -1574,7 +1582,7 @@ export async function ensureComment({
     } else {
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.body === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -1619,7 +1627,7 @@ export async function ensureCommentRemoval(
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
   let commentId: number;
-  comments.forEach(comment => {
+  comments.forEach((comment) => {
     if (comment.body.startsWith(`### ${topic}\n\n`)) {
       commentId = comment.id;
     }
@@ -1769,8 +1777,9 @@ export async function mergePr(
     }
     logger.debug('Found approving reviews');
   }
-  const url = `repos/${config.parentRepo ||
-    config.repository}/pulls/${prNo}/merge`;
+  const url = `repos/${
+    config.parentRepo || config.repository
+  }/pulls/${prNo}/merge`;
   const options = {
     body: {} as any,
   };

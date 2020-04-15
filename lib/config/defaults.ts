@@ -17,7 +17,7 @@ export function getDefault(option: RenovateOptions): any {
 export function getConfig(): RenovateConfig {
   const options = getOptions();
   const config: RenovateConfig = {};
-  options.forEach(option => {
+  options.forEach((option) => {
     if (!option.parent) {
       config[option.name] = getDefault(option);
     }

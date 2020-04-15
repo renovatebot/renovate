@@ -28,10 +28,10 @@ describe(getName(__filename), () => {
     );
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(8);
-    expect(res.deps.find(dep => dep.depName === 'yarn').versioning).toEqual(
+    expect(res.deps.find((dep) => dep.depName === 'yarn').versioning).toEqual(
       'semver'
     );
-    expect(res.deps.find(dep => dep.depName === 'gradle').versioning).toEqual(
+    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
       'maven'
     );
   });

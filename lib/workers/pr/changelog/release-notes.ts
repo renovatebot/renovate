@@ -37,7 +37,7 @@ export async function getReleaseList(
           body: string;
         }[]
       >(url);
-      return res.body.map(release => ({
+      return res.body.map((release) => ({
         url: release.html_url,
         id: release.id,
         tag: release.tag_name,
@@ -58,7 +58,7 @@ export async function getReleaseList(
           tag_name: string;
         }[]
       >(url);
-      return res.body.map(release => ({
+      return res.body.map((release) => ({
         url: `${apiBaseURL}projects/${repository.replace(
           /\//g,
           '%2f'
@@ -119,7 +119,7 @@ export async function getReleaseNotes(
   }
   logger.debug({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
-  releaseList.forEach(release => {
+  releaseList.forEach((release) => {
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
@@ -147,7 +147,7 @@ function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split('\n');
   const tokens = markdown.parse(text, undefined);
-  tokens.forEach(token => {
+  tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substr(1);
       if (lev <= level) {
@@ -200,8 +200,8 @@ export async function getReleaseNotesMd(
     // in gitlab, will look something like projects/meno%2fdropzone/releases/
     const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
-      .map(f => f.name)
-      .filter(f => changelogFilenameRegex.test(f));
+      .map((f) => f.name)
+      .filter((f) => changelogFilenameRegex.test(f));
     if (!files.length) {
       logger.trace('no changelog file found');
       return null;

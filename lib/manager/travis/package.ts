@@ -101,7 +101,7 @@ export async function getPackageUpdates(
   }
   logger.debug({ supportPolicy }, `supportPolicy`);
   let newValue: any[] = (supportPolicy as (keyof NodeJsPolicies)[])
-    .map(policy => policies[policy])
+    .map((policy) => policies[policy])
     .reduce((result, policy) => result.concat(policy), [])
     .sort((a, b) => a - b);
   const newMajor: number = newValue[newValue.length - 1];
@@ -112,13 +112,13 @@ export async function getPackageUpdates(
         datasource: datasourceGithubTags.id,
         depName: 'nodejs/node',
       })
-    ).releases.map(release => release.version);
-    newValue = newValue.map(value =>
+    ).releases.map((release) => release.version);
+    newValue = newValue.map((value) =>
       maxSatisfyingVersion(versions, `${value}`)
     );
   }
   if (is.string(config.currentValue[0])) {
-    newValue = newValue.map(val => `${val}`);
+    newValue = newValue.map((val) => `${val}`);
   }
   newValue.sort((a, b) => a - b);
 

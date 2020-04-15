@@ -10,7 +10,7 @@ import {
 } from './common';
 
 const supportedSchemes = getOptions().find(
-  option => option.name === 'versioning'
+  (option) => option.name === 'versioning'
 ).allowedValues;
 
 describe('allVersioning.get(versioning)', () => {
@@ -70,7 +70,7 @@ describe('allVersioning.get(versioning)', () => {
       'valueOf',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
-      .filter(val => !optionalFunctions.includes(val))
+      .filter((val) => !optionalFunctions.includes(val))
       .sort();
 
     function getAllPropertyNames(obj: any): string[] {
@@ -78,7 +78,7 @@ describe('allVersioning.get(versioning)', () => {
       let o = obj;
 
       do {
-        Object.getOwnPropertyNames(o).forEach(prop => {
+        Object.getOwnPropertyNames(o).forEach((prop) => {
           if (!props.includes(prop)) {
             props.push(prop);
           }
@@ -95,7 +95,7 @@ describe('allVersioning.get(versioning)', () => {
           allVersioning.get(supportedScheme)
         )
           .filter(
-            val => !optionalFunctions.includes(val) && !val.startsWith('_')
+            (val) => !optionalFunctions.includes(val) && !val.startsWith('_')
           )
           .sort();
 
@@ -127,7 +127,9 @@ describe('allVersioning.get(versioning)', () => {
 
       const api = new DummyScheme();
       const schemeKeys = getAllPropertyNames(api)
-        .filter(val => !optionalFunctions.includes(val) && !val.startsWith('_'))
+        .filter(
+          (val) => !optionalFunctions.includes(val) && !val.startsWith('_')
+        )
         .sort();
 
       expect(schemeKeys).toEqual(npmApi);

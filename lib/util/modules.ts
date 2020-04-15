@@ -33,9 +33,9 @@ export function loadModules<T>(
 
   const moduleNames: string[] = fs
     .readdirSync(dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => !name.startsWith('__'))
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter((name) => !name.startsWith('__'))
     .filter(filter)
     .sort();
 

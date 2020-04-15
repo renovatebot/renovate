@@ -161,7 +161,7 @@ export async function extractPackageFile(
           }
           if (lockParsed) {
             const lockedDep = lockParsed.packages.find(
-              item => item.name === dep.depName
+              (item) => item.name === dep.depName
             );
             if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
               dep.lockedVersion = lockedDep.version.replace(/^v/i, '');

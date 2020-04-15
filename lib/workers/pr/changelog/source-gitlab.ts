@@ -31,7 +31,7 @@ async function getTags(
       logger.debug({ repoid }, 'repository has no Gitlab tags');
     }
 
-    return tags.map(tag => tag.name).filter(Boolean);
+    return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
     logger.info({ sourceRepo: repoid }, 'Failed to fetch Gitlab tags');
     // istanbul ignore if
@@ -63,10 +63,7 @@ export async function getChangeLogJSON({
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseURL = 'https://gitlab.com/';
   const apiBaseURL = 'https://gitlab.com/api/v4/';
-  const repository = pathname
-    .slice(1)
-    .replace(/\/$/, '')
-    .replace(/\.git/, '');
+  const repository = pathname.slice(1).replace(/\/$/, '').replace(/\.git/, '');
   if (repository.split('/').length !== 2) {
     logger.info({ sourceUrl }, 'Invalid gitlab (github) URL found');
     return null;
@@ -77,7 +74,7 @@ export async function getChangeLogJSON({
   }
   // This extra filter/sort should not be necessary, but better safe than sorry
   const validReleases = [...releases]
-    .filter(release => version.isVersion(release.version))
+    .filter((release) => version.isVersion(release.version))
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   if (validReleases.length < 2) {
@@ -93,8 +90,8 @@ export async function getChangeLogJSON({
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags
-      .filter(tag => version.isVersion(tag.replace(regex, '')))
-      .find(tag => version.equals(tag.replace(regex, ''), release.version));
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
     if (tagName) {
       return tagName;
     }

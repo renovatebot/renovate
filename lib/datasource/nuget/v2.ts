@@ -50,7 +50,7 @@ export async function getReleases(
 
       const nextPkgUrlListLink = pkgVersionsListDoc
         .childrenNamed('link')
-        .find(node => node.attr.rel === 'next');
+        .find((node) => node.attr.rel === 'next');
 
       pkgUrlList = nextPkgUrlListLink ? nextPkgUrlListLink.attr.href : null;
     } while (pkgUrlList !== null);

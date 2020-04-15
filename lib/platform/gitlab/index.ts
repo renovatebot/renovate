@@ -350,8 +350,8 @@ export async function getBranchStatus(
   }
   let status: BranchStatus = BranchStatus.green; // default to green
   res
-    .filter(check => !check.allow_failure)
-    .forEach(check => {
+    .filter((check) => !check.allow_failure)
+    .forEach((check) => {
       if (status !== BranchStatus.red) {
         // if red, stay red
         let mappedStatus: BranchStatus =

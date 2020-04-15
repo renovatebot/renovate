@@ -52,10 +52,10 @@ class GitHubReporter extends BaseReporter {
         return;
       }
 
-      for (const suite of testResult.testResults.filter(s => !s.skipped)) {
+      for (const suite of testResult.testResults.filter((s) => !s.skipped)) {
         const file = getPath(suite);
         for (const test of suite.testResults.filter(
-          t => !ignoreStates.has(t.status)
+          (t) => !ignoreStates.has(t.status)
         )) {
           const message =
             stripAnsi(test.failureMessages?.join('\n ')) ||

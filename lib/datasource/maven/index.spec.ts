@@ -95,7 +95,7 @@ describe('datasource/maven', () => {
   });
 
   function generateReleases(versions) {
-    return versions.map(v => ({ version: v }));
+    return versions.map((v) => ({ version: v }));
   }
 
   describe('getReleases', () => {

@@ -116,7 +116,7 @@ export function addMetaData(
   }
   const extraBaseUrls = [];
   // istanbul ignore next
-  hostRules.hosts({ hostType: 'github' }).forEach(host => {
+  hostRules.hosts({ hostType: 'github' }).forEach((host) => {
     extraBaseUrls.push(host, `gist.${host}`);
   });
   extraBaseUrls.push('gitlab.com');

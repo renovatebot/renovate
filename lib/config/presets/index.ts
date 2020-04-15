@@ -79,7 +79,7 @@ export function parsePreset(input: string): ParsedPreset {
     params = str
       .slice(str.indexOf('(') + 1, -1)
       .split(',')
-      .map(elem => elem.trim());
+      .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
   if (str.startsWith(':')) {
@@ -148,7 +148,7 @@ export async function getPreset(
     'packagePatterns',
     'excludePackagePatterns',
   ];
-  if (presetKeys.every(key => packageListKeys.includes(key))) {
+  if (presetKeys.every((key) => packageListKeys.includes(key))) {
     delete presetConfig.description;
   }
   const { migratedConfig } = migration.migrateConfig(presetConfig);

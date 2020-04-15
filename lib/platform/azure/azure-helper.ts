@@ -118,7 +118,7 @@ export async function getAzureBranchObj(
 async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   const chunks: string[] = [];
   /* eslint-disable promise/avoid-new */
-  const p = await new Promise<string>(resolve => {
+  const p = await new Promise<string>((resolve) => {
     stream.on('data', (chunk: any) => {
       chunks.push(chunk.toString());
     });
@@ -266,16 +266,16 @@ export async function getMergeMethod(
     await (await azureApi.policyApi()).getPolicyConfigurations(project)
   )
     .filter(
-      p =>
-        p.settings.scope.some(s => s.repositoryId === repoId) &&
+      (p) =>
+        p.settings.scope.some((s) => s.repositoryId === repoId) &&
         p.type.id === mergePolicyGuid
     )
-    .map(p => p.settings)[0];
+    .map((p) => p.settings)[0];
 
   try {
     return Object.keys(policyConfigurations)
-      .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p);
+      .map((p) => GitPullRequestMergeStrategy[p.slice(5)])
+      .find((p) => p);
   } catch (err) {
     return GitPullRequestMergeStrategy.NoFastForward;
   }

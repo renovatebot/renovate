@@ -125,7 +125,7 @@ export async function mergeRenovateConfig(
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
-      .map(e => e.message)
+      .map((e) => e.message)
       .join(', ');
     throw error;
   }

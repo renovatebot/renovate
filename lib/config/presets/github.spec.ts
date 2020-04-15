@@ -71,7 +71,7 @@ describe('config/presets/github', () => {
     });
 
     it('uses default endpoint', async () => {
-      await github.getPreset('some/repo', 'default').catch(_ => {});
+      await github.getPreset('some/repo', 'default').catch((_) => {});
       expect(got.mock.calls[0][0]).toEqual(
         'https://api.github.com/repos/some/repo/contents/default.json'
       );
@@ -81,7 +81,7 @@ describe('config/presets/github', () => {
         .getPreset('some/repo', 'default', {
           endpoint: 'https://api.github.example.org',
         })
-        .catch(_ => {});
+        .catch((_) => {});
       expect(got.mock.calls[0][0]).toEqual(
         'https://api.github.example.org/repos/some/repo/contents/default.json'
       );

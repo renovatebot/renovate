@@ -54,7 +54,7 @@ describe('config/presets/gitlab', () => {
       expect(content).toEqual({ foo: 'bar' });
     });
     it('uses default endpoint', async () => {
-      await gitlab.getPreset('some/repo', 'default').catch(_ => {});
+      await gitlab.getPreset('some/repo', 'default').catch((_) => {});
       expect(glGot.mock.calls[0][0]).toEqual(
         'https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches'
       );
@@ -64,7 +64,7 @@ describe('config/presets/gitlab', () => {
         .getPreset('some/repo', 'default', {
           endpoint: 'https://gitlab.example.org/api/v4',
         })
-        .catch(_ => {});
+        .catch((_) => {});
       expect(glGot.mock.calls[0][0]).toEqual(
         'https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/branches'
       );

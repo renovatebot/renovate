@@ -13,7 +13,7 @@ import { getDefaultConfig } from '../../../datasource';
 
 // Return only rules that contain an updateType
 function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
-  return packageRules.filter(rule => is.nonEmptyArray(rule.updateTypes));
+  return packageRules.filter((rule) => is.nonEmptyArray(rule.updateTypes));
 }
 
 export async function flattenUpdates(
@@ -112,6 +112,6 @@ export async function flattenUpdates(
     }
   }
   return updates
-    .filter(update => update.enabled)
-    .map(update => filterConfig(update, 'branch'));
+    .filter((update) => update.enabled)
+    .map((update) => filterConfig(update, 'branch'));
 }

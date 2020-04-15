@@ -3,7 +3,7 @@ import { readdir, readFile } from 'fs-extra';
 describe('versioning metadata', () => {
   it('readme no markdown headers', async () => {
     const allVersioning = (await readdir('lib/versioning')).filter(
-      item => !item.includes('.')
+      (item) => !item.includes('.')
     );
     for (const versioning of allVersioning) {
       let readme: string;
@@ -22,7 +22,7 @@ describe('versioning metadata', () => {
   });
   it('contains mandatory fields', async () => {
     const allVersioning = (await readdir('lib/versioning')).filter(
-      item => !item.includes('.') && !item.startsWith('_')
+      (item) => !item.includes('.') && !item.startsWith('_')
     );
 
     for (const versioning of allVersioning) {
