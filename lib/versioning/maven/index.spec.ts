@@ -102,6 +102,7 @@ describe('versioning/maven/compare', () => {
     expect(compare('1.3-groovy-2.5', '1.3-RC1-groovy-2.5')).toEqual(1);
     expect(compare('1-xyz', '1-abc')).toEqual(1);
     expect(compare('Hoxton.SR1', 'Hoxton.RELEASE')).toEqual(1);
+    expect(compare('1.4.12', '1.4.12-java7')).toEqual(1);
   });
 
   const invalidRanges = [
@@ -304,6 +305,7 @@ describe('versioning/maven/index', () => {
     expect(isStable('Hoxton.RELEASE')).toBe(true);
     expect(isStable('Hoxton.SR')).toBe(true);
     expect(isStable('Hoxton.SR1')).toBe(true);
+    expect(isStable('1.4.12-java7')).toBe(false);
   });
   it('returns major version', () => {
     expect(getMajor('')).toBeNull();
