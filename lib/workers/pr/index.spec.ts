@@ -6,7 +6,7 @@ import { mocked } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { PrResult } from '../common';
-import { extractChangeLogJSON } from '../repository/extract';
+import { getChangeLogJSON } from './changelog';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
@@ -181,7 +181,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      await extractChangeLogJSON([config]);
+      config.logJSON = await getChangeLogJSON(config);
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = 'before 5am';
@@ -219,9 +219,9 @@ describe('workers/pr', () => {
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
-
-      await extractChangeLogJSON([config]);
-
+      for (const upgrade of config.upgrades) {
+        upgrade.logJSON = await getChangeLogJSON(upgrade);
+      }
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -235,7 +235,7 @@ describe('workers/pr', () => {
       config.schedule = 'before 5am';
       config.timezone = 'some timezone';
       config.rebaseWhen = 'behind-base-branch';
-      await extractChangeLogJSON([config]);
+      config.logJSON = await getChangeLogJSON(config);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -375,7 +375,7 @@ describe('workers/pr', () => {
       config.semanticCommitScope = null;
       config.automerge = true;
       config.schedule = 'before 5am';
-      await extractChangeLogJSON([config]);
+      config.logJSON = await getChangeLogJSON(config);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
@@ -390,7 +390,7 @@ describe('workers/pr', () => {
       config.semanticCommitScope = null;
       config.automerge = true;
       config.schedule = 'before 5am';
-      await extractChangeLogJSON([config]);
+      config.logJSON = await getChangeLogJSON(config);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -400,7 +400,7 @@ describe('workers/pr', () => {
       config.newValue = '1.2.0';
       config.automerge = true;
       config.schedule = 'before 5am';
-      await extractChangeLogJSON([config]);
+      config.logJSON = await getChangeLogJSON(config);
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
@@ -464,7 +464,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
       config.privateRepo = false;
-      await extractChangeLogJSON([config]);
+      config.logJSON = await getChangeLogJSON(config);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
