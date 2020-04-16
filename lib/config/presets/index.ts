@@ -5,6 +5,7 @@ import * as migration from '../migration';
 import * as github from './github';
 import * as npm from './npm';
 import * as gitlab from './gitlab';
+import * as local from './local';
 import { RenovateConfig } from '../common';
 import { mergeChildConfig } from '../utils';
 import { regEx } from '../../util/regex';
@@ -18,6 +19,7 @@ const presetSources = {
   github,
   npm,
   gitlab,
+  local,
 };
 
 export function replaceArgs(
@@ -61,6 +63,15 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('local>')) {
+    presetSource = 'local';
+    str = str.substring('local>'.length);
+  } else if (
+    !str.startsWith('@') &&
+    !str.startsWith(':') &&
+    str.includes('/')
+  ) {
+    presetSource = 'local';
   }
   str = str.replace(/^npm>/, '');
   presetSource = presetSource || 'npm';
@@ -101,12 +112,16 @@ export function parsePreset(input: string): ParsedPreset {
   return { presetSource, packageName, presetName, params };
 }
 
-export async function getPreset(preset: string): Promise<RenovateConfig> {
+export async function getPreset(
+  preset: string,
+  baseConfig?: RenovateConfig
+): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset(
     packageName,
-    presetName
+    presetName,
+    baseConfig
   );
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
@@ -142,6 +157,7 @@ export async function getPreset(preset: string): Promise<RenovateConfig> {
 
 export async function resolveConfigPresets(
   inputConfig: RenovateConfig,
+  baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<RenovateConfig> {
@@ -166,7 +182,7 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset);
+          fetchedPreset = await getPreset(preset, baseConfig);
         } catch (err) {
           logger.debug({ err }, 'Preset fetch error');
           // istanbul ignore if
@@ -194,6 +210,7 @@ export async function resolveConfigPresets(
         }
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
+          baseConfig,
           ignorePresets,
           existingPresets.concat([preset])
         );
@@ -225,6 +242,7 @@ export async function resolveConfigPresets(
           (config[key] as RenovateConfig[]).push(
             await resolveConfigPresets(
               element as RenovateConfig,
+              baseConfig,
               ignorePresets,
               existingPresets
             )
@@ -238,6 +256,7 @@ export async function resolveConfigPresets(
       logger.trace(`Resolving object "${key}"`);
       config[key] = await resolveConfigPresets(
         val as RenovateConfig,
+        baseConfig,
         ignorePresets,
         existingPresets
       );

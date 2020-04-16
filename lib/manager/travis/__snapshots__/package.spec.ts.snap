@@ -5,10 +5,7 @@ Array [
   Object {
     "isRange": true,
     "newMajor": 12,
-    "newValue": Array [
-      "10.0.1",
-      "12.3.0",
-    ],
+    "newValue": "10.0.1,12.3.0",
     "sourceUrl": "https://github.com/nodejs/node",
   },
 ]
@@ -19,10 +16,7 @@ Array [
   Object {
     "isRange": true,
     "newMajor": 12,
-    "newValue": Array [
-      "10",
-      "12",
-    ],
+    "newValue": "10,12",
     "sourceUrl": "https://github.com/nodejs/node",
   },
 ]

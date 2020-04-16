@@ -35,6 +35,7 @@ import { sanitize } from '../../util/sanitize';
 import { BranchStatus } from '../../types';
 import * as helper from './gitea-helper';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { ensureTrailingSlash } from '../../util/url';
 
 type GiteaRenovateConfig = {
   endpoint: string;
@@ -194,8 +195,7 @@ const platform: Platform = {
     }
 
     if (endpoint) {
-      // Ensure endpoint contains trailing slash
-      defaults.endpoint = endpoint.replace(/\/?$/, '/');
+      defaults.endpoint = ensureTrailingSlash(endpoint);
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }

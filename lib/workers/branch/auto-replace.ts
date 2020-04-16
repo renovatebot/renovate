@@ -2,19 +2,14 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
-import { regEx } from '../../util/regex';
+import { regEx, escapeRegExp } from '../../util/regex';
+import { compile } from '../../util/template';
 
 export async function confirmIfDepUpdated(
   upgrade,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    autoReplaceData,
-  } = upgrade;
+  const { manager, packageFile, newValue, newDigest, depIndex } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade;
   try {
@@ -23,7 +18,7 @@ export async function confirmIfDepUpdated(
       packageFile,
       upgrade
     );
-    newUpgrade = newExtract.deps[autoReplaceData.depIndex];
+    newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
@@ -60,10 +55,6 @@ export async function checkBranchDepsMatchBaseDeps(
   }
 }
 
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
-
 export async function doAutoReplace(
   upgrade,
   existingContent: string,
@@ -87,9 +78,9 @@ export async function doAutoReplace(
     newValue,
     currentDigest,
     newDigest,
-    autoReplaceData,
+    autoReplaceStringTemplate,
   } = upgrade;
-  const replaceString = autoReplaceData?.replaceString || currentValue;
+  const replaceString = upgrade.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
@@ -100,15 +91,23 @@ export async function doAutoReplace(
     return existingContent;
   }
   try {
-    let newString = replaceString.replace(
-      regEx(escapeRegExp(currentValue), 'g'),
-      newValue
-    );
-    if (currentDigest && newDigest) {
-      newString = newString.replace(
-        regEx(escapeRegExp(currentDigest), 'g'),
-        newDigest
-      );
+    let newString: string;
+    if (autoReplaceStringTemplate) {
+      newString = compile(autoReplaceStringTemplate, upgrade, false);
+    } else {
+      newString = replaceString;
+      if (currentValue) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentValue), 'g'),
+          newValue
+        );
+      }
+      if (currentDigest && newDigest) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentDigest), 'g'),
+          newDigest
+        );
+      }
     }
     logger.debug(`Starting search at index ${searchIndex}`);
     // Iterate through the rest of the file
