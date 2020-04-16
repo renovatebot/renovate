@@ -181,29 +181,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() lock file maintenance performs lockFileMaintenance 1`] = `
-Array [
-  Object {
-    "cmd": "bundle lock",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`bundler.updateArtifacts() lock file maintenance throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true 1`] = `
+exports[`bundler.updateArtifacts() performs lockFileMaintenance 1`] = `
 Array [
   Object {
     "cmd": "bundle lock",
@@ -231,6 +209,28 @@ exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 
 Array [
   Object {
     "cmd": "bundle lock --update foo bar",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true 1`] = `
+Array [
+  Object {
+    "cmd": "bundle lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

@@ -50,6 +50,7 @@ describe('bundler.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     resetPrefetchedImages();
+    global.repoCache = {};
     await setUtilConfig(config);
   });
   it('returns null by default', async () => {
@@ -261,51 +262,48 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
   });
-
-  describe('lock file maintenance', () => {
-    it('performs lockFileMaintenance', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.outputFile.mockResolvedValueOnce(null as never);
-      const execSnapshots = mockExecAll(exec);
-      platform.getRepoStatus.mockResolvedValueOnce({
-        modified: ['Gemfile.lock'],
-      } as Git.StatusResult);
-      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      expect(
-        await updateArtifacts({
-          packageFileName: 'Gemfile',
-          updatedDeps: [],
-          newPackageFileContent: '{}',
-          config: {
-            ...config,
-            isLockFileMaintenance: true,
-          },
-        })
-      ).not.toBeNull();
-      expect(execSnapshots).toMatchSnapshot();
-    });
-    it('throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true', async () => {
-      const execError = new Error();
-      (execError as any).stdout = ' foo was resolved to';
-      (execError as any).stderr = '';
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.outputFile.mockResolvedValueOnce(null as never);
-      const execSnapshots = mockExecAll(exec, execError);
-      platform.getRepoStatus.mockResolvedValueOnce({
-        modified: ['Gemfile.lock'],
-      } as Git.StatusResult);
-      await expect(
-        updateArtifacts({
-          packageFileName: 'Gemfile',
-          updatedDeps: [],
-          newPackageFileContent: '{}',
-          config: {
-            ...config,
-            isLockFileMaintenance: true,
-          },
-        })
-      ).rejects.toThrowError(BUNDLER_UNKNOWN_ERROR);
-      expect(execSnapshots).toMatchSnapshot();
-    });
+  it('throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true', async () => {
+    const execError = new Error();
+    (execError as any).stdout = ' foo was resolved to';
+    (execError as any).stderr = '';
+    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.outputFile.mockResolvedValueOnce(null as never);
+    const execSnapshots = mockExecAll(exec, execError);
+    platform.getRepoStatus.mockResolvedValueOnce({
+      modified: ['Gemfile.lock'],
+    } as Git.StatusResult);
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+        },
+      })
+    ).rejects.toThrowError(BUNDLER_UNKNOWN_ERROR);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('performs lockFileMaintenance', async () => {
+    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.outputFile.mockResolvedValueOnce(null as never);
+    const execSnapshots = mockExecAll(exec);
+    platform.getRepoStatus.mockResolvedValueOnce({
+      modified: ['Gemfile.lock'],
+    } as Git.StatusResult);
+    fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });
