@@ -9,6 +9,7 @@ import {
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import { getReleases } from '../../../datasource/docker';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 
 const prefetchedImages = new Set<string>();
 
@@ -159,6 +160,10 @@ export async function removeDanglingContainers(): Promise<void> {
       logger.debug('No dangling containers to remove');
     }
   } catch (err) {
+    // istanbul ignore if
+    if (err.errno === 'ENOMEM') {
+      throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
+    }
     logger.warn({ err }, 'Error removing dangling containers');
   }
 }
