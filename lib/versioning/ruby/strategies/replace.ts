@@ -1,4 +1,4 @@
-import { satisfies } from '@snyk/ruby-semver';
+import { satisfies } from '@renovatebot/ruby-semver';
 import bump from './bump';
 import { logger } from '../../../logger';
 

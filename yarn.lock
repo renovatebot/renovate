@@ -1163,6 +1163,11 @@
   dependencies:
     xregexp "4.2.0"
 
+"@renovatebot/ruby-semver@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.3.tgz#dfa43139d5a465dddec9e0e712d9d359bf7ea167"
+  integrity sha512-tGd5CMTCrFrmJhGxIhLP2Imv5bkzfZQY/6gfV+T6TOhMfca9hRBA7hj/xAexSDLAFN5QmEjGPK0SFusVUPPHIw==
+
 "@semantic-release/commit-analyzer@^8.0.0":
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/@semantic-release/commit-analyzer/-/commit-analyzer-8.0.1.tgz#5d2a37cd5a3312da0e3ac05b1ca348bf60b90bca"
@@ -1295,13 +1300,6 @@
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
-
-"@snyk/ruby-semver@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@snyk/ruby-semver/-/ruby-semver-2.1.0.tgz#d76cc02fc20860c224da2646fe9cc1bb0b0d1d15"
-  integrity sha512-u8ez8kWyqge+N+FxRDx/uPBmcHzY7BMfODvzEVeoTOeoD0CHPymEaVlkEKA8ZHtxzXjUzPIl2I8f2siZEzLjYg==
-  dependencies:
-    lodash "^4.17.14"
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
