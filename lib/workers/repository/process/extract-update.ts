@@ -15,9 +15,6 @@ export type ExtractResult = {
   packageFiles: Record<string, PackageFile[]>;
 };
 
-export type UpdateResult = {
-  res: WriteUpdateResult | undefined;
-};
 
 export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   logger.debug('extractAndUpdate()');
