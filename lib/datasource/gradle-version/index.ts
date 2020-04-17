@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
@@ -59,7 +58,7 @@ export async function getReleases({
               release.rcFor === '' && !release.version.includes('milestone')
           )
           .map((release) => ({
-            version: coerce(release.version).toString(),
+            version: release.version,
             downloadUrl: release.downloadUrl,
             checksumUrl: release.checksumUrl,
             releaseTimestamp: formatBuildTime(release.buildTime),
