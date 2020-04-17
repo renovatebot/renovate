@@ -3,13 +3,14 @@ import { resolve } from 'path';
 import Git from 'simple-git/promise';
 import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
-import { mocked, getName } from '../../../test/util';
+import { mocked, getName, bufferSerializer } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import { setUtilConfig } from '../../util';
 
 const platform = mocked(_platform);
 const config = {
   localDir: resolve(__dirname, './__fixtures__/testFiles'),
+  toVersion: '5.6.4',
 };
 
 jest.mock('../../util/got');
@@ -23,6 +24,8 @@ async function resetTestFiles() {
     config,
   });
 }
+
+expect.addSnapshotSerializer(bufferSerializer());
 
 describe(getName(__filename), () => {
   beforeEach(async () => {
@@ -52,7 +55,7 @@ describe(getName(__filename), () => {
           ),
           'utf8'
         ),
-        config,
+        config: { ...config, toVersion: '6.3' },
       });
 
       expect(res).toEqual(
