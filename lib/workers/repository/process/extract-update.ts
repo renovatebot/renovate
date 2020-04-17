@@ -36,7 +36,7 @@ export async function update(
   branches: BranchConfig[],
   branchList: string[],
   packageFiles: Record<string, PackageFile[]>
-): Promise<UpdateResult> {
+): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
   if (config.repoIsOnboarded) {
