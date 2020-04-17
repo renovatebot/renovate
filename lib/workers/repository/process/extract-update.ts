@@ -46,5 +46,5 @@ export async function update(
     res = await writeUpdates(config, packageFiles, branches);
   }
 
-  return { res };
+  return res;
 }
