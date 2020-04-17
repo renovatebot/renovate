@@ -1,5 +1,5 @@
 import { parse, join } from 'upath';
-import { outputFile, readFile } from 'fs-extra';
+import { outputFile, readFile, remove } from 'fs-extra';
 import { logger } from '../logger';
 import { RenovateConfig } from '../config/common';
 
@@ -46,4 +46,8 @@ export async function writeLocalFile(
 ): Promise<void> {
   const localFileName = join(localDir, fileName);
   await outputFile(localFileName, fileContent);
+}
+
+export async function deleteLocalFile(fileName: string): Promise<void> {
+  await remove(fileName);
 }
