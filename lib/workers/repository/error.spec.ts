@@ -24,6 +24,7 @@ import {
   REPOSITORY_TEMPORARY_ERROR,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
+  SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { RenovateConfig, getConfig } from '../../../test/util';
@@ -58,6 +59,7 @@ describe('workers/repository/error', () => {
       PLATFORM_RATE_LIMIT_EXCEEDED,
       MANAGER_LOCKFILE_ERROR,
       SYSTEM_INSUFFICIENT_DISK_SPACE,
+      SYSTEM_INSUFFICIENT_MEMORY,
       PLATFORM_FAILURE,
       REPOSITORY_NO_VULNERABILITY,
       REPOSITORY_CANNOT_FORK,
