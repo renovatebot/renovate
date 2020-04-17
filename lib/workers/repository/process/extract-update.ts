@@ -15,7 +15,6 @@ export type ExtractResult = {
   packageFiles: Record<string, PackageFile[]>;
 };
 
-
 export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   logger.debug('extractAndUpdate()');
   const packageFiles = await extractAllDependencies(config);
