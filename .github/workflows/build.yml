@@ -23,7 +23,6 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - run: df -h
       - name: github-cleanup
         uses: renovatebot/gh-action@v0
         continue-on-error: true
@@ -56,7 +55,6 @@ jobs:
       JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
-      - run: df -h
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v1
         with:
@@ -168,7 +166,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - run: df -h
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v1
         with:
@@ -233,8 +230,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - run: df -h
-
       - uses: actions/checkout@v2
 
       - run: ./.github/workflows/configure-docker.sh
@@ -243,8 +238,6 @@ jobs:
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           version: ${{ env.BUILDX_VERSION }}
-
-      - run: df -h
 
       - name: Build the Docker images
         run: |
