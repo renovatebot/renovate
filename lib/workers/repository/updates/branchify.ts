@@ -7,6 +7,7 @@ import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { BranchUpgradeConfig, BranchConfig } from '../../common';
+import { getChangeLogJSON } from '../../pr/changelog';
 
 /**
  * Clean git branch name
@@ -113,6 +114,9 @@ export async function branchifyUpgrades(
     addMeta({
       branch: branchName,
     });
+    for (const upgrade of branchUpgrades[branchName]) {
+      upgrade.logJSON = await getChangeLogJSON(upgrade);
+    }
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branches.push(branch);
