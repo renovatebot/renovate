@@ -234,14 +234,15 @@ jobs:
 
     steps:
       - run: df -h
+
+      - uses: actions/checkout@v2
+
       - run: ./.github/workflows/configure-docker.sh
 
       - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           version: ${{ env.BUILDX_VERSION }}
-
-      - uses: actions/checkout@v2
 
       - run: df -h
 
