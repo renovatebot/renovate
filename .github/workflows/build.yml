@@ -250,7 +250,7 @@ jobs:
             --driver docker-container \
             --buildkitd-flags '--root /mnt/buildkit' \
             --use
-          buildx inspect --bootstrap
+          docker buildx inspect --bootstrap
 
       - run: df -h
 
