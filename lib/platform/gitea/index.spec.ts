@@ -69,6 +69,7 @@ describe('platform/gitea', () => {
       base: { ref: 'some-base-ref' },
       head: {
         ref: 'some-head-ref',
+        label: 'some-head-ref',
         sha: 'some-head-sha',
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
@@ -85,6 +86,7 @@ describe('platform/gitea', () => {
       base: { ref: 'other-base-ref' },
       head: {
         ref: 'other-head-ref',
+        label: 'other-head-ref',
         sha: 'other-head-sha',
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
@@ -721,6 +723,7 @@ describe('platform/gitea', () => {
       state: 'open',
       head: {
         ref: 'pr-branch',
+        label: 'pr-branch',
         sha: mockCommitHash,
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },

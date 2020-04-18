@@ -80,7 +80,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
 
   if (
     !data.base?.ref ||
-    !data.head?.ref ||
+    !data.head?.label ||
     !data.head?.sha ||
     !data.head?.repo?.full_name
   ) {
@@ -97,7 +97,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     title: data.title,
     body: data.body,
     sha: data.head.sha,
-    branchName: data.head.ref,
+    branchName: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,

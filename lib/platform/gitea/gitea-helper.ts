@@ -29,6 +29,7 @@ export interface PR {
   };
   head?: {
     ref: string;
+    label: string;
     sha: string;
     repo?: Repo;
   };

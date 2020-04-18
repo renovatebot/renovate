@@ -77,6 +77,7 @@ describe('platform/gitea/gitea-helper', () => {
     base: { ref: mockRepo.default_branch },
     head: {
       ref: 'pull-req-13',
+      label: 'pull-req-13',
       sha: mockCommitHash,
       repo: mockRepo,
     },
