@@ -234,6 +234,7 @@ jobs:
 
     steps:
       - run: df -h
+      - run: ls -lah /mnt/
 
       - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
         uses: crazy-max/ghaction-docker-buildx@v1
@@ -241,6 +242,15 @@ jobs:
           version: ${{ env.BUILDX_VERSION }}
 
       - uses: actions/checkout@v2
+
+      - name: configure docker
+        run: |
+          docker buildx create \
+            --name renovate-builder \
+            --driver docker-container \
+            --buildkitd-flags '--root /mnt/buildkit' \
+            --use
+          buildx inspect --bootstrap
 
       - run: df -h
 
