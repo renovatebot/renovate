@@ -237,6 +237,8 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - run: df -h
+
       - name: Build the Docker images
         run: |
           docker buildx bake \
@@ -244,11 +246,14 @@ jobs:
             --file docker/bake.hcl \
             --set settings.output=type=docker \
             default
-          docker images
+
+      - run: df -h
+
+      - name: Images size
+        run: docker image ls | grep ${DOCKER_REPO}
 
       - name: Test the Docker images
         run: |
-          docker images
           docker run --rm -t ${DOCKER_REPO} --version
           docker run --rm -t ${DOCKER_REPO}:slim --version
 
@@ -256,9 +261,6 @@ jobs:
         run: docker history ${DOCKER_REPO}
       - name: Image history slim
         run: docker history ${DOCKER_REPO}:slim
-
-      - name: Images size
-        run: docker image ls | grep ${DOCKER_REPO}
 
   release:
     needs: [lint, test, test-docker]
