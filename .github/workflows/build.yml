@@ -230,12 +230,14 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - uses: actions/checkout@v2
+
+      - run: ./.github/workflows/configure-docker.sh
+
       - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           version: ${{ env.BUILDX_VERSION }}
-
-      - uses: actions/checkout@v2
 
       - name: Build the Docker images
         run: |
@@ -244,6 +246,11 @@ jobs:
             --file docker/bake.hcl \
             --set settings.output=type=docker \
             default
+
+      - run: df -h
+
+      - name: Images size
+        run: docker image ls | grep ${DOCKER_REPO}
 
       - name: Test the Docker images
         run: |
@@ -254,9 +261,6 @@ jobs:
         run: docker history ${DOCKER_REPO}
       - name: Image history slim
         run: docker history ${DOCKER_REPO}:slim
-
-      - name: Images size
-        run: docker image ls | grep ${DOCKER_REPO}
 
   release:
     needs: [lint, test, test-docker]
