@@ -2,7 +2,7 @@ ARG IMAGE=latest
 
 # Base image
 #============
-FROM renovate/yarn:1.22.4@sha256:6f559c0e98e931b0650e35418d385f13726244ec20b4dac6de3dfa808ad49319 AS base
+FROM renovate/yarn:1.22.4@sha256:0115b2988eeb4b691a829ab118b5195f842167c78dcca0462d11e05cfbf19ad6 AS base
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -68,7 +68,7 @@ ENV RENOVATE_BINARY_SOURCE=docker
 FROM final-base as latest
 
 RUN apt-get update && \
-    apt-get install -y gpg wget unzip xz-utils openssh-client bsdtar build-essential openjdk-11-jre-headless dirmngr && \
+    apt-get install -y gpg wget unzip xz-utils openssh-client bsdtar build-essential openjdk-8-jre-headless dirmngr && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -117,7 +117,7 @@ RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu bionic main" > /etc/apt
     rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-releases depName=composer/composer
-ENV COMPOSER_VERSION=1.10.1
+ENV COMPOSER_VERSION=1.10.5
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 

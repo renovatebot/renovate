@@ -62,8 +62,8 @@ function isStable(version: string): boolean {
 export const isValid = (input: string): boolean =>
   input
     .split(',')
-    .map(piece => vtrim(piece.trim()))
-    .every(range => {
+    .map((piece) => vtrim(piece.trim()))
+    .every((range) => {
       const { version, operator } = parseRange(range);
 
       return operator

@@ -142,7 +142,7 @@ function extractVersions(metadata: XmlDocument): string[] {
   if (!elements) {
     return [];
   }
-  return elements.map(el => el.val);
+  return elements.map((el) => el.val);
 }
 
 async function getVersionsFromMetadata(
@@ -255,7 +255,7 @@ export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repositories = registryUrls.map(repository =>
+  const repositories = registryUrls.map((repository) =>
     repository.replace(/\/?$/, '/')
   );
   const dependency = getDependencyParts(lookupName);
@@ -274,7 +274,7 @@ export async function getReleases({
         metadataVersions
       );
       const filteredVersions = availableVersions.filter(
-        version => !versions.includes(version)
+        (version) => !versions.includes(version)
       );
       versions.push(...filteredVersions);
 
@@ -307,6 +307,6 @@ export async function getReleases({
   return {
     ...dependency,
     ...dependencyInfo,
-    releases: versions.map(v => ({ version: v })),
+    releases: versions.map((v) => ({ version: v })),
   };
 }

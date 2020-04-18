@@ -41,7 +41,7 @@ export function getConfigDesc(
   logger.debug({ length: descriptionArr.length }, 'Found description array');
   let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
   desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
-  descriptionArr.forEach(d => {
+  descriptionArr.forEach((d) => {
     desc += `  - ${d}\n`;
   });
   desc += '\n';

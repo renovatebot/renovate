@@ -16,6 +16,37 @@ import { HostRule } from '../../types';
 
 export const id = 'docker';
 
+export const defaultConfig = {
+  managerBranchPrefix: 'docker-',
+  commitMessageTopic: '{{{depName}}} Docker tag',
+  major: { enabled: false },
+  commitMessageExtra:
+    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+  digest: {
+    branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
+    commitMessageExtra: 'to {{newDigestShort}}',
+    commitMessageTopic:
+      '{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
+    group: {
+      commitMessageTopic: '{{{groupName}}}',
+      commitMessageExtra: '',
+    },
+  },
+  pin: {
+    commitMessageExtra: '',
+    groupName: 'Docker digests',
+    group: {
+      commitMessageTopic: '{{{groupName}}}',
+      branchTopic: 'digests-pin',
+    },
+  },
+  group: {
+    commitMessageTopic: '{{{groupName}}} Docker tags',
+  },
+  autoReplaceStringTemplate:
+    '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+};
+
 const http = new Http(id);
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
@@ -29,6 +60,17 @@ export function getRegistryRepository(
   lookupName: string,
   registryUrls: string[]
 ): RegistryRepository {
+  if (is.nonEmptyArray(registryUrls)) {
+    const dockerRegistry = registryUrls[0]
+      .replace('https://', '')
+      .replace(/\/?$/, '/');
+    if (lookupName.startsWith(dockerRegistry)) {
+      return {
+        registry: dockerRegistry,
+        repository: lookupName.replace(dockerRegistry, ''),
+      };
+    }
+  }
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
@@ -68,7 +110,7 @@ function getECRAuthToken(
     config.secretAccessKey = opts.password;
   }
   const ecr = new AWS.ECR(config);
-  return new Promise<string>(resolve => {
+  return new Promise<string>((resolve) => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
         logger.trace({ err }, 'err');
@@ -583,7 +625,7 @@ export async function getReleases({
   if (!tags) {
     return null;
   }
-  const releases = tags.map(version => ({ version }));
+  const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
     dockerRegistry: registry,
     dockerRepository: repository,

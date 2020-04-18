@@ -8,7 +8,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.clojure:clojure",
       "depType": "dependencies",
-      "fileReplacePosition": 2747,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -21,7 +20,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.jclouds:jclouds",
       "depType": "dependencies",
-      "fileReplacePosition": 2794,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -34,7 +32,6 @@ Object {
       "datasource": "clojure",
       "depName": "net.sf.ehcache:ehcache",
       "depType": "dependencies",
-      "fileReplacePosition": 2862,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -47,7 +44,6 @@ Object {
       "datasource": "clojure",
       "depName": "log4j:log4j",
       "depType": "dependencies",
-      "fileReplacePosition": 2912,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -60,7 +56,6 @@ Object {
       "datasource": "clojure",
       "depName": "net.3scale:3scale-api",
       "depType": "dependencies",
-      "fileReplacePosition": 3223,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -73,7 +68,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.lwjgl.lwjgl:lwjgl",
       "depType": "dependencies",
-      "fileReplacePosition": 3272,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -86,7 +80,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.lwjgl.lwjgl:lwjgl-platform",
       "depType": "dependencies",
-      "fileReplacePosition": 3330,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -99,7 +92,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.clojure:clojure",
       "depType": "dependencies",
-      "fileReplacePosition": 11073,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -112,7 +104,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.clojure:clojure",
       "depType": "dependencies",
-      "fileReplacePosition": 11139,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -125,7 +116,6 @@ Object {
       "datasource": "clojure",
       "depName": "clj-stacktrace:clj-stacktrace",
       "depType": "dependencies",
-      "fileReplacePosition": 11287,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -138,7 +128,6 @@ Object {
       "datasource": "clojure",
       "depName": "clj-time:clj-time",
       "depType": "managed-dependencies",
-      "fileReplacePosition": 4705,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -151,7 +140,6 @@ Object {
       "datasource": "clojure",
       "depName": "me.raynes:fs",
       "depType": "managed-dependencies",
-      "fileReplacePosition": 4754,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -164,7 +152,6 @@ Object {
       "datasource": "clojure",
       "depName": "lein-pprint:lein-pprint",
       "depType": "plugins",
-      "fileReplacePosition": 5558,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -177,7 +164,6 @@ Object {
       "datasource": "clojure",
       "depName": "lein-assoc:lein-assoc",
       "depType": "plugins",
-      "fileReplacePosition": 5591,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -190,7 +176,6 @@ Object {
       "datasource": "clojure",
       "depName": "s3-wagon-private:s3-wagon-private",
       "depType": "plugins",
-      "fileReplacePosition": 5630,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -203,7 +188,6 @@ Object {
       "datasource": "clojure",
       "depName": "lein-foo:lein-foo",
       "depType": "plugins",
-      "fileReplacePosition": 5661,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -216,7 +200,6 @@ Object {
       "datasource": "clojure",
       "depName": "lein-bar:lein-bar",
       "depType": "plugins",
-      "fileReplacePosition": 5705,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -229,7 +212,6 @@ Object {
       "datasource": "clojure",
       "depName": "cider:cider-nrepl",
       "depType": "plugins",
-      "fileReplacePosition": 11489,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -242,7 +224,6 @@ Object {
       "datasource": "clojure",
       "depName": "com.theoryinpractise:clojure-maven-plugin",
       "depType": "pom-plugins",
-      "fileReplacePosition": 26925,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -255,7 +236,6 @@ Object {
       "datasource": "clojure",
       "depName": "org.apache.tomcat.maven:tomcat7-maven-plugin",
       "depType": "pom-plugins",
-      "fileReplacePosition": 27372,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
@@ -268,7 +248,6 @@ Object {
       "datasource": "clojure",
       "depName": "com.google.appengine:appengine-maven-plugin",
       "depType": "pom-plugins",
-      "fileReplacePosition": 27440,
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",

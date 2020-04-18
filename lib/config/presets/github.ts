@@ -2,12 +2,18 @@ import { logger } from '../../logger';
 import { Preset } from './common';
 import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { ensureTrailingSlash } from '../../util/url';
+import { RenovateConfig } from '../common';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
-const id = 'github';
-const http = new Http(id);
+const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
-  const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
+async function fetchJSONFile(
+  repo: string,
+  fileName: string,
+  endpoint: string
+): Promise<Preset> {
+  const url = `${endpoint}repos/${repo}/contents/${fileName}`;
   const opts: HttpOptions = {
     headers: {
       accept: global.appMode
@@ -23,7 +29,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
       throw err;
     }
     logger.debug(
-      { statusCode: err.statusCodef },
+      { statusCode: err.statusCode },
       `Failed to retrieve ${fileName} from repo`
     );
     throw new Error('dep not found');
@@ -39,11 +45,21 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
 
 export async function getPreset(
   pkgName: string,
-  presetName = 'default'
+  presetName = 'default',
+  baseConfig?: RenovateConfig
 ): Promise<Preset> {
+  const endpoint = ensureTrailingSlash(
+    (baseConfig?.platform === PLATFORM_TYPE_GITHUB
+      ? baseConfig?.endpoint
+      : null) ?? 'https://api.github.com/'
+  );
   if (presetName === 'default') {
     try {
-      const defaultJson = await fetchJSONFile(pkgName, 'default.json');
+      const defaultJson = await fetchJSONFile(
+        pkgName,
+        'default.json',
+        endpoint
+      );
       return defaultJson;
     } catch (err) {
       if (err.message === PLATFORM_FAILURE) {
@@ -51,10 +67,10 @@ export async function getPreset(
       }
       if (err.message === 'dep not found') {
         logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json');
+        return fetchJSONFile(pkgName, 'renovate.json', endpoint);
       }
       throw err;
     }
   }
-  return fetchJSONFile(pkgName, `${presetName}.json`);
+  return fetchJSONFile(pkgName, `${presetName}.json`, endpoint);
 }

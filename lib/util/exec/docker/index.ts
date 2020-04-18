@@ -9,6 +9,7 @@ import {
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import { getReleases } from '../../../datasource/docker';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 
 const prefetchedImages = new Set<string>();
 
@@ -49,13 +50,13 @@ function uniq<T = unknown>(
   eql = (x: T, y: T): boolean => x === y
 ): T[] {
   return array.filter((x, idx, arr) => {
-    return arr.findIndex(y => eql(x, y)) === idx;
+    return arr.findIndex((y) => eql(x, y)) === idx;
   });
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
-  const filtered: VolumesPair[] = expanded.filter(vol => vol !== null);
+  const filtered: VolumesPair[] = expanded.filter((vol) => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => {
     return `-v "${from}":"${to}"`;
@@ -63,7 +64,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
 }
 
 function prepareCommands(commands: Opt<string>[]): string[] {
-  return commands.filter(command => command && typeof command === 'string');
+  return commands.filter((command) => command && typeof command === 'string');
 }
 
 async function getDockerTag(
@@ -84,9 +85,9 @@ async function getDockerTag(
   );
   const imageReleases = await getReleases({ lookupName });
   if (imageReleases && imageReleases.releases) {
-    let versions = imageReleases.releases.map(release => release.version);
+    let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
-      version => isVersion(version) && matches(version, constraint)
+      (version) => isVersion(version) && matches(version, constraint)
     );
     versions = versions.sort(sortVersions);
     if (versions.length) {
@@ -114,44 +115,55 @@ function getContainerName(image: string): string {
 
 export async function removeDockerContainer(image): Promise<void> {
   const containerName = getContainerName(image);
+  let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(
-      `docker ps --filter name=${containerName} -aq | xargs --no-run-if-empty docker rm -f`,
-      { encoding: 'utf-8' }
-    );
-    if (res?.stdout?.trim().length) {
-      const containerId = res.stdout.trim();
-      logger.info(
-        { image, containerName, containerId },
-        'Finished Docker container removal'
-      );
+    const res = await rawExec(cmd, {
+      encoding: 'utf-8',
+    });
+    const containerId = res?.stdout?.trim() || '';
+    // istanbul ignore if
+    if (containerId.length) {
+      logger.debug({ containerId }, 'Removing container');
+      cmd = `docker rm -f ${containerId}`;
+      await rawExec(cmd, {
+        encoding: 'utf-8',
+      });
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
   } catch (err) /* istanbul ignore next */ {
     logger.trace({ err }, 'removeDockerContainer err');
-    logger.info({ image, containerName }, 'Could not remove Docker container');
+    logger.info(
+      { image, containerName, cmd },
+      'Could not remove Docker container'
+    );
   }
 }
 
 // istanbul ignore next
 export async function removeDanglingContainers(): Promise<void> {
   try {
-    const res = await rawExec(
-      `docker ps --filter label=renovate_child -aq | xargs --no-run-if-empty docker rm -f`,
-      { encoding: 'utf-8' }
-    );
+    const res = await rawExec(`docker ps --filter label=renovate_child -aq`, {
+      encoding: 'utf-8',
+    });
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
         .split('\n')
-        .map(container => container.trim())
+        .map((container) => container.trim())
         .filter(Boolean);
-      logger.debug({ containerIds }, 'Removed dangling child containers');
+      logger.debug({ containerIds }, 'Removing dangling child containers');
+      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
+        encoding: 'utf-8',
+      });
     } else {
-      logger.trace('No dangling containers to remove');
+      logger.debug('No dangling containers to remove');
     }
   } catch (err) {
+    // istanbul ignore if
+    if (err.errno === 'ENOMEM') {
+      throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
+    }
     logger.warn({ err }, 'Error removing dangling containers');
   }
 }
@@ -180,8 +192,8 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter(x => typeof x === 'string')
-        .map(e => `-e ${e}`)
+        .filter((x) => typeof x === 'string')
+        .map((e) => `-e ${e}`)
     );
   }
 

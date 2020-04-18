@@ -6,6 +6,7 @@ import { LANGUAGE_RUBY } from '../../constants/languages';
 import * as rubyVersioning from '../../versioning/ruby';
 
 const language = LANGUAGE_RUBY;
+export const supportsLockFileMaintenance = true;
 
 /*
  * Each of the below functions contain some explanations within their own files.

@@ -168,6 +168,10 @@ To host your preset config on GitLab:
 
 Note: Unlike npmjs-hosted presets, GitLab-hosted ones can contain only one config.
 
+## Local presets
+
+Renovate also supports local presets, i.e. presets that are hosted on the same platform as the target repository. This is especially helpful in self-hosted scenarios where public presets cannot be used. Local presets are only supported on GitHub and GitLab. Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`. Renovate will determine the current platform and look up the preset from there.
+
 ## Presets and Private Modules
 
 Using your own preset config along with private npm modules can present a chicken and egg problem. You want to configure the encrypted token just once, which means in the preset. But you also probably want the preset to be private too, so how can the other repos reference it?

@@ -13,6 +13,7 @@ import {
   GetPkgReleasesConfig,
 } from './common';
 import datasources from './api.generated';
+import { clone } from '../util/clone';
 
 export * from './common';
 
@@ -86,10 +87,12 @@ export async function getPkgReleases(
   }
   let res: ReleaseResult;
   try {
-    res = await getRawReleases({
-      ...config,
-      lookupName,
-    });
+    res = clone(
+      await getRawReleases({
+        ...config,
+        lookupName,
+      })
+    );
   } catch (e) /* istanbul ignore next */ {
     if (e instanceof DatasourceError) {
       e.datasource = config.datasource;
@@ -108,7 +111,7 @@ export async function getPkgReleases(
   }
   if (res.releases) {
     res.releases = res.releases
-      .filter(release => version.isVersion(release.version))
+      .filter((release) => version.isVersion(release.version))
       .sort(sortReleases);
   }
   return res;
@@ -128,4 +131,9 @@ export async function getDigest(
     { lookupName, registryUrls },
     value
   );
+}
+
+export async function getDefaultConfig(datasource: string): Promise<object> {
+  const loadedDatasource = await load(datasource);
+  return loadedDatasource?.defaultConfig || {};
 }

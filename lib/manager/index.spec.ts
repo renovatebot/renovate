@@ -24,9 +24,6 @@ describe('manager', () => {
       if (!module.defaultConfig) {
         return false;
       }
-      if (!module.updateDependency && !module.autoReplace) {
-        return false;
-      }
       if (!module.extractPackageFile && !module.extractAllPackageFiles) {
         return false;
       }

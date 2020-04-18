@@ -55,13 +55,13 @@ async function updateRubyGemsVersions(): Promise<void> {
       [pkg, versions] = split;
       pkg = copystr(pkg);
       packageReleases[pkg] = packageReleases[pkg] || [];
-      const lineVersions = versions.split(',').map(version => version.trim());
+      const lineVersions = versions.split(',').map((version) => version.trim());
       for (const lineVersion of lineVersions) {
         if (lineVersion.startsWith('-')) {
           const deletedVersion = lineVersion.slice(1);
           logger.trace({ pkg, deletedVersion }, 'Rubygems: Deleting version');
           packageReleases[pkg] = packageReleases[pkg].filter(
-            version => version !== deletedVersion
+            (version) => version !== deletedVersion
           );
         } else {
           packageReleases[pkg].push(copystr(lineVersion));
@@ -108,7 +108,7 @@ export async function getRubygemsOrgDependency(
   }
   const dep: ReleaseResult = {
     name: lookupName,
-    releases: packageReleases[lookupName].map(version => ({ version })),
+    releases: packageReleases[lookupName].map((version) => ({ version })),
   };
   return dep;
 }

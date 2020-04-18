@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { RangeStrategy, SkipReason } from '../types';
 import { ValidationMessage, GlobalConfig, UpdateType } from '../config/common';
-import { FileData } from '../platform/common';
+import { File } from '../platform/common';
 
 export type Result<T> = T | Promise<T>;
 
@@ -39,21 +39,17 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   compatibility?: Record<string, string>;
   cacheDir?: string;
+  composerIgnorePlatformReqs?: boolean;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
+
+  toVersion?: string;
 }
 
 export interface PackageUpdateConfig {
   currentValue?: string;
   rangeStrategy?: RangeStrategy;
   supportPolicy?: string[];
-}
-
-export interface PackageUpdateResult {
-  newValue: string[];
-  newMajor: string;
-  isRange: boolean;
-  sourceUrl: string;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -79,7 +75,6 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
-  autoReplace?: boolean;
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
   compatibility?: Record<string, string>;
@@ -130,9 +125,28 @@ export interface Package<T> extends ManagerData<T> {
   prettyDepType?: any;
 }
 
-export interface AutoReplaceData {
-  replaceString: string;
-  depIndex?: number;
+export interface LookupUpdate {
+  blockedByPin?: boolean;
+  branchName?: string;
+  commitMessageAction?: string;
+  displayFrom?: string;
+  displayTo?: string;
+  isLockfileUpdate?: boolean;
+  isPin?: boolean;
+  isRange?: boolean;
+  isRollback?: boolean;
+  isSingleVersion?: boolean;
+  fromVersion?: string;
+  newDigest?: string;
+  newDigestShort?: string;
+  newMajor?: number;
+  newMinor?: number;
+  newValue: string;
+  newVersion?: string;
+  semanticCommitType?: string;
+  toVersion?: string;
+  updateType?: UpdateType;
+  sourceUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -146,17 +160,16 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   displayTo?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  moduleName?: string;
   propSource?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
-  source?: string;
   sourceLine?: number;
   toVersion?: string;
-  updates?: PackageUpdateResult[];
+  updates?: LookupUpdate[];
   versionLine?: number;
-  autoReplaceData?: AutoReplaceData;
+  replaceString?: string;
+  depIndex?: number;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -190,7 +203,7 @@ export interface ArtifactError {
 
 export interface UpdateArtifactsResult {
   artifactError?: ArtifactError;
-  file?: FileData;
+  file?: File;
 }
 
 export interface UpdateArtifact {
@@ -207,7 +220,6 @@ export interface UpdateDependencyConfig {
 
 export interface ManagerApi {
   defaultConfig: object;
-  autoReplace?: boolean;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
@@ -222,9 +234,7 @@ export interface ManagerApi {
     config?: ExtractConfig
   ): Result<PackageFile | null>;
 
-  getPackageUpdates?(
-    config: PackageUpdateConfig
-  ): Result<PackageUpdateResult[]>;
+  getPackageUpdates?(config: PackageUpdateConfig): Result<LookupUpdate[]>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

@@ -1,7 +1,6 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['buildkite\\.ya?ml', '\\.buildkite/.+\\.ya?ml$'],

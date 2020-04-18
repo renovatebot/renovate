@@ -16,7 +16,7 @@ function replaceUrl(
 ): string | null {
   let i = idx;
   i += 'url'.length;
-  i = skip(i, content, c => isSpace(c));
+  i = skip(i, content, (c) => isSpace(c));
   const chr = content[i];
   if (chr !== '"' && chr !== "'") {
     return null;
@@ -79,7 +79,7 @@ function replaceSha256(
 ): string | null {
   let i = idx;
   i += 'sha256'.length;
-  i = skip(i, content, c => isSpace(c));
+  i = skip(i, content, (c) => isSpace(c));
   const chr = content[i];
   if (chr !== '"' && chr !== "'") {
     return null;

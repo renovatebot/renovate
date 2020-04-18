@@ -22,8 +22,8 @@ function compatibleVersions(
   if (!(compatibility && compatibility.python)) {
     return versions;
   }
-  return versions.filter(version =>
-    releases[version].some(release => {
+  return versions.filter((version) =>
+    releases[version].some((release) => {
       if (!release.requires_python) {
         return true;
       }
@@ -71,7 +71,7 @@ async function getDependency(
     dependency.releases = [];
     if (dep.releases) {
       const versions = compatibleVersions(dep.releases, compatibility);
-      dependency.releases = versions.map(version => ({
+      dependency.releases = versions.map((version) => ({
         version,
         releaseTimestamp: (dep.releases[version][0] || {}).upload_time,
       }));
@@ -140,7 +140,7 @@ async function getSimpleDependency(
     }
     dependency.releases = [];
     if (versions && versions.size > 0) {
-      dependency.releases = [...versions].map(version => ({
+      dependency.releases = [...versions].map((version) => ({
         version,
       }));
     }

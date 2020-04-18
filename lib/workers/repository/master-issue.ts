@@ -13,7 +13,7 @@ function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map(upgrade => '`' + upgrade.depName + '`')),
+    ...new Set(branch.upgrades.map((upgrade) => '`' + upgrade.depName + '`')),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -29,7 +29,7 @@ export async function ensureMasterIssue(
     !(
       config.masterIssue ||
       branches.some(
-        branch => branch.masterIssueApproval || branch.masterIssuePrApproval
+        (branch) => branch.masterIssueApproval || branch.masterIssuePrApproval
       )
     )
   ) {
@@ -38,7 +38,7 @@ export async function ensureMasterIssue(
   logger.debug('Ensuring master issue');
   if (
     !branches.length ||
-    branches.every(branch => branch.res === 'automerged')
+    branches.every((branch) => branch.res === 'automerged')
   ) {
     if (config.masterIssueAutoclose) {
       logger.debug('Closing master issue');
@@ -66,7 +66,7 @@ export async function ensureMasterIssue(
   }
   let issueBody = `This [master issue](https://renovatebot.com/blog/master-issue) contains a list of Renovate updates and their statuses.\n\n`;
   const pendingApprovals = branches.filter(
-    branch => branch.res === 'needs-approval'
+    (branch) => branch.res === 'needs-approval'
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -77,7 +77,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    branch => branch.res === 'not-scheduled'
+    (branch) => branch.res === 'not-scheduled'
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -89,7 +89,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const rateLimited = branches.filter(
-    branch => branch.res && branch.res.endsWith('pr-hourly-limit-reached')
+    (branch) => branch.res && branch.res.endsWith('pr-hourly-limit-reached')
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -101,7 +101,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    branch => branch.res && branch.res.endsWith('error')
+    (branch) => branch.res && branch.res.endsWith('error')
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
@@ -113,7 +113,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    branch => branch.res === 'needs-pr-approval'
+    (branch) => branch.res === 'needs-pr-approval'
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -124,7 +124,7 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const prEdited = branches.filter(branch => branch.res === 'pr-edited');
+  const prEdited = branches.filter((branch) => branch.res === 'pr-edited');
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.\n\n`;
@@ -134,7 +134,7 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const prPending = branches.filter(branch => branch.res === 'pending');
+  const prPending = branches.filter((branch) => branch.res === 'pending');
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
     issueBody += `These updates await pending status checks. To force their creation now, check the box below.\n\n`;
@@ -154,7 +154,9 @@ export async function ensureMasterIssue(
     'automerged',
     'pr-edited',
   ];
-  const inProgress = branches.filter(branch => !otherRes.includes(branch.res));
+  const inProgress = branches.filter(
+    (branch) => !otherRes.includes(branch.res)
+  );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
@@ -173,7 +175,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    branch => branch.res && branch.res.endsWith('already-existed')
+    (branch) => branch.res && branch.res.endsWith('already-existed')
   );
   if (alreadyExisted.length) {
     issueBody += '## Closed/Ignored\n\n';

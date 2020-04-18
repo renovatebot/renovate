@@ -23,8 +23,8 @@ const whitespacePropertiesFile = readFileSync(
 const testUpgrades = {
   5: {
     data: {
-      toVersion: '5.0.0',
-      version: '5.0.0',
+      toVersion: '5.0',
+      version: '5.0',
       managerData: {
         gradleWrapperType: 'all',
         lineNumber: 5,

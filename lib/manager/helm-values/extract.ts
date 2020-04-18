@@ -21,7 +21,7 @@ function findDependencies(
     return packageDependencies;
   }
 
-  Object.keys(parsedContent).forEach(key => {
+  Object.keys(parsedContent).forEach((key) => {
     if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
       const currentItem = parsedContent[key];
 

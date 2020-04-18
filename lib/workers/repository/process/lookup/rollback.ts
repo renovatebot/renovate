@@ -1,11 +1,11 @@
 import { logger } from '../../../../logger';
 import * as allVersioning from '../../../../versioning';
-import { LookupUpdate } from './common';
+import { LookupUpdate } from '../../../../manager/common';
 
 export interface RollbackConfig {
   currentValue?: string;
   depName?: string;
-  packageFile: string;
+  packageFile?: string;
   versioning: string;
 }
 
@@ -23,7 +23,7 @@ export function getRollbackUpdate(
     );
     return null;
   }
-  const lessThanVersions = versions.filter(v =>
+  const lessThanVersions = versions.filter((v) =>
     version.isLessThanRange(v, currentValue)
   );
   // istanbul ignore if

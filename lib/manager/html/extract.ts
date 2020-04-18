@@ -17,6 +17,7 @@ export function extractDep(tag: string): PackageDependency | null {
     depName,
     lookupName: `${depName}/${asset}`,
     currentValue,
+    replaceString: tag,
   };
   const integrityMatch = integrityRegex.exec(tag);
   if (integrityMatch) {
@@ -37,12 +38,7 @@ export function extractPackageFile(content: string): PackageFile {
     match = regex.exec(rest);
     const dep = extractDep(replaceString);
     if (dep) {
-      deps.push({
-        ...dep,
-        autoReplaceData: {
-          replaceString,
-        },
-      });
+      deps.push(dep);
     }
   }
   if (!deps.length) {

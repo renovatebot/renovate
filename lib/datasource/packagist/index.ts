@@ -137,7 +137,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
     dep.releases = [];
     return dep;
   }
-  dep.releases = Object.keys(versions).map(version => {
+  dep.releases = Object.keys(versions).map((version) => {
     const release = versions[version];
     dep.homepage = release.homepage || dep.homepage;
     if (release.source && release.source.url) {
@@ -179,7 +179,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const { packages, providersUrl, files, includesFiles } = registryMeta;
   const providerPackages: Record<string, string> = {};
   if (files) {
-    const queue = files.map(file => (): Promise<PackagistFile> =>
+    const queue = files.map((file) => (): Promise<PackagistFile> =>
       getPackagistFile(regUrl, file)
     );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
