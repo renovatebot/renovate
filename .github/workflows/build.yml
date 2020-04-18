@@ -244,9 +244,11 @@ jobs:
             --file docker/bake.hcl \
             --set settings.output=type=docker \
             default
+          docker images
 
       - name: Test the Docker images
         run: |
+          docker images
           docker run --rm -t ${DOCKER_REPO} --version
           docker run --rm -t ${DOCKER_REPO}:slim --version
 
