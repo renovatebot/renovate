@@ -66,10 +66,9 @@ describe('platform/gitea', () => {
       created_at: '2015-03-22T20:36:16Z',
       closed_at: null,
       mergeable: true,
-      base: { ref: 'some-base-ref' },
+      base: { ref: 'some-base-branch' },
       head: {
-        ref: 'some-head-ref',
-        label: 'some-head-ref',
+        label: 'some-head-branch',
         sha: 'some-head-sha',
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
@@ -83,10 +82,9 @@ describe('platform/gitea', () => {
       created_at: '2011-08-18T22:30:38Z',
       closed_at: '2016-01-09T10:03:21Z',
       mergeable: true,
-      base: { ref: 'other-base-ref' },
+      base: { ref: 'other-base-branch' },
       head: {
-        ref: 'other-head-ref',
-        label: 'other-head-ref',
+        label: 'other-head-branch',
         sha: 'other-head-sha',
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
@@ -651,8 +649,8 @@ describe('platform/gitea', () => {
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
 
-      const res = await gitea.findPr({ branchName: mockPR.head.ref });
-      expect(res).toHaveProperty('branchName', mockPR.head.ref);
+      const res = await gitea.findPr({ branchName: mockPR.head.label });
+      expect(res).toHaveProperty('branchName', mockPR.head.label);
     });
 
     it('should find pull request with title', async () => {
@@ -661,10 +659,10 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       const res = await gitea.findPr({
-        branchName: mockPR.head.ref,
+        branchName: mockPR.head.label,
         prTitle: mockPR.title,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.ref);
+      expect(res).toHaveProperty('branchName', mockPR.head.label);
       expect(res).toHaveProperty('title', mockPR.title);
     });
 
@@ -674,10 +672,10 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       const res = await gitea.findPr({
-        branchName: mockPR.head.ref,
+        branchName: mockPR.head.label,
         state: mockPR.state,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.ref);
+      expect(res).toHaveProperty('branchName', mockPR.head.label);
       expect(res).toHaveProperty('state', mockPR.state);
     });
 
@@ -688,7 +686,7 @@ describe('platform/gitea', () => {
 
       expect(
         await gitea.findPr({
-          branchName: mockPR.head.ref,
+          branchName: mockPR.head.label,
           state: `!${mockPR.state}` as ght.PRState,
         })
       ).toBeNull();
@@ -700,11 +698,11 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       const res = await gitea.findPr({
-        branchName: mockPR.head.ref,
+        branchName: mockPR.head.label,
         prTitle: mockPR.title,
         state: mockPR.state,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.ref);
+      expect(res).toHaveProperty('branchName', mockPR.head.label);
       expect(res).toHaveProperty('title', mockPR.title);
       expect(res).toHaveProperty('state', mockPR.state);
     });
@@ -722,7 +720,6 @@ describe('platform/gitea', () => {
       number: 42,
       state: 'open',
       head: {
-        ref: 'pr-branch',
         label: 'pr-branch',
         sha: mockCommitHash,
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
@@ -747,7 +744,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.ref,
+        branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
       });
@@ -758,7 +755,7 @@ describe('platform/gitea', () => {
       expect(helper.createPR).toHaveBeenCalledTimes(1);
       expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
         base: 'devel',
-        head: mockNewPR.head.ref,
+        head: mockNewPR.head.label,
         title: mockNewPR.title,
         body: mockNewPR.body,
         labels: [],
@@ -771,7 +768,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.ref,
+        branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
         useDefaultBranch: true,
@@ -783,7 +780,7 @@ describe('platform/gitea', () => {
       expect(helper.createPR).toHaveBeenCalledTimes(1);
       expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
         base: mockNewPR.base.ref,
-        head: mockNewPR.head.ref,
+        head: mockNewPR.head.label,
         title: mockNewPR.title,
         body: mockNewPR.body,
         labels: [],
@@ -796,7 +793,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       await gitea.createPr({
-        branchName: mockNewPR.head.ref,
+        branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
         labels: mockLabels.map((l) => l.name),
@@ -805,7 +802,7 @@ describe('platform/gitea', () => {
       expect(helper.createPR).toHaveBeenCalledTimes(1);
       expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
         base: mockNewPR.base.ref,
-        head: mockNewPR.head.ref,
+        head: mockNewPR.head.label,
         title: mockNewPR.title,
         body: mockNewPR.body,
         labels: mockLabels.map((l) => l.id),
@@ -819,7 +816,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getPrList();
       await gitea.createPr({
-        branchName: mockNewPR.head.ref,
+        branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
         useDefaultBranch: true,
@@ -836,7 +833,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.ref,
+        branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
         useDefaultBranch: true,
@@ -851,7 +848,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.ref,
+        branchName: mockNewPR.head.label,
         prTitle: 'new-title',
         prBody: 'new-body',
         useDefaultBranch: true,
@@ -872,7 +869,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await expect(
         gitea.createPr({
-          branchName: mockNewPR.head.ref,
+          branchName: mockNewPR.head.label,
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
         })
@@ -1341,7 +1338,7 @@ index 0000000..2173594
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
 
-      expect(await gitea.getBranchPr(mockPR.head.ref)).toHaveProperty(
+      expect(await gitea.getBranchPr(mockPR.head.label)).toHaveProperty(
         'number',
         mockPR.number
       );
@@ -1375,7 +1372,7 @@ index 0000000..2173594
       const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
-      await gitea.deleteBranch(mockPR.head.ref, true);
+      await gitea.deleteBranch(mockPR.head.label, true);
 
       expect(helper.closePR).toHaveBeenCalledTimes(1);
       expect(helper.closePR).toHaveBeenCalledWith(
@@ -1383,7 +1380,7 @@ index 0000000..2173594
         mockPR.number
       );
       expect(gsmDeleteBranch).toHaveBeenCalledTimes(1);
-      expect(gsmDeleteBranch).toHaveBeenCalledWith(mockPR.head.ref);
+      expect(gsmDeleteBranch).toHaveBeenCalledWith(mockPR.head.label);
     });
 
     it('should skip closing pull request if missing', async () => {

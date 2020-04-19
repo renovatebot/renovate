@@ -76,7 +76,6 @@ describe('platform/gitea/gitea-helper', () => {
     diff_url: `https://gitea.renovatebot.com/${mockRepo.full_name}/pulls/13.diff`,
     base: { ref: mockRepo.default_branch },
     head: {
-      ref: 'pull-req-13',
       label: 'pull-req-13',
       sha: mockCommitHash,
       repo: mockRepo,
@@ -362,7 +361,7 @@ describe('platform/gitea/gitea-helper', () => {
             title: mockPR.title,
             body: mockPR.body,
             base: mockPR.base.ref,
-            head: mockPR.head.ref,
+            head: mockPR.head.label,
             assignees: [mockUser.username],
             labels: [mockLabel.id],
           },
@@ -375,7 +374,7 @@ describe('platform/gitea/gitea-helper', () => {
         title: mockPR.title,
         body: mockPR.body,
         base: mockPR.base.ref,
-        head: mockPR.head.ref,
+        head: mockPR.head.label,
         assignees: [mockUser.username],
         labels: [mockLabel.id],
       });
