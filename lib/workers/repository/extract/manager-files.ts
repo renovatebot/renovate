@@ -12,6 +12,7 @@ import {
   getMatchingFiles,
 } from './file-match';
 import { PackageFile } from '../../../manager/common';
+import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;
@@ -52,7 +53,7 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   }
   const packageFiles = [];
   for (const packageFile of matchedFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const res = await extractPackageFile(
         manager,
