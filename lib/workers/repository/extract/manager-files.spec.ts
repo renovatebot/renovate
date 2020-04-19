@@ -47,7 +47,9 @@ describe('workers/repository/extract/manager-files', () => {
     it('returns files with extractAllPackageFiles', async () => {
       const managerConfig = { manager: 'npm', enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
-      platform.getFile.mockResolvedValue('{}');
+      platform.getFile.mockResolvedValueOnce(
+        '{"dependencies":{"chalk":"2.0.0"}}'
+      );
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toMatchSnapshot();
     });
