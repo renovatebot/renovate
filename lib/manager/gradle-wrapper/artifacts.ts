@@ -28,7 +28,9 @@ function getDistributionUrl(newPackageFileContent: string): string {
     .split('\n')
     .find((line) => line.startsWith('distributionUrl='));
   if (distributionUrlLine) {
-    return distributionUrlLine.replace('distributionUrl=', '');
+    return distributionUrlLine
+      .replace('distributionUrl=', '')
+      .replace('https\\:', 'https:');
   }
   return null;
 }
