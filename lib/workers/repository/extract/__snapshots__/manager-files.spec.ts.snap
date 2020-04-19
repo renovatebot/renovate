@@ -8,6 +8,9 @@ Array [
     "lernaClient": "yarn",
     "lernaDir": ".",
     "lernaPackages": undefined,
+    "managerPackageFileList": Array [
+      "package.json",
+    ],
     "npmLock": "package-lock.json",
     "npmrc": "{}",
     "packageFile": "package.json",
