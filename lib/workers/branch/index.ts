@@ -322,9 +322,9 @@ export async function processBranch(
 
     if (
       /* Only run post-upgrade tasks if there are changes to package files... */
-      ((config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
+      (config.updatedPackageFiles?.length > 0 ||
         /* ... or changes to artifacts */
-        (config.updatedArtifacts && config.updatedArtifacts.length > 0)) &&
+        config.updatedArtifacts?.length > 0) &&
       global.trustLevel === 'high' &&
       is.nonEmptyArray(config.allowedPostUpgradeCommands)
     ) {
