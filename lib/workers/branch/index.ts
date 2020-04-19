@@ -2,7 +2,6 @@ import { DateTime } from 'luxon';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { join } from 'path';
-import fs from 'fs-extra';
 import { concat } from 'lodash';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
@@ -41,7 +40,7 @@ import {
 import { BranchStatus } from '../../types';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -352,7 +351,7 @@ export async function processBranch(
             } else {
               contents = file.contents;
             }
-            await fs.outputFile(join(config.localDir, file.name), contents);
+            await writeLocalFile(join(config.localDir, file.name), contents);
           }
         }
 
