@@ -622,6 +622,20 @@ describe('platform/gitea/gitea-helper', () => {
     });
   });
 
+  describe('getOrgLabels', () => {
+    it('should call /api/v1/orgs/[org]/labels endpoint', async () => {
+      mockAPI<ght.Label[]>(
+        {
+          urlPattern: `/api/v1/orgs/${mockRepo.owner.username}/labels`,
+        },
+        [mockLabel, otherMockLabel]
+      );
+
+      const res = await helper.getOrgLabels(mockRepo.owner.username);
+      expect(res).toEqual([mockLabel, otherMockLabel]);
+    });
+  });
+
   describe('unassignLabel', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint', async () => {
       mockAPI({

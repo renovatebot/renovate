@@ -399,6 +399,16 @@ export async function getRepoLabels(
   return res.body;
 }
 
+export async function getOrgLabels(
+  orgName: string,
+  options?: GiteaGotOptions
+): Promise<Label[]> {
+  const url = `orgs/${orgName}/labels`;
+  const res: GotResponse<Label[]> = await api.get(url, options);
+
+  return res.body;
+}
+
 export async function unassignLabel(
   repoPath: string,
   issue: number,
