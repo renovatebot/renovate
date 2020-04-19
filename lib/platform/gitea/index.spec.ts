@@ -1272,21 +1272,6 @@ index 0000000..2173594
       expect(helper.updateComment).not.toHaveBeenCalled();
     });
 
-    it('should skip comments with topic "Renovate Ignore Notification"', async () => {
-      helper.getComments.mockResolvedValueOnce(mockComments);
-
-      await initFakeRepo();
-      const res = await gitea.ensureComment({
-        number: 1,
-        topic: 'Renovate Ignore Notification',
-        content: 'this-should-be-ignored-as-a-workaround',
-      });
-
-      expect(res).toEqual(false);
-      expect(helper.createComment).not.toHaveBeenCalled();
-      expect(helper.updateComment).not.toHaveBeenCalled();
-    });
-
     it('should gracefully fail with warning', async () => {
       helper.getComments.mockRejectedValueOnce(new Error());
       await initFakeRepo();

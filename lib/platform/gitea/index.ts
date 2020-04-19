@@ -749,13 +749,6 @@ const platform: Platform = {
     topic,
     content,
   }: EnsureCommentConfig): Promise<boolean> {
-    if (topic === 'Renovate Ignore Notification') {
-      logger.debug(
-        `Skipping ensureComment(${topic}) as ignoring PRs is unsupported on Gitea.`
-      );
-      return false;
-    }
-
     try {
       let body = sanitize(content);
       const commentList = await helper.getComments(config.repository, issue);
@@ -860,16 +853,7 @@ const platform: Platform = {
   },
 
   getPrBody(prBody: string): string {
-    // Gitea does not preserve the branch name once the head branch gets deleted, so ignoring a PR by simply closing it
-    // results in an endless loop of Renovate creating the PR over and over again. This is not pretty, but can not be
-    // avoided without storing that information somewhere else, so at least warn the user about it.
-    return smartTruncate(
-      prBody.replace(
-        /:no_bell: \*\*Ignore\*\*: Close this PR and you won't be reminded about (this update|these updates) again./,
-        `:ghost: **Immortal**: This PR will be recreated if closed unmerged, as Gitea does not support ignoring PRs.`
-      ),
-      1000000
-    );
+    return smartTruncate(prBody, 1000000);
   },
 
   isBranchStale(branchName: string): Promise<boolean> {
