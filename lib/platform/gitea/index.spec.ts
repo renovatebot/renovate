@@ -587,8 +587,8 @@ describe('platform/gitea', () => {
   });
 
   describe('getPr', () => {
-    it('should return enriched pull request which exists', async () => {
-      const mockPR = mockPRs[1];
+    it('should return enriched pull request which exists if open', async () => {
+      const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       helper.getBranch.mockResolvedValueOnce(
         partial<ght.Branch>({

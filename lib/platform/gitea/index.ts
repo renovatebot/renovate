@@ -473,11 +473,13 @@ const platform: Platform = {
     }
 
     // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.isStale === undefined) {
-      pr.isStale = await platform.isBranchStale(pr.branchName);
-    }
-    if (pr.isModified === undefined) {
-      pr.isModified = await isPRModified(config.repository, pr.branchName);
+    if (pr.state !== 'closed') {
+      if (pr.isStale === undefined) {
+        pr.isStale = await platform.isBranchStale(pr.branchName);
+      }
+      if (pr.isModified === undefined) {
+        pr.isModified = await isPRModified(config.repository, pr.branchName);
+      }
     }
 
     return pr;
