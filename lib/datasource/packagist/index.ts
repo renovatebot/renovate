@@ -4,17 +4,17 @@ import URL from 'url';
 import delay from 'delay';
 import pAll from 'p-all';
 import { logger } from '../../logger';
-
-import got, { GotJSONOptions } from '../../util/got';
+import { Http, HttpOptions } from '../../util/http';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
 
-function getHostOpts(url: string): GotJSONOptions {
-  const opts: GotJSONOptions = {
-    json: true,
-  };
+const http = new Http(id);
+
+// We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
+function getHostOpts(url: string): HttpOptions {
+  const opts: HttpOptions = {};
   const { username, password } = hostRules.find({
     hostType: id,
     url,
@@ -47,7 +47,7 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
   try {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
-    const res: PackageMeta = (await got(url, opts)).body;
+    const res = (await http.getJson<PackageMeta>(url, opts)).body;
     const meta: RegistryMeta = {};
     meta.packages = res.packages;
     if (res.includes) {
@@ -107,7 +107,8 @@ async function getPackagistFile(
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
   if (opts.auth || (opts.headers && opts.headers.authorization)) {
-    return (await got(regUrl + '/' + fileName, opts)).body;
+    return (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
+      .body;
   }
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
@@ -117,7 +118,8 @@ async function getPackagistFile(
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
   }
-  const res = (await got(regUrl + '/' + fileName, opts)).body;
+  const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
+    .body;
   const cacheMinutes = 1440; // 1 day
   await renovateCache.set(
     cacheNamespace,
@@ -135,7 +137,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
     dep.releases = [];
     return dep;
   }
-  dep.releases = Object.keys(versions).map(version => {
+  dep.releases = Object.keys(versions).map((version) => {
     const release = versions[version];
     dep.homepage = release.homepage || dep.homepage;
     if (release.source && release.source.url) {
@@ -177,7 +179,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const { packages, providersUrl, files, includesFiles } = registryMeta;
   const providerPackages: Record<string, string> = {};
   if (files) {
-    const queue = files.map(file => (): Promise<PackagistFile> =>
+    const queue = files.map((file) => (): Promise<PackagistFile> =>
       getPackagistFile(regUrl, file)
     );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
@@ -223,12 +225,8 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
-  const res = (
-    await got(pkgUrl, {
-      json: true,
-      retry: 5,
-    })
-  ).body.packages[name];
+  // TODO: fix types
+  const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
     dep = extractDepReleases(res);
     dep.name = name;
@@ -276,7 +274,10 @@ async function packageLookup(
         .replace('%hash%', providerPackages[name])
     );
     const opts = getHostOpts(regUrl);
-    const versions = (await got(pkgUrl, opts)).body.packages[name];
+    // TODO: fix types
+    const versions = (await http.getJson<any>(pkgUrl, opts)).body.packages[
+      name
+    ];
     const dep = extractDepReleases(versions);
     dep.name = name;
     logger.trace({ dep }, 'dep');
@@ -305,11 +306,11 @@ async function packageLookup(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult> {
-  logger.trace(`getPkgReleases(${lookupName})`);
+  logger.trace(`getReleases(${lookupName})`);
 
   let res: ReleaseResult;
   const registries = is.nonEmptyArray(registryUrls)

@@ -11,7 +11,7 @@ import {
   UpdateDependencyConfig,
   Upgrade,
 } from '../common';
-import { platform } from '../../platform';
+import { readLocalFile } from '../../util/fs';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
@@ -31,24 +31,22 @@ export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
-function gradleWrapperFileName(config: ExtractConfig): string {
+export function gradleWrapperFileName(config: ExtractConfig): string {
   if (
     os.platform() === 'win32' &&
-    config.binarySource !== BinarySource.Docker
+    config?.binarySource !== BinarySource.Docker
   ) {
     return 'gradlew.bat';
   }
   return './gradlew';
 }
 
-async function prepareGradleCommandLine(
-  config: ExtractConfig,
+export async function prepareGradleCommand(
+  gradlewName: string,
   cwd: string,
-  gradlew: Stats | null
+  gradlew: Stats | null,
+  args: string | null
 ): Promise<string> {
-  const args = GRADLE_DEPENDENCY_REPORT_OPTIONS;
-  const gradlewName = gradleWrapperFileName(config);
-
   /* eslint-disable no-bitwise */
   // istanbul ignore if
   if (gradlew?.isFile() === true) {
@@ -57,12 +55,26 @@ async function prepareGradleCommandLine(
       // add the execution permission to the owner, group and others
       await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
     }
-
+    if (args === null) {
+      return gradlewName;
+    }
     return `${gradlewName} ${args}`;
   }
   /* eslint-enable no-bitwise */
+  return null;
+}
 
-  return `gradle ${args}`;
+async function prepareGradleCommandFallback(
+  gradlewName: string,
+  cwd: string,
+  gradlew: Stats | null,
+  args: string
+): Promise<string> {
+  const cmd = await prepareGradleCommand(gradlewName, cwd, gradlew, args);
+  if (cmd === null) {
+    return `gradle ${args}`;
+  }
+  return cmd;
 }
 
 export async function executeGradle(
@@ -72,11 +84,16 @@ export async function executeGradle(
 ): Promise<void> {
   let stdout: string;
   let stderr: string;
-  const timeout =
-    config.gradle && config.gradle.timeout
-      ? config.gradle.timeout * 1000
-      : undefined;
-  const cmd = await prepareGradleCommandLine(config, cwd, gradlew);
+  let timeout;
+  if (config.gradle?.timeout) {
+    timeout = config.gradle.timeout * 1000;
+  }
+  const cmd = await prepareGradleCommandFallback(
+    gradleWrapperFileName(config),
+    cwd,
+    gradlew,
+    GRADLE_DEPENDENCY_REPORT_OPTIONS
+  );
   const execOptions: ExecOptions = {
     timeout,
     cwd,
@@ -144,7 +161,7 @@ export async function extractAllPackageFiles(
 
   const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       gradleFiles.push({
         packageFile,

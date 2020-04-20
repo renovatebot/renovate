@@ -1,8 +1,10 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'orb';
+
+const http = new Http(id);
 
 interface OrbRelease {
   homeUrl?: string;
@@ -13,14 +15,14 @@ interface OrbRelease {
 }
 
 /**
- * orb.getPkgReleases
+ * orb.getReleases
  *
  * This function will fetch an orb from CircleCI and return all semver versions.
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  logger.debug({ lookupName }, 'orb.getPkgReleases()');
+  logger.debug({ lookupName }, 'orb.getReleases()');
   const cacheNamespace = 'orb';
   const cacheKey = lookupName;
   const cachedResult = await renovateCache.get<ReleaseResult>(
@@ -38,11 +40,8 @@ export async function getPkgReleases({
   };
   try {
     const res: OrbRelease = (
-      await got.post(url, {
+      await http.postJson<{ data: { orb: OrbRelease } }>(url, {
         body,
-        hostType: id,
-        json: true,
-        retry: 5,
       })
     ).body.data.orb;
     if (!res) {

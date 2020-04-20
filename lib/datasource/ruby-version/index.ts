@@ -1,14 +1,16 @@
 import { parse } from 'node-html-parser';
 
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { isVersion } from '../../versioning/ruby';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'ruby-version';
 
+const http = new Http(id);
+
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 
-export async function getPkgReleases(
+export async function getReleases(
   _config?: GetReleasesConfig
 ): Promise<ReleaseResult> {
   // First check the persistent cache
@@ -27,12 +29,12 @@ export async function getPkgReleases(
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
-    const response = await got(rubyVersionsUrl);
+    const response = await http.get(rubyVersionsUrl);
     const root: any = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     for (const row of rows) {
       const columns: string[] = Array.from(
-        row.querySelectorAll('td').map(td => td.innerHTML)
+        row.querySelectorAll('td').map((td) => td.innerHTML)
       );
       if (columns.length) {
         const version = columns[0].replace('Ruby ', '');

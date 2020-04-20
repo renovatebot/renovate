@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 
 export const id = 'git-submodules';
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -52,4 +52,4 @@ export async function getPkgReleases({
 export const getDigest = (
   config: DigestConfig,
   newValue?: string
-): Promise<string> => new Promise(resolve => resolve(newValue));
+): Promise<string> => new Promise((resolve) => resolve(newValue));

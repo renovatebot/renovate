@@ -117,7 +117,10 @@ export async function updateArtifacts({
       args =
         ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
     }
-    args += ' --ignore-platform-reqs --no-ansi --no-interaction';
+    if (config.composerIgnorePlatformReqs) {
+      args += ' --ignore-platform-reqs';
+    }
+    args += ' --no-ansi --no-interaction';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader';
     }

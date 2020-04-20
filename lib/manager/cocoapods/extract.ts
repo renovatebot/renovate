@@ -27,6 +27,9 @@ export interface ParsedLine {
 
 export function parseLine(line: string): ParsedLine {
   const result: ParsedLine = {};
+  if (!line) {
+    return result;
+  }
   for (const regex of Object.values(regexMappings)) {
     const match = regex.exec(line.replace(/#.*$/, ''));
     if (match && match.groups) {

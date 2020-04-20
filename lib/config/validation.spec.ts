@@ -11,12 +11,37 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
     });
-    it('catches invalid handlebars templates', async () => {
+    it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
       };
       const { errors } = await configValidation.validateConfig(config);
       expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
+    it('catches invalid allowedVersions regex', async () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['foo'],
+            allowedVersions: '/^2/',
+          },
+          {
+            packageNames: ['bar'],
+            allowedVersions: '/***$}{]][/',
+          },
+          {
+            packageNames: ['baz'],
+            allowedVersions: '!/^2/',
+          },
+          {
+            packageNames: ['quack'],
+            allowedVersions: '!/***$}{]][/',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
     it('returns nested errors', async () => {

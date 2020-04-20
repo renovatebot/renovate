@@ -18,7 +18,7 @@ describe('loose/utils', () => {
     let o = obj;
 
     do {
-      Object.getOwnPropertyNames(o).forEach(prop => {
+      Object.getOwnPropertyNames(o).forEach((prop) => {
         if (!props.includes(prop)) {
           props.push(prop);
         }
@@ -44,9 +44,9 @@ describe('loose/utils', () => {
 
     const api = new DummyScheme();
     const schemeKeys = getAllPropertyNames(api)
-      .filter(val => !optionalFunctions.includes(val) && !val.startsWith('_'))
+      .filter((val) => !optionalFunctions.includes(val) && !val.startsWith('_'))
       .filter(
-        val => !['minSatisfyingVersion', 'maxSatisfyingVersion'].includes(val)
+        (val) => !['minSatisfyingVersion', 'maxSatisfyingVersion'].includes(val)
       )
       .sort();
 

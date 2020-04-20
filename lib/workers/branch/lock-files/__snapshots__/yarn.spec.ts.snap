@@ -1,7 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateLockFile catches errors 1`] = `
+exports[`workers/branch/lock-files/yarn catches errors 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
@@ -22,8 +39,25 @@ Array [
 ]
 `;
 
-exports[`generateLockFile detects yarnIntegrity 1`] = `
+exports[`workers/branch/lock-files/yarn detects yarnIntegrity using yarn v1.0.0 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
@@ -61,8 +95,82 @@ Array [
 ]
 `;
 
-exports[`generateLockFile finds yarn embedded in renovate 1`] = `
+exports[`workers/branch/lock-files/yarn detects yarnIntegrity using yarn v2.0.0 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_SCRIPTS": "0",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`workers/branch/lock-files/yarn finds yarn embedded in renovate 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
@@ -83,8 +191,25 @@ Array [
 ]
 `;
 
-exports[`generateLockFile finds yarn globally 1`] = `
+exports[`workers/branch/lock-files/yarn finds yarn v1.0.0 globally 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
@@ -105,8 +230,65 @@ Array [
 ]
 `;
 
-exports[`generateLockFile generates lock files 1`] = `
+exports[`workers/branch/lock-files/yarn finds yarn v2.0.0 globally 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_SCRIPTS": "0",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`workers/branch/lock-files/yarn generates lock files using yarn v1.0.0 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {
@@ -161,8 +343,65 @@ Array [
 ]
 `;
 
-exports[`generateLockFile performs lock file updates 1`] = `
+exports[`workers/branch/lock-files/yarn generates lock files using yarn v2.0.0 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex network:31879",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_SCRIPTS": "0",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`workers/branch/lock-files/yarn performs lock file updates using yarn v1.0.0 1`] = `
+Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
     "options": Object {
@@ -200,8 +439,82 @@ Array [
 ]
 `;
 
-exports[`generateLockFile uses fallback yarn 1`] = `
+exports[`workers/branch/lock-files/yarn performs lock file updates using yarn v2.0.0 1`] = `
 Array [
+  Object {
+    "cmd": "<yarn> --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_SCRIPTS": "0",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`workers/branch/lock-files/yarn uses fallback yarn 1`] = `
+Array [
+  Object {
+    "cmd": "yarn --version",
+    "options": Object {
+      "cwd": null,
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
     "options": Object {

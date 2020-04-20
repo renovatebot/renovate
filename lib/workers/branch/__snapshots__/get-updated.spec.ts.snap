@@ -82,7 +82,7 @@ Object {
       "stderr": "some error",
     },
   ],
-  "parentBranch": undefined,
+  "parentBranch": "some-branch",
   "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [
     Object {
@@ -96,7 +96,7 @@ Object {
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock files 1`] = `
 Object {
   "artifactErrors": Array [],
-  "parentBranch": undefined,
+  "parentBranch": "some-branch",
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",

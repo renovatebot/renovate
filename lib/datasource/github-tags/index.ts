@@ -99,7 +99,7 @@ export async function getDigest(
 }
 
 /**
- * github.getPkgReleases
+ * github.getReleases
  *
  * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with either tags or releases.
  *
@@ -108,7 +108,7 @@ export async function getDigest(
  *  - Sanitize the versions if desired (e.g. strip out leading 'v')
  *  - Return a dependency object containing sourceUrl string and releases array
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let versions: string[];
@@ -131,7 +131,7 @@ export async function getPkgReleases({
       await ghGot<GitHubTag>(url, {
         paginate: true,
       })
-    ).body.map(o => o.name);
+    ).body.map((o) => o.name);
   } catch (err) {
     logger.debug({ repo, err }, 'Error retrieving from github');
   }
@@ -142,7 +142,7 @@ export async function getPkgReleases({
     sourceUrl: 'https://github.com/' + repo,
     releases: null,
   };
-  dependency.releases = versions.map(version => ({
+  dependency.releases = versions.map((version) => ({
     version,
     gitRef: version,
   }));

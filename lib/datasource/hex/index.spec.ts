@@ -1,7 +1,7 @@
 import fs from 'fs';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
-import { getPkgReleases } from '.';
+import { getReleases } from '.';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const got: any = _got;
@@ -17,25 +17,25 @@ jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
 describe('datasource/hex', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       global.repoCache = {};
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(
-        await getPkgReleases({ lookupName: 'non_existent_package' })
+        await getReleases({ lookupName: 'non_existent_package' })
       ).toBeNull();
     });
     it('returns null for missing fields', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await getPkgReleases({ lookupName: 'non_existent_package' })
+        await getReleases({ lookupName: 'non_existent_package' })
       ).toBeNull();
 
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await getPkgReleases({ lookupName: 'non_existent_package' })
+        await getReleases({ lookupName: 'non_existent_package' })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -44,7 +44,7 @@ describe('datasource/hex', () => {
           statusCode: 404,
         })
       );
-      expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
+      expect(await getReleases({ lookupName: 'some_package' })).toBeNull();
     });
     it('returns null for 401', async () => {
       got.mockImplementationOnce(() =>
@@ -52,7 +52,7 @@ describe('datasource/hex', () => {
           statusCode: 401,
         })
       );
-      expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
+      expect(await getReleases({ lookupName: 'some_package' })).toBeNull();
     });
     it('throws for 429', async () => {
       got.mockImplementationOnce(() =>
@@ -61,7 +61,7 @@ describe('datasource/hex', () => {
         })
       );
       await expect(
-        getPkgReleases({ lookupName: 'some_crate' })
+        getReleases({ lookupName: 'some_crate' })
       ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('throws for 5xx', async () => {
@@ -71,14 +71,14 @@ describe('datasource/hex', () => {
         })
       );
       await expect(
-        getPkgReleases({ lookupName: 'some_crate' })
+        getReleases({ lookupName: 'some_crate' })
       ).rejects.toThrowError(DATASOURCE_FAILURE);
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
+      expect(await getReleases({ lookupName: 'some_package' })).toBeNull();
     });
     it('returns null with wrong auth token', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'this_simple_token' });
@@ -87,14 +87,14 @@ describe('datasource/hex', () => {
           statusCode: 401,
         })
       );
-      const res = await getPkgReleases({ lookupName: 'certifi' });
+      const res = await getReleases({ lookupName: 'certifi' });
       expect(res).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      const res = await getPkgReleases({ lookupName: 'certifi' });
+      const res = await getReleases({ lookupName: 'certifi' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -104,7 +104,7 @@ describe('datasource/hex', () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      const res = await getPkgReleases({ lookupName: 'certifi' });
+      const res = await getReleases({ lookupName: 'certifi' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();

@@ -6,6 +6,8 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export { id } from './common';
 
+export const defaultRegistryUrls = [v3.getDefaultFeed()];
+
 function parseRegistryUrl(
   registryUrl: string
 ): { feedUrl: string; protocolVersion: number } {
@@ -27,20 +29,20 @@ function parseRegistryUrl(
   }
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult> {
-  logger.trace(`nuget.getPkgReleases(${lookupName})`);
+  logger.trace(`nuget.getReleases(${lookupName})`);
   let dep: ReleaseResult = null;
-  for (const feed of registryUrls || [v3.getDefaultFeed()]) {
+  for (const feed of registryUrls) {
     const { feedUrl, protocolVersion } = parseRegistryUrl(feed);
     if (protocolVersion === 2) {
-      dep = await v2.getPkgReleases(feedUrl, lookupName);
+      dep = await v2.getReleases(feedUrl, lookupName);
     } else if (protocolVersion === 3) {
       const queryUrl = await v3.getQueryUrl(feedUrl);
       if (queryUrl !== null) {
-        dep = await v3.getPkgReleases(feedUrl, queryUrl, lookupName);
+        dep = await v3.getReleases(feedUrl, queryUrl, lookupName);
       }
     }
     if (dep != null) {

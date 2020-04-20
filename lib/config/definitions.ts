@@ -4,7 +4,7 @@ import * as pep440Versioning from '../versioning/pep440';
 import * as semverVersioning from '../versioning/semver';
 import { getVersioningList } from '../versioning';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { platformList } from '../platform';
+import { getPlatformList } from '../platform';
 
 import { getManagers } from '../manager';
 
@@ -270,6 +270,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'string',
   },
+  {
+    name: 'composerIgnorePlatformReqs',
+    description:
+      'Enable / disable use of --ignore-platform-reqs in the composer package manager.',
+    type: 'boolean',
+    default: true,
+    admin: true,
+  },
   // Log options
   {
     name: 'logLevel',
@@ -455,7 +463,7 @@ const options: RenovateOptions[] = [
     name: 'platform',
     description: 'Platform type of repository',
     type: 'string',
-    allowedValues: platformList,
+    allowedValues: getPlatformList(),
     default: PLATFORM_TYPE_GITHUB,
     admin: true,
   },
@@ -1456,32 +1464,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       versioning: dockerVersioning.id,
-      managerBranchPrefix: 'docker-',
-      commitMessageTopic: '{{{depName}}} Docker tag',
-      major: { enabled: false },
-      commitMessageExtra:
-        'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
-      digest: {
-        branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
-        commitMessageExtra: 'to {{newDigestShort}}',
-        commitMessageTopic:
-          '{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
-        group: {
-          commitMessageTopic: '{{{groupName}}}',
-          commitMessageExtra: '',
-        },
-      },
-      pin: {
-        commitMessageExtra: '',
-        groupName: 'Docker digests',
-        group: {
-          commitMessageTopic: '{{{groupName}}}',
-          branchTopic: 'digests-pin',
-        },
-      },
-      group: {
-        commitMessageTopic: '{{{groupName}}} Docker tags',
-      },
     },
     mergeable: true,
     cli: false,
@@ -1738,7 +1720,7 @@ export function getOptions(): RenovateOptions[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, config] of Object.entries(getManagers())) {
+  for (const [name, config] of getManagers().entries()) {
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

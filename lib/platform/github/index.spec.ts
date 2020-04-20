@@ -640,7 +640,7 @@ describe('platform/github', () => {
         () =>
           ({
             body: {
-              state: 'failed',
+              state: 'failure',
             },
           } as any)
       );
@@ -690,7 +690,7 @@ describe('platform/github', () => {
                 {
                   id: 23950195,
                   status: 'completed',
-                  conclusion: 'failed',
+                  conclusion: 'failure',
                   name: 'Travis CI - Branch',
                 },
               ],
@@ -717,8 +717,14 @@ describe('platform/github', () => {
         () =>
           ({
             body: {
-              total_count: 2,
+              total_count: 3,
               check_runs: [
+                {
+                  id: 2390199,
+                  status: 'completed',
+                  conclusion: 'skipped',
+                  name: 'Conditional GitHub Action',
+                },
                 {
                   id: 23950198,
                   status: 'completed',
@@ -796,7 +802,7 @@ describe('platform/github', () => {
               },
               {
                 context: 'context-3',
-                state: 'failed',
+                state: 'failure',
               },
             ],
           } as any)
@@ -825,7 +831,7 @@ describe('platform/github', () => {
               },
               {
                 context: 'context-3',
-                state: 'failed',
+                state: 'error',
               },
             ],
           } as any)

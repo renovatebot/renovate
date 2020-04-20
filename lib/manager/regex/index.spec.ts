@@ -28,10 +28,10 @@ describe(getName(__filename), () => {
     );
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(8);
-    expect(res.deps.find(dep => dep.depName === 'yarn').versioning).toEqual(
+    expect(res.deps.find((dep) => dep.depName === 'yarn').versioning).toEqual(
       'semver'
     );
-    expect(res.deps.find(dep => dep.depName === 'gradle').versioning).toEqual(
+    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
       'maven'
     );
   });
@@ -46,7 +46,7 @@ describe(getName(__filename), () => {
     const res = await extractPackageFile('', 'Dockerfile', config);
     expect(res).toBeNull();
   });
-  it('returns null if invalid handlebars template', async () => {
+  it('returns null if invalid template', async () => {
     const config = {
       matchStrings: [
         'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',

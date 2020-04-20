@@ -9,28 +9,38 @@ import { PackageFile } from '../../../manager/common';
 import { RenovateConfig } from '../../../config';
 import { BranchConfig } from '../../common';
 
-export type ExtractAndUpdateResult = {
-  res: WriteUpdateResult | undefined;
+export type ExtractResult = {
   branches: BranchConfig[];
   branchList: string[];
-  packageFiles?: Record<string, PackageFile[]>;
+  packageFiles: Record<string, PackageFile[]>;
 };
 
-export async function extractAndUpdate(
-  config: RenovateConfig
-): Promise<ExtractAndUpdateResult> {
+export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   logger.debug('extractAndUpdate()');
   const packageFiles = await extractAllDependencies(config);
   logger.trace({ config: packageFiles }, 'packageFiles');
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
   await raiseDeprecationWarnings(config, packageFiles);
-  const { branches, branchList } = branchifyUpgrades(config, packageFiles);
+  const { branches, branchList } = await branchifyUpgrades(
+    config,
+    packageFiles
+  );
   sortBranches(branches);
+  return { branches, branchList, packageFiles };
+}
+
+export async function update(
+  config: RenovateConfig,
+  branches: BranchConfig[],
+  branchList: string[],
+  packageFiles: Record<string, PackageFile[]>
+): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
   if (config.repoIsOnboarded) {
     res = await writeUpdates(config, packageFiles, branches);
   }
-  return { res, branches, branchList, packageFiles };
+
+  return res;
 }

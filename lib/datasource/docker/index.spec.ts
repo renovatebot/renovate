@@ -18,6 +18,13 @@ describe('api/docker', () => {
       const res = docker.getRegistryRepository('registry:5000/org/package', []);
       expect(res).toMatchSnapshot();
     });
+    it('supports registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        ['https://my.local.registry/prefix']
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('getDigest', () => {
     beforeEach(() => {
@@ -269,7 +276,7 @@ describe('api/docker', () => {
       ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
   });
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       global.repoCache = {};
@@ -404,7 +411,7 @@ describe('api/docker', () => {
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await docker.getPkgReleases({
+      const res = await docker.getReleases({
         lookupName: 'my/node',
       });
       expect(res).toBeNull();

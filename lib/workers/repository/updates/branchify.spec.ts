@@ -16,29 +16,57 @@ beforeEach(() => {
 
 describe('workers/repository/updates/branchify', () => {
   describe('branchifyUpgrades()', () => {
-    it('returns empty', () => {
-      flattenUpdates.mockReturnValueOnce([]);
-      const res = branchifyUpgrades(config, {});
+    it('returns empty', async () => {
+      flattenUpdates.mockResolvedValueOnce([]);
+      const res = await branchifyUpgrades(config, {});
       expect(res.branches).toEqual([]);
     });
-    it('returns one branch if one input', () => {
-      flattenUpdates.mockReturnValueOnce([
+    it('returns one branch if one input', async () => {
+      flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
           updateType: 'minor',
+          packageFile: 'foo/package.json',
         },
       ]);
       config.repoIsOnboarded = true;
-      const res = branchifyUpgrades(config, {});
+      const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(1);
       expect(res.branches[0].isMinor).toBe(true);
       expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
-    it('uses major/minor/patch slugs', () => {
-      flattenUpdates.mockReturnValueOnce([
+    it('deduplicates', async () => {
+      flattenUpdates.mockResolvedValueOnce([
+        {
+          depName: 'foo',
+          branchName: 'foo-{{version}}',
+          currentValue: '1.1.0',
+          newValue: '1.3.0',
+          prTitle: 'some-title',
+          updateType: 'minor',
+          packageFile: 'foo/package.json',
+        },
+        {
+          depName: 'foo',
+          branchName: 'foo-{{version}}',
+          currentValue: '1.1.0',
+          newValue: '1.2.0',
+          prTitle: 'some-title',
+          updateType: 'minor',
+          packageFile: 'foo/package.json',
+        },
+      ]);
+      config.repoIsOnboarded = true;
+      const res = await branchifyUpgrades(config, {});
+      expect(Object.keys(res.branches)).toHaveLength(1);
+      expect(res.branches[0].isMinor).toBe(true);
+      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
+    });
+    it('uses major/minor/patch slugs', async () => {
+      flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
@@ -48,6 +76,7 @@ describe('workers/repository/updates/branchify', () => {
           groupName: 'some packages',
           group: {},
           separateMajorMinor: true,
+          packageFile: 'package.json',
         },
         {
           depName: 'foo',
@@ -85,7 +114,7 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       config.repoIsOnboarded = true;
-      const res = branchifyUpgrades(config, {});
+      const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(4);
       expect(res.branches[0].isMajor).toBe(true);
       expect(res.branches[0].groupSlug).toBe(`major-some-packages`);
@@ -96,8 +125,8 @@ describe('workers/repository/updates/branchify', () => {
       expect(res.branches[3].isMajor).toBe(true);
       expect(res.branches[3].groupSlug).toBe(`major-2-other-packages`);
     });
-    it('does not group if different compiled branch names', () => {
-      flattenUpdates.mockReturnValueOnce([
+    it('does not group if different compiled branch names', async () => {
+      flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
@@ -117,11 +146,11 @@ describe('workers/repository/updates/branchify', () => {
           prTitle: 'some-title',
         },
       ]);
-      const res = branchifyUpgrades(config, {});
+      const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(3);
     });
-    it('groups if same compiled branch names', () => {
-      flattenUpdates.mockReturnValueOnce([
+    it('groups if same compiled branch names', async () => {
+      flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',
           branchName: 'foo',
@@ -141,11 +170,11 @@ describe('workers/repository/updates/branchify', () => {
           prTitle: 'some-title',
         },
       ]);
-      const res = branchifyUpgrades(config, {});
+      const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
-    it('groups if same compiled group name', () => {
-      flattenUpdates.mockReturnValueOnce([
+    it('groups if same compiled group name', async () => {
+      flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',
           branchName: 'foo',
@@ -169,10 +198,10 @@ describe('workers/repository/updates/branchify', () => {
           group: { branchName: 'renovate/my-group' },
         },
       ]);
-      const res = branchifyUpgrades(config, {});
+      const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
-    it('enforces valid git branch name', () => {
+    it('enforces valid git branch name', async () => {
       const fixtures = [
         {
           upgrade: {
@@ -232,11 +261,11 @@ describe('workers/repository/updates/branchify', () => {
           expectedBranchName: 'renovate/bad-branch-name9',
         },
       ];
-      flattenUpdates.mockReturnValueOnce(
+      flattenUpdates.mockResolvedValueOnce(
         fixtures.map(({ upgrade }) => upgrade)
       );
 
-      branchifyUpgrades(config, {}).branches.forEach(
+      (await branchifyUpgrades(config, {})).branches.forEach(
         ({ branchName }, index: number) => {
           expect(branchName).toBe(fixtures[index].expectedBranchName);
         }

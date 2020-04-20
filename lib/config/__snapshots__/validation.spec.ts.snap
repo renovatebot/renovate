@@ -1,10 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/validation validateConfig(config) catches invalid handlebars templates 1`] = `
+exports[`config/validation validateConfig(config) catches invalid allowedVersions regex 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid handlebars template in config path: commitMessage",
+    "message": "Invalid regExp for packageRules[1].allowedVersions: \`/***$}{]][/\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].allowedVersions: \`!/***$}{]][/\`",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid template in config path: commitMessage",
   },
 ]
 `;

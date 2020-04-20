@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/terraform getPkgReleases processes real data 1`] = `
+exports[`datasource/terraform getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
   "name": "hashicorp/azurerm",

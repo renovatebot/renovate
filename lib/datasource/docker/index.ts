@@ -6,16 +6,48 @@ import wwwAuthenticate from 'www-authenticate';
 import { OutgoingHttpHeaders } from 'http';
 import AWS from 'aws-sdk';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http, HttpResponse } from '../../util/http';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
-import { GotResponse } from '../../platform';
 import { HostRule } from '../../types';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 export const id = 'docker';
+
+export const defaultConfig = {
+  managerBranchPrefix: 'docker-',
+  commitMessageTopic: '{{{depName}}} Docker tag',
+  major: { enabled: false },
+  commitMessageExtra:
+    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+  digest: {
+    branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
+    commitMessageExtra: 'to {{newDigestShort}}',
+    commitMessageTopic:
+      '{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
+    group: {
+      commitMessageTopic: '{{{groupName}}}',
+      commitMessageExtra: '',
+    },
+  },
+  pin: {
+    commitMessageExtra: '',
+    groupName: 'Docker digests',
+    group: {
+      commitMessageTopic: '{{{groupName}}}',
+      branchTopic: 'digests-pin',
+    },
+  },
+  group: {
+    commitMessageTopic: '{{{groupName}}} Docker tags',
+  },
+  autoReplaceStringTemplate:
+    '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+};
+
+const http = new Http(id);
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 
@@ -28,6 +60,17 @@ export function getRegistryRepository(
   lookupName: string,
   registryUrls: string[]
 ): RegistryRepository {
+  if (is.nonEmptyArray(registryUrls)) {
+    const dockerRegistry = registryUrls[0]
+      .replace('https://', '')
+      .replace(/\/?$/, '/');
+    if (lookupName.startsWith(dockerRegistry)) {
+      return {
+        registry: dockerRegistry,
+        repository: lookupName.replace(dockerRegistry, ''),
+      };
+    }
+  }
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
@@ -67,7 +110,7 @@ function getECRAuthToken(
     config.secretAccessKey = opts.password;
   }
   const ecr = new AWS.ECR(config);
-  return new Promise<string>(resolve => {
+  return new Promise<string>((resolve) => {
     ecr.getAuthorizationToken({}, (err, data) => {
       if (err) {
         logger.trace({ err }, 'err');
@@ -98,7 +141,9 @@ async function getAuthHeaders(
 ): Promise<OutgoingHttpHeaders | null> {
   try {
     const apiCheckUrl = `${registry}/v2/`;
-    const apiCheckResponse = await got(apiCheckUrl, { throwHttpErrors: false });
+    const apiCheckResponse = await http.get(apiCheckUrl, {
+      throwHttpErrors: false,
+    });
     if (apiCheckResponse.headers['www-authenticate'] === undefined) {
       return {};
     }
@@ -127,7 +172,7 @@ async function getAuthHeaders(
 
     if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
       logger.debug(`Using Basic auth for docker registry ${repository}`);
-      await got(apiCheckUrl, opts);
+      await http.get(apiCheckUrl, opts);
       return opts.headers;
     }
 
@@ -136,7 +181,12 @@ async function getAuthHeaders(
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
-    const authResponse = (await got(authUrl, opts)).body;
+    const authResponse = (
+      await http.getJson<{ token?: string; access_token?: string }>(
+        authUrl,
+        opts
+      )
+    ).body;
 
     const token = authResponse.token || authResponse.access_token;
     // istanbul ignore if
@@ -187,7 +237,7 @@ function digestFromManifestStr(str: hasha.HashaInput): string {
   return 'sha256:' + hasha(str, { algorithm: 'sha256' });
 }
 
-function extractDigestFromResponse(manifestResponse: GotResponse): string {
+function extractDigestFromResponse(manifestResponse: HttpResponse): string {
   if (manifestResponse.headers['docker-content-digest'] === undefined) {
     return digestFromManifestStr(manifestResponse.body);
   }
@@ -198,7 +248,7 @@ async function getManifestResponse(
   registry: string,
   repository: string,
   tag: string
-): Promise<GotResponse> {
+): Promise<HttpResponse> {
   logger.debug(`getManifestResponse(${registry}, ${repository}, ${tag})`);
   try {
     const headers = await getAuthHeaders(registry, repository);
@@ -208,7 +258,7 @@ async function getManifestResponse(
     }
     headers.accept = 'application/vnd.docker.distribution.manifest.v2+json';
     const url = `${registry}/v2/${repository}/manifests/${tag}`;
-    const manifestResponse = await got(url, {
+    const manifestResponse = await http.get(url, {
       headers,
     });
     return manifestResponse;
@@ -347,7 +397,7 @@ async function getTags(
     }
     let page = 1;
     do {
-      const res = await got<{ tags: string[] }>(url, { json: true, headers });
+      const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
       url =
@@ -415,31 +465,9 @@ async function getTags(
 export function getConfigResponse(
   url: string,
   headers: OutgoingHttpHeaders
-): Promise<GotResponse> {
-  return got(url, {
+): Promise<HttpResponse> {
+  return http.get(url, {
     headers,
-    hooks: {
-      beforeRedirect: [
-        (options: any): void => {
-          if (
-            options.search &&
-            options.search.indexOf('X-Amz-Algorithm') !== -1
-          ) {
-            // if there is no port in the redirect URL string, then delete it from the redirect options.
-            // This can be evaluated for removal after upgrading to Got v10
-            const portInUrl = options.href.split('/')[2].split(':')[1];
-            if (!portInUrl) {
-              // eslint-disable-next-line no-param-reassign
-              delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-            }
-
-            // docker registry is hosted on amazon, redirect url includes authentication.
-            // eslint-disable-next-line no-param-reassign
-            delete options.headers.authorization;
-          }
-        },
-      ],
-    },
   });
 }
 
@@ -575,7 +603,7 @@ async function getLabels(
 }
 
 /**
- * docker.getPkgReleases
+ * docker.getReleases
  *
  * A docker image usually looks something like this: somehost.io/owner/repo:8.1.0-alpine
  * In the above:
@@ -585,7 +613,7 @@ async function getLabels(
  *
  * This function will filter only tags that contain a semver version
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -597,7 +625,7 @@ export async function getPkgReleases({
   if (!tags) {
     return null;
   }
-  const releases = tags.map(version => ({ version }));
+  const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
     dockerRegistry: registry,
     dockerRepository: repository,

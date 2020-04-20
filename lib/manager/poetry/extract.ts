@@ -15,7 +15,7 @@ function extractFromSection(
   if (!sectionContent) {
     return [];
   }
-  Object.keys(sectionContent).forEach(depName => {
+  Object.keys(sectionContent).forEach((depName) => {
     let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;

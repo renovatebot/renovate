@@ -1,5 +1,6 @@
 // System error
 export const SYSTEM_INSUFFICIENT_DISK_SPACE = 'disk-space';
+export const SYSTEM_INSUFFICIENT_MEMORY = 'out-of-memory';
 
 // Platform Error
 export const PLATFORM_AUTHENTICATION_ERROR = 'authentication-error';
