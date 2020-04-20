@@ -8,7 +8,6 @@
   },
   "scripts": {
     "build": "run-s clean generate:* compile:*",
-    "build:docker": "run-s generate:* compile:ts",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
