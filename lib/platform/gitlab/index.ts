@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 
 import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult, CommitFilesConfig } from '../git/storage';
+import GitStorage, { StatusResult } from '../git/storage';
 import {
   PlatformConfig,
   RepoParams,
@@ -17,12 +17,13 @@ import {
   BranchStatusConfig,
   FindPRConfig,
   EnsureCommentConfig,
+  CommitFilesConfig,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';
-import { RenovateConfig } from '../../config';
+import { RenovateConfig } from '../../config/common';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -36,6 +37,7 @@ import {
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { BranchStatus } from '../../types';
+import { ensureTrailingSlash } from '../../util/url';
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];
@@ -71,7 +73,7 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitLab personal access token');
   }
   if (endpoint) {
-    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    defaults.endpoint = ensureTrailingSlash(endpoint);
     api.setBaseUrl(defaults.endpoint);
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
@@ -348,8 +350,8 @@ export async function getBranchStatus(
   }
   let status: BranchStatus = BranchStatus.green; // default to green
   res
-    .filter(check => !check.allow_failure)
-    .forEach(check => {
+    .filter((check) => !check.allow_failure)
+    .forEach((check) => {
       if (status !== BranchStatus.red) {
         // if red, stay red
         let mappedStatus: BranchStatus =

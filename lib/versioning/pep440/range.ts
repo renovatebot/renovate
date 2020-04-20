@@ -74,13 +74,13 @@ export function getNewValue({
       toVersion,
     });
   }
-  if (ranges.some(range => range.operator === '===')) {
+  if (ranges.some((range) => range.operator === '===')) {
     // the operator "===" is used for legacy non PEP440 versions
     logger.warn('Arbitrary equality not supported: ' + currentValue);
     return null;
   }
   let result = ranges
-    .map(range => {
+    .map((range) => {
       // used to exclude versions,
       // we assume that's for a good reason
       if (range.operator === '!=') {

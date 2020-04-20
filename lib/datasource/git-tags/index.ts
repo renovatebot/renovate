@@ -4,7 +4,7 @@ import * as gitRefs from '../git-refs';
 
 export const id = 'git-tags';
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
@@ -13,15 +13,15 @@ export async function getPkgReleases({
     return null;
   }
   const tags = rawRefs
-    .filter(ref => ref.type === 'tags')
-    .map(ref => ref.value)
-    .filter(tag => semver.isVersion(tag));
+    .filter((ref) => ref.type === 'tags')
+    .map((ref) => ref.value)
+    .filter((tag) => semver.isVersion(tag));
 
   const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
 
   const result: ReleaseResult = {
     sourceUrl,
-    releases: tags.map(tag => ({
+    releases: tags.map((tag) => ({
       version: tag,
       gitRef: tag,
     })),

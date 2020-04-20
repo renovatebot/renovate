@@ -38,7 +38,7 @@ export async function generateLockFile(
       if (config.cacheDir) {
         volumes.push(config.cacheDir);
       }
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
+      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
       if (config.dockerMapDotfiles) {
         const homeDir =
           process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -46,7 +46,7 @@ export async function generateLockFile(
         cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
       }
       const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map(e => `-e ${e} `).join('');
+      cmd += envVars.map((e) => `-e ${e} `).join('');
       cmd += `-w "${cwd}" `;
       cmd += `renovate/npm npm`;
     }
@@ -63,20 +63,20 @@ export async function generateLockFile(
     }
     logger.debug(`Using npm: ${cmd} ${args}`);
     // istanbul ignore if
-    if (!upgrades.every(upgrade => upgrade.isLockfileUpdate)) {
+    if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
       // TODO: Switch to native util.promisify once using only node 8
       ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
         cwd,
         env,
       }));
     }
-    const lockUpdates = upgrades.filter(upgrade => upgrade.isLockfileUpdate);
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
         `${cmd} ${args}` +
         lockUpdates
-          .map(update => ` ${update.depName}@${update.toVersion}`)
+          .map((update) => ` ${update.depName}@${update.toVersion}`)
           .join('');
       const updateRes = await exec(updateCmd, {
         cwd,

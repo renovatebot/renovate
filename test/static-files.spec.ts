@@ -5,8 +5,8 @@ const glob = util.promisify(require('glob'));
 const ignoredExtensions = ['js', 'ts', 'md', 'pyc', 'DS_Store', 'map', 'snap'];
 
 function filterFiles(files: string[]): string[] {
-  return files.filter(file =>
-    ignoredExtensions.every(extension => !file.endsWith(`.${extension}`))
+  return files.filter((file) =>
+    ignoredExtensions.every((extension) => !file.endsWith(`.${extension}`))
   );
 }
 

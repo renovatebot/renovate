@@ -34,10 +34,7 @@ describe(getName(__filename), () => {
   }
 
   function mock(opts?: nock.Options, times = 1) {
-    return nock(baseUrl, opts)
-      .get('/some')
-      .times(times)
-      .reply(200, {});
+    return nock(baseUrl, opts).get('/some').times(times).reply(200, {});
   }
 
   it('uses  bearer auth', async () => {
@@ -120,7 +117,7 @@ describe(getName(__filename), () => {
 
     let data = '';
 
-    stream.on('data', c => {
+    stream.on('data', (c) => {
       data += c;
     });
 

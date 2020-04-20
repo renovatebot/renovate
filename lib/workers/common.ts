@@ -1,5 +1,9 @@
 import { Merge } from 'type-fest';
-import { PackageDependency, ArtifactError } from '../manager/common';
+import {
+  PackageDependency,
+  ArtifactError,
+  LookupUpdate,
+} from '../manager/common';
 import {
   RenovateSharedConfig,
   RenovateConfig,
@@ -7,9 +11,9 @@ import {
   RenovateAdminConfig,
   ValidationMessage,
 } from '../config';
-import { LookupUpdate } from './repository/process/lookup/common';
-import { FileData, PlatformPrOptions } from '../platform';
+import { File, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
+import { ChangeLogResult } from './pr/changelog/common';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -17,12 +21,13 @@ export interface BranchUpgradeConfig
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
   branchName: string;
+  commitBody?: string;
   commitMessage?: string;
+  commitMessageExtra?: string;
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
   currentVersion?: string;
-
   endpoint?: string;
   excludeCommitPaths?: string[];
   group?: GroupConfig;
@@ -34,15 +39,20 @@ export interface BranchUpgradeConfig
   packageFile?: string;
 
   parentBranch?: string;
+  prBanner?: string;
   prBodyNotes?: string[];
+  prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
   releases?: Release[];
   releaseTimestamp?: string;
 
   sourceDirectory?: string;
-  updatedPackageFiles?: FileData[];
-  updatedArtifacts?: FileData[];
+
+  updatedPackageFiles?: File[];
+  updatedArtifacts?: File[];
+
+  logJSON?: ChangeLogResult;
 }
 
 export enum PrResult {

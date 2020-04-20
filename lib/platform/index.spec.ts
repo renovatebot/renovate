@@ -8,6 +8,8 @@ import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 
 import * as platform from '.';
 import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
+import { loadModules } from '../util/modules';
+import { Platform } from '.';
 
 jest.unmock('.');
 
@@ -15,6 +17,30 @@ describe('platform', () => {
   beforeEach(() => {
     jest.resetModules();
   });
+
+  it('validates', () => {
+    function validate(module: Platform, name: string): boolean {
+      // TODO: test required api
+      if (!module.initPlatform) {
+        fail(`Missing api on ${name}`);
+      }
+      return true;
+    }
+    const platforms = platform.getPlatforms();
+
+    const loadedMgr = loadModules(
+      __dirname,
+      null,
+      (m) => !['utils', 'git'].includes(m)
+    );
+    expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));
+
+    for (const name of platforms.keys()) {
+      const value = platforms.get(name);
+      expect(validate(value, name)).toBe(true);
+    }
+  });
+
   it('throws if no platform', () => {
     expect(() => platform.platform.initPlatform({})).toThrow(
       PLATFORM_NOT_FOUND

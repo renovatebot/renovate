@@ -33,7 +33,6 @@ export async function getRawRefs({
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
-      '--sort=-v:refname',
       '--tags',
       '--heads',
       '--refs',
@@ -50,7 +49,7 @@ export async function getRawRefs({
       .split('\n');
 
     const refMatch = /(?<type>\w+)\/(?<value>.*)/;
-    const result = refs.map(ref => {
+    const result = refs.map((ref) => {
       const match = refMatch.exec(ref);
       return {
         type: match.groups.type,
@@ -66,16 +65,16 @@ export async function getRawRefs({
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   try {
     const rawRefs: RawRefs[] = await getRawRefs({ lookupName });
 
     const refs = rawRefs
-      .filter(ref => ref.type === 'tags' || ref.type === 'heads')
-      .map(ref => ref.value)
-      .filter(ref => semver.isVersion(ref));
+      .filter((ref) => ref.type === 'tags' || ref.type === 'heads')
+      .map((ref) => ref.value)
+      .filter((ref) => semver.isVersion(ref));
 
     const uniqueRefs = [...new Set(refs)];
 
@@ -83,7 +82,7 @@ export async function getPkgReleases({
 
     const result: ReleaseResult = {
       sourceUrl,
-      releases: uniqueRefs.map(ref => ({
+      releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
       })),

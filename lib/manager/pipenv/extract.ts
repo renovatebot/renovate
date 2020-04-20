@@ -46,7 +46,7 @@ function extractFromSection(
   const pipfileSection = pipfile[section];
 
   const deps = Object.entries(pipfileSection)
-    .map(x => {
+    .map((x) => {
       const [depName, requirements] = x;
       let currentValue: string;
       let nestedVersion: boolean;
@@ -103,7 +103,7 @@ function extractFromSection(
       if (requirements.index) {
         if (is.array(pipfile.source)) {
           const source = pipfile.source.find(
-            item => item.name === requirements.index
+            (item) => item.name === requirements.index
           );
           if (source) {
             dep.registryUrls = [source.url];
@@ -128,7 +128,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
   const res: PackageFile = { deps: [] };
   if (pipfile.source) {
-    res.registryUrls = pipfile.source.map(source => source.url);
+    res.registryUrls = pipfile.source.map((source) => source.url);
   }
 
   res.deps = [

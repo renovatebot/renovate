@@ -26,15 +26,17 @@ function relatePath(here: string, there: string): string {
 
 export function loadModules<T>(
   dirname: string,
-  validate?: (module: T, moduleName?: string) => boolean
+  validate?: (module: T, moduleName?: string) => boolean,
+  filter: (moduleName?: string) => boolean = () => true
 ): Record<string, T> {
   const result: Record<string, T> = {};
 
   const moduleNames: string[] = fs
     .readdirSync(dirname, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(name => !name.startsWith('__'))
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter((name) => !name.startsWith('__'))
+    .filter(filter)
     .sort();
 
   for (const moduleName of moduleNames) {

@@ -1,4 +1,4 @@
-import handlebars from 'handlebars';
+import * as template from '../../../util/template';
 import { logger } from '../../../logger';
 import { BranchConfig } from '../../common';
 
@@ -36,16 +36,14 @@ function getNonEmptyColumns(
 
 export function getPrUpdatesTable(config: BranchConfig): string {
   const tableDefinitions = getTableDefinition(config);
-  const tableValues = config.upgrades.map(upgrade => {
+  const tableValues = config.upgrades.map((upgrade) => {
     const res: Record<string, string> = {};
     for (const column of tableDefinitions) {
       const { header, value } = column;
       try {
         // istanbul ignore else
         if (value) {
-          res[header] = handlebars
-            .compile(value)(upgrade)
-            .replace(/^``$/, '');
+          res[header] = template.compile(value, upgrade).replace(/^``$/, '');
         } else {
           res[header] = '';
         }

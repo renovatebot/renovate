@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import * as handlebars from 'handlebars';
 import { getOptions, RenovateOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import * as managerValidator from './validation-helpers/managers';
 import { RenovateConfig, ValidationMessage } from './common';
 import { regEx } from '../util/regex';
+import * as template from '../util/template';
 
 const options = getOptions();
 
@@ -23,7 +23,7 @@ export async function validateConfig(
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
-    options.forEach(option => {
+    options.forEach((option) => {
       optionTypes[option.name] = option.type;
     });
   }
@@ -77,13 +77,13 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = handlebars.compile(val)(config);
-          res = handlebars.compile(res)(config);
-          handlebars.compile(res)(config);
+          let res = template.compile(val.toString(), config);
+          res = template.compile(res, config);
+          template.compile(res, config);
         } catch (err) {
           errors.push({
             depName: 'Configuration Error',
-            message: `Invalid handlebars template in config path: ${currentPath}`,
+            message: `Invalid template in config path: ${currentPath}`,
           });
         }
       }
@@ -98,6 +98,36 @@ export async function validateConfig(
           errors.push({
             depName: 'Configuration Error',
             message: `Invalid ${currentPath}: \`${errorMessage}\``,
+          });
+        }
+      } else if (
+        key === 'allowedVersions' &&
+        is.string(val) &&
+        val.length > 1 &&
+        val.startsWith('/') &&
+        val.endsWith('/')
+      ) {
+        try {
+          regEx(val.slice(1, -1));
+        } catch (err) {
+          errors.push({
+            depName: 'Configuration Error',
+            message: `Invalid regExp for ${currentPath}: \`${val}\``,
+          });
+        }
+      } else if (
+        key === 'allowedVersions' &&
+        is.string(val) &&
+        val.length > 2 &&
+        val.startsWith('!/') &&
+        val.endsWith('/')
+      ) {
+        try {
+          regEx(val.slice(2, -1));
+        } catch (err) {
+          errors.push({
+            depName: 'Configuration Error',
+            message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
       } else if (key === 'timezone' && val !== null) {
@@ -174,7 +204,8 @@ export async function validateConfig(
                 let hasSelector = false;
                 if (is.object(packageRule)) {
                   const resolvedRule = await resolveConfigPresets(
-                    packageRule as RenovateConfig
+                    packageRule as RenovateConfig,
+                    config
                   );
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
@@ -212,10 +243,12 @@ export async function validateConfig(
               ];
               for (const regexManager of val) {
                 if (
-                  Object.keys(regexManager).some(k => !allowedKeys.includes(k))
+                  Object.keys(regexManager).some(
+                    (k) => !allowedKeys.includes(k)
+                  )
                 ) {
                   const disallowedKeys = Object.keys(regexManager).filter(
-                    k => !allowedKeys.includes(k)
+                    (k) => !allowedKeys.includes(k)
                   );
                   errors.push({
                     depName: 'Configuration Error',
@@ -253,7 +286,7 @@ export async function validateConfig(
                     for (const field of mandatoryFields) {
                       if (
                         !regexManager[`${field}Template`] &&
-                        !regexManager.matchStrings.some(matchString =>
+                        !regexManager.matchStrings.some((matchString) =>
                           matchString.includes(`(?<${field}>`)
                         )
                       ) {
@@ -314,8 +347,8 @@ export async function validateConfig(
         } else if (type === 'object' && currentPath !== 'compatibility') {
           if (is.object(val)) {
             const ignoredObjects = options
-              .filter(option => option.freeChoice)
-              .map(option => option.name);
+              .filter((option) => option.freeChoice)
+              .map((option) => option.name);
             if (!ignoredObjects.includes(key)) {
               const subValidation = await module.exports.validateConfig(
                 val,

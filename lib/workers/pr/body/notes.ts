@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import handlebars from 'handlebars';
+import * as template from '../../../util/template';
 import { logger } from '../../../logger';
 import { emojify } from '../../../util/emoji';
 import { BranchConfig } from '../../common';
@@ -10,9 +10,7 @@ export function getPrNotes(config: BranchConfig): string {
     if (is.nonEmptyArray(upgrade.prBodyNotes)) {
       for (const note of upgrade.prBodyNotes) {
         try {
-          const res = handlebars
-            .compile(note)(upgrade)
-            .trim();
+          const res = template.compile(note, upgrade).trim();
           if (res && res.length) {
             notes.push(res);
           }
@@ -28,7 +26,7 @@ export function getPrNotes(config: BranchConfig): string {
 
 export function getPrExtraNotes(config: BranchConfig): string {
   let res = '';
-  if (config.upgrades.some(upgrade => upgrade.gitRef)) {
+  if (config.upgrades.some((upgrade) => upgrade.gitRef)) {
     res += emojify(
       ':abcd: If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.\n\n'
     );

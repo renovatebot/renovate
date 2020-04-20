@@ -29,7 +29,6 @@ export function extractPackageFile(content: string): PackageFile | null {
               depType: 'orb',
               depName,
               currentValue,
-              managerData: { lineNumber },
               datasource: datasourceOrb.id,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
@@ -53,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           'CircleCI docker image'
         );
         dep.depType = 'docker';
-        dep.managerData = { lineNumber };
+        dep.versioning = 'docker';
         deps.push(dep);
       }
     }

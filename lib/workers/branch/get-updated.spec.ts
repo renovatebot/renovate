@@ -28,25 +28,25 @@ describe('workers/branch/get-updated', () => {
       platform.getFile.mockResolvedValueOnce('existing content');
     });
     it('handles autoreplace base updated', async () => {
-      config.upgrades.push({ manager: 'html', autoReplace: true });
+      config.upgrades.push({ manager: 'html' });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('handles autoreplace branch no update', async () => {
-      config.upgrades.push({ manager: 'html', autoReplace: true });
+      config.upgrades.push({ manager: 'html' });
       autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('handles autoreplace failure', async () => {
-      config.upgrades.push({ manager: 'html', autoReplace: true });
+      config.upgrades.push({ manager: 'html' });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles autoreplace branch needs update', async () => {
       config.parentBranch = 'some branch';
-      config.upgrades.push({ manager: 'html', autoReplace: true });
+      config.upgrades.push({ manager: 'html' });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
@@ -77,7 +77,7 @@ describe('workers/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'composer',
       });
-      composer.updateDependency.mockReturnValue('some new content');
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -128,7 +128,7 @@ describe('workers/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'composer',
       });
-      composer.updateDependency.mockReturnValue('some new content');
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {

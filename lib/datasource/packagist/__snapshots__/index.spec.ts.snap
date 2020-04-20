@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/packagist getPkgReleases adds packagist source implicitly 1`] = `
+exports[`datasource/packagist getReleases adds packagist source implicitly 1`] = `
 Object {
   "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
@@ -100,7 +100,7 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getPkgReleases processes real versioned data 1`] = `
+exports[`datasource/packagist getReleases processes real versioned data 1`] = `
 Object {
   "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
@@ -200,7 +200,7 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getPkgReleases supports includes packages 1`] = `
+exports[`datasource/packagist getReleases supports includes packages 1`] = `
 Object {
   "homepage": "http://guzzlephp.org/",
   "name": "guzzlehttp/guzzle",
@@ -345,7 +345,7 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getPkgReleases supports plain packages 1`] = `
+exports[`datasource/packagist getReleases supports plain packages 1`] = `
 Object {
   "homepage": undefined,
   "name": "vendor/package-name",
@@ -374,7 +374,7 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getPkgReleases supports providers packages 1`] = `
+exports[`datasource/packagist getReleases supports providers packages 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "name": "wpackagist-plugin/1beyt",

@@ -3,8 +3,11 @@ import { downloadHttpProtocol } from '../maven/util';
 import { parseIndexDir } from '../sbt-plugin/util';
 import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { MAVEN_REPO } from '../maven/common';
 
 export const id = 'sbt-package';
+
+export const defaultRegistryUrls = [MAVEN_REPO];
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
@@ -20,7 +23,7 @@ export async function resolvePackageReleases(
   if (indexContent) {
     const releases: string[] = [];
     const parseSubdirs = (content: string): string[] =>
-      parseIndexDir(content, x => {
+      parseIndexDir(content, (x) => {
         if (x === artifact) {
           return true;
         }
@@ -41,7 +44,7 @@ export async function resolvePackageReleases(
       searchSubdirs = [`${artifact}_${scalaVersion}`];
     }
     const parseReleases = (content: string): string[] =>
-      parseIndexDir(content, x => !/^\.+$/.test(x));
+      parseIndexDir(content, (x) => !/^\.+$/.test(x));
     for (const searchSubdir of searchSubdirs) {
       const content = await downloadHttpProtocol(
         ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
@@ -49,7 +52,7 @@ export async function resolvePackageReleases(
       );
       if (content) {
         const subdirReleases = parseReleases(content);
-        subdirReleases.forEach(x => releases.push(x));
+        subdirReleases.forEach((x) => releases.push(x));
       }
     }
     if (releases.length) {
@@ -60,7 +63,7 @@ export async function resolvePackageReleases(
   return null;
 }
 
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -69,9 +72,9 @@ export async function getPkgReleases({
   const artifactIdSplit = artifactId.split('_');
   const [artifact, scalaVersion] = artifactIdSplit;
 
-  const repoRoots = registryUrls.map(x => x.replace(/\/?$/, ''));
+  const repoRoots = registryUrls.map((x) => x.replace(/\/?$/, ''));
   const searchRoots: string[] = [];
-  repoRoots.forEach(repoRoot => {
+  repoRoots.forEach((repoRoot) => {
     // Optimize lookup order
     searchRoots.push(`${repoRoot}/${groupIdSplit.join('/')}`);
     searchRoots.push(`${repoRoot}/${groupIdSplit.join('.')}`);
@@ -93,7 +96,7 @@ export async function getPkgReleases({
         group: groupId,
         name: artifactId,
         dependencyUrl,
-        releases: versions.map(v => ({ version: v })),
+        releases: versions.map((v) => ({ version: v })),
       };
     }
   }

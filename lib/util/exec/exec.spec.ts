@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   exec as _cpExec,
   ExecOptions as ChildProcessExecOptions,
@@ -73,7 +74,7 @@ describe(`Child process execution wrapper`, () => {
   const docker = { image };
   const processEnv = envMock.full;
   const dockerPullCmd = `docker pull ${image}`;
-  const dockerRemoveCmd = `docker ps --filter name=${name} -aq | xargs --no-run-if-empty docker rm -f`;
+  const dockerRemoveCmd = `docker ps --filter name=${name} -aq`;
   const dockerPullOpts = { encoding };
   const dockerRemoveOpts = dockerPullOpts;
 

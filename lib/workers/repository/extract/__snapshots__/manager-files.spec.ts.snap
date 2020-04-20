@@ -3,22 +3,34 @@
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractAllPackageFiles 1`] = `
 Array [
   Object {
-    "deps": Array [],
+    "deps": Array [
+      Object {
+        "currentValue": "2.0.0",
+        "datasource": "npm",
+        "depIndex": 0,
+        "depName": "chalk",
+        "depType": "dependencies",
+        "prettyDepType": "dependency",
+      },
+    ],
     "ignoreNpmrcFile": undefined,
-    "lernaClient": "yarn",
-    "lernaDir": ".",
+    "lernaClient": undefined,
+    "lernaDir": undefined,
     "lernaPackages": undefined,
-    "npmLock": "package-lock.json",
-    "npmrc": "{}",
+    "managerPackageFileList": Array [
+      "package.json",
+    ],
+    "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "package.json",
     "packageJsonName": undefined,
     "packageJsonType": "app",
     "packageJsonVersion": undefined,
-    "pnpmShrinkwrap": "pnpm-lock.yaml",
+    "pnpmShrinkwrap": undefined,
     "skipInstalls": undefined,
-    "yarnLock": "yarn.lock",
+    "yarnLock": undefined,
     "yarnWorkspacesPackages": undefined,
-    "yarnrc": "{}",
+    "yarnrc": undefined,
   },
 ]
 `;
@@ -26,18 +38,13 @@ Array [
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractPackageFile 1`] = `
 Array [
   Object {
-    "autoReplace": true,
     "deps": Array [
       Object {
-        "autoReplaceData": Object {
-          "depIndex": 0,
-        },
+        "depIndex": 0,
       },
       Object {
-        "autoReplaceData": Object {
-          "depIndex": 1,
-          "replaceString": "abc",
-        },
+        "depIndex": 1,
+        "replaceString": "abc",
       },
     ],
     "manager": "html",

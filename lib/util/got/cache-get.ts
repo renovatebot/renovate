@@ -27,12 +27,12 @@ export default create({
         )
         .digest('hex');
       if (!global.repoCache[cacheKey] || options.useCache === false) {
-        global.repoCache[cacheKey] = next(options).catch(err => {
+        global.repoCache[cacheKey] = next(options).catch((err) => {
           delete global.repoCache[cacheKey];
           throw err;
         });
       }
-      return global.repoCache[cacheKey].then(response => ({
+      return global.repoCache[cacheKey].then((response) => ({
         ...response,
         body: clone(response.body),
       }));

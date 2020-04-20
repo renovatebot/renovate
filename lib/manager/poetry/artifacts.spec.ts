@@ -12,6 +12,11 @@ import { resetPrefetchedImages } from '../../util/exec/docker';
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
+jest.mock('../../util/exec/docker/index', () =>
+  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+    removeDanglingContainers: jest.fn(),
+  })
+);
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -22,10 +27,10 @@ const config = {
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setExecConfig(config);
+    await setExecConfig(config);
     resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {
@@ -80,7 +85,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker', async () => {
-    setExecConfig({
+    await setExecConfig({
       ...config,
       binarySource: BinarySource.Docker,
       dockerUser: 'foobar',

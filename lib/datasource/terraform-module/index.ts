@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import got from '../../util/got';
+import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
+
+const http = new Http(id);
 
 interface RegistryRepository {
   registry: string;
@@ -43,13 +45,13 @@ interface TerraformRelease {
 }
 
 /**
- * terraform.getPkgReleases
+ * terraform.getReleases
  *
  * This function will fetch a package from the specified Terraform registry and return all semver versions.
  *  - `sourceUrl` is supported of "source" field is set
  *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
  */
-export async function getPkgReleases({
+export async function getReleases({
   lookupName,
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -72,12 +74,7 @@ export async function getPkgReleases({
     return cachedResult;
   }
   try {
-    const res: TerraformRelease = (
-      await got(pkgUrl, {
-        json: true,
-        hostType: id,
-      })
-    ).body;
+    const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
     if (returnedName !== repository) {
       logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
@@ -92,7 +89,7 @@ export async function getPkgReleases({
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    dep.releases = res.versions.map(version => ({
+    dep.releases = res.versions.map((version) => ({
       version,
     }));
     if (pkgUrl.startsWith('https://registry.terraform.io/')) {

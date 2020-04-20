@@ -47,9 +47,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
-      upgrade.autoReplaceData = {
-        depIndex: 0,
-      };
+      upgrade.depIndex = 0;
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();
     });
@@ -62,16 +60,14 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
-      upgrade.autoReplaceData = {
-        depIndex: 0,
-        replaceString: script,
-      };
+      upgrade.depIndex = 0;
+      upgrade.replaceString = script;
       parentBranch = 'something';
       const srcAlreadyUpdated = src.replace('7.1.0', '7.1.1');
       const res = await doAutoReplace(upgrade, srcAlreadyUpdated, parentBranch);
       expect(res).toMatchSnapshot();
     });
-    it('throws if replaceString mismatch', async () => {
+    it('returns existing content if replaceString mismatch', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
@@ -80,13 +76,10 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
-      upgrade.autoReplaceData = {
-        depIndex: 0,
-        replaceString: script,
-      };
-      await expect(
-        doAutoReplace(upgrade, 'wrong source', parentBranch)
-      ).rejects.toThrow();
+      upgrade.depIndex = 0;
+      upgrade.replaceString = script;
+      const res = await doAutoReplace(upgrade, 'wrong source', parentBranch);
+      expect(res).toEqual('wrong source');
     });
     it('updates version and integrity', async () => {
       const script =
@@ -100,11 +93,28 @@ describe('workers/branch/auto-replace', () => {
         'sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx';
       upgrade.newValue = '0.11.1';
       upgrade.newDigest = 'sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-      upgrade.autoReplaceData = {
-        depIndex: 0,
-        replaceString: script,
-      };
+      upgrade.depIndex = 0;
+      upgrade.replaceString = script;
       const res = await doAutoReplace(upgrade, src, parentBranch);
+      expect(res).toMatchSnapshot();
+    });
+    it('updates with autoReplaceNewString', async () => {
+      const dockerfile =
+        'FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'node';
+      upgrade.lookupName = 'node';
+      upgrade.currentValue = '8.11.3-alpine';
+      upgrade.newValue = '8.11.4-alpine';
+      upgrade.currentDigest =
+        'sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d';
+      upgrade.newDigest = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+      const res = await doAutoReplace(upgrade, dockerfile, parentBranch);
       expect(res).toMatchSnapshot();
     });
   });

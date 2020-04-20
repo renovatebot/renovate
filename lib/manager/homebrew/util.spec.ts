@@ -5,7 +5,7 @@ describe('lib/manager/homebrew/util', () => {
     it('handles out of bounds case', () => {
       const content = 'some content';
       const idx = content.length * 2;
-      expect(skip(idx, content, c => c === '!')).toBe(idx);
+      expect(skip(idx, content, (c) => c === '!')).toBe(idx);
     });
   });
 });

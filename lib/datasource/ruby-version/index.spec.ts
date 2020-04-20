@@ -1,6 +1,6 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import { getPkgReleases } from '.';
+import { getReleases } from '.';
 
 jest.mock('../../util/got');
 
@@ -12,7 +12,7 @@ const rubyReleasesHtml = fs.readFileSync(
 );
 
 describe('datasource/gradle', () => {
-  describe('getPkgReleases', () => {
+  describe('getReleases', () => {
     beforeEach(() => {
       global.repoCache = {};
       return global.renovateCache.rmAll();
@@ -21,12 +21,12 @@ describe('datasource/gradle', () => {
       got.mockReturnValueOnce({
         body: rubyReleasesHtml,
       });
-      const res = await getPkgReleases();
+      const res = await getReleases();
       expect(res).toMatchSnapshot();
     });
     it('throws for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
-      await expect(getPkgReleases()).rejects.toThrow();
+      await expect(getReleases()).rejects.toThrow();
     });
 
     it('throws for 404', async () => {
@@ -35,7 +35,7 @@ describe('datasource/gradle', () => {
           statusCode: 404,
         })
       );
-      await expect(getPkgReleases()).rejects.toThrow();
+      await expect(getReleases()).rejects.toThrow();
     });
   });
 });

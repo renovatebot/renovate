@@ -22,20 +22,26 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const platform = mocked(_platform);
+jest.mock('../../util/exec/docker/index', () =>
+  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
+    removeDanglingContainers: jest.fn(),
+  })
+);
 
 const config = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   dockerUser: 'foobar',
+  composerIgnorePlatformReqs: true,
 };
 
 describe('.updateArtifacts()', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setUtilConfig(config);
+    await setUtilConfig(config);
     resetPrefetchedImages();
   });
   it('returns if no composer.lock found', async () => {
@@ -124,7 +130,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
-    setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Current composer.lock');
 
     const execSnapshots = mockExecAll(exec);
@@ -202,5 +208,25 @@ describe('.updateArtifacts()', () => {
         config,
       })
     ).rejects.toThrow();
+  });
+  it('disables ignorePlatformReqs', async () => {
+    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New composer.lock' as any);
+    platform.getRepoStatus.mockResolvedValue({
+      modified: ['composer.lock'],
+    } as StatusResult);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          composerIgnorePlatformReqs: false,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });

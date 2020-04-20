@@ -47,7 +47,7 @@ export function migrateConfig(
   try {
     if (!optionTypes) {
       optionTypes = {};
-      options.forEach(option => {
+      options.forEach((option) => {
         optionTypes[option.name] = option.type;
       });
     }
@@ -69,7 +69,7 @@ export function migrateConfig(
         if (is.array(val)) {
           migratedConfig.packageRules = migratedConfig.packageRules || [];
           const migratedPathRules = migratedConfig.pathRules.map(
-            p => migrateConfig(p, key).migratedConfig
+            (p) => migrateConfig(p, key).migratedConfig
           );
           migratedConfig.packageRules = migratedPathRules.concat(
             migratedConfig.packageRules
@@ -282,7 +282,9 @@ export function migrateConfig(
         isMigrated = true;
         migratedConfig.packageRules = migratedConfig.packageRules || [];
         migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages.map(p => migrateConfig(p, key).migratedConfig)
+          migratedConfig.packages.map(
+            (p) => migrateConfig(p, key).migratedConfig
+          )
         );
         delete migratedConfig.packages;
       } else if (key === 'excludedPackageNames') {
@@ -386,7 +388,7 @@ export function migrateConfig(
           '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}'
         );
       } else if (key === 'depTypes' && is.array(val)) {
-        val.forEach(depType => {
+        val.forEach((depType) => {
           if (is.object(depType) && !is.array(depType)) {
             const depTypeName = (depType as any).depType;
             if (depTypeName) {

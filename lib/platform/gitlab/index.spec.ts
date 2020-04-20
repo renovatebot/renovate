@@ -54,8 +54,8 @@ describe('platform/gitlab', () => {
     });
   });
 
-  afterEach(() => {
-    gitlab.cleanRepo();
+  afterEach(async () => {
+    await gitlab.cleanRepo();
   });
 
   describe('initPlatform()', () => {
@@ -164,8 +164,8 @@ describe('platform/gitlab', () => {
     });
   });
   describe('cleanRepo()', () => {
-    it('exists', () => {
-      gitlab.cleanRepo();
+    it('exists', async () => {
+      await gitlab.cleanRepo();
     });
   });
 
@@ -565,7 +565,7 @@ describe('platform/gitlab', () => {
   describe('setBranchStatus', () => {
     it.each([BranchStatus.green, BranchStatus.yellow, BranchStatus.red])(
       'sets branch status yellow',
-      async state => {
+      async (state) => {
         await initRepo();
         await gitlab.setBranchStatus({
           branchName: 'some-branch',

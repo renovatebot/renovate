@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/nuget getPkgReleases handles paginated results (v2) 1`] = `
+exports[`datasource/nuget getReleases handles paginated results (v2) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -14,7 +14,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data (v2) 1`] = `
+exports[`datasource/nuget getReleases processes real data (v2) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -152,7 +152,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data (v3) feed is a nuget.org 1`] = `
+exports[`datasource/nuget getReleases processes real data (v3) feed is a nuget.org 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -248,7 +248,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data (v3) feed is not a nuget.org 1`] = `
+exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -344,7 +344,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data with no github project url (v2) 1`] = `
+exports[`datasource/nuget getReleases processes real data with no github project url (v2) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -356,7 +356,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data with no github project url (v3) 1`] = `
+exports[`datasource/nuget getReleases processes real data with no github project url (v3) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -368,7 +368,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data without project url (v2) 1`] = `
+exports[`datasource/nuget getReleases processes real data without project url (v2) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
@@ -505,7 +505,7 @@ Object {
 }
 `;
 
-exports[`datasource/nuget getPkgReleases processes real data without project url (v3) 1`] = `
+exports[`datasource/nuget getReleases processes real data without project url (v3) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [

@@ -45,12 +45,12 @@ export function getMeta(rec: BunyanRecord): string {
     return '';
   }
   let res = rec.module ? ` [${rec.module}]` : ``;
-  const filteredMeta = metaFields.filter(elem => rec[elem]);
+  const filteredMeta = metaFields.filter((elem) => rec[elem]);
   if (!filteredMeta.length) {
     return res;
   }
   const metaStr = filteredMeta
-    .map(field => `${field}=${rec[field]}`)
+    .map((field) => `${field}=${rec[field]}`)
     .join(', ');
   res = ` (${metaStr})${res}`;
   return chalk.gray(res);
@@ -62,7 +62,7 @@ export function getDetails(rec: BunyanRecord): string {
   }
   const recFiltered = { ...rec };
   delete recFiltered.module;
-  Object.keys(recFiltered).forEach(key => {
+  Object.keys(recFiltered).forEach((key) => {
     if (
       key === 'logContext' ||
       bunyanFields.includes(key) ||
@@ -76,7 +76,7 @@ export function getDetails(rec: BunyanRecord): string {
     return '';
   }
   return `${remainingKeys
-    .map(key => `${indent(`"${key}": ${stringify(recFiltered[key])}`, true)}`)
+    .map((key) => `${indent(`"${key}": ${stringify(recFiltered[key])}`, true)}`)
     .join(',\n')}\n`;
 }
 

@@ -17,7 +17,7 @@ export interface RenovateCliConfig extends Record<string, any> {
 export function getConfig(input: string[]): RenovateCliConfig {
   // massage migrated configuration keys
   const argv = input
-    .map(a =>
+    .map((a) =>
       a
         .replace('--endpoints=', '--host-rules=')
         .replace('--expose-env=true', '--trust-level=high')
@@ -27,12 +27,12 @@ export function getConfig(input: string[]): RenovateCliConfig {
         .replace('"endpoint":"', '"baseUrl":"')
         .replace('"host":"', '"hostName":"')
     )
-    .filter(a => !a.startsWith('--git-fs'));
+    .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
 
   const config: RenovateCliConfig = {};
 
-  const coersions = {
+  const coersions: Record<string, (arg: string) => unknown> = {
     boolean: (val: string): boolean => {
       if (val === 'true' || val === '') {
         return true;
@@ -53,7 +53,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
       try {
         return JSON.parse(val);
       } catch (err) {
-        return val.split(',').map(el => el.trim());
+        return val.split(',').map((el) => el.trim());
       }
     },
     object: (val: string): any => {
@@ -72,7 +72,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
 
   let program = new Command().arguments('[repositories...]');
 
-  options.forEach(option => {
+  options.forEach((option) => {
     if (option.cli !== false) {
       const param = `<${option.type}>`.replace('<boolean>', '[boolean]');
       const optionString = `${getCliName(option)} ${param}`;
@@ -103,14 +103,14 @@ export function getConfig(input: string[]): RenovateCliConfig {
   program = program
     .version(version, '-v, --version')
     .on('--help', helpConsole)
-    .action(repositories => {
+    .action((repositories) => {
       if (repositories && repositories.length) {
         config.repositories = repositories;
       }
     })
     .parse(argv);
 
-  options.forEach(option => {
+  options.forEach((option) => {
     if (option.cli !== false) {
       if (program[option.name] !== undefined) {
         config[option.name] = program[option.name];
