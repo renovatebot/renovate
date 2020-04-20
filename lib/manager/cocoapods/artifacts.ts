@@ -9,6 +9,21 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 
+const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
+
+function getPluginCommands(content: string): string[] {
+  const result = new Set<string>();
+  const lines: string[] = content.split('\n');
+  lines.forEach((line) => {
+    const match = pluginRegex.exec(line);
+    if (match) {
+      const { plugin } = match.groups;
+      result.add(`gem install ${plugin}`);
+    }
+  });
+  return [...result];
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -50,7 +65,7 @@ export async function updateArtifacts({
   const tagConstraint =
     match && match.groups ? match.groups.cocoapodsVersion : null;
 
-  const cmd = 'pod install';
+  const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {

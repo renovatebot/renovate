@@ -3,7 +3,7 @@ import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
-import { platform } from '../../platform';
+import { readLocalFile } from '../../util/fs';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SkipReason } from '../../types';
@@ -300,7 +300,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const pkg = extractPackage(content, packageFile);
       if (pkg) {

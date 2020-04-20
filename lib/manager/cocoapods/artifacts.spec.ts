@@ -124,7 +124,7 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: ['foo'],
-        newPackageFileContent: '',
+        newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
     ).toMatchSnapshot();

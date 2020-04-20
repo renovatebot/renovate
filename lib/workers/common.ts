@@ -13,6 +13,7 @@ import {
 } from '../config';
 import { File, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
+import { ChangeLogResult } from './pr/changelog/common';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -47,8 +48,11 @@ export interface BranchUpgradeConfig
   releaseTimestamp?: string;
 
   sourceDirectory?: string;
+
   updatedPackageFiles?: File[];
   updatedArtifacts?: File[];
+
+  logJSON?: ChangeLogResult;
 }
 
 export enum PrResult {

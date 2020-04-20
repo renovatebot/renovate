@@ -2,10 +2,10 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageFile, PackageDependency } from '../common';
-import { platform } from '../../platform';
 import { SkipReason } from '../../types';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
+import { readLocalFile } from '../../util/fs';
 
 interface Repo {
   name?: string;
@@ -102,7 +102,7 @@ export async function extractPackageFile(
 
   // handle lockfile
   const lockfilePath = fileName.replace(/\.json$/, '.lock');
-  const lockContents = await platform.getFile(lockfilePath);
+  const lockContents = await readLocalFile(lockfilePath, 'utf8');
   let lockParsed;
   if (lockContents) {
     logger.debug({ packageFile: fileName }, 'Found composer lock file');

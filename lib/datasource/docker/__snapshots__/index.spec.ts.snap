@@ -7,6 +7,13 @@ Object {
 }
 `;
 
+exports[`api/docker getRegistryRepository supports registryUrls 1`] = `
+Object {
+  "registry": "my.local.registry/prefix/",
+  "repository": "image",
+}
+`;
+
 exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
 [MockFunction] {
   "calls": Array [
