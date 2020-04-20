@@ -68,7 +68,7 @@ ENV RENOVATE_BINARY_SOURCE=docker
 FROM final-base as latest
 
 RUN apt-get update && \
-    apt-get install -y gpg wget unzip xz-utils openssh-client bsdtar build-essential openjdk-8-jre-headless dirmngr && \
+    apt-get install -y gpg wget unzip xz-utils openssh-client bsdtar build-essential openjdk-8-jdk-headless dirmngr && \
     rm -rf /var/lib/apt/lists/*
 
 
