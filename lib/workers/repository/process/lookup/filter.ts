@@ -4,6 +4,8 @@ import * as allVersioning from '../../../../versioning';
 import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as npmVersioning from '../../../../versioning/npm';
+import * as pep440 from '../../../../versioning/pep440';
+import * as poetryVersioning from '../../../../versioning/poetry';
 import { regEx } from '../../../../util/regex';
 
 export interface FilterConfig {
@@ -94,6 +96,17 @@ export function filterVersions(
       );
       filteredVersions = filteredVersions.filter((v) =>
         semver.satisfies(semver.coerce(v), allowedVersions)
+      );
+    } else if (
+      versioning === poetryVersioning.id &&
+      pep440.isValid(allowedVersions)
+    ) {
+      logger.debug(
+        { depName: config.depName },
+        'Falling back to pypi syntax for allowedVersions'
+      );
+      filteredVersions = filteredVersions.filter((v) =>
+        pep440.matches(v, allowedVersions)
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
