@@ -4,6 +4,7 @@ import * as _yarnHelper from '../../../manager/npm/post-update/yarn';
 import { getName, mocked } from '../../../../test/util';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
 import * as _env from '../../../util/exec/env';
+import { BinarySource } from '../../../util/exec/common';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -62,7 +63,7 @@ describe(getName(__filename), () => {
     }
   );
   it.each([['1.0.0'], ['2.0.0']])(
-    'detects yarnIntegrity using yarn v%s',
+    'docker using yarn v%s',
     async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
@@ -72,6 +73,8 @@ describe(getName(__filename), () => {
       fs.readFile = jest.fn(() => 'package-lock-contents') as never;
       const config = {
         upgrades: [{ yarnIntegrity: true }],
+        binarySource: BinarySource.Docker,
+        cacheDir: 'dummy/dir',
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { depName: 'some-dep', isLockfileUpdate: true },
@@ -94,14 +97,7 @@ describe(getName(__filename), () => {
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
-  it('finds yarn globally', async () => {
-    const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const res = await yarnHelper.generateLockFile('some-dir');
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-  });
+
   it.each([['1.0.0'], ['2.0.0']])(
     'finds yarn v%s globally',
     async (yarnVersion) => {
