@@ -80,7 +80,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
 
   if (
     !data.base?.ref ||
-    !data.head?.ref ||
+    !data.head?.label ||
     !data.head?.sha ||
     !data.head?.repo?.full_name
   ) {
@@ -97,7 +97,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     title: data.title,
     body: data.body,
     sha: data.head.sha,
-    branchName: data.head.ref,
+    branchName: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
@@ -491,11 +491,13 @@ const platform: Platform = {
     }
 
     // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.isStale === undefined) {
-      pr.isStale = await platform.isBranchStale(pr.branchName);
-    }
-    if (pr.isModified === undefined) {
-      pr.isModified = await isPRModified(config.repository, pr.branchName);
+    if (pr.state !== 'closed') {
+      if (pr.isStale === undefined) {
+        pr.isStale = await platform.isBranchStale(pr.branchName);
+      }
+      if (pr.isModified === undefined) {
+        pr.isModified = await isPRModified(config.repository, pr.branchName);
+      }
     }
 
     return pr;
