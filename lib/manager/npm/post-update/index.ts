@@ -150,15 +150,17 @@ export async function writeExistingFiles(
     const massagedFile: PackageJson = JSON.parse(
       await platform.getFile(packageFile.packageFile)
     );
-    if (massagedFile.name) {
-      massagedFile.name = massagedFile.name.replace(/[{}]/g, '');
+    if (massagedFile) {
+      if (massagedFile.name) {
+        massagedFile.name = massagedFile.name.replace(/[{}]/g, '');
+      }
+      delete massagedFile.engines;
+      delete massagedFile.scripts;
+      await fs.outputFile(
+        upath.join(basedir, 'package.json'),
+        JSON.stringify(massagedFile)
+      );
     }
-    delete massagedFile.engines;
-    delete massagedFile.scripts;
-    await fs.outputFile(
-      upath.join(basedir, 'package.json'),
-      JSON.stringify(massagedFile)
-    );
     const npmrc = packageFile.npmrc || config.npmrc;
     if (npmrc) {
       await fs.outputFile(upath.join(basedir, '.npmrc'), npmrc);
