@@ -202,7 +202,7 @@
     "@types/js-yaml": "3.12.3",
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
-    "@types/lodash": "4.14.149",
+    "@types/lodash": "4.14.150",
     "@types/luxon": "1.22.0",
     "@types/markdown-it": "10.0.0",
     "@types/moment-timezone": "0.5.13",
