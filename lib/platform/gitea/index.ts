@@ -166,14 +166,32 @@ async function retrieveDefaultConfig(
 
 function getLabelList(): Promise<helper.Label[]> {
   if (config.labelList === null) {
-    config.labelList = helper
+    const repoLabels = helper
       .getRepoLabels(config.repository, {
         useCache: false,
       })
       .then((labels) => {
-        logger.debug(`Retrieved ${labels.length} Labels`);
+        logger.debug(`Retrieved ${labels.length} repo labels`);
         return labels;
       });
+
+    const orgLabels = helper
+      .getOrgLabels(config.repository.split('/')[0], {
+        useCache: false,
+      })
+      .then((labels) => {
+        logger.debug(`Retrieved ${labels.length} org labels`);
+        return labels;
+      })
+      .catch((err) => {
+        // Will fail if owner of repo is not org or Gitea version < 1.12
+        logger.debug(`Unable to fetch organization labels`);
+        return [];
+      });
+
+    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) => {
+      return [].concat(...labels);
+    });
   }
 
   return config.labelList;

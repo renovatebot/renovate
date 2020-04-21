@@ -135,9 +135,24 @@ describe('platform/gitea', () => {
     { id: 3, body: '### some-topic\n\nsome-content' },
   ];
 
-  const mockLabels: ght.Label[] = [
+  const mockRepoLabels: ght.Label[] = [
     { id: 1, name: 'some-label', description: 'its a me', color: '#000000' },
     { id: 2, name: 'other-label', description: 'labelario', color: '#ffffff' },
+  ];
+
+  const mockOrgLabels: ght.Label[] = [
+    {
+      id: 3,
+      name: 'some-org-label',
+      description: 'its a org me',
+      color: '#0000aa',
+    },
+    {
+      id: 4,
+      name: 'other-org-label',
+      description: 'org labelario',
+      color: '#ffffaa',
+    },
   ];
 
   const gsmInitRepo = jest.fn();
@@ -789,7 +804,10 @@ describe('platform/gitea', () => {
 
     it('should resolve and apply optional labels to pull request', async () => {
       helper.createPR.mockResolvedValueOnce(mockNewPR);
-      helper.getRepoLabels.mockResolvedValueOnce(mockLabels);
+      helper.getRepoLabels.mockResolvedValueOnce(mockRepoLabels);
+      helper.getOrgLabels.mockResolvedValueOnce(mockOrgLabels);
+
+      const mockLabels = mockRepoLabels.concat(mockOrgLabels);
 
       await initFakeRepo();
       await gitea.createPr({
@@ -1157,8 +1175,9 @@ index 0000000..2173594
 
   describe('deleteLabel', () => {
     it('should delete a label which exists', async () => {
-      const mockLabel = mockLabels[0];
-      helper.getRepoLabels.mockResolvedValueOnce(mockLabels);
+      const mockLabel = mockRepoLabels[0];
+      helper.getRepoLabels.mockResolvedValueOnce(mockRepoLabels);
+      helper.getOrgLabels.mockRejectedValueOnce(new Error());
       await initFakeRepo();
       await gitea.deleteLabel(42, mockLabel.name);
 
@@ -1171,7 +1190,8 @@ index 0000000..2173594
     });
 
     it('should gracefully fail with warning if label is missing', async () => {
-      helper.getRepoLabels.mockResolvedValueOnce(mockLabels);
+      helper.getRepoLabels.mockResolvedValueOnce(mockRepoLabels);
+      helper.getOrgLabels.mockResolvedValueOnce([]);
       await initFakeRepo();
       await gitea.deleteLabel(42, 'missing');
 
