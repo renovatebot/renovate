@@ -3,6 +3,7 @@
 exports[`lib/manager/dockerfile/extract extractPackageFile() detects ["stage"] and ["final"] deps of docker multi-stage build. 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.15.1-alpine",
@@ -12,6 +13,7 @@ Array [
     "replaceString": "node:8.15.1-alpine",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "1.7.3",
     "datasource": "docker",
@@ -20,6 +22,7 @@ Array [
     "replaceString": "golang:1.7.3",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
@@ -33,6 +36,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() extracts images on adjacent lines 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentValue": "8.11.3-alpine",
@@ -42,6 +46,7 @@ Array [
     "replaceString": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "1.1.1",
     "datasource": "docker",
@@ -55,6 +60,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() extracts multiple FROM tags 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6.12.3",
@@ -64,6 +70,7 @@ Array [
     "replaceString": "node:6.12.3",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "3.6-slim",
     "datasource": "docker",
@@ -77,6 +84,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles COPY --from 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.11.0",
     "datasource": "docker",
@@ -90,6 +98,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles abnoral spacing 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.7.0",
@@ -104,6 +113,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles calico/node 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -117,6 +127,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles comments 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -131,6 +142,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8",
@@ -145,6 +157,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts and suffix 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8-alpine",
@@ -159,6 +172,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts with namespace 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8",
@@ -173,6 +187,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts with port 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8",
@@ -187,6 +202,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts with port without tag 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -201,6 +217,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles digest 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentValue": undefined,
@@ -215,6 +232,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles from as 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.9.0-alpine",
@@ -229,6 +247,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles naked dep 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -243,6 +262,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles namespaced images 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8",
@@ -257,6 +277,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles tag 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "8.9.0-alpine",
@@ -271,6 +292,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles tag and digest 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentValue": "8.9.0",
@@ -285,6 +307,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() is case insensitive 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -299,6 +322,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() skips index reference COPY --from tags 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6.12.3",
@@ -313,6 +337,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() skips named multistage COPY --from tags 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6.12.3",
@@ -327,6 +352,7 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() skips named multistage FROM tags 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "6.12.3",

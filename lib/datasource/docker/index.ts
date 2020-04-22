@@ -43,8 +43,6 @@ export const defaultConfig = {
   group: {
     commitMessageTopic: '{{{groupName}}} Docker tags',
   },
-  autoReplaceStringTemplate:
-    '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
 };
 
 const http = new Http(id);
