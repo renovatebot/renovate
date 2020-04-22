@@ -27,7 +27,7 @@ function findDependencies(
 
       const registry = currentItem.registry ? `${currentItem.registry}/` : '';
       packageDependencies.push(
-        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`)
+        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`, false)
       );
     } else {
       findDependencies(parsedContent[key], packageDependencies);

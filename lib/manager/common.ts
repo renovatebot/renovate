@@ -169,6 +169,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   updates?: LookupUpdate[];
   versionLine?: number;
   replaceString?: string;
+  autoReplaceStringTemplate?: string;
   depIndex?: number;
 }
 
