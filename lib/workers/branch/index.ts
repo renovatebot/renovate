@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import { join } from 'path';
+import { concat } from 'lodash';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -38,7 +40,7 @@ import {
 import { BranchStatus } from '../../types';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -319,6 +321,10 @@ export async function processBranch(
     }
 
     if (
+      /* Only run post-upgrade tasks if there are changes to package files... */
+      (config.updatedPackageFiles?.length > 0 ||
+        /* ... or changes to artifacts */
+        config.updatedArtifacts?.length > 0) &&
       global.trustLevel === 'high' &&
       is.nonEmptyArray(config.allowedPostUpgradeCommands)
     ) {
@@ -333,6 +339,22 @@ export async function processBranch(
       const fileFilters = config.postUpgradeTasks.fileFilters || [];
 
       if (is.nonEmptyArray(commands)) {
+        // Persist updated files in file system so any executed commands can see them
+        for (const file of concat(
+          config.updatedPackageFiles,
+          config.updatedArtifacts
+        )) {
+          if (file.name !== '|delete|') {
+            let contents;
+            if (typeof file.contents === 'string') {
+              contents = Buffer.from(file.contents);
+            } else {
+              contents = file.contents;
+            }
+            await writeLocalFile(join(config.localDir, file.name), contents);
+          }
+        }
+
         for (const cmd of commands) {
           if (
             !config.allowedPostUpgradeCommands.some((pattern) =>
