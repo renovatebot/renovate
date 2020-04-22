@@ -3,7 +3,6 @@ import { Preset } from './common';
 import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { ensureTrailingSlash } from '../../util/url';
-import { RenovateConfig } from '../common';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
@@ -43,16 +42,13 @@ async function fetchJSONFile(
   }
 }
 
-export async function getPreset(
+export async function getPresetFromEndpoint(
   pkgName: string,
-  presetName = 'default',
-  baseConfig?: RenovateConfig
+  presetName: string,
+  endpoint = 'https://api.github.com/'
 ): Promise<Preset> {
-  const endpoint = ensureTrailingSlash(
-    (baseConfig?.platform === PLATFORM_TYPE_GITHUB
-      ? baseConfig?.endpoint
-      : null) ?? 'https://api.github.com/'
-  );
+  // eslint-disable-next-line no-param-reassign
+  endpoint = ensureTrailingSlash(endpoint);
   if (presetName === 'default') {
     try {
       const defaultJson = await fetchJSONFile(
@@ -73,4 +69,11 @@ export async function getPreset(
     }
   }
   return fetchJSONFile(pkgName, `${presetName}.json`, endpoint);
+}
+
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
+  return getPresetFromEndpoint(pkgName, presetName);
 }

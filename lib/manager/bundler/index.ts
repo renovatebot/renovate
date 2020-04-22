@@ -1,5 +1,4 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 import { updateArtifacts } from './artifacts';
 import { getRangeStrategy } from './range';
 import { LANGUAGE_RUBY } from '../../constants/languages';
@@ -18,7 +17,6 @@ export {
   updateArtifacts, // Optional
   getRangeStrategy, // Optional
   language, // Optional
-  updateDependency, // Mandatory
 };
 
 export const defaultConfig = {

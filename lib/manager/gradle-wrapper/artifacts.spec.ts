@@ -86,10 +86,14 @@ describe(getName(__filename), () => {
         'gradlew.bat',
       ].forEach((file) => {
         expect(
-          readFileSync(resolve(__dirname, `./__fixtures__/testFiles/${file}`))
+          readFileSync(
+            resolve(__dirname, `./__fixtures__/testFiles/${file}`),
+            'utf8'
+          )
         ).toEqual(
           readFileSync(
-            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`)
+            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
+            'utf8'
           )
         );
       });
