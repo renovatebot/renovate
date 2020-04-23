@@ -130,20 +130,18 @@ export async function branchifyUpgrades(
         } = upgrade;
         const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
         const previousNewValue = seenUpdates[upgradeKey];
-        if (previousNewValue) {
-          if (previousNewValue !== newValue) {
-            logger.info(
-              {
-                manager,
-                packageFile,
-                depName,
-                currentValue,
-                previousNewValue,
-                thisNewValue: newValue,
-              },
-              'Ignoring upgrade collision'
-            );
-          }
+        if (previousNewValue && previousNewValue !== newValue) {
+          logger.info(
+            {
+              manager,
+              packageFile,
+              depName,
+              currentValue,
+              previousNewValue,
+              thisNewValue: newValue,
+            },
+            'Ignoring upgrade collision'
+          );
           return false;
         }
         seenUpdates[upgradeKey] = newValue;
