@@ -488,6 +488,13 @@ function autoExtendMavenRange(
   } else {
     interval.leftValue = newValue;
   }
+  if (interval.leftValue && interval.rightValue) {
+    if (compare(interval.leftValue, interval.rightValue) !== 1) {
+      return rangeToStr(range);
+    } else {
+      return currentRepresentation;
+    }
+  }
   return rangeToStr(range);
 }
 
