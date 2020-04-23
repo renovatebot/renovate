@@ -19,7 +19,7 @@ function getPythonConstraint(
   const { python } = compatibility;
 
   if (python) {
-    logger.debug('Using rubyConstraint from config');
+    logger.debug('Using python constraint from config');
     return python;
   }
   const pm = pythonRe.exec(newPackageFileContent);
