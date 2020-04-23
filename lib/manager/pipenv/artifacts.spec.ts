@@ -66,7 +66,7 @@ describe('.updateArtifacts()', () => {
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: '{}',
+        newPackageFileContent: '[requires]\npython_full_version = "3.7.6"',
         config,
       })
     ).toBeNull();
@@ -83,8 +83,8 @@ describe('.updateArtifacts()', () => {
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: '{}',
-        config,
+        newPackageFileContent: '[requires]\npython_version = "3.7"',
+        config: { ...config, compatibility: { python: '3.7' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -101,7 +101,7 @@ describe('.updateArtifacts()', () => {
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: '{}',
+        newPackageFileContent: '[requires]\npython_version = "3.7"',
         config: dockerConfig,
       })
     ).not.toBeNull();

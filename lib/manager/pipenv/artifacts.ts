@@ -2,12 +2,32 @@ import { ensureDir, outputFile, readFile } from 'fs-extra';
 import { join } from 'upath';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
-import { UpdateArtifactsResult, UpdateArtifact } from '../common';
+import {
+  UpdateArtifactsResult,
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+} from '../common';
 import { platform } from '../../platform';
+
+const pythonRe = /python(?:_full)_version\s=\s"(?<version>.+?)"/;
+
+function getPythonConstraint(
+  newPackageFileContent: string,
+  config: UpdateArtifactsConfig
+): string | undefined | null {
+  const { compatibility = {} } = config;
+  const { python } = compatibility;
+
+  if (python) {
+    logger.debug('Using rubyConstraint from config');
+    return python;
+  }
+  const pm = pythonRe.exec(newPackageFileContent);
+  return pm?.groups?.version;
+}
 
 export async function updateArtifacts({
   packageFileName: pipfileName,
-  updatedDeps: _updatedDeps,
   newPackageFileContent: newPipfileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -28,7 +48,7 @@ export async function updateArtifacts({
     const localPipfileFileName = join(config.localDir, pipfileName);
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
-    const cmd = 'pipenv lock';
+    const cmd = ['pip install pipenv', 'pipenv lock'];
     const execOptions: ExecOptions = {
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
@@ -36,6 +56,7 @@ export async function updateArtifacts({
       docker: {
         image: 'renovate/pipenv',
         volumes: [cacheDir],
+        tagConstraint: getPythonConstraint(newPipfileContent, config),
       },
     };
     logger.debug({ cmd }, 'pipenv lock command');

@@ -14,6 +14,24 @@ Array [
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
+    "cmd": "pip install pipenv",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
     "cmd": "pipenv lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
@@ -36,6 +54,24 @@ Array [
 
 exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
 Array [
+  Object {
+    "cmd": "pip install pipenv",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "timeout": 900000,
+    },
+  },
   Object {
     "cmd": "pipenv lock",
     "options": Object {
@@ -72,7 +108,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_pipenv --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv bash -l -c \\"pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_pipenv --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv bash -l -c \\"pip install pipenv && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
