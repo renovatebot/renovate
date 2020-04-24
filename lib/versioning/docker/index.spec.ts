@@ -115,6 +115,28 @@ describe('docker.', () => {
         );
       });
     });
+
+    it('sorts unstable', () => {
+      const versions = [
+        '3.7.0',
+        '3.7-alpine',
+        '3.7.0b1',
+        '3.8.0-alpine',
+        '3.8.0b1-alpine',
+        '3.8.2',
+        '3.8.0',
+      ];
+
+      expect(versions.sort(docker.sortVersions)).toEqual([
+        '3.7.0b1',
+        '3.7.0',
+        '3.7-alpine',
+        '3.8.0b1-alpine',
+        '3.8.0-alpine',
+        '3.8.0',
+        '3.8.2',
+      ]);
+    });
   });
   describe('getNewValue(', () => {
     it('returns toVersion', () => {

@@ -1,4 +1,3 @@
-import { is } from 'semver-stable';
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
@@ -9,21 +8,23 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-// const numberRe = /^(?:0|[1-9]+)$/;
-// function toNumber(str: string): number {
-//   return numberRe.test(str) ? Number(str) : Number.NaN;
-// }
+const versionRe = /^(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$/;
 
-function parse(version: string): any {
+function parse(version: string): generic.GenericVersion {
   const versionPieces = version.replace(/^v/, '').split('-');
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
-  const release = prefix.split('.').map(Number);
+  const m = versionRe.exec(prefix);
+  if (!m?.groups) {
+    return null;
+  }
+
+  const release = m.groups.version.split('.').map(Number);
   // eslint-disable-next-line @typescript-eslint/unbound-method
   if (release.some(Number.isNaN)) {
     return null;
   }
-  return { release, suffix };
+  return { release, suffix, prerelease: m.groups.prerelease };
 }
 
 function valueToVersion(value: string): string {
@@ -53,6 +54,17 @@ function compare(version1: string, vervion2: string): number {
       return part1 - part2;
     }
   }
+  if (parsed1.prerelease !== parsed2.prerelease) {
+    // unstable is lower
+    if (!parsed1.prerelease && parsed2.prerelease) {
+      return 1;
+    }
+    if (parsed1.prerelease && !parsed2.prerelease) {
+      return -1;
+    }
+    // alphabetic order
+    return parsed2.prerelease.localeCompare(parsed1.prerelease);
+  }
   // equals
   return parsed2.suffix.localeCompare(parsed1.suffix);
 }
@@ -66,19 +78,12 @@ function isCompatible(version: string, range: string): boolean {
   );
 }
 
-const stableRe = /^(?:\d+(?:\.\d+)*)$/;
-
-function isStable(version: string): boolean {
-  return stableRe.test(valueToVersion(version));
-}
-
 export const api: VersioningApi = {
   ...generic.create({
     parse,
     compare,
   }),
   isCompatible,
-  isStable,
   valueToVersion,
 };
 
