@@ -60,7 +60,7 @@ export async function getChangeLogJSON({
   }
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const baseURL = `${protocol}//${host}/`;
+  const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
@@ -154,7 +154,7 @@ export async function getChangeLogJSON({
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
         if (prevHead && nextHead) {
-          release.compare.url = `${baseURL}${repository}/compare/${prevHead}...${nextHead}`;
+          release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
         await renovateCache.set(
@@ -171,7 +171,7 @@ export async function getChangeLogJSON({
   let res: ChangeLogResult = {
     project: {
       apiBaseURL,
-      baseURL,
+      baseUrl,
       github: repository,
       repository: sourceUrl,
       depName,

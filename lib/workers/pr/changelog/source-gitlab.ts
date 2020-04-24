@@ -61,7 +61,7 @@ export async function getChangeLogJSON({
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
-  const baseURL = 'https://gitlab.com/';
+  const baseUrl = 'https://gitlab.com/';
   const apiBaseURL = 'https://gitlab.com/api/v4/';
   const repository = pathname.slice(1).replace(/\/$/, '').replace(/\.git/, '');
   if (repository.split('/').length !== 2) {
@@ -130,7 +130,7 @@ export async function getChangeLogJSON({
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
         if (prevHead && nextHead) {
-          release.compare.url = `${baseURL}${repository}/compare/${prevHead}...${nextHead}`;
+          release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
         await renovateCache.set(
@@ -147,7 +147,7 @@ export async function getChangeLogJSON({
   let res: ChangeLogResult = {
     project: {
       apiBaseURL,
-      baseURL,
+      baseUrl,
       gitlab: repository,
       repository: sourceUrl,
       depName,

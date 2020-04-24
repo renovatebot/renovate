@@ -5,7 +5,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://api.github.com/",
-    "baseURL": "https://github.com/",
+    "baseUrl": "https://github.com/",
     "depName": "@renovate/no",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
@@ -56,7 +56,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://github-enterprise.example.com/",
-    "baseURL": "https://github-enterprise.example.com/",
+    "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github-enterprise.example.com/chalk/chalk",
@@ -107,7 +107,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://api.github.com/",
-    "baseURL": "https://github.com/",
+    "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
@@ -158,7 +158,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://api.github.com/",
-    "baseURL": "https://github.com/",
+    "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
@@ -209,7 +209,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://api.github.com/",
-    "baseURL": "https://github.com/",
+    "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
@@ -264,7 +264,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://api.github.com/",
-    "baseURL": "https://github.com/",
+    "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",

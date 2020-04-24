@@ -5,7 +5,7 @@ Object {
   "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
-    "baseURL": "https://gitlab.com/",
+    "baseUrl": "https://gitlab.com/",
     "depName": "@renovate/no",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab.com/meno/dropzone/",
@@ -48,7 +48,7 @@ Object {
   "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
-    "baseURL": "https://gitlab.com/",
+    "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab-enterprise.example.com/meno/dropzone/",
@@ -91,7 +91,7 @@ Object {
   "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
-    "baseURL": "https://gitlab.com/",
+    "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab.com/meno/dropzone/",
@@ -134,7 +134,7 @@ Object {
   "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
-    "baseURL": "https://gitlab.com/",
+    "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab.com/meno/dropzone/",
@@ -177,7 +177,7 @@ Object {
   "hasReleaseNotes": true,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
-    "baseURL": "https://gitlab.com/",
+    "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab.com/meno/dropzone/",
@@ -236,7 +236,7 @@ Object {
   "hasReleaseNotes": false,
   "project": Object {
     "apiBaseURL": "https://gitlab.com/api/v4/",
-    "baseURL": "https://gitlab.com/",
+    "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab.com/meno/dropzone/",

@@ -78,7 +78,7 @@ export async function getReleaseList(
 
 export function massageBody(
   input: string | undefined | null,
-  baseURL: string
+  baseUrl: string
 ): string {
   let body = input || '';
   // Convert line returns
@@ -87,13 +87,13 @@ export function massageBody(
   body = body.replace(/^<a name="[^"]*"><\/a>\n/, '');
   body = body.replace(
     new RegExp(
-      `^##? \\[[^\\]]*\\]\\(${baseURL}[^/]*\\/[^/]*\\/compare\\/.*?\\n`
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`
     ),
     ''
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    new RegExp(`\\n${baseURL}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    new RegExp(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
     '\n'
   );
   // Reduce headings size
@@ -109,7 +109,7 @@ export async function getReleaseNotes(
   repository: string,
   version: string,
   depName: string,
-  baseURL: string,
+  baseUrl: string,
   apiBaseURL: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
@@ -126,15 +126,15 @@ export async function getReleaseNotes(
       release.tag === `${depName}-${version}`
     ) {
       releaseNotes = release;
-      releaseNotes.url = baseURL.includes('github')
-        ? `${baseURL}${repository}/releases/${release.tag}`
-        : `${baseURL}${repository}/tags/${release.tag}`;
-      releaseNotes.body = massageBody(releaseNotes.body, baseURL);
+      releaseNotes.url = baseUrl.includes('github')
+        ? `${baseUrl}${repository}/releases/${release.tag}`
+        : `${baseUrl}${repository}/tags/${release.tag}`;
+      releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
       if (!releaseNotes.body.length) {
         releaseNotes = null;
       } else {
         releaseNotes.body = linkify(releaseNotes.body, {
-          repository: `${baseURL}${repository}`,
+          repository: `${baseUrl}${repository}`,
         });
       }
     }
@@ -181,7 +181,7 @@ function isUrl(url: string): boolean {
 export async function getReleaseNotesMd(
   repository: string,
   version: string,
-  baseURL: string,
+  baseUrl: string,
   apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
@@ -240,9 +240,9 @@ export async function getReleaseNotesMd(
           for (const word of title) {
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              let url = `${baseURL}${repository}/blob/master/${changelogFile}#`;
+              let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');
-              body = massageBody(body, baseURL);
+              body = massageBody(body, baseUrl);
               if (body && body.length) {
                 try {
                   body = linkify(body, {
@@ -299,7 +299,7 @@ export async function addReleaseNotes(
         repository,
         v.version,
         input.project.depName,
-        input.project.baseURL,
+        input.project.baseUrl,
         input.project.apiBaseURL
       );
       if (!releaseNotes) {
@@ -307,14 +307,14 @@ export async function addReleaseNotes(
           releaseNotes = await getReleaseNotesMd(
             repository,
             v.version,
-            input.project.baseURL,
+            input.project.baseUrl,
             input.project.apiBaseURL
           );
         } else {
           releaseNotes = await getReleaseNotesMd(
             repository.replace(/\//g, '%2F'),
             v.version,
-            input.project.baseURL,
+            input.project.baseUrl,
             input.project.apiBaseURL
           );
         }

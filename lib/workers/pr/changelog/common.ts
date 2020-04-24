@@ -25,7 +25,7 @@ export interface ChangeLogProject {
   github?: string;
   gitlab?: string;
   apiBaseURL?: string;
-  baseURL: string;
+  baseUrl: string;
   repository: string;
 }
 
