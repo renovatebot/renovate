@@ -256,8 +256,13 @@ export async function getDependency(
           err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
-        logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
-        await delay(5000);
+        // Delay a random time to avoid contention
+        const delaySeconds = 5 + Math.round(Math.random() * 25);
+        logger.warn(
+          { pkgUrl, errName: err.name, delaySeconds },
+          'Retrying npm error'
+        );
+        await delay(1000 * delaySeconds);
         return getDependency(packageName, retries - 1);
       }
       if (err.name === 'ParseError' && err.body) {
