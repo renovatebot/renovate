@@ -198,16 +198,16 @@ export async function ensurePr(
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          upgrade.githubName = logJSON.project.github;
+          upgrade.repoName = logJSON.project.github;
         }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
         if (
           upgrade.hasReleaseNotes &&
-          upgrade.githubName &&
-          !commitRepos.includes(upgrade.githubName)
+          upgrade.repoName &&
+          !commitRepos.includes(upgrade.repoName)
         ) {
-          commitRepos.push(upgrade.githubName);
+          commitRepos.push(upgrade.repoName);
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };
