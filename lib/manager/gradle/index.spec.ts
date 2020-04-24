@@ -4,7 +4,7 @@ import * as upath from 'upath';
 import { exec as _exec } from 'child_process';
 import * as _os from 'os';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { platform as _platform } from '../../platform';
+import * as _utilfs from '../../util/fs';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';
 import { BinarySource } from '../../util/exec/common';
@@ -45,17 +45,16 @@ async function setupMocks() {
 
   jest.mock('child_process');
   jest.mock('../../util/exec/env');
-  jest.mock('../../platform');
+  jest.mock('../../util/fs');
   jest.mock('os');
 
   const os: jest.Mocked<typeof _os> = require('os');
-  const platform: jest.Mocked<typeof _platform> = require('../../platform')
-    .platform;
+  const utilfs: jest.Mocked<typeof _utilfs> = require('../../util/fs');
   const env: jest.Mocked<typeof _env> = require('../../util/exec/env');
   const exec: jest.Mock<typeof _exec> = require('child_process').exec;
   const util: jest.Mocked<typeof _util> = require('../../util');
 
-  platform.getFile.mockResolvedValue('some content');
+  utilfs.readLocalFile.mockResolvedValue('some content');
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(baseConfig);
 

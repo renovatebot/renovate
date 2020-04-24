@@ -18,6 +18,13 @@ describe('api/docker', () => {
       const res = docker.getRegistryRepository('registry:5000/org/package', []);
       expect(res).toMatchSnapshot();
     });
+    it('supports registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        ['https://my.local.registry/prefix']
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('getDigest', () => {
     beforeEach(() => {

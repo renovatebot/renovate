@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
-import upath from 'upath';
 import yaml from 'js-yaml';
 import { SkipReason } from '../../types';
 import { logger } from '../../logger';
 import { PackageFile, PackageDependency, ExtractConfig } from '../common';
-import { platform } from '../../platform';
 import * as datasourceHelm from '../../datasource/helm';
+import { readLocalFile, getSiblingFileName } from '../../util/fs';
 
 export async function extractPackageFile(
   content: string,
@@ -13,9 +12,8 @@ export async function extractPackageFile(
   config: ExtractConfig
 ): Promise<PackageFile> {
   try {
-    const baseDir = upath.parse(fileName).dir;
-    const chartFileName = upath.join(baseDir, 'Chart.yaml');
-    const chartContents = await platform.getFile(chartFileName);
+    const chartFileName = getSiblingFileName(fileName, 'Chart.yaml');
+    const chartContents = await readLocalFile(chartFileName, 'utf8');
     if (!chartContents) {
       logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;

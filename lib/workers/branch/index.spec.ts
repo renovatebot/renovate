@@ -22,6 +22,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { StatusResult } from '../../platform/git/storage';
+import { File } from '../../platform';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');
@@ -613,13 +614,22 @@ describe('workers/branch', () => {
     });
 
     it('executes post-upgrade tasks if trust is high', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [{}],
+        updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
       } as never);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [{}],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -635,6 +645,7 @@ describe('workers/branch', () => {
       } as StatusResult);
       global.trustLevel = 'high';
 
+      fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);

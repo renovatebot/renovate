@@ -3,6 +3,7 @@
 exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -11,6 +12,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -19,6 +21,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -27,6 +30,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
@@ -35,6 +39,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -43,6 +48,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -51,6 +57,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
@@ -59,6 +66,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
@@ -67,6 +75,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
@@ -80,6 +89,7 @@ Array [
 exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "11.5.1",
     "datasource": "docker",
@@ -88,6 +98,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "10",
     "datasource": "docker",
@@ -96,6 +107,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "4.0.9-1",
     "datasource": "docker",
@@ -104,6 +116,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "2.6.2",
     "datasource": "docker",

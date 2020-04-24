@@ -48,6 +48,9 @@ async function get(path: string, options: any): Promise<GotResponse> {
     if (platformFailureCodes.includes(err.code)) {
       throw new Error(PLATFORM_FAILURE);
     }
+    if (err.name === 'ParseError') {
+      throw new Error(PLATFORM_FAILURE);
+    }
     throw err;
   }
 }

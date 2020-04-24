@@ -7,6 +7,7 @@ import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { BranchUpgradeConfig, BranchConfig } from '../../common';
+import { getChangeLogJSON } from '../../pr/changelog';
 
 /**
  * Clean git branch name
@@ -113,6 +114,40 @@ export async function branchifyUpgrades(
     addMeta({
       branch: branchName,
     });
+    for (const upgrade of branchUpgrades[branchName]) {
+      upgrade.logJSON = await getChangeLogJSON(upgrade);
+    }
+    const seenUpdates = {};
+    // Filter out duplicates
+    branchUpgrades[branchName] = branchUpgrades[branchName].filter(
+      (upgrade) => {
+        const {
+          manager,
+          packageFile,
+          depName,
+          currentValue,
+          newValue,
+        } = upgrade;
+        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+        const previousNewValue = seenUpdates[upgradeKey];
+        if (previousNewValue && previousNewValue !== newValue) {
+          logger.info(
+            {
+              manager,
+              packageFile,
+              depName,
+              currentValue,
+              previousNewValue,
+              thisNewValue: newValue,
+            },
+            'Ignoring upgrade collision'
+          );
+          return false;
+        }
+        seenUpdates[upgradeKey] = newValue;
+        return true;
+      }
+    );
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branches.push(branch);

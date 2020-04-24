@@ -188,7 +188,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"gem install cocoapods-acknowledgements && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

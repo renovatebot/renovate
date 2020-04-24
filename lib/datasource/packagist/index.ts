@@ -29,6 +29,7 @@ interface PackageMeta {
   includes?: Record<string, { sha256: string }>;
   packages: Record<string, RegistryFile>;
   'provider-includes': Record<string, { sha256: string }>;
+  providers: Record<string, { sha256: string }>;
   'providers-url'?: string;
 }
 
@@ -38,6 +39,7 @@ interface RegistryFile {
 }
 interface RegistryMeta {
   files?: RegistryFile[];
+  providerPackages: Record<string, string>;
   providersUrl?: string;
   includesFiles?: RegistryFile[];
   packages?: Record<string, RegistryFile>;
@@ -48,7 +50,9 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
     const res = (await http.getJson<PackageMeta>(url, opts)).body;
-    const meta: RegistryMeta = {};
+    const meta: RegistryMeta = {
+      providerPackages: {},
+    };
     meta.packages = res.packages;
     if (res.includes) {
       meta.includesFiles = [];
@@ -60,8 +64,10 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
         meta.includesFiles.push(file);
       }
     }
-    if (res['providers-url'] && res['provider-includes']) {
+    if (res['providers-url']) {
       meta.providersUrl = res['providers-url'];
+    }
+    if (res['provider-includes']) {
       meta.files = [];
       for (const [key, val] of Object.entries(res['provider-includes'])) {
         const file = {
@@ -69,6 +75,11 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
           sha256: val.sha256,
         };
         meta.files.push(file);
+      }
+    }
+    if (res.providers) {
+      for (const [key, val] of Object.entries(res.providers)) {
+        meta.providerPackages[key] = val.sha256;
       }
     }
     return meta;
@@ -176,8 +187,13 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     global.repoCache[`packagist-${regUrl}`] = null;
     return null;
   }
-  const { packages, providersUrl, files, includesFiles } = registryMeta;
-  const providerPackages: Record<string, string> = {};
+  const {
+    packages,
+    providersUrl,
+    files,
+    includesFiles,
+    providerPackages,
+  } = registryMeta;
   if (files) {
     const queue = files.map((file) => (): Promise<PackagistFile> =>
       getPackagistFile(regUrl, file)

@@ -12,15 +12,16 @@ export async function getChangeLogJSON(
   args: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
   const { sourceUrl, versioning, fromVersion, toVersion } = args;
-  if (!sourceUrl) {
-    return null;
-  }
-  const version = allVersioning.get(versioning);
-  if (!fromVersion || version.equals(fromVersion, toVersion)) {
-    return null;
-  }
+  try {
+    if (!sourceUrl) {
+      return null;
+    }
+    const version = allVersioning.get(versioning);
+    if (!fromVersion || version.equals(fromVersion, toVersion)) {
+      return null;
+    }
 
-  const releases = args.releases || (await getInRangeReleases(args));
+    const releases = args.releases || (await getInRangeReleases(args));
 
   try {
     let res: ChangeLogResult | null = null;
@@ -32,7 +33,7 @@ export async function getChangeLogJSON(
     }
     return res;
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'getChangeLogJSON error');
+    logger.error({ args, err }, 'getChangeLogJSON error');
     return null;
   }
 }

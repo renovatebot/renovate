@@ -13,6 +13,7 @@ import {
   GetPkgReleasesConfig,
 } from './common';
 import datasources from './api.generated';
+import { clone } from '../util/clone';
 
 export * from './common';
 
@@ -86,10 +87,12 @@ export async function getPkgReleases(
   }
   let res: ReleaseResult;
   try {
-    res = await getRawReleases({
-      ...config,
-      lookupName,
-    });
+    res = clone(
+      await getRawReleases({
+        ...config,
+        lookupName,
+      })
+    );
   } catch (e) /* istanbul ignore next */ {
     if (e instanceof DatasourceError) {
       e.datasource = config.datasource;

@@ -6,13 +6,7 @@ Array [
     "currentValue": "4.10.3",
     "datasource": "gradle-version",
     "depName": "gradle",
-    "depType": "gradle-wrapper",
-    "managerData": Object {
-      "checksumLineNumber": 6,
-      "gradleWrapperType": "all",
-      "lineNumber": 5,
-    },
-    "versioning": "semver",
+    "versioning": "gradle",
   },
 ]
 `;
@@ -20,15 +14,10 @@ Array [
 exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts bin version line 1`] = `
 Array [
   Object {
-    "currentValue": "4.8.0",
+    "currentValue": "4.8",
     "datasource": "gradle-version",
     "depName": "gradle",
-    "depType": "gradle-wrapper",
-    "managerData": Object {
-      "gradleWrapperType": "bin",
-      "lineNumber": 4,
-    },
-    "versioning": "semver",
+    "versioning": "gradle",
   },
 ]
 `;
@@ -39,13 +28,7 @@ Array [
     "currentValue": "4.10.3",
     "datasource": "gradle-version",
     "depName": "gradle",
-    "depType": "gradle-wrapper",
-    "managerData": Object {
-      "checksumLineNumber": 6,
-      "gradleWrapperType": "all",
-      "lineNumber": 5,
-    },
-    "versioning": "semver",
+    "versioning": "gradle",
   },
 ]
 `;

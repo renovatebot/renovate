@@ -43,8 +43,6 @@ export const defaultConfig = {
   group: {
     commitMessageTopic: '{{{groupName}}} Docker tags',
   },
-  autoReplaceStringTemplate:
-    '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
 };
 
 const http = new Http(id);
@@ -60,6 +58,17 @@ export function getRegistryRepository(
   lookupName: string,
   registryUrls: string[]
 ): RegistryRepository {
+  if (is.nonEmptyArray(registryUrls)) {
+    const dockerRegistry = registryUrls[0]
+      .replace('https://', '')
+      .replace(/\/?$/, '/');
+    if (lookupName.startsWith(dockerRegistry)) {
+      return {
+        registry: dockerRegistry,
+        repository: lookupName.replace(dockerRegistry, ''),
+      };
+    }
+  }
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
