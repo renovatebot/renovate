@@ -25,7 +25,7 @@ export async function confirmIfDepUpdated(
   if (
     newUpgrade &&
     newUpgrade.currentValue === newValue &&
-    (!newUpgrade.currentDigest || newUpgrade.currentDigest === newDigest)
+    (!newDigest || newUpgrade.currentDigest === newDigest)
   ) {
     return true;
   }

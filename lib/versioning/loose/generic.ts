@@ -2,6 +2,8 @@ import { VersioningApi, NewValueConfig } from '../common';
 
 export interface GenericVersion {
   release: number[];
+  /** prereleases are treated in the standard semver manner, if present */
+  prerelease?: string;
   suffix?: string;
 }
 export interface VersionParser {
@@ -40,7 +42,8 @@ export const parser = (parse: VersionParser): Partial<VersioningApi> => {
   }
 
   function isStable(version: string): boolean {
-    return !!isValid(version);
+    const parsed = parse(version);
+    return parsed && !parsed.prerelease;
   }
 
   return {
@@ -142,7 +145,8 @@ export abstract class GenericVersioningApi<
   }
 
   isStable(version: string): boolean {
-    return this.isValid(version);
+    const parsed = this._parse(version);
+    return parsed && !parsed.prerelease;
   }
 
   isSingleVersion(version: string): string | boolean {
