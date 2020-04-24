@@ -19,12 +19,9 @@ function parse(version: string): generic.GenericVersion {
     return null;
   }
 
-  const release = m.groups.version.split('.').map(Number);
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  if (release.some(Number.isNaN)) {
-    return null;
-  }
-  return { release, suffix, prerelease: m.groups.prerelease };
+  const { version: ver, prerelease } = m.groups;
+  const release = ver.split('.').map(Number);
+  return { release, suffix, prerelease };
 }
 
 function valueToVersion(value: string): string {
@@ -63,7 +60,7 @@ function compare(version1: string, vervion2: string): number {
       return -1;
     }
     // alphabetic order
-    return parsed2.prerelease.localeCompare(parsed1.prerelease);
+    return parsed1.prerelease.localeCompare(parsed2.prerelease);
   }
   // equals
   return parsed2.suffix.localeCompare(parsed1.suffix);

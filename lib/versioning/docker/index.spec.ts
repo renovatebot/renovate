@@ -121,14 +121,16 @@ describe('docker.', () => {
         '3.7.0',
         '3.7-alpine',
         '3.7.0b1',
-        '3.8.0-alpine',
+        '3.7.0b5',
         '3.8.0b1-alpine',
+        '3.8.0-alpine',
         '3.8.2',
         '3.8.0',
       ];
 
       expect(versions.sort(docker.sortVersions)).toEqual([
         '3.7.0b1',
+        '3.7.0b5',
         '3.7.0',
         '3.7-alpine',
         '3.8.0b1-alpine',
@@ -161,11 +163,54 @@ describe('docker.', () => {
       '3.8.2',
     ];
 
-    expect(versions.filter((v) => docker.isStable(v))).toEqual([
+    expect(versions.filter(docker.isStable)).toEqual([
       '3.7.0',
       '3.7-alpine',
       '3.8.0-alpine',
       '3.8.2',
+    ]);
+  });
+
+  it('isCompatible(version)', () => {
+    const versions = [
+      '3.7.0',
+      '3.7.0b1',
+      '3.7-alpine',
+      '3.8.0-alpine',
+      '3.8.0b1-alpine',
+      '3.8.2',
+    ];
+
+    expect(versions.filter((v) => docker.isCompatible(v, '3.7.0'))).toEqual([
+      '3.7.0',
+      '3.7.0b1',
+      '3.8.2',
+    ]);
+
+    expect(
+      versions.filter((v) => docker.isCompatible(v, '3.7.0-alpine'))
+    ).toEqual(['3.8.0-alpine', '3.8.0b1-alpine']);
+  });
+
+  it('valueToVersion(version)', () => {
+    const versions = [
+      '3.7.0',
+      '3.7.0b1',
+      '3.7-alpine',
+      '3.8.0-alpine',
+      '3.8.0b1-alpine',
+      '3.8.2',
+      undefined,
+    ];
+
+    expect(versions.map(docker.valueToVersion)).toEqual([
+      '3.7.0',
+      '3.7.0b1',
+      '3.7',
+      '3.8.0',
+      '3.8.0b1',
+      '3.8.2',
+      undefined,
     ]);
   });
 });
