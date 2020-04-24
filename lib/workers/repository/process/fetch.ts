@@ -115,25 +115,6 @@ export async function fetchUpdates(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
-  const stats = {
-    managers: {},
-    fileCount: 0,
-    depCount: 0,
-  };
-  for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
-    const fileCount = managerPackageFiles.length;
-    let depCount = 0;
-    for (const file of managerPackageFiles) {
-      depCount += file.deps.length;
-    }
-    stats.managers[manager] = {
-      fileCount,
-      depCount,
-    };
-    stats.fileCount += fileCount;
-    stats.depCount += depCount;
-  }
-  logger.info({ stats }, `Extraction statistics`);
   const startTime = hrtime();
   const allManagerJobs = managers.map((manager) =>
     fetchManagerUpdates(config, packageFiles, manager)
