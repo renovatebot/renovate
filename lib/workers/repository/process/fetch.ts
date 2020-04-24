@@ -1,4 +1,5 @@
 import pAll from 'p-all';
+import { hrtime } from 'process';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
 import {
@@ -133,9 +134,12 @@ export async function fetchUpdates(
     stats.depCount += depCount;
   }
   logger.info({ stats }, `Extraction statistics`);
+  const startTime = hrtime();
   const allManagerJobs = managers.map((manager) =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  logger.debug('fetchUpdates complete');
+  const duration = hrtime(startTime);
+  const seconds = Math.round(duration[0] + duration[1] / 1e9);
+  logger.info({ seconds }, 'Package releases lookups complete');
 }
