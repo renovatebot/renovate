@@ -23,7 +23,6 @@ export async function getChangeLogJSON(
 
     const releases = args.releases || (await getInRangeReleases(args));
 
-  try {
     let res: ChangeLogResult | null = null;
 
     if (args.sourceUrl?.includes('gitlab')) {
