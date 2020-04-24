@@ -128,4 +128,22 @@ describe('docker.', () => {
       ).toBe('1.2.3');
     });
   });
+
+  it('isStable(version)', () => {
+    const versions = [
+      '3.7.0',
+      '3.7.0b1',
+      '3.7-alpine',
+      '3.8.0-alpine',
+      '3.8.0b1-alpine',
+      '3.8.2',
+    ];
+
+    expect(versions.filter((v) => docker.isStable(v))).toEqual([
+      '3.7.0',
+      '3.7-alpine',
+      '3.8.0-alpine',
+      '3.8.2',
+    ]);
+  });
 });

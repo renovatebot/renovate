@@ -1,3 +1,4 @@
+import { is } from 'semver-stable';
 import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
 
@@ -7,6 +8,11 @@ export const urls = [
   'https://docs.docker.com/engine/reference/commandline/tag/',
 ];
 export const supportsRanges = false;
+
+// const numberRe = /^(?:0|[1-9]+)$/;
+// function toNumber(str: string): number {
+//   return numberRe.test(str) ? Number(str) : Number.NaN;
+// }
 
 function parse(version: string): any {
   const versionPieces = version.replace(/^v/, '').split('-');
@@ -60,12 +66,19 @@ function isCompatible(version: string, range: string): boolean {
   );
 }
 
+const stableRe = /^(?:\d+(?:\.\d+)*)$/;
+
+function isStable(version: string): boolean {
+  return stableRe.test(valueToVersion(version));
+}
+
 export const api: VersioningApi = {
   ...generic.create({
     parse,
     compare,
   }),
   isCompatible,
+  isStable,
   valueToVersion,
 };
 
