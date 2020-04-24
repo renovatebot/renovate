@@ -198,8 +198,7 @@ export async function ensurePr(
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          // TODO: this githubName thing should be repoName or similar
-          upgrade.githubName = logJSON.project.github
+          upgrade.repoName = logJSON.project.github
             ? logJSON.project.github
             : logJSON.project.gitlab;
         }
@@ -207,10 +206,10 @@ export async function ensurePr(
         upgrade.releases = [];
         if (
           upgrade.hasReleaseNotes &&
-          upgrade.githubName &&
-          !commitRepos.includes(upgrade.githubName)
+          upgrade.repoName &&
+          !commitRepos.includes(upgrade.repoName)
         ) {
-          commitRepos.push(upgrade.githubName);
+          commitRepos.push(upgrade.repoName);
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };
