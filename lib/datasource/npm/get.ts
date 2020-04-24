@@ -207,7 +207,17 @@ export async function getDependency(
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 5;
-    if (!packageName.startsWith('@')) {
+    // TODO: use dynamic detection of public repos instead of a static list
+    const whitelistedPublicScopes = [
+      '@graphql-codegen',
+      '@storybook',
+      '@types',
+      '@typescript-eslint',
+    ];
+    if (
+      whitelistedPublicScopes.includes(scope) ||
+      !packageName.startsWith('@')
+    ) {
       await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
