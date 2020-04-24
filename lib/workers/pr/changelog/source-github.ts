@@ -84,7 +84,7 @@ export async function getChangeLogJSON({
     );
     return null;
   }
-  const apiBaseURL = sourceUrl.startsWith('https://github.com/')
+  const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : endpoint; // TODO FIX
   const repository = pathname.slice(1).replace(/\/$/, '');
@@ -170,7 +170,7 @@ export async function getChangeLogJSON({
 
   let res: ChangeLogResult = {
     project: {
-      apiBaseURL,
+      apiBaseUrl,
       baseUrl,
       github: repository,
       repository: sourceUrl,

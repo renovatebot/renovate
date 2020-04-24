@@ -15,18 +15,18 @@ const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
 export async function getReleaseList(
-  apiBaseURL: string,
+  apiBaseUrl: string,
   repository: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   // istanbul ignore if
-  if (!apiBaseURL) {
-    logger.debug('No apiBaseURL');
+  if (!apiBaseUrl) {
+    logger.debug('No apiBaseUrl');
     return [];
   }
   try {
-    let url = apiBaseURL.replace(/\/?$/, '/');
-    if (apiBaseURL.includes('github')) {
+    let url = apiBaseUrl.replace(/\/?$/, '/');
+    if (apiBaseUrl.includes('github')) {
       url += `repos/${repository}/releases?per_page=100`;
       const res = await ghGot<
         {
@@ -45,7 +45,7 @@ export async function getReleaseList(
         body: release.body,
       }));
     }
-    if (apiBaseURL.includes('gitlab')) {
+    if (apiBaseUrl.includes('gitlab')) {
       url += `projects/${repository.replace(
         /\//g,
         '%2f'
@@ -59,7 +59,7 @@ export async function getReleaseList(
         }[]
       >(url);
       return res.body.map((release) => ({
-        url: `${apiBaseURL}projects/${repository.replace(
+        url: `${apiBaseUrl}projects/${repository.replace(
           /\//g,
           '%2f'
         )}/releases/${release.tag_name}`,
@@ -110,10 +110,10 @@ export async function getReleaseNotes(
   version: string,
   depName: string,
   baseUrl: string,
-  apiBaseURL: string
+  apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releaseList = await getReleaseList(apiBaseURL, repository);
+  const releaseList = await getReleaseList(apiBaseUrl, repository);
   if (releaseList == null) {
     return null;
   }
@@ -300,7 +300,7 @@ export async function addReleaseNotes(
         v.version,
         input.project.depName,
         input.project.baseUrl,
-        input.project.apiBaseURL
+        input.project.apiBaseUrl
       );
       if (!releaseNotes) {
         if (input.project.github != null) {
@@ -308,14 +308,14 @@ export async function addReleaseNotes(
             repository,
             v.version,
             input.project.baseUrl,
-            input.project.apiBaseURL
+            input.project.apiBaseUrl
           );
         } else {
           releaseNotes = await getReleaseNotesMd(
             repository.replace(/\//g, '%2F'),
             v.version,
             input.project.baseUrl,
-            input.project.apiBaseURL
+            input.project.apiBaseUrl
           );
         }
       }

@@ -4,7 +4,7 @@ exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseURL": "https://api.github.com/",
+    "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "@renovate/no",
     "github": "chalk/chalk",
@@ -55,7 +55,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and gi
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseURL": "https://github-enterprise.example.com/",
+    "apiBaseUrl": "https://github-enterprise.example.com/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
@@ -106,7 +106,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and gi
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseURL": "https://api.github.com/",
+    "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
@@ -157,7 +157,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseURL": "https://api.github.com/",
+    "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
@@ -208,7 +208,7 @@ exports[`workers/pr/changelog getChangeLogJSON uses GitHub tags 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseURL": "https://api.github.com/",
+    "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
@@ -263,7 +263,7 @@ exports[`workers/pr/changelog getChangeLogJSON works without Github 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseURL": "https://api.github.com/",
+    "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
     "github": "chalk/chalk",

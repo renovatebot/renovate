@@ -44,7 +44,7 @@ describe('workers/pr/release-notes', () => {
     });
   });
   describe('getReleaseList()', () => {
-    it('should return empty array if no apiBaseURL', async () => {
+    it('should return empty array if no apiBaseUrl', async () => {
       const res = await getReleaseList('', 'some/yet-other-repository');
       expect(res).toEqual([]);
     });
