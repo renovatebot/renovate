@@ -26,15 +26,6 @@ function removeLeadingV(input: string): string {
   return input.replace(/^v/i, '');
 }
 
-function composerStability2npm(input: string): string {
-  const sections = input.split('@');
-  if (sections.length == 1) {
-    return input
-  }
-  const stability = sections[1].replace(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi, '$1.$2');
-  return sections[0] + '-' + stability;
-}
-
 function composer2npm(input: string): string {
   const cleanInput = removeLeadingV(input);
   if (npm.isVersion(cleanInput)) {
@@ -44,13 +35,23 @@ function composer2npm(input: string): string {
     return padZeroes(cleanInput);
   }
   let output = cleanInput;
+
+  // Handle stability modifiers.
+  const versionParts = output.split('@');
+  let stability = '';
+  if (versionParts.length > 1) {
+    // Process the version number separately.
+    output = versionParts[0]
+    // 1.0@beta2 to 1.0-beta.2
+    stability = '-' + versionParts[1].replace(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi, '$1.$2');
+  }
+
   // ~4 to ^4 and ~4.1 to ^4.1
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
   // ~0.4 to >=0.4 <1
   output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
-  // 1.0@beta2 to 1.0-beta.2
-  output = composerStability2npm(output);
-  return output;
+
+  return output + stability;
 }
 
 const equals = (a: string, b: string): boolean =>
