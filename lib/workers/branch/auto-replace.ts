@@ -4,6 +4,7 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
 import { regEx, escapeRegExp } from '../../util/regex';
 import { compile } from '../../util/template';
+import { writeLocalFile } from '../../util/fs';
 
 export async function confirmIfDepUpdated(
   upgrade,
@@ -122,9 +123,12 @@ export async function doAutoReplace(
           replaceString,
           newString
         );
+        await writeLocalFile(upgrade.packageFile, testContent);
         if (await confirmIfDepUpdated(upgrade, testContent)) {
           return testContent;
         }
+        // istanbul ignore next
+        await writeLocalFile(upgrade.packageFile, existingContent);
       }
     }
   } catch (err) /* istanbul ignore next */ {
