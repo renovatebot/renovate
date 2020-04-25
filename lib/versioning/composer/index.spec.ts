@@ -12,6 +12,11 @@ describe('semver.equals(a, b)', () => {
   it('should pad really short version', () => {
     expect(semver.equals('v1.0.0', '1')).toBe(true);
   });
+  it('should translate stability modifier', () => {
+    expect(semver.equals('1.0@alpha3', '1.0.0-alpha.3')).toBe(true);
+    expect(semver.equals('1.0@beta', '1.0.0-beta')).toBe(true);
+    expect(semver.equals('1.0@rc2', '1.0.0-rc.2')).toBe(true);
+  });
 });
 describe('semver.isGreaterThan(a, b)', () => {
   it('should pad short version', () => {
