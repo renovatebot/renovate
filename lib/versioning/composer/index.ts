@@ -41,9 +41,12 @@ function composer2npm(input: string): string {
   let stability = '';
   if (versionParts.length > 1) {
     // Process the version number separately.
-    output = versionParts[0]
+    output = versionParts[0];
     // 1.0@beta2 to 1.0-beta.2
-    stability = '-' + versionParts[1].replace(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi, '$1.$2');
+    stability = versionParts[1].replace(
+      /(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi,
+      '-$1.$2'
+    );
   }
 
   // ~4 to ^4 and ~4.1 to ^4.1
