@@ -54,6 +54,11 @@ describe('semver.isValid(input)', () => {
     expect(semver.isValid('^1.2.3')).toBeTruthy();
     expect(semver.isValid('>1.2.3')).toBeTruthy();
   });
+  it('should support ranges with stability modifiers', () => {
+    expect(semver.isValid('~1.2.3@beta1')).toBeTruthy();
+    expect(semver.isValid('^1.2.3@alpha')).toBeTruthy();
+    expect(semver.isValid('>1.2.3@rc2')).toBeTruthy();
+  });
 });
 describe('semver.isVersion(input)', () => {
   it('should support simple semver', () => {
