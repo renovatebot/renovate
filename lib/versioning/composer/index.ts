@@ -54,7 +54,7 @@ function composer2npm(input: string): string {
   // ~0.4 to >=0.4 <1
   output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
 
-  return output + stability;
+  return padZeroes(output) + stability;
 }
 
 const equals = (a: string, b: string): boolean =>
