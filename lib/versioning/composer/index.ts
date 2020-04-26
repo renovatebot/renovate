@@ -61,7 +61,8 @@ function composer2npm(input: string): string {
   if (npm.isVersion(padZeroes(cleanInput))) {
     return padZeroes(cleanInput);
   }
-  let [output, stability] = getVersionParts(cleanInput);
+  const [versionId, stability] = getVersionParts(cleanInput);
+  let output = versionId;
 
   // ~4 to ^4 and ~4.1 to ^4.1
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
