@@ -14,16 +14,19 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
-function padZeroes(input: string): string {
-  // Handle stability modifiers.
+function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');
-  let stability = '';
-  if (versionParts.length > 1) {
-    input = versionParts[0];
-    stability = '-' + versionParts[1];
+  if (versionParts.length === 1) {
+    return [input, ''];
   }
 
-  const sections = input.split('.');
+  return [versionParts[0], '-' + versionParts[1]];
+}
+
+function padZeroes(input: string): string {
+  const [output, stability] = getVersionParts(input);
+
+  const sections = output.split('.');
   while (sections.length < 3) {
     sections.push('0');
   }
@@ -58,16 +61,7 @@ function composer2npm(input: string): string {
   if (npm.isVersion(padZeroes(cleanInput))) {
     return padZeroes(cleanInput);
   }
-  let output = cleanInput;
-
-  // Handle stability modifiers.
-  const versionParts = output.split('-');
-  let stability = '';
-  if (versionParts.length > 1) {
-    // Process the version number separately.
-    output = versionParts[0];
-    stability = '-' + versionParts[1];
-  }
+  let [output, stability] = getVersionParts(cleanInput);
 
   // ~4 to ^4 and ~4.1 to ^4.1
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
