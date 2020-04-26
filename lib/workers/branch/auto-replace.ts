@@ -10,7 +10,15 @@ export async function confirmIfDepUpdated(
   upgrade,
   newContent: string
 ): Promise<boolean> {
-  const { manager, packageFile, newValue, newDigest, depIndex } = upgrade;
+  const {
+    manager,
+    packageFile,
+    newValue,
+    newDigest,
+    depIndex,
+    currentDigest,
+    pinDigests,
+  } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade;
   try {
@@ -23,13 +31,22 @@ export async function confirmIfDepUpdated(
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
-  if (
-    newUpgrade &&
-    newUpgrade.currentValue === newValue &&
-    (!newDigest || newUpgrade.currentDigest === newDigest)
-  ) {
+  if (!newUpgrade) {
+    return false;
+  }
+  if (newUpgrade.currentValue !== newValue) {
+    return false;
+  }
+  if (!newDigest) {
     return true;
   }
+  if (newUpgrade.currentDigest === newDigest) {
+    return true;
+  }
+  if (!currentDigest && !pinDigests) {
+    return true;
+  }
+  // istanbul ignore next
   return false;
 }
 
