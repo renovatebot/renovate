@@ -103,7 +103,7 @@ export async function doAutoReplace(
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
     logger.warn(
-      { depName },
+      { depName, existingContent, replaceString },
       'Cannot find replaceString in current file content'
     );
     return existingContent;
