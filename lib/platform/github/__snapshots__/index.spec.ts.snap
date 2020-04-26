@@ -16,6 +16,28 @@ Array [
 ]
 `;
 
+exports[`platform/github addAssignees(issueNo, assignees) should add the given assignees to the issue 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "assignees": Array [
+          "someuser",
+          "someotheruser",
+        ],
+      },
+    },
+    "url": "repos/some/repo/issues/42/assignees",
+  },
+]
+`;
+
 exports[`platform/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
 Array [
   Array [
@@ -32,6 +54,31 @@ Array [
       },
     },
   ],
+]
+`;
+
+exports[`platform/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "reviewers": Array [
+          "someuser",
+          "someotheruser",
+        ],
+        "team_reviewers": Array [
+          "someteam",
+        ],
+      },
+    },
+    "url": "repos/some/repo/pulls/42/requested_reviewers",
+  },
 ]
 `;
 
@@ -80,6 +127,71 @@ Array [
 ]
 `;
 
+exports[`platform/github createPr() should create and return a PR object 3`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "base": "master",
+        "body": "Hello world",
+        "head": "some:some-branch",
+        "title": "The Title",
+      },
+    },
+    "url": "repos/some/repo/pulls",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Array [
+        "deps",
+        "renovate",
+      ],
+    },
+    "url": "repos/some/repo/issues/123/labels",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "context": "renovate/verify",
+        "description": "Renovate verified pull request",
+        "state": "success",
+        "target_url": "https://github.com/renovatebot/renovate",
+      },
+    },
+    "url": "repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": false,
+    },
+    "url": "repos/some/repo/commits/some-branch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": false,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
 exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "branchName": "some-branch",
@@ -105,11 +217,48 @@ Array [
 ]
 `;
 
+exports[`platform/github createPr() should use defaultBranch 3`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "base": "master",
+        "body": "Hello world",
+        "head": "some:some-branch",
+        "title": "The Title",
+      },
+    },
+    "url": "repos/some/repo/pulls",
+  },
+]
+`;
+
 exports[`platform/github deleteLabel(issueNo, label) should delete the label 1`] = `
 Array [
   Array [
     "repos/some/repo/issues/42/labels/rebase",
   ],
+]
+`;
+
+exports[`platform/github deleteLabel(issueNo, label) should delete the label 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "delete",
+    "options": undefined,
+    "url": "repos/some/repo/issues/42/labels/rebase",
+  },
 ]
 `;
 
@@ -127,6 +276,43 @@ content",
 ]
 `;
 
+exports[`platform/github ensureComment add comment if not found 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/issues/42/comments?per_page=100",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+    "url": "repos/some/repo/issues/42/comments",
+  },
+]
+`;
+
 exports[`platform/github ensureComment add updates comment if necessary 1`] = `
 Array [
   Array [
@@ -140,6 +326,685 @@ content",
       },
     },
   ],
+]
+`;
+
+exports[`platform/github ensureComment add updates comment if necessary 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/issues/42/comments?per_page=100",
+  },
+  Object {
+    "method": "patch",
+    "options": Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+    "url": "repos/some/repo/issues/comments/1234",
+  },
+]
+`;
+
+exports[`platform/github ensureComment adds comment if found in closed PR list 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+    "url": "repos/some/repo/issues/2499/comments",
+  },
+]
+`;
+
+exports[`platform/github ensureComment handles comment with no description 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/issues/42/comments?per_page=100",
+  },
+]
+`;
+
+exports[`platform/github ensureComment skips comment 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/issues/42/comments?per_page=100",
+  },
+]
+`;
+
+exports[`platform/github ensureCommentRemoval deletes comment if found 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/issues/42/comments?per_page=100",
+  },
+  Object {
+    "method": "delete",
+    "options": undefined,
+    "url": "repos/some/repo/issues/comments/1234",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() closes others if ensuring only once 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() creates issue 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() creates issue if not ensuring only once 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() creates issue if reopen flag false and issue is not open 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/issues/2",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "body": "new-content",
+        "title": "title-2",
+      },
+    },
+    "url": "repos/undefined/issues",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() deletes if duplicate 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "patch",
+    "options": Object {
+      "body": Object {
+        "state": "closed",
+      },
+    },
+    "url": "repos/undefined/issues/1",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() does not create issue if ensuring only once 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() does not create issue if reopen flag false and issue is already open 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() skips update if unchanged 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/github ensureIssue() updates issue 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/issues/2",
+  },
+  Object {
+    "method": "patch",
+    "options": Object {
+      "body": Object {
+        "body": "newer-content",
+        "state": "open",
+      },
+    },
+    "url": "repos/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/github ensureIssueClosing() closes issue 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github findIssue() finds issue 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "baseUrl": "",
+      "body": Object {
+        "query": "
+    query {
+      repository(owner: \\"undefined\\", name: \\"undefined\\") {
+        issues(first: 100orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: \\"undefined\\"}) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          nodes {
+            number
+            state
+            title
+            body
+          }
+        }
+      }
+    }
+  ",
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "hostType": undefined,
+      "json": true,
+      "method": "POST",
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/issues/2",
+  },
+]
+`;
+
+exports[`platform/github findIssue() returns null if no issue 1`] = `Array []`;
+
+exports[`platform/github findPr(branchName, prTitle, state) caches pr list 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/undefined/pulls?per_page=100&state=all",
+  },
+]
+`;
+
+exports[`platform/github findPr(branchName, prTitle, state) returns true if no title and all state 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/undefined/pulls?per_page=100&state=all",
+  },
+]
+`;
+
+exports[`platform/github findPr(branchName, prTitle, state) returns true if not open 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/undefined/pulls?per_page=100&state=all",
+  },
+]
+`;
+
+exports[`platform/github getBranchPr(branchName) should return null if no PR exists 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/pulls?per_page=100&state=all",
+  },
 ]
 `;
 
@@ -187,6 +1052,52 @@ Object {
   "sha": undefined,
   "state": "open",
 }
+`;
+
+exports[`platform/github getBranchPr(branchName) should return the PR object 3`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/pulls?per_page=100&state=all",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/91",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
 `;
 
 exports[`platform/github getBranchPr(branchName) should return the PR object in fork mode 1`] = `
@@ -245,6 +1156,293 @@ Object {
 }
 `;
 
+exports[`platform/github getBranchPr(branchName) should return the PR object in fork mode 3`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+      "token": "abc123",
+    },
+    "url": "user/repos?per_page=100",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "repos/some/repo/forks",
+  },
+  Object {
+    "method": "patch",
+    "options": Object {
+      "body": Object {
+        "force": true,
+        "sha": "1234",
+      },
+      "token": "abc123",
+    },
+    "url": "repos/forked/repo/git/refs/heads/master",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+    },
+    "url": "repos/some/repo/pulls?per_page=100&state=all",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/90",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/forked/repo/git/refs/heads/master",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() defaults to pending 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/somebranch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.antiope-preview+json",
+      },
+    },
+    "url": "repos/some/repo/commits/somebranch/check-runs",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() return failed if unsupported requiredStatusChecks 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() returns success if requiredStatusChecks null 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() should fail if a check run has failed 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/somebranch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.antiope-preview+json",
+      },
+    },
+    "url": "repos/some/repo/commits/somebranch/check-runs",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() should fail if a check run has failed 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/somebranch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.antiope-preview+json",
+      },
+    },
+    "url": "repos/some/repo/commits/somebranch/check-runs",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() should pass through failed 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/somebranch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.antiope-preview+json",
+      },
+    },
+    "url": "repos/some/repo/commits/somebranch/check-runs",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() should pass through success 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/somebranch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.antiope-preview+json",
+      },
+    },
+    "url": "repos/some/repo/commits/somebranch/check-runs",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatus() should suceed if no status and all passed check runs 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/somebranch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.antiope-preview+json",
+      },
+    },
+    "url": "repos/some/repo/commits/somebranch/check-runs",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatusCheck returns null 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
+exports[`platform/github getBranchStatusCheck returns state if found 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
 Object {
   "body": "dummy body",
@@ -268,6 +1466,40 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
 }
 `;
 
+exports[`platform/github getPr(prNo) should return PR from closed graphql result 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
 Object {
   "branchName": "renovate/jest-monorepo",
@@ -284,6 +1516,32 @@ Object {
 }
 `;
 
+exports[`platform/github getPr(prNo) should return PR from graphql result 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return a PR object - 0 1`] = `
 Object {
   "base": Object {
@@ -295,6 +1553,40 @@ Object {
   "number": 1,
   "state": "closed",
 }
+`;
+
+exports[`platform/github getPr(prNo) should return a PR object - 0 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+]
 `;
 
 exports[`platform/github getPr(prNo) should return a PR object - 1 1`] = `
@@ -316,6 +1608,45 @@ Object {
 }
 `;
 
+exports[`platform/github getPr(prNo) should return a PR object - 1 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return a PR object - 2 1`] = `
 Object {
   "base": Object {
@@ -332,6 +1663,45 @@ Object {
   "sha": undefined,
   "state": "open",
 }
+`;
+
+exports[`platform/github getPr(prNo) should return a PR object - 2 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
 `;
 
 exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor does not match 1 commit 1`] = `
@@ -353,6 +1723,50 @@ Object {
 }
 `;
 
+exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor does not match 1 commit 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234/commits",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return a rebaseable PR despite multiple commits 1`] = `
 Object {
   "base": Object {
@@ -370,6 +1784,50 @@ Object {
   "sha": undefined,
   "state": "open",
 }
+`;
+
+exports[`platform/github getPr(prNo) should return a rebaseable PR despite multiple commits 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234/commits",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
 `;
 
 exports[`platform/github getPr(prNo) should return a rebaseable PR if gitAuthor matches 1 commit 1`] = `
@@ -391,6 +1849,50 @@ Object {
 }
 `;
 
+exports[`platform/github getPr(prNo) should return a rebaseable PR if gitAuthor matches 1 commit 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234/commits",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return a rebaseable PR if web-flow is second author 1`] = `
 Object {
   "base": Object {
@@ -408,6 +1910,50 @@ Object {
   "sha": undefined,
   "state": "open",
 }
+`;
+
+exports[`platform/github getPr(prNo) should return a rebaseable PR if web-flow is second author 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234/commits",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
 `;
 
 exports[`platform/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
@@ -429,12 +1975,164 @@ Object {
 }
 `;
 
+exports[`platform/github getPr(prNo) should return an unrebaseable PR if multiple authors 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234/commits",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+]
+`;
+
+exports[`platform/github getPr(prNo) should return null if no PR is returned from GitHub 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.merge-info-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+      "json": false,
+    },
+    "url": "graphql",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/pulls/1234",
+  },
+]
+`;
+
+exports[`platform/github getPrBody(input) returns not-updated pr body for GHE 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://github.company.com/user",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://github.company.com/user/emails",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
 exports[`platform/github getPrBody(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
 
 exports[`platform/github getPrFiles() returns files 1`] = `
 Array [
   "renovate.json",
   "not renovate.json",
+]
+`;
+
+exports[`platform/github getPrFiles() returns files 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/pulls/123/files",
+  },
+]
+`;
+
+exports[`platform/github getRepoForceRebase should detect repoForceRebase 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/branches/undefined/protection",
+  },
+]
+`;
+
+exports[`platform/github getRepoForceRebase should handle 403 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/branches/undefined/protection",
+  },
+]
+`;
+
+exports[`platform/github getRepoForceRebase should handle 404 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/branches/undefined/protection",
+  },
+]
+`;
+
+exports[`platform/github getRepoForceRebase should throw 401 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/undefined/branches/undefined/protection",
+  },
 ]
 `;
 
@@ -456,12 +2154,79 @@ Array [
 ]
 `;
 
+exports[`platform/github getVulnerabilityAlerts() returns array if found 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.vixen-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github getVulnerabilityAlerts() returns empty if disabled 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.vixen-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+]
+`;
+
+exports[`platform/github getVulnerabilityAlerts() returns empty if error 1`] = `
+Array [
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+      "headers": Object {
+        "accept": "application/vnd.github.vixen-preview+json",
+      },
+      "json": false,
+    },
+    "url": "graphql",
+  },
+]
+`;
+
 exports[`platform/github initPlatform() should support custom endpoint 1`] = `
 Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
+`;
+
+exports[`platform/github initPlatform() should support custom endpoint 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://ghe.renovatebot.com/user",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://ghe.renovatebot.com/user/emails",
+  },
+]
 `;
 
 exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
@@ -472,12 +2237,50 @@ Object {
 }
 `;
 
+exports[`platform/github initPlatform() should support default endpoint no email access 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user/emails",
+  },
+]
+`;
+
 exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
 }
+`;
+
+exports[`platform/github initPlatform() should support default endpoint no email result 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user/emails",
+  },
+]
 `;
 
 exports[`platform/github initPlatform() should support default endpoint with email 1`] = `
@@ -488,11 +2291,74 @@ Object {
 }
 `;
 
+exports[`platform/github initPlatform() should support default endpoint with email 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user/emails",
+  },
+]
+`;
+
+exports[`platform/github initPlatform() should throw if no token 1`] = `Array []`;
+
+exports[`platform/github initPlatform() should throw if user failure 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "https://api.github.com/user",
+  },
+]
+`;
+
 exports[`platform/github initRepo should forks when forkMode 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
+`;
+
+exports[`platform/github initRepo should forks when forkMode 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+      "token": "abc123",
+    },
+    "url": "user/repos?per_page=100",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "repos/some/repo/forks",
+  },
+]
 `;
 
 exports[`platform/github initRepo should merge 1`] = `
@@ -502,11 +2368,31 @@ Object {
 }
 `;
 
+exports[`platform/github initRepo should merge 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
+`;
+
+exports[`platform/github initRepo should not guess at merge 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
 `;
 
 exports[`platform/github initRepo should rebase 1`] = `
@@ -516,6 +2402,16 @@ Object {
 }
 `;
 
+exports[`platform/github initRepo should rebase 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
 exports[`platform/github initRepo should squash 1`] = `
 Object {
   "baseBranch": "master",
@@ -523,11 +2419,326 @@ Object {
 }
 `;
 
+exports[`platform/github initRepo should squash 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
+exports[`platform/github initRepo should throw err if disabled in renovate.json 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/contents/renovate.json",
+  },
+]
+`;
+
+exports[`platform/github initRepo should throw error if archived 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
+exports[`platform/github initRepo should throw error if renamed 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
+`;
+
+exports[`platform/github initRepo should update fork when forkMode 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo/git/refs/heads/master",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "paginate": true,
+      "token": "abc123",
+    },
+    "url": "user/repos?per_page=100",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "token": "abc123",
+    },
+    "url": "repos/some/repo/forks",
+  },
+  Object {
+    "method": "patch",
+    "options": Object {
+      "body": Object {
+        "force": true,
+        "sha": "1234",
+      },
+      "token": "abc123",
+    },
+    "url": "repos/forked_repo/git/refs/heads/master",
+  },
+]
+`;
+
+exports[`platform/github initRepo throws not-found 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+]
+`;
+
+exports[`platform/github mergePr(prNo) - autodetection should give up 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "merge",
+      },
+    },
+    "url": "repos/some/repo/pulls/1237/merge",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "merge",
+      },
+    },
+    "url": "repos/some/repo/pulls/1237/merge",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "merge",
+      },
+    },
+    "url": "repos/some/repo/pulls/1237/merge",
+  },
+]
+`;
+
+exports[`platform/github mergePr(prNo) - autodetection should try merge after squash 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "merge",
+      },
+    },
+    "url": "repos/some/repo/pulls/1237/merge",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "merge",
+      },
+    },
+    "url": "repos/some/repo/pulls/1237/merge",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "merge",
+      },
+    },
+    "url": "repos/some/repo/pulls/1237/merge",
+  },
+]
+`;
+
+exports[`platform/github mergePr(prNo) - autodetection should try rebase first 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "rebase",
+      },
+    },
+    "url": "repos/some/repo/pulls/1235/merge",
+  },
+]
+`;
+
+exports[`platform/github mergePr(prNo) - autodetection should try squash after rebase 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "squash",
+      },
+    },
+    "url": "repos/some/repo/pulls/1236/merge",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "squash",
+      },
+    },
+    "url": "repos/some/repo/pulls/1236/merge",
+  },
+]
+`;
+
+exports[`platform/github mergePr(prNo) should handle merge error 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "rebase",
+      },
+    },
+    "url": "repos/some/repo/pulls/1234/merge",
+  },
+]
+`;
+
+exports[`platform/github mergePr(prNo) should merge the PR 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "put",
+    "options": Object {
+      "body": Object {
+        "merge_method": "rebase",
+      },
+    },
+    "url": "repos/some/repo/pulls/1234/merge",
+  },
+]
+`;
+
+exports[`platform/github setBranchStatus returns if already set 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
+`;
+
+exports[`platform/github setBranchStatus sets branch status 1`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": true,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+  Object {
+    "method": "post",
+    "options": Object {
+      "body": Object {
+        "context": "some-context",
+        "description": "some-description",
+        "state": "success",
+        "target_url": "some-url",
+      },
+    },
+    "url": "repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": false,
+    },
+    "url": "repos/some/repo/commits/some-branch/status",
+  },
+  Object {
+    "method": "get",
+    "options": Object {
+      "useCache": false,
+    },
+    "url": "repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
+  },
+]
 `;
 
 exports[`platform/github updatePr(prNo, title, body) should update the PR 1`] = `
@@ -541,5 +2752,25 @@ Array [
       },
     },
   ],
+]
+`;
+
+exports[`platform/github updatePr(prNo, title, body) should update the PR 2`] = `
+Array [
+  Object {
+    "method": "get",
+    "options": undefined,
+    "url": "repos/some/repo",
+  },
+  Object {
+    "method": "patch",
+    "options": Object {
+      "body": Object {
+        "body": "Hello world again",
+        "title": "The New Title",
+      },
+    },
+    "url": "repos/some/repo/pulls/1234",
+  },
 ]
 `;
