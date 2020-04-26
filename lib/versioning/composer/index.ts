@@ -15,19 +15,43 @@ export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function padZeroes(input: string): string {
+  // Handle stability modifiers.
+  const versionParts = input.split('-');
+  let stability = '';
+  if (versionParts.length > 1) {
+    input = versionParts[0];
+    stability = '-' + versionParts[1];
+  }
+
   const sections = input.split('.');
   while (sections.length < 3) {
     sections.push('0');
   }
-  return sections.join('.');
+  return sections.join('.') + stability;
 }
 
 function removeLeadingV(input: string): string {
   return input.replace(/^v/i, '');
 }
 
+function convertStabilitiyModifier(input: string): string {
+  // Handle stability modifiers.
+  const versionParts = input.split('@');
+  if (versionParts.length === 1) {
+    return input;
+  }
+
+  // 1.0@beta2 to 1.0-beta.2
+  const stability = versionParts[1].replace(
+    /(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi,
+    '$1.$2'
+  );
+
+  return versionParts[0] + '-' + stability;
+}
+
 function composer2npm(input: string): string {
-  const cleanInput = removeLeadingV(input);
+  const cleanInput = convertStabilitiyModifier(removeLeadingV(input));
   if (npm.isVersion(cleanInput)) {
     return cleanInput;
   }
@@ -37,18 +61,12 @@ function composer2npm(input: string): string {
   let output = cleanInput;
 
   // Handle stability modifiers.
-  const versionParts = output.split('@');
+  const versionParts = output.split('-');
   let stability = '';
   if (versionParts.length > 1) {
     // Process the version number separately.
     output = versionParts[0];
-    // 1.0@beta2 to 1.0-beta.2
-    stability =
-      '-' +
-      versionParts[1].replace(
-        /(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi,
-        '$1.$2'
-      );
+    stability = '-' + versionParts[1];
   }
 
   // ~4 to ^4 and ~4.1 to ^4.1
@@ -56,7 +74,7 @@ function composer2npm(input: string): string {
   // ~0.4 to >=0.4 <1
   output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
 
-  return padZeroes(output) + stability;
+  return output + stability;
 }
 
 const equals = (a: string, b: string): boolean =>
