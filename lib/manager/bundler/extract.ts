@@ -55,7 +55,6 @@ export async function extractPackageFile(
       if (gemMatch[3]) {
         dep.currentValue = gemMatch[0]
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
-          .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
       } else {
         dep.skipReason = SkipReason.NoVersion;
