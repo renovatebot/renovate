@@ -23,6 +23,8 @@ interface UpdateFunction {
 }
 
 const groovyQuotes = `(?:["'](?:""|'')?)`;
+const groovyVersionVariable = `(?:${groovyQuotes}\\$)?{?([^\\s"'{}$)]+)}?${groovyQuotes}?`;
+const kotlinVersionVariable = `(?:"\\$)?{?([^\\s"{}$]+?)}?"?`;
 
 // https://github.com/patrikerdes/gradle-use-latest-versions-plugin/blob/8cf9c3917b8b04ba41038923cab270d2adda3aa6/src/main/groovy/se/patrikerdes/DependencyUpdate.groovy#L27-L29
 function moduleStringVersionFormatMatch(dependency: GradleDependency): RegExp {
@@ -35,7 +37,7 @@ function groovyPluginStringVersionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return new RegExp(
-    `(id\\s+${groovyQuotes}${dependency.group}${groovyQuotes}\\s+version\\s+${groovyQuotes})[^$].*?(${groovyQuotes})`
+    `(id\\s+${groovyQuotes}${dependency.group}${groovyQuotes}\\s+version\\s+${groovyQuotes})[^"$].*?(${groovyQuotes})`
   );
 }
 
@@ -89,7 +91,7 @@ function moduleMapVariableVersionFormatMatch(
   // one capture group: the version variable
   const group = `group\\s*:\\s*${groovyQuotes}${dependency.group}${groovyQuotes}`;
   const name = `name\\s*:\\s*${groovyQuotes}${dependency.name}${groovyQuotes}`;
-  const version = `version\\s*:\\s*(?:${groovyQuotes}\\$)?{?([^\\s"'{}$)]+)}?${groovyQuotes}?`;
+  const version = `version\\s*:\\s*${groovyVersionVariable}`;
   return allMapFormatOrders(group, name, version, '', '');
 }
 
@@ -99,7 +101,7 @@ function moduleKotlinNamedArgumentVariableVersionFormatMatch(
   // one capture group: the version variable
   const group = `group\\s*=\\s*"${dependency.group}"`;
   const name = `name\\s*=\\s*"${dependency.name}"`;
-  const version = `version\\s*=\\s*(?:"\\$)?{?([^\\s"{}$]+?)}?"?`;
+  const version = `version\\s*=\\s*${kotlinVersionVariable}`;
   return allMapFormatOrders(group, name, version, '', '[\\s),]');
 }
 
@@ -117,6 +119,22 @@ function moduleStringVariableExpressionVersionFormatMatch(
   return new RegExp(
     `${groovyQuotes}${dependency.group}:${dependency.name}:\\$` +
       `{([^{].*?)}${groovyQuotes}`
+  );
+}
+
+function groovyPluginVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return new RegExp(
+    `id\\s+${groovyQuotes}${dependency.group}${groovyQuotes}\\s+version\\s+${groovyVersionVariable}(?:\\s|;|})`
+  );
+}
+
+function kotlinPluginVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return new RegExp(
+    `id\\("${dependency.group}"\\)\\s+version\\s+${kotlinVersionVariable}(?:\\s|;|})`
   );
 }
 
@@ -143,6 +161,8 @@ export function collectVersionVariables(
     const regexes = [
       moduleStringVariableExpressionVersionFormatMatch(dependency),
       moduleStringVariableInterpolationVersionFormatMatch(dependency),
+      groovyPluginVariableVersionFormatMatch(dependency),
+      kotlinPluginVariableVersionFormatMatch(dependency),
       ...moduleMapVariableVersionFormatMatch(dependency),
       ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
     ];
@@ -189,6 +209,8 @@ function updateLocalVariables(
     ...moduleMapVariableVersionFormatMatch(dependency),
     moduleStringVariableInterpolationVersionFormatMatch(dependency),
     moduleStringVariableExpressionVersionFormatMatch(dependency),
+    groovyPluginVariableVersionFormatMatch(dependency),
+    kotlinPluginVariableVersionFormatMatch(dependency),
     ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
   ];
   for (const regex of regexes) {
