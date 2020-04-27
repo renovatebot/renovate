@@ -26,25 +26,6 @@ export async function getReleaseList(
   }
   try {
     let url = apiBaseUrl.replace(/\/?$/, '/');
-    if (apiBaseUrl.includes('github')) {
-      url += `repos/${repository}/releases?per_page=100`;
-      const res = await ghGot<
-        {
-          html_url: string;
-          id: number;
-          tag_name: string;
-          name: string;
-          body: string;
-        }[]
-      >(url);
-      return res.body.map((release) => ({
-        url: release.html_url,
-        id: release.id,
-        tag: release.tag_name,
-        name: release.name,
-        body: release.body,
-      }));
-    }
     if (apiBaseUrl.includes('gitlab')) {
       url += `projects/${repository.replace(
         /\//g,
@@ -68,8 +49,23 @@ export async function getReleaseList(
         tag: release.tag_name,
       }));
     }
-
-    return null;
+    url += `repos/${repository}/releases?per_page=100`;
+    const res = await ghGot<
+      {
+        html_url: string;
+        id: number;
+        tag_name: string;
+        name: string;
+        body: string;
+      }[]
+    >(url);
+    return res.body.map((release) => ({
+      url: release.html_url,
+      id: release.id,
+      tag: release.tag_name,
+      name: release.name,
+      body: release.body,
+    }));
   } catch (err) /* istanbul ignore next */ {
     logger.info({ repository, err }, 'getReleaseList error');
     return [];
