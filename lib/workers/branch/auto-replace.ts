@@ -32,9 +32,21 @@ export async function confirmIfDepUpdated(
     logger.debug('Failed to parse newContent');
   }
   if (!newUpgrade) {
+    logger.debug('No newUpgrade');
     return false;
   }
+  // istanbul ignore if
+  if (upgrade.depName !== newUpgrade.depName) {
+    logger.debug(
+      { currentDepName: upgrade.depName, newDepName: newUpgrade.depName },
+      'depName mismatch'
+    );
+  }
   if (newUpgrade.currentValue !== newValue) {
+    logger.debug(
+      { expectedValue: newValue, foundValue: newUpgrade.currentValue },
+      'Value mismatch'
+    );
     return false;
   }
   if (!newDigest) {
