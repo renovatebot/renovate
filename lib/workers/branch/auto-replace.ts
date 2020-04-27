@@ -80,7 +80,7 @@ export async function checkBranchDepsMatchBaseDeps(
     );
     return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
-    logger.warn('Failed to parse branchContent');
+    logger.info('Failed to parse branchContent - rebasing');
     return false;
   }
 }
