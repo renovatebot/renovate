@@ -1595,7 +1595,7 @@ Object {
       "skipReason": "no-version",
     },
     Object {
-      "currentValue": ">= 3.0.5, < 3.2",
+      "currentValue": "\\">= 3.0.5\\", \\"< 3.2\\"",
       "datasource": "rubygems",
       "depName": "listen",
       "lockedVersion": "3.1.5",
