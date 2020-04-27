@@ -9,10 +9,7 @@ import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
-import {
-  BUNDLER_INVALID_CREDENTIALS,
-  BUNDLER_UNKNOWN_ERROR,
-} from '../../constants/error-messages';
+import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { HostRule } from '../../types';
 import {
   getAuthenticationHeaderValue,
@@ -212,20 +209,19 @@ export async function updateArtifacts(
         { err },
         'Gemfile.lock update failed due to incompatible packages'
       );
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: err.stdout + '\n' + err.stderr,
-          },
-        },
-      ];
+    } else {
+      logger.info(
+        { err },
+        'Gemfile.lock update failed due to an unknown reason'
+      );
     }
-    logger.warn(
-      { err },
-      'Gemfile.lock update failed due to unknown reason - skipping branch'
-    );
-    global.repoCache.bundlerArtifactsError = BUNDLER_UNKNOWN_ERROR;
-    throw new Error(BUNDLER_UNKNOWN_ERROR);
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: err.stdout + '\n' + err.stderr,
+        },
+      },
+    ];
   }
 }
