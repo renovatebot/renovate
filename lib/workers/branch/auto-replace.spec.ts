@@ -49,7 +49,21 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
+      upgrade.newDigest = 'some-digest';
       upgrade.depIndex = 0;
+      const res = await doAutoReplace(upgrade, src, parentBranch);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles a double attempt', async () => {
+      const script =
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
+      const src = `     ${script}  ${script} `;
+      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.depName = 'reactstrap';
+      upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
+      upgrade.currentValue = '7.1.0';
+      upgrade.newValue = '7.1.1';
+      upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();
     });

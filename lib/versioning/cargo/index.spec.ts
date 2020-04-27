@@ -103,6 +103,24 @@ describe('semver.isSingleVersion()', () => {
   });
 });
 describe('semver.getNewValue()', () => {
+  it('returns if empty or *', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: null,
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.0',
+      })
+    ).toEqual(null);
+    expect(
+      semver.getNewValue({
+        currentValue: '*',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.1.0',
+      })
+    ).toEqual('*');
+  });
   it('bumps equals', () => {
     expect(
       semver.getNewValue({
