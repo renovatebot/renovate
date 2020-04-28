@@ -8,6 +8,7 @@ Object {
   "extends": Array [
     "packages:eslint",
     "packages:stylelint",
+    "packages:tslint",
   ],
   "packageNames": Array [
     "remark-lint",
@@ -145,22 +146,22 @@ Object {
 
 exports[`config/presets parsePreset returns default package name 1`] = `
 Object {
-  "packageName": "renovate-config-default",
+  "packageName": "renovatebot/presets",
   "params": undefined,
-  "presetName": "base",
-  "presetSource": "npm",
+  "presetName": "presets/default/base",
+  "presetSource": "github",
 }
 `;
 
 exports[`config/presets parsePreset returns default package name with params 1`] = `
 Object {
-  "packageName": "renovate-config-default",
+  "packageName": "renovatebot/presets",
   "params": Array [
     "packages/eslint",
     "eslint",
   ],
-  "presetName": "group",
-  "presetSource": "npm",
+  "presetName": "presets/default/group",
+  "presetSource": "github",
 }
 `;
 
@@ -313,6 +314,9 @@ Object {
 
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
+  "packageNames": Array [
+    "babel-eslint",
+  ],
   "packagePatterns": Array [
     "^eslint",
     "^stylelint",
@@ -374,6 +378,12 @@ Object {
       ],
       "rangeStrategy": "pin",
     },
+    Object {
+      "depTypeList": Array [
+        "peerDependencies",
+      ],
+      "rangeStrategy": "widen",
+    },
   ],
   "prCreation": "immediate",
   "rebaseWhen": "behind-base-branch",
@@ -392,6 +402,9 @@ Object {
 
 exports[`config/presets resolvePreset resolves eslint 1`] = `
 Object {
+  "packageNames": Array [
+    "babel-eslint",
+  ],
   "packagePatterns": Array [
     "^eslint",
   ],
@@ -400,268 +413,1028 @@ Object {
 
 exports[`config/presets resolvePreset resolves group monorepos 1`] = `
 Object {
+  "description": Array [
+    "Group known monorepo packages together",
+  ],
+  "ignoreDeps": Array [],
   "packageRules": Array [
     Object {
       "description": Array [
+        "ag-grid monorepo",
+        "Group packages from ag-grid monorepo together",
+      ],
+      "groupName": "ag-grid monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ag-grid/ag-grid",
+      ],
+    },
+    Object {
+      "description": Array [
+        "arcus event-grid monorepo",
+        "Group packages from arcus event-grid monorepo together",
+      ],
+      "groupName": "arcus event-grid monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/arcus-azure/arcus.eventgrid",
+      ],
+    },
+    Object {
+      "description": Array [
+        "arcus security monorepo",
+        "Group packages from arcus security monorepo together",
+      ],
+      "groupName": "arcus security monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/arcus-azure/arcus.security",
+      ],
+    },
+    Object {
+      "description": Array [
+        "arcus messaging monorepo",
+        "Group packages from arcus messaging monorepo together",
+      ],
+      "groupName": "arcus messaging monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/arcus-azure/arcus.messaging",
+      ],
+    },
+    Object {
+      "description": Array [
+        "arcus observability monorepo",
+        "Group packages from arcus observability monorepo together",
+      ],
+      "groupName": "arcus observability monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/arcus-azure/arcus.observability",
+      ],
+    },
+    Object {
+      "description": Array [
+        "arcus webapi monorepo",
+        "Group packages from arcus webapi monorepo together",
+      ],
+      "groupName": "arcus webapi monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/arcus-azure/arcus.webapi",
+      ],
+    },
+    Object {
+      "description": Array [
+        "arcus background-jobs monorepo",
+        "Group packages from arcus background-jobs monorepo together",
+      ],
+      "groupName": "arcus background-jobs monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/arcus-azure/arcus.backgroundjobs",
+      ],
+    },
+    Object {
+      "description": Array [
+        "algolia-react-instantsearch monorepo",
+        "Group packages from algolia-react-instantsearch monorepo together",
+      ],
+      "groupName": "algolia-react-instantsearch monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/algolia/react-instantsearch",
+      ],
+    },
+    Object {
+      "description": Array [
+        "apollo-server monorepo",
+        "Group packages from apollo-server monorepo together",
+      ],
+      "groupName": "apollo-server monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/apollographql/apollo-server",
+      ],
+    },
+    Object {
+      "description": Array [
+        "aspnet AspNetWebStack monorepo",
+        "Group packages from aspnet AspNetWebStack monorepo together",
+      ],
+      "groupName": "aspnet AspNetWebStack monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/aspnet/AspNetWebStack",
+      ],
+    },
+    Object {
+      "description": Array [
+        "aspnet Extensions monorepo",
+        "Group packages from aspnet Extensions monorepo together",
+      ],
+      "groupName": "aspnet Extensions monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/aspnet/Extensions",
+      ],
+    },
+    Object {
+      "description": Array [
+        "aws-cdk monorepo",
+        "Group packages from aws-cdk monorepo together",
+      ],
+      "groupName": "aws-cdk monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/aws/aws-cdk",
+      ],
+    },
+    Object {
+      "description": Array [
+        "azure azure-libraries-for-net monorepo",
+        "Group packages from azure azure-libraries-for-net monorepo together",
+      ],
+      "groupName": "azure azure-libraries-for-net monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/Azure/azure-libraries-for-net",
+      ],
+    },
+    Object {
+      "description": Array [
+        "azure azure-sdk-for-net monorepo",
+        "Group packages from azure azure-sdk-for-net monorepo together",
+      ],
+      "groupName": "azure azure-sdk-for-net monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/Azure/azure-sdk-for-net",
+      ],
+    },
+    Object {
+      "description": Array [
+        "azure azure-storage-net monorepo",
+        "Group packages from azure azure-storage-net monorepo together",
+      ],
+      "groupName": "azure azure-storage-net monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/Azure/azure-storage-net",
+      ],
+    },
+    Object {
+      "description": Array [
+        "bugsnag-js monorepo",
+        "Group packages from bugsnag-js monorepo together",
+      ],
+      "groupName": "bugsnag-js monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/bugsnag/bugsnag-js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "devextreme-reactive monorepo",
+        "Group packages from devextreme-reactive monorepo together",
+      ],
+      "groupName": "devextreme-reactive monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/DevExpress/devextreme-reactive",
+      ],
+    },
+    Object {
+      "description": Array [
+        "electron-forge monorepo",
+        "Group packages from electron-forge monorepo together",
+      ],
+      "groupName": "electron-forge monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/electron-userland/electron-forge",
+      ],
+    },
+    Object {
+      "description": Array [
+        "ember-decorators monorepo",
+        "Group packages from ember-decorators monorepo together",
+      ],
+      "groupName": "ember-decorators monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ember-decorators/ember-decorators",
+      ],
+    },
+    Object {
+      "description": Array [
+        "graphql-modules monorepo",
+        "Group packages from graphql-modules monorepo together",
+      ],
+      "groupName": "graphql-modules monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/Urigo/graphql-modules",
+      ],
+    },
+    Object {
+      "description": Array [
+        "ionic-native monorepo",
+        "Group packages from ionic-native monorepo together",
+      ],
+      "groupName": "ionic-native monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ionic-team/ionic-native",
+      ],
+    },
+    Object {
+      "description": Array [
+        "mdc-react monorepo",
+        "Group packages from mdc-react monorepo together",
+      ],
+      "groupName": "mdc-react monorepo",
+      "sourceUrlPrefixes": Array [
+        "material-components/material-components-web-react",
+      ],
+    },
+    Object {
+      "description": Array [
+        "ngx-formly monorepo",
+        "Group packages from ngx-formly monorepo together",
+      ],
+      "groupName": "ngx-formly monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ngx-formly/ngx-formly",
+      ],
+    },
+    Object {
+      "description": Array [
+        "ngxs-store monorepo",
+        "Group packages from ngxs-store monorepo together",
+      ],
+      "groupName": "ngxs-store monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ngxs/store",
+      ],
+    },
+    Object {
+      "description": Array [
+        "react-apollo monorepo",
+        "Group packages from react-apollo monorepo together",
+      ],
+      "groupName": "react-apollo monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/apollographql/react-apollo",
+      ],
+    },
+    Object {
+      "description": Array [
+        "react-dnd monorepo",
+        "Group packages from react-dnd monorepo together",
+      ],
+      "groupName": "react-dnd monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/react-dnd/react-dnd",
+      ],
+    },
+    Object {
+      "description": Array [
+        "react-navigation monorepo",
+        "Group packages from react-navigation monorepo together",
+      ],
+      "groupName": "react-navigation monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/react-navigation/react-navigation",
+      ],
+    },
+    Object {
+      "description": Array [
+        "reactivestack-cookies monorepo",
+        "Group packages from reactivestack-cookies monorepo together",
+      ],
+      "groupName": "reactivestack-cookies monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/reactivestack/cookies",
+      ],
+    },
+    Object {
+      "description": Array [
+        "semantic-release monorepo",
+        "Group packages from semantic-release monorepo together",
+      ],
+      "groupName": "semantic-release monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/semantic-release/",
+      ],
+    },
+    Object {
+      "description": Array [
+        "telus-tds monorepo",
+        "Group packages from telus-tds monorepo together",
+      ],
+      "groupName": "telus-tds monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/telusdigital/tds",
+      ],
+    },
+    Object {
+      "description": Array [
+        "typescript-eslint monorepo",
+        "Group packages from typescript-eslint monorepo together",
+      ],
+      "groupName": "typescript-eslint monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/typescript-eslint/typescript-eslint",
+      ],
+    },
+    Object {
+      "description": Array [
+        "typography-js monorepo",
+        "Group packages from typography-js monorepo together",
+      ],
+      "groupName": "typography-js monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/KyleAMathews/typography.js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "vue-cli monorepo",
+        "Group packages from vue-cli monorepo together",
+      ],
+      "groupName": "vue-cli monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/vuejs/vue-cli",
+      ],
+    },
+    Object {
+      "description": Array [
+        "accounts monorepo",
+        "Group packages from accounts monorepo together",
+      ],
+      "groupName": "accounts monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/accounts-js/accounts",
+      ],
+    },
+    Object {
+      "description": Array [
+        "angular1 monorepo",
+        "Group packages from angular1 monorepo together",
+      ],
+      "groupName": "angular1 monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/angular/angular.js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "angular monorepo",
         "Group packages from angular monorepo together",
       ],
       "groupName": "angular monorepo",
-      "packagePatterns": Array [
-        "^@angular/",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/angular/angular",
       ],
     },
     Object {
       "description": Array [
+        "angularcli monorepo",
+        "Group packages from angularcli monorepo together",
+      ],
+      "groupName": "angularcli monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/angular/angular-cli",
+      ],
+    },
+    Object {
+      "description": Array [
+        "apolloclient monorepo",
+        "Group packages from apolloclient monorepo together",
+      ],
+      "groupName": "apolloclient monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/apollographql/apollo-client",
+      ],
+    },
+    Object {
+      "description": Array [
+        "apollolink monorepo",
+        "Group packages from apollolink monorepo together",
+      ],
+      "groupName": "apollolink monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/apollographql/apollo-link",
+      ],
+    },
+    Object {
+      "description": Array [
+        "awsappsync monorepo",
+        "Group packages from awsappsync monorepo together",
+      ],
+      "groupName": "awsappsync monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "babel monorepo",
         "Group packages from babel monorepo together",
       ],
       "groupName": "babel monorepo",
-      "packageNames": Array [
-        "babel-cli",
-        "babel-code-frame",
-        "babel-core",
-        "babel-generator",
-        "babel-helper-bindify-decorators",
-        "babel-helper-builder-binary-assignment-operator-visitor",
-        "babel-helper-builder-react-jsx",
-        "babel-helper-call-delegate",
-        "babel-helper-define-map",
-        "babel-helper-explode-assignable-expression",
-        "babel-helper-explode-class",
-        "babel-helper-fixtures",
-        "babel-helper-function-name",
-        "babel-helper-get-function-arity",
-        "babel-helper-hoist-variables",
-        "babel-helper-optimise-call-expression",
-        "babel-helper-plugin-test-runner",
-        "babel-helper-regex",
-        "babel-helper-remap-async-to-generator",
-        "babel-helper-replace-supers",
-        "babel-helper-transform-fixture-test-runner",
-        "babel-helper-wrap-function",
-        "babel-helpers",
-        "babel-messages",
-        "babel-node",
-        "babel-plugin-check-es2015-constants",
-        "babel-plugin-external-helpers",
-        "babel-plugin-syntax-async-functions",
-        "babel-plugin-syntax-async-generators",
-        "babel-plugin-syntax-class-properties",
-        "babel-plugin-syntax-decorators",
-        "babel-plugin-syntax-do-expressions",
-        "babel-plugin-syntax-dynamic-import",
-        "babel-plugin-syntax-exponentiation-operator",
-        "babel-plugin-syntax-export-extensions",
-        "babel-plugin-syntax-flow",
-        "babel-plugin-syntax-function-bind",
-        "babel-plugin-syntax-function-sent",
-        "babel-plugin-syntax-jsx",
-        "babel-plugin-syntax-numeric-separator",
-        "babel-plugin-syntax-object-rest-spread",
-        "babel-plugin-syntax-optional-catch-binding",
-        "babel-plugin-syntax-optional-chaining",
-        "babel-plugin-syntax-trailing-function-commas",
-        "babel-plugin-syntax-typescript",
-        "babel-plugin-transform-async-functions",
-        "babel-plugin-transform-async-generator-functions",
-        "babel-plugin-transform-async-to-generator",
-        "babel-plugin-transform-async-to-module-method",
-        "babel-plugin-transform-class-properties",
-        "babel-plugin-transform-decorators",
-        "babel-plugin-transform-do-expressions",
-        "babel-plugin-transform-es2015-arrow-functions",
-        "babel-plugin-transform-es2015-block-scoped-functions",
-        "babel-plugin-transform-es2015-block-scoping",
-        "babel-plugin-transform-es2015-classes",
-        "babel-plugin-transform-es2015-computed-properties",
-        "babel-plugin-transform-es2015-destructuring",
-        "babel-plugin-transform-es2015-duplicate-keys",
-        "babel-plugin-transform-es2015-for-of",
-        "babel-plugin-transform-es2015-function-name",
-        "babel-plugin-transform-es2015-instanceof",
-        "babel-plugin-transform-es2015-literals",
-        "babel-plugin-transform-es2015-modules-amd",
-        "babel-plugin-transform-es2015-modules-commonjs",
-        "babel-plugin-transform-es2015-modules-systemjs",
-        "babel-plugin-transform-es2015-modules-umd",
-        "babel-plugin-transform-es2015-object-super",
-        "babel-plugin-transform-es2015-parameters",
-        "babel-plugin-transform-es2015-shorthand-properties",
-        "babel-plugin-transform-es2015-spread",
-        "babel-plugin-transform-es2015-sticky-regex",
-        "babel-plugin-transform-es2015-template-literals",
-        "babel-plugin-transform-es2015-typeof-symbol",
-        "babel-plugin-transform-es2015-unicode-regex",
-        "babel-plugin-transform-es3-member-expression-literals",
-        "babel-plugin-transform-es3-property-literals",
-        "babel-plugin-transform-es5-property-mutators",
-        "babel-plugin-transform-eval",
-        "babel-plugin-transform-exponentiation-operator",
-        "babel-plugin-transform-export-extensions",
-        "babel-plugin-transform-flow-comments",
-        "babel-plugin-transform-flow-strip-types",
-        "babel-plugin-transform-function-bind",
-        "babel-plugin-transform-function-sent",
-        "babel-plugin-transform-jscript",
-        "babel-plugin-transform-new-target",
-        "babel-plugin-transform-numeric-separator",
-        "babel-plugin-transform-object-assign",
-        "babel-plugin-transform-object-rest-spread",
-        "babel-plugin-transform-object-set-prototype-of-to-assign",
-        "babel-plugin-transform-optional-catch-binding",
-        "babel-plugin-transform-optional-chaining",
-        "babel-plugin-transform-proto-to-assign",
-        "babel-plugin-transform-react-constant-elements",
-        "babel-plugin-transform-react-display-name",
-        "babel-plugin-transform-react-inline-elements",
-        "babel-plugin-transform-react-jsx-compat",
-        "babel-plugin-transform-react-jsx-self",
-        "babel-plugin-transform-react-jsx-source",
-        "babel-plugin-transform-react-jsx",
-        "babel-plugin-transform-regenerator",
-        "babel-plugin-transform-runtime",
-        "babel-plugin-transform-strict-mode",
-        "babel-plugin-transform-typescript",
-        "babel-polyfill",
-        "babel-preset-es2015",
-        "babel-preset-es2016",
-        "babel-preset-es2017",
-        "babel-preset-flow",
-        "babel-preset-react",
-        "babel-preset-stage-0",
-        "babel-preset-stage-1",
-        "babel-preset-stage-2",
-        "babel-preset-stage-3",
-        "babel-preset-typescript",
-        "babel-register",
-        "babel-runtime",
-        "babel-standalone",
-        "babel-template",
-        "babel-traverse",
-        "babel-types",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/babel/babel",
       ],
     },
     Object {
       "description": Array [
+        "baset monorepo",
+        "Group packages from baset monorepo together",
+      ],
+      "groupName": "baset monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/igmat/baset",
+      ],
+    },
+    Object {
+      "description": Array [
+        "brave monorepo",
+        "Group packages from brave monorepo together",
+      ],
+      "groupName": "brave monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/openzipkin/brave",
+      ],
+    },
+    Object {
+      "description": Array [
+        "capacitor monorepo",
+        "Group packages from capacitor monorepo together",
+      ],
+      "groupName": "capacitor monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ionic-team/capacitor",
+      ],
+    },
+    Object {
+      "description": Array [
+        "clarity monorepo",
+        "Group packages from clarity monorepo together",
+      ],
+      "groupName": "clarity monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/vmware/clarity",
+      ],
+    },
+    Object {
+      "description": Array [
+        "commitlint monorepo",
+        "Group packages from commitlint monorepo together",
+      ],
+      "groupName": "commitlint monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/conventional-changelog/commitlint",
+      ],
+    },
+    Object {
+      "description": Array [
+        "dropwizard monorepo",
+        "Group packages from dropwizard monorepo together",
+      ],
+      "groupName": "dropwizard monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/dropwizard/dropwizard",
+      ],
+    },
+    Object {
+      "description": Array [
+        "emotion monorepo",
+        "Group packages from emotion monorepo together",
+      ],
+      "groupName": "emotion monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/emotion-js/emotion",
+      ],
+    },
+    Object {
+      "description": Array [
+        "expo monorepo",
+        "Group packages from expo monorepo together",
+      ],
+      "groupName": "expo monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/expo/expo",
+      ],
+    },
+    Object {
+      "description": Array [
+        "fimbullinter monorepo",
+        "Group packages from fimbullinter monorepo together",
+      ],
+      "groupName": "fimbullinter monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/fimbullinter/wotan",
+      ],
+    },
+    Object {
+      "description": Array [
+        "flopflip monorepo",
+        "Group packages from flopflip monorepo together",
+      ],
+      "groupName": "flopflip monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/tdeekens/flopflip",
+      ],
+    },
+    Object {
+      "description": Array [
+        "framework7 monorepo",
+        "Group packages from framework7 monorepo together",
+      ],
+      "groupName": "framework7 monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/framework7io/framework7",
+      ],
+    },
+    Object {
+      "description": Array [
+        "gatsby monorepo",
+        "Group packages from gatsby monorepo together",
+      ],
+      "groupName": "gatsby monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/gatsbyjs/gatsby",
+      ],
+    },
+    Object {
+      "description": Array [
+        "graphqlcodegenerator monorepo",
+        "Group packages from graphqlcodegenerator monorepo together",
+      ],
+      "groupName": "graphqlcodegenerator monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/dotansimha/graphql-code-generator",
+        "https://github.com/dotansimha/graphql-codegen",
+      ],
+    },
+    Object {
+      "description": Array [
+        "graphql-toolkit monorepo",
+        "Group packages from graphql-toolkit monorepo together",
+      ],
+      "groupName": "graphql-toolkit monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ardatan/graphql-toolkit",
+      ],
+    },
+    Object {
+      "description": Array [
+        "hamcrest monorepo",
+        "Group packages from hamcrest monorepo together",
+      ],
+      "groupName": "hamcrest monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/hamcrest/JavaHamcrest",
+      ],
+    },
+    Object {
+      "description": Array [
+        "hapijs monorepo",
+        "Group packages from hapijs monorepo together",
+      ],
+      "groupName": "hapijs monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/hapijs",
+      ],
+    },
+    Object {
+      "description": Array [
+        "infrastructure monorepo",
+        "Group packages from infrastructure monorepo together",
+      ],
+      "groupName": "infrastructure monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/instructure/instructure-ui",
+      ],
+    },
+    Object {
+      "description": Array [
+        "jasmine monorepo",
+        "Group packages from jasmine monorepo together",
+      ],
+      "groupName": "jasmine monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/jasmine/jasmine",
+      ],
+    },
+    Object {
+      "description": Array [
+        "jersey monorepo",
+        "Group packages from jersey monorepo together",
+      ],
+      "groupName": "jersey monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/eclipse-ee4j/jersey",
+      ],
+    },
+    Object {
+      "description": Array [
+        "jest monorepo",
         "Group packages from jest monorepo together",
       ],
       "groupName": "jest monorepo",
-      "packageNames": Array [
-        "babel-jest",
-        "babel-plugin-jest-hoist",
-        "babel-preset-jest",
-        "eslint-config-fb-strict",
-        "eslint-plugin-jest",
-        "jest-changed-files",
-        "jest-circus",
-        "jest-cli",
-        "jest-config",
-        "jest-diff",
-        "jest-docblock",
-        "jest-editor-support",
-        "jest-environment-jsdom",
-        "jest-environment-node",
-        "jest-get-type",
-        "jest-haste-map",
-        "jest-jasmine2",
-        "jest-matcher-utils",
-        "jest-matchers",
-        "jest-message-util",
-        "jest-mock",
-        "jest-phabricator",
-        "jest-regex-util",
-        "jest-repl",
-        "jest-resolve-dependencies",
-        "jest-resolve",
-        "jest-runner",
-        "jest-runtime",
-        "jest-snapshot",
-        "jest-test-typescript-parser",
-        "jest-util",
-        "jest-validate",
-        "jest",
-        "pretty-format",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/facebook/jest",
       ],
     },
     Object {
       "description": Array [
+        "lerna monorepo",
+        "Group packages from lerna monorepo together",
+      ],
+      "groupName": "lerna monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/lerna/lerna",
+      ],
+    },
+    Object {
+      "description": Array [
+        "lingui monorepo",
+        "Group packages from lingui monorepo together",
+      ],
+      "groupName": "lingui monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/lingui/js-lingui",
+      ],
+    },
+    Object {
+      "description": Array [
+        "lodash monorepo",
         "Group packages from lodash monorepo together",
       ],
       "groupName": "lodash monorepo",
-      "packageNames": Array [
-        "babel-plugin-lodash",
-        "lodash-webpack-plugin",
-        "lodash-es",
-      ],
-      "packagePatterns": Array [
-        "^lodash",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/lodash/",
       ],
     },
     Object {
       "description": Array [
+        "loopback monorepo",
+        "Group packages from loopback monorepo together",
+      ],
+      "groupName": "loopback monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/strongloop/loopback-next",
+      ],
+    },
+    Object {
+      "description": Array [
+        "material monorepo",
+        "Group packages from material monorepo together",
+      ],
+      "groupName": "material monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/material-components/material-components-web",
+      ],
+    },
+    Object {
+      "description": Array [
+        "mdx monorepo",
+        "Group packages from mdx monorepo together",
+      ],
+      "groupName": "mdx monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/mdx-js/mdx",
+      ],
+    },
+    Object {
+      "description": Array [
+        "mui monorepo",
+        "Group packages from mui monorepo together",
+      ],
+      "groupName": "mui monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/mui-org/material-ui",
+      ],
+    },
+    Object {
+      "description": Array [
+        "nest monorepo",
+        "Group packages from nest monorepo together",
+      ],
+      "groupName": "nest monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/nestjs/nest",
+      ],
+    },
+    Object {
+      "description": Array [
+        "neutrino monorepo",
+        "Group packages from neutrino monorepo together",
+      ],
+      "groupName": "neutrino monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/neutrinojs/neutrino",
+        "https://github.com/mozilla-neutrino/neutrino-dev",
+      ],
+    },
+    Object {
+      "description": Array [
+        "nextjs monorepo",
+        "Group packages from nextjs monorepo together",
+      ],
+      "groupName": "nextjs monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/zeit/next.js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "ngrx monorepo",
+        "Group packages from ngrx monorepo together",
+      ],
+      "groupName": "ngrx monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ngrx/",
+      ],
+    },
+    Object {
+      "description": Array [
+        "nrwl monorepo",
+        "Group packages from nrwl monorepo together",
+      ],
+      "groupName": "nrwl monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/nrwl/",
+      ],
+    },
+    Object {
+      "description": Array [
+        "nuxtjs monorepo",
+        "Group packages from nuxtjs monorepo together",
+      ],
+      "groupName": "nuxtjs monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/nuxt/nuxt.js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "openfeign monorepo",
+        "Group packages from openfeign monorepo together",
+      ],
+      "groupName": "openfeign monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/OpenFeign/feign",
+      ],
+    },
+    Object {
+      "description": Array [
+        "picasso monorepo",
+        "Group packages from picasso monorepo together",
+      ],
+      "groupName": "picasso monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/qlik-oss/picasso.js",
+      ],
+    },
+    Object {
+      "description": Array [
+        "pollyjs monorepo",
+        "Group packages from pollyjs monorepo together",
+      ],
+      "groupName": "pollyjs monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/Netflix/pollyjs",
+      ],
+    },
+    Object {
+      "description": Array [
+        "pouchdb monorepo",
         "Group packages from pouchdb monorepo together",
       ],
       "groupName": "pouchdb monorepo",
-      "packageNames": Array [
-        "pouchdb-abstract-mapreduce",
-        "pouchdb-adapter-fruitdown",
-        "pouchdb-adapter-http",
-        "pouchdb-adapter-idb",
-        "pouchdb-adapter-indexeddb",
-        "pouchdb-adapter-leveldb-core",
-        "pouchdb-adapter-leveldb",
-        "pouchdb-adapter-localstorage",
-        "pouchdb-adapter-memory",
-        "pouchdb-adapter-node-websql",
-        "pouchdb-adapter-utils",
-        "pouchdb-adapter-websql-core",
-        "pouchdb-adapter-websql",
-        "pouchdb-ajax",
-        "pouchdb-binary-utils",
-        "pouchdb-browser",
-        "pouchdb-changes-filter",
-        "pouchdb-checkpointer",
-        "pouchdb-collate",
-        "pouchdb-collections",
-        "pouchdb-core",
-        "pouchdb-debug",
-        "pouchdb-errors",
-        "pouchdb-find",
-        "pouchdb-for-coverage",
-        "pouchdb-generate-replication-id",
-        "pouchdb-json",
-        "pouchdb-mapreduce-utils",
-        "pouchdb-mapreduce",
-        "pouchdb-md5",
-        "pouchdb-merge",
-        "pouchdb-node",
-        "pouchdb-promise",
-        "pouchdb-replication",
-        "pouchdb-selector-core",
-        "pouchdb-utils",
-        "pouchdb",
-        "sublevel-pouchdb",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/pouchdb/pouchdb",
       ],
     },
     Object {
       "description": Array [
+        "react monorepo",
         "Group packages from react monorepo together",
       ],
       "groupName": "react monorepo",
-      "packageNames": Array [
-        "react-art",
-        "react-dom",
-        "react-noop-renderer",
-        "react-test-renderer",
-        "react",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/facebook/react",
       ],
     },
     Object {
       "description": Array [
+        "reactrouter monorepo",
+        "Group packages from reactrouter monorepo together",
+      ],
+      "groupName": "reactrouter monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/ReactTraining/react-router",
+      ],
+    },
+    Object {
+      "description": Array [
+        "reakit monorepo",
+        "Group packages from reakit monorepo together",
+      ],
+      "groupName": "reakit monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/reakit/reakit",
+      ],
+    },
+    Object {
+      "description": Array [
+        "remark monorepo",
+        "Group packages from remark monorepo together",
+      ],
+      "groupName": "remark monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/remarkjs/remark",
+      ],
+    },
+    Object {
+      "description": Array [
+        "router5 monorepo",
+        "Group packages from router5 monorepo together",
+      ],
+      "groupName": "router5 monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/router5/router5",
+      ],
+    },
+    Object {
+      "description": Array [
+        "sentry monorepo",
+        "Group packages from sentry monorepo together",
+      ],
+      "groupName": "sentry monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/getsentry/sentry-javascript",
+      ],
+    },
+    Object {
+      "description": Array [
+        "springfox monorepo",
+        "Group packages from springfox monorepo together",
+      ],
+      "groupName": "springfox monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/springfox/springfox",
+      ],
+    },
+    Object {
+      "description": Array [
+        "sanity monorepo",
+        "Group packages from sanity monorepo together",
+      ],
+      "groupName": "sanity monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/sanity-io/sanity",
+      ],
+    },
+    Object {
+      "description": Array [
+        "storybook monorepo",
         "Group packages from storybook monorepo together",
       ],
       "groupName": "storybook monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/storybookjs/storybook",
+      ],
+    },
+    Object {
+      "description": Array [
+        "strapi monorepo",
+        "Group packages from strapi monorepo together",
+      ],
+      "groupName": "strapi monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/strapi/strapi",
+      ],
+    },
+    Object {
+      "description": Array [
+        "stryker monorepo",
+        "Group packages from stryker monorepo together",
+      ],
+      "groupName": "stryker monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/stryker-mutator/stryker",
+      ],
+    },
+    Object {
+      "description": Array [
+        "surveyjs monorepo",
+        "Group packages from surveyjs monorepo together",
+      ],
+      "groupName": "surveyjs monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/surveyjs/surveyjs",
+      ],
+    },
+    Object {
+      "description": Array [
+        "Swashbuckle monorepo",
+        "Group packages from Swashbuckle monorepo together",
+      ],
+      "groupName": "Swashbuckle monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
+      ],
+    },
+    Object {
+      "description": Array [
+        "treat monorepo",
+        "Group packages from treat monorepo together",
+      ],
+      "groupName": "treat monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/seek-oss/treat",
+      ],
+    },
+    Object {
+      "description": Array [
+        "typefaces monorepo",
+        "Group packages from typefaces monorepo together",
+      ],
+      "groupName": "typefaces monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/KyleAMathews/typefaces",
+      ],
+    },
+    Object {
+      "description": Array [
+        "uppy monorepo",
+        "Group packages from uppy monorepo together",
+      ],
+      "groupName": "uppy monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/transloadit/uppy",
+      ],
+    },
+    Object {
+      "description": Array [
+        "vue monorepo",
+        "Group packages from vue monorepo together",
+      ],
+      "groupName": "vue monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/vuejs/vue",
+      ],
+    },
+    Object {
+      "description": Array [
+        "vuepress monorepo",
+        "Group packages from vuepress monorepo together",
+      ],
+      "groupName": "vuepress monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/vuejs/vuepress",
+      ],
+    },
+    Object {
+      "description": Array [
+        "webdriverio monorepo",
+        "Group packages from webdriverio monorepo together",
+      ],
+      "groupName": "webdriverio monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/webdriverio/webdriverio",
+      ],
+    },
+    Object {
+      "description": Array [
+        "workbox monorepo",
+        "Group packages from workbox monorepo together",
+      ],
+      "groupName": "workbox monorepo",
+      "sourceUrlPrefixes": Array [
+        "https://github.com/googlechrome/workbox",
+      ],
+    },
+    Object {
+      "description": Array [
+        "Group packages from babel6 monorepo together",
+      ],
+      "groupName": "babel6 monorepo",
       "packagePatterns": Array [
-        "^@storybook/",
+        "^babel6$",
+      ],
+    },
+    Object {
+      "description": Array [
+        "Group packages from wordpress monorepo together",
+      ],
+      "groupName": "wordpress monorepo",
+      "packagePatterns": Array [
+        "^@wordpress/",
+      ],
+    },
+    Object {
+      "description": Array [
+        "Group packages from angularmaterial monorepo together",
+      ],
+      "groupName": "angularmaterial monorepo",
+      "packagePatterns": Array [
+        "^@angular/material",
+        "^@angular/cdk",
+      ],
+    },
+    Object {
+      "description": Array [
+        "Group packages from aws-java-sdk monorepo together",
+      ],
+      "groupName": "aws-java-sdk monorepo",
+      "packagePatterns": Array [
+        "^com.amazonaws:aws-java-sdk-",
       ],
     },
   ],
@@ -674,11 +1447,14 @@ Object {
     "All lint-related packages",
   ],
   "packageNames": Array [
+    "babel-eslint",
+    "codelyzer",
     "remark-lint",
   ],
   "packagePatterns": Array [
     "^eslint",
     "^stylelint",
+    "\\\\btslint\\\\b",
   ],
 }
 `;
@@ -695,11 +1471,14 @@ Object {
         "All lint-related packages",
       ],
       "packageNames": Array [
+        "babel-eslint",
+        "codelyzer",
         "remark-lint",
       ],
       "packagePatterns": Array [
         "^eslint",
         "^stylelint",
+        "\\\\btslint\\\\b",
       ],
     },
   ],
@@ -711,6 +1490,9 @@ Object {
   "packageRules": Array [
     Object {
       "groupName": "eslint",
+      "packageNames": Array [
+        "babel-eslint",
+      ],
       "packagePatterns": Array [
         "^eslint",
       ],
