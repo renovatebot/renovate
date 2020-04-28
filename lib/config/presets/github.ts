@@ -13,6 +13,20 @@ async function fetchJSONFile(
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
+  // istanbul ignore if
+  if (
+    url ===
+    'https://api.github.com/repos/renovatebot/presets/contents/presets.json'
+  ) {
+    try {
+      const res = await http.getJson<Preset>(
+        'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
+      );
+      return res.body;
+    } catch (err) {
+      throw new Error(PLATFORM_FAILURE);
+    }
+  }
   const opts: HttpOptions = {
     headers: {
       accept: global.appMode
