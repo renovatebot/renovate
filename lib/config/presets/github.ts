@@ -62,7 +62,7 @@ export async function getPresetFromEndpoint(
       jsonContent = await fetchJSONFile(pkgName, 'renovate.json', endpoint);
     }
   } else {
-    jsonContent = await fetchJSONFile(pkgName, `${filePreset}.json`, endpoint);
+    jsonContent = await fetchJSONFile(pkgName, `${fileName}.json`, endpoint);
   }
   if (presetName) {
     if (subPresetName) {
