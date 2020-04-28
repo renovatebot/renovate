@@ -548,12 +548,11 @@ async function getLabels(
     if (err instanceof DatasourceError) {
       throw err;
     }
-    if (err.statusCode === 401) {
+    if (err.statusCode === 400 || err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository: repository },
+        { registry, dockerRepository: repository, err },
         'Unauthorized docker lookup'
       );
-      logger.debug({ err });
     } else if (err.statusCode === 404) {
       logger.warn(
         {
@@ -591,7 +590,7 @@ async function getLabels(
         'Ignoring quay.io errors until they fully support v2 schema'
       );
     } else {
-      logger.warn(
+      logger.info(
         { registry, dockerRepository: repository, tag, err },
         'Unknown error getting Docker labels'
       );
