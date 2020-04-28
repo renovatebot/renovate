@@ -48,11 +48,7 @@ function convertStabilitiyModifier(input: string): string {
 
   // If there is a stability part, npm semver expects the version
   // to be full
-  if (stability) {
-    versionParts[0] = padZeroes(versionParts[0]);
-  }
-
-  return versionParts[0] + '-' + stability;
+  return padZeroes(versionParts[0]) + '-' + stability;
 }
 
 function normalizeVersion(input: string): string {
