@@ -134,15 +134,15 @@ function getNewValue({
   if (isVersion(currentValue)) {
     newValue = toVersion;
   } else if (
-    npm.isVersion(padZeroes(toVersion)) &&
-    npm.isValid(currentValue) &&
+    npm.isVersion(normalizeVersion(toVersion)) &&
+    npm.isValid(normalizeVersion(currentValue)) &&
     composer2npm(currentValue) === normalizeVersion(currentValue)
   ) {
     newValue = npm.getNewValue({
-      currentValue,
+      currentValue: normalizeVersion(currentValue),
       rangeStrategy,
-      fromVersion,
-      toVersion: padZeroes(toVersion),
+      fromVersion: normalizeVersion(fromVersion),
+      toVersion: normalizeVersion(toVersion),
     });
   } else if (/^~(0\.[1-9][0-9]*)$/.test(currentValue)) {
     // handle ~0.4 case first
