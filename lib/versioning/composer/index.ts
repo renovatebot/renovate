@@ -133,13 +133,13 @@ function getNewValue({
     newValue = toVersion;
   } else if (
     npm.isVersion(padZeroes(normalizeVersion(toVersion))) &&
-    npm.isValid(normalizeVersion(currentValue)) &&
-    composer2npm(currentValue) === normalizeVersion(currentValue)
+    npm.isValid(padZeroes(normalizeVersion(currentValue))) &&
+    composer2npm(currentValue) === padZeroes(normalizeVersion(currentValue))
   ) {
     newValue = npm.getNewValue({
-      currentValue: normalizeVersion(currentValue),
+      currentValue: padZeroes(normalizeVersion(currentValue)),
       rangeStrategy,
-      fromVersion: normalizeVersion(fromVersion),
+      fromVersion: padZeroes(normalizeVersion(fromVersion)),
       toVersion: padZeroes(normalizeVersion(toVersion)),
     });
   } else if (/^~(0\.[1-9][0-9]*)$/.test(currentValue)) {
