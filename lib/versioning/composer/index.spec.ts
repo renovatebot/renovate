@@ -106,13 +106,14 @@ describe('semver.maxSatisfyingVersion()', () => {
           '0.5.0',
           '4.0.0-beta1',
           '4.0.0',
+          '4.0.1-beta1',
           '4.2.0-beta1',
           '4.2.0-beta2',
           '5.0.0',
         ],
         '~4@beta'
       )
-    ).toBe('4.2.0-beta2');
+    ).toBe('4.0.1-beta1');
   });
 });
 describe('semver.minSatisfyingVersion()', () => {
