@@ -119,7 +119,7 @@
     "chalk": "4.0.0",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "5.0.0",
+    "commander": "5.1.0",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "3.0.0",
     "deepmerge": "4.2.2",
