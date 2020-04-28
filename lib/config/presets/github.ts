@@ -7,21 +7,31 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function fetchJSONFile(
+export function setInternalPreset(content: { body: Preset }) {
+  global.repoCache.internalPresets = content;
+}
+
+async function fetchInternalPresets(): Promise<{ body: Preset }> {
+  global.repoCache.internalPresets =
+    global.repoCache.internalPresets ||
+    http.getJson<Preset>(
+      'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
+    );
+  return global.repoCache.internalPresets;
+}
+
+export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
-  // istanbul ignore if
   if (
     url ===
     'https://api.github.com/repos/renovatebot/presets/contents/presets.json'
   ) {
     try {
-      const res = await http.getJson<Preset>(
-        'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
-      );
+      const res = await fetchInternalPresets();
       return res.body;
     } catch (err) {
       throw new Error(PLATFORM_FAILURE);

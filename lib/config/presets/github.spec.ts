@@ -18,6 +18,11 @@ describe('config/presets/github', () => {
     got.mockReset();
     return global.renovateCache.rmAll();
   });
+  describe('setInternalPreset()', () => {
+    it('allows override', async () => {
+      github.setInternalPreset({ body: {} });
+    });
+  });
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
