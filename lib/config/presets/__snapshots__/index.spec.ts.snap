@@ -89,6 +89,33 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses github subfiles 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "somefile",
+  "presetSource": "github",
+}
+`;
+
+exports[`config/presets parsePreset parses github subfiles with preset and sub-preset name 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "somefile/somepreset/somesubpreset",
+  "presetSource": "github",
+}
+`;
+
+exports[`config/presets parsePreset parses github subfiles with preset name 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "somefile/somepreset",
+  "presetSource": "github",
+}
+`;
+
 exports[`config/presets parsePreset parses gitlab 1`] = `
 Object {
   "packageName": "some/repo",

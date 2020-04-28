@@ -44,31 +44,35 @@ async function fetchJSONFile(
 
 export async function getPresetFromEndpoint(
   pkgName: string,
-  presetName: string,
+  filePreset: string,
   endpoint = 'https://api.github.com/'
 ): Promise<Preset> {
   // eslint-disable-next-line no-param-reassign
   endpoint = ensureTrailingSlash(endpoint);
-  if (presetName === 'default') {
+  const [fileName, presetName, subPresetName] = filePreset.split('/');
+  let jsonContent;
+  if (fileName === 'default') {
     try {
-      const defaultJson = await fetchJSONFile(
-        pkgName,
-        'default.json',
-        endpoint
-      );
-      return defaultJson;
+      jsonContent = await fetchJSONFile(pkgName, 'default.json', endpoint);
     } catch (err) {
-      if (err.message === PLATFORM_FAILURE) {
+      if (err.message !== 'dep not found') {
         throw err;
       }
-      if (err.message === 'dep not found') {
-        logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json', endpoint);
-      }
-      throw err;
+      logger.debug('default.json preset not found - trying renovate.json');
+      jsonContent = await fetchJSONFile(pkgName, 'renovate.json', endpoint);
     }
+  } else {
+    jsonContent = await fetchJSONFile(pkgName, `${filePreset}.json`, endpoint);
   }
-  return fetchJSONFile(pkgName, `${presetName}.json`, endpoint);
+  if (presetName) {
+    if (subPresetName) {
+      return jsonContent[presetName]
+        ? jsonContent[presetName][subPresetName]
+        : undefined;
+    }
+    return jsonContent[presetName];
+  }
+  return jsonContent;
 }
 
 export async function getPreset(
