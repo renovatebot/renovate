@@ -1,39 +1,19 @@
 import * as _npm from './npm';
+import * as _github from './github';
 import * as presets from '.';
-import presetDefaults from './__fixtures__/renovate-config-default.json';
-import presetPackages from './__fixtures__/renovate-config-packages.json';
-import presetGroup from './__fixtures__/renovate-config-group.json';
-import presetMonorepo from './__fixtures__/renovate-config-monorepo.json';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
+import githubPresets from './__fixtures__/presets.json';
 import { RenovateConfig } from '..';
 
 jest.mock('./npm');
+jest.mock('./github');
 
 const npm: any = _npm;
+const github: any = _github;
 
 npm.getPreset = jest.fn((dep, presetName) => {
-  if (dep === 'renovate-config-default') {
-    return presetDefaults.versions[presetDefaults['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
-  if (dep === 'renovate-config-packages') {
-    return presetPackages.versions[presetPackages['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
-  if (dep === 'renovate-config-group') {
-    return presetGroup.versions[presetGroup['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
   if (dep === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
-  if (dep === 'renovate-config-monorepo') {
-    return presetMonorepo.versions[presetMonorepo['dist-tags'].latest][
       'renovate-config'
     ][presetName];
   }
@@ -50,6 +30,11 @@ npm.getPreset = jest.fn((dep, presetName) => {
     throw new Error('preset not found');
   }
   return null;
+});
+
+github.getPreset = jest.fn((dep, filePreset) => {
+  const [, presetName, subPresetName] = filePreset.split('/');
+  return githubPresets[presetName][subPresetName];
 });
 
 describe('config/presets', () => {
@@ -176,8 +161,8 @@ describe('config/presets', () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.packageNames).toHaveLength(1);
-      expect(res.packagePatterns).toHaveLength(2);
+      expect(res.packageNames).toHaveLength(3);
+      expect(res.packagePatterns).toHaveLength(3);
     });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
@@ -185,8 +170,8 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
       expect(rule.automerge).toBe(true);
-      expect(rule.packageNames).toHaveLength(1);
-      expect(rule.packagePatterns).toHaveLength(2);
+      expect(rule.packageNames).toHaveLength(3);
+      expect(rule.packagePatterns).toHaveLength(3);
     });
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
@@ -351,7 +336,7 @@ describe('config/presets', () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
-      expect(res.extends).toHaveLength(2);
+      expect(res.extends).toHaveLength(3);
     });
     it('gets parameterised configs', async () => {
       const res = await presets.getPreset(
