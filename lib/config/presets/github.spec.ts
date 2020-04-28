@@ -19,7 +19,7 @@ describe('config/presets/github', () => {
     return global.renovateCache.rmAll();
   });
   describe('setInternalPreset()', () => {
-    it('allows override', async () => {
+    it('allows override', () => {
       github.setInternalPreset({ body: {} });
     });
   });
