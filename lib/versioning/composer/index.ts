@@ -46,9 +46,7 @@ function convertStabilitiyModifier(input: string): string {
     '$1.$2'
   );
 
-  // If there is a stability part, npm semver expects the version
-  // to be full
-  return padZeroes(versionParts[0]) + '-' + stability;
+  return versionParts[0] + '-' + stability;
 }
 
 function normalizeVersion(input: string): string {
@@ -72,6 +70,10 @@ function composer2npm(input: string): string {
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
   // ~0.4 to >=0.4 <1
   output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
+
+  if (stability) {
+    output = padZeroes(output);
+  }
 
   return output + stability;
 }
