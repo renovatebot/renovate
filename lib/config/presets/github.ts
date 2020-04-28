@@ -11,12 +11,16 @@ export function setInternalPreset(content: { body: Preset }) {
   global.repoCache.internalPresets = content;
 }
 
-async function fetchInternalPresets(): Promise<{ body: Preset }> {
+async function fetchInternalPreset(): Promise<Preset> {
+  const res = await http.getJson<Preset>(
+    'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
+  );
+  return res.body;
+}
+
+function getInternalPreset(): Promise<Preset> {
   global.repoCache.internalPresets =
-    global.repoCache.internalPresets ||
-    http.getJson<Preset>(
-      'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
-    );
+    global.repoCache.internalPresets || fetchInternalPreset();
   return global.repoCache.internalPresets;
 }
 
@@ -31,8 +35,8 @@ export async function fetchJSONFile(
     'https://api.github.com/repos/renovatebot/presets/contents/presets.json'
   ) {
     try {
-      const res = await fetchInternalPresets();
-      return res.body;
+      const res = await getInternalPreset();
+      return res;
     } catch (err) {
       throw new Error(PLATFORM_FAILURE);
     }

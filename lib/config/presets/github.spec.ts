@@ -23,6 +23,49 @@ describe('config/presets/github', () => {
       github.setInternalPreset({ body: {} });
     });
   });
+  describe('fetchJSONFile()', () => {
+    beforeEach(() => {
+      delete global.repoCache.internalPresets;
+    });
+    it('returns JSON', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        },
+      }));
+      const res = await github.fetchJSONFile(
+        'some/repo',
+        'some-filename',
+        'https://api.github.com'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('returns renovate internal', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
+        body: { from: 'www' },
+      }));
+      const res = await github.fetchJSONFile(
+        'renovatebot/presets',
+        'presets.json',
+        'https://api.github.com/'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('throws platform error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      await expect(
+        github.fetchJSONFile(
+          'renovatebot/presets',
+          'presets.json',
+          'https://api.github.com/'
+        )
+      ).rejects.toThrow(PLATFORM_FAILURE);
+    });
+  });
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
