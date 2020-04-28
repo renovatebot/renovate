@@ -1899,7 +1899,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let alerts = [];
   try {
     const res = JSON.parse((await api.post(url, options)).body);
-    if (res.data.repository.vulnerabilityAlerts) {
+    if (res?.data?.repository?.vulnerabilityAlerts) {
       alerts = res.data.repository.vulnerabilityAlerts.edges.map(
         (edge: { node: any }) => edge.node
       );
