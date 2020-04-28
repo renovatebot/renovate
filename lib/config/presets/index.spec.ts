@@ -256,6 +256,23 @@ describe('config/presets', () => {
     it('parses github', () => {
       expect(presets.parsePreset('github>some/repo')).toMatchSnapshot();
     });
+    it('parses github subfiles', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile')
+      ).toMatchSnapshot();
+    });
+    it('parses github subfiles with preset name', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile/somepreset')
+      ).toMatchSnapshot();
+    });
+    it('parses github subfiles with preset and sub-preset name', () => {
+      expect(
+        presets.parsePreset(
+          'github>some/repo:somefile/somepreset/somesubpreset'
+        )
+      ).toMatchSnapshot();
+    });
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
     });
