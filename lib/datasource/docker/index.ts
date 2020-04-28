@@ -569,7 +569,7 @@ async function getLabels(
     ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.warn(
+      logger.debug(
         {
           err,
           registry,
