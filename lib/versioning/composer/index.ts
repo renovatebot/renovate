@@ -182,7 +182,7 @@ function getNewValue({
   if (currentValue.split('.')[0].includes('v')) {
     newValue = newValue.replace(/([0-9])/, 'v$1');
   }
-  return newValue;
+  return newValue.replace('-', '@');
 }
 
 function sortVersions(a: string, b: string): number {

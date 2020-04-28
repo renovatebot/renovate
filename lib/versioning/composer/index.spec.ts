@@ -266,7 +266,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0-beta3',
         toVersion: '1.0.0-beta5',
       })
-    ).toEqual('^v1.0@beta5');
+    ).toEqual('^v1.0.0@beta5');
   });
   it('replaces short caret with stability modifiers', () => {
     expect(
@@ -276,7 +276,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0-beta3',
         toVersion: '2.0.0-beta5',
       })
-    ).toEqual('^v2.0@beta5');
+    ).toEqual('^v2.0.0@beta5');
   });
   it('handles differing lengths', () => {
     expect(
