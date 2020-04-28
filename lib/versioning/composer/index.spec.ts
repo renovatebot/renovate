@@ -98,6 +98,14 @@ describe('semver.maxSatisfyingVersion()', () => {
       )
     ).toBe('0.5.0');
   });
+  it('handles prereleases', () => {
+    expect(
+      semver.maxSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.0.0-beta1', '4.2.0-beta2', '5.0.0'],
+        '~4@beta'
+      )
+    ).toBe('4.2.0-beta2');
+  });
 });
 describe('semver.minSatisfyingVersion()', () => {
   it('handles massaged tilde', () => {
@@ -119,6 +127,22 @@ describe('semver.minSatisfyingVersion()', () => {
         '~0.4'
       )
     ).toBe('0.4.0');
+  });
+  it('handles prereleases', () => {
+    expect(
+      semver.minSatisfyingVersion(
+        [
+          '0.4.0',
+          '0.5.0',
+          '4.0.0-beta1',
+          '4.0.0',
+          '4.2.0-beta1',
+          '4.2.0-beta2',
+          '5.0.0',
+        ],
+        '~4@beta'
+      )
+    ).toBe('4.0.0-beta1');
   });
 });
 describe('semver.matches()', () => {
