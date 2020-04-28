@@ -46,7 +46,9 @@ function convertStabilitiyModifier(input: string): string {
     '$1.$2'
   );
 
-  return versionParts[0] + '-' + stability;
+  // If there is a stability part, npm semver expects the version
+  // to be full
+  return padZeroes(versionParts[0]) + '-' + stability;
 }
 
 function normalizeVersion(input: string): string {
@@ -70,10 +72,6 @@ function composer2npm(input: string): string {
   output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
   // ~0.4 to >=0.4 <1
   output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
-
-  if (stability) {
-    output = padZeroes(output);
-  }
 
   return output + stability;
 }
@@ -133,13 +131,13 @@ function getNewValue({
     newValue = toVersion;
   } else if (
     npm.isVersion(padZeroes(normalizeVersion(toVersion))) &&
-    npm.isValid(padZeroes(normalizeVersion(currentValue))) &&
-    composer2npm(currentValue) === padZeroes(normalizeVersion(currentValue))
+    npm.isValid(normalizeVersion(currentValue)) &&
+    composer2npm(currentValue) === normalizeVersion(currentValue)
   ) {
     newValue = npm.getNewValue({
-      currentValue: padZeroes(normalizeVersion(currentValue)),
+      currentValue: normalizeVersion(currentValue),
       rangeStrategy,
-      fromVersion: padZeroes(normalizeVersion(fromVersion)),
+      fromVersion: normalizeVersion(fromVersion),
       toVersion: padZeroes(normalizeVersion(toVersion)),
     });
   } else if (/^~(0\.[1-9][0-9]*)$/.test(currentValue)) {
