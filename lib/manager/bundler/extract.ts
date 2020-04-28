@@ -53,10 +53,18 @@ export async function extractPackageFile(
         managerData: { lineNumber },
       };
       if (gemMatch[3]) {
-        dep.currentValue = gemMatch[0]
+        let currentValue = gemMatch[0]
           .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
-          .replace(regEx(gemDelimiter, 'g'), '')
           .trim();
+        // strip quotes unless it's a complex constraint
+        if (
+          currentValue.startsWith(gemDelimiter) &&
+          currentValue.endsWith(gemDelimiter) &&
+          currentValue.split(gemDelimiter).length === 3
+        ) {
+          currentValue = currentValue.slice(1, -1);
+        }
+        dep.currentValue = currentValue;
       } else {
         dep.skipReason = SkipReason.NoVersion;
       }

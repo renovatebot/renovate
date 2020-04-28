@@ -1297,10 +1297,10 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
-"@snyk/ruby-semver@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@snyk/ruby-semver/-/ruby-semver-2.1.0.tgz#d76cc02fc20860c224da2646fe9cc1bb0b0d1d15"
-  integrity sha512-u8ez8kWyqge+N+FxRDx/uPBmcHzY7BMfODvzEVeoTOeoD0CHPymEaVlkEKA8ZHtxzXjUzPIl2I8f2siZEzLjYg==
+"@snyk/ruby-semver@2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@snyk/ruby-semver/-/ruby-semver-2.1.2.tgz#5c85a388d927a86c6ea3022b02ba77c4cac1098b"
+  integrity sha512-hYiNnwzNJ5DYM9JydeK3d2rd0lupgB/r5Nh154uazsV6EJn+lcba49X8+pdMMQIBhGQNvLtWLqYpeGfG07WcGQ==
   dependencies:
     lodash "^4.17.14"
 
@@ -1551,10 +1551,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.11.tgz#bec2961975888d964196bf0016a2f984d793d3ce"
   integrity sha512-O+x6uIpa6oMNTkPuHDa9MhMMehlxLAd5QcOvKRjAFsBVpeFWTOPnXbDvILvFgFFZfQ1xh1EZi1FbXxUix+zpsQ==
 
-"@types/node@11.15.11":
-  version "11.15.11"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.15.11.tgz#c428d8327dcbd2106d559433728ba261e27bf7c0"
-  integrity sha512-TyWPoOfqHw3zu61/+2nNuUPhk3XUZnw271ot5K5dhcdSPeO35AjMHU+oBXfvsqdrA+Owwa2Z1999E4m2ENtdrg==
+"@types/node@11.15.12":
+  version "11.15.12"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.15.12.tgz#bf5d348c4d37c026029ad81e874946fa6ad100ba"
+  integrity sha512-iefeBfpmhoYaZfj+gJM5z9H9eiTwhuzhPsJgH/flx4HP2SBI2FNDra1D3vKljqPLGDr9Cazvh9gP9Xszc30ncA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"

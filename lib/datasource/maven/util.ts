@@ -47,6 +47,10 @@ function isConnectionError(err: { code: string }): boolean {
   );
 }
 
+function isUnsupportedHostError(err: { name: string }): boolean {
+  return err.name === 'UnsupportedProtocolError';
+}
+
 export async function downloadHttpProtocol(
   pkgUrl: url.URL | string,
   hostType = id
@@ -75,6 +79,9 @@ export async function downloadHttpProtocol(
     } else if (isConnectionError(err)) {
       // istanbul ignore next
       logger.debug({ failedUrl }, 'Connection refused to maven registry');
+    } else if (isUnsupportedHostError(err)) {
+      // istanbul ignore next
+      logger.debug({ failedUrl }, 'Unsupported host');
     } else {
       logger.warn({ failedUrl, err }, 'Unknown error');
     }
