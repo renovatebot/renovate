@@ -33,10 +33,6 @@ function padZeroes(input: string): string {
   return sections.join('.') + stability;
 }
 
-function removeLeadingV(input: string): string {
-  return input.replace(/^v/i, '');
-}
-
 function convertStabilitiyModifier(input: string): string {
   // Handle stability modifiers.
   const versionParts = input.split('@');
@@ -50,11 +46,23 @@ function convertStabilitiyModifier(input: string): string {
     '$1.$2'
   );
 
+  // If there is a stability part, npm semver expects the version
+  // to be full
+  if (stability) {
+    versionParts[0] = padZeroes(versionParts[0]);
+  }
+
   return versionParts[0] + '-' + stability;
 }
 
+function normalizeVersion(input: string): string {
+  let output = input;
+  output = output.replace(/(^|>|>=|\^|~)v([\^~]?)v/i, '$1');
+  return convertStabilitiyModifier(output);
+}
+
 function composer2npm(input: string): string {
-  const cleanInput = convertStabilitiyModifier(removeLeadingV(input));
+  const cleanInput = normalizeVersion(input);
   if (npm.isVersion(cleanInput)) {
     return cleanInput;
   }
@@ -128,7 +136,7 @@ function getNewValue({
   } else if (
     npm.isVersion(padZeroes(toVersion)) &&
     npm.isValid(currentValue) &&
-    composer2npm(currentValue) === removeLeadingV(currentValue)
+    composer2npm(currentValue) === normalizeVersion(currentValue)
   ) {
     newValue = npm.getNewValue({
       currentValue,
