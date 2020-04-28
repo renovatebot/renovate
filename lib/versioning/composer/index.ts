@@ -57,7 +57,7 @@ function convertStabilitiyModifier(input: string): string {
 
 function normalizeVersion(input: string): string {
   let output = input;
-  output = output.replace(/(^|>|>=|\^|~)v([\^~]?)v/i, '$1');
+  output = output.replace(/(^|>|>=|\^|~)v/i, '$1');
   return convertStabilitiyModifier(output);
 }
 
