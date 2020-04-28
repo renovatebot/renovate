@@ -245,7 +245,7 @@
     "pretty-quick": "2.0.1",
     "rimraf": "3.0.2",
     "semantic-release": "17.0.7",
-    "shelljs": "0.8.3",
+    "shelljs": "0.8.4",
     "strip-ansi": "6.0.0",
     "tmp-promise": "2.0.2",
     "type-fest": "0.13.1",
