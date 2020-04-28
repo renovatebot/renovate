@@ -37,6 +37,7 @@ async function get(path: string, options: any): Promise<GotResponse> {
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
+      logger.debug({ err }, 'Throwing platform failure');
       throw new Error(PLATFORM_FAILURE);
     }
     const platformFailureCodes = [

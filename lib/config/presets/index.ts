@@ -83,10 +83,28 @@ export function parsePreset(input: string): ParsedPreset {
       .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
-  if (str.startsWith(':')) {
+  const presetsPackages = [
+    'config',
+    'default',
+    'docker',
+    'group',
+    'helpers',
+    'monorepo',
+    'packages',
+    'preview',
+    'schedule',
+  ];
+  if (
+    presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
+  ) {
+    presetSource = 'github';
+    packageName = 'renovatebot/presets';
+    presetName = `presets/` + str.replace(':', '/');
+  } else if (str.startsWith(':')) {
     // default namespace
-    packageName = 'renovate-config-default';
-    presetName = str.slice(1);
+    presetSource = 'github';
+    packageName = 'renovatebot/presets';
+    presetName = `presets/default/` + str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
     [, packageName] = /(@.*?)(:|$)/.exec(str);
@@ -134,6 +152,7 @@ export async function getPreset(
   }
   logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
   const presetKeys = Object.keys(presetConfig);
+  // istanbul ignore if
   if (
     presetKeys.length === 2 &&
     presetKeys.includes('description') &&
