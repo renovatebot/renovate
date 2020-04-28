@@ -258,6 +258,26 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('^v1.1');
   });
+  it('bumps short caret with stability modifiers', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^v1.0@beta',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0-beta3',
+        toVersion: '1.0.0-beta5',
+      })
+    ).toEqual('^v1.0@beta5');
+  });
+  it('replaces short caret with stability modifiers', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^v1.0@beta',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0.0-beta3',
+        toVersion: '2.0.0-beta5',
+      })
+    ).toEqual('^v2.0@beta5');
+  });
   it('handles differing lengths', () => {
     expect(
       semver.getNewValue({
