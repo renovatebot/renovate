@@ -205,7 +205,14 @@ export async function generateDockerCommand(
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {
-    tag = await getDockerTag(image, tagConstraint, tagScheme || 'semver');
+    const tagVersioning = tagScheme || 'semver';
+    tag = await getDockerTag(image, tagConstraint, tagVersioning);
+    logger.debug(
+      { image, tagConstraint, tagVersioning, tag },
+      'Resolved tag constraint'
+    );
+  } else {
+    logger.debug({ image }, 'No tag or tagConstraint specified');
   }
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;

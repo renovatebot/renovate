@@ -12,4 +12,5 @@ export interface HostRule {
   insecureRegistry?: boolean;
   platform?: string;
   timeout?: number;
+  encrypted?: HostRule;
 }

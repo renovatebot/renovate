@@ -54,7 +54,7 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
-    logger.warn({ err }, 'Failed to update Pipfile.lock');
+    logger.debug({ err }, 'Failed to update Pipfile.lock');
     return [
       {
         artifactError: {

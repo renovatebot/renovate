@@ -43,7 +43,9 @@ function isPermissionsIssue(err: { statusCode: number }): boolean {
 
 function isConnectionError(err: { code: string }): boolean {
   return (
-    err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || err.code === 'ECONNREFUSED'
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+    err.code === 'ECONNREFUSED'
   );
 }
 
@@ -83,7 +85,7 @@ export async function downloadHttpProtocol(
       // istanbul ignore next
       logger.debug({ failedUrl }, 'Unsupported host');
     } else {
-      logger.warn({ failedUrl, err }, 'Unknown error');
+      logger.info({ failedUrl, err }, 'Unknown error');
     }
     return null;
   }

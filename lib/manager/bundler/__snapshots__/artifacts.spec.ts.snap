@@ -203,12 +203,22 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 1`] = `null`;
-
-exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `
+exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 1`] = `
 Array [
   Object {
-    "cmd": "bundle lock --update foo bar",
+    "artifactError": Object {
+      "lockFile": "Gemfile.lock",
+      "stderr": " foo was resolved to
+",
+    },
+  },
+]
+`;
+
+exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 2`] = `
+Array [
+  Object {
+    "cmd": "bundle lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -227,10 +237,12 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true 1`] = `
+exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 1`] = `null`;
+
+exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 2`] = `
 Array [
   Object {
-    "cmd": "bundle lock",
+    "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
