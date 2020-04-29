@@ -578,12 +578,11 @@ async function getLabels(
         },
         'docker registry failure: internal error'
       );
-    } else if (err.code === 'ETIMEDOUT') {
-      logger.debug(
-        { registry },
-        'Timeout when attempting to connect to docker registry'
-      );
-      logger.debug({ err });
+    } else if (
+      err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+      err.code === 'ETIMEDOUT'
+    ) {
+      logger.debug({ registry, err }, 'Error connecting to docker registry');
     } else if (registry === 'https://quay.io') {
       // istanbul ignore next
       logger.debug(
