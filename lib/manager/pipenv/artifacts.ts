@@ -54,7 +54,7 @@ export async function updateArtifacts({
         PIPENV_CACHE_DIR: cacheDir,
       },
       docker: {
-        image: 'renovate/pipenv',
+        image: 'renovate/python',
         volumes: [cacheDir],
         tagConstraint: getPythonConstraint(newPipfileContent, config),
       },
