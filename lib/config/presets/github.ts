@@ -4,27 +4,8 @@ import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { ensureTrailingSlash } from '../../util/url';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { getRepoCache } from '../../util/cache';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
-
-export function setInternalPreset(content: { body: Preset }): void {
-  const cache = getRepoCache();
-  cache.internalPresets = Promise.resolve(content);
-}
-
-async function fetchInternalPreset(): Promise<Preset> {
-  const res = await http.getJson<Preset>(
-    'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
-  );
-  return res.body;
-}
-
-function getInternalPreset(): Promise<Preset> {
-  const cache = getRepoCache();
-  cache.internalPresets = cache.internalPresets || fetchInternalPreset();
-  return cache.internalPresets;
-}
 
 export async function fetchJSONFile(
   repo: string,
@@ -32,17 +13,6 @@ export async function fetchJSONFile(
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
-  if (
-    url ===
-    'https://api.github.com/repos/renovatebot/presets/contents/presets.json'
-  ) {
-    try {
-      const res = await getInternalPreset();
-      return res;
-    } catch (err) {
-      throw new Error(PLATFORM_FAILURE);
-    }
-  }
   const opts: HttpOptions = {
     headers: {
       accept: global.appMode

@@ -6,6 +6,7 @@ import * as github from './github';
 import * as npm from './npm';
 import * as gitlab from './gitlab';
 import * as local from './local';
+import * as internal from './internal';
 import { RenovateConfig } from '../common';
 import { mergeChildConfig } from '../utils';
 import { regEx } from '../../util/regex';
@@ -21,6 +22,7 @@ const presetSources: Record<string, PresetApi> = {
   npm,
   gitlab,
   local,
+  internal,
 };
 
 export function replaceArgs(
@@ -97,14 +99,13 @@ export function parsePreset(input: string): ParsedPreset {
   if (
     presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
   ) {
-    presetSource = 'github';
-    packageName = 'renovatebot/presets';
-    presetName = `presets/` + str.replace(':', '/');
+    presetSource = 'internal';
+    [packageName, presetName] = str.split(':');
   } else if (str.startsWith(':')) {
     // default namespace
-    presetSource = 'github';
-    packageName = 'renovatebot/presets';
-    presetName = `presets/default/` + str.slice(1);
+    presetSource = 'internal';
+    packageName = 'default';
+    presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
     [, packageName] = /(@.*?)(:|$)/.exec(str);
@@ -204,7 +205,7 @@ export async function resolveConfigPresets(
         try {
           fetchedPreset = await getPreset(preset, baseConfig);
         } catch (err) {
-          logger.debug({ err }, 'Preset fetch error');
+          logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
           if (
             err.message === PLATFORM_FAILURE ||

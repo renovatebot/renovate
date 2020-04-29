@@ -19,11 +19,6 @@ describe('config/presets/github', () => {
     got.mockReset();
     return global.renovateCache.rmAll();
   });
-  describe('setInternalPreset()', () => {
-    it('allows override', () => {
-      github.setInternalPreset({ body: {} });
-    });
-  });
   describe('fetchJSONFile()', () => {
     beforeEach(() => {
       clearRepoCache();
@@ -41,30 +36,6 @@ describe('config/presets/github', () => {
         'https://api.github.com'
       );
       expect(res).toMatchSnapshot();
-    });
-    it('returns renovate internal', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementationOnce(() => ({
-        body: { from: 'www' },
-      }));
-      const res = await github.fetchJSONFile(
-        'renovatebot/presets',
-        'presets.json',
-        'https://api.github.com/'
-      );
-      expect(res).toMatchSnapshot();
-    });
-    it('throws platform error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
-      await expect(
-        github.fetchJSONFile(
-          'renovatebot/presets',
-          'presets.json',
-          'https://api.github.com/'
-        )
-      ).rejects.toThrow(PLATFORM_FAILURE);
     });
   });
   describe('getPreset()', () => {

@@ -1,15 +1,12 @@
 import * as _npm from './npm';
-import * as _github from './github';
 import * as presets from '.';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
-import githubPresets from './__fixtures__/presets.json';
 import { RenovateConfig } from '..';
 
 jest.mock('./npm');
 jest.mock('./github');
 
 const npm: any = _npm;
-const github: any = _github;
 
 npm.getPreset = jest.fn((dep, presetName) => {
   if (dep === 'renovate-config-ikatyang') {
@@ -30,11 +27,6 @@ npm.getPreset = jest.fn((dep, presetName) => {
     throw new Error('preset not found');
   }
   return null;
-});
-
-github.getPreset = jest.fn((dep, filePreset) => {
-  const [, presetName, subPresetName] = filePreset.split('/');
-  return githubPresets[presetName][subPresetName];
 });
 
 describe('config/presets', () => {
@@ -130,11 +122,6 @@ describe('config/presets', () => {
       expect(e.configFile).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
-    });
-    it('resolves group monorepos', async () => {
-      config.extends = ['group:monorepos'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
     });
     it('combines two package alls', async () => {
       config.extends = ['packages:eslint', 'packages:stylelint'];

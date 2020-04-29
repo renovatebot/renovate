@@ -5,9 +5,3 @@ Object {
   "from": "api",
 }
 `;
-
-exports[`config/presets/github fetchJSONFile() returns renovate internal 1`] = `
-Object {
-  "from": "www",
-}
-`;
