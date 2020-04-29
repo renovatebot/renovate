@@ -205,10 +205,10 @@ export async function generateDockerCommand(
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {
-    const versioning = tagScheme || 'semver';
-    tag = await getDockerTag(image, tagConstraint, versioning);
+    const tagVersioning = tagScheme || 'semver';
+    tag = await getDockerTag(image, tagConstraint, tagVersioning);
     logger.debug(
-      { image, tagConstraint, versioning, tag },
+      { image, tagConstraint, tagVersioning, tag },
       'Resolved tag constraint'
     );
   } else {
