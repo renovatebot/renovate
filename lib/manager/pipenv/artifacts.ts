@@ -23,9 +23,11 @@ function getPythonConstraint(
   try {
     const pipfileLock = JSON.parse(existingLockFileContent);
     if (pipfileLock?._meta?.requires?.python_version) {
-      return pipfileLock._meta.requires.python_version + '.*';
+      return '== ' + pipfileLock._meta.requires.python_version + '.*';
     }
-    return pipfileLock._meta.requires.python_full_version;
+    if (pipfileLock?._meta?.requires?.python_full_version) {
+      return '== ' + pipfileLock._meta.requires.python_full_version;
+    }
   } catch (err) {
     // Do nothing
   }
@@ -55,10 +57,7 @@ export async function updateArtifacts({
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
     const cmd = ['pipenv lock'];
-    let tagConstraint = getPythonConstraint(existingLockFileContent, config);
-    if (tagConstraint) {
-      tagConstraint = `== ${tagConstraint}`;
-    }
+    const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const execOptions: ExecOptions = {
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
