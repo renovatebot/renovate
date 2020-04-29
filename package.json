@@ -172,7 +172,7 @@
     "yarn": "1.22.4"
   },
   "optionalDependencies": {
-    "re2": "1.10.5"
+    "re2": "1.11.0"
   },
   "devDependencies": {
     "@actions/core": "1.2.3",
