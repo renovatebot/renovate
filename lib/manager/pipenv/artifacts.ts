@@ -23,7 +23,7 @@ function getPythonConstraint(
   try {
     const pipfileLock = JSON.parse(existingLockFileContent);
     return (
-      pipfileLock?._meta?.requires?.python_version ||
+      pipfileLock?._meta?.requires?.python_version + '.*' ||
       pipfileLock?._meta?.requires?.python_full_version
     );
   } catch (err) {
