@@ -7,12 +7,40 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function fetchJSONFile(
+export function setInternalPreset(content: { body: Preset }): void {
+  global.repoCache.internalPresets = Promise.resolve(content);
+}
+
+async function fetchInternalPreset(): Promise<Preset> {
+  const res = await http.getJson<Preset>(
+    'https://raw.githubusercontent.com/renovatebot/presets/master/presets.json'
+  );
+  return res.body;
+}
+
+function getInternalPreset(): Promise<Preset> {
+  global.repoCache.internalPresets =
+    global.repoCache.internalPresets || fetchInternalPreset();
+  return global.repoCache.internalPresets;
+}
+
+export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
+  if (
+    url ===
+    'https://api.github.com/repos/renovatebot/presets/contents/presets.json'
+  ) {
+    try {
+      const res = await getInternalPreset();
+      return res;
+    } catch (err) {
+      throw new Error(PLATFORM_FAILURE);
+    }
+  }
   const opts: HttpOptions = {
     headers: {
       accept: global.appMode
