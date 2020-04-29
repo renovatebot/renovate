@@ -7,7 +7,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function fetchJSONFile(
+export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string
