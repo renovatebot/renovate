@@ -8,7 +8,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
 export function setInternalPreset(content: { body: Preset }): void {
-  global.repoCache.internalPresets = content;
+  global.repoCache.internalPresets = Promise.resolve(content);
 }
 
 async function fetchInternalPreset(): Promise<Preset> {
