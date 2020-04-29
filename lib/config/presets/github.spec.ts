@@ -5,6 +5,7 @@ import * as _hostRules from '../../util/host-rules';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
+import { clearRepoCache } from '../../util/cache';
 
 jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
@@ -25,7 +26,7 @@ describe('config/presets/github', () => {
   });
   describe('fetchJSONFile()', () => {
     beforeEach(() => {
-      delete global.repoCache.internalPresets;
+      clearRepoCache();
     });
     it('returns JSON', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'abc' });
