@@ -225,7 +225,10 @@ export async function resolveConfigPresets(
             error.validationError +=
               '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
           }
-          logger.info('Throwing preset error');
+          logger.info(
+            { validationError: error.validationError },
+            'Throwing preset error'
+          );
           throw error;
         }
         const presetConfig = await resolveConfigPresets(
