@@ -9,10 +9,8 @@ import {
 } from '../common';
 import { platform } from '../../platform';
 
-const pythonRe = /python(?:_full)_version\s=\s"(?<version>.+?)"/;
-
 function getPythonConstraint(
-  newPackageFileContent: string,
+  existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string | undefined | null {
   const { compatibility = {} } = config;
@@ -22,8 +20,16 @@ function getPythonConstraint(
     logger.debug('Using python constraint from config');
     return python;
   }
-  const pm = pythonRe.exec(newPackageFileContent);
-  return pm?.groups?.version;
+  try {
+    const pipfileLock = JSON.parse(existingLockFileContent);
+    return (
+      pipfileLock?._meta?.requires?.python_version ||
+      pipfileLock?._meta?.requires?.python_full_version
+    );
+  } catch (err) {
+    // Do nothing
+  }
+  return undefined;
 }
 
 export async function updateArtifacts({
@@ -49,14 +55,19 @@ export async function updateArtifacts({
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
     const cmd = ['pip install pipenv', 'pipenv lock'];
+    let tagConstraint = getPythonConstraint(existingLockFileContent, config);
+    if (tagConstraint) {
+      tagConstraint = `== ${tagConstraint}`;
+    }
     const execOptions: ExecOptions = {
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
       },
       docker: {
         image: 'renovate/python',
+        tagScheme: 'pep440',
         volumes: [cacheDir],
-        tagConstraint: getPythonConstraint(newPipfileContent, config),
+        tagConstraint,
       },
     };
     logger.debug({ cmd }, 'pipenv lock command');
