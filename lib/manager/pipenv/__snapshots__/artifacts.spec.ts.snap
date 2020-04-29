@@ -11,10 +11,10 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`.updateArtifacts() handles no constraint 1`] = `
 Array [
   Object {
-    "cmd": "pip install pipenv",
+    "cmd": "pipenv lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -31,6 +31,11 @@ Array [
       "timeout": 900000,
     },
   },
+]
+`;
+
+exports[`.updateArtifacts() returns null if unchanged 1`] = `
+Array [
   Object {
     "cmd": "pipenv lock",
     "options": Object {
@@ -55,24 +60,6 @@ Array [
 exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
 Array [
   Object {
-    "cmd": "pip install pipenv",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
-      },
-      "timeout": 900000,
-    },
-  },
-  Object {
     "cmd": "pipenv lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
@@ -96,19 +83,19 @@ Array [
 exports[`.updateArtifacts() supports docker mode 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/pipenv",
+    "cmd": "docker pull renovate/python:latest",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_pipenv -aq",
+    "cmd": "docker ps --filter name=renovate_python -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_pipenv --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/pipenv bash -l -c \\"pip install pipenv && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/pipenv\\":\\"/tmp/renovate/cache/others/pipenv\\" -e PIPENV_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install --user pipenv && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
