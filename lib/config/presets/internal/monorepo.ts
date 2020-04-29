@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { Preset } from '../common';
 
 const repoGroups = {
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
@@ -117,7 +118,8 @@ const patternGroups = {
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
 };
 
-export const presets = {};
+export const presets: Record<string, Preset> = {};
+
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,

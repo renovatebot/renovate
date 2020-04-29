@@ -1,4 +1,6 @@
-export const presets = {
+import { Preset } from '../common';
+
+export const presets: Record<string, Preset> = {
   angularJs: {
     description: 'All angular.js packages',
     packageNames: [

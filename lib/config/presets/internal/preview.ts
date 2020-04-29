@@ -1,4 +1,6 @@
-export const presets = {
+import { Preset } from '../common';
+
+export const presets: Record<string, Preset> = {
   dockerCompose: {
     description: 'Enable docker compose image updating',
     'docker-compose': {

@@ -1,4 +1,5 @@
 import * as monorepos from './monorepo';
+import { Preset } from '../common';
 
 const staticGroups = {
   all: {
@@ -556,4 +557,4 @@ config.monorepos = {
   extends: monorepoNames,
 };
 
-export const presets = config;
+export const presets: Record<string, Preset> = config;

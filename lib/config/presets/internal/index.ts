@@ -9,7 +9,7 @@ import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as schedulePreset from './schedule';
 
-export const groups: Record<string, Record<string, any>> = {
+export const groups: Record<string, Record<string, Preset>> = {
   config: configPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
@@ -21,6 +21,9 @@ export const groups: Record<string, Record<string, any>> = {
   schedule: schedulePreset.presets,
 };
 
-export function getPreset(pkgName: string, presetName: string): Preset | undefined {
+export function getPreset(
+  pkgName: string,
+  presetName: string
+): Preset | undefined {
   return groups[pkgName] ? groups[pkgName][presetName] : undefined;
 }

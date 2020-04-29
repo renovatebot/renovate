@@ -1,6 +1,6 @@
-export const presets = {
-  description:
-    'This presets file is intended for simple and commonly used presets. This is a special preset file, because each element below can be accessed using the `:` prefix e.g `:enableRenovate`.',
+import { Preset } from '../common';
+
+export const presets: Record<string, Preset> = {
   enableRenovate: {
     description: 'Enable renovate',
     enabled: true,

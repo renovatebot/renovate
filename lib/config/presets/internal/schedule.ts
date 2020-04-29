@@ -1,11 +1,13 @@
-export const presets = {
+import { Preset } from '../common';
+
+export const presets: Record<string, Preset> = {
   earlyMondays: {
     description: 'Weekly schedule on early monday mornings',
-    schedule: 'before 3am on Monday',
+    schedule: ['before 3am on Monday'],
   },
   daily: {
     description: 'Schedule daily',
-    schedule: 'before 2am',
+    schedule: ['before 2am'],
   },
   weekly: {
     description: 'Schedule weekly',
@@ -13,15 +15,15 @@ export const presets = {
   },
   monthly: {
     description: 'Schedule monthly',
-    schedule: 'before 3am on the first day of the month',
+    schedule: ['before 3am on the first day of the month'],
   },
   weekends: {
     description: 'Schedule for weekends',
-    schedule: 'every weekend',
+    schedule: ['every weekend'],
   },
   weekdays: {
     description: 'Schedule for weekdays',
-    schedule: 'every weekday',
+    schedule: ['every weekday'],
   },
   nonOfficeHours: {
     description:
