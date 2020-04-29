@@ -1,11 +1,11 @@
 diff --git a/node_modules/jest-runtime/build/index.js b/node_modules/jest-runtime/build/index.js
-index 0c9dd8c..58109b5 100644
+index 0080697..e60da58 100644
 --- a/node_modules/jest-runtime/build/index.js
 +++ b/node_modules/jest-runtime/build/index.js
-@@ -1189,7 +1189,38 @@ class Runtime {
+@@ -1274,7 +1274,38 @@ class Runtime {
        return this._getMockedNativeModule();
      }
-
+ 
 -    return require(moduleName);
 +    // return require(moduleName);
 +    if (!this._coreModulesProxyCache) {
@@ -40,5 +40,5 @@ index 0c9dd8c..58109b5 100644
 +
 +    return this._coreModulesProxyCache[moduleName] = new Proxy(mod, {set});
    }
-
+ 
    _importCoreModule(moduleName, context) {

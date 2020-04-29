@@ -12,5 +12,8 @@
     "lodash": "4.17.15",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/graceful-fs": "4.1.3"
   }
 }
