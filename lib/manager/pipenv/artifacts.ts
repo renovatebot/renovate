@@ -56,7 +56,7 @@ export async function updateArtifacts({
     const localPipfileFileName = join(config.localDir, pipfileName);
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
-    const cmd = ['pipenv lock'];
+    const cmd = 'pipenv lock';
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const execOptions: ExecOptions = {
       extraEnv: {
@@ -64,10 +64,10 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'renovate/python',
+        tagConstraint,
         tagScheme: 'pep440',
         preCommands: ['pip install --user pipenv'],
         volumes: [cacheDir],
-        tagConstraint,
       },
     };
     logger.debug({ cmd }, 'pipenv lock command');
