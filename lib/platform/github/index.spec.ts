@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import nock from 'nock';
 import { GotApi, GotResponse, Platform } from '../common';
 import {
   REPOSITORY_DISABLED,
@@ -8,6 +9,9 @@ import {
 import { BranchStatus } from '../../types';
 import { mocked } from '../../../test/util';
 import { mockGot } from '../../../test/platformUtil';
+import * as httpMock from '../../util/http/mock';
+
+const githubApiHost = 'https://api.github.com';
 
 describe('platform/github', () => {
   let github: Platform;
@@ -20,11 +24,7 @@ describe('platform/github', () => {
     jest.resetModules();
     jest.unmock('.');
     jest.mock('delay');
-    jest.mock('./gh-got-wrapper');
     jest.mock('../../util/host-rules');
-    jest.mock('../../util/got');
-    api = mocked((await import('./gh-got-wrapper')).api);
-    got = (await import('../../util/got')).default as any;
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
     jest.mock('../git/storage');
@@ -57,6 +57,10 @@ describe('platform/github', () => {
     });
   });
 
+  afterEach(async () => {
+    httpMock.reset();
+  });
+
   const graphqlOpenPullRequests = fs.readFileSync(
     'lib/platform/github/__fixtures__/graphql/pullrequest-1.json',
     'utf8'
@@ -66,111 +70,109 @@ describe('platform/github', () => {
     'utf8'
   );
 
-  function getRepos() {
-    // repo info
-    api.get.mockImplementationOnce(
-      () =>
-        ({
-          body: [
-            {
-              full_name: 'a/b',
-            },
-            {
-              full_name: 'c/d',
-            },
-          ],
-        } as any)
-    );
-    return github.getRepos();
-  }
-
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      const httpCalls = mockGot(api, {});
-      await expect(github.initPlatform({} as any)).rejects.toThrow();
-      expect(httpCalls).toMatchSnapshot();
+      await expect(github.initPlatform({} as any)).rejects.toThrow(
+        'Init: You must configure a GitHub personal access token'
+      );
     });
     it('should throw if user failure', async () => {
-      const httpCalls = mockGot(api, {});
+      httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(
         github.initPlatform({ token: 'abc123' } as any)
       ).rejects.toThrow();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should support default endpoint no email access', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
           login: 'renovate-bot',
-        },
-      });
+        })
+        .get('/user/emails')
+        .reply(200);
       expect(
         await github.initPlatform({ token: 'abc123' } as any)
       ).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should support default endpoint no email result', async () => {
-      const httpCalls = mockGot(api, [
-        {
-          body: {
-            login: 'renovate-bot',
-          },
-        },
-        {
-          body: [{}],
-        },
-      ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, [{}]);
       expect(
         await github.initPlatform({ token: 'abc123' } as any)
       ).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should support default endpoint with email', async () => {
-      const httpCalls = mockGot(api, [
-        {
-          body: {
-            login: 'renovate-bot',
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, [
+          {
+            email: 'user@domain.com',
           },
-        },
-        {
-          body: [
-            {
-              email: 'user@domain.com',
-            },
-          ],
-        },
-      ]);
+        ]);
       expect(
         await github.initPlatform({ token: 'abc123' } as any)
       ).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should support custom endpoint', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .get('/user')
+        .reply(200, {
           login: 'renovate-bot',
-        },
-      });
+        })
+        .get('/user/emails')
+        .reply(200, [
+          {
+            email: 'user@domain.com',
+          },
+        ]);
       expect(
         await github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'abc123',
         })
       ).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
   });
 
   describe('getRepos', () => {
     it('should return an array of repos', async () => {
-      const repos = await getRepos();
-      expect(api.get.mock.calls).toMatchSnapshot();
+      httpMock
+        .scope(githubApiHost)
+        .get('/user/repos?per_page=100')
+        .reply(200, [
+          {
+            full_name: 'a/b',
+          },
+          {
+            full_name: 'c/d',
+          },
+        ]);
+      const repos = await github.getRepos();
       expect(repos).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
   });
 
-  const initRepoMock = {
-    method: 'get',
-    body: {
+  function initRepoMock(scope: nock.Scope, repository: string): void {
+    scope.get(`/repos/${repository}`).reply(200, {
       owner: {
         login: 'theowner',
       },
@@ -178,8 +180,8 @@ describe('platform/github', () => {
       allow_rebase_merge: true,
       allow_squash_merge: true,
       allow_merge_commit: true,
-    },
-  };
+    });
+  }
 
   function initRepoMocks(): any[] {
     return [
@@ -195,6 +197,38 @@ describe('platform/github', () => {
         },
       },
     ];
+  }
+
+  function forkInitRepoMock(
+    scope: nock.Scope,
+    repository: string,
+    forkedRepo?: string
+  ): void {
+    scope
+      // repo info
+      .get(`/repos/${repository}`)
+      .reply(200, {
+        owner: {
+          login: 'theowner',
+        },
+        default_branch: 'master',
+        allow_rebase_merge: true,
+        allow_squash_merge: true,
+        allow_merge_commit: true,
+      })
+      // getBranchCommit
+      .get(`/repos/${repository}/git/refs/heads/master`)
+      .reply(200, {
+        object: {
+          sha: '1234',
+        },
+      })
+      // getRepos
+      .get('/user/repos?per_page=100')
+      .reply(200, forkedRepo ? [{ full_name: forkedRepo }] : [])
+      // getBranchCommit
+      .post(`/repos/${repository}/forks`)
+      .reply(200, forkedRepo ? { full_name: forkedRepo } : {});
   }
 
   function forkInitRepoMocks(repo?: string): any[] {
@@ -243,70 +277,56 @@ describe('platform/github', () => {
 
   describe('initRepo', () => {
     it('should throw err if disabled in renovate.json', async () => {
-      // repo info
-      const httpCalls = mockGot(api, [
-        {
-          body: {
-            owner: {
-              login: 'theowner',
-            },
-          },
-        },
-        {
-          body: {
-            content: Buffer.from('{"enabled": false}').toString('base64'),
-          },
-        },
-      ]);
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/repo/contents/renovate.json')
+        .reply(200, {
+          content: Buffer.from('{"enabled": false}').toString('base64'),
+        });
+      initRepoMock(scope, 'some/repo');
       await expect(
         github.initRepo({
           repository: 'some/repo',
           optimizeForDisabled: true,
         } as any)
       ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
+      expect(scope.isDone()).toBe(true);
     });
     it('should rebase', async () => {
-      const httpCalls = mockGot(api, [
-        {
-          body: {
-            owner: {
-              login: 'theowner',
-            },
-            default_branch: 'master',
-            allow_rebase_merge: true,
-            allow_squash_merge: true,
-            allow_merge_commit: true,
-          },
-        },
-      ]);
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({
         repository: 'some/repo',
       } as any);
       expect(config).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
-    it('should forks when forkMode', async () => {
-      const httpCalls = mockGot(api, [...forkInitRepoMocks()]);
+    it('should fork when forkMode', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo');
       const config = await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
       } as any);
       expect(config).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should update fork when forkMode', async () => {
-      const httpCalls = mockGot(api, [...forkInitRepoMocks('forked_repo')]);
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', 'forked_repo');
       const config = await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
       } as any);
       expect(config).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should squash', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
+      httpMock
+        .scope(githubApiHost)
+        .get(`/repos/some/repo`)
+        .reply(200, {
           owner: {
             login: 'theowner',
           },
@@ -314,17 +334,18 @@ describe('platform/github', () => {
           allow_rebase_merge: false,
           allow_squash_merge: true,
           allow_merge_commit: true,
-        },
-      });
+        });
       const config = await github.initRepo({
         repository: 'some/repo',
       } as any);
       expect(config).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should merge', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
+      httpMock
+        .scope(githubApiHost)
+        .get(`/repos/some/repo`)
+        .reply(200, {
           owner: {
             login: 'theowner',
           },
@@ -332,63 +353,55 @@ describe('platform/github', () => {
           allow_rebase_merge: false,
           allow_squash_merge: false,
           allow_merge_commit: true,
-        },
-      });
+        });
       const config = await github.initRepo({
         repository: 'some/repo',
       } as any);
       expect(config).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should not guess at merge', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
+      httpMock
+        .scope(githubApiHost)
+        .get(`/repos/some/repo`)
+        .reply(200, {
           owner: {
             login: 'theowner',
           },
           default_branch: 'master',
-        },
-      });
+        });
       const config = await github.initRepo({
         repository: 'some/repo',
       } as any);
       expect(config).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should throw error if archived', async () => {
-      const httpCalls = mockGot(api, [
-        {
-          body: {
-            archived: true,
-            owner: {},
-          },
-        },
-      ]);
+      httpMock.scope(githubApiHost).get(`/repos/some/repo`).reply(200, {
+        archived: true,
+        owner: {},
+      });
       await expect(
         github.initRepo({
           repository: 'some/repo',
         } as any)
       ).rejects.toThrow();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('throws not-found', async () => {
-      const httpCalls = mockGot(api, {
-        statusCode: 404,
-      });
+      httpMock.scope(githubApiHost).get(`/repos/some/repo`).reply(404);
       await expect(
         github.initRepo({
           repository: 'some/repo',
         } as any)
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should throw error if renamed', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
-          fork: true,
-          full_name: 'some/other',
-          owner: {},
-        },
+      httpMock.scope(githubApiHost).get(`/repos/some/repo`).reply(200, {
+        fork: true,
+        full_name: 'some/other',
+        owner: {},
       });
       await expect(
         github.initRepo({
@@ -396,13 +409,16 @@ describe('platform/github', () => {
           repository: 'some/repo',
         } as any)
       ).rejects.toThrow(REPOSITORY_RENAMED);
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
   });
   describe('getRepoForceRebase', () => {
     it('should detect repoForceRebase', async () => {
-      const httpCalls = mockGot(api, {
-        body: {
+      debugger;
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/undefined/protection')
+        .reply(200, {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
             require_code_owner_reviews: false,
@@ -422,128 +438,135 @@ describe('platform/github', () => {
             ],
             teams: [],
           },
-        },
-      });
+        });
       const res = await github.getRepoForceRebase();
       expect(res).toBe(true);
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
+      expect(scope.isDone()).toBe(true);
     });
     it('should handle 404', async () => {
-      const httpCalls = mockGot(api, { statusCode: 404 });
+      debugger;
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/undefined/protection')
+        .reply(404);
       const res = await github.getRepoForceRebase();
       expect(res).toBe(false);
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
+      expect(scope.isDone()).toBe(true);
     });
     it('should handle 403', async () => {
-      const httpCalls = mockGot(api, { statusCode: 403 });
+      debugger;
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/undefined/protection')
+        .reply(403);
       const res = await github.getRepoForceRebase();
       expect(res).toBe(false);
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should throw 401', async () => {
-      const httpCalls = mockGot(api, { statusCode: 401 });
-      await expect(github.getRepoForceRebase()).rejects.toEqual({
+      debugger;
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/undefined/protection')
+        .reply(401);
+      await expect(github.getRepoForceRebase()).rejects.toMatchObject({
         statusCode: 401,
       });
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
   });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
-      const httpCalls = mockGot(api, [
-        ...initRepoMocks(),
-        {
-          body: [],
-        },
-      ]);
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, []);
+      initRepoMock(scope, 'some/repo');
       await github.initRepo({
         repository: 'some/repo',
       } as any);
       const pr = await github.getBranchPr('somebranch');
       expect(pr).toBeNull();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should return the PR object', async () => {
-      const httpCalls = mockGot(api, [
-        ...initRepoMocks(),
-        {
-          body: [
-            {
-              number: 90,
-              head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-              state: 'open',
-            },
-            {
-              number: 91,
-              head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-              state: 'open',
-            },
-          ],
-        },
-        {
-          body: {
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
+            number: 90,
+            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+            state: 'open',
+          },
+          {
             number: 91,
-            additions: 1,
-            deletions: 1,
-            commits: 1,
-            base: {
-              sha: '1234',
-            },
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             state: 'open',
           },
-        },
-        { body: { object: { sha: '12345' } } },
-      ]);
+        ])
+        .get('/repos/some/repo/pulls/91')
+        .reply(200, {
+          number: 91,
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          base: {
+            sha: '1234',
+          },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+        })
+        .get('/repos/some/repo/git/refs/heads/master')
+        .reply(200, { object: { sha: '12345' } });
+      initRepoMock(scope, 'some/repo');
       await github.initRepo({
         repository: 'some/repo',
       } as any);
       const pr = await github.getBranchPr('somebranch');
-      expect(api.get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
     it('should return the PR object in fork mode', async () => {
-      const httpCalls = mockGot(api, [
-        ...forkInitRepoMocks('forked/repo'),
-        {
-          body: [
-            {
-              number: 90,
-              head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-              state: 'open',
-            },
-            {
-              number: 91,
-              head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-              state: 'open',
-            },
-          ],
-        },
-        {
-          body: {
+      const scope = httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
+        .reply(200, [
+          {
             number: 90,
-            additions: 1,
-            deletions: 1,
-            commits: 1,
-            base: {
-              sha: '1234',
-            },
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
             state: 'open',
           },
-        },
-        { body: { object: { sha: '12345' } } },
-      ]);
-
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            state: 'open',
+          },
+        ])
+        .get('/repos/some/repo/pulls/90')
+        .reply(200, {
+          number: 90,
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          base: {
+            sha: '1234',
+          },
+          head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
+          state: 'open',
+        })
+        .get('/repos/forked/repo/git/refs/heads/master')
+        .reply(200, { object: { sha: '12345' } });
+      forkInitRepoMock(scope, 'some/repo', 'forked/repo');
       await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
       } as any);
       const pr = await github.getBranchPr('somebranch');
-      expect(api.get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
-      expect(httpCalls).toMatchSnapshot();
+      expect(httpMock.trace()).toMatchSnapshot();
     });
   });
   describe('getBranchStatus()', () => {
