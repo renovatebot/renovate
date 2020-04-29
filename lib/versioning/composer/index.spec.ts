@@ -169,6 +169,14 @@ describe('semver.getNewValue()', () => {
         toVersion: 'V1.1',
       })
     ).toEqual('V1.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0',
+        rangeStrategy: 'pin',
+        fromVersion: '1.0',
+        toVersion: 'V1.1',
+      })
+    ).toEqual('V1.1');
   });
   it('returns toVersion', () => {
     expect(
@@ -189,6 +197,36 @@ describe('semver.getNewValue()', () => {
         toVersion: '1.0.7',
       })
     ).toEqual('^1.0');
+  });
+  it('bumps caret to same', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.0.0',
+        toVersion: '1.3.5',
+      })
+    ).toEqual('^1.0');
+  });
+  it('replaces caret to same', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0.0',
+        toVersion: '1.3.5',
+      })
+    ).toEqual('^1.0');
+  });
+  it('replaces short caret', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^1.0',
+        rangeStrategy: 'replace',
+        fromVersion: '1.0.0',
+        toVersion: '2.3.5',
+      })
+    ).toEqual('^2.0');
   });
   it('handles tilde zero', () => {
     expect(
