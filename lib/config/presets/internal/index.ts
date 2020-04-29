@@ -21,6 +21,6 @@ export const groups: Record<string, Record<string, any>> = {
   schedule: schedulePreset.presets,
 };
 
-export function getPreset(pkgName: string, presetName: string): Preset {
+export function getPreset(pkgName: string, presetName: string): Preset | undefined {
   return groups[pkgName] ? groups[pkgName][presetName] : undefined;
 }
