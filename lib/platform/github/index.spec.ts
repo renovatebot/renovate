@@ -10,6 +10,7 @@ import { BranchStatus } from '../../types';
 import { mocked } from '../../../test/util';
 import { mockGot } from '../../../test/platformUtil';
 import * as httpMock from '../../util/http/mock';
+import { clearRepoCache } from '../../util/cache';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -57,8 +58,9 @@ describe('platform/github', () => {
     });
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     httpMock.reset();
+    clearRepoCache();
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
