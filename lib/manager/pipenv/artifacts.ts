@@ -54,7 +54,7 @@ export async function updateArtifacts({
     const localPipfileFileName = join(config.localDir, pipfileName);
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
-    const cmd = ['pip install pipenv', 'pipenv lock'];
+    const cmd = ['pip install pipenv', 'pipenv --user lock'];
     let tagConstraint = getPythonConstraint(existingLockFileContent, config);
     if (tagConstraint) {
       tagConstraint = `== ${tagConstraint}`;
