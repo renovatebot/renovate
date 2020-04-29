@@ -4,11 +4,13 @@ import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { ensureTrailingSlash } from '../../util/url';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { getRepoCache } from '../../util/cache';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
 export function setInternalPreset(content: { body: Preset }): void {
-  global.repoCache.internalPresets = Promise.resolve(content);
+  const cache = getRepoCache();
+  cache.internalPresets = Promise.resolve(content);
 }
 
 async function fetchInternalPreset(): Promise<Preset> {
@@ -19,9 +21,9 @@ async function fetchInternalPreset(): Promise<Preset> {
 }
 
 function getInternalPreset(): Promise<Preset> {
-  global.repoCache.internalPresets =
-    global.repoCache.internalPresets || fetchInternalPreset();
-  return global.repoCache.internalPresets;
+  const cache = getRepoCache();
+  cache.internalPresets = cache.internalPresets || fetchInternalPreset();
+  return cache.internalPresets;
 }
 
 export async function fetchJSONFile(
