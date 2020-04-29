@@ -537,7 +537,7 @@ const staticGroups = {
 const config: any = { ...staticGroups };
 
 const monorepoNames = [];
-for (const monorepo of Object.keys(monorepos)) {
+for (const monorepo of Object.keys(monorepos.presets)) {
   const name = `${monorepo}Monorepo`;
   monorepoNames.push(`group:${name}`);
   config[name] = {

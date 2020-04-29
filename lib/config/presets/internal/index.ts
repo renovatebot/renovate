@@ -9,8 +9,7 @@ import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as schedulePreset from './schedule';
 
-/* eslint-disable global-require */
-const groups: Record<string, Record<string, any>> = {
+export const groups: Record<string, Record<string, any>> = {
   config: configPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,

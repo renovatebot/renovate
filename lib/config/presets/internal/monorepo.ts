@@ -117,18 +117,16 @@ const patternGroups = {
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
 };
 
-const config = {};
+export const presets = {};
 for (const [name, value] of Object.entries(repoGroups)) {
-  config[name] = {
+  presets[name] = {
     description: `${name} monorepo`,
     sourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
 for (const [name, value] of Object.entries(patternGroups)) {
-  config[name] = {
+  presets[name] = {
     description: `${name} monorepo`,
     packagePatterns: is.array(value) ? value : [value],
   };
 }
-
-export const presets = config;
