@@ -1,4 +1,4 @@
-import { ensureDir, outputFile, readFile } from 'fs-extra';
+import { ensureDir, outputFile, readFile, remove } from 'fs-extra';
 import { join } from 'upath';
 import { exec, ExecOptions } from '../../util/exec';
 import { logger } from '../../logger';
@@ -28,6 +28,9 @@ export async function updateArtifacts({
     const localPipfileFileName = join(config.localDir, pipfileName);
     await outputFile(localPipfileFileName, newPipfileContent);
     const localLockFileName = join(config.localDir, lockFileName);
+    if (config.isLockFileMaintenance) {
+      await remove(localLockFileName);
+    }
     const cmd = 'pipenv lock';
     const execOptions: ExecOptions = {
       extraEnv: {
