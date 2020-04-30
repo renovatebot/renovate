@@ -1,10 +1,11 @@
 import url from 'url';
 import fs from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
+import pAll from 'p-all';
 import { logger } from '../../logger';
 import { compare } from '../../versioning/maven/compare';
 import mavenVersion from '../../versioning/maven';
-import { downloadHttpProtocol } from './util';
+import { downloadHttpProtocol, isHttpResourceExists } from './util';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { MAVEN_REPO } from './common';
 
@@ -43,6 +44,7 @@ function getMavenUrl(
 async function downloadMavenXml(
   pkgUrl: url.URL | null
 ): Promise<XmlDocument | null> {
+  /* istanbul ignore if */
   if (!pkgUrl) {
     return null;
   }
@@ -143,6 +145,112 @@ function extractVersions(metadata: XmlDocument): string[] {
   return elements.map((el) => el.val);
 }
 
+async function getVersionsFromMetadata(
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string[] | null> {
+  const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
+  if (!metadataUrl) {
+    return null;
+  }
+
+  const cacheNamespace = 'datasource-maven-metadata';
+  const cacheKey = metadataUrl.toString();
+  const cachedVersions = await renovateCache.get<string[]>(
+    cacheNamespace,
+    cacheKey
+  );
+  /* istanbul ignore if */
+  if (cachedVersions) {
+    return cachedVersions;
+  }
+
+  const mavenMetadata = await downloadMavenXml(metadataUrl);
+  if (!mavenMetadata) {
+    return null;
+  }
+
+  const versions = extractVersions(mavenMetadata);
+  await renovateCache.set<string[]>(cacheNamespace, cacheKey, versions, 10);
+  return versions;
+}
+
+type ArtifactsInfo = Record<string, boolean | null>;
+
+function isValidArtifactsInfo(
+  info: ArtifactsInfo | null,
+  versions: string[]
+): boolean {
+  if (!info) {
+    return false;
+  }
+  return versions.every((v) => info[v] !== undefined);
+}
+
+type ArtifactInfoResult = [string, boolean | null];
+
+async function getArtifactInfo(
+  version: string,
+  artifactUrl: url.URL
+): Promise<ArtifactInfoResult> {
+  const proto = artifactUrl.protocol;
+  if (proto === 'http:' || proto === 'https:') {
+    const result = await isHttpResourceExists(artifactUrl);
+    return [version, result];
+  }
+  return [version, true];
+}
+
+async function filterMissingArtifacts(
+  dependency: MavenDependency,
+  repoUrl: string,
+  versions: string[]
+): Promise<string[]> {
+  const cacheNamespace = 'datasource-maven-metadata';
+  const cacheKey = dependency.dependencyUrl;
+  let artifactsInfo: ArtifactsInfo | null = await renovateCache.get<
+    ArtifactsInfo
+  >(cacheNamespace, cacheKey);
+
+  if (!isValidArtifactsInfo(artifactsInfo, versions)) {
+    const queue = versions
+      .map((version): [string, url.URL | null] => {
+        const artifactUrl = getMavenUrl(
+          dependency,
+          repoUrl,
+          `${version}/${dependency.name}-${version}.jar`
+        );
+        return [version, artifactUrl];
+      })
+      .filter(([_, artifactUrl]) => Boolean(artifactUrl))
+      .map(([version, artifactUrl]) => (): Promise<ArtifactInfoResult> =>
+        getArtifactInfo(version, artifactUrl)
+      );
+    const results = await pAll(queue, { concurrency: 5 });
+    artifactsInfo = results.reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value,
+      }),
+      {}
+    );
+
+    // Retry earlier for status other than 404
+    const cacheTTL = Object.values(artifactsInfo).some((x) => x === null)
+      ? 60
+      : 24 * 60;
+
+    await renovateCache.set<ArtifactsInfo>(
+      cacheNamespace,
+      cacheKey,
+      artifactsInfo,
+      cacheTTL
+    );
+  }
+
+  return versions.filter((v) => artifactsInfo[v]);
+}
+
 export async function getReleases({
   lookupName,
   registryUrls,
@@ -158,18 +266,24 @@ export async function getReleases({
     logger.debug(
       `Looking up ${dependency.display} in repository #${i} - ${repoUrl}`
     );
-    const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
-    const mavenMetadata = await downloadMavenXml(metadataUrl);
-    if (mavenMetadata) {
-      const newVersions = extractVersions(mavenMetadata).filter(
+    const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
+    if (metadataVersions) {
+      const availableVersions = await filterMissingArtifacts(
+        dependency,
+        repoUrl,
+        metadataVersions
+      );
+      const filteredVersions = availableVersions.filter(
         (version) => !versions.includes(version)
       );
-      const latestVersion = getLatestStableVersion(newVersions);
+      versions.push(...filteredVersions);
+
+      const latestVersion = getLatestStableVersion(filteredVersions);
       if (latestVersion) {
         repoForVersions[latestVersion] = repoUrl;
       }
-      versions.push(...newVersions);
-      logger.debug(`Found ${newVersions.length} new versions for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
+
+      logger.debug(`Found ${availableVersions.length} new versions for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
     }
   }
 
