@@ -184,7 +184,7 @@ function isValidArtifactsInfo(
   if (!info) {
     return false;
   }
-  return versions.every(v => info[v] !== undefined);
+  return versions.every((v) => info[v] !== undefined);
 }
 
 type ArtifactInfoResult = [string, boolean | null];
@@ -236,7 +236,7 @@ async function filterMissingArtifacts(
     );
 
     // Retry earlier for status other than 404
-    const cacheTTL = Object.values(artifactsInfo).some(x => x === null)
+    const cacheTTL = Object.values(artifactsInfo).some((x) => x === null)
       ? 60
       : 24 * 60;
 
@@ -248,7 +248,7 @@ async function filterMissingArtifacts(
     );
   }
 
-  return versions.filter(v => artifactsInfo[v]);
+  return versions.filter((v) => artifactsInfo[v]);
 }
 
 export async function getReleases({
