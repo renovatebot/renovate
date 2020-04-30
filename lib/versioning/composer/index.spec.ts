@@ -169,12 +169,12 @@ describe('semver.getNewValue()', () => {
   it('replaces caret to same', () => {
     expect(
       semver.getNewValue({
-        currentValue: '^1.0.0',
+        currentValue: '^1',
         rangeStrategy: 'replace',
         fromVersion: '1.0.0',
         toVersion: '1.3.5',
       })
-    ).toEqual('^1.0');
+    ).toEqual('^1');
   });
   it('replaces short caret', () => {
     expect(
