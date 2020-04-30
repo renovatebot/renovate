@@ -122,7 +122,7 @@ export interface RenovateConfig
   baseBranches?: string[];
   baseBranch?: string;
   branchList?: string[];
-  description?: string[];
+  description?: string | string[];
 
   errors?: ValidationMessage[];
   extends?: string[];

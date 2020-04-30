@@ -40,6 +40,12 @@ describe('datasource/cdnjs', () => {
       got.mockRejectedValueOnce({ statusCode: 404 });
       expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
     });
+    it('returns null for empty 200 OK', async () => {
+      got.mockResolvedValueOnce({ body: {} });
+      expect(
+        await getReleases({ lookupName: 'doesnotexist/doesnotexist' })
+      ).toBeNull();
+    });
     it('throws for 401', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });
       await expect(getReleases({ lookupName: 'foo/bar' })).rejects.toThrowError(

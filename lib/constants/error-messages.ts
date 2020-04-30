@@ -41,7 +41,6 @@ export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
 
 // Bundler Error
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
-export const BUNDLER_UNKNOWN_ERROR = 'bundler-unknown';
 
 // Unknown Error
 export const UNKNOWN_ERROR = 'unknown-error';

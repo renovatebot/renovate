@@ -8,5 +8,5 @@ export interface PresetApi {
     pkgName: string,
     presetName?: string,
     baseConfig?: RenovateConfig
-  ): Promise<Preset>;
+  ): Promise<Preset> | Preset;
 }

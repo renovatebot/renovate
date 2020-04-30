@@ -39,7 +39,7 @@ export async function getRepositoryData(
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.warn({ err }, 'index.yaml lookup error');
+      logger.debug({ err }, 'Helm Chart not found');
       return null;
     }
     if (

@@ -43,8 +43,14 @@ function isPermissionsIssue(err: { statusCode: number }): boolean {
 
 function isConnectionError(err: { code: string }): boolean {
   return (
-    err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || err.code === 'ECONNREFUSED'
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+    err.code === 'ECONNREFUSED'
   );
+}
+
+function isUnsupportedHostError(err: { name: string }): boolean {
+  return err.name === 'UnsupportedProtocolError';
 }
 
 export async function downloadHttpProtocol(
@@ -76,8 +82,11 @@ export async function downloadHttpProtocol(
     } else if (isConnectionError(err)) {
       // istanbul ignore next
       logger.debug({ failedUrl }, 'Connection refused to maven registry');
+    } else if (isUnsupportedHostError(err)) {
+      // istanbul ignore next
+      logger.debug({ failedUrl }, 'Unsupported host');
     } else {
-      logger.warn({ failedUrl, err }, 'Unknown error');
+      logger.info({ failedUrl, err }, 'Unknown error');
     }
     return null;
   }

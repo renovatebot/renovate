@@ -18,7 +18,7 @@ function setupChangelogMock() {
   changelogHelper.getChangeLogJSON = jest.fn();
   const resultValue = {
     project: {
-      githubBaseURL: 'https://github.com/',
+      baseUrl: 'https://github.com/',
       github: 'renovateapp/dummy',
       repository: 'https://github.com/renovateapp/dummy',
     },

@@ -44,6 +44,7 @@ type GiteaRenovateConfig = {
 
 interface GiteaRepoConfig {
   storage: GitStorage;
+  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -240,6 +241,7 @@ const platform: Platform = {
 
   async initRepo({
     repository,
+    gitPrivateKey,
     localDir,
     optimizeForDisabled,
   }: RepoParams): Promise<RepoConfig> {
@@ -248,6 +250,7 @@ const platform: Platform = {
 
     config = {} as any;
     config.repository = repository;
+    config.gitPrivateKey = gitPrivateKey;
     config.localDir = localDir;
 
     // Attempt to fetch information about repository

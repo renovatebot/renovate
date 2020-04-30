@@ -37,6 +37,9 @@ export async function getReleases({
       lookup: library,
       cb: downloadLibrary,
     });
+    if (!assets) {
+      return null;
+    }
     const assetName = lookupName.replace(`${library}/`, '');
     const releases = assets
       .filter(({ files }) => files.includes(assetName))

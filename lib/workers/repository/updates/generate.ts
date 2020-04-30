@@ -62,13 +62,12 @@ function getTableValues(
 export function generateBranchConfig(
   branchUpgrades: BranchUpgradeConfig[]
 ): BranchConfig {
-  logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
-  logger.trace({ config: branchUpgrades });
+  logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],
   } as any;
   const hasGroupName = branchUpgrades[0].groupName !== null;
-  logger.debug(`hasGroupName: ${hasGroupName}`);
+  logger.trace(`hasGroupName: ${hasGroupName}`);
   // Use group settings only if multiple upgrades or lazy grouping is disabled
   const depNames = [];
   const newValue = [];
@@ -96,9 +95,9 @@ export function generateBranchConfig(
     // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
-  logger.debug(`groupEligible: ${groupEligible}`);
+  logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
-  logger.debug(`useGroupSettings: ${useGroupSettings}`);
+  logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: string;
   for (const branchUpgrade of branchUpgrades) {
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
