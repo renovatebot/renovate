@@ -57,6 +57,29 @@ Array [
 ]
 `;
 
+exports[`.updateArtifacts() returns updated Pipenv.lock when doing lockfile maintenance 1`] = `
+Array [
+  Object {
+    "cmd": "pipenv lock",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
 Array [
   Object {

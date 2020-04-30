@@ -34,6 +34,7 @@ const config = {
 };
 
 const dockerConfig = { ...config, binarySource: BinarySource.Docker };
+const lockMaintenceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('.updateArtifacts()', () => {
   let pipFileLock;
@@ -138,5 +139,22 @@ describe('.updateArtifacts()', () => {
         config,
       })
     ).toMatchSnapshot();
+  });
+  it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
+    platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
+    const execSnapshots = mockExecAll(exec);
+    platform.getRepoStatus.mockResolvedValue({
+      modified: ['Pipfile.lock'],
+    } as StatusResult);
+    fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: lockMaintenceConfig,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });
