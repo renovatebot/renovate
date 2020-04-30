@@ -173,12 +173,12 @@ interface AllPackages {
 }
 
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
-  let repoCacheResult = getRepoCached(`packagist-${regUrl}`);
+  let repoCacheResult = getRepoCached<Promise<AllPackages | null>>(`packagist-${regUrl}`);
   // istanbul ignore if
   if (repoCacheResult) {
     while (repoCacheResult === 'pending') {
       await delay(200);
-      repoCacheResult = getRepoCached(`packagist-${regUrl}`);
+      repoCacheResult = getRepoCached<Promise<AllPackages | null>>(`packagist-${regUrl}`);
     }
     return repoCacheResult;
   }

@@ -72,7 +72,7 @@ export async function updateArtifacts(
   } = updateArtifact;
   const { compatibility = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
-  const existingError = getRepoCached('bundlerArtifactsError');
+  const existingError = getRepoCached<string>('bundlerArtifactsError');
   // istanbul ignore if
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');

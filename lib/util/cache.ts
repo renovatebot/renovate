@@ -1,13 +1,13 @@
-let repoCache: Record<string, any> = {};
+let repoCache: Record<string, unknown> = {};
 
 export function clearRepoCache(): void {
   repoCache = {};
 }
 
-export function getRepoCached(key: string): any {
+export function getRepoCached<T = unknown>(key: string): T {
   return repoCache[key];
 }
 
-export function setRepoCached(key: string, value: any): void {
+export function setRepoCached(key: string, value: unknown): void {
   repoCache[key] = value;
 }

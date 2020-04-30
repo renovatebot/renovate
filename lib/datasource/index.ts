@@ -70,7 +70,7 @@ function getRawReleases(
   if (!getRepoCached(cacheKey)) {
     setRepoCached(cacheKey, fetchReleases(config));
   }
-  return getRepoCached(cacheKey);
+  return getRepoCached<Promise<ReleaseResult | null>>(cacheKey);
 }
 
 export async function getPkgReleases(
