@@ -184,7 +184,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0',
         toVersion: '2.3.5',
       })
-    ).toEqual('^2.0.0');
+    ).toEqual('^2.0');
   });
   it('handles tilde zero', () => {
     expect(
