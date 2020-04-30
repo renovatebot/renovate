@@ -165,8 +165,9 @@ export async function removeDanglingContainers(): Promise<void> {
     }
     if (err.stderr?.includes('Cannot connect to the Docker daemon')) {
       logger.info('No docker deamon found');
+    } else {
+      logger.warn({ err }, 'Error removing dangling containers');
     }
-    logger.warn({ err }, 'Error removing dangling containers');
   }
 }
 
