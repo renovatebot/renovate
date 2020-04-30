@@ -1,8 +1,13 @@
-export function getRepoCache(): Record<string, any> {
-  // eslint-disable-next-line no-return-assign
-  return global.repoCache ?? (global.repoCache = {});
-}
+let repoCache: Record<string, any> = {};
 
 export function clearRepoCache(): void {
-  global.repoCache = {};
+  repoCache = {};
+}
+
+export function getRepoCached(key: string): any {
+  return repoCache[key];
+}
+
+export function setRepoCached(key: string, value: any): void {
+  repoCache[key] = value;
 }

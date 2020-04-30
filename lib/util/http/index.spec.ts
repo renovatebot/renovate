@@ -79,6 +79,5 @@ describe(getName(__filename), () => {
 
     expect(data).toBe('{}');
     expect(nock.isDone()).toBe(true);
-    expect(global.repoCache).toEqual({});
   });
 });

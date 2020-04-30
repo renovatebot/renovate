@@ -14,6 +14,7 @@ import {
 } from './common';
 import datasources from './api.generated';
 import { clone } from '../util/clone';
+import { getRepoCached, setRepoCached } from '../util/cache';
 
 export * from './common';
 
@@ -65,12 +66,11 @@ function getRawReleases(
     config.datasource +
     config.lookupName +
     config.registryUrls;
-  // The repoCache is initialized for each repo
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  if (!global.repoCache[cacheKey]) {
-    global.repoCache[cacheKey] = fetchReleases(config);
+  if (!getRepoCached(cacheKey)) {
+    setRepoCached(cacheKey, fetchReleases(config));
   }
-  return global.repoCache[cacheKey];
+  return getRepoCached(cacheKey);
 }
 
 export async function getPkgReleases(

@@ -49,7 +49,7 @@ describe('bundler.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     resetPrefetchedImages();
-    global.repoCache = {};
+
     await setUtilConfig(config);
   });
   it('returns null by default', async () => {

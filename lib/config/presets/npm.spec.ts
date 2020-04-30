@@ -8,7 +8,7 @@ describe('config/presets/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    global.repoCache = {};
+
     global.trustLevel = 'low';
     nock.cleanAll();
     return global.renovateCache.rmAll();

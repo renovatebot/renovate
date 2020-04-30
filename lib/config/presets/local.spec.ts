@@ -18,7 +18,7 @@ describe('config/presets/local', () => {
     gitlabGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
     githubGetPreset.mockReset();
     githubGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
-    global.repoCache = {};
+
     return global.renovateCache.rmAll();
   });
   describe('getPreset()', () => {

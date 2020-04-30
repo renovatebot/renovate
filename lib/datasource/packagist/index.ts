@@ -7,6 +7,7 @@ import { logger } from '../../logger';
 import { Http, HttpOptions } from '../../util/http';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { getRepoCached, setRepoCached } from '../../util/cache';
 
 export const id = 'packagist';
 
@@ -172,19 +173,19 @@ interface AllPackages {
 }
 
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
-  let repoCacheResult = global.repoCache[`packagist-${regUrl}`];
+  let repoCacheResult = getRepoCached(`packagist-${regUrl}`);
   // istanbul ignore if
   if (repoCacheResult) {
     while (repoCacheResult === 'pending') {
       await delay(200);
-      repoCacheResult = global.repoCache[`packagist-${regUrl}`];
+      repoCacheResult = getRepoCached(`packagist-${regUrl}`);
     }
     return repoCacheResult;
   }
-  global.repoCache[`packagist-${regUrl}`] = 'pending';
+  setRepoCached(`packagist-${regUrl}`, 'pending');
   const registryMeta = await getRegistryMeta(regUrl);
   if (!registryMeta) {
-    global.repoCache[`packagist-${regUrl}`] = null;
+    setRepoCached(`packagist-${regUrl}`, null);
     return null;
   }
   const {
@@ -224,7 +225,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     providerPackages,
     includesPackages,
   };
-  global.repoCache[`packagist-${regUrl}`] = allPackages;
+  setRepoCached(`packagist-${regUrl}`, allPackages);
   return allPackages;
 }
 

@@ -19,7 +19,7 @@ describe('datasource/gradle-version', () => {
         lookupName: 'abc',
       };
       jest.clearAllMocks();
-      global.repoCache = {};
+
       return global.renovateCache.rmAll();
     });
 
