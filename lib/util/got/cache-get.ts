@@ -31,7 +31,7 @@ export default create({
           })
         );
       }
-      return getRepoCached(cacheKey).then((response) => ({
+      return getRepoCached<Promise<any>>(cacheKey).then((response) => ({
         ...response,
         body: clone(response.body),
       }));
