@@ -205,7 +205,7 @@
     "@types/later": "1.2.6",
     "@types/lodash": "4.14.150",
     "@types/luxon": "1.22.0",
-    "@types/markdown-it": "10.0.0",
+    "@types/markdown-it": "10.0.1",
     "@types/moment-timezone": "0.5.13",
     "@types/nock": "10.0.3",
     "@types/node": "11.15.12",
