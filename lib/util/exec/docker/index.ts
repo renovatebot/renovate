@@ -159,10 +159,12 @@ export async function removeDanglingContainers(): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) {
-    // istanbul ignore if
+  } catch (err) /* istanbul ignore next */ {
     if (err.errno === 'ENOMEM') {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
+    }
+    if (err.stderr?.includes('Cannot connect to the Docker daemon')) {
+      logger.info('No docker deamon found');
     }
     logger.warn({ err }, 'Error removing dangling containers');
   }
