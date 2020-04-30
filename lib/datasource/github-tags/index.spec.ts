@@ -16,7 +16,6 @@ describe('datasource/github-tags', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.hosts = jest.fn(() => []);
-
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {

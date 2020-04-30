@@ -18,7 +18,6 @@ jest.mock('../../util/host-rules');
 
 describe('datasource/hex', () => {
   describe('getReleases', () => {
-    beforeEach(() => {});
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(

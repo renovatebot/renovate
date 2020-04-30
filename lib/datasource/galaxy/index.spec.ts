@@ -18,7 +18,6 @@ jest.mock('../../util/got');
 
 describe('datasource/galaxy', () => {
   describe('getReleases', () => {
-    beforeEach(() => {});
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(

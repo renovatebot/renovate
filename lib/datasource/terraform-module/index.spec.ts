@@ -14,7 +14,6 @@ describe('datasource/terraform-module', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {

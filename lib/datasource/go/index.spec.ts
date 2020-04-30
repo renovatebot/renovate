@@ -24,7 +24,6 @@ Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a
 </html>`;
 
 describe('datasource/go', () => {
-  beforeEach(() => {});
   describe('getDigest', () => {
     it('returns null for wrong name', async () => {
       got.mockReturnValueOnce({

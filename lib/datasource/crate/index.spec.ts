@@ -19,7 +19,6 @@ jest.mock('../../util/got');
 
 describe('datasource/crate', () => {
   describe('getReleases', () => {
-    beforeEach(() => {});
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(
