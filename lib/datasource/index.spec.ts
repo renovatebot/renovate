@@ -1,4 +1,3 @@
-
 import { mocked } from '../../test/util';
 import { loadModules } from '../util/modules';
 import * as datasourceDocker from './docker';

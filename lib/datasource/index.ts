@@ -15,7 +15,6 @@ import {
 } from './common';
 import { addMetaData } from './metadata';
 
-
 export * from './common';
 
 export const getDatasources = (): Map<string, Promise<Datasource>> =>

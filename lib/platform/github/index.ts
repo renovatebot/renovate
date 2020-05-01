@@ -2,7 +2,6 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 
-
 import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_FAILURE,
