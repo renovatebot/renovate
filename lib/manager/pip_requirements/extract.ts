@@ -1,10 +1,10 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
+import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import * as datasourcePypi from '../../datasource/pypi';
-import { SkipReason } from '../../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';

@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import fs from 'fs-extra';
-import * as upath from 'upath';
 import { exec as _exec } from 'child_process';
 import * as _os from 'os';
+import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import * as _utilfs from '../../util/fs';
+import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
+import { replacingSerializer } from '../../../test/util';
+import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as _docker from '../../util/exec/docker';
-import * as _util from '../../util';
-import { ifSystemSupportsGradle } from './__testutil__/gradle';
-import * as _manager from '.';
+import * as _env from '../../util/exec/env';
+import * as _utilfs from '../../util/fs';
 import { ExtractConfig } from '../common';
+import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
-import { replacingSerializer } from '../../../test/util';
+import * as _manager from '.';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 const standardUpdatesReport = () =>

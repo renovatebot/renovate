@@ -1,11 +1,11 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import nock from 'nock';
 import { getPkgReleases } from '..';
+import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPlugin from '.';
-import * as mavenVersioning from '../../versioning/maven';
 
 const mavenIndexHtml = fs.readFileSync(
   path.resolve(__dirname, `./__fixtures__/maven-index.html`),

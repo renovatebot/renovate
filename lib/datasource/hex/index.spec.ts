@@ -1,8 +1,8 @@
 import fs from 'fs';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import { getReleases } from '.';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const got: any = _got;
 const hostRules: any = _hostRules;

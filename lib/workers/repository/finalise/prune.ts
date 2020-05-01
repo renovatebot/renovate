@@ -1,8 +1,8 @@
+import { RenovateConfig } from '../../../config';
+import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
-import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,

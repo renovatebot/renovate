@@ -1,12 +1,12 @@
-import { RenovateConfigStage } from './common';
+import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { getManagers } from '../manager';
+import { getPlatformList } from '../platform';
+import { getVersioningList } from '../versioning';
 import * as dockerVersioning from '../versioning/docker';
 import * as pep440Versioning from '../versioning/pep440';
 import * as semverVersioning from '../versioning/semver';
-import { getVersioningList } from '../versioning';
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { getPlatformList } from '../platform';
 
-import { getManagers } from '../manager';
+import { RenovateConfigStage } from './common';
 
 export interface RenovateOptionBase {
   admin?: boolean;

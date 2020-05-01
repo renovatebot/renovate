@@ -1,7 +1,7 @@
 import crypto from 'crypto';
+import { logger } from '../../logger';
 import { api } from '../../platform/github/gh-got-wrapper';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { logger } from '../../logger';
 
 export const id = 'pod';
 

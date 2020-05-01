@@ -1,13 +1,13 @@
-import { join } from 'upath';
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import { updateArtifacts } from './artifacts';
-import { mocked } from '../../../test/util';
+import _fs from 'fs-extra';
+import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
+import { mocked } from '../../../test/util';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
+import * as _env from '../../util/exec/env';
+import { updateArtifacts } from './artifacts';
 
 jest.mock('fs-extra');
 jest.mock('child_process');

@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { platform } from '../../../platform';
-import { PackageFile } from '../../../manager/common';
 import { RenovateConfig } from '../../../config';
+import { logger } from '../../../logger';
+import { PackageFile } from '../../../manager/common';
+import { platform } from '../../../platform';
 
 export async function raiseDeprecationWarnings(
   config: RenovateConfig,

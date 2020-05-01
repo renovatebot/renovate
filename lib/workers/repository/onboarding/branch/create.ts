@@ -1,8 +1,8 @@
-import { logger } from '../../../../logger';
-import { getOnboardingConfig } from './config';
-import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
+import { configFileNames } from '../../../../config/app-strings';
+import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
+import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
 

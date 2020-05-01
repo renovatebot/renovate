@@ -1,13 +1,13 @@
-import * as globalWorker from '.';
-import * as _repositoryWorker from '../repository';
 import * as _configParser from '../../config';
-import * as _platform from '../../platform';
-import * as _limits from './limits';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import * as datasourceDocker from '../../datasource/docker';
+import * as _platform from '../../platform';
+import * as _repositoryWorker from '../repository';
+import * as _limits from './limits';
+import * as globalWorker from '.';
 
 jest.mock('../repository');
 

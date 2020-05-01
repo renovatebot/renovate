@@ -1,5 +1,5 @@
-import * as template from '.';
 import { getOptions } from '../../config/definitions';
+import * as template from '.';
 
 describe('util/template', () => {
   it('has valid exposed config options', () => {

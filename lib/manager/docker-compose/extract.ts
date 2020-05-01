@@ -1,8 +1,8 @@
 import { safeLoad } from 'js-yaml';
 
 import { logger } from '../../logger';
-import { getDep } from '../dockerfile/extract';
 import { PackageFile } from '../common';
+import { getDep } from '../dockerfile/extract';
 
 interface DockerComposeConfig {
   version?: string;

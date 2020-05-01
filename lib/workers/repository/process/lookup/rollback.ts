@@ -1,6 +1,6 @@
 import { logger } from '../../../../logger';
-import * as allVersioning from '../../../../versioning';
 import { LookupUpdate } from '../../../../manager/common';
+import * as allVersioning from '../../../../versioning';
 
 export interface RollbackConfig {
   currentValue?: string;

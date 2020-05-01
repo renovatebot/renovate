@@ -1,7 +1,7 @@
-import { extractPackageFile } from './extract';
-import { updateArtifacts } from './artifacts';
 import { LANGUAGE_RUST } from '../../constants/languages';
 import * as cargoVersioning from '../../versioning/cargo';
+import { updateArtifacts } from './artifacts';
+import { extractPackageFile } from './extract';
 
 const language = LANGUAGE_RUST;
 // TODO: Support this

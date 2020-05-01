@@ -1,5 +1,5 @@
-import { extractPackageFile } from './extract';
 import { LANGUAGE_DOCKER } from '../../constants/languages';
+import { extractPackageFile } from './extract';
 
 const language = LANGUAGE_DOCKER;
 

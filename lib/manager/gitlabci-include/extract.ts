@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
-import { logger } from '../../logger';
-import { PackageDependency, ExtractConfig, PackageFile } from '../common';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 function extractDepFromInclude(includeObj: {
   file: any;

@@ -1,13 +1,13 @@
 import URL from 'url';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
+import { api } from '../../../platform/github/gh-got-wrapper';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
-import { addReleaseNotes } from './release-notes';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
-import { Release } from '../../../datasource';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { BranchUpgradeConfig } from '../../common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
+import { addReleaseNotes } from './release-notes';
 
 const { get: ghGot } = api;
 

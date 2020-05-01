@@ -1,11 +1,11 @@
-import nock from 'nock';
 import fs from 'fs';
 import { resolve } from 'path';
-import * as maven from '.';
-import * as mavenVersioning from '../../versioning/maven';
+import nock from 'nock';
 import { getPkgReleases } from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
+import * as mavenVersioning from '../../versioning/maven';
+import * as maven from '.';
 
 const MYSQL_VERSIONS = ['6.0.5', '6.0.6', '8.0.7', '8.0.8', '8.0.9'];
 

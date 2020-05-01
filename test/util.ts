@@ -1,8 +1,8 @@
-import * as upath from 'upath';
 import crypto from 'crypto';
-import { platform as _platform } from '../lib/platform';
-import { getConfig } from '../lib/config/defaults';
+import * as upath from 'upath';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
+import { getConfig } from '../lib/config/defaults';
+import { platform as _platform } from '../lib/platform';
 
 /**
  * Simple wrapper for getting mocked version of a module

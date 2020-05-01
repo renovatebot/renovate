@@ -1,17 +1,17 @@
+import { OutgoingHttpHeaders } from 'http';
+import url from 'url';
+import is from '@sindresorhus/is';
 import delay from 'delay';
 import moment from 'moment';
-import url from 'url';
-import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import { OutgoingHttpHeaders } from 'http';
-import is from '@sindresorhus/is';
+import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { getNpmrc } from './npmrc';
 import { DatasourceError, Release, ReleaseResult } from '../common';
 import { id } from './common';
+import { getNpmrc } from './npmrc';
 
 const http = new Http(id);
 

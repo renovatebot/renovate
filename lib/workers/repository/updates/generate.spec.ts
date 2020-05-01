@@ -1,8 +1,8 @@
 import { defaultConfig, partial } from '../../../../test/util';
-import { generateBranchConfig } from './generate';
-import * as datasourceNpm from '../../../datasource/npm';
 import { UpdateType } from '../../../config';
+import * as datasourceNpm from '../../../datasource/npm';
 import { BranchUpgradeConfig } from '../../common';
+import { generateBranchConfig } from './generate';
 
 beforeEach(() => {
   jest.resetAllMocks();
